@@ -1,0 +1,17 @@
+{
+  "name": "@cred/sync",
+  "scripts": {
+    "start": "pnpm lint && tsx src/sync.ts",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "firebase-admin": "^12.1.0",
+    "nanoid": "^5.0.7",
+    "viem": "^2.10.9"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "tsx": "^4.7.1"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@sutori/api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./out/index.js",
+  "types": "out/index.d.ts",
+  "private": true,
+  "scripts": {
+    "build": "tsc -d"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^20.11.17",
+    "@trpc/server": "11.0.0-rc.417",
+    "zod": "^3.23.8"
+  }
+}

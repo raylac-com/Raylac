@@ -1,0 +1,35 @@
+{
+  "cli": {
+    "version": ">= 5.9.1",
+    "appVersionSource": "remote" 
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "APP_VARIANT": "development"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+      }
+    },
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_DATABASE_ID": "default"
+      },
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "dan00300@icloud.com",
+        "ascAppId": "6502227171",
+        "appleTeamId": "D7H78Z8FX2"
+      }
+    }
+  }
+}
