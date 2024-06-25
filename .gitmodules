@@ -1,0 +1,10 @@
+[submodule "packages/contracts2/lib/forge-std"]
+	path = packages/contracts2/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "packages/contracts2/lib/account-abstraction"]
+	path = packages/contracts2/lib/account-abstraction
+	url = https://github.com/eth-infinitism/account-abstraction
+	tag = v0.6.0
+[submodule "packages/contracts2/lib/openzeppelin-contracts"]
+	path = packages/contracts2/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
