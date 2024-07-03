@@ -14,6 +14,7 @@ services:
         - packages/api/**/*
         - packages/shared/**/*
     envVars:
+      - fromGroup: sutori
       - key: NODE_VERSION
         value: 18.17.0
       - key: CHAIN
@@ -33,6 +34,7 @@ services:
         - packages/sync/**/*
         - packages/shared/**/*  
     envVars:
+      - fromGroup: sutori
       - key: NODE_VERSION
         value: 18.17.0
       - key: DATABASE_URL
