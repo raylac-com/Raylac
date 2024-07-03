@@ -1,7 +1,7 @@
 services:
   - type: web
     name: sutori-api
-    plan: pro
+    plan: standard
     previewPlan: starter
     runtime: node
     region: oregon
@@ -20,7 +20,6 @@ services:
   - type: worker
     name: sutori-sync
     plan: standard
-    previewPlan: starter
     runtime: node
     region: oregon
     buildCommand: pnpm i
@@ -45,6 +44,5 @@ databases:
   - name: cred
     databaseName: cred
     region: oregon
-    plan: pro
-    previewPlan: starter
+    plan: standard
     postgresMajorVersion: 15
