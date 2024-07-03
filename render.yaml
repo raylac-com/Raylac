@@ -1,4 +1,3 @@
-previewsEnabled: true
 services:
   - type: web
     name: sutori-api
@@ -17,8 +16,7 @@ services:
       - key: NODE_VERSION
         value: 18.17.0
       - key: CHAIN
-        value: "mainnet"
-        previewValue: "sepolia"
+        value: "sepolia"
   - type: worker
     name: sutori-sync
     plan: standard
@@ -41,8 +39,7 @@ services:
           name: cred
           property: connectionString
       - key: CHAIN
-        value: "mainnet"
-        previewValue: "sepolia"
+        value: "sepolia"
 
 databases:
   - name: cred
