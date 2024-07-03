@@ -1,0 +1,53 @@
+previewsEnabled: true
+services:
+  - type: web
+    name: sutori-api
+    plan: pro
+    previewPlan: starter
+    runtime: node
+    region: oregon
+    buildCommand: pnpm i && pnpm -F api build
+    startCommand: NODE_ENV=production pnpm -F api start
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - packages/api/**/*
+        - packages/shared/**/*
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - key: CHAIN
+        value: "mainnet"
+        previewValue: "sepolia"
+  - type: worker
+    name: sutori-sync
+    plan: standard
+    previewPlan: starter
+    runtime: node
+    region: oregon
+    buildCommand: pnpm i
+    startCommand: pnpm -F sync start
+    rootDir: ./
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - packages/sync/**/*
+        - packages/shared/**/*  
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cred
+          property: connectionString
+      - key: CHAIN
+        value: "mainnet"
+        previewValue: "sepolia"
+
+databases:
+  - name: cred
+    databaseName: cred
+    region: oregon
+    plan: pro
+    previewPlan: starter
+    postgresMajorVersion: 15

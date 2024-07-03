@@ -1,15 +1,36 @@
-import { createTRPCClient, httpBatchLink } from '@trpc/client';
-import type { AppRouter } from "@sutori/api";
-//     👆 **type-only** import
- 
-// Pass AppRouter as generic here. 👇 This lets the `trpc` object know
-// what procedures are available on the server and their input/output types.
-const trpc = createTRPCClient<AppRouter>({
-  links: [
-    httpBatchLink({
-      url: 'http://localhost:3000',
-    }),
-  ],
-});
+import {
+  createTRPCClient,
+  createTRPCReact,
+  httpBatchLink,
+} from '@trpc/react-query';
+import type { AppRouter } from '@sutori/api';
+import { getAuthToken } from './auth';
 
-export default trpc;
+export const trpc = createTRPCReact<AppRouter>();
+
+const EXPO_PUBLIC_RPC_URL = process.env.EXPO_PUBLIC_RPC_URL;
+
+if (!EXPO_PUBLIC_RPC_URL) {
+  throw new Error('Missing EXPO_PUBLIC_RPC_URL');
+}
+
+export const rpcLinks = [
+  httpBatchLink({
+    url: EXPO_PUBLIC_RPC_URL,
+    async headers() {
+      const authToken = await getAuthToken();
+
+      if (authToken) {
+        return {
+          authorization: `Bearer ${authToken}`,
+        };
+      }
+
+      return {};
+    },
+  }),
+];
+
+export const client = createTRPCClient<AppRouter>({
+  links: rpcLinks,
+});

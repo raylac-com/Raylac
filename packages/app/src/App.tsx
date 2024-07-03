@@ -1,41 +1,35 @@
-import AntDesign from '@expo/vector-icons/AntDesign';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import * as Notifications from 'expo-notifications';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
-import 'fastestsmallesttextencoderdecoder';
-import { AuthKitProvider } from '@farcaster/auth-kit';
-import { Feather, Ionicons } from '@expo/vector-icons';
-import { QueryClient } from '@tanstack/react-query';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+// 3. React Native needs crypto.getRandomValues polyfill and sha512
+import 'react-native-get-random-values';
 import { StatusBar } from 'expo-status-bar';
-import Toast from 'react-native-toast-message';
-import * as Sentry from '@sentry/react-native';
-import Constants from 'expo-constants';
-import * as Linking from 'expo-linking';
-import { ThemeProvider, DarkTheme } from '@react-navigation/native';
 import { theme } from './lib/theme';
+import {
+  NativeStackNavigationProp,
+  createNativeStackNavigator,
+} from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RootStackParamsList, RootTabsParamsList } from './navigation/types';
-import SignIn from './screens/SignIn';
-// @ts-ignore
-import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
-import { Link } from '@react-navigation/native';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
-
-const asyncStoragePersister = createAsyncStoragePersister({
-  storage: AsyncStorage,
-});
+import Home from './screens/Home';
+import SignUp from './screens/SignUp';
+import {
+  DefaultTheme,
+  NavigationContainer,
+  ThemeProvider,
+  useNavigation,
+} from '@react-navigation/native';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { trpc, rpcLinks } from './lib/trpc';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import useIsSignedIn from './hooks/useIsSignedIn';
+import { useEffect } from 'react';
+import EnterDepositInfo from './screens/Deposit/EnterDepositInfo';
+import ConfirmDeposit from './screens/Deposit/ConfirmDeposit';
+import SelectSend from './screens/Send/SelectSend';
+import Account from './screens/Account';
+import Receive from './screens/Receive';
+import SendToSutoriUser from './screens/Send/SendToSutoriUser';
+import SendToNonSutoriUser from './screens/Send/SendToNonSutoriUser';
+import Toast from 'react-native-toast-message';
+import { deleteSignedInUser } from './lib/utils';
 
 const Tab = createBottomTabNavigator<RootTabsParamsList>();
 const Stack = createNativeStackNavigator<RootStackParamsList>();
@@ -48,24 +42,18 @@ const Tabs = () => {
         component={Home}
         options={{
           title: 'Home',
-          tabBarIcon: props => (
-            <Ionicons name="people-sharp" size={24} color={props.color} />
+          tabBarIcon: ({ color }) => (
+            <AntDesign name="home" size={24} color={color} />
           ),
-          headerRight: () => (
-            <Link
-              to={{
-                screen: 'NewGroup',
-              }}
-            >
-              <AntDesign
-                name="plus"
-                size={24}
-                color={theme.color}
-                style={{
-                  marginRight: 12,
-                }}
-              />
-            </Link>
+        }}
+      ></Tab.Screen>
+      <Tab.Screen
+        name="Account"
+        component={Account}
+        options={{
+          title: 'Account',
+          tabBarIcon: ({ color }) => (
+            <AntDesign name="user" size={24} color={color} />
           ),
         }}
       ></Tab.Screen>
@@ -74,6 +62,17 @@ const Tabs = () => {
 };
 
 const Screens = () => {
+  const { data: isSignedIn } = useIsSignedIn();
+
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamsList>>();
+
+  useEffect(() => {
+    if (isSignedIn === false) {
+      navigation.navigate('SignUp');
+    }
+  }, [isSignedIn]);
+
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -84,10 +83,58 @@ const Screens = () => {
         }}
       ></Stack.Screen>
       <Stack.Screen
-        name="SignIn"
-        component={SignIn}
+        name="SignUp"
+        component={SignUp}
         options={{
           headerBackVisible: false,
+        }}
+      ></Stack.Screen>
+      <Stack.Screen
+        name="EnterDepositInfo"
+        component={EnterDepositInfo}
+        options={{
+          title: 'Add money',
+          headerBackVisible: true,
+        }}
+      ></Stack.Screen>
+      <Stack.Screen
+        name="ConfirmDeposit"
+        component={ConfirmDeposit}
+        options={{
+          title: 'Confirm deposit',
+          headerBackVisible: true,
+        }}
+      ></Stack.Screen>
+      <Stack.Screen
+        name="Send"
+        component={SelectSend}
+        options={{
+          title: 'Send',
+          headerBackVisible: true,
+        }}
+      ></Stack.Screen>
+      <Stack.Screen
+        name="SendToSutoriUser"
+        component={SendToSutoriUser}
+        options={{
+          title: 'Send',
+          headerBackVisible: true,
+          headerBackTitle: 'Back',
+        }}
+      ></Stack.Screen>
+      <Stack.Screen
+        name="SendToNonSutoriUser"
+        component={SendToNonSutoriUser}
+        options={{
+          headerBackVisible: true,
+          headerBackTitle: 'Back',
+        }}
+      ></Stack.Screen>
+      <Stack.Screen
+        name="Receive"
+        component={Receive}
+        options={{
+          headerBackVisible: true,
         }}
       ></Stack.Screen>
     </Stack.Navigator>
@@ -95,31 +142,44 @@ const Screens = () => {
 };
 
 const NavigationTheme = {
-  ...DarkTheme,
+  ...DefaultTheme,
   colors: {
-    ...DarkTheme.colors,
+    ...DefaultTheme.colors,
     card: theme.background,
     primary: theme.orange,
   },
 };
 
-const App = () => {
-  return (
-    <NavigationContainer>
-      <PersistQueryClientProvider
-        client={queryClient}
-        persistOptions={{ persister: asyncStoragePersister }}
-      >
-        <ThemeProvider value={NavigationTheme}>
-          <GestureHandlerRootView style={{ flex: 1 }}>
-            <Screens></Screens>
-            <StatusBar style="light" />
-            <Toast></Toast>
-          </GestureHandlerRootView>
-        </ThemeProvider>
-      </PersistQueryClientProvider>
-    </NavigationContainer>
-  );
-};
+const queryClient = new QueryClient({
+  // TODO:
+  defaultOptions: {
+    queries: {
+      throwOnError: true,
+      retry: false,
+      gcTime: 1000 * 60 * 60 * 24,
+    },
+    mutations: {
+      throwOnError: true,
+    },
+  },
+});
 
-export default App;
+export default function App() {
+  const trpcClient = trpc.createClient({
+    links: rpcLinks,
+  });
+
+  return (
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <NavigationContainer>
+          <ThemeProvider value={NavigationTheme}>
+            <Screens></Screens>
+            <StatusBar style="auto" />
+            <Toast></Toast>
+          </ThemeProvider>
+        </NavigationContainer>
+      </QueryClientProvider>
+    </trpc.Provider>
+  );
+}

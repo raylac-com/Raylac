@@ -6,9 +6,10 @@
   },
   "dependencies": {
     "dotenv": "^16.4.5",
-    "firebase-admin": "^12.1.0",
-    "nanoid": "^5.0.7",
-    "viem": "^2.10.9"
+    "@sutori/shared": "workspace:*",
+    "@prisma/client": "^5.12.1",
+    "viem": "^2.10.9",
+    "@noble/secp256k1": "^2.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",

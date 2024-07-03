@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider        = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -10,11 +10,55 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model ERC5564Announcement {
+  id              Int      @id @default(autoincrement())
+  schemeId        Int
+  stealthAddress  String
+  caller          String
+  ephemeralPubKey String
+  metadata        String
+  blockNumber     BigInt
+  logIndex        Int
+  txIndex         Int
+  chainId         Int
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([blockNumber, logIndex, txIndex, chainId])
+}
+
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 Int                  @id @default(autoincrement())
+  spendingPubKey     String               @unique
+  viewingPubKey      String               @unique
+  viewingPrivKey     String               @unique
+  name               String
+  username           String               @unique
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  UserStealthAddress UserStealthAddress[]
+  StealthTransfer    StealthTransfer[]
+}
+
+model UserStealthAddress {
+  id              Int      @id @default(autoincrement())
+  user            User     @relation(fields: [userId], references: [id])
+  userId          Int
+  address         String
+  ephemeralPubKey String
+  viewTag         String
+  stealthPubKey   String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model StealthTransfer {
+  id           Int      @id @default(autoincrement())
+  sender       User     @relation(fields: [senderId], references: [id])
+  senderId     Int
+  to           String
+  amount       BigInt
+  userOpHashes String[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }

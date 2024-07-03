@@ -1,0 +1,53 @@
+import { theme } from '@/lib/theme';
+import {
+  Pressable,
+  Text,
+  ActivityIndicator,
+  PressableProps,
+} from 'react-native';
+
+type StyledButtonProps = {
+  title: string;
+  isLoading?: boolean;
+} & PressableProps;
+
+const StyledButton = (props: StyledButtonProps) => {
+  const { title, disabled, isLoading } = props;
+  const style = (props.style ? props.style : {}) as object;
+
+  return (
+    <Pressable
+      {...props}
+      style={{
+        ...style,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: disabled ? theme.backgroundHover : theme.primary,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 4,
+      }}
+    >
+      {
+        // Show an activity indicator when the button is loading
+        isLoading && (
+          <ActivityIndicator
+            size="small"
+            style={{
+              marginRight: 10,
+            }}
+          ></ActivityIndicator>
+        )
+      }
+      <Text
+        style={{
+          color: theme.color,
+        }}
+      >
+        {title}
+      </Text>
+    </Pressable>
+  );
+};
+
+export default StyledButton;

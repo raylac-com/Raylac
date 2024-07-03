@@ -1,0 +1,147 @@
+import { getSpendingPrivKey, getViewingPrivKey } from '@/lib/key';
+import { trpc, client as trpcClient } from '@/lib/trpc';
+import client from '@/lib/viemClient';
+import { RouterOutput } from '@/types';
+import {
+  BASE_SEPOLIA_USDC_CONTRACT,
+  ERC20Abi,
+  SUTORI_PAYMASTER_ADDRESS,
+  buildUserOp,
+  encodePaymasterAndData,
+  getUserOpHash,
+  recoveryStealthPrivKey,
+} from '@sutori/shared';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { getQueryKey } from '@trpc/react-query';
+import { Hex, encodeFunctionData } from 'viem';
+import {
+  privateKeyToAccount,
+  publicKeyToAddress,
+  signMessage,
+} from 'viem/accounts';
+
+// This is a workaround for the fact that BigInts are not supported by JSON.stringify
+// @ts-ignore
+BigInt.prototype.toJSON = function () {
+  return this.toString();
+};
+
+const useSend = () => {
+  const { data: stealthAccounts } = trpc.getStealthAccounts.useQuery();
+  const { mutateAsync: send } = trpc.send.useMutation();
+  const { mutateAsync: signUserOp } = trpc.signUserOp.useMutation();
+
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ amount, to }: { amount: bigint; to: string }) => {
+      if (!stealthAccounts) {
+        throw new Error('Stealth addresses not loaded');
+      }
+
+      // Sort the stealth accounts by balance
+      const sortedStealthAccounts = stealthAccounts.sort((a, b) =>
+        BigInt(b.balance) > BigInt(a.balance) ? 1 : -1
+      );
+
+      let currentAmount = BigInt(0);
+      const sendFrom: RouterOutput['getStealthAccounts'] = [];
+
+      for (const account of sortedStealthAccounts) {
+        sendFrom.push(account);
+        currentAmount += BigInt(account.balance);
+
+        if (currentAmount >= amount) {
+          break;
+        }
+      }
+
+      if (currentAmount < amount) {
+        // throw new Error('Not enough funds');
+      }
+
+      const viewPrivKey = await getViewingPrivKey();
+      const spendingPrivKey = await getSpendingPrivKey();
+
+      if (!viewPrivKey) {
+        throw new Error('No view key found');
+      }
+
+      if (!spendingPrivKey) {
+        throw new Error('No spending key found');
+      }
+
+      let remainingAmount = amount;
+
+      const userOps = await Promise.all(
+        sendFrom.map(async account => {
+          const accountBalance = BigInt(account.balance);
+
+          const sendAmount =
+            remainingAmount > accountBalance ? accountBalance : remainingAmount;
+
+          const transferCall = encodeFunctionData({
+            abi: ERC20Abi,
+            functionName: 'transfer',
+            args: [to as Hex, BigInt(10000000)],
+          });
+
+          const stealthSigner = publicKeyToAddress(
+            account.stealthPubKey as Hex
+          );
+
+          let userOp = await buildUserOp({
+            // @ts-ignore
+            client,
+            stealthSigner,
+            value: BigInt(0),
+            to: BASE_SEPOLIA_USDC_CONTRACT,
+            data: transferCall,
+          });
+
+          userOp.paymasterAndData = encodePaymasterAndData({
+            paymaster: SUTORI_PAYMASTER_ADDRESS,
+            data: await signUserOp({ userOp }),
+          });
+
+          remainingAmount -= sendAmount;
+
+          const userOpHash = await getUserOpHash({
+            // @ts-ignore
+            client,
+            userOp,
+          });
+
+          console.log('Signing user op', userOpHash);
+
+          const stealthPrivKey = recoveryStealthPrivKey({
+            ephemeralPubKey: account.ephemeralPubKey as Hex,
+            viewingPrivKey: viewPrivKey as Hex,
+            spendingPrivKey: spendingPrivKey as Hex,
+          });
+
+          const sig = await signMessage({
+            privateKey: stealthPrivKey,
+            message: {
+              raw: userOpHash,
+            },
+          });
+
+          userOp.signature = sig;
+
+          return userOp;
+        })
+      );
+      await send({
+        userOps,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: getQueryKey(trpc.getBalance),
+      });
+    },
+  });
+};
+
+export default useSend;

@@ -5,5 +5,5 @@
     }
   },
   "extends": "expo/tsconfig.base",
-  "include": ["./src/**/*", "./app/**/*"]
+  "include": ["./src/**/*", "./app/**/*"],
 }

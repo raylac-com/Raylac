@@ -1,7 +1,10 @@
 export const theme = {
-  backgroundHover: '#1E1E1E',
-  primary: '#FFFFFF',
-  secondary: '#808080',
-  background: '#000000',
-  color: '#FFFFFF',
-};
+    orange: '#FDA174',
+    backgroundHover: '#e5e5e5',
+    background: '#FFFFFF',
+    color: '#FFFFFF',
+    primary: '#1E1E1E',
+    waning: "#F08080",
+    blue: "#1E90FF",
+  };
+  

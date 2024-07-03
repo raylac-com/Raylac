@@ -6,14 +6,27 @@
   "types": "out/index.d.ts",
   "private": true,
   "scripts": {
-    "build": "tsc -d"
+    "start": "tsx --watch ./src/index.ts",
+    "build": "tsc -d",
+    "build:watch": "tsc -d --watch"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^20.11.17",
+    "@prisma/client": "^5.12.1",
+    "@sutori/shared": "workspace:*",
     "@trpc/server": "11.0.0-rc.417",
+    "@types/node": "^20.11.17",
+    "alchemy-sdk": "^3.3.1",
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "jsonwebtoken": "^9.0.2",
+    "tsx": "^4.7.1",
+    "viem": "^2.10.9",
     "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.6"
   }
 }
