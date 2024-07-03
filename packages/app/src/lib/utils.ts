@@ -1,9 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Hex } from 'viem';
 import { base, baseSepolia } from 'viem/chains';
-import * as SecureStore from 'expo-secure-store';
-import * as bip39 from 'bip39';
-import { HDKey, hdKeyToAccount } from 'viem/accounts';
 import * as Clipboard from 'expo-clipboard';
 
 export const ACCOUNT_SPENDING_PUB_KEY_STORAGE_KEY = 'account_spending_pub_key';
@@ -43,7 +40,7 @@ export const getSignedInUserId = async (): Promise<number | null> => {
 
 export const deleteSignedInUser = async () => {
   await AsyncStorage.removeItem(SIGNED_IN_USER_STORAGE_KEY);
-}
+};
 
 export const copyToClipboard = async (text: string) => {
   await Clipboard.setStringAsync(text);

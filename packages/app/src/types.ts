@@ -5,7 +5,7 @@ import { Hex } from 'viem';
 
 export type RouterOutput = inferRouterOutputs<AppRouter>;
 
-export type User = RouterOutput['userBySpendingPubKey'];
+export type User = RouterOutput["getUser"];
 
 export interface StealthAccount {
   address: Hex;

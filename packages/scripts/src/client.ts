@@ -1,5 +1,5 @@
 import { createPublicClient, createWalletClient, http } from 'viem';
-import { anvil, baseSepolia } from 'viem/chains';
+import { baseSepolia } from 'viem/chains';
 
 const chain = baseSepolia;
 

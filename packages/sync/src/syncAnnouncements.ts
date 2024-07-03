@@ -1,7 +1,8 @@
-import { ERC5564_ANNOUNCER_ADDRESS } from '@sutori/shared';
-import client from './lib/viemClient';
-import { Hex, decodeEventLog, parseAbi, parseAbiItem } from 'viem';
+import { ERC5564_ANNOUNCER_ADDRESS, getPublicClient } from '@sutori/shared';
+import { Hex, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
+
+const client = getPublicClient();
 
 const announcementAbiItem = parseAbiItem(
   'event Announcement(uint256 indexed, address indexed, address indexed, bytes, bytes)'

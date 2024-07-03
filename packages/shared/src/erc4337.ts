@@ -9,12 +9,13 @@ import AccountFactoryAbi from './abi/AccountFactory';
 import EntryPointAbi from './abi/EntryPoint';
 import {
   BaseError,
+  Chain,
   ContractFunctionRevertedError,
   Hex,
+  HttpTransport,
   PublicClient,
   encodeFunctionData,
   hexToBigInt,
-  keccak256,
   pad,
   parseEther,
   toHex,
@@ -22,8 +23,8 @@ import {
 } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import axios from 'axios';
-import { getChain, getEthRpcUrl } from './utils';
 import SutoriPaymasterAbi from './abi/SutoriPaymaster';
+import { getChain, getEthRpcUrl } from './ethRpc';
 
 const chain = getChain();
 const ethRpcUrl = getEthRpcUrl(chain);
@@ -54,7 +55,7 @@ export const buildUserOp = async ({
   value,
   data,
 }: {
-  client: PublicClient;
+  client: PublicClient<HttpTransport, Chain>;
   stealthSigner: Hex;
   to: Hex;
   value: bigint;
@@ -63,7 +64,7 @@ export const buildUserOp = async ({
   const initCode = getInitCode({ stealthSigner });
 
   const senderAddress = await getSenderAddress({
-    publicClient: client,
+    client,
     initCode,
   });
 
@@ -141,7 +142,7 @@ export const getPaymasterMessageHash = async ({
   client,
 }: {
   userOp: UserOperation;
-  client: PublicClient;
+  client: PublicClient<HttpTransport, Chain>;
 }) => {
   const paymasterMessageHash = await client.readContract({
     abi: SutoriPaymasterAbi,
@@ -168,17 +169,17 @@ export const getPaymasterMessageHash = async ({
 };
 
 export const getSenderAddress = async ({
-  publicClient,
+  client,
   initCode,
 }: {
-  publicClient: PublicClient;
+  client: PublicClient<HttpTransport, Chain>;
   initCode: Hex;
 }): Promise<Hex | undefined> => {
   try {
     // Simulate contract call from a random account
     const account = await privateKeyToAccount(pad('0x1'));
 
-    await publicClient.simulateContract({
+    await client.simulateContract({
       address: ENTRY_POINT_ADDRESS,
       account,
       abi: EntryPointAbi,

@@ -1,9 +1,14 @@
 import { useMutation } from '@tanstack/react-query';
-import viemClient from '@/lib/viemClient';
 import { Hex } from 'viem';
-import { generateStealthAddress, getStealthAddress } from '@sutori/shared';
+import {
+  generateStealthAddress,
+  getPublicClient,
+  getStealthAddress,
+} from '@sutori/shared';
 import { StealthAccount } from '@/types';
 import { publicKeyToAddress } from 'viem/accounts';
+
+const client = getPublicClient();
 
 /**
  * Hook to generate a new stealth address for the given public spending/viewing key pair
@@ -25,8 +30,7 @@ const useGenerateStealthAccount = () => {
 
       const stealthSigner = publicKeyToAddress(stealthPubKey);
       const address = await getStealthAddress({
-        // @ts-ignore
-        publicClient: viemClient,
+        client,
         stealthSigner,
       });
 

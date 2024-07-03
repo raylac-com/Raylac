@@ -5,7 +5,6 @@ import StyledButton from '@/components/StyledButton';
 import { useCallback, useState } from 'react';
 import { parseUnits } from 'viem';
 import { FontAwesome5 } from '@expo/vector-icons';
-import { getDefaultAutoSelectFamilyAttemptTimeout } from 'net';
 import { getClipboardText } from '@/lib/utils';
 import { theme } from '@/lib/theme';
 

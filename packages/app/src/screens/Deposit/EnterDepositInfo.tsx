@@ -1,7 +1,6 @@
 import { View } from 'react-native';
 import StyledButton from '@/components/StyledButton';
 import StyledTextInput from '@/components/StyledTextInput';
-import useTypedNavigation from '@/hooks/useTypedNavigation';
 import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
 import { useCallback, useState } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';

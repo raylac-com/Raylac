@@ -3,7 +3,6 @@ import { getUserIdFromToken } from './auth';
 
 export async function createContext({
   req,
-  res,
 }: trpcNext.CreateNextContextOptions) {
   const token = req.headers['authorization']?.split(' ')[1];
 

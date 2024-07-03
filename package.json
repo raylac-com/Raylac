@@ -1,8 +1,11 @@
 {
   "name": "@sutori/monorepo",
   "version": "1.0.0",
+  "private": true,
   "description": "",
-  "main": "index.js",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
   },
   "keywords": [],
@@ -10,9 +13,17 @@
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^20.14.2",
-    "eslint": "^9.4.0",
+    "eslint": "^8.56.0",
     "prettier": "^3.3.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1",
+    "lint-staged": "^15.2.2"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js}": [
+      "eslint --cache --fix"
+    ],
+    "*.{js,ts,tsx,json}": "prettier --write --ignore-unknown"
   }
 }

@@ -11,3 +11,4 @@ export * from './addresses';
 export * from './utils';
 export * from './types';
 export * from './erc4337';
+export * from './ethRpc';

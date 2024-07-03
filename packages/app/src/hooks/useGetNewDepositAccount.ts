@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import useGenerateStealthAccount from './useGenerateStealthAccount';
 import useSignedInUser from './useSignInUser';
 import { Hex } from 'viem';

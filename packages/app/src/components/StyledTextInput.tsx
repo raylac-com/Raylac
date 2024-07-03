@@ -2,12 +2,11 @@ import { theme } from '@/lib/theme';
 import { Text, TextInput, TextInputProps, View } from 'react-native';
 
 type StyledTextInputProps = {
-  prefix?: string;
   postfix?: string;
 } & TextInputProps;
 
 const StyledTextInput = (props: StyledTextInputProps) => {
-  const { prefix, postfix } = props;
+  const { postfix } = props;
   const style = (props.style ? props.style : {}) as object;
 
   return (

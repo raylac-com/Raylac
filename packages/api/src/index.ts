@@ -10,9 +10,7 @@ import jwt from 'jsonwebtoken';
 import alchemy from './lib/alchemy';
 import {
   encodeERC5564Metadata,
-  encodePaymasterAndData,
   sendUserOperation,
-  SUTORI_PAYMASTER_ADDRESS,
   UserOperation,
 } from '@sutori/shared';
 import * as erc20 from './lib/erc20';
@@ -72,8 +70,7 @@ const appRouter = router({
 
       const userOpHashes = [];
 
-      for (let userOp of userOps) {
-        console.log('Sending user op', userOp);
+      for (const userOp of userOps) {
         const userOpHash = await sendUserOperation(userOp);
         userOpHashes.push(userOpHash);
       }

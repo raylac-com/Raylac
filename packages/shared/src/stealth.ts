@@ -21,16 +21,16 @@ const g = {
  * This functions calls the `getSenderAddress` function of the entry point contract.
  */
 export const getStealthAddress = async ({
-  publicClient,
+  client,
   stealthSigner,
 }: {
-  publicClient: PublicClient<HttpTransport, Chain>;
+  client: PublicClient<HttpTransport, Chain>;
   stealthSigner: Hex;
 }) => {
   const initCode = getInitCode({ stealthSigner });
 
   const senderAddress = await getSenderAddress({
-    publicClient,
+    client,
     initCode,
   });
 

@@ -1,6 +1,5 @@
 import { getSpendingPrivKey, getViewingPrivKey } from '@/lib/key';
-import { trpc, client as trpcClient } from '@/lib/trpc';
-import client from '@/lib/viemClient';
+import { trpc } from '@/lib/trpc';
 import { RouterOutput } from '@/types';
 import {
   BASE_SEPOLIA_USDC_CONTRACT,
@@ -8,23 +7,22 @@ import {
   SUTORI_PAYMASTER_ADDRESS,
   buildUserOp,
   encodePaymasterAndData,
+  getPublicClient,
   getUserOpHash,
   recoveryStealthPrivKey,
 } from '@sutori/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
 import { Hex, encodeFunctionData } from 'viem';
-import {
-  privateKeyToAccount,
-  publicKeyToAddress,
-  signMessage,
-} from 'viem/accounts';
+import { publicKeyToAddress, signMessage } from 'viem/accounts';
 
 // This is a workaround for the fact that BigInts are not supported by JSON.stringify
 // @ts-ignore
 BigInt.prototype.toJSON = function () {
   return this.toString();
 };
+
+const client = getPublicClient();
 
 const useSend = () => {
   const { data: stealthAccounts } = trpc.getStealthAccounts.useQuery();
@@ -90,8 +88,7 @@ const useSend = () => {
             account.stealthPubKey as Hex
           );
 
-          let userOp = await buildUserOp({
-            // @ts-ignore
+          const userOp = await buildUserOp({
             client,
             stealthSigner,
             value: BigInt(0),
@@ -107,7 +104,6 @@ const useSend = () => {
           remainingAmount -= sendAmount;
 
           const userOpHash = await getUserOpHash({
-            // @ts-ignore
             client,
             userOp,
           });
