@@ -34,7 +34,8 @@
         {
           "faceIDPermission": "Allow Sutori to access your biometric data."
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "extra": {
       "eas": {

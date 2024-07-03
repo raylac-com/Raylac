@@ -28,6 +28,7 @@
     "buffer": "^6.0.3",
     "ethereum-blockies-base64": "^1.0.2",
     "expo": "~51.0.17",
+    "expo-asset": "~10.0.10",
     "expo-camera": "~15.0.12",
     "expo-clipboard": "~6.0.3",
     "expo-linking": "~6.3.1",
