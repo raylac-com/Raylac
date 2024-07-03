@@ -17,6 +17,10 @@ services:
       - fromGroup: sutori
       - key: NODE_VERSION
         value: 18.17.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sutori
+          property: connectionString
       - key: CHAIN
         value: "sepolia"
   - type: worker
