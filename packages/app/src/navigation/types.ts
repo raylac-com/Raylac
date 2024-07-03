@@ -27,5 +27,6 @@ export type RootStackParamsList = {
   SendToNonSutoriUser: undefined;
   EnterDepositInfo: undefined;
   ConfirmDeposit: undefined;
+  TransferHistory: undefined;
   Receive: undefined;
 };

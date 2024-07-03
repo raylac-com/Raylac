@@ -29,7 +29,7 @@ import Receive from './screens/Receive';
 import SendToSutoriUser from './screens/Send/SendToSutoriUser';
 import SendToNonSutoriUser from './screens/Send/SendToNonSutoriUser';
 import Toast from 'react-native-toast-message';
-import { deleteSignedInUser } from './lib/utils';
+import TransferHistory from './screens/TransferHistory';
 
 const Tab = createBottomTabNavigator<RootTabsParamsList>();
 const Stack = createNativeStackNavigator<RootStackParamsList>();
@@ -133,6 +133,13 @@ const Screens = () => {
       <Stack.Screen
         name="Receive"
         component={Receive}
+        options={{
+          headerBackVisible: true,
+        }}
+      ></Stack.Screen>
+      <Stack.Screen
+        name="TransferHistory"
+        component={TransferHistory}
         options={{
           headerBackVisible: true,
         }}

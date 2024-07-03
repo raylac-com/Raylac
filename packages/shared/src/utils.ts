@@ -58,8 +58,8 @@ export const decodeERC5564Metadata = (metadata: Hex) => {
     );
   }
 
-  const viewTag = metadata.slice(0, 4);
-  const stealthPubKey = `0x${metadata.slice(4)}`;
+  const viewTag = metadata.slice(0, 4) as Hex;
+  const stealthPubKey = `0x${metadata.slice(4)}` as Hex;
 
   return { viewTag, stealthPubKey };
 };

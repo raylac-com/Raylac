@@ -27,10 +27,18 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      ["expo-secure-store",
-      {
-        "faceIDPermission": "Allow Sutori to access your biometric data."
-      }]
-    ]
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "Allow Sutori to access your biometric data."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "8c208206-1d5b-45a4-9cf7-724b76fde97b"
+      }
+    },
+    "owner": "dantehrani"
   }
 }

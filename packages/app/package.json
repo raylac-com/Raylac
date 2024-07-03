@@ -37,7 +37,7 @@
     "react-native-fast-image": "^8.6.3",
     "react-native-get-random-values": "^1.11.0",
     "react-native-toast-message": "^2.2.0",
-    "viem": "^2.10.9"
+    "viem": "^2.17.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.4",

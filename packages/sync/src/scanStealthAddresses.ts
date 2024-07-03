@@ -1,7 +1,6 @@
 import { checkStealthAddress, decodeERC5564Metadata } from '@sutori/shared';
 import prisma from './lib/prisma';
 import { sleep } from './lib/utils';
-import * as secp from '@noble/secp256k1';
 import { webcrypto } from 'node:crypto';
 import { Hex } from 'viem';
 
@@ -22,14 +21,23 @@ const getAnnouncements = async () => {
 
 const assignStealthAddressToUser = async ({
   stealthAddress,
+  ephemeralPubKey,
+  stealthPubKey,
+  viewTag,
   userId,
 }: {
-  stealthAddress: string;
+  stealthAddress: Hex;
+  ephemeralPubKey: Hex;
+  stealthPubKey: Hex;
+  viewTag: Hex;
   userId: number;
 }) => {
   await prisma.userStealthAddress.create({
     data: {
       address: stealthAddress,
+      ephemeralPubKey,
+      stealthPubKey,
+      viewTag,
       userId,
     },
   });
@@ -49,31 +57,27 @@ const scanStealthAddresses = async () => {
       );
 
       const viewTag = decodedMetadata.viewTag;
-      const stealthPubKey = secp.ProjectivePoint.fromHex(
-        decodedMetadata.stealthPubKey
-      );
 
-      const ephemeralPubKey = secp.ProjectivePoint.fromHex(
-        announcement.ephemeralPubKey
-      );
+      const stealthAddress = announcement.stealthAddress as Hex;
+      const ephemeralPubKey = announcement.ephemeralPubKey as Hex;
+      const stealthPubKey = decodedMetadata.stealthPubKey;
 
       const matchedUser = users.find(user => {
-        const spendingPubKey = secp.ProjectivePoint.fromHex(
-          user.spendingPubKey
-        );
-
         return checkStealthAddress({
           viewTag,
-          stealthPubKey,
-          ephemeralPubKey,
-          spendingPubKey,
-          viewingPrivKey: BigInt(user.viewingPrivKey),
+          stealthPubKey: decodedMetadata.stealthPubKey,
+          ephemeralPubKey: ephemeralPubKey,
+          spendingPubKey: user.spendingPubKey as Hex,
+          viewingPrivKey: user.viewingPrivKey as Hex,
         });
       });
 
       if (matchedUser) {
         await assignStealthAddressToUser({
-          stealthAddress: announcement.stealthAddress,
+          stealthAddress,
+          ephemeralPubKey,
+          stealthPubKey,
+          viewTag,
           userId: matchedUser.id,
         });
       } else {
