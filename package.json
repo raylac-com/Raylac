@@ -7,11 +7,13 @@
     "packages/*"
   ],
   "scripts": {
+    "prepare": "if [ \"$NODE_ENV\" != \"production\" ]; then husky; fi"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "husky": "^9.0.11",
     "@types/node": "^20.14.2",
     "eslint": "^8.56.0",
     "prettier": "^3.3.2",
