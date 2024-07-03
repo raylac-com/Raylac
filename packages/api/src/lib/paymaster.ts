@@ -1,10 +1,7 @@
-import {
-  UserOperation,
-  getPaymasterMessageHash,
-  getPublicClient,
-} from '@sutori/shared';
+import { UserOperation, getPaymasterMessageHash } from '@sutori/shared';
 import { privateKeyToAccount, signMessage } from 'viem/accounts';
 import { Hex } from 'viem';
+import { publicClient } from './viem';
 
 const PAYMASTER_PRIVATE_KEY = process.env.PAYMASTER_PRIVATE_KEY;
 
@@ -12,11 +9,9 @@ if (!PAYMASTER_PRIVATE_KEY) {
   throw new Error('PAYMASTER_PRIVATE_KEY not set');
 }
 
-const client = getPublicClient();
-
 export const signUserOp = async (userOp: UserOperation): Promise<Hex> => {
   const userOpHash = await getPaymasterMessageHash({
-    client,
+    client: publicClient,
     userOp,
   });
 

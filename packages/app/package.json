@@ -13,10 +13,11 @@
     "@expo/vector-icons": "^14.0.2",
     "@noble/secp256k1": "^2.1.0",
     "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-native/assets-registry": "^0.74.85",
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.9.26",
-    "@sentry/react-native": "^5.22.0",
+    "@sentry/react-native": "^5.22.3",
     "@sutori/api": "workspace:*",
     "@sutori/shared": "workspace:*",
     "@tanstack/react-query": "^5.48.0",
@@ -44,7 +45,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.24.4",
-    "@babel/runtime": "^7.24.7"
+    "@babel/runtime": "^7.24.7",
+    "babel-preset-expo": "^11.0.11"
   },
   "private": true
 }

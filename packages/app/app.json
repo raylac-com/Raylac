@@ -35,7 +35,14 @@
           "faceIDPermission": "Allow Sutori to access your biometric data."
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "sutori",
+          "project": "sutori"
+        }
+      ]
     ],
     "extra": {
       "eas": {

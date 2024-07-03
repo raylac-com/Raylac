@@ -10,7 +10,7 @@ import { Chain, base, baseSepolia } from 'viem/chains';
 /**
  * Get the chain based on the environment
  */
-export const getChain = () => {
+export const getChain = (): Chain => {
   if (
     process.env.NODE_ENV === 'development' ||
     process.env.CHAIN === 'sepolia' ||
@@ -22,24 +22,21 @@ export const getChain = () => {
   return base;
 };
 
-const ALCHEMY_BASE_SEPOLIA_API_KEY = process.env.ALCHEMY_BASE_SEPOLIA_API_KEY;
-const ALCHEMY_BASE_API_KEY = process.env.ALCHEMY_BASE_API_KEY;
+export const getAlchemyRpcUrl = ({
+  chain,
+  apiKey,
+}: {
+  chain: Chain;
+  apiKey: string;
+}) => {
+  if (!apiKey) {
+    throw new Error('API key is required');
+  }
 
-export const getEthRpcUrl = (chain: Chain) => {
   if (chain === baseSepolia) {
-    if (!ALCHEMY_BASE_SEPOLIA_API_KEY) {
-      throw new Error(
-        'ALCHEMY_BASE_SEPOLIA_API_KEY is required in development'
-      );
-    }
-
-    return `https://base-sepolia.g.alchemy.com/v2/${ALCHEMY_BASE_SEPOLIA_API_KEY}`;
+    return `https://base-sepolia.g.alchemy.com/v2/${apiKey}`;
   } else if (chain === base) {
-    if (!ALCHEMY_BASE_API_KEY) {
-      throw new Error('ALCHEMY_BASE_API_KEY is required in production');
-    }
-
-    return `https://base.g.alchemy.com/v2/${ALCHEMY_BASE_API_KEY}`;
+    return `https://base.g.alchemy.com/v2/${apiKey}`;
   } else {
     throw new Error(`Unknown chain: ${chain}`);
   }
@@ -49,13 +46,16 @@ export const getEthRpcUrl = (chain: Chain) => {
  * Get a `PublicClient` viem instance.
  * The chain is determined by the environment.
  */
-export const getPublicClient = (): PublicClient<HttpTransport, Chain> => {
-  const chain = getChain();
-  const transport = getEthRpcUrl(chain);
-
+export const getPublicClient = ({
+  chain,
+  rpcUrl,
+}: {
+  chain: Chain;
+  rpcUrl: string;
+}): PublicClient<HttpTransport, Chain> => {
   const client = createPublicClient({
     chain,
-    transport: http(transport),
+    transport: http(rpcUrl),
   });
 
   return client as PublicClient<HttpTransport, Chain>;
@@ -65,12 +65,15 @@ export const getPublicClient = (): PublicClient<HttpTransport, Chain> => {
  * Get a `WalletClient` viem instance.
  * The chain is determined by the environment.
  */
-export const getWalletClient = () => {
-  const chain = getChain();
-  const transport = getEthRpcUrl(chain);
-
+export const getWalletClient = ({
+  chain,
+  rpcUrl,
+}: {
+  chain: Chain;
+  rpcUrl: string;
+}) => {
   return createWalletClient({
     chain,
-    transport: http(transport),
+    transport: http(rpcUrl),
   });
 };

@@ -2,12 +2,11 @@ import { Hex } from 'viem';
 import {
   ERC5564_ANNOUNCER_ADDRESS,
   ERC5564AnnouncerAbi,
-  getWalletClient,
 } from '@sutori/shared';
 import { privateKeyToAccount } from 'viem/accounts';
+import { walletClient } from './viem';
 
 const SCHEME_ID = BigInt(1);
-const walletClient = getWalletClient();
 
 const ANNOUNCER_PRIVATE_KEY = process.env.ANNOUNCER_PRIVATE_KEY;
 

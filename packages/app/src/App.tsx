@@ -30,6 +30,12 @@ import SendToSutoriUser from './screens/Send/SendToSutoriUser';
 import SendToNonSutoriUser from './screens/Send/SendToNonSutoriUser';
 import Toast from 'react-native-toast-message';
 import TransferHistory from './screens/TransferHistory';
+import * as Sentry from '@sentry/react-native';
+
+Sentry.init({
+  dsn: "https://adc4c437047fef7e4ebe5d0d77df3ff5@o1348995.ingest.us.sentry.io/4507536730030080",
+  debug: process.env.NODE_ENV === 'development',
+});
 
 const Tab = createBottomTabNavigator<RootTabsParamsList>();
 const Stack = createNativeStackNavigator<RootStackParamsList>();

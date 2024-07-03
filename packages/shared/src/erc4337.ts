@@ -24,10 +24,6 @@ import {
 import { privateKeyToAccount } from 'viem/accounts';
 import axios from 'axios';
 import SutoriPaymasterAbi from './abi/SutoriPaymaster';
-import { getChain, getEthRpcUrl } from './ethRpc';
-
-const chain = getChain();
-const ethRpcUrl = getEthRpcUrl(chain);
 
 /**
  * Get the init code for creating a stealth contract account
@@ -220,9 +216,13 @@ export const getSenderAddress = async ({
  * Calls the `eth_sendUserOperation` JSON-RPC method
  * @returns user operation hash
  */
-export const sendUserOperation = async (
-  userOp: UserOperation
-): Promise<Hex> => {
+export const sendUserOperation = async ({
+  client,
+  userOp,
+}: {
+  client: PublicClient<HttpTransport, Chain>;
+  userOp: UserOperation;
+}): Promise<Hex> => {
   const config = {
     headers: {
       accept: 'application/json',
@@ -237,7 +237,7 @@ export const sendUserOperation = async (
       message: string;
     };
   }>(
-    ethRpcUrl,
+    client.transport.url as string,
     {
       id: 1,
       jsonrpc: '2.0',
@@ -258,7 +258,13 @@ export const sendUserOperation = async (
  * Get a user operation by its hash.
  * Calls the `eth_getUserOperationByHash` JSON-RPC method
  */
-export const getUserOpByHash = async (hash: Hex) => {
+export const getUserOpByHash = async ({
+  client,
+  hash,
+}: {
+  client: PublicClient<HttpTransport, Chain>;
+  hash: Hex;
+}) => {
   const config = {
     headers: {
       accept: 'application/json',
@@ -267,7 +273,7 @@ export const getUserOpByHash = async (hash: Hex) => {
   };
 
   const result = await axios.post(
-    ethRpcUrl,
+    client.transport.url as string,
     {
       id: 1,
       jsonrpc: '2.0',

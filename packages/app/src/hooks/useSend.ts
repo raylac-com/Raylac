@@ -1,5 +1,6 @@
 import { getSpendingPrivKey, getViewingPrivKey } from '@/lib/key';
 import { trpc } from '@/lib/trpc';
+import { publicClient } from '@/lib/viem';
 import { RouterOutput } from '@/types';
 import {
   BASE_SEPOLIA_USDC_CONTRACT,
@@ -7,7 +8,6 @@ import {
   SUTORI_PAYMASTER_ADDRESS,
   buildUserOp,
   encodePaymasterAndData,
-  getPublicClient,
   getUserOpHash,
   recoveryStealthPrivKey,
 } from '@sutori/shared';
@@ -21,8 +21,6 @@ import { publicKeyToAddress, signMessage } from 'viem/accounts';
 BigInt.prototype.toJSON = function () {
   return this.toString();
 };
-
-const client = getPublicClient();
 
 const useSend = () => {
   const { data: stealthAccounts } = trpc.getStealthAccounts.useQuery();
@@ -89,7 +87,7 @@ const useSend = () => {
           );
 
           const userOp = await buildUserOp({
-            client,
+            client: publicClient,
             stealthSigner,
             value: BigInt(0),
             to: BASE_SEPOLIA_USDC_CONTRACT,
@@ -104,7 +102,7 @@ const useSend = () => {
           remainingAmount -= sendAmount;
 
           const userOpHash = await getUserOpHash({
-            client,
+            client: publicClient,
             userOp,
           });
 

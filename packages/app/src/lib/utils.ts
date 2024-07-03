@@ -1,23 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Hex } from 'viem';
-import { base, baseSepolia } from 'viem/chains';
 import * as Clipboard from 'expo-clipboard';
 
 export const ACCOUNT_SPENDING_PUB_KEY_STORAGE_KEY = 'account_spending_pub_key';
 export const ACCOUNT_VIEWING_PUB_KEY_STORAGE_KEY = 'account_viewing_pub_key';
 export const ACCOUNT_SPENDING_PRIV_KEY_STORAGE_KEY = 'account_priv_key';
 export const ACCOUNT_VIEWING_PRIV_KEY_STORAGE_KEY = 'account_viewing_priv_key';
-
-export const getChain = () => {
-  if (
-    process.env.NODE_ENV === 'development' ||
-    process.env.NEXT_PUBLIC_CHAIN === 'sepolia'
-  ) {
-    return baseSepolia;
-  }
-
-  return base;
-};
 
 export const shortenAddress = (address: Hex) => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;

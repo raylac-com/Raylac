@@ -1,15 +1,14 @@
-import { ERC5564_ANNOUNCER_ADDRESS, getPublicClient } from '@sutori/shared';
+import { ERC5564_ANNOUNCER_ADDRESS } from '@sutori/shared';
 import { Hex, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
-
-const client = getPublicClient();
+import { publicClient } from './lib/viem';
 
 const announcementAbiItem = parseAbiItem(
   'event Announcement(uint256 indexed, address indexed, address indexed, bytes, bytes)'
 );
 
 const syncAnnouncements = async () => {
-  const logs = await client.getLogs({
+  const logs = await publicClient.getLogs({
     address: ERC5564_ANNOUNCER_ADDRESS,
     event: announcementAbiItem,
     fromBlock: 'earliest',
@@ -32,7 +31,7 @@ const syncAnnouncements = async () => {
       txIndex: log.transactionIndex,
       logIndex: log.logIndex,
       blockNumber: log.blockNumber,
-      chainId: client.chain.id,
+      chainId: publicClient.chain.id,
     };
 
     await prisma.eRC5564Announcement.upsert({
@@ -43,7 +42,7 @@ const syncAnnouncements = async () => {
           blockNumber: log.blockNumber,
           logIndex: log.logIndex,
           txIndex: log.transactionIndex,
-          chainId: client.chain.id,
+          chainId: publicClient.chain.id,
         },
       },
     });

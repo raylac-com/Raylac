@@ -19,6 +19,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { createContext } from './context';
 import { JWT_PRIV_KEY, getTransferDataFromUserOp } from './utils';
 import { Transfer } from './types';
+import { publicClient } from './lib/viem';
 
 // This is a workaround for the fact that BigInts are not supported by JSON.stringify
 // @ts-ignore
@@ -71,7 +72,10 @@ const appRouter = router({
       const userOpHashes = [];
 
       for (const userOp of userOps) {
-        const userOpHash = await sendUserOperation(userOp);
+        const userOpHash = await sendUserOperation({
+          client: publicClient,
+          userOp,
+        });
         userOpHashes.push(userOpHash);
       }
 
