@@ -11,7 +11,6 @@ import { RootStackParamsList, RootTabsParamsList } from './navigation/types';
 import Home from './screens/Home';
 import SignUp from './screens/SignUp';
 import {
-  DefaultTheme,
   NavigationContainer,
   ThemeProvider,
   useNavigation,
@@ -31,9 +30,10 @@ import SendToNonSutoriUser from './screens/Send/SendToNonSutoriUser';
 import Toast from 'react-native-toast-message';
 import TransferHistory from './screens/TransferHistory';
 import * as Sentry from '@sentry/react-native';
+import SignIn from './screens/Start';
 
 Sentry.init({
-  dsn: "https://adc4c437047fef7e4ebe5d0d77df3ff5@o1348995.ingest.us.sentry.io/4507536730030080",
+  dsn: 'https://adc4c437047fef7e4ebe5d0d77df3ff5@o1348995.ingest.us.sentry.io/4507536730030080',
   debug: process.env.NODE_ENV === 'development',
 });
 
@@ -78,6 +78,10 @@ const Screens = () => {
       navigation.navigate('SignUp');
     }
   }, [isSignedIn]);
+
+  if (!isSignedIn) {
+    return null;
+  }
 
   return (
     <Stack.Navigator>
@@ -150,29 +154,31 @@ const Screens = () => {
           headerBackVisible: true,
         }}
       ></Stack.Screen>
+      <Stack.Screen
+        name="SignIn"
+        component={SignIn}
+        options={{
+          headerBackVisible: false,
+        }}
+      ></Stack.Screen>
     </Stack.Navigator>
   );
 };
 
 const NavigationTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    card: theme.background,
-    primary: theme.orange,
-  },
+  dark: true,
+  colors: theme
 };
 
 const queryClient = new QueryClient({
-  // TODO:
   defaultOptions: {
     queries: {
-      throwOnError: true,
-      retry: false,
+      throwOnError: process.env.NODE_ENV === 'development',
+      retry: process.env.NODE_ENV === 'development' ? false : 3,
       gcTime: 1000 * 60 * 60 * 24,
     },
     mutations: {
-      throwOnError: true,
+      throwOnError: process.env.NODE_ENV === 'development',
     },
   },
 });

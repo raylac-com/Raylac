@@ -71,6 +71,10 @@ const appRouter = router({
 
       const userOpHashes = [];
 
+      // Make sure that all of the user operations are going to succeed
+
+      // Get and save the user operation hashes before sending them
+
       for (const userOp of userOps) {
         const userOpHash = await sendUserOperation({
           client: publicClient,
@@ -158,6 +162,8 @@ const appRouter = router({
     const totalBalance = balances.reduce((acc, balance) => {
       return acc + balance;
     }, BigInt(0));
+
+    console.log('totalBalance', totalBalance.toString());
 
     return totalBalance.toString();
   }),

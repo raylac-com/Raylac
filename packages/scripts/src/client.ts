@@ -1,22 +1,23 @@
-import { createPublicClient, createWalletClient, http } from 'viem';
-import { baseSepolia } from 'viem/chains';
+import {
+  getAlchemyRpcUrl,
+  getChain,
+  getPublicClient,
+  getWalletClient,
+} from '@sutori/shared';
 
-const chain = baseSepolia;
+const chain = getChain();
 
-const transport =
-  // http();
-  http(
-    `https://base-sepolia.g.alchemy.com/v2/BjrzZCLjdOu3etOMvJrm6HV63zBtxIjA`
-  );
-
-export const walletClient = createWalletClient({
+const rpcUrl = getAlchemyRpcUrl({
   chain,
-  transport,
+  apiKey: process.env.ALCHEMY_API_KEY as string,
 });
 
-const client = createPublicClient({
+export const publicClient = getPublicClient({
   chain,
-  transport,
+  rpcUrl,
 });
 
-export default client;
+export const walletClient = getWalletClient({
+  chain,
+  rpcUrl,
+});

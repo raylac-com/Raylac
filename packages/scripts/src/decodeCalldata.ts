@@ -20,5 +20,4 @@ const decodeCalldata = () => {
   console.log(transfer);
 };
 
-
 decodeCalldata();

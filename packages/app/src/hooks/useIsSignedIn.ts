@@ -10,6 +10,14 @@ const useIsSignedIn = () => {
       const signedInUser = await getSignedInUserId();
       const authToken = await getAuthToken();
 
+      if (!signedInUser) {
+        console.log('No signed in user');
+      }
+
+      if (!authToken) {
+        console.log('No auth token');
+      }
+
       return !!signedInUser && !!authToken;
     },
   });

@@ -42,6 +42,7 @@ const EnterDepositInfo = ({ navigation }: Props) => {
           width: 200,
         }}
         keyboardType="numeric"
+        postfix='USDC'
       ></StyledTextInput>
       <StyledButton
         title="Next"

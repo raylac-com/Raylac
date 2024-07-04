@@ -73,7 +73,7 @@ const UsernameAvailabilityIndicator = (
 const SignUp = () => {
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
-  const { mutateAsync: signUp } = useSignUp();
+  const { mutateAsync: signUp, isPending: isSigningUp } = useSignUp();
 
   const { data: isSignedIn } = useIsSignedIn();
 
@@ -141,6 +141,7 @@ const SignUp = () => {
           marginTop: 20,
         }}
         disabled={!canGoNext}
+        isLoading={isSigningUp}
         onPress={async () => {
           await signUp({
             name,

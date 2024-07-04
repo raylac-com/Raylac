@@ -285,3 +285,41 @@ export const getUserOpByHash = async ({
 
   return result.data;
 };
+
+export const getUserOpReceipt = async ({
+  client,
+  hash,
+}: {
+  client: PublicClient<HttpTransport, Chain>;
+  hash: Hex;
+}) => {
+  const config = {
+    headers: {
+      accept: 'application/json',
+      'content-type': 'application/json',
+    },
+  };
+
+  const result = await axios.post<{
+    result?: any;
+    error?: {
+      code: number;
+      message: string;
+    };
+  }>(
+    client.transport.url as string,
+    {
+      id: 1,
+      jsonrpc: '2.0',
+      method: 'eth_getUserOperationReceipt',
+      params: [hash],
+    },
+    config
+  );
+
+  if (result.data.error) {
+    throw new Error(JSON.stringify(result.data.error));
+  }
+
+  return result.data!;
+};

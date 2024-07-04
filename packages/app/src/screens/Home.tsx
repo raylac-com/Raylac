@@ -11,8 +11,9 @@ import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { formatUnits } from 'viem';
 import { theme } from '@/lib/theme';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
+import useIsSignedIn from '@/hooks/useIsSignedIn';
 
 interface MenuItemProps {
   icon: React.ReactNode;
@@ -55,18 +56,36 @@ const MenuItem = (props: MenuItemProps) => {
 const NUM_TRANSFERS_TO_SHOW = 5;
 
 const HomeScreen = () => {
-  const { data: balance } = trpc.getBalance.useQuery();
-  const { data: txHistory } = trpc.getTxHistory.useQuery();
-  const [refreshing, setRefreshing] = useState(false);
+  const { data: isSignedIn } = useIsSignedIn();
+
+  const {
+    data: balance,
+    error,
+    isStale,
+    refetch: refetchBalance,
+    isRefetching: isRefetchingBalance,
+  } = trpc.getBalance.useQuery();
+
+  console.log('isSignedIn', isSignedIn);
+  console.log('balance', balance);
+  console.log('error', error);
+  console.log('isStale', isStale);
+  console.log('isRefetchingBalance', isRefetchingBalance);
+
+  const {
+    data: txHistory,
+    refetch: refetchTxHistory,
+    isRefetching: isRefetchingTxHistory,
+  } = trpc.getTxHistory.useQuery(null, {
+    enabled: isSignedIn,
+  });
 
   const navigation = useTypedNavigation();
 
   const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
-  }, []);
+    refetchBalance();
+    refetchTxHistory();
+  }, [refetchBalance, refetchTxHistory]);
 
   return (
     <SafeAreaView
@@ -77,7 +96,10 @@ const HomeScreen = () => {
     >
       <ScrollView
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={isRefetchingBalance || isRefetchingTxHistory}
+            onRefresh={onRefresh}
+          />
         }
       >
         <View
@@ -90,9 +112,10 @@ const HomeScreen = () => {
           <Text
             style={{
               fontSize: 24,
+              color: theme.text,
             }}
           >
-            {balance ? formatUnits(BigInt(balance), 6) : ''} USD
+            {balance !== undefined ? formatUnits(BigInt(balance), 6) : ''} USD
           </Text>
         </View>
         <View
@@ -104,21 +127,21 @@ const HomeScreen = () => {
           }}
         >
           <MenuItem
-            icon={<AntDesign name="plus" size={24} color={theme.color} />}
+            icon={<AntDesign name="plus" size={24} color={theme.text} />}
             title="Add money"
             onPress={() => {
               navigation.navigate('EnterDepositInfo');
             }}
           />
           <MenuItem
-            icon={<AntDesign name="arrowup" size={24} color={theme.color} />}
+            icon={<AntDesign name="arrowup" size={24} color={theme.text} />}
             title="Send"
             onPress={() => {
               navigation.navigate('Send');
             }}
           />
           <MenuItem
-            icon={<AntDesign name="arrowdown" size={24} color={theme.color} />}
+            icon={<AntDesign name="arrowdown" size={24} color={theme.text} />}
             title="Receive"
             onPress={() => {
               navigation.navigate('Receive');

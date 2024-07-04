@@ -19,6 +19,7 @@ export type SendStackParamsList = {
 
 export type RootStackParamsList = {
   Tabs: { screen: keyof RootTabsParamsList; params?: any };
+  SignIn: undefined;
   SignUp: undefined;
   Send: undefined;
   SendToSutoriUser: undefined;

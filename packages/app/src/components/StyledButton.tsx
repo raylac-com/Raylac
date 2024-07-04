@@ -25,7 +25,7 @@ const StyledButton = (props: StyledButtonProps) => {
         backgroundColor: disabled ? theme.backgroundHover : theme.primary,
         paddingHorizontal: 20,
         paddingVertical: 10,
-        borderRadius: 4,
+        borderRadius: 36,
       }}
     >
       {
@@ -41,7 +41,7 @@ const StyledButton = (props: StyledButtonProps) => {
       }
       <Text
         style={{
-          color: theme.color,
+          color: theme.text,
         }}
       >
         {title}

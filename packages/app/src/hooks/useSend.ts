@@ -79,7 +79,7 @@ const useSend = () => {
           const transferCall = encodeFunctionData({
             abi: ERC20Abi,
             functionName: 'transfer',
-            args: [to as Hex, BigInt(10000000)],
+            args: [to as Hex, sendAmount],
           });
 
           const stealthSigner = publicKeyToAddress(
