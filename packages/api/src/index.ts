@@ -88,7 +88,15 @@ const appRouter = router({
           senderId: userId,
           amount: transferAmount,
           to,
-          userOpHashes,
+          // Create empty user op receipts for the user ops.
+          // This should be filled by the indexer once the user ops are processed
+          userOpReceipts: {
+            createMany: {
+              data: userOpHashes.map(hash => ({
+                hash,
+              })),
+            },
+          },
         },
       });
 
@@ -165,7 +173,9 @@ const appRouter = router({
 
     console.log('totalBalance', totalBalance.toString());
 
-    return totalBalance.toString();
+    return {
+      balance: totalBalance,
+    }
   }),
 
   getTxHistory: authedProcedure.query(async opts => {
@@ -194,6 +204,11 @@ const appRouter = router({
       select: {
         amount: true,
         to: true,
+        userOpReceipts: {
+          select: {
+            success: true,
+          },
+        },
       },
       where: {
         senderId: userId,
@@ -214,6 +229,8 @@ const appRouter = router({
         }))
       ),
     ];
+
+    console.log('transfers', transfers);
 
     return transfers;
   }),

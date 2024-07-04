@@ -53,12 +53,28 @@ model UserStealthAddress {
 }
 
 model StealthTransfer {
-  id           Int      @id @default(autoincrement())
-  sender       User     @relation(fields: [senderId], references: [id])
-  senderId     Int
-  to           String
-  amount       BigInt
-  userOpHashes String[]
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id             Int                    @id @default(autoincrement())
+  sender         User                   @relation(fields: [senderId], references: [id])
+  senderId       Int
+  to             String
+  amount         BigInt
+  userOpReceipts UserOperationReceipt[]
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+}
+
+model UserOperationReceipt {
+  hash              String           @id
+  nonce             BigInt?
+  success           Boolean?
+  actualGasUsed     BigInt?
+  actualGasCost     BigInt?
+  blockNumber       BigInt?
+  logIndex          Int?
+  txIndex           Int?
+  chainId           Int?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  StealthTransfer   StealthTransfer? @relation(fields: [stealthTransferId], references: [id])
+  stealthTransferId Int?
 }
