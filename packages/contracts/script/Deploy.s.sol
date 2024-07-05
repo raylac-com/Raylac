@@ -8,39 +8,78 @@ import '../src/SutoriPaymaster.sol';
 import 'account-abstraction/contracts/samples/SimpleAccount.sol';
 import 'account-abstraction/contracts/interfaces/IEntryPoint.sol';
 import 'openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol';
+import './Utils.s.sol';
 
-contract Deploy is Script {
+contract Deploy is Script, Utils {
   function run() external {
-    //uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
+    // uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
     vm.startBroadcast();
 
-    IEntryPoint entryPoint = IEntryPoint(
-      0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789
+    address recoveryGuardian = 0xb3F7dAf94A3816e4b2Cb21fA5622A0DfeEB58E0A;
+
+    // Deploy SutoriAccount
+
+    SutoriAccount sutoriAccount;
+    address sutoriAccountAddress = getDeployedAddress(
+      type(SutoriAccount).creationCode,
+      ''
     );
 
-    address recoveryPubKey = 0xb3F7dAf94A3816e4b2Cb21fA5622A0DfeEB58E0A;
+    if (sutoriAccountAddress == address(0)) {
+      sutoriAccount = new SutoriAccount{ salt: 0 }();
+      console.log('SutoriAccount deployed at:', address(sutoriAccount));
+    } else {
+      sutoriAccount = SutoriAccount(payable(sutoriAccountAddress));
+      console.log('SutoriAccount already deployed at:', address(sutoriAccount));
+    }
 
-    SutoriAccount account = new SutoriAccount{ salt: 0 }(entryPoint);
+    // Deploy AccountFactory
 
-    console.log('SutoriAccount deployed at:', address(account));
-
-    AccountFactory accountFactory = new AccountFactory{ salt: 0 }(
-      account,
-      recoveryPubKey
+    AccountFactory accountFactory;
+    address accountFactoryAddress = getDeployedAddress(
+      type(AccountFactory).creationCode,
+      abi.encode(entryPoint, sutoriAccount, recoveryGuardian)
     );
+
+    if (accountFactoryAddress == address(0)) {
+      accountFactory = new AccountFactory{ salt: 0 }(
+        entryPoint,
+        sutoriAccount,
+        recoveryGuardian
+      );
+      console.log('AccountFactory deployed at:', address(accountFactory));
+    } else {
+      accountFactory = AccountFactory(payable(accountFactoryAddress));
+      console.log(
+        'AccountFactory already deployed at:',
+        address(accountFactory)
+      );
+    }
 
     console.log('AccountFactory deployed at:', address(accountFactory));
 
+    // Deploy SutoriPaymaster
 
-    address verifyingSigner = 0x94f149b27065aa60ef053788f6B8A60C53C001D4;
-    /*
-    SutoriPaymaster paymaster = new SutoriPaymaster{ salt: 0 }(
-      entryPoint,
-      verifyingSigner
+    address verifyingSigner = 0x9D3224743435d058f4B17Da29E8673DceD1768E7;
+    SutoriPaymaster sutoriPaymaster;
+    address sutoriPaymasterAddress = getDeployedAddress(
+      type(SutoriPaymaster).creationCode,
+      abi.encode(entryPoint, verifyingSigner)
     );
 
-    console.log('SutoriPaymaster deployed at:', address(paymaster));
-    */
+    if (accountFactoryAddress == address(0)) {
+      sutoriPaymaster = new SutoriPaymaster{ salt: 0 }(
+        entryPoint,
+        verifyingSigner
+      );
+      console.log('SutoriPaymaster deployed at:', address(sutoriPaymaster));
+    } else {
+      sutoriPaymaster = SutoriPaymaster(payable(sutoriPaymasterAddress));
+      console.log(
+        'SutoriPaymaster already deployed at:',
+        address(sutoriPaymaster)
+      );
+    }
 
     vm.stopBroadcast();
   }

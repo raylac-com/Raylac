@@ -8,7 +8,6 @@ import '@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 import '@openzeppelin/contracts/interfaces/IERC1271.sol';
-import 'forge-std/console.sol';
 
 contract SutoriAccount is
   BaseAccount,
@@ -18,20 +17,21 @@ contract SutoriAccount is
 {
   using ECDSA for bytes32;
 
-  /// The ERC-4337 entry point singleton
-  IEntryPoint public immutable _entryPoint;
+  IEntryPoint public _entryPoint;
 
+  address public recoveryGuardian;
   address public stealthSigner;
 
   uint256 private constant _SIG_VALIDATION_SUCCEED = 0;
   uint256 private constant _SIG_VALIDATION_FAILED = 1;
 
-  constructor(IEntryPoint __entryPoint) {
-    _entryPoint = __entryPoint;
-  }
-
   modifier onlySelf() {
     require(msg.sender == address(this), 'only self');
+    _;
+  }
+
+  modifier onlyRecoveryGuardian() {
+    require(msg.sender == recoveryGuardian, 'only recovery guardian');
     _;
   }
 
@@ -41,8 +41,14 @@ contract SutoriAccount is
     return _entryPoint;
   }
 
-  function initialize(address _stealthSigner) public virtual initializer {
+  function initialize(
+    IEntryPoint __entryPoint,
+    address _stealthSigner,
+    address _recoveryGuardian
+  ) public virtual initializer {
+    _entryPoint = __entryPoint;
     stealthSigner = _stealthSigner;
+    recoveryGuardian = _recoveryGuardian;
   }
 
   /**
@@ -52,7 +58,7 @@ contract SutoriAccount is
    * @param func the calldata to pass in this call
    */
   function execute(address dest, uint256 value, bytes calldata func) external {
-    // _requireFromEntryPoint();
+    _requireFromEntryPoint();
     _call(dest, value, func);
   }
 
@@ -88,6 +94,12 @@ contract SutoriAccount is
     }
 
     return _SIG_VALIDATION_SUCCEED;
+  }
+
+  function setStealthSigner(
+    address newStelathSigner
+  ) public onlyRecoveryGuardian {
+    stealthSigner = newStelathSigner;
   }
 
   /// UUPSUpsgradeable: only allow self-upgrade.

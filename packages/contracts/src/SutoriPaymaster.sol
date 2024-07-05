@@ -6,7 +6,6 @@ pragma solidity ^0.8.12;
 
 import 'account-abstraction/contracts/core/BasePaymaster.sol';
 import '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
-import 'forge-std/console.sol';
 
 contract SutoriPaymaster is BasePaymaster {
   using ECDSA for bytes32;

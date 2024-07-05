@@ -3,27 +3,33 @@ pragma solidity ^0.8.13;
 
 import 'forge-std/Script.sol';
 import '../src/SutoriPaymaster.sol';
+import './Utils.s.sol';
 
-contract Paymaster is Script {
+contract Paymaster is Script, Utils {
+  address verifyingSigner = 0x94f149b27065aa60ef053788f6B8A60C53C001D4;
+
+  function getPaymaster() public view returns (SutoriPaymaster) {
+    address paymasterAddress = getDeployedAddress(
+      type(SutoriPaymaster).creationCode,
+      abi.encode(entryPoint, verifyingSigner)
+    );
+    require(paymasterAddress != address(0), 'Paymaster not deployed');
+
+    return SutoriPaymaster(payable(paymasterAddress));
+  }
+
   function deposit() external {
     vm.startBroadcast();
 
-    SutoriPaymaster paymaster = SutoriPaymaster(
-      0xB9e5f8ad1A8d925059478260A63F02D001406be5
-    );
-
-    paymaster.deposit{ value: 0.01 ether }();
+    SutoriPaymaster sutoriPaymaster = getPaymaster();
+    sutoriPaymaster.deposit{ value: 0.01 ether }();
 
     vm.stopBroadcast();
   }
 
-
   function getDeposit() external view {
-    SutoriPaymaster paymaster = SutoriPaymaster(
-      0xB9e5f8ad1A8d925059478260A63F02D001406be5
-    );
-
-    uint256 currentDeposit = paymaster.getDeposit();
+    SutoriPaymaster sutoriPaymaster = getPaymaster();
+    uint256 currentDeposit = sutoriPaymaster.getDeposit();
     console.log('Deposit:', currentDeposit);
   }
 }
