@@ -1,5 +1,8 @@
-import { ERC5564_ANNOUNCER_ADDRESS } from '@sutori/shared';
-import { Hex, parseAbiItem } from 'viem';
+import {
+  ERC5564_ANNOUNCER_ADDRESS,
+  formatERC5564AnnouncementLog,
+} from '@sutori/shared';
+import { parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
 import { publicClient } from './lib/viem';
 
@@ -15,24 +18,10 @@ const syncAnnouncements = async () => {
   });
 
   for (const log of logs) {
-    const schemeId = Number(log.args[0] as bigint);
-    const stealthAddress = log.args[1] as Hex;
-    const caller = log.args[2] as Hex;
-    const ephemeralPubKey = log.args[3] as Hex;
-    const metadata = log.args[4] as Hex;
-
-    // If it does, add the stealth address to the user's linked stealth addresses
-    const data = {
-      schemeId,
-      stealthAddress: stealthAddress,
-      caller: caller,
-      ephemeralPubKey: ephemeralPubKey,
-      metadata: metadata,
-      txIndex: log.transactionIndex,
-      logIndex: log.logIndex,
-      blockNumber: log.blockNumber,
+    const data = formatERC5564AnnouncementLog({
+      log,
       chainId: publicClient.chain.id,
-    };
+    });
 
     await prisma.eRC5564Announcement.upsert({
       create: data,

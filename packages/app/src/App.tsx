@@ -20,9 +20,9 @@ import { trpc, rpcLinks } from './lib/trpc';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import useIsSignedIn from './hooks/useIsSignedIn';
 import { useEffect } from 'react';
-import EnterDepositInfo from './screens/Deposit/EnterDepositInfo';
 import ConfirmDeposit from './screens/Deposit/ConfirmDeposit';
 import SelectSend from './screens/Send/SelectSend';
+import ConfirmSend from './screens/Send/ConfirmSend';
 import Account from './screens/Account';
 import Receive from './screens/Receive';
 import SendToSutoriUser from './screens/Send/SendToSutoriUser';
@@ -31,6 +31,8 @@ import Toast from 'react-native-toast-message';
 import TransferHistory from './screens/TransferHistory';
 import * as Sentry from '@sentry/react-native';
 import SignIn from './screens/Start';
+import EnterSendAmount from './screens/Send/EnterSendAmount';
+import EnterDepositAmount from './screens/Deposit/EnterDepositAmount';
 
 Sentry.init({
   dsn: 'https://adc4c437047fef7e4ebe5d0d77df3ff5@o1348995.ingest.us.sentry.io/4507536730030080',
@@ -38,7 +40,7 @@ Sentry.init({
 });
 
 const Tab = createBottomTabNavigator<RootTabsParamsList>();
-const Stack = createNativeStackNavigator<RootStackParamsList>();
+const RootStack = createNativeStackNavigator<RootStackParamsList>();
 
 const Tabs = () => {
   return (
@@ -84,90 +86,121 @@ const Screens = () => {
   }
 
   return (
-    <Stack.Navigator>
-      <Stack.Screen
+    <RootStack.Navigator>
+      <RootStack.Screen
         name="Tabs"
         component={Tabs}
         options={{
           headerShown: false,
         }}
-      ></Stack.Screen>
-      <Stack.Screen
+      ></RootStack.Screen>
+      <RootStack.Screen
         name="SignUp"
         component={SignUp}
         options={{
           headerBackVisible: false,
         }}
-      ></Stack.Screen>
-      <Stack.Screen
-        name="EnterDepositInfo"
-        component={EnterDepositInfo}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="SignIn"
+        component={SignIn}
         options={{
-          title: 'Add money',
-          headerBackVisible: true,
+          title: 'Sign in',
+          headerBackVisible: false,
         }}
-      ></Stack.Screen>
-      <Stack.Screen
-        name="ConfirmDeposit"
-        component={ConfirmDeposit}
-        options={{
-          title: 'Confirm deposit',
-          headerBackVisible: true,
-        }}
-      ></Stack.Screen>
-      <Stack.Screen
-        name="Send"
-        component={SelectSend}
-        options={{
-          title: 'Send',
-          headerBackVisible: true,
-        }}
-      ></Stack.Screen>
-      <Stack.Screen
-        name="SendToSutoriUser"
-        component={SendToSutoriUser}
-        options={{
-          title: 'Send',
-          headerBackVisible: true,
+      ></RootStack.Screen>
+      <RootStack.Group
+        screenOptions={{
           headerBackTitle: 'Back',
         }}
-      ></Stack.Screen>
-      <Stack.Screen
-        name="SendToNonSutoriUser"
-        component={SendToNonSutoriUser}
-        options={{
-          headerBackVisible: true,
+      >
+        <RootStack.Screen
+          name="EnterDepositAmount"
+          component={EnterDepositAmount}
+          options={{
+            title: 'Add money',
+            headerBackVisible: true,
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="ConfirmDeposit"
+          component={ConfirmDeposit}
+          options={{
+            title: 'Confirm deposit',
+            headerBackVisible: true,
+          }}
+        ></RootStack.Screen>
+      </RootStack.Group>
+      <RootStack.Group
+        screenOptions={{
           headerBackTitle: 'Back',
         }}
-      ></Stack.Screen>
-      <Stack.Screen
+      >
+        <RootStack.Screen
+          name="SelectSend"
+          component={SelectSend}
+          options={{
+            title: 'Select recipient',
+            headerBackVisible: true,
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="SendToSutoriUser"
+          component={SendToSutoriUser}
+          options={{
+            title: 'Select recipient',
+            headerBackVisible: true,
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="SendToNonSutoriUser"
+          component={SendToNonSutoriUser}
+          options={{
+            title: 'Enter recipient details',
+            headerBackVisible: true,
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="EnterSendAmount"
+          component={EnterSendAmount}
+          options={{
+            title: 'Enter amount',
+            headerBackVisible: true,
+            headerBackTitle: 'Back',
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="ConfirmSend"
+          component={ConfirmSend}
+          options={{
+            title: 'Confirm',
+            headerBackVisible: true,
+            headerBackTitle: 'Back',
+          }}
+        ></RootStack.Screen>
+      </RootStack.Group>
+      <RootStack.Screen
         name="Receive"
         component={Receive}
         options={{
           headerBackVisible: true,
         }}
-      ></Stack.Screen>
-      <Stack.Screen
+      ></RootStack.Screen>
+      <RootStack.Screen
         name="TransferHistory"
         component={TransferHistory}
         options={{
+          title: 'Transfer history',
           headerBackVisible: true,
         }}
-      ></Stack.Screen>
-      <Stack.Screen
-        name="SignIn"
-        component={SignIn}
-        options={{
-          headerBackVisible: false,
-        }}
-      ></Stack.Screen>
-    </Stack.Navigator>
+      ></RootStack.Screen>
+    </RootStack.Navigator>
   );
 };
 
 const NavigationTheme = {
   dark: true,
-  colors: theme
+  colors: theme,
 };
 
 const queryClient = new QueryClient({
@@ -194,7 +227,7 @@ export default function App() {
         <NavigationContainer>
           <ThemeProvider value={NavigationTheme}>
             <Screens></Screens>
-            <StatusBar style="auto" />
+            <StatusBar style="light" />
             <Toast></Toast>
           </ThemeProvider>
         </NavigationContainer>

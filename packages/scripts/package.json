@@ -5,6 +5,9 @@
   },
   "dependencies": {
     "@sutori/shared": "workspace:*",
+    "@trpc/client": "11.0.0-rc.439",
+    "@trpc/server": "11.0.0-rc.439",
+    "@sutori/api": "workspace:*",
     "axios": "^1.7.2",
     "dotenv": "^16.4.5",
     "viem": "^2.17.0"

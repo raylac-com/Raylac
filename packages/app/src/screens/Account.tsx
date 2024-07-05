@@ -1,5 +1,6 @@
 import FastAvatar from '@/components/FastAvatar';
 import useSignedInUser from '@/hooks/useSignInUser';
+import { theme } from '@/lib/theme';
 import { Text, View } from 'react-native';
 import { Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
@@ -28,6 +29,7 @@ const Account = () => {
         style={{
           fontSize: 24,
           marginTop: 12,
+          color: theme.text,
         }}
       >
         {user.name}
@@ -36,6 +38,7 @@ const Account = () => {
         style={{
           marginTop: 4,
           opacity: 0.5,
+          color: theme.text,
         }}
       >
         @{user.username}

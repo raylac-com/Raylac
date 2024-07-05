@@ -1,11 +1,10 @@
 import { View } from 'react-native';
 import StyledButton from '@/components/StyledButton';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { SendStackParamsList } from '@/navigation/types';
+import useTypedNavigation from '@/hooks/useTypedNavigation';
 
-type Props = NativeStackScreenProps<SendStackParamsList, 'Send'>;
+const SelectSend = () => {
+  const navigation = useTypedNavigation();
 
-const SelectSend = ({ navigation }: Props) => {
   return (
     <View
       style={{
@@ -17,7 +16,7 @@ const SelectSend = ({ navigation }: Props) => {
     >
       <StyledButton
         title="Send to a Sutori user"
-        onPress={() => navigation.navigate("SendToSutoriUser")}
+        onPress={() => navigation.navigate('SendToSutoriUser')}
       ></StyledButton>
       <StyledButton
         title="Send to a non-Sutori user"

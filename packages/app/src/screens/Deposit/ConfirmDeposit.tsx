@@ -1,15 +1,16 @@
 import { Text, View } from 'react-native';
 import { copyToClipboard, shortenAddress } from '@/lib/utils';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { DepositStackParamsList } from '@/navigation/types';
+import { RootStackParamsList } from '@/navigation/types';
 import { Hex } from 'viem';
 import { Feather } from '@expo/vector-icons';
 import { useCallback } from 'react';
 import Toast from 'react-native-toast-message';
 import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
+import { theme } from '@/lib/theme';
 
-type Props = NativeStackScreenProps<DepositStackParamsList, 'ConfirmDeposit'>;
+type Props = NativeStackScreenProps<RootStackParamsList, 'ConfirmDeposit'>;
 
 const ConfirmDeposit = ({ route }: Props) => {
   const depositAddress = route.params.address as Hex;
@@ -32,7 +33,7 @@ const ConfirmDeposit = ({ route }: Props) => {
         flex: 1,
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: "center",
+        justifyContent: 'center',
         padding: 24,
         rowGap: 24,
       }}
@@ -42,6 +43,7 @@ const ConfirmDeposit = ({ route }: Props) => {
           fontSize: 18,
           fontWeight: 'bold',
           textAlign: 'center',
+          color: theme.text,
         }}
       >
         Send {amount} USDC to the following address on Base
@@ -58,12 +60,18 @@ const ConfirmDeposit = ({ route }: Props) => {
           style={{
             fontSize: 18,
             textAlign: 'center',
+            color: theme.text,
           }}
           onPress={onCopyClick}
         >
           {shortenAddress(depositAddress)}
         </Text>
-        <Feather name="copy" size={18} color="black" onPress={onCopyClick} />
+        <Feather
+          name="copy"
+          size={18}
+          color={theme.primary}
+          onPress={onCopyClick}
+        />
       </View>
       <View></View>
       <StyledButton

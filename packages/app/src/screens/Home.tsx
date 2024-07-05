@@ -45,6 +45,7 @@ const MenuItem = (props: MenuItemProps) => {
         style={{
           fontSize: 16,
           marginTop: 8,
+          color: theme.text,
         }}
       >
         {title}
@@ -60,17 +61,11 @@ const HomeScreen = () => {
 
   const {
     data: balance,
-    error,
-    isStale,
     refetch: refetchBalance,
     isRefetching: isRefetchingBalance,
-  } = trpc.getBalance.useQuery();
-
-  console.log('isSignedIn', isSignedIn);
-  console.log('balance', balance);
-  console.log('error', error);
-  console.log('isStale', isStale);
-  console.log('isRefetchingBalance', isRefetchingBalance);
+  } = trpc.getBalance.useQuery(null, {
+    enabled: isSignedIn,
+  });
 
   const {
     data: txHistory,
@@ -97,6 +92,7 @@ const HomeScreen = () => {
       <ScrollView
         refreshControl={
           <RefreshControl
+            tintColor={theme.primary}
             refreshing={isRefetchingBalance || isRefetchingTxHistory}
             onRefresh={onRefresh}
           />
@@ -127,21 +123,25 @@ const HomeScreen = () => {
           }}
         >
           <MenuItem
-            icon={<AntDesign name="plus" size={24} color={theme.text} />}
+            icon={<AntDesign name="plus" size={24} color={theme.background} />}
             title="Add money"
             onPress={() => {
               navigation.navigate('EnterDepositInfo');
             }}
           />
           <MenuItem
-            icon={<AntDesign name="arrowup" size={24} color={theme.text} />}
+            icon={
+              <AntDesign name="arrowup" size={24} color={theme.background} />
+            }
             title="Send"
             onPress={() => {
-              navigation.navigate('Send');
+              navigation.navigate('SelectSend');
             }}
           />
           <MenuItem
-            icon={<AntDesign name="arrowdown" size={24} color={theme.text} />}
+            icon={
+              <AntDesign name="arrowdown" size={24} color={theme.background} />
+            }
             title="Receive"
             onPress={() => {
               navigation.navigate('Receive');
@@ -174,6 +174,7 @@ const HomeScreen = () => {
                 marginRight: 20,
                 marginBottom: 20,
                 textDecorationLine: 'underline',
+                color: theme.text,
               }}
               onPress={() => {
                 navigation.navigate('TransferHistory');
@@ -188,6 +189,7 @@ const HomeScreen = () => {
                 textAlign: 'center',
                 marginTop: 20,
                 opacity: 0.5,
+                color: theme.text,
               }}
             >
               No transactions

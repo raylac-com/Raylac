@@ -8,11 +8,7 @@ import { AssetTransfersCategory } from 'alchemy-sdk';
 import { authedProcedure, publicProcedure, router } from './trpc';
 import jwt from 'jsonwebtoken';
 import alchemy from './lib/alchemy';
-import {
-  encodeERC5564Metadata,
-  sendUserOperation,
-  UserOperation,
-} from '@sutori/shared';
+import { sendUserOperation, UserOperation } from '@sutori/shared';
 import * as erc20 from './lib/erc20';
 import { signUserOp } from './lib/paymaster';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -20,6 +16,7 @@ import { createContext } from './context';
 import { JWT_PRIV_KEY, getTransferDataFromUserOp } from './utils';
 import { Transfer } from './types';
 import { publicClient } from './lib/viem';
+import { saveStealthTransfer } from './lib/stealthTransfer';
 
 // This is a workaround for the fact that BigInts are not supported by JSON.stringify
 // @ts-ignore
@@ -49,10 +46,18 @@ const appRouter = router({
     .input(
       z.object({
         userOps: z.any(),
+        stealthAccount: z
+          .object({
+            ephemeralPubKey: z.string(),
+            stealthPubKey: z.string(),
+            viewTag: z.string(),
+          })
+          .optional(),
       })
     )
     .mutation(async opts => {
       const { input } = opts;
+
       const userId = opts.ctx.userId;
       const userOps = input.userOps as UserOperation[];
 
@@ -83,22 +88,22 @@ const appRouter = router({
         userOpHashes.push(userOpHash);
       }
 
-      await prisma.stealthTransfer.create({
-        data: {
-          senderId: userId,
-          amount: transferAmount,
-          to,
-          // Create empty user op receipts for the user ops.
-          // This should be filled by the indexer once the user ops are processed
-          userOpReceipts: {
-            createMany: {
-              data: userOpHashes.map(hash => ({
-                hash,
-              })),
-            },
-          },
-        },
+      await saveStealthTransfer({
+        senderId: userId,
+        amount: transferAmount,
+        to,
+        userOpHashes,
       });
+
+      if (input.stealthAccount) {
+        // Announce the stealth account
+        await erc5564.announce({
+          stealthAddress: to as Hex,
+          ephemeralPubKey: input.stealthAccount.ephemeralPubKey as Hex,
+          viewTag: input.stealthAccount.viewTag as Hex,
+          stealthPubKey: input.stealthAccount.stealthPubKey as Hex,
+        });
+      }
 
       return 'ok';
     }),
@@ -109,6 +114,8 @@ const appRouter = router({
         id: true,
         name: true,
         username: true,
+        spendingPubKey: true,
+        viewingPubKey: true,
       },
     });
 
@@ -171,11 +178,9 @@ const appRouter = router({
       return acc + balance;
     }, BigInt(0));
 
-    console.log('totalBalance', totalBalance.toString());
+    console.log('totalBalance', totalBalance);
 
-    return {
-      balance: totalBalance,
-    }
+    return totalBalance;
   }),
 
   getTxHistory: authedProcedure.query(async opts => {
@@ -190,6 +195,7 @@ const appRouter = router({
       },
     });
 
+    console.log('addresses', addresses);
     const incomingTxs = await Promise.all(
       addresses.map(async address => {
         return alchemy.core.getAssetTransfers({
@@ -199,6 +205,7 @@ const appRouter = router({
         });
       })
     );
+    console.log('incomingTxs', incomingTxs);
 
     const outgoingTransfers = await prisma.stealthTransfer.findMany({
       select: {
@@ -248,17 +255,12 @@ const appRouter = router({
       const { input } = opts;
       const userId = opts.ctx.userId;
 
-      // Check that the ephemeralPubKey
-      const metadata = encodeERC5564Metadata({
-        viewTag: input.viewTag as Hex,
-        stealthPubKey: input.stealthPubKey as Hex,
-      });
-
       // Submit an announcement to the ERC5564 announcer contract
       await erc5564.announce({
         stealthAddress: input.address as Hex,
         ephemeralPubKey: input.ephemeralPubKey as Hex,
-        metadata: metadata as Hex,
+        viewTag: input.viewTag as Hex,
+        stealthPubKey: input.stealthPubKey as Hex,
       });
 
       // Save the stealth address to the user's linked stealth addresses

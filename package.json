@@ -7,7 +7,8 @@
     "packages/*"
   ],
   "scripts": {
-    "prepare": "if [ \"$NODE_ENV\" != \"production\" ]; then husky; fi"
+    "prepare": "if [ \"$NODE_ENV\" != \"production\" ]; then husky; fi",
+    "lint": "eslint . --ext .ts,.tsx,.js"
   },
   "keywords": [],
   "author": "",

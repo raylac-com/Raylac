@@ -23,9 +23,9 @@ const StyledButton = (props: StyledButtonProps) => {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: disabled ? theme.backgroundHover : theme.primary,
-        paddingHorizontal: 20,
+        paddingHorizontal: 24,
         paddingVertical: 10,
-        borderRadius: 36,
+        borderRadius: 30,
       }}
     >
       {
@@ -41,7 +41,8 @@ const StyledButton = (props: StyledButtonProps) => {
       }
       <Text
         style={{
-          color: theme.text,
+          color: theme.background,
+          fontSize  : 16
         }}
       >
         {title}

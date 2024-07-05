@@ -1,14 +1,14 @@
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import StyledButton from '@/components/StyledButton';
 import StyledTextInput from '@/components/StyledTextInput';
 import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
 import { useCallback, useState } from 'react';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { DepositStackParamsList } from '@/navigation/types';
+import { theme } from '@/lib/theme';
+import useTypedNavigation from '@/hooks/useTypedNavigation';
 
-type Props = NativeStackScreenProps<DepositStackParamsList, 'EnterDepositInfo'>;
+const EnterDepositAmount = () => {
+  const navigation = useTypedNavigation();
 
-const EnterDepositInfo = ({ navigation }: Props) => {
   const {
     mutateAsync: getNewDepositAccount,
     isPending: isGettingDepositAccount,
@@ -28,10 +28,19 @@ const EnterDepositInfo = ({ navigation }: Props) => {
     <View
       style={{
         flex: 1,
-        justifyContent: 'center',
         alignItems: 'center',
+        rowGap: 8,
       }}
     >
+      <Text
+        style={{
+          fontSize: 20,
+          color: theme.text,
+          marginTop: 20,
+        }}
+      >
+        Enter amount
+      </Text>
       <StyledTextInput
         placeholder="Amount"
         value={amount ? amount.toString() : ''}
@@ -39,10 +48,10 @@ const EnterDepositInfo = ({ navigation }: Props) => {
           setAmount(Number(_amount));
         }}
         style={{
-          width: 200,
+          width: 120,
         }}
         keyboardType="numeric"
-        postfix='USDC'
+        postfix="USDC"
       ></StyledTextInput>
       <StyledButton
         title="Next"
@@ -53,4 +62,4 @@ const EnterDepositInfo = ({ navigation }: Props) => {
   );
 };
 
-export default EnterDepositInfo;
+export default EnterDepositAmount;

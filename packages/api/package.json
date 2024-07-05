@@ -6,7 +6,7 @@
   "types": "out/index.d.ts",
   "private": true,
   "scripts": {
-    "start": "tsx --watch ./src/index.ts",
+    "start": "tsx --watch ./src/index",
     "build": "tsc -d",
     "build:watch": "tsc -d --watch"
   },
@@ -16,7 +16,7 @@
   "dependencies": {
     "@prisma/client": "^5.12.1",
     "@sutori/shared": "workspace:*",
-    "@trpc/server": "11.0.0-rc.417",
+    "@trpc/server": "^11.0.0-next-beta.0",
     "@types/node": "^20.11.17",
     "alchemy-sdk": "^3.3.1",
     "axios": "^1.7.2",

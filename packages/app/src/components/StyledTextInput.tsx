@@ -22,17 +22,19 @@ const StyledTextInput = (props: StyledTextInputProps) => {
         {...props}
         style={{
           ...style,
-          backgroundColor: theme.backgroundHover,
+          backgroundColor: theme.primary,
           paddingHorizontal: 20,
           paddingVertical: 10,
           borderRadius: 4,
           marginVertical: 10,
+          color: theme.background,
         }}
       ></TextInput>
       {postfix ? (
         <Text
           style={{
             opacity: 0.6,
+            color: theme.text,
           }}
         >
           {postfix}

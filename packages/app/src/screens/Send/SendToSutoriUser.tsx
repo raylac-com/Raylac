@@ -1,23 +1,24 @@
 import useSend from '@/hooks/useSend';
-import { useMutation } from '@tanstack/react-query';
 import { Pressable, Text, View } from 'react-native';
 import { useCallback, useState } from 'react';
-import { parseUnits } from 'viem';
 import { trpc } from '@/lib/trpc';
 import StyledTextInput from '@/components/StyledTextInput';
-import StyledButton from '@/components/StyledButton';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { RouterOutput } from '@/types';
-import FastAvatar from '@/components/FastAvatar';
 import { FontAwesome } from '@expo/vector-icons';
+import { theme } from '@/lib/theme';
+import { RootStackParamsList } from '@/navigation/types';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 interface UserListItemProps {
   user: RouterOutput['getUsers'][number];
+  onPress: () => void;
 }
 
 const UserListItem = (props: UserListItemProps) => {
   return (
-    <View
+    <Pressable
+      onPress={props.onPress}
       style={{
         flexDirection: 'row',
         alignItems: 'center',
@@ -27,15 +28,17 @@ const UserListItem = (props: UserListItemProps) => {
         columnGap: 8,
       }}
     >
-      <FontAwesome name="user-circle-o" size={40} color="black" />
+      <FontAwesome name="user-circle-o" size={40} color={theme.primary} />
       <Text
         style={{
           fontSize: 16,
+          fontWeight: 'bold',
+          color: theme.text,
         }}
       >
         {props.user.name}
       </Text>
-    </View>
+    </Pressable>
   );
 };
 
@@ -55,9 +58,10 @@ const FloatingScanButton = () => {
   );
 };
 
-const SendToSutoriUser = () => {
+type Props = NativeStackScreenProps<RootStackParamsList, 'SendToSutoriUser'>;
+
+const SendToSutoriUser = ({ navigation }: Props) => {
   const { mutateAsync: send } = useSend();
-  const [recipientAddress, setRecipientAddress] = useState('');
   const { data: users } = trpc.getUsers.useQuery();
   const [username, setUsername] = useState('');
 
@@ -65,12 +69,9 @@ const SendToSutoriUser = () => {
 
   const onUserClick = useCallback(
     async (user: RouterOutput['getUsers'][number]) => {
-      /*
-      await send({
-        recipient: user.publicKey,
-        amount: parseUnits('0.01', 'ether'),
+      navigation.navigate('EnterAmount', {
+        recipientUserOrAddress: user,
       });
-      */
     },
     [send]
   );
@@ -99,7 +100,15 @@ const SendToSutoriUser = () => {
       >
         {users
           ?.filter(user => user.name.includes(username))
-          .map(user => <UserListItem key={user.id} user={user} />)}
+          .map(user => (
+            <UserListItem
+              onPress={() => {
+                onUserClick(user);
+              }}
+              key={user.id}
+              user={user}
+            />
+          ))}
       </View>
       <FloatingScanButton></FloatingScanButton>
     </View>

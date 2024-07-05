@@ -10,7 +10,9 @@ import { theme } from '@/lib/theme';
 
 const SendToNonSutoriUser = () => {
   const { mutateAsync: send, isPending: isSending } = useSend();
-  const [recipientAddress, setRecipientAddress] = useState('0x94f149b27065aa60ef053788f6B8A60C53C001D4');
+  const [recipientAddress, setRecipientAddress] = useState(
+    '0x94f149b27065aa60ef053788f6B8A60C53C001D4'
+  );
   const [amount, setAmount] = useState(2);
 
   const onSendPress = useCallback(() => {

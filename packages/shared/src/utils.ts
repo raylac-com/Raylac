@@ -7,14 +7,14 @@ export const encodeERC5564Metadata = ({
 }: {
   viewTag: Hex;
   stealthPubKey: Hex;
-}) => {
+}): Hex => {
   if (viewTag.length !== 4) {
     throw new Error(
       `viewTag must be exactly 4 bytes, got ${viewTag.length} hex chars`
     );
   }
 
-  const metadata = `${viewTag}${stealthPubKey.replace('0x', '')}`;
+  const metadata = `0x${viewTag}${stealthPubKey.replace('0x', '')}` as Hex;
   return metadata;
 };
 

@@ -1,7 +1,7 @@
 import { getSpendingPrivKey, getViewingPrivKey } from '@/lib/key';
 import { trpc } from '@/lib/trpc';
 import { publicClient } from '@/lib/viem';
-import { RouterOutput } from '@/types';
+import { RouterOutput, StealthAccount } from '@/types';
 import {
   BASE_SEPOLIA_USDC_CONTRACT,
   ERC20Abi,
@@ -22,21 +22,32 @@ BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
+/**
+ * Hook to build and send user operations
+ */
 const useSend = () => {
-  const { data: stealthAccounts } = trpc.getStealthAccounts.useQuery();
+  const { data: userStealthAccounts } = trpc.getStealthAccounts.useQuery();
   const { mutateAsync: send } = trpc.send.useMutation();
   const { mutateAsync: signUserOp } = trpc.signUserOp.useMutation();
 
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ amount, to }: { amount: bigint; to: string }) => {
-      if (!stealthAccounts) {
+    mutationFn: async ({
+      amount,
+      to,
+      stealthAccount,
+    }: {
+      amount: bigint;
+      to: string;
+      stealthAccount?: StealthAccount;
+    }) => {
+      if (!userStealthAccounts) {
         throw new Error('Stealth addresses not loaded');
       }
 
       // Sort the stealth accounts by balance
-      const sortedStealthAccounts = stealthAccounts.sort((a, b) =>
+      const sortedStealthAccounts = userStealthAccounts.sort((a, b) =>
         BigInt(b.balance) > BigInt(a.balance) ? 1 : -1
       );
 
@@ -53,7 +64,7 @@ const useSend = () => {
       }
 
       if (currentAmount < amount) {
-        // throw new Error('Not enough funds');
+        throw new Error('Not enough funds');
       }
 
       const viewPrivKey = await getViewingPrivKey();
@@ -126,8 +137,10 @@ const useSend = () => {
           return userOp;
         })
       );
+
       await send({
         userOps,
+        stealthAccount,
       });
     },
     onSuccess: () => {

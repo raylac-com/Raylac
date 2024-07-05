@@ -1,7 +1,7 @@
 import { shortenAddress } from '@/lib/utils';
 import { Text, View } from 'react-native';
 import FastAvatar from './FastAvatar';
-import { AntDesign } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
 import { Hex } from 'viem';
 
@@ -32,19 +32,27 @@ const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
         }}
       >
         <FastAvatar address={tx.from} size={36}></FastAvatar>
-        <Text>{shortenAddress(tx.from as Hex)}</Text>
+        <Text
+          style={{
+            color: theme.text,
+          }}
+        >
+          {shortenAddress(tx.from as Hex)}
+        </Text>
       </View>
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
+          columnGap: 4,
         }}
       >
-        <AntDesign name="arrowdown" size={16} color={theme.blue} />
+        <Ionicons name="arrow-down-outline" size={18} color={theme.green} />
         <Text
           style={{
             fontWeight: 'bold',
             fontSize: 16,
+            color: theme.green,
           }}
         >
           {tx.amount} USDC
@@ -81,19 +89,27 @@ const OutGoingTransferListItem = (props: OutGoingTransferListItemProps) => {
         }}
       >
         <FastAvatar address={tx.to} size={36}></FastAvatar>
-        <Text>{shortenAddress(tx.to as Hex)}</Text>
+        <Text
+          style={{
+            color: theme.text,
+          }}
+        >
+          {shortenAddress(tx.to as Hex)}
+        </Text>
       </View>
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
+          columnGap: 4,
         }}
       >
-        <AntDesign name="arrowup" size={16} color={theme.waning} />
+        <Ionicons name="arrow-up-outline" size={18} color={theme.waning} />
         <Text
           style={{
             fontWeight: 'bold',
             fontSize: 16,
+            color: theme.waning,
           }}
         >
           {tx.amount} USDC
