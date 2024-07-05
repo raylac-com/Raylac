@@ -24,7 +24,6 @@ import ConfirmDeposit from './screens/Deposit/ConfirmDeposit';
 import SelectSend from './screens/Send/SelectSend';
 import ConfirmSend from './screens/Send/ConfirmSend';
 import Account from './screens/Account';
-import Receive from './screens/Receive';
 import SendToSutoriUser from './screens/Send/SendToSutoriUser';
 import SendToNonSutoriUser from './screens/Send/SendToNonSutoriUser';
 import Toast from 'react-native-toast-message';
@@ -118,7 +117,7 @@ const Screens = () => {
           name="EnterDepositAmount"
           component={EnterDepositAmount}
           options={{
-            title: 'Add money',
+            title: 'Enter amount',
             headerBackVisible: true,
           }}
         ></RootStack.Screen>
@@ -179,13 +178,6 @@ const Screens = () => {
           }}
         ></RootStack.Screen>
       </RootStack.Group>
-      <RootStack.Screen
-        name="Receive"
-        component={Receive}
-        options={{
-          headerBackVisible: true,
-        }}
-      ></RootStack.Screen>
       <RootStack.Screen
         name="TransferHistory"
         component={TransferHistory}

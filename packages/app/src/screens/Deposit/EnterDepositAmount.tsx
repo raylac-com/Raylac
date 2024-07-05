@@ -1,9 +1,8 @@
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import StyledButton from '@/components/StyledButton';
 import StyledTextInput from '@/components/StyledTextInput';
 import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
 import { useCallback, useState } from 'react';
-import { theme } from '@/lib/theme';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 
 const EnterDepositAmount = () => {
@@ -32,15 +31,6 @@ const EnterDepositAmount = () => {
         rowGap: 8,
       }}
     >
-      <Text
-        style={{
-          fontSize: 20,
-          color: theme.text,
-          marginTop: 20,
-        }}
-      >
-        Enter amount
-      </Text>
       <StyledTextInput
         placeholder="Amount"
         value={amount ? amount.toString() : ''}
@@ -49,6 +39,7 @@ const EnterDepositAmount = () => {
         }}
         style={{
           width: 120,
+          marginTop: 20,
         }}
         keyboardType="numeric"
         postfix="USDC"

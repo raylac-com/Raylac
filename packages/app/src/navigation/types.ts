@@ -30,5 +30,4 @@ export type RootStackParamsList = {
     amount: number;
   };
   TransferHistory: undefined;
-  Receive: undefined;
 };

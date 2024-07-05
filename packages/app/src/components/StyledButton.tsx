@@ -3,7 +3,7 @@ import {
   Pressable,
   Text,
   ActivityIndicator,
-  PressableProps,
+  PressableProps
 } from 'react-native';
 
 type StyledButtonProps = {
@@ -22,7 +22,8 @@ const StyledButton = (props: StyledButtonProps) => {
         ...style,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: disabled ? theme.backgroundHover : theme.primary,
+        backgroundColor: theme.primary,
+        opacity: disabled ? 0.4 : 1,
         paddingHorizontal: 24,
         paddingVertical: 10,
         borderRadius: 30,

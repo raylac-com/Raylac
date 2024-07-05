@@ -126,7 +126,7 @@ const HomeScreen = () => {
             icon={<AntDesign name="plus" size={24} color={theme.background} />}
             title="Add money"
             onPress={() => {
-              navigation.navigate('EnterDepositInfo');
+              navigation.navigate('EnterDepositAmount');
             }}
           />
           <MenuItem
@@ -136,15 +136,6 @@ const HomeScreen = () => {
             title="Send"
             onPress={() => {
               navigation.navigate('SelectSend');
-            }}
-          />
-          <MenuItem
-            icon={
-              <AntDesign name="arrowdown" size={24} color={theme.background} />
-            }
-            title="Receive"
-            onPress={() => {
-              navigation.navigate('Receive');
             }}
           />
         </View>

@@ -1,30 +1,28 @@
-import useSend from '@/hooks/useSend';
 import { Text, View } from 'react-native';
 import StyledTextInput from '@/components/StyledTextInput';
 import StyledButton from '@/components/StyledButton';
 import { useCallback, useState } from 'react';
-import { parseUnits } from 'viem';
+import { Hex, isAddress } from 'viem';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { getClipboardText } from '@/lib/utils';
 import { theme } from '@/lib/theme';
+import useTypedNavigation from '@/hooks/useTypedNavigation';
 
 const SendToNonSutoriUser = () => {
-  const { mutateAsync: send, isPending: isSending } = useSend();
-  const [recipientAddress, setRecipientAddress] = useState(
-    '0x94f149b27065aa60ef053788f6B8A60C53C001D4'
-  );
-  const [amount, setAmount] = useState(2);
+  const navigation = useTypedNavigation();
+  const [recipientAddress, setRecipientAddress] = useState('0x9D3224743435d058f4B17Da29E8673DceD1768E7');
 
-  const onSendPress = useCallback(() => {
-    send({
-      amount: parseUnits(amount.toString(), 6),
-      to: recipientAddress,
+  const onNextClick = useCallback(() => {
+    navigation.navigate('EnterSendAmount', {
+      recipientUserOrAddress: recipientAddress as Hex,
     });
-  }, [recipientAddress, send, amount]);
+  }, [recipientAddress, navigation]);
 
   const onPastePress = useCallback(async () => {
     const clipboardText = await getClipboardText();
-    setRecipientAddress(clipboardText);
+    if (clipboardText) {
+      setRecipientAddress(clipboardText);
+    }
   }, []);
 
   return (
@@ -36,9 +34,22 @@ const SendToNonSutoriUser = () => {
     >
       <View
         style={{
-          flexDirection: 'column',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          columnGap: 8,
+          marginTop: 20,
         }}
       >
+        <StyledTextInput
+          style={{
+            width: 200,
+          }}
+          keyboardType="default"
+          onChangeText={setRecipientAddress}
+          value={recipientAddress}
+          placeholder="recipient address"
+        ></StyledTextInput>
         <View
           style={{
             flexDirection: 'row',
@@ -47,56 +58,41 @@ const SendToNonSutoriUser = () => {
             columnGap: 8,
           }}
         >
-          <StyledTextInput
+          <Text
             style={{
-              width: 200,
+              color: theme.blue,
             }}
-            keyboardType="default"
-            onChangeText={setRecipientAddress}
-            value={recipientAddress}
-            placeholder="recipient address"
-          ></StyledTextInput>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              columnGap: 8,
-            }}
+            onPress={onPastePress}
           >
-            <Text
-              style={{
-                color: theme.blue,
-              }}
-              onPress={onPastePress}
-            >
-              Paste
-            </Text>
-            <FontAwesome5
-              name="pen"
-              size={12}
-              color={theme.blue}
-              onPress={onPastePress}
-            />
-          </View>
+            Paste
+          </Text>
+          <FontAwesome5
+            name="pen"
+            size={12}
+            color={theme.blue}
+            onPress={onPastePress}
+          />
         </View>
-        <StyledTextInput
-          placeholder="Amount"
-          value={amount.toString()}
-          onChangeText={_amount => {
-            setAmount(Number(_amount));
-          }}
-          style={{
-            width: 120,
-          }}
-          keyboardType="numeric"
-          postfix="USDC"
-        ></StyledTextInput>
       </View>
+      {recipientAddress &&
+      !isAddress(recipientAddress, {
+        strict: false,
+      }) ? (
+        <Text
+          style={{
+            color: theme.waning,
+            marginTop: 8,
+          }}
+        >
+          Invalid address
+        </Text>
+      ) : null}
       <StyledButton
-        title="Send"
-        onPress={onSendPress}
-        isLoading={isSending}
+        style={{
+          marginTop: 24,
+        }}
+        title="Next"
+        onPress={onNextClick}
       ></StyledButton>
     </View>
   );

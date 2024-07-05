@@ -1,44 +1,94 @@
 import StyledButton from '@/components/StyledButton';
 import StyledTextInput from '@/components/StyledTextInput';
+import { theme } from '@/lib/theme';
+import { trpc } from '@/lib/trpc';
+import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useState } from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'EnterSendAmount'>;
 
 const EnterSendAmount = ({ navigation, route }: Props) => {
   const [amount, setAmount] = useState<null | number>(null);
+  const { data: balance } = trpc.getBalance.useQuery();
+
+  const recipientUserOrAddress = route.params.recipientUserOrAddress;
 
   const onNextClick = useCallback(async () => {
-    console.log('amount', amount);
     navigation.navigate('ConfirmSend', {
-      recipientUserOrAddress: route.params.recipientUserOrAddress,
+      recipientUserOrAddress,
       amount,
     });
-  }, [amount]);
+  }, [amount, recipientUserOrAddress]);
+
+  const canGoNext = balance && amount && amount <= balance;
+
+  const recipient =
+    typeof recipientUserOrAddress === 'string'
+      ? shortenAddress(recipientUserOrAddress)
+      : recipientUserOrAddress.name;
 
   return (
     <View
       style={{
         flex: 1,
         alignItems: 'center',
-        rowGap: 8,
       }}
     >
       <StyledTextInput
-        placeholder="Amount"
-        value={amount ? amount.toString() : ''}
-        onChangeText={_amount => {
-          setAmount(Number(_amount));
+        containerStyle={{
+          marginVertical: 20,
         }}
-        style={{
-          width: 120,
+        placeholder="Amount"
+        value={amount !== null ? amount.toString() : ''}
+        onChangeText={_amount => {
+          if (_amount === '') {
+            setAmount(null);
+          } else {
+            setAmount(Number(_amount));
+          }
         }}
         keyboardType="numeric"
         postfix="USDC"
       ></StyledTextInput>
-      <StyledButton title="Next" onPress={onNextClick}></StyledButton>
+      {balance && amount > balance ? (
+        <Text
+          style={{
+            color: theme.waning,
+            marginBottom:10
+          }}
+        >
+          Insufficient balance
+        </Text>
+      ) : null}
+      <Text
+        style={{
+          color: theme.text,
+          opacity: 0.6,
+        }}
+      >
+        Available balance: {balance} USDC
+      </Text>
+      <Text
+        style={{
+          color: theme.text,
+          fontSize: 14,
+          marginTop: 8,
+          opacity: 0.6,
+        }}
+      >
+        Send to {recipient}
+      </Text>
+      <StyledButton
+        style={{
+          marginTop: 24,
+        }}
+        title="Next"
+        onPress={onNextClick}
+        disabled={!canGoNext}
+      ></StyledButton>
     </View>
   );
 };
