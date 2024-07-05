@@ -12,7 +12,7 @@ import { useMutation } from '@tanstack/react-query';
 const useGetNewDepositAccount = () => {
   const { mutateAsync: generateStealthAccount } = useGenerateStealthAccount();
   const { data: signedInUser } = useSignedInUser();
-  const { mutateAsync: syncDeposit, error } = trpc.syncDeposit.useMutation();
+  const { mutateAsync: addStealthAccount, error } = trpc.addStealthAccount.useMutation();
 
   useEffect(() => {
     if (error) {
@@ -36,7 +36,7 @@ const useGetNewDepositAccount = () => {
       });
 
       /// Submit the deposit account to the server
-      await syncDeposit({
+      await addStealthAccount({
         address: account.address,
         stealthPubKey: account.stealthPubKey,
         ephemeralPubKey: account.ephemeralPubKey,

@@ -13,3 +13,10 @@ export interface UserOperation {
   paymasterAndData: Hex;
   signature: Hex;
 }
+
+export interface StealthAccount {
+  address: Hex;
+  viewTag: string;
+  stealthPubKey: Hex;
+  ephemeralPubKey: Hex;
+}

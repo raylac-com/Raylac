@@ -3,7 +3,6 @@ import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { z } from 'zod';
 import prisma from './lib/prisma';
 import { Hex } from 'viem';
-import * as erc5564 from './lib/erc5564';
 import { AssetTransfersCategory } from 'alchemy-sdk';
 import { authedProcedure, publicProcedure, router } from './trpc';
 import jwt from 'jsonwebtoken';
@@ -17,6 +16,7 @@ import { JWT_PRIV_KEY, getTransferDataFromUserOp } from './utils';
 import { Transfer } from './types';
 import { publicClient } from './lib/viem';
 import { saveStealthTransfer } from './lib/stealthTransfer';
+import { handleNewStealthAccount } from './lib/stealthAccount';
 
 // This is a workaround for the fact that BigInts are not supported by JSON.stringify
 // @ts-ignore
@@ -42,6 +42,9 @@ const appRouter = router({
       return sig;
     }),
 
+  /**
+   * Send a transfer to a stealth address
+   */
   send: authedProcedure
     .input(
       z.object({
@@ -76,10 +79,6 @@ const appRouter = router({
 
       const userOpHashes = [];
 
-      // Make sure that all of the user operations are going to succeed
-
-      // Get and save the user operation hashes before sending them
-
       for (const userOp of userOps) {
         const userOpHash = await sendUserOperation({
           client: publicClient,
@@ -96,18 +95,40 @@ const appRouter = router({
       });
 
       if (input.stealthAccount) {
-        // Announce the stealth account
-        await erc5564.announce({
-          stealthAddress: to as Hex,
-          ephemeralPubKey: input.stealthAccount.ephemeralPubKey as Hex,
-          viewTag: input.stealthAccount.viewTag as Hex,
-          stealthPubKey: input.stealthAccount.stealthPubKey as Hex,
+        // If `stealthAccount` is provided, this is a transfer to a stealth account.
+        // Announce the stealth account to the ERC5564 announcer contract.
+
+        // Get the user who corresponds to the stealth account
+        const stealthAccountUser = await prisma.userStealthAddress.findFirst({
+          select: {
+            userId: true,
+          },
+          where: {
+            address: to,
+          },
         });
+
+        if (stealthAccountUser) {
+          await handleNewStealthAccount({
+            userId: stealthAccountUser.userId,
+            stealthAccount: {
+              address: to as Hex,
+              stealthPubKey: input.stealthAccount.stealthPubKey as Hex,
+              ephemeralPubKey: input.stealthAccount.ephemeralPubKey as Hex,
+              viewTag: input.stealthAccount.viewTag as Hex,
+            },
+          });
+        } else {
+          console.error('Stealth account user not found');
+        }
       }
 
       return 'ok';
     }),
 
+  /**
+   * Get all users
+   */
   getUsers: publicProcedure.query(async () => {
     const users = await prisma.user.findMany({
       select: {
@@ -122,6 +143,9 @@ const appRouter = router({
     return users;
   }),
 
+  /**
+   * Get the stealth accounts of the user
+   */
   getStealthAccounts: authedProcedure.query(async opts => {
     const userId = opts.ctx.userId;
 
@@ -183,6 +207,9 @@ const appRouter = router({
     return totalBalance;
   }),
 
+  /**
+   * Get the transaction history of the user
+   */
   getTxHistory: authedProcedure.query(async opts => {
     const userId = opts.ctx.userId;
 
@@ -195,7 +222,6 @@ const appRouter = router({
       },
     });
 
-    console.log('addresses', addresses);
     const incomingTxs = await Promise.all(
       addresses.map(async address => {
         return alchemy.core.getAssetTransfers({
@@ -205,7 +231,6 @@ const appRouter = router({
         });
       })
     );
-    console.log('incomingTxs', incomingTxs);
 
     const outgoingTransfers = await prisma.stealthTransfer.findMany({
       select: {
@@ -237,12 +262,14 @@ const appRouter = router({
       ),
     ];
 
-    console.log('transfers', transfers);
-
     return transfers;
   }),
 
-  syncDeposit: authedProcedure
+  /**
+   * Add a new stealth account to the user.
+   * This is called when the user wants to receive/deposit funds to a new stealth address.
+   */
+  addStealthAccount: authedProcedure
     .input(
       z.object({
         address: z.string(),
@@ -255,26 +282,20 @@ const appRouter = router({
       const { input } = opts;
       const userId = opts.ctx.userId;
 
-      // Submit an announcement to the ERC5564 announcer contract
-      await erc5564.announce({
-        stealthAddress: input.address as Hex,
-        ephemeralPubKey: input.ephemeralPubKey as Hex,
-        viewTag: input.viewTag as Hex,
-        stealthPubKey: input.stealthPubKey as Hex,
-      });
-
-      // Save the stealth address to the user's linked stealth addresses
-      await prisma.userStealthAddress.create({
-        data: {
-          userId,
-          address: input.address,
-          stealthPubKey: input.stealthPubKey,
-          viewTag: input.viewTag,
-          ephemeralPubKey: input.ephemeralPubKey,
+      await handleNewStealthAccount({
+        userId,
+        stealthAccount: {
+          address: input.address as Hex,
+          stealthPubKey: input.stealthPubKey as Hex,
+          ephemeralPubKey: input.ephemeralPubKey as Hex,
+          viewTag: input.viewTag as Hex,
         },
       });
     }),
 
+  /**
+   * Return whether a username is available
+   */
   isUsernameAvailable: publicProcedure
     .input(
       z.object({

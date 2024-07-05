@@ -1,7 +1,7 @@
 import { getSpendingPrivKey, getViewingPrivKey } from '@/lib/key';
 import { trpc } from '@/lib/trpc';
 import { publicClient } from '@/lib/viem';
-import { RouterOutput, StealthAccount } from '@/types';
+import { RouterOutput } from '@/types';
 import {
   BASE_SEPOLIA_USDC_CONTRACT,
   ERC20Abi,
@@ -10,6 +10,7 @@ import {
   encodePaymasterAndData,
   getUserOpHash,
   recoveryStealthPrivKey,
+  StealthAccount,
 } from '@sutori/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
