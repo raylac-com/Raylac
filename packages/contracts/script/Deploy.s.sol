@@ -15,7 +15,7 @@ contract Deploy is Script, Utils {
     // uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
     vm.startBroadcast();
 
-    address recoveryGuardian = 0xb3F7dAf94A3816e4b2Cb21fA5622A0DfeEB58E0A;
+    address recoveryGuardian = 0x524e829F6D6C38653D5BCA78DB7324Af505fE133;
 
     // Deploy SutoriAccount
 
