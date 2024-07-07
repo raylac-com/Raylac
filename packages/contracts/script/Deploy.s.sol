@@ -56,8 +56,6 @@ contract Deploy is Script, Utils {
       );
     }
 
-    console.log('AccountFactory deployed at:', address(accountFactory));
-
     // Deploy SutoriPaymaster
 
     address verifyingSigner = 0x9D3224743435d058f4B17Da29E8673DceD1768E7;
