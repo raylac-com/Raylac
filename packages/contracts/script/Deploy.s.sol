@@ -65,7 +65,7 @@ contract Deploy is Script, Utils {
       abi.encode(entryPoint, verifyingSigner)
     );
 
-    if (accountFactoryAddress == address(0)) {
+    if (sutoriPaymasterAddress == address(0)) {
       sutoriPaymaster = new SutoriPaymaster{ salt: 0 }(
         entryPoint,
         verifyingSigner
