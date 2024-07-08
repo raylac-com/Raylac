@@ -21,8 +21,6 @@ services:
         fromDatabase:
           name: sutori
           property: connectionString
-      - key: CHAIN
-        value: "mainnet"
   - type: worker
     name: sutori-sync
     plan: standard
@@ -45,8 +43,6 @@ services:
         fromDatabase:
           name: sutori
           property: connectionString
-      - key: CHAIN
-        value: "mainnet"
 
 databases:
   - name: sutori
