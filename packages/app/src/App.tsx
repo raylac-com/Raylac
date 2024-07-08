@@ -23,6 +23,8 @@ import * as Sentry from '@sentry/react-native';
 import SignIn from './screens/Start';
 import EnterSendAmount from './screens/Send/EnterSendAmount';
 import EnterDepositAmount from './screens/Deposit/EnterDepositAmount';
+import { useTranslation } from 'react-i18next';
+import './i18n';
 
 Sentry.init({
   dsn: 'https://adc4c437047fef7e4ebe5d0d77df3ff5@o1348995.ingest.us.sentry.io/4507536730030080',
@@ -33,13 +35,15 @@ const Tab = createBottomTabNavigator<RootTabsParamsList>();
 const RootStack = createNativeStackNavigator<RootStackParamsList>();
 
 const Tabs = () => {
+  const { t } = useTranslation();
+
   return (
     <Tab.Navigator>
       <Tab.Screen
         name="Home"
         component={Home}
         options={{
-          title: 'Home',
+          title: t('title', { ns: 'Home' }),
           tabBarIcon: ({ color }) => (
             <AntDesign name="home" size={24} color={color} />
           ),
@@ -49,7 +53,7 @@ const Tabs = () => {
         name="Account"
         component={Account}
         options={{
-          title: 'Account',
+          title: t('title', { ns: 'Account' }),
           tabBarIcon: ({ color }) => (
             <AntDesign name="user" size={24} color={color} />
           ),
@@ -60,6 +64,8 @@ const Tabs = () => {
 };
 
 const Screens = () => {
+  const { t } = useTranslation();
+
   return (
     <RootStack.Navigator>
       <RootStack.Screen
@@ -80,7 +86,7 @@ const Screens = () => {
         name="SignIn"
         component={SignIn}
         options={{
-          title: 'Sign in',
+          title: t('title', { ns: 'SignIn' }),
           headerBackVisible: false,
         }}
       ></RootStack.Screen>
@@ -93,7 +99,7 @@ const Screens = () => {
           name="EnterDepositAmount"
           component={EnterDepositAmount}
           options={{
-            title: 'Enter amount',
+            title: t('title', { ns: 'EnterDepositAmount' }),
             headerBackVisible: true,
           }}
         ></RootStack.Screen>
@@ -101,7 +107,7 @@ const Screens = () => {
           name="ConfirmDeposit"
           component={ConfirmDeposit}
           options={{
-            title: 'Confirm deposit',
+            title: t('title', { ns: 'ConfirmDeposit' }),
             headerBackVisible: true,
           }}
         ></RootStack.Screen>
@@ -115,7 +121,7 @@ const Screens = () => {
           name="SelectSend"
           component={SelectSend}
           options={{
-            title: 'Select recipient',
+            title: t('title', { ns: 'SelectSend' }),
             headerBackVisible: true,
           }}
         ></RootStack.Screen>
@@ -123,7 +129,7 @@ const Screens = () => {
           name="SendToSutoriUser"
           component={SendToSutoriUser}
           options={{
-            title: 'Select recipient',
+            title: t('title', { ns: 'SendToSutoriUser' }),
             headerBackVisible: true,
           }}
         ></RootStack.Screen>
@@ -131,7 +137,7 @@ const Screens = () => {
           name="SendToNonSutoriUser"
           component={SendToNonSutoriUser}
           options={{
-            title: 'Enter recipient details',
+            title: t('title', { ns: 'SendToNonSutoriUser' }),
             headerBackVisible: true,
           }}
         ></RootStack.Screen>
@@ -139,7 +145,7 @@ const Screens = () => {
           name="EnterSendAmount"
           component={EnterSendAmount}
           options={{
-            title: 'Enter amount',
+            title: t('title', { ns: 'EnterSendAmount' }),
             headerBackVisible: true,
             headerBackTitle: 'Back',
           }}
@@ -148,7 +154,7 @@ const Screens = () => {
           name="ConfirmSend"
           component={ConfirmSend}
           options={{
-            title: 'Confirm',
+            title: t('title', { ns: 'ConfirmSend' }),
             headerBackVisible: true,
             headerBackTitle: 'Back',
           }}
@@ -158,7 +164,7 @@ const Screens = () => {
         name="TransferHistory"
         component={TransferHistory}
         options={{
-          title: 'Transfer history',
+            title: t('title', { ns: 'TransferHistory' }),
           headerBackVisible: true,
         }}
       ></RootStack.Screen>

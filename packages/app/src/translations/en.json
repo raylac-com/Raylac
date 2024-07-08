@@ -1,0 +1,47 @@
+{
+    "Sign in": {
+      "title": "Sign in"
+    },
+    "Home": {
+      "title": "Home",
+      "deposit": "Add money",
+    "send": "Send",
+    "noTransfers": "No transfers yet."
+    },
+    "Account": {
+      "title": "Account"
+    },
+    "SignUp": {
+      "title": "Sign Up"
+    },
+    "SignIn": {
+      "title": "Sign In"
+    },
+    "EnterDepositAmount": {
+      "title": "Enter Amount"
+    },
+    "ConfirmDeposit": {
+      "title": "Confirm"
+    },
+    "SelectSend": {
+      "title": "Select Send"
+    },
+    "EnterSendAmount": {
+      "title": "Enter Amount"
+    },
+    "SendToSutoriUser": {
+      "title": "Send to Sutori User"
+    },
+    "SendToNonSutoriUser": {
+      "title": "Enter recipient details"
+    },
+    "ConfirmSend": {
+      "title": "Confirm"
+    },
+    "TransferHistory": {
+      "title": "Transfer History"
+    },
+    "common": {
+      "next": "Next"
+    }
+  }

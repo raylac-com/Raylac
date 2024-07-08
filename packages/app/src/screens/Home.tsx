@@ -14,6 +14,7 @@ import { theme } from '@/lib/theme';
 import { useCallback, useEffect } from 'react';
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
+import { useTranslation } from 'react-i18next';
 
 interface MenuItemProps {
   icon: React.ReactNode;
@@ -57,6 +58,7 @@ const MenuItem = (props: MenuItemProps) => {
 const NUM_TRANSFERS_TO_SHOW = 5;
 
 const HomeScreen = () => {
+  const { t } = useTranslation('Home');
   const { data: isSignedIn } = useIsSignedIn();
 
   const {
@@ -132,7 +134,7 @@ const HomeScreen = () => {
         >
           <MenuItem
             icon={<AntDesign name="plus" size={24} color={theme.background} />}
-            title="Add money"
+            title={t('deposit')}
             onPress={() => {
               navigation.navigate('EnterDepositAmount');
             }}
@@ -141,7 +143,7 @@ const HomeScreen = () => {
             icon={
               <AntDesign name="arrowup" size={24} color={theme.background} />
             }
-            title="Send"
+            title={t('send')}
             onPress={() => {
               navigation.navigate('SelectSend');
             }}
@@ -192,7 +194,7 @@ const HomeScreen = () => {
                 color: theme.text,
               }}
             >
-              No transfers
+              {t('noTransfers')}
             </Text>
           ) : null}
         </View>

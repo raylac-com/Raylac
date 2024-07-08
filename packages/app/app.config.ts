@@ -1,6 +1,7 @@
 import type { ExpoConfig } from '@expo/config';
 
 const IS_DEV = process.env.APP_VARIANT === 'development';
+console.log('IS_DEV', IS_DEV);
 
 const config: ExpoConfig = {
   name: IS_DEV ? 'sutori-dev' : 'sutori',

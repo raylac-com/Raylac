@@ -165,9 +165,15 @@ importers:
       expo-status-bar:
         specifier: ~1.12.1
         version: 1.12.1
+      i18next:
+        specifier: ^23.11.5
+        version: 23.11.5
       react:
         specifier: 18.2.0
         version: 18.2.0
+      react-i18next:
+        specifier: ^14.1.2
+        version: 14.1.2(i18next@23.11.5)(react-dom@18.3.1(react@18.2.0))(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0)
       react-native:
         specifier: 0.74.3
         version: 0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10)
@@ -3269,6 +3275,9 @@ packages:
     resolution: {integrity: sha512-aXpmwoOhRBrw6X3j0h5RloK4x1OzsxMPyxqIHyNfSe2pypkVTZFpEiRoSipPEPlMrh0HW/XsjkJ5WgnCirpNUw==}
     engines: {node: '>=10'}
 
+  html-parse-stringify@3.0.1:
+    resolution: {integrity: sha512-KknJ50kTInJ7qIScF3jeaFRpMpE8/lfiTdzf/twXyPBLAGrLRTmkz3AdTnKeh40X8k9L2fdYwEp/42WGXIRGcg==}
+
   http-errors@2.0.0:
     resolution: {integrity: sha512-FtwrG/euBzaEjYeRqOgly7G0qviiXoJWnvEH2Z1plBdXgbyjv34pHTSb9zoeHMyDy33+DWy5Wt9Wo+TURtOYSQ==}
     engines: {node: '>= 0.8'}
@@ -3289,6 +3298,9 @@ packages:
     resolution: {integrity: sha512-AB6lFlbwwyIqMdHYhwPe+kjOC3Oc5P3nThEoW/AaO2BX3vJDjWPFxYLxokUZOo6RNX20He3AaT8sESs9NJcmEw==}
     engines: {node: '>=18'}
     hasBin: true
+
+  i18next@23.11.5:
+    resolution: {integrity: sha512-41pvpVbW9rhZPk5xjCX2TPJi2861LEig/YRhUkY+1FQ2IQPS0bKUDYnEqY8XPPbB48h1uIwLnP9iiEfuSl20CA==}
 
   ieee754@1.2.1:
     resolution: {integrity: sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==}
@@ -4436,6 +4448,19 @@ packages:
     peerDependencies:
       react: '>=17.0.0'
 
+  react-i18next@14.1.2:
+    resolution: {integrity: sha512-FSIcJy6oauJbGEXfhUgVeLzvWBhIBIS+/9c6Lj4niwKZyGaGb4V4vUbATXSlsHJDXXB+ociNxqFNiFuV1gmoqg==}
+    peerDependencies:
+      i18next: '>= 23.2.3'
+      react: '>= 16.8.0'
+      react-dom: '*'
+      react-native: '*'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+      react-native:
+        optional: true
+
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -5220,6 +5245,10 @@ packages:
 
   vlq@1.0.1:
     resolution: {integrity: sha512-gQpnTgkubC6hQgdIcRdYGDSDc+SaujOdyesZQMv6JlfQee/9Mp0Qhnys6WxDWvQnL5WZdT7o2Ul187aSt0Rq+w==}
+
+  void-elements@3.1.0:
+    resolution: {integrity: sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==}
+    engines: {node: '>=0.10.0'}
 
   walker@1.0.8:
     resolution: {integrity: sha512-ts/8E8l5b7kY0vlWLewOkDXMmPdLcVV4GmOQLyxuSswIJsweeFZtAsMF7k1Nszz+TYBQrlYRmzOnr398y1JemQ==}
@@ -9509,6 +9538,10 @@ snapshots:
     dependencies:
       lru-cache: 6.0.0
 
+  html-parse-stringify@3.0.1:
+    dependencies:
+      void-elements: 3.1.0
+
   http-errors@2.0.0:
     dependencies:
       depd: 2.0.0
@@ -9529,6 +9562,10 @@ snapshots:
   human-signals@5.0.0: {}
 
   husky@9.0.11: {}
+
+  i18next@23.11.5:
+    dependencies:
+      '@babel/runtime': 7.24.7
 
   ieee754@1.2.1: {}
 
@@ -10728,6 +10765,16 @@ snapshots:
     dependencies:
       react: 18.2.0
 
+  react-i18next@14.1.2(i18next@23.11.5)(react-dom@18.3.1(react@18.2.0))(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0):
+    dependencies:
+      '@babel/runtime': 7.24.7
+      html-parse-stringify: 3.0.1
+      i18next: 23.11.5
+      react: 18.2.0
+    optionalDependencies:
+      react-dom: 18.3.1(react@18.2.0)
+      react-native: 0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10)
+
   react-is@16.13.1: {}
 
   react-is@17.0.2: {}
@@ -11550,6 +11597,8 @@ snapshots:
       - zod
 
   vlq@1.0.1: {}
+
+  void-elements@3.1.0: {}
 
   walker@1.0.8:
     dependencies:

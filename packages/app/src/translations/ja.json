@@ -1,0 +1,47 @@
+{
+  "Sign in": {
+    "title": "ログイン"
+  },
+  "Home": {
+    "title": "ホーム",
+    "deposit": "チャージ",
+    "send": "送金",
+    "noTransfers": ""
+  },
+  "Account": {
+    "title": "アカウント"
+  },
+  "SignUp": {
+    "title": "アカウント作成"
+  },
+  "SignIn": {
+    "title": "ログイン"
+  },
+  "EnterDepositAmount": {
+    "title": "金額を入力"
+  },
+  "ConfirmDeposit": {
+    "title": "確認"
+  },
+  "SelectSend": {
+    "title": "送金先を選択"
+  },
+  "EnterSendAmount": {
+    "title": "金額を入力"
+  },
+  "SendToSutoriUser": {
+    "title": "Sutoriユーザーに送金"
+  },
+  "SendToNonSutoriUser": {
+    "title": "受取人を入力"
+  },
+  "ConfirmSend": {
+    "title": "確認"
+  },
+  "TransferHistory": {
+    "title": "取引履歴"
+  },
+  "common": {
+    "next": "次へ"
+  }
+}

@@ -46,11 +46,9 @@ const initAccount = async (): Promise<{
   const spendingPrivKey = hdKeyToPrivateKey(spendingAccount.getHdKey());
   const viewingPrivKey = hdKeyToPrivateKey(viewingAccount.getHdKey());
 
-  await Promise.all([
-    saveMnemonic(mnemonic),
-    saveSpendingPrivKey(spendingPrivKey),
-    saveViewingPrivKey(viewingPrivKey),
-  ]);
+  await saveMnemonic(mnemonic);
+  await saveSpendingPrivKey(spendingPrivKey);
+  await saveViewingPrivKey(viewingPrivKey);
 
   return {
     spendingPubKey: spendingAccount.publicKey,
