@@ -10,7 +10,7 @@ import useTypedNavigation from '@/hooks/useTypedNavigation';
 
 const SendToNonSutoriUser = () => {
   const navigation = useTypedNavigation();
-  const [recipientAddress, setRecipientAddress] = useState('0x9D3224743435d058f4B17Da29E8673DceD1768E7');
+  const [recipientAddress, setRecipientAddress] = useState("");
 
   const onNextClick = useCallback(() => {
     navigation.navigate('EnterSendAmount', {

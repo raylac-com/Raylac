@@ -9,6 +9,7 @@ interface IncomingTransferListItemProps {
   tx: {
     from: string;
     amount: number;
+    timestamp: number;
   };
 }
 
@@ -19,45 +20,62 @@ const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
     <View
       style={{
         flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        flexDirection: 'column',
       }}
     >
       <View
         style={{
+          flex: 1,
           flexDirection: 'row',
           alignItems: 'center',
-          columnGap: 8,
+          justifyContent: 'space-between',
         }}
       >
-        <FastAvatar address={tx.from} size={36}></FastAvatar>
-        <Text
+        <View
           style={{
-            color: theme.text,
+            flexDirection: 'row',
+            alignItems: 'center',
+            columnGap: 8,
           }}
         >
-          {shortenAddress(tx.from as Hex)}
-        </Text>
+          <FastAvatar address={tx.from} size={36}></FastAvatar>
+          <Text
+            style={{
+              color: theme.text,
+            }}
+          >
+            {shortenAddress(tx.from as Hex)}
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            columnGap: 4,
+          }}
+        >
+          <Ionicons name="arrow-down-outline" size={18} color={theme.green} />
+          <Text
+            style={{
+              fontWeight: 'bold',
+              fontSize: 16,
+              color: theme.green,
+            }}
+          >
+            {tx.amount} USDC
+          </Text>
+        </View>
       </View>
-      <View
+      <Text
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          columnGap: 4,
+          color: theme.text,
+          marginTop: 4,
+          textAlign: 'right',
+          opacity: 0.5,
         }}
       >
-        <Ionicons name="arrow-down-outline" size={18} color={theme.green} />
-        <Text
-          style={{
-            fontWeight: 'bold',
-            fontSize: 16,
-            color: theme.green,
-          }}
-        >
-          {tx.amount} USDC
-        </Text>
-      </View>
+        {new Date(tx.timestamp).toLocaleDateString()}
+      </Text>
     </View>
   );
 };
@@ -66,6 +84,7 @@ interface OutGoingTransferListItemProps {
   tx: {
     to: string;
     amount: number;
+    timestamp: number;
   };
 }
 
@@ -76,45 +95,62 @@ const OutGoingTransferListItem = (props: OutGoingTransferListItemProps) => {
     <View
       style={{
         flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        flexDirection: 'column',
       }}
     >
       <View
         style={{
+          flex: 1,
           flexDirection: 'row',
           alignItems: 'center',
-          columnGap: 8,
+          justifyContent: 'space-between',
         }}
       >
-        <FastAvatar address={tx.to} size={36}></FastAvatar>
-        <Text
+        <View
           style={{
-            color: theme.text,
+            flexDirection: 'row',
+            alignItems: 'center',
+            columnGap: 8,
           }}
         >
-          {shortenAddress(tx.to as Hex)}
-        </Text>
+          <FastAvatar address={tx.to} size={36}></FastAvatar>
+          <Text
+            style={{
+              color: theme.text,
+            }}
+          >
+            {shortenAddress(tx.to as Hex)}
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            columnGap: 4,
+          }}
+        >
+          <Ionicons name="arrow-up-outline" size={18} color={theme.waning} />
+          <Text
+            style={{
+              fontWeight: 'bold',
+              fontSize: 16,
+              color: theme.waning,
+            }}
+          >
+            {tx.amount} USDC
+          </Text>
+        </View>
       </View>
-      <View
+      <Text
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          columnGap: 4,
+          color: theme.text,
+          marginTop: 4,
+          textAlign: 'right',
+          opacity: 0.5,
         }}
       >
-        <Ionicons name="arrow-up-outline" size={18} color={theme.waning} />
-        <Text
-          style={{
-            fontWeight: 'bold',
-            fontSize: 16,
-            color: theme.waning,
-          }}
-        >
-          {tx.amount} USDC
-        </Text>
-      </View>
+        {new Date(tx.timestamp).toLocaleDateString()}
+      </Text>
     </View>
   );
 };
@@ -125,6 +161,7 @@ interface TransferHistoryListItemProps {
     to: string;
     type: string;
     amount: number;
+    timestamp: number;
   };
 }
 

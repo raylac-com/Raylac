@@ -3,7 +3,7 @@ import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { z } from 'zod';
 import prisma from './lib/prisma';
 import { Hex } from 'viem';
-import { AssetTransfersCategory } from 'alchemy-sdk';
+import { AssetTransfersCategory, SortingOrder } from 'alchemy-sdk';
 import { authedProcedure, publicProcedure, router } from './trpc';
 import jwt from 'jsonwebtoken';
 import alchemy from './lib/alchemy';
@@ -228,6 +228,8 @@ const appRouter = router({
           category: [AssetTransfersCategory.ERC20],
           toAddress: address.address as Hex,
           contractAddresses: [erc20.BASE_USDC_CONTRACT],
+          order: SortingOrder.DESCENDING,
+          withMetadata: true,
         });
       })
     );
@@ -241,6 +243,7 @@ const appRouter = router({
             success: true,
           },
         },
+        createdAt: true,
       },
       where: {
         senderId: userId,
@@ -252,15 +255,17 @@ const appRouter = router({
         type: 'outgoing',
         to: transfer.to,
         amount: Number(transfer.amount / BigInt(10 ** 6)),
+        timestamp: transfer.createdAt.getTime(),
       })),
       ...incomingTxs.flatMap(txs =>
         txs.transfers.map(tx => ({
           type: 'incoming',
           from: tx.from || '',
           amount: tx.value as number,
+          timestamp: new Date(tx.metadata.blockTimestamp).getTime(),
         }))
       ),
-    ];
+    ].sort((a, b) => b.timestamp - a.timestamp);
 
     return transfers;
   }),

@@ -1,5 +1,5 @@
 import { Log, decodeEventLog, parseAbi } from 'viem';
-import { ERC5564Announcement } from '@prisma/client';
+import { ERC5564AnnouncementData } from './types';
 
 export const formatERC5564AnnouncementLog = ({
   log,
@@ -7,17 +7,13 @@ export const formatERC5564AnnouncementLog = ({
 }: {
   log: Log;
   chainId: number;
-}): Omit<ERC5564Announcement, 'id' | 'createdAt' | 'updatedAt'> => {
+}): ERC5564AnnouncementData => {
   const decodedLog = decodeEventLog({
     abi: parseAbi([
       'event Announcement(uint256 indexed schemeId, address indexed stealthAddress, address indexed caller, bytes ephemeralPubKey, bytes metadata)',
     ]),
-    // `data` should be 64 bytes, but is only 32 bytes.
-    data: '0x0000000000000000000000000000000000000000000000000000000000000001',
-    topics: [
-      '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef',
-      '0x000000000000000000000000f39fd6e51aad88f6f4ce6ab8827279cfffb92266',
-    ],
+    data: log.data,
+    topics: log.topics,
   });
 
   const schemeId = Number(decodedLog.args.schemeId);

@@ -22,6 +22,7 @@ const TransferHistory = () => {
               to: item.to,
               amount: item.amount,
               type: item.type,
+              timestamp: item.timestamp,
             }}
           />
         )}
@@ -34,7 +35,7 @@ const TransferHistory = () => {
             opacity: 0.5,
           }}
         >
-          No transactions
+          No transfers
         </Text>
       ) : null}
     </View>

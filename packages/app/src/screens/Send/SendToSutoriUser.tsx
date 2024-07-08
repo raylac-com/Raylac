@@ -9,6 +9,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
 import { RootStackParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import useSignedInUser from '@/hooks/useSignInUser';
 
 interface UserListItemProps {
   user: RouterOutput['getUsers'][number];
@@ -64,12 +65,13 @@ const SendToSutoriUser = ({ navigation }: Props) => {
   const { mutateAsync: send } = useSend();
   const { data: users } = trpc.getUsers.useQuery();
   const [username, setUsername] = useState('');
+  const { data: signedInUser } = useSignedInUser();
 
   // Search user and generate a new stealth address for them
 
   const onUserClick = useCallback(
     async (user: RouterOutput['getUsers'][number]) => {
-      navigation.navigate('EnterAmount', {
+      navigation.navigate("EnterSendAmount", {
         recipientUserOrAddress: user,
       });
     },
@@ -100,6 +102,7 @@ const SendToSutoriUser = ({ navigation }: Props) => {
       >
         {users
           ?.filter(user => user.name.includes(username))
+          .filter(user => user.id !== signedInUser?.id)
           .map(user => (
             <UserListItem
               onPress={() => {

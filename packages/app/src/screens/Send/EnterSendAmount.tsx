@@ -7,6 +7,7 @@ import { RootStackParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useState } from 'react';
 import { Text, View } from 'react-native';
+import { formatUnits, parseUnits } from 'viem';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'EnterSendAmount'>;
 
@@ -23,7 +24,10 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
     });
   }, [amount, recipientUserOrAddress]);
 
-  const canGoNext = balance && amount && amount <= balance;
+  const parsedAmount = amount ? parseUnits(amount.toString(), 6) : null;
+
+  const canGoNext =
+    balance && parsedAmount && parsedAmount <= balance;
 
   const recipient =
     typeof recipientUserOrAddress === 'string'
@@ -35,6 +39,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
       style={{
         flex: 1,
         alignItems: 'center',
+        marginTop: 40
       }}
     >
       <StyledTextInput
@@ -53,11 +58,11 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
         keyboardType="numeric"
         postfix="USDC"
       ></StyledTextInput>
-      {balance && amount > balance ? (
+      {balance && parsedAmount > balance ? (
         <Text
           style={{
             color: theme.waning,
-            marginBottom:10
+            marginBottom: 10,
           }}
         >
           Insufficient balance
@@ -69,7 +74,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           opacity: 0.6,
         }}
       >
-        Available balance: {balance} USDC
+        Available balance: {balance ? formatUnits(balance, 6): ""} USDC
       </Text>
       <Text
         style={{

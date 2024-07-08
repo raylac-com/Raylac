@@ -11,7 +11,7 @@ import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { formatUnits } from 'viem';
 import { theme } from '@/lib/theme';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 
@@ -65,6 +65,7 @@ const HomeScreen = () => {
     isRefetching: isRefetchingBalance,
   } = trpc.getBalance.useQuery(null, {
     enabled: isSignedIn,
+    refetchOnWindowFocus: true,
   });
 
   const {
@@ -73,6 +74,7 @@ const HomeScreen = () => {
     isRefetching: isRefetchingTxHistory,
   } = trpc.getTxHistory.useQuery(null, {
     enabled: isSignedIn,
+    refetchOnWindowFocus: true,
   });
 
   const navigation = useTypedNavigation();
@@ -81,6 +83,12 @@ const HomeScreen = () => {
     refetchBalance();
     refetchTxHistory();
   }, [refetchBalance, refetchTxHistory]);
+
+  useEffect(() => {
+    if (isSignedIn === false) {
+      navigation.navigate('SignUp');
+    }
+  }, [isSignedIn]);
 
   return (
     <SafeAreaView
@@ -154,6 +162,7 @@ const HomeScreen = () => {
                 to: tx.to,
                 amount: tx.amount,
                 type: tx.type,
+                timestamp: tx.timestamp,
               }}
             />
           ))}
@@ -183,7 +192,7 @@ const HomeScreen = () => {
                 color: theme.text,
               }}
             >
-              No transactions
+              No transfers
             </Text>
           ) : null}
         </View>

@@ -1,6 +1,7 @@
 import StyledButton from '@/components/StyledButton';
 import useGenerateStealthAccount from '@/hooks/useGenerateStealthAccount';
 import useSend from '@/hooks/useSend';
+import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { theme } from '@/lib/theme';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
@@ -15,12 +16,13 @@ const ConfirmSend = ({ route }: Props) => {
   const { amount, recipientUserOrAddress } = route.params;
   const { mutateAsync: send, isPending: isSending } = useSend();
   const { mutateAsync: generateStealthAccount } = useGenerateStealthAccount();
+  const navigation = useTypedNavigation();
 
   const onSendPress = useCallback(async () => {
     const parsedAmount = parseUnits(amount.toString(), 6);
     if (typeof recipientUserOrAddress === 'string') {
       // If the recipient is an address, send directly to that address
-      send({
+      await send({
         amount: parsedAmount,
         to: recipientUserOrAddress,
       });
@@ -32,12 +34,18 @@ const ConfirmSend = ({ route }: Props) => {
         spendingPubKey: recipientUserOrAddress.spendingPubKey as Hex,
       });
 
-      send({
+      await send({
         amount: parsedAmount,
         to: stealthAccount.address,
         stealthAccount,
       });
     }
+
+    // Navigate back to the home screen
+    navigation.navigate("Tabs", {
+      screen: "Home",
+    });
+    
   }, [recipientUserOrAddress, send, amount]);
 
   return (
@@ -66,6 +74,9 @@ const ConfirmSend = ({ route }: Props) => {
         isLoading={isSending}
         onPress={() => {
           onSendPress();
+        }}
+        style={{
+          marginTop: 16,
         }}
       ></StyledButton>
     </View>

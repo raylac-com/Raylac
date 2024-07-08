@@ -29,6 +29,7 @@ const EnterDepositAmount = () => {
         flex: 1,
         alignItems: 'center',
         rowGap: 8,
+        marginTop: 40
       }}
     >
       <StyledTextInput
@@ -48,6 +49,9 @@ const EnterDepositAmount = () => {
         title="Next"
         onPress={onNextClick}
         isLoading={isGettingDepositAccount}
+        style={{
+          marginTop: 24,
+        }}
       ></StyledButton>
     </View>
   );

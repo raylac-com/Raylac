@@ -8,6 +8,7 @@ contract Utils {
     IEntryPoint(0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789);
 
   address constant deployerAddress = 0x4e59b44847b379578588920cA78FbF26c0B4956C;
+  address constant paymasterSigner = 0x9D3224743435d058f4B17Da29E8673DceD1768E7;
 
   /**
    * Compute the address of a contract deployed using CREATE2,

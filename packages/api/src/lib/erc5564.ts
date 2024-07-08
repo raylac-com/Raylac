@@ -43,8 +43,11 @@ export const announce = async ({
     functionName: 'announce',
     args: [SCHEME_ID, stealthAddress, ephemeralPubKey, metadata],
   });
+  console.log('Tx hash', txHash);
 
-  const txReceipt = await publicClient.getTransactionReceipt({
+  // TODO: Handle tx being dropped
+
+  const txReceipt = await publicClient.waitForTransactionReceipt({
     hash: txHash,
   });
 

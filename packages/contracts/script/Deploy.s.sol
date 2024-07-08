@@ -58,17 +58,16 @@ contract Deploy is Script, Utils {
 
     // Deploy SutoriPaymaster
 
-    address verifyingSigner = 0x9D3224743435d058f4B17Da29E8673DceD1768E7;
     SutoriPaymaster sutoriPaymaster;
     address sutoriPaymasterAddress = getDeployedAddress(
       type(SutoriPaymaster).creationCode,
-      abi.encode(entryPoint, verifyingSigner)
+      abi.encode(entryPoint, paymasterSigner)
     );
 
     if (sutoriPaymasterAddress == address(0)) {
       sutoriPaymaster = new SutoriPaymaster{ salt: 0 }(
         entryPoint,
-        verifyingSigner
+        paymasterSigner
       );
       console.log('SutoriPaymaster deployed at:', address(sutoriPaymaster));
     } else {

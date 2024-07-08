@@ -22,7 +22,7 @@ services:
           name: sutori
           property: connectionString
       - key: CHAIN
-        value: "sepolia"
+        value: "mainnet"
   - type: worker
     name: sutori-sync
     plan: standard
@@ -46,7 +46,7 @@ services:
           name: sutori
           property: connectionString
       - key: CHAIN
-        value: "sepolia"
+        value: "mainnet"
 
 databases:
   - name: sutori

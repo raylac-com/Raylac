@@ -1,4 +1,4 @@
-import { Hex } from "viem";
+import { Hex } from 'viem';
 
 export interface UserOperation {
   sender: Hex;
@@ -19,4 +19,16 @@ export interface StealthAccount {
   viewTag: string;
   stealthPubKey: Hex;
   ephemeralPubKey: Hex;
+}
+
+export interface ERC5564AnnouncementData {
+  schemeId: number;
+  stealthAddress: string;
+  caller: string;
+  ephemeralPubKey: string;
+  metadata: string;
+  blockNumber: bigint;
+  logIndex: number;
+  txIndex: number;
+  chainId: number;
 }

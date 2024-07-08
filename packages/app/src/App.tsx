@@ -2,24 +2,15 @@
 import 'react-native-get-random-values';
 import { StatusBar } from 'expo-status-bar';
 import { theme } from './lib/theme';
-import {
-  NativeStackNavigationProp,
-  createNativeStackNavigator,
-} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RootStackParamsList, RootTabsParamsList } from './navigation/types';
 import Home from './screens/Home';
 import SignUp from './screens/SignUp';
-import {
-  NavigationContainer,
-  ThemeProvider,
-  useNavigation,
-} from '@react-navigation/native';
+import { NavigationContainer, ThemeProvider } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc, rpcLinks } from './lib/trpc';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import useIsSignedIn from './hooks/useIsSignedIn';
-import { useEffect } from 'react';
 import ConfirmDeposit from './screens/Deposit/ConfirmDeposit';
 import SelectSend from './screens/Send/SelectSend';
 import ConfirmSend from './screens/Send/ConfirmSend';
@@ -69,21 +60,6 @@ const Tabs = () => {
 };
 
 const Screens = () => {
-  const { data: isSignedIn } = useIsSignedIn();
-
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamsList>>();
-
-  useEffect(() => {
-    if (isSignedIn === false) {
-      navigation.navigate('SignUp');
-    }
-  }, [isSignedIn]);
-
-  if (!isSignedIn) {
-    return null;
-  }
-
   return (
     <RootStack.Navigator>
       <RootStack.Screen
@@ -214,16 +190,16 @@ export default function App() {
   });
 
   return (
-    <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        <NavigationContainer>
+    <NavigationContainer>
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
           <ThemeProvider value={NavigationTheme}>
             <Screens></Screens>
             <StatusBar style="light" />
             <Toast></Toast>
           </ThemeProvider>
-        </NavigationContainer>
-      </QueryClientProvider>
-    </trpc.Provider>
+        </QueryClientProvider>
+      </trpc.Provider>
+    </NavigationContainer>
   );
 }

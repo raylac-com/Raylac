@@ -14,7 +14,7 @@ export const encodeERC5564Metadata = ({
     );
   }
 
-  const metadata = `0x${viewTag}${stealthPubKey.replace('0x', '')}` as Hex;
+  const metadata = `${viewTag}${stealthPubKey.replace('0x', '')}` as Hex;
   return metadata;
 };
 

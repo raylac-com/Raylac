@@ -1,15 +1,4 @@
 const SutoriAccount = [
-  {
-    type: 'constructor',
-    inputs: [
-      {
-        name: '__entryPoint',
-        type: 'address',
-        internalType: 'contract IEntryPoint',
-      },
-    ],
-    stateMutability: 'nonpayable',
-  },
   { type: 'receive', stateMutability: 'payable' },
   {
     type: 'function',
@@ -51,7 +40,13 @@ const SutoriAccount = [
     type: 'function',
     name: 'initialize',
     inputs: [
+      {
+        name: '__entryPoint',
+        type: 'address',
+        internalType: 'contract IEntryPoint',
+      },
       { name: '_stealthSigner', type: 'address', internalType: 'address' },
+      { name: '_recoveryGuardian', type: 'address', internalType: 'address' },
     ],
     outputs: [],
     stateMutability: 'nonpayable',
@@ -72,6 +67,22 @@ const SutoriAccount = [
     inputs: [],
     outputs: [{ name: '', type: 'bytes32', internalType: 'bytes32' }],
     stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'recoveryGuardian',
+    inputs: [],
+    outputs: [{ name: '', type: 'address', internalType: 'address' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'setStealthSigner',
+    inputs: [
+      { name: 'newStelathSigner', type: 'address', internalType: 'address' },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'function',

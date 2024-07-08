@@ -104,6 +104,8 @@ const SignUp = () => {
       style={{
         flex: 1,
         alignItems: 'center',
+        rowGap: 8,
+        marginTop: 24
       }}
     >
       <StyledTextInput

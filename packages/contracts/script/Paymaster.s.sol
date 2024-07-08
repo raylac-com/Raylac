@@ -6,12 +6,10 @@ import '../src/SutoriPaymaster.sol';
 import './Utils.s.sol';
 
 contract Paymaster is Script, Utils {
-  address verifyingSigner = 0x94f149b27065aa60ef053788f6B8A60C53C001D4;
-
   function getPaymaster() public view returns (SutoriPaymaster) {
     address paymasterAddress = getDeployedAddress(
       type(SutoriPaymaster).creationCode,
-      abi.encode(entryPoint, verifyingSigner)
+      abi.encode(entryPoint, paymasterSigner)
     );
     require(paymasterAddress != address(0), 'Paymaster not deployed');
 
@@ -22,7 +20,7 @@ contract Paymaster is Script, Utils {
     vm.startBroadcast();
 
     SutoriPaymaster sutoriPaymaster = getPaymaster();
-    sutoriPaymaster.deposit{ value: 0.01 ether }();
+    sutoriPaymaster.deposit{ value: 0.02 ether }();
 
     vm.stopBroadcast();
   }
