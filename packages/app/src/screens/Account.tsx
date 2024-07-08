@@ -27,14 +27,10 @@ const Account = () => {
           await signOut();
           navigation.navigate('Start');
         },
-        style: "destructive"
+        style: 'destructive',
       },
     ]);
   }, [signOut, navigation]);
-
-  if (!user) {
-    return null;
-  }
 
   return (
     <View
@@ -45,29 +41,40 @@ const Account = () => {
         marginTop: 24,
       }}
     >
-      <FastAvatar
-        address={publicKeyToAddress(user.spendingPubKey as Hex)}
-        size={50}
-      ></FastAvatar>
+      {user ? (
+        <View>
+          <FastAvatar
+            address={publicKeyToAddress(user.spendingPubKey as Hex)}
+            size={50}
+          ></FastAvatar>
+          <Text
+            style={{
+              fontSize: 24,
+              marginTop: 12,
+              color: theme.text,
+            }}
+          >
+            {user.name}
+          </Text>
+          <Text
+            style={{
+              marginTop: 4,
+              opacity: 0.5,
+              color: theme.text,
+            }}
+          >
+            @{user.username}
+          </Text>
+        </View>
+      ) : null}
       <Text
         style={{
-          fontSize: 24,
-          marginTop: 12,
+          marginTop: 24,
           color: theme.text,
         }}
       >
-        {user.name}
+        Reveal mnemonic
       </Text>
-      <Text
-        style={{
-          marginTop: 4,
-          opacity: 0.5,
-          color: theme.text,
-        }}
-      >
-        @{user.username}
-      </Text>
-      <Text>Reveal mnemonic</Text>
       <StyledButton
         title="Sign out"
         onPress={onSignOutPress}

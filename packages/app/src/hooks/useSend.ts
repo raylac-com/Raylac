@@ -1,4 +1,4 @@
-import { getSpendingPrivKey, getViewingPrivKey } from '@/lib/key';
+import { getMnemonic, getSpendingPrivKey, getViewingPrivKey } from '@/lib/key';
 import { trpc } from '@/lib/trpc';
 import { publicClient } from '@/lib/viem';
 import { RouterOutput } from '@/types';
@@ -68,8 +68,9 @@ const useSend = () => {
         throw new Error('Not enough funds');
       }
 
-      const viewPrivKey = await getViewingPrivKey();
-      const spendingPrivKey = await getSpendingPrivKey();
+      const mnemonic = await getMnemonic();
+      const viewPrivKey = await getViewingPrivKey(mnemonic);
+      const spendingPrivKey = await getSpendingPrivKey(mnemonic);
 
       if (!viewPrivKey) {
         throw new Error('No view key found');
@@ -117,8 +118,6 @@ const useSend = () => {
             client: publicClient,
             userOp,
           });
-
-          console.log('Signing user op', userOpHash);
 
           const stealthPrivKey = recoveryStealthPrivKey({
             ephemeralPubKey: account.ephemeralPubKey as Hex,

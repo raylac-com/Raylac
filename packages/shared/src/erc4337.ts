@@ -17,7 +17,6 @@ import {
   encodeFunctionData,
   hexToBigInt,
   pad,
-  parseEther,
   toHex,
   zeroAddress,
 } from 'viem';
@@ -85,19 +84,36 @@ export const buildUserOp = async ({
     address: senderAddress,
   });
 
+  const gasPrice = await client.getGasPrice();
+  const gasPriceBuffer = gasPrice * BigInt(20) / BigInt(100);
+  const maxFeePerGas = gasPrice + gasPriceBuffer;
+  const maxPriorityFeePerGas = await rundlerMaxPriorityFeePerGas({ client });
+
   const userOp: UserOperation = {
     sender: senderAddress,
     nonce: toHex(nonce),
     initCode: senderCode ? '0x' : initCode,
     callData,
-    callGasLimit: toHex(BigInt(100_000)),
-    verificationGasLimit: toHex(BigInt(400_000)),
-    preVerificationGas: toHex(BigInt(90000)),
-    maxFeePerGas: toHex(parseEther('0.00000001')),
-    maxPriorityFeePerGas: toHex(BigInt(1562500000)),
+    callGasLimit: toHex(BigInt(0)),
+    verificationGasLimit: toHex(BigInt(0)),
+    preVerificationGas: toHex(BigInt(0)),
+    maxFeePerGas: toHex(maxFeePerGas),
+    maxPriorityFeePerGas,
     paymasterAndData: '0x',
-    signature: '0x',
+    // Dummy signature as specified by Alchemy https://docs.alchemy.com/reference/eth-estimateuseroperationgas
+    signature: '0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c',
   };
+
+  const gasEstimation = await estimateUserOperationGas({
+    client,
+    userOp,
+  });
+
+  userOp.callGasLimit = gasEstimation.callGasLimit;
+  userOp.verificationGasLimit = gasEstimation.verificationGasLimit;
+  userOp.preVerificationGas = gasEstimation.preVerificationGas;
+
+  console.log('User operation:', userOp);
 
   return userOp;
 };
@@ -209,6 +225,89 @@ export const getSenderAddress = async ({
 
     throw err;
   }
+};
+
+export const estimateUserOperationGas = async ({
+  client,
+  userOp,
+}: {
+  client: PublicClient<HttpTransport, Chain>;
+  userOp: UserOperation;
+}) => {
+  const config = {
+    headers: {
+      accept: 'application/json',
+      'content-type': 'application/json',
+    },
+  };
+
+  const result = await axios.post<{
+    result?: {
+      preVerificationGas: Hex;
+      verificationGasLimit: Hex;
+      callGasLimit: Hex;
+      paymasterVerificationGasLimit: Hex;
+    };
+    error?: {
+      code: number;
+      message: string;
+    };
+  }>(
+    client.transport.url as string,
+    {
+      id: 1,
+      jsonrpc: '2.0',
+      method: 'eth_estimateUserOperationGas',
+      params: [userOp, ENTRY_POINT_ADDRESS],
+    },
+    config
+  );
+
+  if (result.data.error) {
+    throw new Error(JSON.stringify(result.data.error));
+  }
+
+  return result.data.result!;
+};
+
+/**
+ * Calls Alchemy's `eth_sendUserOperation` JSON-RPC method
+ * https://docs.alchemy.com/reference/rundler-maxpriorityfeepergas
+ */
+export const rundlerMaxPriorityFeePerGas = async ({
+  client,
+}: {
+  client: PublicClient<HttpTransport, Chain>;
+}) => {
+  const config = {
+    headers: {
+      accept: 'application/json',
+      'content-type': 'application/json',
+    },
+  };
+
+  const result = await axios.post<{
+    result?: Hex;
+    error?: {
+      code: number;
+      message: string;
+    };
+  }>(
+    client.transport.url as string,
+    {
+      id: 1,
+      jsonrpc: '2.0',
+      method: 'rundler_maxPriorityFeePerGas',
+      params: [],
+    },
+    config
+  );
+
+  if (result.data.error) {
+    throw new Error(JSON.stringify(result.data.error));
+  }
+
+  return result.data.result!;
 };
 
 /**

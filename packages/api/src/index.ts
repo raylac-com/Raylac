@@ -7,7 +7,11 @@ import { AssetTransfersCategory, SortingOrder } from 'alchemy-sdk';
 import { authedProcedure, publicProcedure, router } from './trpc';
 import jwt from 'jsonwebtoken';
 import alchemy from './lib/alchemy';
-import { sendUserOperation, USDC_CONTRACT_ADDRESS, UserOperation } from '@sutori/shared';
+import {
+  sendUserOperation,
+  USDC_CONTRACT_ADDRESS,
+  UserOperation,
+} from '@sutori/shared';
 import * as erc20 from './lib/erc20';
 import { signUserOp } from './lib/paymaster';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -201,8 +205,6 @@ const appRouter = router({
     const totalBalance = balances.reduce((acc, balance) => {
       return acc + balance;
     }, BigInt(0));
-
-    console.log('totalBalance', totalBalance);
 
     return totalBalance;
   }),

@@ -82,11 +82,13 @@ const SignUp = () => {
     500
   );
 
-  const { data: isUsernameAvailable } = trpc.isUsernameAvailable.useQuery({
-    username: debouncedUsername,
-  });
+  const { data: isUsernameAvailable, isPending: isCheckingUsername } =
+    trpc.isUsernameAvailable.useQuery({
+      username: debouncedUsername,
+    });
 
-  const canGoNext = isValidUsername(username);
+  const canGoNext =
+    isValidUsername(username) && isUsernameAvailable && !isCheckingUsername;
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamsList>>();
@@ -105,7 +107,7 @@ const SignUp = () => {
         flex: 1,
         alignItems: 'center',
         rowGap: 8,
-        marginTop: 24
+        marginTop: 24,
       }}
     >
       <StyledTextInput
@@ -115,7 +117,7 @@ const SignUp = () => {
           marginTop: 40,
         }}
         inputStyle={{
-          width: 220
+          width: 220,
         }}
         onChangeText={text => {
           setName(text);
@@ -124,7 +126,7 @@ const SignUp = () => {
       <StyledTextInput
         placeholder="Username"
         inputStyle={{
-          width: 220
+          width: 220,
         }}
         value={username}
         inputMode="text"

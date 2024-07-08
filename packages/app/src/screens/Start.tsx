@@ -5,13 +5,12 @@ import { View } from 'react-native';
 
 const Start = () => {
   const navigation = useTypedNavigation();
-  const { data: isSignedIn} = useIsSignedIn();
+  const { data: isSignedIn } = useIsSignedIn();
 
   if (isSignedIn) {
-    navigation.navigate("Tabs", {
-      screen: "Home"
+    navigation.navigate('Tabs', {
+      screen: 'Home',
     });
-    return null;
   }
 
   return (
@@ -30,7 +29,7 @@ const Start = () => {
         }}
         style={{
           justifyContent: 'center',
-          width: 160
+          width: 160,
         }}
       ></StyledButton>
       <StyledButton
@@ -40,7 +39,7 @@ const Start = () => {
         }}
         style={{
           justifyContent: 'center',
-          width: 160
+          width: 160,
         }}
       ></StyledButton>
     </View>

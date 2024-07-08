@@ -5,12 +5,7 @@ import { trpc } from '@/lib/trpc';
 import { Buffer } from 'buffer';
 import * as bip39 from 'bip39';
 import userKeys from '@/queryKeys/userKeys';
-import {
-  getMnemonic,
-  saveMnemonic,
-  saveSpendingPrivKey,
-  saveViewingPrivKey,
-} from '@/lib/key';
+import { getMnemonic, saveMnemonic } from '@/lib/key';
 import { Hex } from 'viem';
 import { saveAuthToken } from '@/lib/auth';
 
@@ -43,12 +38,9 @@ const initAccount = async (): Promise<{
     accountIndex: 1,
   });
 
-  const spendingPrivKey = hdKeyToPrivateKey(spendingAccount.getHdKey());
   const viewingPrivKey = hdKeyToPrivateKey(viewingAccount.getHdKey());
 
   await saveMnemonic(mnemonic);
-  await saveSpendingPrivKey(spendingPrivKey);
-  await saveViewingPrivKey(viewingPrivKey);
 
   return {
     spendingPubKey: spendingAccount.publicKey,
