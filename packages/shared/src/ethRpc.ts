@@ -36,7 +36,7 @@ export const getAlchemyRpcUrl = ({
   if (chain === baseSepolia) {
     return `https://base-sepolia.g.alchemy.com/v2/${apiKey}`;
   } else if (chain === base) {
-    return `https://base.g.alchemy.com/v2/${apiKey}`;
+    return `https://base-mainnet.g.alchemy.com/v2/${apiKey}`;
   } else {
     throw new Error(`Unknown chain: ${chain}`);
   }
