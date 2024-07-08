@@ -75,6 +75,9 @@ importers:
 
   packages/app:
     dependencies:
+      '@expo/config':
+        specifier: ~9.0.0
+        version: 9.0.1
       '@expo/vector-icons':
         specifier: ^14.0.2
         version: 14.0.2
