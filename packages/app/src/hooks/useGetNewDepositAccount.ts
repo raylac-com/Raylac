@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import useGenerateStealthAccount from './useGenerateStealthAccount';
-import useSignedInUser from './useSignInUser';
+import useSignedInUser from './useSignedInUser';
 import { Hex } from 'viem';
 import { trpc } from '@/lib/trpc';
 import Toast from 'react-native-toast-message';

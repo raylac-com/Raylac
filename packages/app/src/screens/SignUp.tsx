@@ -112,8 +112,10 @@ const SignUp = () => {
         value={name}
         placeholder="Name"
         style={{
-          width: 240,
           marginTop: 40,
+        }}
+        inputStyle={{
+          width: 220
         }}
         onChangeText={text => {
           setName(text);
@@ -121,8 +123,8 @@ const SignUp = () => {
       ></StyledTextInput>
       <StyledTextInput
         placeholder="Username"
-        style={{
-          width: 240,
+        inputStyle={{
+          width: 220
         }}
         value={username}
         inputMode="text"

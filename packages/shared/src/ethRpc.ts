@@ -7,19 +7,23 @@ import {
 } from 'viem';
 import { Chain, base, baseSepolia } from 'viem/chains';
 
+const CHAIN = process.env.CHAIN || process.env.EXPO_PUBLIC_CHAIN;
+
+if (CHAIN !== 'base-sepolia' && CHAIN !== 'base-mainnet') {
+  throw new Error(`Unknown chain: ${CHAIN}`);
+}
+
 /**
  * Get the chain based on the environment
  */
 export const getChain = (): Chain => {
-  if (
-    process.env.NODE_ENV === 'development' ||
-    process.env.CHAIN === 'sepolia' ||
-    process.env.EXPO_PUBLIC_CHAIN === 'sepolia'
-  ) {
+  if (CHAIN === 'base-sepolia') {
     return baseSepolia;
+  } else if (CHAIN === 'base-mainnet') {
+    return base;
+  } else {
+    throw new Error(`Unknown chain: ${CHAIN}`);
   }
-
-  return base;
 };
 
 export const getAlchemyRpcUrl = ({

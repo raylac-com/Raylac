@@ -9,7 +9,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
 import { RootStackParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import useSignedInUser from '@/hooks/useSignInUser';
+import useSignedInUser from '@/hooks/useSignedInUser';
 
 interface UserListItemProps {
   user: RouterOutput['getUsers'][number];

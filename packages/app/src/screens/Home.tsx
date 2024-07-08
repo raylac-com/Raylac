@@ -60,6 +60,7 @@ const NUM_TRANSFERS_TO_SHOW = 5;
 const HomeScreen = () => {
   const { t } = useTranslation('Home');
   const { data: isSignedIn } = useIsSignedIn();
+  console.log('isSignedIn', isSignedIn);
 
   const {
     data: balance,
@@ -67,7 +68,6 @@ const HomeScreen = () => {
     isRefetching: isRefetchingBalance,
   } = trpc.getBalance.useQuery(null, {
     enabled: isSignedIn,
-    refetchOnWindowFocus: true,
   });
 
   const {
@@ -76,7 +76,6 @@ const HomeScreen = () => {
     isRefetching: isRefetchingTxHistory,
   } = trpc.getTxHistory.useQuery(null, {
     enabled: isSignedIn,
-    refetchOnWindowFocus: true,
   });
 
   const navigation = useTypedNavigation();
@@ -88,9 +87,13 @@ const HomeScreen = () => {
 
   useEffect(() => {
     if (isSignedIn === false) {
-      navigation.navigate('SignUp');
+      navigation.navigate('Start');
     }
   }, [isSignedIn]);
+
+  if (!isSignedIn) {
+    return null;
+  }
 
   return (
     <SafeAreaView

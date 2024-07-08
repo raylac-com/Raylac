@@ -79,12 +79,11 @@ const useSignUp = () => {
 
       await saveSignedInUser(userId);
       await saveAuthToken(token);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+
+      await queryClient.invalidateQueries({
         queryKey: [userKeys.isSignedIn],
       });
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: [userKeys.signedInUser],
       });
     },

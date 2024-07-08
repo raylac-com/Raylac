@@ -9,3 +9,7 @@ export const saveAuthToken = async (token: string) => {
 export const getAuthToken = async () => {
   return await SecureStore.getItemAsync(AUTH_TOKEN_STORAGE_KEY);
 };
+
+export const deleteAuthToken = async () => {
+  await SecureStore.deleteItemAsync(AUTH_TOKEN_STORAGE_KEY);
+}

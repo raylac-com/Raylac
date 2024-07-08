@@ -7,7 +7,7 @@ import { AssetTransfersCategory, SortingOrder } from 'alchemy-sdk';
 import { authedProcedure, publicProcedure, router } from './trpc';
 import jwt from 'jsonwebtoken';
 import alchemy from './lib/alchemy';
-import { sendUserOperation, UserOperation } from '@sutori/shared';
+import { sendUserOperation, USDC_CONTRACT_ADDRESS, UserOperation } from '@sutori/shared';
 import * as erc20 from './lib/erc20';
 import { signUserOp } from './lib/paymaster';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -227,7 +227,7 @@ const appRouter = router({
         return alchemy.core.getAssetTransfers({
           category: [AssetTransfersCategory.ERC20],
           toAddress: address.address as Hex,
-          contractAddresses: [erc20.BASE_USDC_CONTRACT],
+          contractAddresses: [USDC_CONTRACT_ADDRESS],
           order: SortingOrder.DESCENDING,
           withMetadata: true,
         });

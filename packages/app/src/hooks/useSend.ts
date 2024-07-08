@@ -3,7 +3,7 @@ import { trpc } from '@/lib/trpc';
 import { publicClient } from '@/lib/viem';
 import { RouterOutput } from '@/types';
 import {
-  BASE_SEPOLIA_USDC_CONTRACT,
+  USDC_CONTRACT_ADDRESS,
   ERC20Abi,
   SUTORI_PAYMASTER_ADDRESS,
   buildUserOp,
@@ -102,7 +102,7 @@ const useSend = () => {
             client: publicClient,
             stealthSigner,
             value: BigInt(0),
-            to: BASE_SEPOLIA_USDC_CONTRACT,
+            to: USDC_CONTRACT_ADDRESS,
             data: transferCall,
           });
 

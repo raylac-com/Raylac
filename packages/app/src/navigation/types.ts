@@ -8,8 +8,11 @@ export type RootTabsParamsList = {
 
 export type RootStackParamsList = {
   Tabs: { screen: keyof RootTabsParamsList; params?: any };
+  Start: undefined;
   SignIn: undefined;
   SignUp: undefined;
+
+  SignInWithMnemonic: undefined;
 
   // Send stack
   SelectSend: undefined;

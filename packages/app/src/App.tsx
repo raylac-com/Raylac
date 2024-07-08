@@ -7,6 +7,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RootStackParamsList, RootTabsParamsList } from './navigation/types';
 import Home from './screens/Home';
 import SignUp from './screens/SignUp';
+import SignIn from './screens/SignIn';
 import { NavigationContainer, ThemeProvider } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc, rpcLinks } from './lib/trpc';
@@ -20,7 +21,7 @@ import SendToNonSutoriUser from './screens/Send/SendToNonSutoriUser';
 import Toast from 'react-native-toast-message';
 import TransferHistory from './screens/TransferHistory';
 import * as Sentry from '@sentry/react-native';
-import SignIn from './screens/Start';
+import Start from './screens/Start';
 import EnterSendAmount from './screens/Send/EnterSendAmount';
 import EnterDepositAmount from './screens/Deposit/EnterDepositAmount';
 import { useTranslation } from 'react-i18next';
@@ -67,7 +68,7 @@ const Screens = () => {
   const { t } = useTranslation();
 
   return (
-    <RootStack.Navigator>
+    <RootStack.Navigator initialRouteName="Start">
       <RootStack.Screen
         name="Tabs"
         component={Tabs}
@@ -85,6 +86,14 @@ const Screens = () => {
       <RootStack.Screen
         name="SignIn"
         component={SignIn}
+        options={{
+          headerBackVisible: true,
+          headerBackTitle: 'Back',
+        }}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="Start"
+        component={Start}
         options={{
           title: t('title', { ns: 'SignIn' }),
           headerBackVisible: false,
@@ -164,7 +173,7 @@ const Screens = () => {
         name="TransferHistory"
         component={TransferHistory}
         options={{
-            title: t('title', { ns: 'TransferHistory' }),
+          title: t('title', { ns: 'TransferHistory' }),
           headerBackVisible: true,
         }}
       ></RootStack.Screen>
