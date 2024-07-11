@@ -11,6 +11,7 @@ export const authedProcedure = t.procedure.use(async opts => {
   const { ctx } = opts;
   
   if (!ctx.userId) {
+    console.log({opts});
     throw new Error('User not logged in');
   }
 

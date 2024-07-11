@@ -7,10 +7,12 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import { getClipboardText } from '@/lib/utils';
 import { theme } from '@/lib/theme';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
+import { useTranslation } from 'react-i18next';
 
 const SendToNonSutoriUser = () => {
   const navigation = useTypedNavigation();
-  const [recipientAddress, setRecipientAddress] = useState("");
+  const [recipientAddress, setRecipientAddress] = useState('');
+  const { t } = useTranslation();
 
   const onNextClick = useCallback(() => {
     navigation.navigate('EnterSendAmount', {
@@ -42,6 +44,7 @@ const SendToNonSutoriUser = () => {
         }}
       >
         <StyledTextInput
+          autoFocus
           style={{
             width: 200,
           }}
@@ -91,7 +94,7 @@ const SendToNonSutoriUser = () => {
         style={{
           marginTop: 24,
         }}
-        title="Next"
+        title={t('next', { ns: 'common' })}
         onPress={onNextClick}
       ></StyledButton>
     </View>

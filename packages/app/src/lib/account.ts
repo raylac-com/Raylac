@@ -25,7 +25,7 @@ export const initAccountFromMnemonic = async (mnemonic: string) => {
   await saveMnemonic(mnemonic);
 
   return {
-    spendingPubKey: spendingAccount.publicKey,
+    spendingAccount,
     viewingPrivKey,
   };
 };

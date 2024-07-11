@@ -60,7 +60,6 @@ const NUM_TRANSFERS_TO_SHOW = 5;
 const HomeScreen = () => {
   const { t } = useTranslation('Home');
   const { data: isSignedIn } = useIsSignedIn();
-  console.log('isSignedIn', isSignedIn);
 
   const {
     data: balance,

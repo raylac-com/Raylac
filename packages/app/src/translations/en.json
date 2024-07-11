@@ -24,7 +24,9 @@
       "title": "Confirm"
     },
     "SelectSend": {
-      "title": "Select Send"
+      "title": "Select Send",
+      "sendToSutoriUser": "Send to Sutori user",
+      "sendToNonSutoriUser": "Send to non-Sutori User"
     },
     "EnterSendAmount": {
       "title": "Enter Amount"
@@ -36,10 +38,14 @@
       "title": "Enter recipient details"
     },
     "ConfirmSend": {
-      "title": "Confirm"
+      "title": "Confirm",
+      "send": "Send"
     },
     "TransferHistory": {
       "title": "Transfer History"
+    },
+    "BackupAccount": {
+      "title": "Backup Account"
     },
     "common": {
       "next": "Next"

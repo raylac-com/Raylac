@@ -1,6 +1,6 @@
 import StyledButton from '@/components/StyledButton';
 import StyledTextInput from '@/components/StyledTextInput';
-import { initAccountFromMnemonic } from '@/lib/account';
+import { useSignIn } from '@/hooks/useSIgnIn';
 import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { mnemonicToAccount } from 'viem/accounts';
@@ -8,10 +8,11 @@ import { mnemonicToAccount } from 'viem/accounts';
 const SignIn = () => {
   const [mnemonic, setMnemonic] = useState('');
   const [isMnemonicValid, setIsMnemonicValid] = useState(false);
+  const { mutateAsync: signIn, isPending: isSigningIn } = useSignIn();
 
   const onSignInPress = useCallback(async () => {
-    await initAccountFromMnemonic(mnemonic);
-  }, [mnemonic]);
+    await signIn({ mnemonic });
+  }, [signIn, mnemonic]);
 
   useEffect(() => {
     try {
@@ -42,6 +43,7 @@ const SignIn = () => {
         }}
       ></StyledTextInput>
       <StyledButton
+        isLoading={isSigningIn}
         title="Sign In"
         onPress={onSignInPress}
         disabled={!isMnemonicValid}

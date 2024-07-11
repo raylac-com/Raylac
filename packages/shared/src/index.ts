@@ -13,3 +13,4 @@ export * from './types';
 export * from './erc4337';
 export * from './erc5564';
 export * from './ethRpc';
+export * from './siwe';

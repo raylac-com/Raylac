@@ -217,6 +217,9 @@ importers:
 
   packages/scripts:
     dependencies:
+      '@noble/secp256k1':
+        specifier: ^2.1.0
+        version: 2.1.0
       '@sutori/api':
         specifier: workspace:*
         version: link:../api
@@ -232,6 +235,9 @@ importers:
       axios:
         specifier: ^1.7.2
         version: 1.7.2
+      bip39:
+        specifier: ^3.1.0
+        version: 3.1.0
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5

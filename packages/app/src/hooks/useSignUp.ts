@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { HDKey, hdKeyToAccount } from 'viem/accounts';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { trpc } from '@/lib/trpc';
@@ -8,15 +7,12 @@ import userKeys from '@/queryKeys/userKeys';
 import { getMnemonic, saveMnemonic } from '@/lib/key';
 import { Hex } from 'viem';
 import { saveAuthToken } from '@/lib/auth';
+import { saveSignedInUser } from '@/lib/utils';
 
 globalThis.Buffer = Buffer;
 
 const hdKeyToPrivateKey = (hdKey: HDKey): Hex => {
   return `0x${Buffer.from(hdKey.privateKey).toString('hex')}`;
-};
-
-const saveSignedInUser = async (userId: number) => {
-  await AsyncStorage.setItem('signedInUser', userId.toString());
 };
 
 const initAccount = async (): Promise<{
@@ -73,10 +69,10 @@ const useSignUp = () => {
       await saveAuthToken(token);
 
       await queryClient.invalidateQueries({
-        queryKey: [userKeys.isSignedIn],
+        queryKey: userKeys.isSignedIn,
       });
       await queryClient.invalidateQueries({
-        queryKey: [userKeys.signedInUser],
+        queryKey: userKeys.signedInUser,
       });
     },
   });

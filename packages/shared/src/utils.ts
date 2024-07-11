@@ -1,5 +1,5 @@
 import * as secp from '@noble/secp256k1';
-import { Hex } from 'viem';
+import { Hex, parseUnits } from 'viem';
 
 export const encodeERC5564Metadata = ({
   viewTag,
@@ -48,4 +48,34 @@ export const encodePaymasterAndData = ({
 }) => {
   const encoded = `${paymasterAddress.replace('0x', '')}${data.replace('0x', '')}`;
   return `0x${encoded}` as Hex;
+};
+
+export const STEALTH_UNITS = [
+  parseUnits('1000', 6),
+  parseUnits('500', 6),
+  parseUnits('100', 6),
+  parseUnits('50', 6),
+  parseUnits('10', 6),
+  parseUnits('5', 6),
+  parseUnits('1', 6),
+];
+
+export const splitToUnits = ({
+  amount,
+}: {
+  amount: bigint;
+  decimals: number;
+}) => {
+  const result: {
+    [key: string]: number;
+  } = STEALTH_UNITS.reduce((acc, unit) => {
+    const count = amount / unit;
+    amount -= BigInt(count * unit);
+    return {
+      ...acc,
+      [unit.toString()]: Number(count),
+    };
+  }, {});
+
+  return result;
 };

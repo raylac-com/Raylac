@@ -5,11 +5,11 @@ import {
   createWalletClient,
   http,
 } from 'viem';
-import { Chain, base, baseSepolia } from 'viem/chains';
+import { Chain, anvil, base, baseSepolia } from 'viem/chains';
 
 const CHAIN = process.env.CHAIN || process.env.EXPO_PUBLIC_CHAIN;
 
-if (CHAIN !== 'base-sepolia' && CHAIN !== 'base-mainnet') {
+if (CHAIN !== 'base-sepolia' && CHAIN !== 'base-mainnet' && CHAIN !== 'anvil') {
   throw new Error(`Unknown chain: ${CHAIN}`);
 }
 
@@ -21,6 +21,8 @@ export const getChain = (): Chain => {
     return baseSepolia;
   } else if (CHAIN === 'base-mainnet') {
     return base;
+  } else if (CHAIN === 'anvil') {
+    return anvil;
   } else {
     throw new Error(`Unknown chain: ${CHAIN}`);
   }
@@ -41,6 +43,8 @@ export const getAlchemyRpcUrl = ({
     return `https://base-sepolia.g.alchemy.com/v2/${apiKey}`;
   } else if (chain === base) {
     return `https://base-mainnet.g.alchemy.com/v2/${apiKey}`;
+  } else  if (chain === anvil) {
+    return `http://127.0.0.01:8545`;
   } else {
     throw new Error(`Unknown chain: ${chain}`);
   }

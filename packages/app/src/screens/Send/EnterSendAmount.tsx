@@ -6,6 +6,7 @@ import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import { formatUnits, parseUnits } from 'viem';
 
@@ -14,6 +15,7 @@ type Props = NativeStackScreenProps<RootStackParamsList, 'EnterSendAmount'>;
 const EnterSendAmount = ({ navigation, route }: Props) => {
   const [amount, setAmount] = useState<null | number>(null);
   const { data: balance } = trpc.getBalance.useQuery();
+  const { t } = useTranslation();
 
   const recipientUserOrAddress = route.params.recipientUserOrAddress;
 
@@ -26,8 +28,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
 
   const parsedAmount = amount ? parseUnits(amount.toString(), 6) : null;
 
-  const canGoNext =
-    balance && parsedAmount && parsedAmount <= balance;
+  const canGoNext = balance && parsedAmount && parsedAmount <= balance;
 
   const recipient =
     typeof recipientUserOrAddress === 'string'
@@ -39,10 +40,11 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
       style={{
         flex: 1,
         alignItems: 'center',
-        marginTop: 40
+        marginTop: 40,
       }}
     >
       <StyledTextInput
+        autoFocus
         containerStyle={{
           marginVertical: 20,
         }}
@@ -74,7 +76,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           opacity: 0.6,
         }}
       >
-        Available balance: {balance ? formatUnits(balance, 6): ""} USDC
+        Available balance: {balance ? formatUnits(balance, 6) : ''} USDC
       </Text>
       <Text
         style={{
@@ -90,7 +92,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
         style={{
           marginTop: 24,
         }}
-        title="Next"
+        title={t('next', { ns: 'common' })}
         onPress={onNextClick}
         disabled={!canGoNext}
       ></StyledButton>

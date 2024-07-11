@@ -9,6 +9,7 @@ import Toast from 'react-native-toast-message';
 import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { theme } from '@/lib/theme';
+import { useTranslation } from 'react-i18next';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'ConfirmDeposit'>;
 
@@ -17,6 +18,7 @@ const ConfirmDeposit = ({ route }: Props) => {
   const amount = route.params.amount;
 
   const navigation = useTypedNavigation();
+  const { t } = useTranslation('ConfirmDeposit');
 
   const onCopyClick = useCallback(() => {
     copyToClipboard(depositAddress);
@@ -75,7 +77,7 @@ const ConfirmDeposit = ({ route }: Props) => {
       </View>
       <View></View>
       <StyledButton
-        title="Back to Home"
+        title={t('confirm')}
         onPress={() =>
           navigation.navigate('Tabs', {
             screen: 'Home',

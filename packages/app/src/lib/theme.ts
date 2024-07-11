@@ -6,7 +6,7 @@ export const theme = {
   background: '#171717',
   backgroundHover: '#171717',
   card: '#171717',
-  text: '#EDEDED',
+  text: '#E5E5E5',
   border: '#171717',
   notification: '#285181',
 };

@@ -1,6 +1,6 @@
 {
   "Sign in": {
-    "title": "ログイン"
+    "title": ""
   },
   "Home": {
     "title": "ホーム",
@@ -24,7 +24,9 @@
     "title": "確認"
   },
   "SelectSend": {
-    "title": "送金先を選択"
+    "title": "送金先を選択",
+    "sendToSutoriUser": "Sutoriユーザーに送金",
+      "sendToNonSutoriUser": "Sutoriユーザー以外に送金"
   },
   "EnterSendAmount": {
     "title": "金額を入力"
@@ -36,11 +38,15 @@
     "title": "受取人を入力"
   },
   "ConfirmSend": {
-    "title": "確認"
+    "title": "確認",
+    "send": "送金"
   },
   "TransferHistory": {
     "title": "取引履歴"
   },
+  "BackupAccount": {
+      "title": "アカウントのバックアップ"
+    },
   "common": {
     "next": "次へ"
   }

@@ -1,9 +1,11 @@
 import { View } from 'react-native';
 import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
+import { useTranslation } from 'react-i18next';
 
 const SelectSend = () => {
   const navigation = useTypedNavigation();
+  const { t } = useTranslation('SelectSend');
 
   return (
     <View
@@ -15,11 +17,11 @@ const SelectSend = () => {
       }}
     >
       <StyledButton
-        title="Send to a Sutori user"
+        title={t('sendToSutoriUser')}
         onPress={() => navigation.navigate('SendToSutoriUser')}
       ></StyledButton>
       <StyledButton
-        title="Send to a non-Sutori user"
+        title={t('sendToNonSutoriUser')}
         onPress={() => navigation.navigate('SendToNonSutoriUser')}
       ></StyledButton>
     </View>

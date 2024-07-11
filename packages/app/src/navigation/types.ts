@@ -33,4 +33,5 @@ export type RootStackParamsList = {
     amount: number;
   };
   TransferHistory: undefined;
+  BackupAccount: undefined;
 };

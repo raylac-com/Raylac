@@ -1,13 +1,46 @@
 import FastAvatar from '@/components/FastAvatar';
-import StyledButton from '@/components/StyledButton';
 import useSignOut from '@/hooks/useSignOut';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { theme } from '@/lib/theme';
 import { useCallback } from 'react';
-import { Alert, Text, View } from 'react-native';
+import { Alert, Pressable, Text, View } from 'react-native';
 import { Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
+
+interface SettingListItemProps {
+  title: string;
+  onPress: () => void;
+  color: string;
+}
+
+const SettingListItem = (props: SettingListItemProps) => {
+  const { title, onPress, color } = props;
+
+  return (
+    <Pressable
+      style={{
+        padding: 8,
+        width: '62%',
+        borderWidth: 1,
+        borderRadius: 8,
+        backgroundColor: theme.background,
+        borderColor: color ? color : theme.text,
+      }}
+      onPress={onPress}
+    >
+      <Text
+        style={{
+          fontSize: 16,
+          textAlign: 'center',
+          color: color ? color : theme.text,
+        }}
+      >
+        {title}
+      </Text>
+    </Pressable>
+  );
+};
 
 const Account = () => {
   const { data: user } = useSignedInUser();
@@ -42,7 +75,10 @@ const Account = () => {
       }}
     >
       {user ? (
-        <View>
+        <View style={{
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}>
           <FastAvatar
             address={publicKeyToAddress(user.spendingPubKey as Hex)}
             size={50}
@@ -67,21 +103,24 @@ const Account = () => {
           </Text>
         </View>
       ) : null}
-      <Text
+      <View
         style={{
+          width: '100%',
+          flexDirection: 'column',
+          alignItems: 'center',
           marginTop: 24,
-          color: theme.text,
+          rowGap: 12,
         }}
       >
-        Reveal mnemonic
-      </Text>
-      <StyledButton
-        title="Sign out"
-        onPress={onSignOutPress}
-        style={{
-          marginTop: 128,
-        }}
-      />
+        <SettingListItem
+          title="Backup account"
+          onPress={() => navigation.navigate('BackupAccount')}
+          color={theme.text}
+        />
+        <SettingListItem title="Sign out" onPress={onSignOutPress} 
+          color={theme.waning}
+        />
+      </View>
     </View>
   );
 };

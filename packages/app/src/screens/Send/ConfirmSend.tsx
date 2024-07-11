@@ -7,6 +7,7 @@ import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import { Hex, parseUnits } from 'viem';
 
@@ -17,6 +18,7 @@ const ConfirmSend = ({ route }: Props) => {
   const { mutateAsync: send, isPending: isSending } = useSend();
   const { mutateAsync: generateStealthAccount } = useGenerateStealthAccount();
   const navigation = useTypedNavigation();
+  const { t } = useTranslation('ConfirmSend');
 
   const onSendPress = useCallback(async () => {
     const parsedAmount = parseUnits(amount.toString(), 6);
@@ -42,10 +44,9 @@ const ConfirmSend = ({ route }: Props) => {
     }
 
     // Navigate back to the home screen
-    navigation.navigate("Tabs", {
-      screen: "Home",
+    navigation.navigate('Tabs', {
+      screen: 'Home',
     });
-    
   }, [recipientUserOrAddress, send, amount]);
 
   return (
@@ -70,7 +71,7 @@ const ConfirmSend = ({ route }: Props) => {
           : recipientUserOrAddress.name}
       </Text>
       <StyledButton
-        title="Send"
+        title={t('send')}
         isLoading={isSending}
         onPress={() => {
           onSendPress();

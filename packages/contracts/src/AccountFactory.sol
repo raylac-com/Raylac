@@ -7,6 +7,7 @@ import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol';
 import '@openzeppelin/contracts/utils/Create2.sol';
 import './SutoriAccount.sol';
+import './SutoriAccountProxy.sol';
 
 contract AccountFactory {
   SutoriAccount public immutable accountImplementation;
@@ -27,21 +28,12 @@ contract AccountFactory {
   function createAccount(
     address stealthSigner
   ) external returns (SutoriAccount ret) {
-    address addr = getAddress(stealthSigner);
-    uint codeSize = addr.code.length;
-    if (codeSize > 0) {
-      return SutoriAccount(payable(addr));
-    }
-
     // Deploy a new account with CREATE2
     ret = SutoriAccount(
       payable(
-        new ERC1967Proxy{ salt: 0 }(
+        new SutoriAccountProxy{ salt: 0 }(
           address(accountImplementation),
-          abi.encodeCall(
-            SutoriAccount.initialize,
-            (entryPoint, stealthSigner, recoveryGuardian)
-          )
+          abi.encodeCall(SutoriAccount.initialize, (stealthSigner))
         )
       )
     );
@@ -59,10 +51,7 @@ contract AccountFactory {
             type(ERC1967Proxy).creationCode,
             abi.encode(
               address(accountImplementation),
-              abi.encodeCall(
-                SutoriAccount.initialize,
-                (entryPoint, stealthSigner, recoveryGuardian)
-              )
+              abi.encodeCall(SutoriAccount.initialize, (stealthSigner))
             )
           )
         )

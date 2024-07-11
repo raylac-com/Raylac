@@ -1,11 +1,12 @@
 import { createTRPCClient, httpBatchLink } from '@trpc/client';
 import type { AppRouter } from '@sutori/api';
 
+const url = 'http://localhost:3000';
+
 export const client = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
-      url: 'https://1e6059ef741c.ngrok.app',
-      // url: "http://192.168.1.36:3000",
+      url,
       headers: async () => {
         return {
           authorization:
@@ -15,6 +16,21 @@ export const client = createTRPCClient<AppRouter>({
     }),
   ],
 });
+
+export const getAuthedClient = (token: string) => {
+  return createTRPCClient<AppRouter>({
+    links: [
+      httpBatchLink({
+        url,
+        headers: async () => {
+          return {
+            authorization: `Bearer ${token}`,
+          };
+        },
+      }),
+    ],
+  });
+};
 
 const rpc = async () => {
   const balance = await client.getBalance.query();

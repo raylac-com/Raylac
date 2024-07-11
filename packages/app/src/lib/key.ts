@@ -8,6 +8,11 @@ const MNEMONIC_STORAGE_KEY = 'mnemonic';
 const REQUIRE_AUTHENTICATION = process.env.NODE_ENV !== 'development';
 
 export const saveMnemonic = async (mnemonic: string) => {
+  const existingMnemonic = await getMnemonic();
+  if (existingMnemonic !== null && existingMnemonic !== mnemonic) {
+    throw new Error('Trying to overwrite existing mnemonic');
+  }
+
   await SecureStore.setItemAsync(MNEMONIC_STORAGE_KEY, mnemonic);
 };
 
@@ -48,8 +53,4 @@ export const getViewingPrivKey = (mnemonic: string) => {
   });
 
   return hdKeyToPrivateKey(viewingAccount.getHdKey());
-};
-
-export const deleteMnemonic = async () => {
-  await SecureStore.deleteItemAsync(MNEMONIC_STORAGE_KEY);
 };

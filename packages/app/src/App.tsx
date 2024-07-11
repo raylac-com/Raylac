@@ -26,6 +26,7 @@ import EnterSendAmount from './screens/Send/EnterSendAmount';
 import EnterDepositAmount from './screens/Deposit/EnterDepositAmount';
 import { useTranslation } from 'react-i18next';
 import './i18n';
+import BackupAccount from './screens/BackupAccount';
 
 Sentry.init({
   dsn: 'https://adc4c437047fef7e4ebe5d0d77df3ff5@o1348995.ingest.us.sentry.io/4507536730030080',
@@ -39,7 +40,7 @@ const Tabs = () => {
   const { t } = useTranslation();
 
   return (
-    <Tab.Navigator>
+    <Tab.Navigator initialRouteName="Home">
       <Tab.Screen
         name="Home"
         component={Home}
@@ -68,7 +69,7 @@ const Screens = () => {
   const { t } = useTranslation();
 
   return (
-    <RootStack.Navigator initialRouteName="Start">
+    <RootStack.Navigator initialRouteName="Tabs">
       <RootStack.Screen
         name="Tabs"
         component={Tabs}
@@ -97,6 +98,13 @@ const Screens = () => {
         options={{
           title: t('title', { ns: 'SignIn' }),
           headerBackVisible: false,
+        }}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="BackupAccount"
+        component={BackupAccount}
+        options={{
+          title: t('title', { ns: 'BackupAccount' }),
         }}
       ></RootStack.Screen>
       <RootStack.Group

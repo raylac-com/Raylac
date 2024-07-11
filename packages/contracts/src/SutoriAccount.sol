@@ -17,9 +17,11 @@ contract SutoriAccount is
 {
   using ECDSA for bytes32;
 
-  IEntryPoint public _entryPoint;
+  IEntryPoint public constant _entryPoint =
+    IEntryPoint(0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789);
 
-  address public recoveryGuardian;
+  address public constant recoveryGuardian =
+    0x524e829F6D6C38653D5BCA78DB7324Af505fE133;
   address public stealthSigner;
 
   uint256 private constant _SIG_VALIDATION_SUCCEED = 0;
@@ -41,14 +43,8 @@ contract SutoriAccount is
     return _entryPoint;
   }
 
-  function initialize(
-    IEntryPoint __entryPoint,
-    address _stealthSigner,
-    address _recoveryGuardian
-  ) public virtual initializer {
-    _entryPoint = __entryPoint;
+  function initialize(address _stealthSigner) public virtual initializer {
     stealthSigner = _stealthSigner;
-    recoveryGuardian = _recoveryGuardian;
   }
 
   /**
@@ -58,7 +54,7 @@ contract SutoriAccount is
    * @param func the calldata to pass in this call
    */
   function execute(address dest, uint256 value, bytes calldata func) external {
-    _requireFromEntryPoint();
+    // _requireFromEntryPoint();
     _call(dest, value, func);
   }
 

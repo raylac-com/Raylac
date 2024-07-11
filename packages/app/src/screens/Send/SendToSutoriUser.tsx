@@ -23,7 +23,6 @@ const UserListItem = (props: UserListItemProps) => {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 8,
         borderBottomWidth: 1,
         borderBottomColor: 'rgba(0,0,0,0.1)',
         columnGap: 8,
@@ -71,7 +70,7 @@ const SendToSutoriUser = ({ navigation }: Props) => {
 
   const onUserClick = useCallback(
     async (user: RouterOutput['getUsers'][number]) => {
-      navigation.navigate("EnterSendAmount", {
+      navigation.navigate('EnterSendAmount', {
         recipientUserOrAddress: user,
       });
     },
@@ -87,17 +86,23 @@ const SendToSutoriUser = ({ navigation }: Props) => {
       }}
     >
       <StyledTextInput
+        autoFocus
         value={username}
         placeholder="Search by username"
-        style={{
-          width: 300,
+        inputStyle={{
+          width: '80%',
+        }}
+        containerStyle={{
+          marginTop: 12,
         }}
         onChangeText={setUsername}
       ></StyledTextInput>
       <View
         style={{
           flexDirection: 'column',
-          width: 300,
+          width: '62%',
+          rowGap: 16,
+          marginTop: 24,
         }}
       >
         {users

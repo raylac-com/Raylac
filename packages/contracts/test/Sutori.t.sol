@@ -229,6 +229,21 @@ contract TestSutori is Test {
     return userOp;
   }
 
+  function test_createAccount() public {
+    address stealthSigner = vm.addr(1);
+
+    uint256 gasLeftBefore = gasleft();
+    SutoriAccount newAccount = accountFactory.createAccount(stealthSigner);
+    uint256 gasLeftAfter = gasleft();
+    uint256 codeSize = address(newAccount).code.length;
+
+    uint256 gasUsed = gasLeftBefore - gasLeftAfter;
+    console.log('code size: ', codeSize);
+    console.log('gas before: ', gasLeftBefore);
+    console.log('gas used: ', gasLeftAfter);
+    console.log('gas used: ', gasUsed);
+  }
+
   /**
    * Test that `isValidSignature` returns the correct selector for a valid signature
    */
