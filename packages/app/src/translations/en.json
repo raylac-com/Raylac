@@ -9,8 +9,12 @@
     "noTransfers": "No transfers yet."
     },
     "Account": {
-      "title": "Account"
-    },
+    "title": "Account",
+    "signOut": "Sign out",
+    "confirmSignOut": "Sign out?",
+    "backupAccount": "Backup account",
+    "cancel": "Cancel"
+  },
     "SignUp": {
       "title": "Sign Up"
     },

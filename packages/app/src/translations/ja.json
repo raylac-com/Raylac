@@ -9,7 +9,11 @@
     "noTransfers": ""
   },
   "Account": {
-    "title": "アカウント"
+    "title": "アカウント",
+    "signOut": "ログアウト",
+    "confirmSignOut": "ログアウトしますか？",
+    "backupAccount": "アカウントのバックアップ",
+    "cancel": "キャンセル"
   },
   "SignUp": {
     "title": "アカウント作成"
