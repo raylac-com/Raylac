@@ -1,8 +1,8 @@
 import { theme } from '@/lib/theme';
-import { changeLanguage } from 'i18next';
 import { Pressable, Text, View } from 'react-native';
 import Entypo from '@expo/vector-icons/Entypo';
 import { useTranslation } from 'react-i18next';
+import { saveSelectedLanguage } from '@/i18n';
 
 const languages = [
   {
@@ -35,7 +35,10 @@ const LanguageItem = (props: LanguageItemProps) => {
         justifyContent: 'space-between',
         alignItems: 'center',
       }}
-      onPress={() => changeLanguage(code)}
+      onPress={() => {
+        i18n.changeLanguage(code);
+        saveSelectedLanguage(code as 'en' | 'ja');
+      }}
     >
       <Text
         style={{
@@ -52,8 +55,6 @@ const LanguageItem = (props: LanguageItemProps) => {
 };
 
 const SelectLanguage = () => {
-  changeLanguage;
-
   return (
     <View
       style={{

@@ -29,6 +29,9 @@ import { useTranslation } from 'react-i18next';
 import './i18n';
 import BackupAccount from './screens/BackupAccount';
 import SelectLanguage from './screens/SelectLanguage';
+import SendSuccess from './screens/Send/SendSuccess';
+import { useEffect } from 'react';
+import { getSelectedLanguage } from './i18n';
 
 Sentry.init({
   dsn: 'https://adc4c437047fef7e4ebe5d0d77df3ff5@o1348995.ingest.us.sentry.io/4507536730030080',
@@ -207,6 +210,15 @@ const Screens = () => {
           headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
       ></RootStack.Screen>
+      <RootStack.Screen
+        name="SendSuccess"
+        component={SendSuccess}
+        options={{
+          title: t('title', { ns: 'SendSuccess' }),
+          headerBackVisible: true,
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+        }}
+      ></RootStack.Screen>
     </RootStack.Navigator>
   );
 };
@@ -235,6 +247,14 @@ export default function App() {
   const trpcClient = trpc.createClient({
     links: rpcLinks,
   });
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    (async () => {
+      const lang = await getSelectedLanguage();
+      i18n.changeLanguage(lang);
+    })();
+  }, []);
 
   return (
     <NavigationContainer>

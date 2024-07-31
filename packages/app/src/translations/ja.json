@@ -52,6 +52,12 @@
     "sendToSutoriUser": "Sutoriユーザーに送金",
       "sendToNonSutoriUser": "Sutoriユーザー以外に送金"
   },
+ 
+  "SendSuccess": {
+      "title": "",
+      "transferSuccessful": "送金完了",
+      "backToHome": "ホームに戻る"
+    },
   "EnterSendAmount": {
     "title": "金額を入力",
     "availableBalance": "残高: {{ amount}} USDC",

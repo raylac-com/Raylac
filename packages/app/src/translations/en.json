@@ -52,6 +52,11 @@
       "sendToSutoriUser": "Send to Sutori user",
       "sendToNonSutoriUser": "Send to non-Sutori User"
     },
+    "SendSuccess": {
+      "title": "",
+      "transferSuccessful": "Transfer successful",
+      "backToHome": "Back to home"
+  },
     "EnterSendAmount": {
       "title": "Enter Amount",
        "availableBalance": "Balance: {{ amount}} USDC",

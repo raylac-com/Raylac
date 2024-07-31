@@ -43,10 +43,8 @@ const ConfirmSend = ({ route }: Props) => {
       });
     }
 
-    // Navigate back to the home screen
-    navigation.navigate('Tabs', {
-      screen: 'Home',
-    });
+    // Navigate to the `SendSuccess` screen
+    navigation.navigate('SendSuccess');
   }, [recipientUserOrAddress, send, amount]);
 
   const recipientName =

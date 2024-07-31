@@ -79,11 +79,11 @@ const ConfirmDeposit = ({ route }: Props) => {
       <View></View>
       <StyledButton
         title={t('confirm')}
-        onPress={() =>
+        onPress={async () => {
           navigation.navigate('Tabs', {
             screen: 'Home',
-          })
-        }
+          });
+        }}
       ></StyledButton>
     </View>
   );
