@@ -89,7 +89,7 @@ const Screens = () => {
         component={SignIn}
         options={{
           headerBackVisible: true,
-          headerBackTitle: 'Back',
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
       ></RootStack.Screen>
       <RootStack.Screen
@@ -105,11 +105,12 @@ const Screens = () => {
         component={BackupAccount}
         options={{
           title: t('title', { ns: 'BackupAccount' }),
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
       ></RootStack.Screen>
       <RootStack.Group
         screenOptions={{
-          headerBackTitle: 'Back',
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
       >
         <RootStack.Screen
@@ -131,7 +132,7 @@ const Screens = () => {
       </RootStack.Group>
       <RootStack.Group
         screenOptions={{
-          headerBackTitle: 'Back',
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
       >
         <RootStack.Screen
@@ -164,7 +165,7 @@ const Screens = () => {
           options={{
             title: t('title', { ns: 'EnterSendAmount' }),
             headerBackVisible: true,
-            headerBackTitle: 'Back',
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
           }}
         ></RootStack.Screen>
         <RootStack.Screen
@@ -173,7 +174,7 @@ const Screens = () => {
           options={{
             title: t('title', { ns: 'ConfirmSend' }),
             headerBackVisible: true,
-            headerBackTitle: 'Back',
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
           }}
         ></RootStack.Screen>
       </RootStack.Group>

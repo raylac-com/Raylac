@@ -6,8 +6,10 @@ import { AntDesign, Feather } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
 import { copyToClipboard } from '@/lib/utils';
 import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 const BackupAccount = () => {
+  const { t } = useTranslation('BackupAccount');
   const [mnemonic, setMnemonic] = useState<string | null>(null);
   const onRevealPress = useCallback(async () => {
     setMnemonic(await getMnemonic());
@@ -59,7 +61,7 @@ const BackupAccount = () => {
               fontWeight: 'bold',
             }}
           >
-            Anyone who has your backup phrase can access and spend your balance.
+            {t('backupWarning1')}
           </Text>
         </View>
         <View
@@ -77,8 +79,7 @@ const BackupAccount = () => {
               fontWeight: 'bold',
             }}
           >
-            Make sure no one can see your screen when you reveal your backup
-            phrase.
+            {t('backupWarning2')}
           </Text>
         </View>
       </View>
@@ -122,14 +123,14 @@ const BackupAccount = () => {
                 color: theme.text,
               }}
             >
-              Copy
+              {t('copyBackupPhrase')}
             </Text>
           </View>
         </Pressable>
       ) : null}
       {mnemonic ? (
         <StyledButton
-          title="Hide backup phrase"
+          title={t('hideBackupPhrase')}
           onPress={onHidePress}
           style={{
             marginTop: 36,
@@ -137,7 +138,7 @@ const BackupAccount = () => {
         ></StyledButton>
       ) : (
         <StyledButton
-          title="Reveal backup phrase"
+          title={t('revealBackupPhrase')}
           onPress={onRevealPress}
           style={{
             marginTop: 36,

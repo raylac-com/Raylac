@@ -15,7 +15,7 @@ type Props = NativeStackScreenProps<RootStackParamsList, 'EnterSendAmount'>;
 const EnterSendAmount = ({ navigation, route }: Props) => {
   const [amount, setAmount] = useState<null | number>(null);
   const { data: balance } = trpc.getBalance.useQuery();
-  const { t } = useTranslation();
+  const { t } = useTranslation("EnterSendAmount");
 
   const recipientUserOrAddress = route.params.recipientUserOrAddress;
 
@@ -67,7 +67,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
             marginBottom: 10,
           }}
         >
-          Insufficient balance
+          {t('insufficientBalance')}
         </Text>
       ) : null}
       <Text
@@ -76,7 +76,9 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           opacity: 0.6,
         }}
       >
-        Available balance: {balance ? formatUnits(balance, 6) : ''} USDC
+        {t('availableBalance', {
+          amount: balance ? formatUnits(balance, 6) : '',
+        })}
       </Text>
       <Text
         style={{
@@ -86,7 +88,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           opacity: 0.6,
         }}
       >
-        Send to {recipient}
+        {t('sendToUser', { name: recipient })}
       </Text>
       <StyledButton
         style={{

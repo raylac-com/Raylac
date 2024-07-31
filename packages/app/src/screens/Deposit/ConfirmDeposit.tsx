@@ -48,7 +48,7 @@ const ConfirmDeposit = ({ route }: Props) => {
           color: theme.text,
         }}
       >
-        Send {amount} USDC to the following address on Base
+        {t('sendAmountToAddress', { amount })}
       </Text>
       <View
         style={{
@@ -61,6 +61,7 @@ const ConfirmDeposit = ({ route }: Props) => {
         <Text
           style={{
             fontSize: 18,
+            fontWeight: 'bold',
             textAlign: 'center',
             color: theme.text,
           }}
@@ -70,7 +71,7 @@ const ConfirmDeposit = ({ route }: Props) => {
         </Text>
         <Feather
           name="copy"
-          size={18}
+          size={20}
           color={theme.primary}
           onPress={onCopyClick}
         />

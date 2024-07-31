@@ -49,6 +49,11 @@ const ConfirmSend = ({ route }: Props) => {
     });
   }, [recipientUserOrAddress, send, amount]);
 
+  const recipientName =
+    typeof recipientUserOrAddress === 'string'
+      ? shortenAddress(recipientUserOrAddress)
+      : recipientUserOrAddress.name;
+
   return (
     <View
       style={{
@@ -57,19 +62,31 @@ const ConfirmSend = ({ route }: Props) => {
         padding: 24,
       }}
     >
-      <Text
-        style={{
-          fontSize: 18,
-          fontWeight: 'bold',
-          textAlign: 'center',
-          color: theme.text,
-        }}
-      >
-        Send {amount} USDC to{' '}
-        {typeof recipientUserOrAddress === 'string'
-          ? shortenAddress(recipientUserOrAddress)
-          : recipientUserOrAddress.name}
-      </Text>
+      <View style={{
+        flexDirection: 'column',
+        rowGap: 12,
+      }}>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: 'bold',
+            textAlign: 'center',
+            color: theme.text,
+          }}
+        >
+          {t('sendToUser', { name: recipientName })}
+        </Text>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: 'bold',
+            textAlign: 'center',
+            color: theme.text,
+          }}
+        >
+          {amount} USDC
+        </Text>
+      </View>
       <StyledButton
         title={t('send')}
         isLoading={isSending}
@@ -77,7 +94,7 @@ const ConfirmSend = ({ route }: Props) => {
           onSendPress();
         }}
         style={{
-          marginTop: 16,
+          marginTop: 24,
         }}
       ></StyledButton>
     </View>

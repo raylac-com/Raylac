@@ -11,7 +11,8 @@
     "Account": {
     "title": "Account",
     "signOut": "Sign out",
-    "confirmSignOut": "Sign out?",
+    "confirmSignOutTitle": "Sign out?",
+    "confirmSignOut": "Confirm",
     "backupAccount": "Backup account",
     "cancel": "Cancel"
   },
@@ -25,7 +26,9 @@
       "title": "Enter Amount"
     },
     "ConfirmDeposit": {
-      "title": "Confirm"
+      "title": "Confirm",
+      "sendAmountToAddress": "Send \n {{amount}} USDC to the following address",
+      "confirm": "I made the transfer"
     },
     "SelectSend": {
       "title": "Select Send",
@@ -33,25 +36,36 @@
       "sendToNonSutoriUser": "Send to non-Sutori User"
     },
     "EnterSendAmount": {
-      "title": "Enter Amount"
+      "title": "Enter Amount",
+       "availableBalance": "Balance: {{ amount}} USDC",
+       "insufficientBalance": "Insufficient balance",
+      "sendToUser": "Send to {{ name }}"
     },
     "SendToSutoriUser": {
       "title": "Send to Sutori User"
     },
     "SendToNonSutoriUser": {
-      "title": "Enter recipient details"
+      "title": "Enter recipient details",
+      "invalidAddress": "Invalid address"
     },
     "ConfirmSend": {
       "title": "Confirm",
+      "sendToUser":  "Send to {{ name }}",  
       "send": "Send"
     },
     "TransferHistory": {
       "title": "Transfer History"
     },
     "BackupAccount": {
-      "title": "Backup Account"
+      "title": "Backup Account",
+      "backupWarning1": "Anyone who has your backup phrase can access and spend your balance.",
+      "backupWarning2": "Make sure no one can see your screen when you reveal your backup phrase.",
+      "revealBackupPhrase": "復元フレーズを表示",
+      "hideBackupPhrase": "閉じる",
+      "copyBackupPhrase": "コピー"
     },
     "common": {
-      "next": "Next"
+      "next": "Next",
+    "headerBackTitle": "Back"
     }
   }

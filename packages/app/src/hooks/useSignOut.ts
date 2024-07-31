@@ -8,6 +8,10 @@ const signOut = async () => {
   await deleteSignedInUser();
 };
 
+/**
+ * Hook to delete the auth token from SecureStorage and the signed in user from AsyncStorage.
+ * This doesn't delete the mnemonic, so the user can sign in again.
+ */
 const useSignOut = () => {
   const queryClient = useQueryClient();
   return useMutation({

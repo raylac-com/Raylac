@@ -11,7 +11,8 @@
   "Account": {
     "title": "アカウント",
     "signOut": "ログアウト",
-    "confirmSignOut": "ログアウトしますか？",
+    "confirmSignOutTitle": "ログアウトしますか？",
+    "confirmSignOut": "ログアウト",
     "backupAccount": "アカウントのバックアップ",
     "cancel": "キャンセル"
   },
@@ -25,7 +26,9 @@
     "title": "金額を入力"
   },
   "ConfirmDeposit": {
-    "title": "確認"
+    "title": "確認",
+    "sendAmountToAddress": "下記のアドレスに \n {{amount}} USDC 送金してください",
+    "confirm": "送金しました"
   },
   "SelectSend": {
     "title": "送金先を選択",
@@ -33,25 +36,36 @@
       "sendToNonSutoriUser": "Sutoriユーザー以外に送金"
   },
   "EnterSendAmount": {
-    "title": "金額を入力"
+    "title": "金額を入力",
+    "availableBalance": "残高: {{ amount}} USDC",
+    "insufficientBalance": "残高が足りません",
+    "sendToUser": "{{ name }} へ送金"
   },
   "SendToSutoriUser": {
     "title": "Sutoriユーザーに送金"
   },
   "SendToNonSutoriUser": {
-    "title": "受取人を入力"
+    "title": "受取人を入力",
+    "invalidAddress": "無効なアドレスです"
   },
   "ConfirmSend": {
     "title": "確認",
+    "sendToUser": "{{ name }} へ送金",
     "send": "送金"
   },
   "TransferHistory": {
     "title": "取引履歴"
   },
   "BackupAccount": {
-      "title": "アカウントのバックアップ"
+      "title": "アカウントのバックアップ",
+      "backupWarning1": "次に表示される復元フレーズを使用することで、誰でもあなたの残高を使用することができます。",
+      "backupWarning2": "次の画面が誰にも見えないことを確認してください",
+      "revealBackupPhrase": "復元フレーズを表示",
+      "hideBackupPhrase": "閉じる",
+      "copyBackupPhrase": "コピー"
     },
   "common": {
-    "next": "次へ"
+    "next": "次へ",
+    "headerBackTitle": "戻る"
   }
 }

@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 const SendToNonSutoriUser = () => {
   const navigation = useTypedNavigation();
   const [recipientAddress, setRecipientAddress] = useState('');
-  const { t } = useTranslation();
+  const { t } = useTranslation("SendToNonSutoriUser");
 
   const onNextClick = useCallback(() => {
     navigation.navigate('EnterSendAmount', {
@@ -87,7 +87,7 @@ const SendToNonSutoriUser = () => {
             marginTop: 8,
           }}
         >
-          Invalid address
+          {t("invalidAddress")}
         </Text>
       ) : null}
       <StyledButton

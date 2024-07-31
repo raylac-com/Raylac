@@ -4,7 +4,7 @@ import { publicClient } from './viem';
 
 export const getUSDCBalance = async ({ address }: { address: Hex }) => {
   console.log('Getting USDC balance for', USDC_CONTRACT_ADDRESS);
-  console.log(publicClient.chain.name);
+
   const balance = await publicClient.readContract({
     address: USDC_CONTRACT_ADDRESS,
     abi: ERC20Abi,
