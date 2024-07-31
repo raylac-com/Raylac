@@ -1,15 +1,17 @@
 import useSend from '@/hooks/useSend';
-import { Pressable, Text, View } from 'react-native';
+import { FlatList, Pressable, Text, View } from 'react-native';
 import { useCallback, useState } from 'react';
 import { trpc } from '@/lib/trpc';
 import StyledTextInput from '@/components/StyledTextInput';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { RouterOutput } from '@/types';
-import { FontAwesome } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
 import { RootStackParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import useSignedInUser from '@/hooks/useSignedInUser';
+import FastAvatar from '@/components/FastAvatar';
+import { publicKeyToAddress } from 'viem/accounts';
+import { Hex } from 'viem';
 
 interface UserListItemProps {
   user: RouterOutput['getUsers'][number];
@@ -25,10 +27,14 @@ const UserListItem = (props: UserListItemProps) => {
         alignItems: 'center',
         borderBottomWidth: 1,
         borderBottomColor: 'rgba(0,0,0,0.1)',
-        columnGap: 8,
+        columnGap: 12,
+        marginBottom: 16,
       }}
     >
-      <FontAwesome name="user-circle-o" size={40} color={theme.primary} />
+      <FastAvatar
+        address={publicKeyToAddress(props.user.spendingPubKey as Hex)}
+        size={36}
+      ></FastAvatar>
       <Text
         style={{
           fontSize: 16,
@@ -83,41 +89,36 @@ const SendToSutoriUser = ({ navigation }: Props) => {
         flex: 1,
         position: 'relative',
         alignItems: 'center',
+        width: '100%',
       }}
     >
       <StyledTextInput
-        autoFocus
         value={username}
         placeholder="Search by username"
-        inputStyle={{
-          width: '80%',
-        }}
         containerStyle={{
           marginTop: 12,
+          width: '80%',
         }}
         onChangeText={setUsername}
       ></StyledTextInput>
-      <View
+      <FlatList
         style={{
-          flexDirection: 'column',
-          width: '62%',
-          rowGap: 16,
           marginTop: 24,
+          width: '80%',
         }}
-      >
-        {users
+        data={users
           ?.filter(user => user.name.includes(username))
-          .filter(user => user.id !== signedInUser?.id)
-          .map(user => (
-            <UserListItem
-              onPress={() => {
-                onUserClick(user);
-              }}
-              key={user.id}
-              user={user}
-            />
-          ))}
-      </View>
+          .filter(user => user.id !== signedInUser?.id)}
+        renderItem={({ item }) => (
+          <UserListItem
+            onPress={() => {
+              onUserClick(item);
+            }}
+            key={item.id}
+            user={item}
+          />
+        )}
+      ></FlatList>
       <FloatingScanButton></FloatingScanButton>
     </View>
   );
