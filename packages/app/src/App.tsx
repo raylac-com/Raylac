@@ -28,6 +28,7 @@ import EnterDepositAmount from './screens/Deposit/EnterDepositAmount';
 import { useTranslation } from 'react-i18next';
 import './i18n';
 import BackupAccount from './screens/BackupAccount';
+import SelectLanguage from './screens/SelectLanguage';
 
 Sentry.init({
   dsn: 'https://adc4c437047fef7e4ebe5d0d77df3ff5@o1348995.ingest.us.sentry.io/4507536730030080',
@@ -197,6 +198,15 @@ const Screens = () => {
           headerBackVisible: true,
         }}
       ></RootStack.Screen>
+      <RootStack.Screen
+        name="SelectLanguage"
+        component={SelectLanguage}
+        options={{
+          title: t('title', { ns: 'SelectLanguage' }),
+          headerBackVisible: true,
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+        }}
+      ></RootStack.Screen>
     </RootStack.Navigator>
   );
 };
@@ -209,9 +219,9 @@ const NavigationTheme = {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-       throwOnError: process.env.NODE_ENV === 'development',
+      throwOnError: process.env.NODE_ENV === 'development',
       // throwOnError: false,
-       retry: process.env.NODE_ENV === 'development' ? false : 3,
+      retry: process.env.NODE_ENV === 'development' ? false : 3,
       // retry: 3,
       gcTime: 1000 * 60 * 60 * 24,
     },

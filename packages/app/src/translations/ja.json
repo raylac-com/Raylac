@@ -21,7 +21,8 @@
     "confirmSignOutTitle": "ログアウトしますか？",
     "confirmSignOut": "ログアウト",
     "backupAccount": "アカウントのバックアップ",
-    "cancel": "キャンセル"
+    "cancel": "キャンセル",
+    "language": "言語"
   },
   "SignUp": {
     "title": "アカウント作成",
@@ -79,6 +80,9 @@
       "revealBackupPhrase": "復元フレーズを表示",
       "hideBackupPhrase": "閉じる",
       "copyBackupPhrase": "コピー"
+    },
+    "SelectLanguage": {
+      "title": "言語"
     },
   "common": {
     "next": "次へ",

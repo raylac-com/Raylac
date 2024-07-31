@@ -37,4 +37,5 @@ export type RootStackParamsList = {
   };
   TransferHistory: undefined;
   BackupAccount: undefined;
+  SelectLanguage: undefined;
 };

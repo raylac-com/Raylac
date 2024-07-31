@@ -84,7 +84,7 @@ const HomeScreen = () => {
     refetchTxHistory();
   }, [refetchBalance, refetchTxHistory]);
 
-  console.log("isSignedIn", isSignedIn);
+  console.log('isSignedIn', isSignedIn);
 
   useEffect(() => {
     if (isSignedIn === false) {

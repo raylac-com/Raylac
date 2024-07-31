@@ -68,6 +68,10 @@ const Account = () => {
     ]);
   }, [signOut, navigation]);
 
+  const onChangeLanguagePress = useCallback(() => {
+    navigation.navigate('SelectLanguage');
+  }, []);
+
   const onDeletePress = useCallback(async () => {
     Alert.alert('Delete account', '', [
       {
@@ -139,6 +143,11 @@ const Account = () => {
         <SettingListItem
           title={t('backupAccount')}
           onPress={() => navigation.navigate('BackupAccount')}
+          color={theme.text}
+        />
+        <SettingListItem
+          title={t('language')}
+          onPress={onChangeLanguagePress}
           color={theme.text}
         />
         <SettingListItem

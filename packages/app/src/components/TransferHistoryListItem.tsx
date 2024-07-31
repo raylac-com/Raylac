@@ -174,7 +174,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
         flexDirection: 'row',
         justifyContent: 'space-between',
         borderBottomWidth: 1,
-        padding: 24,
+        padding: 12,
       }}
     >
       {tx.type === 'incoming' ? (
