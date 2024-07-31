@@ -4,7 +4,8 @@ import { Hex } from 'viem';
 import prisma from './prisma';
 
 /**
- * Save a new stealth account to the database
+ * Announce a new stealth account to the ERC5564 announcer contract
+ * and save the account to the database
  */
 export const handleNewStealthAccount = async ({
   userId,
