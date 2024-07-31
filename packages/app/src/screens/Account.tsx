@@ -147,21 +147,23 @@ const Account = () => {
           color={theme.waning}
         />
       </View>
-      <View
-        style={{
-          marginTop: 40,
-        }}
-      >
-        <Text
-          onPress={onDeletePress}
+      {process.env.NODE_ENV === 'development' ? (
+        <View
           style={{
-            color: theme.waning,
-            opacity: 0.6,
+            marginTop: 40,
           }}
         >
-          delete account
-        </Text>
-      </View>
+          <Text
+            onPress={onDeletePress}
+            style={{
+              color: theme.waning,
+              opacity: 0.6,
+            }}
+          >
+            delete account
+          </Text>
+        </View>
+      ) : null}
     </View>
   );
 };

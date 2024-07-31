@@ -84,6 +84,8 @@ const HomeScreen = () => {
     refetchTxHistory();
   }, [refetchBalance, refetchTxHistory]);
 
+  console.log("isSignedIn", isSignedIn);
+
   useEffect(() => {
     if (isSignedIn === false) {
       navigation.navigate('Start');

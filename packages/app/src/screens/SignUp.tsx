@@ -12,8 +12,12 @@ import {
 } from '@/lib/username';
 import { RootStackParamsList } from '@/navigation/types';
 import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 
 interface UsernameAvailabilityIndicator {
@@ -25,6 +29,7 @@ interface UsernameAvailabilityIndicator {
 const UsernameAvailabilityIndicator = (
   props: UsernameAvailabilityIndicator
 ) => {
+  const { t } = useTranslation('SignUp');
   const { username, isUsernameAvailable, isPending } = props;
 
   if (!username || isPending) {
@@ -38,7 +43,7 @@ const UsernameAvailabilityIndicator = (
           color: theme.waning,
         }}
       >
-        Username must be at least {MIN_USERNAME_LENGTH} characters
+        {t('usernameLengthWarning', { minChars: MIN_USERNAME_LENGTH })}
       </Text>
     );
   }
@@ -50,7 +55,7 @@ const UsernameAvailabilityIndicator = (
           color: theme.waning,
         }}
       >
-        Username contains invalid characters
+        {t('usernameInvalid')}
       </Text>
     );
   }
@@ -62,7 +67,7 @@ const UsernameAvailabilityIndicator = (
           color: theme.waning,
         }}
       >
-        Username is not available
+        {t('usernameTaken')}
       </Text>
     );
   }
@@ -70,7 +75,14 @@ const UsernameAvailabilityIndicator = (
   return null;
 };
 
-const SignUp = () => {
+type Props = NativeStackScreenProps<RootStackParamsList, 'SignUp'>;
+
+/**
+ * Sign up screen
+ */
+const SignUp = ({ route }: Props) => {
+  const { t } = useTranslation('SignUp');
+  const { inviteCode } = route.params;
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   const { mutateAsync: signUp, isPending: isSigningUp } = useSignUp();
@@ -110,33 +122,65 @@ const SignUp = () => {
         marginTop: 24,
       }}
     >
-      <StyledTextInput
-        value={name}
-        placeholder="Name"
+      <View
         style={{
-          marginTop: 40,
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          rowGap: 8,
         }}
-        inputStyle={{
-          width: 220,
+      >
+        <Text
+          style={{
+            fontSize: 14,
+            color: theme.text,
+          }}
+        >{t('name')}
+        </Text>
+        <StyledTextInput
+          value={name}
+          placeholder={t('name')}
+          style={{
+            marginTop: 40,
+          }}
+          inputStyle={{
+            width: 220,
+          }}
+          onChangeText={text => {
+            setName(text);
+          }}
+        ></StyledTextInput>
+      </View>
+      <View
+        style={{
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          rowGap: 8,
+          marginTop: 8,
         }}
-        onChangeText={text => {
-          setName(text);
-        }}
-      ></StyledTextInput>
-      <StyledTextInput
-        placeholder="Username"
-        inputStyle={{
-          width: 220,
-        }}
-        value={username}
-        inputMode="text"
-        autoComplete="off"
-        autoCorrect={false}
-        autoCapitalize="none"
-        onChangeText={text => {
-          setUsername(text.toLowerCase());
-        }}
-      ></StyledTextInput>
+      >
+        <Text
+          style={{
+            fontSize: 14,
+            color: theme.text,
+          }}
+        >
+          {t('username')}
+        </Text>
+        <StyledTextInput
+          placeholder={t('username')}
+          inputStyle={{
+            width: 220,
+          }}
+          value={username}
+          inputMode="text"
+          autoComplete="off"
+          autoCorrect={false}
+          autoCapitalize="none"
+          onChangeText={text => {
+            setUsername(text.toLowerCase());
+          }}
+        ></StyledTextInput>
+      </View>
       <UsernameAvailabilityIndicator
         isPending={isPending}
         isUsernameAvailable={isUsernameAvailable}
@@ -151,6 +195,7 @@ const SignUp = () => {
         onPress={async () => {
           await signUp({
             name,
+            inviteCode,
             username,
           });
 
@@ -158,7 +203,7 @@ const SignUp = () => {
             screen: 'Home',
           });
         }}
-        title="Sign Up"
+        title={t('signUp')}
       ></StyledButton>
     </View>
   );

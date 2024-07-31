@@ -8,6 +8,7 @@ import { RootStackParamsList, RootTabsParamsList } from './navigation/types';
 import Home from './screens/Home';
 import SignUp from './screens/SignUp';
 import SignIn from './screens/SignIn';
+import EnterInviteCode from './screens/EnterInviteCode';
 import { NavigationContainer, ThemeProvider } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc, rpcLinks } from './lib/trpc';
@@ -81,6 +82,7 @@ const Screens = () => {
         name="SignUp"
         component={SignUp}
         options={{
+          title: t('title', { ns: 'SignUp' }),
           headerBackVisible: false,
         }}
       ></RootStack.Screen>
@@ -96,8 +98,17 @@ const Screens = () => {
         name="Start"
         component={Start}
         options={{
-          title: t('title', { ns: 'SignIn' }),
+          title: t('title', { ns: 'Start' }),
           headerBackVisible: false,
+        }}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="EnterInviteCode"
+        component={EnterInviteCode}
+        options={{
+          title: t('title', { ns: 'EnterInviteCode' }),
+          headerBackVisible: true,
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
       ></RootStack.Screen>
       <RootStack.Screen
@@ -198,8 +209,10 @@ const NavigationTheme = {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      throwOnError: process.env.NODE_ENV === 'development',
-      retry: process.env.NODE_ENV === 'development' ? false : 3,
+       throwOnError: process.env.NODE_ENV === 'development',
+      // throwOnError: false,
+       retry: process.env.NODE_ENV === 'development' ? false : 3,
+      // retry: 3,
       gcTime: 1000 * 60 * 60 * 24,
     },
     mutations: {

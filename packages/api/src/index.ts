@@ -34,6 +34,29 @@ BigInt.prototype.toJSON = function () {
 };
 
 const appRouter = router({
+  /**
+   * Returns whether an invite code is valid
+   */
+  isInviteCodeValid: publicProcedure
+    .input(
+      z.object({
+        inviteCode: z.string(),
+      })
+    )
+    .query(async opts => {
+      const { input } = opts;
+      console.log(`Checking invite code ${input.inviteCode}`);
+
+      const unusedInviteCodeExists = await prisma.inviteCode.findFirst({
+        where: {
+          inviteCode: input.inviteCode,
+          isUsed: false,
+        },
+      });
+
+      return unusedInviteCodeExists ? true : false;
+    }),
+
   signUserOp: authedProcedure
     .input(
       z.object({
@@ -363,7 +386,7 @@ const appRouter = router({
     )
     .mutation(async opts => {
       const { input } = opts;
-      
+
       const user = await prisma.user.findUnique({
         where: {
           spendingPubKey: input.userSpendingPubKey,
@@ -407,6 +430,7 @@ const appRouter = router({
       z.object({
         name: z.string(),
         username: z.string(),
+        inviteCode: z.string(),
         spendingPubKey: z.string(),
         viewingPrivKey: z.string(),
       })
@@ -418,6 +442,17 @@ const appRouter = router({
 
       // TODO: Check username validity
 
+      const inviteCodeExists = await prisma.inviteCode.findFirst({
+        where: {
+          inviteCode: input.inviteCode,
+          isUsed: false,
+        },
+      });
+
+      if (!inviteCodeExists) {
+        throw new Error('Invalid invite code');
+      }
+
       const user = await prisma.user.create({
         data: {
           name: input.name,
@@ -428,7 +463,19 @@ const appRouter = router({
         },
       });
 
+      // TODO: Send sign up bonus
+
       const token = jwt.sign({ userId: user.id }, JWT_PRIV_KEY);
+
+      // Mark the invite code as used
+      await prisma.inviteCode.update({
+        where: {
+          inviteCode: input.inviteCode,
+        },
+        data: {
+          isUsed: true,
+        },
+      });
 
       return { userId: user.id, token };
     }),

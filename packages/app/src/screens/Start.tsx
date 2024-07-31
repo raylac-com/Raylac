@@ -4,9 +4,15 @@ import { useSignIn } from '@/hooks/useSIgnIn';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { getMnemonic } from '@/lib/key';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
+/**
+ * This screen in shown when the user is not signed in.
+ * The user can either sign in or create an account.
+ */
 const Start = () => {
+  const { t } = useTranslation('Start');
   const navigation = useTypedNavigation();
   const { data: isSignedIn } = useIsSignedIn();
   const { mutateAsync: signIn } = useSignIn();
@@ -55,20 +61,19 @@ const Start = () => {
       }}
     >
       <StyledButton
-        title="Sign In"
+        title={t('signIn')}
         onPress={onSignInPress}
         isLoading={isSigningIn}
         style={{
           justifyContent: 'center',
-          width: 160,
+          width: mnemonicExists ? 110 : 160,
         }}
       ></StyledButton>
-      {mnemonicExists ? // Don't show the "Create account" button if the mnemonic exists
-      null : (
+      {mnemonicExists ? null : ( // Don't show the "Create account" button if the mnemonic exists
         <StyledButton
-          title="Create account"
+          title={t('createAccount')}
           onPress={() => {
-            navigation.navigate('SignUp');
+            navigation.navigate('EnterInviteCode');
           }}
           style={{
             justifyContent: 'center',

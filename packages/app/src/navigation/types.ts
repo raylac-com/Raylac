@@ -10,7 +10,10 @@ export type RootStackParamsList = {
   Tabs: { screen: keyof RootTabsParamsList; params?: any };
   Start: undefined;
   SignIn: undefined;
-  SignUp: undefined;
+  SignUp: {
+    inviteCode: string;
+  };
+  EnterInviteCode: undefined;
 
   SignInWithMnemonic: undefined;
 

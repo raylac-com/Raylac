@@ -220,6 +220,9 @@ importers:
       '@noble/secp256k1':
         specifier: ^2.1.0
         version: 2.1.0
+      '@prisma/client':
+        specifier: ^5.12.1
+        version: 5.16.0(prisma@5.16.0)
       '@sutori/api':
         specifier: workspace:*
         version: link:../api
@@ -241,6 +244,9 @@ importers:
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5
+      nanoid:
+        specifier: ^5.0.7
+        version: 5.0.7
       viem:
         specifier: ^2.17.0
         version: 2.17.0(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@5.0.10)(zod@3.23.8)
@@ -4049,6 +4055,11 @@ packages:
   nanoid@3.3.7:
     resolution: {integrity: sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+
+  nanoid@5.0.7:
+    resolution: {integrity: sha512-oLxFY2gd2IqnjcYyOXD8XGCftpGtZP2AbHbOkthDkvRywH5ayNtPVy9YlOPcHckXzbLTCHpkb7FB+yuxKV13pQ==}
+    engines: {node: ^18 || >=20}
     hasBin: true
 
   natural-compare@1.4.0:
@@ -10404,6 +10415,8 @@ snapshots:
       thenify-all: 1.6.0
 
   nanoid@3.3.7: {}
+
+  nanoid@5.0.7: {}
 
   natural-compare@1.4.0: {}
 

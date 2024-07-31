@@ -1,6 +1,13 @@
 {
-  "Sign in": {
-    "title": ""
+  "Start": {
+    "title": "",
+    "signIn": "ログイン",
+    "createAccount": "アカウント作成"
+  },
+  "SignIn": {
+    "title": "ログイン",
+    "enterYourMnemonic": "復元コードを入力",
+    "signIn":"ログイン"
   },
   "Home": {
     "title": "ホーム",
@@ -17,10 +24,19 @@
     "cancel": "キャンセル"
   },
   "SignUp": {
-    "title": "アカウント作成"
+    "title": "アカウント作成",
+    "name": "名前",
+    "username": "ユーザー名",
+    "usernameLengthWarning": "ユーザー名は{{minChars}}文字以上である必要があります",
+    "usernameInvalid": "ユーザー名は英数字のみ使用できます",
+    "usernameTaken": "このユーザー名は既に使用されています",
+    "signUp": "次へ"
   },
-  "SignIn": {
-    "title": "ログイン"
+  "EnterInviteCode": {
+    "title": "招待コードを入力",
+    "inviteCode": "招待コード",
+    "validInviteCode": "有効",
+      "invalidInviteCode": "無効な招待コードです"
   },
   "EnterDepositAmount": {
     "title": "金額を入力"

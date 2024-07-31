@@ -1,6 +1,13 @@
 {
-    "Sign in": {
-      "title": "Sign in"
+  "Start": {
+    "title": "",
+    "signIn": "Sign in",
+    "createAccount": "Create account"
+  },
+    "SignIn": {
+      "title": "Sign in",
+      "enterYourMnemonic": "Enter your mnemonic",
+      "signIn":"Sign in"
     },
     "Home": {
       "title": "Home",
@@ -17,10 +24,19 @@
     "cancel": "Cancel"
   },
     "SignUp": {
-      "title": "Sign Up"
+      "title": "Sign Up",
+      "name": "Name",
+    "username": "username",
+    "usernameLengthWarning": "Username must be at least {{minChars}} characters",
+    "usernameInvalid": "Username contains invalid characters",
+    "usernameTaken": "Username is not available",
+    "signUp": "Sign up"
     },
-    "SignIn": {
-      "title": "Sign In"
+    "EnterInviteCode": {
+      "title": "Enter Invite Code",
+      "inviteCode": "Invite Code",
+      "validInviteCode": "Valid invite code",
+      "invalidInviteCode": "Invalid invite code"
     },
     "EnterDepositAmount": {
       "title": "Enter Amount"
