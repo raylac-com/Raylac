@@ -186,7 +186,7 @@ const HomeScreen = () => {
                 navigation.navigate('TransferHistory');
               }}
             >
-              See all
+              {t('seeAll')}
             </Text>
           ) : null}
           {txHistory?.length === 0 ? (

@@ -13,7 +13,8 @@
     "title": "ホーム",
     "deposit": "チャージ",
     "send": "送金",
-    "noTransfers": ""
+    "noTransfers": "",
+    "seeAll": "全て表示"
   },
   "Account": {
     "title": "アカウント",

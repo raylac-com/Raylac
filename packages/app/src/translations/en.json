@@ -13,7 +13,8 @@
       "title": "Home",
       "deposit": "Add money",
     "send": "Send",
-    "noTransfers": "No transfers yet."
+    "noTransfers": "No transfers yet.",
+    "seeAll": "See all"
     },
     "Account": {
     "title": "Account",
