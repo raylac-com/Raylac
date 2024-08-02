@@ -4,13 +4,10 @@ import FastAvatar from './FastAvatar';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
 import { Hex } from 'viem';
+import { Transfer, TransferStatus } from '@sutori/shared';
 
 interface IncomingTransferListItemProps {
-  tx: {
-    from: string;
-    amount: number;
-    timestamp: number;
-  };
+  tx: Transfer;
 }
 
 const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
@@ -81,11 +78,7 @@ const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
 };
 
 interface OutGoingTransferListItemProps {
-  tx: {
-    to: string;
-    amount: number;
-    timestamp: number;
-  };
+  tx: Transfer;
 }
 
 const OutGoingTransferListItem = (props: OutGoingTransferListItemProps) => {
@@ -120,6 +113,14 @@ const OutGoingTransferListItem = (props: OutGoingTransferListItemProps) => {
             }}
           >
             {shortenAddress(tx.to as Hex)}
+          </Text>
+          <Text
+            style={{
+              color: theme.gold,
+              opacity: 0.8
+            }}
+          >
+            {tx.status === TransferStatus.Pending && 'pending'}
           </Text>
         </View>
         <View
@@ -156,13 +157,7 @@ const OutGoingTransferListItem = (props: OutGoingTransferListItemProps) => {
 };
 
 interface TransferHistoryListItemProps {
-  tx: {
-    from: string;
-    to: string;
-    type: string;
-    amount: number;
-    timestamp: number;
-  };
+  tx: Transfer;
 }
 
 const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {

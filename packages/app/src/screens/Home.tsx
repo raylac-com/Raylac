@@ -15,6 +15,7 @@ import { useCallback, useEffect } from 'react';
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import { useTranslation } from 'react-i18next';
+import { Transfer } from '@sutori/shared';
 
 interface MenuItemProps {
   icon: React.ReactNode;
@@ -163,13 +164,7 @@ const HomeScreen = () => {
           {txHistory?.map((tx, i) => (
             <TransferHistoryListItem
               key={i}
-              tx={{
-                from: tx.from,
-                to: tx.to,
-                amount: tx.amount,
-                type: tx.type,
-                timestamp: tx.timestamp,
-              }}
+              tx={tx as Transfer}
             />
           ))}
           {txHistory && txHistory.length > NUM_TRANSFERS_TO_SHOW ? (

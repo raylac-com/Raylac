@@ -2,6 +2,7 @@ export const theme = {
   waning: '#F08080',
   blue: '#1E90FF',
   green: "#228B22",
+  gold: "#FFD700",
   primary: '#EDEDED',
   background: '#171717',
   backgroundHover: '#171717',

@@ -36,6 +36,7 @@ import { getSelectedLanguage } from './i18n';
 Sentry.init({
   dsn: 'https://adc4c437047fef7e4ebe5d0d77df3ff5@o1348995.ingest.us.sentry.io/4507536730030080',
   debug: process.env.NODE_ENV === 'development',
+  enabled: process.env.NODE_ENV !== 'development',
 });
 
 const Tab = createBottomTabNavigator<RootTabsParamsList>();

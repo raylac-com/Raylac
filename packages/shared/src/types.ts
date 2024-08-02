@@ -32,3 +32,17 @@ export interface ERC5564AnnouncementData {
   txIndex: number;
   chainId: number;
 }
+
+export enum TransferStatus {
+  Success,
+  Pending,
+}
+
+export interface Transfer {
+  type: string;
+  status: TransferStatus;
+  to?: string;
+  from?: string;
+  amount: number;
+  timestamp: number;
+}

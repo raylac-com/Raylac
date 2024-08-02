@@ -1,12 +1,4 @@
-import { Hex } from "viem";
-
-export interface Transfer {
-  type: string;
-  to?: string;
-  from?: string;
-  amount: number;
-  timestamp: number;
-}
+import { Hex } from 'viem';
 
 export interface SplitTransfer {
   to: Hex;

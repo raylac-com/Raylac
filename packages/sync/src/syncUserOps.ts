@@ -8,9 +8,15 @@ const userOpEvent = parseAbiItem(
   'event UserOperationEvent(bytes32 indexed userOpHash, address indexed sender, address indexed paymaster, uint256 nonce, bool success, uint256 actualGasCost, uint256 actualGasUsed)'
 );
 
+/**
+ * Fetch and save the logs of the user operations that were paid by the Sutori paymaster.
+ * An empty user operation receipt should have been created in the database for each user operation,
+ * when the user sent a transfer.
+ */
 const syncUserOps = async () => {
   // eslint-disable-next-line no-constant-condition
   while (true) {
+    // TODO: Only fetch from the last block we checked.
     const logs = await publicClient.getLogs({
       address: ENTRY_POINT_ADDRESS,
       event: userOpEvent,
@@ -21,6 +27,7 @@ const syncUserOps = async () => {
       },
     });
 
+    // For each log, update the corresponding user operation receipt in the database.
     for (const log of logs) {
       const { userOpHash, nonce, success, actualGasCost, actualGasUsed } =
         log.args;

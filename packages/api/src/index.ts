@@ -13,6 +13,8 @@ import {
   getStealthAddress,
   sendUserOperation,
   splitToUnits,
+  Transfer,
+  TransferStatus,
   USDC_CONTRACT_ADDRESS,
   UserOperation,
 } from '@sutori/shared';
@@ -21,7 +23,7 @@ import { signUserOp } from './lib/paymaster';
 import { privateKeyToAccount, publicKeyToAddress } from 'viem/accounts';
 import { createContext } from './context';
 import { JWT_PRIV_KEY, getTransferDataFromUserOp } from './utils';
-import { SplitTransfer, Transfer } from './types';
+import { SplitTransfer } from './types';
 import { publicClient } from './lib/viem';
 import { saveStealthTransfer } from './lib/stealthTransfer';
 import { handleNewStealthAccount } from './lib/stealthAccount';
@@ -286,6 +288,9 @@ const appRouter = router({
         to: transfer.to,
         amount: Number(transfer.amount / BigInt(10 ** 6)),
         timestamp: transfer.createdAt.getTime(),
+        status: transfer.userOpReceipts.every(receipt => receipt.success)
+          ? TransferStatus.Success
+          : TransferStatus.Pending,
       })),
       ...incomingTxs.flatMap(txs =>
         txs.transfers.map(tx => ({
@@ -293,6 +298,7 @@ const appRouter = router({
           from: tx.from || '',
           amount: tx.value as number,
           timestamp: new Date(tx.metadata.blockTimestamp).getTime(),
+          status: TransferStatus.Success,
         }))
       ),
     ].sort((a, b) => b.timestamp - a.timestamp);
