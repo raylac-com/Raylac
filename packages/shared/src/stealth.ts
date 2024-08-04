@@ -54,7 +54,9 @@ export const recoveryStealthPrivKey = (input: {
   const secretHash = BigInt(secretHashHex);
 
   const stealthPrivKey = (spendingPrivKey + secretHash) % secp.CURVE.n;
-  return toHex(stealthPrivKey);
+  return toHex(stealthPrivKey, {
+    size: 32,
+  });
 };
 
 /**
