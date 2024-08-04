@@ -1,11 +1,13 @@
 import StyledButton from '@/components/StyledButton';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import { useSignIn } from '@/hooks/useSIgnIn';
+import useSignOut from '@/hooks/useSignOut';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { getMnemonic } from '@/lib/key';
+import { deleteMnemonic, getMnemonic } from '@/lib/key';
+import { theme } from '@/lib/theme';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { Alert, Text, View } from 'react-native';
 
 /**
  * This screen in shown when the user is not signed in.
@@ -16,6 +18,7 @@ const Start = () => {
   const navigation = useTypedNavigation();
   const { data: isSignedIn } = useIsSignedIn();
   const { mutateAsync: signIn } = useSignIn();
+  const { mutateAsync: signOut} = useSignOut();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [mnemonicExists, setMnemonicExists] = useState<boolean | null>(null);
 
@@ -43,6 +46,25 @@ const Start = () => {
     }
   }, [setIsSigningIn]);
 
+  const onDeletePress = useCallback(async () => {
+    Alert.alert('Delete account', '', [
+      {
+        text: 'Cancel',
+        onPress: () => {},
+        style: 'cancel',
+      },
+      {
+        text: 'Delete',
+        onPress: async () => {
+          await signOut()
+          await deleteMnemonic();
+          navigation.navigate('Start');
+        },
+        style: 'destructive',
+      },
+    ]);
+  }, []);
+
   if (isSignedIn) {
     navigation.navigate('Tabs', {
       screen: 'Home',
@@ -69,7 +91,18 @@ const Start = () => {
           width: mnemonicExists ? 110 : 160,
         }}
       ></StyledButton>
-      {mnemonicExists ? null : ( // Don't show the "Create account" button if the mnemonic exists
+      {mnemonicExists ? (
+        <Text
+          style={{
+            color: theme.waning,
+            opacity: 0.8,
+          }}
+          onPress={onDeletePress}
+        >
+          {t('deleteAccount')}
+        </Text>
+      ) : (
+        // Don't show the "Create account" button if the mnemonic exists
         <StyledButton
           title={t('createAccount')}
           onPress={() => {
