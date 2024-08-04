@@ -10,7 +10,7 @@ import { mnemonicToAccount } from 'viem/accounts';
  * Sign in screen
  */
 const SignIn = () => {
-  const { t } = useTranslation('Start');
+  const { t } = useTranslation('SignIn');
   const [mnemonic, setMnemonic] = useState('');
   const [isMnemonicValid, setIsMnemonicValid] = useState(false);
   const { mutateAsync: signIn, isPending: isSigningIn } = useSignIn();
