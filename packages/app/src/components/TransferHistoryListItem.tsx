@@ -3,8 +3,12 @@ import { Text, View } from 'react-native';
 import FastAvatar from './FastAvatar';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
-import { Hex } from 'viem';
+import { Hex, getAddress } from 'viem';
 import { Transfer, TransferStatus } from '@sutori/shared';
+import { useTranslation } from 'react-i18next';
+
+const SIGN_UP_BONUS_PAYER_ADDRESS =
+  '0x9D3224743435d058f4B17Da29E8673DceD1768E7';
 
 interface IncomingTransferListItemProps {
   tx: Transfer;
@@ -12,6 +16,7 @@ interface IncomingTransferListItemProps {
 
 const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
   const { tx } = props;
+  const { t } = useTranslation();
 
   return (
     <View
@@ -41,7 +46,9 @@ const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
               color: theme.text,
             }}
           >
-            {shortenAddress(tx.from as Hex)}
+            {getAddress(tx.from) === SIGN_UP_BONUS_PAYER_ADDRESS
+              ? t('signUpBonus', { ns: 'common' })
+              : shortenAddress(tx.from as Hex)}
           </Text>
         </View>
         <View
@@ -117,7 +124,7 @@ const OutGoingTransferListItem = (props: OutGoingTransferListItemProps) => {
           <Text
             style={{
               color: theme.gold,
-              opacity: 0.8
+              opacity: 0.8,
             }}
           >
             {tx.status === TransferStatus.Pending && 'pending'}

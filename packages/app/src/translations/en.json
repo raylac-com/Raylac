@@ -92,6 +92,7 @@
     },
     "common": {
       "next": "Next",
-    "headerBackTitle": "Back"
+    "headerBackTitle": "Back",
+      "signUpBonus": "Sign up bonus"
     }
   }

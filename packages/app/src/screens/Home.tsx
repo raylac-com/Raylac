@@ -1,5 +1,4 @@
 import {
-  Pressable,
   Text,
   View,
   SafeAreaView,
@@ -16,6 +15,7 @@ import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import { useTranslation } from 'react-i18next';
 import { Transfer } from '@sutori/shared';
+import StyledPressable from '@/components/StyledPressable';
 
 interface MenuItemProps {
   icon: React.ReactNode;
@@ -27,7 +27,7 @@ const MenuItem = (props: MenuItemProps) => {
   const { icon, title, onPress } = props;
 
   return (
-    <Pressable
+    <StyledPressable
       onPress={onPress}
       style={{
         flexDirection: 'column',
@@ -36,6 +36,11 @@ const MenuItem = (props: MenuItemProps) => {
     >
       <View
         style={{
+          width: 50,
+          height: 50,
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
           backgroundColor: theme.primary,
           padding: 12,
           borderRadius: 100,
@@ -48,11 +53,12 @@ const MenuItem = (props: MenuItemProps) => {
           fontSize: 16,
           marginTop: 8,
           color: theme.text,
+          textAlign: 'center',
         }}
       >
         {title}
       </Text>
-    </Pressable>
+    </StyledPressable>
   );
 };
 
@@ -68,6 +74,7 @@ const HomeScreen = () => {
     isRefetching: isRefetchingBalance,
   } = trpc.getBalance.useQuery(null, {
     enabled: isSignedIn,
+    throwOnError: false, // Don't throw on error for this particular query in all environments
   });
 
   const {
@@ -76,6 +83,7 @@ const HomeScreen = () => {
     isRefetching: isRefetchingTxHistory,
   } = trpc.getTxHistory.useQuery(null, {
     enabled: isSignedIn,
+    throwOnError: false, // Don't throw on error for this particular query in all environments
   });
 
   const navigation = useTypedNavigation();
@@ -162,10 +170,7 @@ const HomeScreen = () => {
           }}
         >
           {txHistory?.map((tx, i) => (
-            <TransferHistoryListItem
-              key={i}
-              tx={tx as Transfer}
-            />
+            <TransferHistoryListItem key={i} tx={tx as Transfer} />
           ))}
           {txHistory && txHistory.length > NUM_TRANSFERS_TO_SHOW ? (
             <Text

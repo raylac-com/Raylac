@@ -11,7 +11,6 @@ import {
   buildSiweMessage,
   generateStealthAddress,
   getStealthAddress,
-  sendUserOperation,
   splitToUnits,
   Transfer,
   TransferStatus,
@@ -20,14 +19,19 @@ import {
 } from '@sutori/shared';
 import * as erc20 from './lib/erc20';
 import { signUserOp } from './lib/paymaster';
-import { privateKeyToAccount, publicKeyToAddress } from 'viem/accounts';
+import { publicKeyToAddress } from 'viem/accounts';
 import { createContext } from './context';
-import { JWT_PRIV_KEY, getTransferDataFromUserOp } from './utils';
+import { JWT_PRIV_KEY } from './utils';
 import { SplitTransfer } from './types';
 import { publicClient } from './lib/viem';
-import { saveStealthTransfer } from './lib/stealthTransfer';
 import { handleNewStealthAccount } from './lib/stealthAccount';
 import { verifySiweMessage } from 'viem/siwe';
+import send from './api/send';
+import signUp from './api/signUp';
+
+import { webcrypto } from 'node:crypto';
+// @ts-ignore
+if (!globalThis.crypto) globalThis.crypto = webcrypto;
 
 // This is a workaround for the fact that BigInts are not supported by JSON.stringify
 // @ts-ignore
@@ -98,64 +102,11 @@ const appRouter = router({
       const userId = opts.ctx.userId;
       const userOps = input.userOps as UserOperation[];
 
-      const transfers = userOps.map(getTransferDataFromUserOp);
-
-      const to = transfers[0].to;
-
-      // Check that the transfers are all going to the same address
-      if (transfers.some(transfer => transfer.to !== to)) {
-        throw new Error('Transfers must all be to the same address');
-      }
-
-      const transferAmount = transfers.reduce((acc, transfer) => {
-        return acc + BigInt(transfer.amount);
-      }, BigInt(0));
-
-      const userOpHashes = [];
-
-      for (const userOp of userOps) {
-        const userOpHash = await sendUserOperation({
-          client: publicClient,
-          userOp,
-        });
-        userOpHashes.push(userOpHash);
-      }
-
-      await saveStealthTransfer({
-        senderId: userId,
-        amount: transferAmount,
-        to,
-        userOpHashes,
+      await send({
+        senderUserId: userId,
+        userOps,
+        stealthAccount: input.stealthAccount,
       });
-
-      if (input.stealthAccount) {
-        // If `stealthAccount` is provided, this is a transfer to a stealth account.
-        // Announce the stealth account to the ERC5564 announcer contract.
-
-        // Get the user who corresponds to the stealth account
-        const stealthAccountUser = await prisma.userStealthAddress.findFirst({
-          select: {
-            userId: true,
-          },
-          where: {
-            address: to,
-          },
-        });
-
-        if (stealthAccountUser) {
-          await handleNewStealthAccount({
-            userId: stealthAccountUser.userId,
-            stealthAccount: {
-              address: to as Hex,
-              stealthPubKey: input.stealthAccount.stealthPubKey as Hex,
-              ephemeralPubKey: input.stealthAccount.ephemeralPubKey as Hex,
-              viewTag: input.stealthAccount.viewTag as Hex,
-            },
-          });
-        } else {
-          console.error('Stealth account user not found');
-        }
-      }
 
       return 'ok';
     }),
@@ -429,7 +380,7 @@ const appRouter = router({
     }),
 
   /**
-   * Save a new user to the database
+   * Sign up a new user
    */
   signUp: publicProcedure
     .input(
@@ -444,43 +395,12 @@ const appRouter = router({
     .mutation(async opts => {
       const { input } = opts;
 
-      const viewingAccount = privateKeyToAccount(input.viewingPrivKey as Hex);
-
-      // TODO: Check username validity
-
-      const inviteCodeExists = await prisma.inviteCode.findFirst({
-        where: {
-          inviteCode: input.inviteCode,
-          isUsed: false,
-        },
-      });
-
-      if (!inviteCodeExists) {
-        throw new Error('Invalid invite code');
-      }
-
-      const user = await prisma.user.create({
-        data: {
-          name: input.name,
-          username: input.username,
-          spendingPubKey: input.spendingPubKey,
-          viewingPubKey: viewingAccount.publicKey,
-          viewingPrivKey: input.viewingPrivKey,
-        },
-      });
-
-      // TODO: Send sign up bonus
-
-      const token = jwt.sign({ userId: user.id }, JWT_PRIV_KEY);
-
-      // Mark the invite code as used
-      await prisma.inviteCode.update({
-        where: {
-          inviteCode: input.inviteCode,
-        },
-        data: {
-          isUsed: true,
-        },
+      const { user, token } = await signUp({
+        name: input.name,
+        username: input.username,
+        inviteCode: input.inviteCode,
+        spendingPubKey: input.spendingPubKey as Hex,
+        viewingPrivKey: input.viewingPrivKey as Hex,
       });
 
       return { userId: user.id, token };

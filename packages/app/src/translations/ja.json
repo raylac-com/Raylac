@@ -2,7 +2,8 @@
   "Start": {
     "title": "",
     "signIn": "ログイン",
-    "createAccount": "アカウント作成"
+    "createAccount": "アカウント作成",
+    "deleteAccount": "アカウント削除"
   },
   "SignIn": {
     "title": "ログイン",
@@ -93,6 +94,7 @@
     },
   "common": {
     "next": "次へ",
-    "headerBackTitle": "戻る"
+    "headerBackTitle": "戻る",
+    "signUpBonus": "新規登録ボーナス"
   }
 }

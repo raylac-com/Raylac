@@ -1,4 +1,5 @@
 import FastAvatar from '@/components/FastAvatar';
+import StyledPressable from '@/components/StyledPressable';
 import useSignOut from '@/hooks/useSignOut';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -6,7 +7,7 @@ import { deleteMnemonic } from '@/lib/key';
 import { theme } from '@/lib/theme';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, Text, View } from 'react-native';
+import { Alert, Text, View } from 'react-native';
 import { Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
 
@@ -20,7 +21,7 @@ const SettingListItem = (props: SettingListItemProps) => {
   const { title, onPress, color } = props;
 
   return (
-    <Pressable
+    <StyledPressable
       style={{
         padding: 8,
         width: '62%',
@@ -40,7 +41,7 @@ const SettingListItem = (props: SettingListItemProps) => {
       >
         {title}
       </Text>
-    </Pressable>
+    </StyledPressable>
   );
 };
 
