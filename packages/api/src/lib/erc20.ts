@@ -10,6 +10,7 @@ export const getUSDCBalance = async ({ address }: { address: Hex }) => {
     abi: ERC20Abi,
     functionName: 'balanceOf',
     args: [address],
+    blockTag: "latest"
   });
 
   return balance;

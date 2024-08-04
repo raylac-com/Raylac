@@ -29,6 +29,7 @@ const getTxHistory = async ({ userId }: { userId: number }) => {
         contractAddresses: [USDC_CONTRACT_ADDRESS],
         order: SortingOrder.DESCENDING,
         withMetadata: true,
+        toBlock: 'latest',
       });
     })
   );
