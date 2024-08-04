@@ -12,6 +12,7 @@ import useSignedInUser from '@/hooks/useSignedInUser';
 import FastAvatar from '@/components/FastAvatar';
 import { publicKeyToAddress } from 'viem/accounts';
 import { Hex } from 'viem';
+import { useTranslation } from 'react-i18next';
 
 interface UserListItemProps {
   user: RouterOutput['getUsers'][number];
@@ -35,15 +36,33 @@ const UserListItem = (props: UserListItemProps) => {
         address={publicKeyToAddress(props.user.spendingPubKey as Hex)}
         size={36}
       ></FastAvatar>
-      <Text
+      <View
         style={{
-          fontSize: 16,
-          fontWeight: 'bold',
-          color: theme.text,
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'flex-end',
+          columnGap: 4,
         }}
       >
-        {props.user.name}
-      </Text>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: 'bold',
+            color: theme.text,
+          }}
+        >
+          {props.user.name}
+        </Text>
+        <Text
+          style={{
+            fontSize: 14,
+            opacity: 0.6,
+            color: theme.text,
+          }}
+        >
+          @{props.user.username}
+        </Text>
+      </View>
     </Pressable>
   );
 };
@@ -67,6 +86,7 @@ const FloatingScanButton = () => {
 type Props = NativeStackScreenProps<RootStackParamsList, 'SendToSutoriUser'>;
 
 const SendToSutoriUser = ({ navigation }: Props) => {
+  const { t } = useTranslation('SendToSutoriUser');
   const { mutateAsync: send } = useSend();
   const { data: users } = trpc.getUsers.useQuery();
   const [username, setUsername] = useState('');
@@ -94,7 +114,7 @@ const SendToSutoriUser = ({ navigation }: Props) => {
     >
       <StyledTextInput
         value={username}
-        placeholder="Search by username"
+        placeholder={t('searchUser')}
         containerStyle={{
           marginTop: 12,
           width: '80%',

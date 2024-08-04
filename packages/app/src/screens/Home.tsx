@@ -75,6 +75,7 @@ const HomeScreen = () => {
   } = trpc.getBalance.useQuery(null, {
     enabled: isSignedIn,
     throwOnError: false, // Don't throw on error for this particular query in all environments
+    refetchOnWindowFocus: true,
   });
 
   const {
@@ -84,6 +85,7 @@ const HomeScreen = () => {
   } = trpc.getTxHistory.useQuery(null, {
     enabled: isSignedIn,
     throwOnError: false, // Don't throw on error for this particular query in all environments
+    refetchOnWindowFocus: true,
   });
 
   const navigation = useTypedNavigation();
@@ -149,7 +151,7 @@ const HomeScreen = () => {
             icon={<AntDesign name="plus" size={24} color={theme.background} />}
             title={t('deposit')}
             onPress={() => {
-              navigation.navigate('EnterDepositAmount');
+              navigation.navigate('ConfirmDeposit');
             }}
           />
           <MenuItem

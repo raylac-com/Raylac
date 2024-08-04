@@ -24,7 +24,6 @@ import TransferHistory from './screens/TransferHistory';
 import * as Sentry from '@sentry/react-native';
 import Start from './screens/Start';
 import EnterSendAmount from './screens/Send/EnterSendAmount';
-import EnterDepositAmount from './screens/Deposit/EnterDepositAmount';
 import { useTranslation } from 'react-i18next';
 import './i18n';
 import BackupAccount from './screens/BackupAccount';
@@ -129,14 +128,6 @@ const Screens = () => {
           headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
       >
-        <RootStack.Screen
-          name="EnterDepositAmount"
-          component={EnterDepositAmount}
-          options={{
-            title: t('title', { ns: 'EnterDepositAmount' }),
-            headerBackVisible: true,
-          }}
-        ></RootStack.Screen>
         <RootStack.Screen
           name="ConfirmDeposit"
           component={ConfirmDeposit}

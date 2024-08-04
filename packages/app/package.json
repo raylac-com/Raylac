@@ -36,6 +36,7 @@
     "expo-clipboard": "~6.0.3",
     "expo-constants": "~16.0.2",
     "expo-dev-client": "~4.0.19",
+    "expo-image": "~1.12.13",
     "expo-linking": "~6.3.1",
     "expo-modules-autolinking": "~1.11.0",
     "expo-secure-store": "~13.0.2",

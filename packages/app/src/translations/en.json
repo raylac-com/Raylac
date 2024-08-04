@@ -45,7 +45,7 @@
     },
     "ConfirmDeposit": {
       "title": "Confirm",
-      "sendAmountToAddress": "Send \n {{amount}} USDC to the following address",
+      "sendAmountToAddress": "Send USDC to the following address on Base",
       "confirm": "I made the transfer"
     },
     "SelectSend": {
@@ -65,7 +65,8 @@
       "sendToUser": "Send to {{ name }}"
     },
     "SendToSutoriUser": {
-      "title": "Send to Sutori User"
+      "title": "Send to Sutori User",
+      "searchUser": "Search by username"
     },
     "SendToNonSutoriUser": {
       "title": "Enter recipient details",
@@ -93,6 +94,7 @@
     "common": {
       "next": "Next",
     "headerBackTitle": "Back",
-      "signUpBonus": "Sign up bonus"
+      "signUpBonus": "Sign up bonus",
+      "copied": "Copied"
     }
   }

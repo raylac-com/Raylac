@@ -1,32 +1,44 @@
-import { Text, View } from 'react-native';
+import { Image } from 'expo-image';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { copyToClipboard, shortenAddress } from '@/lib/utils';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamsList } from '@/navigation/types';
 import { Hex } from 'viem';
 import { Feather } from '@expo/vector-icons';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Toast from 'react-native-toast-message';
 import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { theme } from '@/lib/theme';
 import { useTranslation } from 'react-i18next';
+import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
+import useSignedInUser from '@/hooks/useSignedInUser';
 
-type Props = NativeStackScreenProps<RootStackParamsList, 'ConfirmDeposit'>;
+const ConfirmDeposit = () => {
+  const [depositAddress, setDepositAddress] = useState<Hex | null>(null);
+  const { data: signedInUser } = useSignedInUser();
 
-const ConfirmDeposit = ({ route }: Props) => {
-  const depositAddress = route.params.address as Hex;
-  const amount = route.params.amount;
+  const { mutateAsync: getNewDepositAccount } = useGetNewDepositAccount();
 
   const navigation = useTypedNavigation();
   const { t } = useTranslation('ConfirmDeposit');
 
+  useEffect(() => {
+    (async () => {
+      if (signedInUser) {
+        const account = await getNewDepositAccount();
+        setDepositAddress(account.address);
+      }
+    })();
+  }, [setDepositAddress, signedInUser]);
+
   const onCopyClick = useCallback(() => {
-    copyToClipboard(depositAddress);
-    Toast.show({
-      type: 'success',
-      text1: 'Copied address',
-      position: 'bottom',
-    });
+    if (depositAddress) {
+      copyToClipboard(depositAddress);
+      Toast.show({
+        type: 'success',
+        text1: t('copied', { ns: 'common' }),
+        position: 'bottom',
+      });
+    }
   }, [depositAddress]);
 
   return (
@@ -43,12 +55,11 @@ const ConfirmDeposit = ({ route }: Props) => {
       <Text
         style={{
           fontSize: 18,
-          fontWeight: 'bold',
           textAlign: 'center',
           color: theme.text,
         }}
       >
-        {t('sendAmountToAddress', { amount })}
+        {t('sendAmountToAddress')}
       </Text>
       <View
         style={{
@@ -58,6 +69,10 @@ const ConfirmDeposit = ({ route }: Props) => {
           columnGap: 8,
         }}
       >
+        <Image
+          source={require('../../../assets/base.png')}
+          style={{ width: 20, height: 20 }}
+        ></Image>
         <Text
           style={{
             fontSize: 18,
@@ -67,7 +82,11 @@ const ConfirmDeposit = ({ route }: Props) => {
           }}
           onPress={onCopyClick}
         >
-          {shortenAddress(depositAddress)}
+          {depositAddress ? (
+            shortenAddress(depositAddress)
+          ) : (
+            <ActivityIndicator></ActivityIndicator>
+          )}
         </Text>
         <Feather
           name="copy"

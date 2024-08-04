@@ -46,7 +46,7 @@
   },
   "ConfirmDeposit": {
     "title": "確認",
-    "sendAmountToAddress": "下記のアドレスに \n {{amount}} USDC 送金してください",
+    "sendAmountToAddress": "下記のアドレスに \n USDCをBase で送金してください",
     "confirm": "送金しました"
   },
   "SelectSend": {
@@ -67,7 +67,8 @@
     "sendToUser": "{{ name }} へ送金"
   },
   "SendToSutoriUser": {
-    "title": "Sutoriユーザーに送金"
+    "title": "Sutoriユーザーに送金",
+    "searchUser": "ユーザー名で検索"
   },
   "SendToNonSutoriUser": {
     "title": "受取人を入力",
@@ -95,6 +96,7 @@
   "common": {
     "next": "次へ",
     "headerBackTitle": "戻る",
-    "signUpBonus": "新規登録ボーナス"
+    "signUpBonus": "新規登録ボーナス",
+    "copied": "コピーしました"
   }
 }
