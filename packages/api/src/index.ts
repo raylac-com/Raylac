@@ -140,6 +140,29 @@ const appRouter = router({
   }),
 
   /**
+   * Get the details of a transfer
+   */
+  getTransferDetails: authedProcedure
+    .input(
+      z.object({
+        transferIdOrTxHash: z.string(),
+      })
+    )
+    .query(async opts => {
+      const transferId = opts.input.transferIdOrTxHash;
+      const userId = opts.ctx.userId;
+
+      const transfer = await prisma.stealthTransfer.findUnique({
+        where: {
+          senderId: userId,
+          id: transferId,
+        },
+      });
+
+      return transfer;
+    }),
+
+  /**
    * Add a new stealth account to the user.
    * This is called when the user wants to receive/deposit funds to a new stealth address.
    */

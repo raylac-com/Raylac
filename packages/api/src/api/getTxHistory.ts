@@ -34,10 +34,17 @@ const getTxHistory = async ({ userId }: { userId: number }) => {
     })
   );
 
-  const outgoingTransfers = await prisma.stealthTransfer.findMany({
+  const outgoingTransfers = await prisma.transfer.findMany({
     select: {
       amount: true,
-      to: true,
+      toAddress: true,
+      toUser: {
+        select: {
+          id: true,
+          name: true,
+          username: true,
+        },
+      },
       userOpReceipts: {
         select: {
           success: true,
@@ -46,14 +53,14 @@ const getTxHistory = async ({ userId }: { userId: number }) => {
       createdAt: true,
     },
     where: {
-      senderId: userId,
+      fromUserId: userId,
     },
   });
 
   const transfers: Transfer[] = [
     ...outgoingTransfers.map(transfer => ({
       type: 'outgoing',
-      to: transfer.to,
+      to: transfer.toUser || (transfer.toAddress as Hex),
       amount: Number(transfer.amount / BigInt(10 ** 6)),
       timestamp: transfer.createdAt.getTime(),
       status: transfer.userOpReceipts.every(receipt => receipt.success)
@@ -63,7 +70,7 @@ const getTxHistory = async ({ userId }: { userId: number }) => {
     ...incomingTxs.flatMap(txs =>
       txs.transfers.map(tx => ({
         type: 'incoming',
-        from: tx.from || '',
+        from: tx.from as Hex,
         amount: tx.value as number,
         timestamp: new Date(tx.metadata.blockTimestamp).getTime(),
         status: TransferStatus.Success,
@@ -73,6 +80,5 @@ const getTxHistory = async ({ userId }: { userId: number }) => {
 
   return transfers;
 };
-
 
 export default getTxHistory;

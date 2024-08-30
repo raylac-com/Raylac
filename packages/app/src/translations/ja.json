@@ -13,6 +13,7 @@
   "Home": {
     "title": "ホーム",
     "deposit": "チャージ",
+    "receive": "受取",
     "send": "送金",
     "noTransfers": "",
     "seeAll": "全て表示"

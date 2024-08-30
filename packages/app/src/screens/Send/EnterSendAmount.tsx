@@ -1,5 +1,5 @@
 import StyledButton from '@/components/StyledButton';
-import StyledTextInput from '@/components/StyledTextInput';
+import StyledNumberInput from '@/components/StyledNumberInput';
 import { theme } from '@/lib/theme';
 import { trpc } from '@/lib/trpc';
 import { shortenAddress } from '@/lib/utils';
@@ -15,7 +15,7 @@ type Props = NativeStackScreenProps<RootStackParamsList, 'EnterSendAmount'>;
 const EnterSendAmount = ({ navigation, route }: Props) => {
   const [amount, setAmount] = useState<null | number>(null);
   const { data: balance } = trpc.getBalance.useQuery();
-  const { t } = useTranslation("EnterSendAmount");
+  const { t } = useTranslation('EnterSendAmount');
 
   const recipientUserOrAddress = route.params.recipientUserOrAddress;
 
@@ -43,12 +43,11 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
         marginTop: 40,
       }}
     >
-      <StyledTextInput
+      <StyledNumberInput
         autoFocus
         containerStyle={{
           marginVertical: 20,
         }}
-        placeholder="Amount"
         value={amount !== null ? amount.toString() : ''}
         onChangeText={_amount => {
           if (_amount === '') {
@@ -59,7 +58,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
         }}
         keyboardType="numeric"
         postfix="USDC"
-      ></StyledTextInput>
+      ></StyledNumberInput>
       {balance && parsedAmount > balance ? (
         <Text
           style={{

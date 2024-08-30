@@ -38,46 +38,66 @@ model User {
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   UserStealthAddress UserStealthAddress[]
-  StealthTransfer    StealthTransfer[]
+  incomingTransfers  IncomingTransfer[]
 }
 
 model UserStealthAddress {
-  id              Int      @id @default(autoincrement())
-  user            User     @relation(fields: [userId], references: [id])
-  userId          Int
-  address         String
-  ephemeralPubKey String
-  viewTag         String
-  stealthPubKey   String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                 Int      @id @default(autoincrement())
+  user               User     @relation(fields: [userId], references: [id])
+  userId             Int
+  address            String
+  ephemeralPubKey    String
+  viewTag            String
+  stealthPubKey      String
+  lastSyncedBlockNum BigInt?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
-model StealthTransfer {
-  id             Int                    @id @default(autoincrement())
-  sender         User                   @relation(fields: [senderId], references: [id])
-  senderId       Int
-  to             String
-  amount         BigInt
-  userOpReceipts UserOperationReceipt[]
-  createdAt      DateTime               @default(now())
-  updatedAt      DateTime               @updatedAt
+model ERC20Token {
+  id               Int                @id @default(autoincrement())
+  contractAddress  String
+  name             String
+  symbol           String
+  decimals         Int
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  IncomingTransfer IncomingTransfer[]
+}
+
+model IncomingTransfer {
+  id          Int        @id @default(autoincrement())
+  token       ERC20Token @relation(fields: [tokenId], references: [id])
+  tokenId     Int
+  fromAddress String
+  toAddress   String
+  toUser      User       @relation(fields: [toUserId], references: [id])
+  toUserId    Int
+  groupingTag String?
+  amount      BigInt
+  blockNumber BigInt
+  logIndex    Int
+  txIndex     Int
+  chainId     Int
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([blockNumber, logIndex, txIndex, chainId])
 }
 
 model UserOperationReceipt {
-  hash              String           @id
-  nonce             BigInt?
-  success           Boolean?
-  actualGasUsed     BigInt?
-  actualGasCost     BigInt?
-  blockNumber       BigInt?
-  logIndex          Int?
-  txIndex           Int?
-  chainId           Int?
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  StealthTransfer   StealthTransfer? @relation(fields: [stealthTransferId], references: [id])
-  stealthTransferId Int?
+  hash          String   @id
+  nonce         BigInt?
+  success       Boolean?
+  actualGasUsed BigInt?
+  actualGasCost BigInt?
+  blockNumber   BigInt?
+  logIndex      Int?
+  txIndex       Int?
+  chainId       Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  transferId    Int?
 }
 
 model InviteCode {

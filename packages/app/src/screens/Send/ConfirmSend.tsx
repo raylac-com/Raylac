@@ -1,4 +1,4 @@
-import StyledButton from '@/components/StyledButton';
+ import StyledButton from '@/components/StyledButton';
 import useGenerateStealthAccount from '@/hooks/useGenerateStealthAccount';
 import useSend from '@/hooks/useSend';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -57,7 +57,9 @@ const ConfirmSend = ({ route }: Props) => {
       style={{
         flex: 1,
         alignItems: 'center',
+        justifyContent: 'center',
         padding: 24,
+        marginTop: -60,
       }}
     >
       <View style={{
@@ -66,7 +68,7 @@ const ConfirmSend = ({ route }: Props) => {
       }}>
         <Text
           style={{
-            fontSize: 18,
+            fontSize: 28,
             fontWeight: 'bold',
             textAlign: 'center',
             color: theme.text,
@@ -76,11 +78,11 @@ const ConfirmSend = ({ route }: Props) => {
         </Text>
         <Text
           style={{
-            fontSize: 18,
+            fontSize: 28,
             fontWeight: 'bold',
             textAlign: 'center',
             color: theme.text,
-          }}
+          }}      
         >
           {amount} USDC
         </Text>

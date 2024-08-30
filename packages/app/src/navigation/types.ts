@@ -36,6 +36,10 @@ export type RootStackParamsList = {
     amount: number;
   };
   TransferHistory: undefined;
+  TransferDetails: {
+    transferIdOrTxHash: string;
+  };
+  Receive: undefined;
   BackupAccount: undefined;
   SelectLanguage: undefined;
   SendSuccess: undefined;

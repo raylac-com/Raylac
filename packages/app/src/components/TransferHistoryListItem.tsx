@@ -18,6 +18,8 @@ const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
   const { tx } = props;
   const { t } = useTranslation();
 
+  const isFromAddress = typeof tx.from === 'string';
+
   return (
     <View
       style={{
@@ -40,13 +42,16 @@ const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
             columnGap: 8,
           }}
         >
-          <FastAvatar address={tx.from} size={36}></FastAvatar>
+          {isFromAddress && (
+            <FastAvatar address={tx.from as Hex} size={36}></FastAvatar>
+          )}
           <Text
             style={{
               color: theme.text,
             }}
           >
-            {getAddress(tx.from) === SIGN_UP_BONUS_PAYER_ADDRESS
+            {isFromAddress &&
+            getAddress(tx.from as Hex) === SIGN_UP_BONUS_PAYER_ADDRESS
               ? t('signUpBonus', { ns: 'common' })
               : shortenAddress(tx.from as Hex)}
           </Text>

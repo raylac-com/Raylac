@@ -12,9 +12,14 @@
     "Home": {
       "title": "Home",
       "deposit": "Add money",
+      "receive": "Receive",
     "send": "Send",
     "noTransfers": "No transfers yet.",
     "seeAll": "See all"
+    },
+    "Receive": {
+      "title": "Receive",
+      "backToHome": "Back to home"
     },
     "Account": {
     "title": "Account",

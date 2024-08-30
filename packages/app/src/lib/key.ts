@@ -17,7 +17,9 @@ export const saveMnemonic = async (mnemonic: string) => {
     throw new Error('Trying to overwrite existing mnemonic');
   }
 
-  await SecureStore.setItemAsync(MNEMONIC_STORAGE_KEY, mnemonic);
+  await SecureStore.setItemAsync(MNEMONIC_STORAGE_KEY, mnemonic, {
+    requireAuthentication: REQUIRE_AUTHENTICATION,
+  });
 };
 
 /**

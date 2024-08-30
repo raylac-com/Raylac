@@ -1,5 +1,6 @@
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import { trpc } from '@/lib/trpc';
+import { Transfer } from '@sutori/shared';
 import { FlatList, Text, View } from 'react-native';
 
 const TransferHistory = () => {
@@ -16,15 +17,7 @@ const TransferHistory = () => {
       <FlatList
         data={txHistory}
         renderItem={({ item }) => (
-          <TransferHistoryListItem
-            tx={{
-              from: item.from,
-              to: item.to,
-              amount: item.amount,
-              type: item.type,
-              timestamp: item.timestamp,
-            }}
-          />
+          <TransferHistoryListItem tx={item as Transfer} />
         )}
       />
       {txHistory?.length === 0 ? (

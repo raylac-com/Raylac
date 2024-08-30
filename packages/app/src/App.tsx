@@ -31,6 +31,7 @@ import SelectLanguage from './screens/SelectLanguage';
 import SendSuccess from './screens/Send/SendSuccess';
 import { useEffect } from 'react';
 import { getSelectedLanguage } from './i18n';
+import Receive from './screens/Receive';
 
 Sentry.init({
   dsn: 'https://adc4c437047fef7e4ebe5d0d77df3ff5@o1348995.ingest.us.sentry.io/4507536730030080',
@@ -120,6 +121,14 @@ const Screens = () => {
         component={BackupAccount}
         options={{
           title: t('title', { ns: 'BackupAccount' }),
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+        }}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="Receive"
+        component={Receive}
+        options={{
+          title: t('title', { ns: 'Receive' }),
           headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
       ></RootStack.Screen>

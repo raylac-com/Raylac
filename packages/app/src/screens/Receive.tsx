@@ -4,21 +4,21 @@ import { Hex } from 'viem';
 import { Feather } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
 import Toast from 'react-native-toast-message';
-import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { theme } from '@/lib/theme';
 import { useTranslation } from 'react-i18next';
 import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
 import useSignedInUser from '@/hooks/useSignedInUser';
+import StyledButton from '@/components/StyledButton';
 
-const ConfirmDeposit = () => {
+const Receive = () => {
   const [depositAddress, setDepositAddress] = useState<Hex | null>(null);
   const { data: signedInUser } = useSignedInUser();
 
   const { mutateAsync: getNewDepositAccount } = useGetNewDepositAccount();
 
   const navigation = useTypedNavigation();
-  const { t } = useTranslation('ConfirmDeposit');
+  const { t } = useTranslation('Receive');
 
   useEffect(() => {
     (async () => {
@@ -69,12 +69,12 @@ const ConfirmDeposit = () => {
         }}
       >
         <Image
-          source={require('../../../assets/base.png')}
+          source={require('../../assets/base.png')}
           style={{ width: 20, height: 20 }}
         ></Image>
         <Text
           style={{
-            fontSize: 18,
+            fontSize: 18, 
             fontWeight: 'bold',
             textAlign: 'center',
             color: theme.text,
@@ -94,9 +94,8 @@ const ConfirmDeposit = () => {
           onPress={onCopyClick}
         />
       </View>
-      <View></View>
       <StyledButton
-        title={t('confirm')}
+        title={t('backToHome')}
         onPress={async () => {
           navigation.navigate('Tabs', {
             screen: 'Home',
@@ -107,4 +106,4 @@ const ConfirmDeposit = () => {
   );
 };
 
-export default ConfirmDeposit;
+export default Receive;

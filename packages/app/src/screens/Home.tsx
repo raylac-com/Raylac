@@ -155,6 +155,13 @@ const HomeScreen = () => {
             }}
           />
           <MenuItem
+            icon={<AntDesign name="arrowdown" size={24} color={theme.background} />}
+            title={t('receive')}
+            onPress={() => {
+              navigation.navigate('Receive');
+            }}
+          />
+          <MenuItem
             icon={
               <AntDesign name="arrowup" size={24} color={theme.background} />
             }

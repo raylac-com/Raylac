@@ -41,8 +41,14 @@ export enum TransferStatus {
 export interface Transfer {
   type: string;
   status: TransferStatus;
-  to?: string;
-  from?: string;
+  to?: Hex | User; // Address or User
+  from?: Hex | User; // Address or User
   amount: number;
   timestamp: number;
+}
+
+export interface User {
+  id: number;
+  name: string;
+  username: string;
 }
