@@ -18,6 +18,17 @@
     "noTransfers": "",
     "seeAll": "全て表示"
   },
+  "Card": {
+    "title": "カード",
+    "cardInfo" : "カード情報"
+  },
+  "CardInfo": {
+    "title": "カード情報",
+    "cardHolder": "カード名義",
+    "cardNumber": "カード番号",
+    "expirationDate": "有効期限",
+    "cvv": "セキュリティコード"
+  },
   "Account": {
     "title": "アカウント",
     "signOut": "ログアウト",

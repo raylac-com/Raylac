@@ -32,6 +32,8 @@ import SendSuccess from './screens/Send/SendSuccess';
 import { useEffect } from 'react';
 import { getSelectedLanguage } from './i18n';
 import Receive from './screens/Receive';
+import Card from './screens/Card';
+import CardInfo from './screens/CardInfo';
 
 Sentry.init({
   dsn: 'https://adc4c437047fef7e4ebe5d0d77df3ff5@o1348995.ingest.us.sentry.io/4507536730030080',
@@ -54,6 +56,16 @@ const Tabs = () => {
           title: t('title', { ns: 'Home' }),
           tabBarIcon: ({ color }) => (
             <AntDesign name="home" size={24} color={color} />
+          ),
+        }}
+      ></Tab.Screen>
+      <Tab.Screen
+        name="Card"
+        component={Card}
+        options={{
+          title: t('title', { ns: 'Card' }),
+          tabBarIcon: ({ color }) => (
+            <AntDesign name="creditcard" size={24} color={color} />
           ),
         }}
       ></Tab.Screen>
@@ -113,6 +125,14 @@ const Screens = () => {
         options={{
           title: t('title', { ns: 'EnterInviteCode' }),
           headerBackVisible: true,
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+        }}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="CardInfo"
+        component={CardInfo}
+        options={{
+          title: t('title', { ns: 'CardInfo ' }),
           headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
       ></RootStack.Screen>

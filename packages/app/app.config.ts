@@ -1,6 +1,8 @@
 import type { ExpoConfig } from '@expo/config';
 
-const IS_DEV = process.env.APP_VARIANT === 'development';
+//const IS_DEV = process.env.APP_VARIANT === 'development';
+const IS_DEV = true;
+// console.log('process.env.APP_VARIANT', process.env.APP_VARIANT);
 
 const config: ExpoConfig = {
   name: IS_DEV ? 'sutori-dev' : 'sutori',
@@ -43,6 +45,12 @@ const config: ExpoConfig = {
       {
         organization: 'sutori',
         project: 'sutori',
+      },
+    ],
+    [
+      'react-native-cloud-storage',
+      {
+        iCloudContainerEnvironment: IS_DEV ? 'Development': "Production",
       },
     ],
   ],

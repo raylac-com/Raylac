@@ -75,14 +75,15 @@ const UsernameAvailabilityIndicator = (
   return null;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Props = NativeStackScreenProps<RootStackParamsList, 'SignUp'>;
 
 /**
  * Sign up screen
  */
-const SignUp = ({ route }: Props) => {
+const SignUp = () => {
   const { t } = useTranslation('SignUp');
-  const { inviteCode } = route.params;
+//  const { inviteCode } = route.params;
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   const { mutateAsync: signUp, isPending: isSigningUp } = useSignUp();
@@ -142,9 +143,6 @@ const SignUp = ({ route }: Props) => {
           style={{
             marginTop: 40,
           }}
-          inputStyle={{
-            width: 220,
-          }}
           onChangeText={text => {
             setName(text);
           }}
@@ -168,9 +166,6 @@ const SignUp = ({ route }: Props) => {
         </Text>
         <StyledTextInput
           placeholder={t('username')}
-          inputStyle={{
-            width: 220,
-          }}
           value={username}
           inputMode="text"
           autoComplete="off"
@@ -195,7 +190,7 @@ const SignUp = ({ route }: Props) => {
         onPress={async () => {
           await signUp({
             name,
-            inviteCode,
+            inviteCode: "",
             username,
           });
 

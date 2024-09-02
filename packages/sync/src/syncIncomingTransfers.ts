@@ -2,34 +2,37 @@ import { publicClient } from './lib/viem';
 import prisma from './lib/prisma';
 import { sleep } from './lib/utils';
 import { USDC_CONTRACT_ADDRESS } from '@sutori/shared';
-import { Hex } from 'viem';
+import { Hex, parseAbiItem } from 'viem';
 import { base } from 'viem/chains';
 
 // Address chunks
 
+// We syne incoming transfers by listening to the logs emitted by the USDC contract.
+// All outgoing transfers can be indexed by listening to the logs emitted by the mixing contract. We index them separately.
+
+const BASE_BLOCK_TIME = 2; // seconds
+
 const syncIncomingTransfers = async () => {
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const toBlock = await publicClient.getBlockNumber();
-
-    const logs = await publicClient.getLogs({
-      address: USDC_CONTRACT_ADDRESS,
-      toBlock,
-    });
-
     const userAddresses = await prisma.userStealthAddress.findMany({
       select: {
         userId: true,
         address: true,
       },
-      orderBy: {
-        lastSyncedBlockNum: 'asc',
+    });
+
+    const logs = await publicClient.getLogs({
+      event: parseAbiItem(
+        'event Transfer(address indexed from, address indexed to, uint256 value)'
+      ),
+      address: USDC_CONTRACT_ADDRESS,
+      args: {
+        to: '0x0',
       },
     });
 
     // Get all transfers made to Sutori users
-    // We index all transfers made from Sutori users from the logs
-    // emitted by the mixing contract.
     const sutoriUserTransfers = logs.filter(log =>
       userAddresses.some(address => address.address === log.topics[2])
     );

@@ -41,7 +41,7 @@ const MenuItem = (props: MenuItemProps) => {
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: theme.primary,
+          backgroundColor: theme.text,
           padding: 12,
           borderRadius: 100,
         }}

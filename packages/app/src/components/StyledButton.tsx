@@ -32,10 +32,11 @@ const StyledButton = (props: StyledButtonProps) => {
         ...style,
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: theme.text,
+        justifyContent: 'center',
+        backgroundColor: theme.primary,
         opacity: disabled || isPressed ? 0.4 : 1,
-        paddingHorizontal: 24,
-        paddingVertical: 10,
+        paddingHorizontal: 36,
+        paddingVertical: 12,
         borderRadius: 30,
       }}
       onPressIn={handlePressIn}
@@ -54,7 +55,8 @@ const StyledButton = (props: StyledButtonProps) => {
       }
       <Text
         style={{
-          color: theme.background,
+          color: theme.text,
+          fontWeight: 'bold',
           fontSize: 16,
         }}
       >

@@ -7,7 +7,7 @@ import { deleteMnemonic, getMnemonic } from '@/lib/key';
 import { theme } from '@/lib/theme';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Text, View } from 'react-native';
+import { Alert, Image, Text, View } from 'react-native';
 
 /**
  * This screen in shown when the user is not signed in.
@@ -18,7 +18,7 @@ const Start = () => {
   const navigation = useTypedNavigation();
   const { data: isSignedIn } = useIsSignedIn();
   const { mutateAsync: signIn } = useSignIn();
-  const { mutateAsync: signOut} = useSignOut();
+  const { mutateAsync: signOut } = useSignOut();
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [mnemonicExists, setMnemonicExists] = useState<boolean | null>(null);
 
@@ -56,7 +56,7 @@ const Start = () => {
       {
         text: 'Delete',
         onPress: async () => {
-          await signOut()
+          await signOut();
           await deleteMnemonic();
           navigation.navigate('Start');
         },
@@ -78,17 +78,26 @@ const Start = () => {
       style={{
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-end',
         rowGap: 24,
+        paddingBottom: 92,
       }}
     >
+      <Image
+        src={require('../../assets/adaptive-icon.png')}
+        style={{
+          width: 80,
+          height: 80,
+        }}
+      ></Image>
       <StyledButton
         title={t('signIn')}
         onPress={onSignInPress}
         isLoading={isSigningIn}
         style={{
           justifyContent: 'center',
-          width: mnemonicExists ? 110 : 160,
+          width: '90%',
+          height: 48,
         }}
       ></StyledButton>
       {mnemonicExists ? (
@@ -106,11 +115,12 @@ const Start = () => {
         <StyledButton
           title={t('createAccount')}
           onPress={() => {
-            navigation.navigate('EnterInviteCode');
+            navigation.navigate('SignUp');
           }}
           style={{
             justifyContent: 'center',
-            width: 160,
+            width: '90%',
+            height: 48,
           }}
         ></StyledButton>
       )}

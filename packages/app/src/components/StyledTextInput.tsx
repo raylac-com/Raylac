@@ -19,11 +19,12 @@ const StyledTextInput = (props: StyledTextInputProps) => {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: theme.primary,
+        backgroundColor: theme.text,
         paddingHorizontal: 24,
         paddingVertical: 12,
-        borderRadius: 4,
+        borderRadius: 20,
         columnGap: 8,
+        width: '85%',
         ...containerStyle,
       }}
     >
@@ -31,7 +32,8 @@ const StyledTextInput = (props: StyledTextInputProps) => {
         {...props}
         style={{
           color: theme.background,
-          width: 120,
+          width:  "100%", 
+          height: 32,
           ...inputStyle,
         }}
       ></TextInput>
@@ -39,7 +41,7 @@ const StyledTextInput = (props: StyledTextInputProps) => {
         <Text
           style={{
             opacity: 0.6,
-            color: theme.background,
+            color: theme.text,
             marginRight: -8,
           }}
         >

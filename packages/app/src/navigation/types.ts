@@ -4,6 +4,7 @@ import { Hex } from 'viem';
 export type RootTabsParamsList = {
   Home: undefined;
   Account: undefined;
+  Card: undefined;
 };
 
 export type RootStackParamsList = {
@@ -16,6 +17,8 @@ export type RootStackParamsList = {
   EnterInviteCode: undefined;
 
   SignInWithMnemonic: undefined;
+
+  CardInfo: undefined;
 
   // Send stack
   SelectSend: undefined;

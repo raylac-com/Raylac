@@ -24,6 +24,7 @@ const SIGN_UP_BONUS_PAYER_ACCOUNT = privateKeyToAccount(
 
 const BONUS_AMOUNT = parseUnits('1', 6);
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const sendSignUpBonus = async ({ to }: { to: Hex }) => {
   await walletClient.writeContract({
     abi: ERC20Abi,
@@ -58,6 +59,7 @@ const signUp = async ({
 
   // TODO: Check username validity
 
+  /*
   const inviteCodeExists = await prisma.inviteCode.findFirst({
     where: {
       inviteCode,
@@ -68,6 +70,7 @@ const signUp = async ({
   if (!inviteCodeExists) {
     throw new Error('Invalid invite code');
   }
+    */
 
   const user = await prisma.user.create({
     data: {
@@ -103,21 +106,13 @@ const signUp = async ({
     },
   });
 
+  /*
   await sendSignUpBonus({
     to: sendSignUpBonusToAddress,
   });
+  */
 
   const token = jwt.sign({ userId: user.id }, JWT_PRIV_KEY);
-
-  // Mark the invite code as used
-  await prisma.inviteCode.update({
-    where: {
-      inviteCode,
-    },
-    data: {
-      isUsed: true,
-    },
-  });
 
   return {
     user,
