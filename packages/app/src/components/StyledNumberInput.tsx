@@ -20,7 +20,6 @@ const StyledNumberInput = (props: StyledNumberInputProps) => {
         flexDirection: 'row',
         alignItems: 'center',
         backgroundColor: theme.background,
-        paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 4,
         columnGap: 8,
@@ -32,7 +31,7 @@ const StyledNumberInput = (props: StyledNumberInputProps) => {
         style={{
           color: theme.text,
           width: 120,
-          fontSize: 38,
+          fontSize: 30,
           backgroundColor: theme.background,
           borderColor: theme.background,
           ...inputStyle,

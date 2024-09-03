@@ -16,6 +16,7 @@ import getStealthAccounts from './api/getStealthAccounts';
 import getBalance from './api/getBalance';
 import getTxHistory from './api/getTxHistory';
 import signIn from './api/signIn';
+import getUsdToJpy from './api/getUsdToJpy';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -139,28 +140,10 @@ const appRouter = router({
     return transfers;
   }),
 
-  /**
-   * Get the details of a transfer
-   */
-  getTransferDetails: authedProcedure
-    .input(
-      z.object({
-        transferIdOrTxHash: z.string(),
-      })
-    )
-    .query(async opts => {
-      const transferId = opts.input.transferIdOrTxHash;
-      const userId = opts.ctx.userId;
-
-      const transfer = await prisma.stealthTransfer.findUnique({
-        where: {
-          senderId: userId,
-          id: transferId,
-        },
-      });
-
-      return transfer;
-    }),
+  getUsdToJpy: publicProcedure.query(async () => {
+    const usdToJpy = await getUsdToJpy();
+    return usdToJpy;
+  }),
 
   /**
    * Add a new stealth account to the user.

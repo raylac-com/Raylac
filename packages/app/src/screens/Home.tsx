@@ -67,6 +67,7 @@ const NUM_TRANSFERS_TO_SHOW = 5;
 const HomeScreen = () => {
   const { t } = useTranslation('Home');
   const { data: isSignedIn } = useIsSignedIn();
+  const { data: usdToJpy } = trpc.getUsdToJpy.useQuery();
 
   const {
     data: balance,
@@ -95,8 +96,6 @@ const HomeScreen = () => {
     refetchTxHistory();
   }, [refetchBalance, refetchTxHistory]);
 
-  console.log('isSignedIn', isSignedIn);
-
   useEffect(() => {
     if (isSignedIn === false) {
       navigation.navigate('Start');
@@ -106,6 +105,11 @@ const HomeScreen = () => {
   if (!isSignedIn) {
     return null;
   }
+
+  const jpyBalance =
+    balance !== undefined && usdToJpy !== undefined
+      ? (BigInt(balance) * BigInt(Math.round(usdToJpy * 100))) / BigInt(100)
+      : undefined;
 
   return (
     <SafeAreaView
@@ -125,8 +129,9 @@ const HomeScreen = () => {
       >
         <View
           style={{
-            flexDirection: 'row',
+            flexDirection: 'column',
             justifyContent: 'center',
+            alignItems: 'center',
             marginTop: 24,
           }}
         >
@@ -137,6 +142,16 @@ const HomeScreen = () => {
             }}
           >
             {balance !== undefined ? formatUnits(BigInt(balance), 6) : ''} USD
+          </Text>
+          <Text
+            style={{
+              fontSize: 18,
+              color: theme.text,
+              opacity: 0.6,
+              marginTop: 6,
+            }}
+          >
+            {usdToJpy !== undefined ? `${formatUnits(jpyBalance, 6)}円` : ''}
           </Text>
         </View>
         <View
@@ -155,7 +170,9 @@ const HomeScreen = () => {
             }}
           />
           <MenuItem
-            icon={<AntDesign name="arrowdown" size={24} color={theme.background} />}
+            icon={
+              <AntDesign name="arrowdown" size={24} color={theme.background} />
+            }
             title={t('receive')}
             onPress={() => {
               navigation.navigate('Receive');

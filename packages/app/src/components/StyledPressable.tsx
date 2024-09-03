@@ -26,7 +26,6 @@ const StyledPressable = (props: PressableProps) => {
         {...props}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        style={{}}
       ></Pressable>
     </Animated.View>
   );

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import prisma from './prisma';
 
 /**
@@ -14,6 +15,7 @@ export const saveStealthTransfer = async ({
   to: string;
   userOpHashes: string[];
 }) => {
+  /*
   await prisma.stealthTransfer.create({
     data: {
       senderId,
@@ -30,4 +32,5 @@ export const saveStealthTransfer = async ({
       },
     },
   });
+  */
 };

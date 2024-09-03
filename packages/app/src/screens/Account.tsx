@@ -1,5 +1,4 @@
 import FastAvatar from '@/components/FastAvatar';
-import StyledPressable from '@/components/StyledPressable';
 import useSignOut from '@/hooks/useSignOut';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -7,41 +6,62 @@ import { deleteMnemonic } from '@/lib/key';
 import { theme } from '@/lib/theme';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Text, View } from 'react-native';
+import { Alert, Text, TouchableHighlight, View } from 'react-native';
 import { Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { Entypo } from '@expo/vector-icons';
 
 interface SettingListItemProps {
+  isFirst?: boolean;
+  icon: React.ReactNode;
   title: string;
   onPress: () => void;
   color: string;
 }
 
 const SettingListItem = (props: SettingListItemProps) => {
-  const { title, onPress, color } = props;
+  const { icon, title, onPress, color } = props;
 
   return (
-    <StyledPressable
+    <TouchableHighlight
       style={{
-        padding: 8,
-        width: '62%',
-        borderWidth: 1,
-        borderRadius: 8,
-        backgroundColor: theme.background,
-        borderColor: color ? color : theme.text,
+        width: '100%',
+        height: 60,
       }}
       onPress={onPress}
+      underlayColor={theme.backgroundHover}
     >
-      <Text
+      <View
         style={{
-          fontSize: 16,
-          textAlign: 'center',
-          color: color ? color : theme.text,
+          paddingHorizontal: 36,
+          width: '100%',
+          flexDirection: 'row',
+          justifyContent: 'flex-start',
+          alignItems: 'center',
+          height: '100%',
         }}
       >
-        {title}
-      </Text>
-    </StyledPressable>
+        <View
+          style={{
+            width: 20,
+          }}
+        >
+          {icon}
+        </View>
+        <Text
+          style={{
+            marginLeft: 24,
+            fontSize: 16,
+            textAlign: 'center',
+            fontWeight: '500',
+            color: color ? color : theme.text,
+          }}
+        >
+          {title}
+        </Text>
+      </View>
+    </TouchableHighlight>
   );
 };
 
@@ -138,20 +158,23 @@ const Account = () => {
           flexDirection: 'column',
           alignItems: 'center',
           marginTop: 24,
-          rowGap: 12,
         }}
       >
         <SettingListItem
+          isFirst
+          icon={<MaterialIcons name="backup" size={24} color={theme.gray} />}
           title={t('backupAccount')}
           onPress={() => navigation.navigate('BackupAccount')}
           color={theme.text}
         />
         <SettingListItem
+          icon={<Entypo name="language" size={24} color={theme.gray} />}
           title={t('language')}
           onPress={onChangeLanguagePress}
           color={theme.text}
         />
         <SettingListItem
+          icon={<MaterialIcons name="logout" size={24} color={theme.waning} />}
           title={t('signOut')}
           onPress={onSignOutPress}
           color={theme.waning}

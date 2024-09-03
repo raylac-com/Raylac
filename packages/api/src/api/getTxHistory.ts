@@ -34,39 +34,7 @@ const getTxHistory = async ({ userId }: { userId: number }) => {
     })
   );
 
-  const outgoingTransfers = await prisma.transfer.findMany({
-    select: {
-      amount: true,
-      toAddress: true,
-      toUser: {
-        select: {
-          id: true,
-          name: true,
-          username: true,
-        },
-      },
-      userOpReceipts: {
-        select: {
-          success: true,
-        },
-      },
-      createdAt: true,
-    },
-    where: {
-      fromUserId: userId,
-    },
-  });
-
   const transfers: Transfer[] = [
-    ...outgoingTransfers.map(transfer => ({
-      type: 'outgoing',
-      to: transfer.toUser || (transfer.toAddress as Hex),
-      amount: Number(transfer.amount / BigInt(10 ** 6)),
-      timestamp: transfer.createdAt.getTime(),
-      status: transfer.userOpReceipts.every(receipt => receipt.success)
-        ? TransferStatus.Success
-        : TransferStatus.Pending,
-    })),
     ...incomingTxs.flatMap(txs =>
       txs.transfers.map(tx => ({
         type: 'incoming',
