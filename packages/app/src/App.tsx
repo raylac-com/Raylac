@@ -34,6 +34,9 @@ import { getSelectedLanguage } from './i18n';
 import Receive from './screens/Receive';
 import Card from './screens/Card';
 import CardInfo from './screens/CardInfo';
+import AccountInfo from './screens/AccountInfo/AccountInfo';
+import UpdateDisplayName from './screens/AccountInfo/UpdateDisplayName';
+import UpdateUsername from './screens/AccountInfo/UpdateUsername';
 
 Sentry.init({
   dsn: 'https://adc4c437047fef7e4ebe5d0d77df3ff5@o1348995.ingest.us.sentry.io/4507536730030080',
@@ -236,6 +239,33 @@ const Screens = () => {
         component={SendSuccess}
         options={{
           title: t('title', { ns: 'SendSuccess' }),
+          headerBackVisible: true,
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+        }}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="AccountInfo"
+        component={AccountInfo}
+        options={{
+          title: t('title', { ns: 'AccountInfo' }),
+          headerBackVisible: true,
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+        }}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="UpdateDisplayName"
+        component={UpdateDisplayName}
+        options={{
+          title: t('title', { ns: 'UpdateDisplayName' }),
+          headerBackVisible: true,
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+        }}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="UpdateUsername"
+        component={UpdateUsername}
+        options={{
+          title: t('title', { ns: 'UpdateUsername' }),
           headerBackVisible: true,
           headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}

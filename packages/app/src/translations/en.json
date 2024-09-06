@@ -27,8 +27,25 @@
     "confirmSignOutTitle": "Sign out?",
     "confirmSignOut": "Confirm",
     "backupAccount": "Backup account",
+    "accountInfo": "Account info",
     "cancel": "Cancel",
     "language": "Language"
+  },
+  "AccountInfo": {
+    "title": "",
+    "displayName": "Name",
+    "username": "Username",
+    "edit": "Edit"
+  },
+  "UpdateDisplayName": {
+    "title": "",
+    "save": "",
+    "displayName": "Name"
+  },
+  "UpdateUsername": {
+    "title": "",
+    "save": "",
+    "username": "Username"
   },
     "SignUp": {
       "title": "Sign Up",

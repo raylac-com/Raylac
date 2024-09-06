@@ -4,19 +4,17 @@ import { z } from 'zod';
 import prisma from './lib/prisma';
 import { Hex } from 'viem';
 import { authedProcedure, publicProcedure, router } from './trpc';
-import { UserOperation } from '@sutori/shared';
-import { signUserOp } from './lib/paymaster';
 import { createContext } from './context';
 import { handleNewStealthAccount } from './lib/stealthAccount';
-import send from './api/send';
 import signUp from './api/signUp';
 import { webcrypto } from 'node:crypto';
 import getUsers from './api/getUsers';
-import getStealthAccounts from './api/getStealthAccounts';
 import getBalance from './api/getBalance';
 import getTxHistory from './api/getTxHistory';
 import signIn from './api/signIn';
 import getUsdToJpy from './api/getUsdToJpy';
+import updateDisplayName from './api/updateDisplayName';
+import updateUsername from './api/updateUsername';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -51,23 +49,6 @@ const appRouter = router({
       return unusedInviteCodeExists ? true : false;
     }),
 
-  signUserOp: authedProcedure
-    .input(
-      z.object({
-        userOp: z.any(),
-      })
-    )
-    .mutation(async opts => {
-      const { input } = opts;
-      const userOp = input.userOp as UserOperation;
-
-      // TODO: Validate that the user has signed this user operation
-
-      const sig = await signUserOp(userOp);
-
-      return sig;
-    }),
-
   /**
    * Send a transfer to a stealth address
    */
@@ -84,18 +65,7 @@ const appRouter = router({
           .optional(),
       })
     )
-    .mutation(async opts => {
-      const { input } = opts;
-
-      const userId = opts.ctx.userId;
-      const userOps = input.userOps as UserOperation[];
-
-      await send({
-        senderUserId: userId,
-        userOps,
-        stealthAccount: input.stealthAccount,
-      });
-
+    .mutation(async _opts => {
       return 'ok';
     }),
 
@@ -105,17 +75,6 @@ const appRouter = router({
   getUsers: publicProcedure.query(async () => {
     const users = await getUsers();
     return users;
-  }),
-
-  /**
-   * Get the stealth accounts of the user
-   */
-  getStealthAccounts: authedProcedure.query(async opts => {
-    const userId = opts.ctx.userId;
-
-    const addressWithBalances = await getStealthAccounts({ userId });
-
-    return addressWithBalances;
   }),
 
   /**
@@ -139,6 +98,44 @@ const appRouter = router({
 
     return transfers;
   }),
+
+  /**
+   * Update the display name of the user
+   */
+  updateDisplayName: authedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+      })
+    )
+    .mutation(async opts => {
+      const { input } = opts;
+      const userId = opts.ctx.userId;
+
+      await updateDisplayName({
+        userId,
+        name: input.name,
+      });
+    }),
+
+  /**
+   * Update the username of the user
+   */
+  updateUsername: authedProcedure
+    .input(
+      z.object({
+        username: z.string(),
+      })
+    )
+    .mutation(async opts => {
+      const { input } = opts;
+      const userId = opts.ctx.userId;
+
+      await updateUsername({
+        userId,
+        username: input.username,
+      });
+    }),
 
   getUsdToJpy: publicProcedure.query(async () => {
     const usdToJpy = await getUsdToJpy();

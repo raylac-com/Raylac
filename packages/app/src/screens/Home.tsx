@@ -151,7 +151,7 @@ const HomeScreen = () => {
               marginTop: 6,
             }}
           >
-            {usdToJpy !== undefined ? `${formatUnits(jpyBalance, 6)}円` : ''}
+            {jpyBalance !== undefined ? `${formatUnits(jpyBalance, 6)}円` : ''}
           </Text>
         </View>
         <View

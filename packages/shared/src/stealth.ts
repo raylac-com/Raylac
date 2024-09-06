@@ -1,40 +1,11 @@
 import * as secp from '@noble/secp256k1';
-import {
-  Chain,
-  HttpTransport,
-  PublicClient,
-  hexToBigInt,
-  keccak256,
-  toHex,
-} from 'viem';
+import { hexToBigInt, keccak256, toHex } from 'viem';
 import { Hex } from 'viem';
-import { getInitCode, getSenderAddress } from './erc4337';
 import { hexToProjectivePoint, projectivePointToHex } from './utils';
 
 const g = {
   x: secp.CURVE.Gx,
   y: secp.CURVE.Gy,
-};
-
-/**
- * Get the address of the contract account created by the given stealthPubKey.
- * This functions calls the `getSenderAddress` function of the entry point contract.
- */
-export const getStealthAddress = async ({
-  client,
-  stealthSigner,
-}: {
-  client: PublicClient<HttpTransport, Chain>;
-  stealthSigner: Hex;
-}) => {
-  const initCode = getInitCode({ stealthSigner });
-
-  const senderAddress = await getSenderAddress({
-    client,
-    initCode,
-  });
-
-  return senderAddress;
 };
 
 /**

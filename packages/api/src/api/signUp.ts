@@ -1,39 +1,14 @@
-import {
-  ERC20Abi,
-  USDC_CONTRACT_ADDRESS,
-  generateStealthAddress,
-  getStealthAddress,
-} from '@sutori/shared';
-import { publicClient, walletClient } from '../lib/viem';
-import { Hex, parseUnits } from 'viem';
-import { privateKeyToAccount, publicKeyToAddress } from 'viem/accounts';
+import { Hex } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 import prisma from '../lib/prisma';
 import jwt from 'jsonwebtoken';
 import { JWT_PRIV_KEY } from '../utils';
-import { handleNewStealthAccount } from '../lib/stealthAccount';
 
 const SIGNUP_BONUS_PAYER_PRIV_KEY = process.env.SIGNUP_BONUS_PAYER_PRIV_KEY;
 
 if (!SIGNUP_BONUS_PAYER_PRIV_KEY) {
   throw new Error('Missing SIGNUP_BONUS_PAYER_PRIV_KEY');
 }
-
-const SIGN_UP_BONUS_PAYER_ACCOUNT = privateKeyToAccount(
-  SIGNUP_BONUS_PAYER_PRIV_KEY as Hex
-);
-
-const BONUS_AMOUNT = parseUnits('1', 6);
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const sendSignUpBonus = async ({ to }: { to: Hex }) => {
-  await walletClient.writeContract({
-    abi: ERC20Abi,
-    address: USDC_CONTRACT_ADDRESS,
-    functionName: 'transfer',
-    args: [to as Hex, BONUS_AMOUNT],
-    account: SIGN_UP_BONUS_PAYER_ACCOUNT,
-  });
-};
 
 /**
  * Sign up a new user.
@@ -81,36 +56,6 @@ const signUp = async ({
       viewingPrivKey: viewingPrivKey,
     },
   });
-
-  const sendSignUpBonusTo = await generateStealthAddress({
-    spendingPubKey: spendingPubKey,
-    viewingPubKey: viewingAccount.publicKey,
-  });
-
-  const sendSignUpBonusToAddress = await getStealthAddress({
-    client: publicClient,
-    stealthSigner: publicKeyToAddress(sendSignUpBonusTo.stealthPubKey),
-  });
-
-  if (!sendSignUpBonusToAddress) {
-    throw new Error('Failed to generate stealth address');
-  }
-
-  await handleNewStealthAccount({
-    userId: user.id,
-    stealthAccount: {
-      address: sendSignUpBonusToAddress,
-      stealthPubKey: sendSignUpBonusTo.stealthPubKey,
-      viewTag: sendSignUpBonusTo.viewTag,
-      ephemeralPubKey: sendSignUpBonusTo.ephemeralPubKey,
-    },
-  });
-
-  /*
-  await sendSignUpBonus({
-    to: sendSignUpBonusToAddress,
-  });
-  */
 
   const token = jwt.sign({ userId: user.id }, JWT_PRIV_KEY);
 

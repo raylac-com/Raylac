@@ -35,8 +35,25 @@
     "confirmSignOutTitle": "ログアウトしますか？",
     "confirmSignOut": "ログアウト",
     "backupAccount": "アカウントのバックアップ",
+    "accountInfo": "アカウント情報",
     "cancel": "キャンセル",
     "language": "言語"
+  },
+  "AccountInfo": {
+    "title": "アカウント情報",
+    "displayName": "名前",
+    "username": "ユーザー名",
+    "edit": "編集"
+  },
+  "UpdateDisplayName": {
+    "title": "名前を変更",
+    "save": "保存",
+    "displayName": "名前"
+  },
+  "UpdateUsername": {
+    "title": "ユーザー名を変更",
+    "save": "保存",
+    "username": "ユーザー名"
   },
   "SignUp": {
     "title": "アカウント作成",

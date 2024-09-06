@@ -38,7 +38,6 @@ model User {
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   UserStealthAddress UserStealthAddress[]
-  incomingTransfers  IncomingTransfer[]
 }
 
 model UserStealthAddress {
@@ -62,18 +61,16 @@ model ERC20Token {
   decimals         Int
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
-  IncomingTransfer IncomingTransfer[]
+  transfers        StealthTransfer[]
+  ERC20TransferLog ERC20TransferLog[]
 }
 
-model IncomingTransfer {
+/// A StealthTransfer consists of multiple ERC20 token trnasfers
+/// to disguist the destination address and the amount
+model StealthTransfer {
   id          Int        @id @default(autoincrement())
   token       ERC20Token @relation(fields: [tokenId], references: [id])
   tokenId     Int
-  fromAddress String
-  toAddress   String
-  toUser      User       @relation(fields: [toUserId], references: [id])
-  toUserId    Int
-  groupingTag String?
   amount      BigInt
   blockNumber BigInt
   logIndex    Int
@@ -85,19 +82,21 @@ model IncomingTransfer {
   @@unique([blockNumber, logIndex, txIndex, chainId])
 }
 
-model UserOperationReceipt {
-  hash          String   @id
-  nonce         BigInt?
-  success       Boolean?
-  actualGasUsed BigInt?
-  actualGasCost BigInt?
-  blockNumber   BigInt?
-  logIndex      Int?
-  txIndex       Int?
-  chainId       Int?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  transferId    Int?
+model ERC20TransferLog {
+  id          Int        @id @default(autoincrement())
+  token       ERC20Token @relation(fields: [tokenId], references: [id])
+  tokenId     Int
+  from        String
+  to          String
+  amount      BigInt
+  blockNumber BigInt
+  logIndex    Int
+  txIndex     Int
+  chainId     Int
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([blockNumber, logIndex, txIndex, chainId])
 }
 
 model InviteCode {

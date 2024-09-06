@@ -20,6 +20,10 @@ export type RootStackParamsList = {
 
   CardInfo: undefined;
 
+  AccountInfo: undefined;
+  UpdateDisplayName: undefined;
+  UpdateUsername: undefined;
+
   // Send stack
   SelectSend: undefined;
   SendToNonSutoriUser: undefined;

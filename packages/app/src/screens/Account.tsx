@@ -6,11 +6,12 @@ import { deleteMnemonic } from '@/lib/key';
 import { theme } from '@/lib/theme';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Text, TouchableHighlight, View } from 'react-native';
+import { Alert, Pressable, Text, TouchableHighlight, View } from 'react-native';
 import { Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Entypo } from '@expo/vector-icons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 interface SettingListItemProps {
   isFirst?: boolean;
@@ -34,32 +35,49 @@ const SettingListItem = (props: SettingListItemProps) => {
     >
       <View
         style={{
-          paddingHorizontal: 36,
           width: '100%',
-          flexDirection: 'row',
-          justifyContent: 'flex-start',
-          alignItems: 'center',
           height: '100%',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingHorizontal: 36,
         }}
       >
         <View
           style={{
-            width: 20,
+            flexDirection: 'row',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+            height: '100%',
           }}
         >
-          {icon}
+          <View
+            style={{
+              width: 20,
+            }}
+          >
+            {icon}
+          </View>
+          <Text
+            style={{
+              marginLeft: 24,
+              fontSize: 16,
+              textAlign: 'center',
+              fontWeight: '500',
+              color: color ? color : theme.text,
+            }}
+          >
+            {title}
+          </Text>
         </View>
-        <Text
+        <Entypo
+          name="chevron-right"
+          size={18}
+          color={theme.text}
           style={{
-            marginLeft: 24,
-            fontSize: 16,
-            textAlign: 'center',
-            fontWeight: '500',
-            color: color ? color : theme.text,
+            opacity: 0.7,
           }}
-        >
-          {title}
-        </Text>
+        />
       </View>
     </TouchableHighlight>
   );
@@ -132,15 +150,33 @@ const Account = () => {
             address={publicKeyToAddress(user.spendingPubKey as Hex)}
             size={50}
           ></FastAvatar>
-          <Text
+          <Pressable
             style={{
-              fontSize: 24,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
               marginTop: 12,
-              color: theme.text,
             }}
+            onPress={() => navigation.navigate('UpdateDisplayName')}
           >
-            {user.name}
-          </Text>
+            <Text
+              style={{
+                fontSize: 24,
+                color: theme.text,
+              }}
+            >
+              {user.name}
+            </Text>
+            <AntDesign
+              name="edit"
+              size={22}
+              color={theme.gray}
+              style={{
+                marginLeft: 4,
+                marginRight: -12,
+              }}
+            />
+          </Pressable>
           <Text
             style={{
               marginTop: 4,
@@ -160,6 +196,15 @@ const Account = () => {
           marginTop: 24,
         }}
       >
+        <SettingListItem
+          isFirst
+          icon={
+            <MaterialIcons name="account-circle" size={24} color={theme.gray} />
+          }
+          title={t('accountInfo')}
+          onPress={() => navigation.navigate('AccountInfo')}
+          color={theme.text}
+        />
         <SettingListItem
           isFirst
           icon={<MaterialIcons name="backup" size={24} color={theme.gray} />}
