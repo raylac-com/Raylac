@@ -10,6 +10,7 @@ import signUp from './api/signUp';
 import { webcrypto } from 'node:crypto';
 import getUsers from './api/getUsers';
 import getBalance from './api/getBalance';
+import buildStealthTransfer from './api/buildStealthTransfer';
 import getTxHistory from './api/getTxHistory';
 import signIn from './api/signIn';
 import getUsdToJpy from './api/getUsdToJpy';
@@ -49,20 +50,44 @@ const appRouter = router({
       return unusedInviteCodeExists ? true : false;
     }),
 
+  buildStealthTransfer: authedProcedure
+    .input(
+      z.object({
+        amount: z.string(),
+        toUserId: z.number(),
+      })
+    )
+    .mutation(async opts => {
+      const { input } = opts;
+
+      const stealthTransfer = await buildStealthTransfer({
+        amount: input.amount,
+        toUserId: input.toUserId,
+      });
+
+      return stealthTransfer;
+    }),
+
   /**
    * Send a transfer to a stealth address
    */
   send: authedProcedure
     .input(
       z.object({
-        userOps: z.any(),
-        stealthAccount: z
-          .object({
-            ephemeralPubKey: z.string(),
-            stealthPubKey: z.string(),
-            viewTag: z.string(),
-          })
-          .optional(),
+        stealthTransferData: z.object({
+          inputs: z.array(
+            z.object({
+              amount: z.string(),
+              from: z.object({
+                address: z.string(),
+                viewTag: z.string(),
+                stealthPubKey: z.string(),
+                ephemeralPubKey: z.string(),
+              }),
+            })
+          ),
+        }),
+        signatures: z.array(z.string()),
       })
     )
     .mutation(async _opts => {

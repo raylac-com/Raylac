@@ -1,6 +1,6 @@
 import { Hex } from 'viem';
 
-export interface StealthAccount {
+export interface StealthAddressWithEphemeral {
   address: Hex;
   viewTag: string;
   stealthPubKey: Hex;
@@ -32,6 +32,14 @@ export interface Transfer {
   amount: number;
   timestamp: number;
 }
+
+export interface StealthInnerTransfer {
+  from: StealthAddressWithEphemeral;
+  to: StealthAddressWithEphemeral;
+  amount: number;
+}
+
+export type StealthTransferData = StealthInnerTransfer[];
 
 export interface User {
   id: number;

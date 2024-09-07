@@ -79,3 +79,15 @@ export const splitToUnits = ({
 
   return result;
 };
+
+export const getRandomBigInt = ({
+  min,
+  max,
+}: {
+  min: bigint;
+  max: bigint;
+}): bigint => {
+  const range = max - min + 1n; // Calculate the range
+  const randomValue = BigInt(Math.floor(Math.random() * Number(range))); // Generate a random number in range
+  return min + randomValue;
+};

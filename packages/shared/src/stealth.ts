@@ -2,6 +2,8 @@ import * as secp from '@noble/secp256k1';
 import { hexToBigInt, keccak256, toHex } from 'viem';
 import { Hex } from 'viem';
 import { hexToProjectivePoint, projectivePointToHex } from './utils';
+import { publicKeyToAddress } from 'viem/accounts';
+import { StealthAddressWithEphemeral } from './types';
 
 const g = {
   x: secp.CURVE.Gx,
@@ -64,11 +66,12 @@ export const checkStealthAddress = (input: {
 
 /**
  * Generate a stealth address for the given spending and viewing public keys.
+ * Returns the stealth public key, ephemeral public key, and view tag.
  */
 export const generateStealthAddress = (input: {
   spendingPubKey: Hex;
   viewingPubKey: Hex;
-}) => {
+}): StealthAddressWithEphemeral => {
   const spendingPubKey = hexToProjectivePoint(input.spendingPubKey);
   const viewingPubKey = hexToProjectivePoint(input.viewingPubKey);
 
@@ -91,9 +94,13 @@ export const generateStealthAddress = (input: {
   const sH = secp.ProjectivePoint.fromAffine(g).multiply(secretHash);
 
   const stealthPubKey = spendingPubKey.add(sH);
+  const stealthPubKeyHex = projectivePointToHex(stealthPubKey);
+
+  const address = publicKeyToAddress(stealthPubKeyHex);
 
   return {
-    stealthPubKey: projectivePointToHex(stealthPubKey),
+    address,
+    stealthPubKey: stealthPubKeyHex,
     ephemeralPubKey: projectivePointToHex(ephemeralPubKey),
     viewTag,
   };

@@ -5,10 +5,7 @@ import { RouterOutput } from '@/types';
 import {
   USDC_CONTRACT_ADDRESS,
   ERC20Abi,
-  SUTORI_PAYMASTER_ADDRESS,
-  buildUserOp,
   encodePaymasterAndData,
-  getUserOpHash,
   recoveryStealthPrivKey,
   StealthAccount,
 } from '@sutori/shared';
@@ -27,46 +24,26 @@ BigInt.prototype.toJSON = function () {
  * Hook to build and send user operations
  */
 const useSend = () => {
-  const { data: userStealthAccounts } = trpc.getStealthAccounts.useQuery();
   const { mutateAsync: send } = trpc.send.useMutation();
-  const { mutateAsync: signUserOp } = trpc.signUserOp.useMutation();
+  const { mutateAsync: buildStealthTransfer } =
+    trpc.buildStealthTransfer.useMutation();
 
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({
       amount,
-      to,
-      stealthAccount,
+      toUserId,
     }: {
       amount: bigint;
-      to: string;
-      stealthAccount?: StealthAccount;
+      toUserId: number;
     }) => {
-      if (!userStealthAccounts) {
-        throw new Error('Stealth addresses not loaded');
-      }
+      const stealthTransferData = await buildStealthTransfer({
+        amount: amount.toString(),
+        toUserId,
+      });
 
-      // Sort the stealth accounts by balance
-      const sortedStealthAccounts = userStealthAccounts.sort((a, b) =>
-        BigInt(b.balance) > BigInt(a.balance) ? 1 : -1
-      );
-
-      let currentAmount = BigInt(0);
-      const sendFrom: RouterOutput['getStealthAccounts'] = [];
-
-      for (const account of sortedStealthAccounts) {
-        sendFrom.push(account);
-        currentAmount += BigInt(account.balance);
-
-        if (currentAmount >= amount) {
-          break;
-        }
-      }
-
-      if (currentAmount < amount) {
-        throw new Error('Not enough funds');
-      }
+      // Recover the private keys of the inputs specified in "stealthTransferData".
 
       const mnemonic = await getMnemonic();
       const viewPrivKey = await getViewingPrivKey(mnemonic);
@@ -80,47 +57,16 @@ const useSend = () => {
         throw new Error('No spending key found');
       }
 
-      let remainingAmount = amount;
-
-      const userOps = await Promise.all(
-        sendFrom.map(async account => {
-          const accountBalance = BigInt(account.balance);
-
-          const sendAmount =
-            remainingAmount > accountBalance ? accountBalance : remainingAmount;
-
+      const signatures = await Promise.all(
+        stealthTransferData.inputs.map(async input => {
           const transferCall = encodeFunctionData({
             abi: ERC20Abi,
             functionName: 'transfer',
-            args: [to as Hex, sendAmount],
-          });
-
-          const stealthSigner = publicKeyToAddress(
-            account.stealthPubKey as Hex
-          );
-
-          const userOp = await buildUserOp({
-            client: publicClient,
-            stealthSigner,
-            value: BigInt(0),
-            to: USDC_CONTRACT_ADDRESS,
-            data: transferCall,
-          });
-
-          userOp.paymasterAndData = encodePaymasterAndData({
-            paymaster: SUTORI_PAYMASTER_ADDRESS,
-            data: await signUserOp({ userOp }),
-          });
-
-          remainingAmount -= sendAmount;
-
-          const userOpHash = await getUserOpHash({
-            client: publicClient,
-            userOp,
+            args: [stealthTransferData.to.address, input.amount],
           });
 
           const stealthPrivKey = recoveryStealthPrivKey({
-            ephemeralPubKey: account.ephemeralPubKey as Hex,
+            ephemeralPubKey: input.from.ephemeralPubKey,
             viewingPrivKey: viewPrivKey as Hex,
             spendingPrivKey: spendingPrivKey as Hex,
           });
@@ -128,19 +74,17 @@ const useSend = () => {
           const sig = await signMessage({
             privateKey: stealthPrivKey,
             message: {
-              raw: userOpHash,
+              raw: transferCall,
             },
           });
 
-          userOp.signature = sig;
-
-          return userOp;
+          return sig;
         })
       );
 
       await send({
-        userOps,
-        stealthAccount,
+        signatures,
+        stealthTransferData: stealthTransferData,
       });
     },
     onSuccess: () => {

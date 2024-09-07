@@ -1,4 +1,4 @@
-import { StealthAccount } from '@sutori/shared';
+import { StealthAddressWithEphemeral } from '@sutori/shared';
 import * as erc5564 from './erc5564';
 import { Hex } from 'viem';
 import prisma from './prisma';
@@ -12,7 +12,7 @@ export const handleNewStealthAccount = async ({
   stealthAccount,
 }: {
   userId: number;
-  stealthAccount: StealthAccount;
+  stealthAccount: StealthAddressWithEphemeral;
 }) => {
   // Submit an announcement to the ERC5564 announcer contract
   await erc5564.announce({
