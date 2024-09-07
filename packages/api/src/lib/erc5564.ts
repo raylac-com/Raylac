@@ -4,7 +4,7 @@ import {
   ERC5564_ANNOUNCER_ADDRESS,
   ERC5564AnnouncerAbi,
   formatERC5564AnnouncementLog,
-} from '@sutori/shared';
+} from '@raylac/shared';
 import { privateKeyToAccount } from 'viem/accounts';
 import { publicClient, walletClient } from './viem';
 import prisma from './prisma';

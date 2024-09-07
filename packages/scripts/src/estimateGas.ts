@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { AccountFactoryAbi, ACCOUNT_FACTORY_ADDRESS } from '@sutori/shared';
+import { AccountFactoryAbi, ACCOUNT_FACTORY_ADDRESS } from '@raylac/shared';
 import { publicClient } from './viem';
 import { encodeFunctionData } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';

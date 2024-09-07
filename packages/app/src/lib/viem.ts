@@ -3,7 +3,7 @@ import {
   getChain,
   getPublicClient,
   getWalletClient,
-} from '@sutori/shared';
+} from '@raylac/shared';
 
 const chain = getChain();
 

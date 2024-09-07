@@ -9,7 +9,7 @@
       "distribution": "internal",
       "env": {
         "SENTRY_AUTH_TOKEN": "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",
-        "EXPO_PUBLIC_RPC_URL": "https://sutori-api.onrender.com",
+        "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
         "EXPO_PUBLIC_ALCHEMY_API_KEY": "UfWNqNlX3Wq4oJtE0iObWWgcenwyICcp",
         "EXPO_PUBLIC_CHAIN": "base-sepolia",
         "APP_VARIANT": "development"
@@ -19,7 +19,7 @@
       "distribution": "internal",
       "env": {
         "SENTRY_AUTH_TOKEN": "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",
-        "EXPO_PUBLIC_RPC_URL": "https://sutori-api.onrender.com",
+        "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
         "EXPO_PUBLIC_ALCHEMY_API_KEY": "UfWNqNlX3Wq4oJtE0iObWWgcenwyICcp",
         "EXPO_PUBLIC_CHAIN": "base-mainnet"
       }
@@ -27,7 +27,7 @@
     "production": {
       "env": {
         "SENTRY_AUTH_TOKEN": "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",
-        "EXPO_PUBLIC_RPC_URL": "https://sutori-api.onrender.com",
+        "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
         "EXPO_PUBLIC_ALCHEMY_API_KEY": "UfWNqNlX3Wq4oJtE0iObWWgcenwyICcp",
         "EXPO_PUBLIC_CHAIN": "base-mainnet"
       },

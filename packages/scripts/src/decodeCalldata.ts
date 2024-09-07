@@ -1,4 +1,4 @@
-import { ERC20Abi, SutoriAccountAbi } from '@sutori/shared';
+import { ERC20Abi, SutoriAccountAbi } from '@raylac/shared';
 import { Hex, decodeFunctionData } from 'viem';
 
 const decodeCalldata = () => {

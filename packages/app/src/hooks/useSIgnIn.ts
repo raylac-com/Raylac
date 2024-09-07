@@ -4,7 +4,7 @@ import { trpc } from '@/lib/trpc';
 import { saveSignedInUser } from '@/lib/utils';
 import { publicClient } from '@/lib/viem';
 import userKeys from '@/queryKeys/userKeys';
-import { buildSiweMessage } from '@sutori/shared';
+import { buildSiweMessage } from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { publicKeyToAddress } from 'viem/accounts';
 

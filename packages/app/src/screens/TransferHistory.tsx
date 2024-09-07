@@ -1,6 +1,6 @@
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import { trpc } from '@/lib/trpc';
-import { Transfer } from '@sutori/shared';
+import { Transfer } from '@raylac/shared';
 import { FlatList, Text, View } from 'react-native';
 
 const TransferHistory = () => {

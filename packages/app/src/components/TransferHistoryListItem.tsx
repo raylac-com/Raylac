@@ -4,7 +4,7 @@ import FastAvatar from './FastAvatar';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
 import { Hex, getAddress } from 'viem';
-import { Transfer, TransferStatus } from '@sutori/shared';
+import { Transfer, TransferStatus } from '@raylac/shared';
 import { useTranslation } from 'react-i18next';
 
 const SIGN_UP_BONUS_PAYER_ADDRESS =

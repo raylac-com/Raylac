@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: sutori-api
+    name: raylac-api
     plan: standard
     previewPlan: starter
     runtime: node
@@ -14,15 +14,15 @@ services:
         - packages/api/**/*
         - packages/shared/**/*
     envVars:
-      - fromGroup: sutori
+      - fromGroup: raylac
       - key: NODE_VERSION
         value: 18.17.0
       - key: DATABASE_URL
         fromDatabase:
-          name: sutori
+          name: raylac
           property: connectionString
   - type: worker
-    name: sutori-sync
+    name: raylac-sync
     plan: standard
     runtime: node
     region: oregon
@@ -36,17 +36,17 @@ services:
         - packages/sync/**/*
         - packages/shared/**/*  
     envVars:
-      - fromGroup: sutori
+      - fromGroup: raylac
       - key: NODE_VERSION
         value: 18.17.0
       - key: DATABASE_URL
         fromDatabase:
-          name: sutori
+          name: raylac
           property: connectionString
 
 databases:
-  - name: sutori
-    databaseName: sutori
+  - name: raylac
+    databaseName: raylac
     region: oregon
     plan: standard
     postgresMajorVersion: 15

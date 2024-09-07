@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma';
 import { publicClient } from '@/lib/viem';
 import { JWT_PRIV_KEY } from '@/utils';
-import { buildSiweMessage } from '@sutori/shared';
+import { buildSiweMessage } from '@raylac/shared';
 import jwt from 'jsonwebtoken';
 import { Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';

@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { Hex } from 'viem';
-import { generateStealthAddress, StealthAccount } from '@sutori/shared';
+import { generateStealthAddress, StealthAccount } from '@raylac/shared';
 import { publicKeyToAddress } from 'viem/accounts';
 
 /**

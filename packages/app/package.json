@@ -1,5 +1,5 @@
 {
-  "name": "@sutori/app",
+  "name": "@raylac/app",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -21,8 +21,8 @@
     "@react-navigation/native-stack": "^6.9.26",
     "@sentry/cli": "^2.32.1",
     "@sentry/react-native": "^5.22.3",
-    "@sutori/api": "workspace:*",
-    "@sutori/shared": "workspace:*",
+    "@raylac/api": "workspace:*",
+    "@raylac/shared": "workspace:*",
     "@tanstack/react-query": "^5.48.0",
     "@trpc/client": "11.0.0-rc.439",
     "@trpc/react-query": "11.0.0-rc.439",

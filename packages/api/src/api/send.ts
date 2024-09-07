@@ -1,4 +1,4 @@
-import { StealthTransferData } from '@sutori/shared';
+import { StealthTransferData } from '@raylac/shared';
 import { Hex } from 'viem';
 
 const send = async ({

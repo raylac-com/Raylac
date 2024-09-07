@@ -14,7 +14,7 @@ import { useCallback, useEffect } from 'react';
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import { useTranslation } from 'react-i18next';
-import { Transfer } from '@sutori/shared';
+import { Transfer } from '@raylac/shared';
 import StyledPressable from '@/components/StyledPressable';
 
 interface MenuItemProps {

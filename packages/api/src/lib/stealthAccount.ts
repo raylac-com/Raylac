@@ -1,4 +1,4 @@
-import { StealthAddressWithEphemeral } from '@sutori/shared';
+import { StealthAddressWithEphemeral } from '@raylac/shared';
 import * as erc5564 from './erc5564';
 import { Hex } from 'viem';
 import prisma from './prisma';

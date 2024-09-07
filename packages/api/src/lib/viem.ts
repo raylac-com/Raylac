@@ -1,4 +1,4 @@
-import { getAlchemyRpcUrl, getChain, getPublicClient, getWalletClient } from '@sutori/shared';
+import { getAlchemyRpcUrl, getChain, getPublicClient, getWalletClient } from '@raylac/shared';
 
 const chain = getChain();
 

@@ -13,10 +13,10 @@ export const buildSiweMessage = ({
   return createSiweMessage({
     issuedAt,
     address: address,
-    domain: 'sutori.com',
+    domain: 'raylac.com',
     nonce: '0xdeadbeef',
     chainId,
-    uri: 'https://sutori.com',
+    uri: 'https://raylac.com',
     version: '1',
   });
 };

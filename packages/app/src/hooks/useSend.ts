@@ -8,7 +8,7 @@ import {
   encodePaymasterAndData,
   recoveryStealthPrivKey,
   StealthAccount,
-} from '@sutori/shared';
+} from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
 import { Hex, encodeFunctionData } from 'viem';

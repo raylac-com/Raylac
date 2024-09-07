@@ -3,7 +3,7 @@ import {
   createTRPCReact,
   httpBatchLink,
 } from '@trpc/react-query';
-import type { AppRouter } from '@sutori/api';
+import type { AppRouter } from '@raylac/api';
 import { getAuthToken } from './auth';
 
 export const trpc = createTRPCReact<AppRouter>();

@@ -1,4 +1,4 @@
-import { checkStealthAddress, decodeERC5564Metadata } from '@sutori/shared';
+import { checkStealthAddress, decodeERC5564Metadata } from '@raylac/shared';
 import prisma from './lib/prisma';
 import { sleep } from './lib/utils';
 import { webcrypto } from 'node:crypto';

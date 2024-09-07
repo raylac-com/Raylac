@@ -82,8 +82,8 @@
     },
     "SelectSend": {
       "title": "Select Send",
-      "sendToSutoriUser": "Send to Sutori user",
-      "sendToNonSutoriUser": "Send to non-Sutori User"
+      "sendToSutoriUser": "Send to Raylac user",
+      "sendToNonSutoriUser": "Send to non-Raylac User"
     },
     "SendSuccess": {
       "title": "",
@@ -97,7 +97,7 @@
       "sendToUser": "Send to {{ name }}"
     },
     "SendToSutoriUser": {
-      "title": "Send to Sutori User",
+      "title": "Send to Raylac User",
       "searchUser": "Search by username"
     },
     "SendToNonSutoriUser": {

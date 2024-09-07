@@ -29,7 +29,7 @@ const ConfirmSend = ({ route }: Props) => {
         to: recipientUserOrAddress,
       });
     } else {
-      // If the recipient is a Sutori user,
+      // If the recipient is a Raylac user,
       // generate a stealth account and send to that
       const stealthAccount = await generateStealthAccount({
         viewingPubKey: recipientUserOrAddress.viewingPubKey as Hex,

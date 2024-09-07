@@ -1,4 +1,4 @@
-import { ENTRY_POINT_ADDRESS, SUTORI_PAYMASTER_ADDRESS } from '@sutori/shared';
+import { ENTRY_POINT_ADDRESS, SUTORI_PAYMASTER_ADDRESS } from '@raylac/shared';
 import { publicClient } from './lib/viem';
 import { parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
@@ -9,7 +9,7 @@ const userOpEvent = parseAbiItem(
 );
 
 /**
- * Fetch and save the logs of the user operations that were paid by the Sutori paymaster.
+ * Fetch and save the logs of the user operations that were paid by the Raylac paymaster.
  * An empty user operation receipt should have been created in the database for each user operation,
  * when the user sent a transfer.
  */

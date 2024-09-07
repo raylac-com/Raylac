@@ -4,7 +4,7 @@ import {
   getRandomBigInt,
   StealthAddressWithEphemeral,
   StealthTransferData,
-} from '@sutori/shared';
+} from '@raylac/shared';
 import { Hex } from 'viem';
 
 const MIN_BUFF_AMOUNT = BigInt(0);

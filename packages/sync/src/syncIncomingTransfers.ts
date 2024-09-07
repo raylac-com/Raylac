@@ -1,7 +1,7 @@
 import { publicClient } from './lib/viem';
 import prisma from './lib/prisma';
 import { sleep } from './lib/utils';
-import { USDC_CONTRACT_ADDRESS } from '@sutori/shared';
+import { USDC_CONTRACT_ADDRESS } from '@raylac/shared';
 import { Hex, parseAbiItem } from 'viem';
 import { base } from 'viem/chains';
 
@@ -32,7 +32,7 @@ const syncIncomingTransfers = async () => {
       },
     });
 
-    // Get all transfers made to Sutori users
+    // Get all transfers made to Raylac users
     const sutoriUserTransfers = logs.filter(log =>
       userAddresses.some(address => address.address === log.topics[2])
     );

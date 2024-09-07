@@ -38,7 +38,7 @@ importers:
       '@prisma/client':
         specifier: ^5.12.1
         version: 5.16.0(prisma@5.16.0)
-      '@sutori/shared':
+      '@raylac/shared':
         specifier: workspace:*
         version: link:../shared
       '@trpc/server':
@@ -111,10 +111,10 @@ importers:
       '@sentry/react-native':
         specifier: ^5.22.3
         version: 5.22.3(expo@51.0.17(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(bufferutil@4.0.8)(utf-8-validate@5.0.10))(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0)
-      '@sutori/api':
+      '@raylac/api':
         specifier: workspace:*
         version: link:../api
-      '@sutori/shared':
+      '@raylac/shared':
         specifier: workspace:*
         version: link:../shared
       '@tanstack/react-query':
@@ -287,10 +287,10 @@ importers:
       '@prisma/client':
         specifier: ^5.12.1
         version: 5.16.0(prisma@5.16.0)
-      '@sutori/api':
+      '@raylac/api':
         specifier: workspace:*
         version: link:../api
-      '@sutori/shared':
+      '@raylac/shared':
         specifier: workspace:*
         version: link:../shared
       '@trpc/client':
@@ -355,7 +355,7 @@ importers:
       '@prisma/client':
         specifier: ^5.12.1
         version: 5.16.0(prisma@5.16.0)
-      '@sutori/shared':
+      '@raylac/shared':
         specifier: workspace:*
         version: link:../shared
       dotenv:

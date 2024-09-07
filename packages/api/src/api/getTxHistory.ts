@@ -4,7 +4,7 @@ import {
   Transfer,
   TransferStatus,
   USDC_CONTRACT_ADDRESS,
-} from '@sutori/shared';
+} from '@raylac/shared';
 import { AssetTransfersCategory, SortingOrder } from 'alchemy-sdk';
 import { Hex } from 'viem';
 

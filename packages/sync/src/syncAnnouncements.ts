@@ -1,7 +1,7 @@
 import {
   ERC5564_ANNOUNCER_ADDRESS,
   formatERC5564AnnouncementLog,
-} from '@sutori/shared';
+} from '@raylac/shared';
 import { parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
 import { publicClient } from './lib/viem';
