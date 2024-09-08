@@ -43,6 +43,7 @@ const LanguageItem = (props: LanguageItemProps) => {
       <Text
         style={{
           color: theme.text,
+          fontWeight: 'bold',    
         }}
       >
         {language}

@@ -1,8 +1,11 @@
 import StyledButton from '@/components/StyledButton';
 import StyledTextInput from '@/components/StyledTextInput';
+import UsernameAvailabilityIndicator from '@/components/UsernameAvailabilityIndicator';
+import useCheckUsername from '@/hooks/useCheckUsername';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { trpc } from '@/lib/trpc';
+import { isValidUsername } from '@/lib/username';
 import userKeys from '@/queryKeys/userKeys';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
@@ -17,14 +20,14 @@ const UpdateUsername = () => {
 
   const { t } = useTranslation('UpdateUsername');
 
+  const { isUsernameAvailable, isCheckingUsername } =
+    useCheckUsername(newUsername);
+
+  const canSave =
+    isValidUsername(newUsername) && isUsernameAvailable && !isCheckingUsername;
+
   const { mutateAsync: updateUsername, isPending: isUpdating } =
-    trpc.updateUsername.useMutation({
-      onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: userKeys.signedInUser,
-        });
-      },
-    });
+    trpc.updateUsername.useMutation();
 
   const navigation = useTypedNavigation();
 
@@ -32,11 +35,14 @@ const UpdateUsername = () => {
     if (signedInUser.username) {
       setNewUsername(signedInUser.username);
     }
-  }, [signedInUser.username]);
+  }, [signedInUser]);
 
   const onSavePress = useCallback(async () => {
     // Save the new name
     await updateUsername({ username: newUsername });
+    await queryClient.invalidateQueries({
+      queryKey: userKeys.signedInUser,
+    });
 
     navigation.goBack();
   }, [newUsername]);
@@ -53,13 +59,21 @@ const UpdateUsername = () => {
         value={newUsername}
         onChangeText={setNewUsername}
       ></StyledTextInput>
+      <UsernameAvailabilityIndicator
+        isPending={isCheckingUsername}
+        isUsernameAvailable={
+          isUsernameAvailable || newUsername === signedInUser?.username
+        }
+        username={newUsername}
+      ></UsernameAvailabilityIndicator>
       <StyledButton
         style={{
           marginTop: 12,
         }}
         title={t('save')}
         disabled={
-          newUsername === signedInUser.username ||
+          !canSave ||
+          newUsername === signedInUser?.username ||
           newUsername === '' ||
           isUpdating
         }

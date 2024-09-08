@@ -47,9 +47,7 @@ const AccountInfoListItem = (props: AccountInfoListItemProps) => {
       <StyledButton
         title={t('edit')}
         onPress={props.onPress}
-        style={{
-          padding: 4,
-        }}
+        variant="underline"
       ></StyledButton>
     </View>
   );

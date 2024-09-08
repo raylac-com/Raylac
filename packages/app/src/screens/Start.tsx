@@ -4,10 +4,9 @@ import { useSignIn } from '@/hooks/useSIgnIn';
 import useSignOut from '@/hooks/useSignOut';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { deleteMnemonic, getMnemonic } from '@/lib/key';
-import { theme } from '@/lib/theme';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Image, Text, View } from 'react-native';
+import { Alert, Image, View } from 'react-native';
 
 /**
  * This screen in shown when the user is not signed in.
@@ -77,53 +76,70 @@ const Start = () => {
     <View
       style={{
         flex: 1,
+        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'flex-end',
-        rowGap: 24,
-        paddingBottom: 92,
+        justifyContent: 'space-between',
       }}
     >
-      <Image
-        src={require('../../assets/adaptive-icon.png')}
+      <View
         style={{
-          width: 80,
-          height: 80,
-        }}
-      ></Image>
-      <StyledButton
-        title={t('signIn')}
-        onPress={onSignInPress}
-        isLoading={isSigningIn}
-        style={{
+          height: '62%',
+          alignItems: 'center',
           justifyContent: 'center',
-          width: '90%',
-          height: 48,
         }}
-      ></StyledButton>
-      {mnemonicExists ? (
-        <Text
+      >
+        <Image
+          source={require('../../assets/adaptive-icon.png')}
           style={{
-            color: theme.waning,
-            opacity: 0.8,
+            width: 240,
+            height: 240,
           }}
-          onPress={onDeletePress}
-        >
-          {t('deleteAccount')}
-        </Text>
-      ) : (
-        // Don't show the "Create account" button if the mnemonic exists
+        ></Image>
+      </View>
+      <View
+        style={{
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          rowGap: 24,
+          paddingBottom: 92,
+          width: '100%',
+        }}
+      >
         <StyledButton
-          title={t('createAccount')}
-          onPress={() => {
-            navigation.navigate('SignUp');
-          }}
+          title={t('signIn')}
+          onPress={onSignInPress}
+          isLoading={isSigningIn}
           style={{
-            justifyContent: 'center',
             width: '90%',
             height: 48,
           }}
         ></StyledButton>
-      )}
+        {mnemonicExists ? (
+          <StyledButton
+            title={t('deleteAccount')}
+            variant="outline"
+            style={{
+              height: 48,
+              width: '90%',
+            }}
+            onPress={onDeletePress}
+          ></StyledButton>
+        ) : (
+          // Don't show the "Create account" button if the mnemonic exists
+          <StyledButton
+            title={t('createAccount')}
+            onPress={() => {
+              navigation.navigate('SignUp');
+            }}
+            variant="outline"
+            style={{
+              justifyContent: 'center',
+              width: '90%',
+              height: 48,
+            }}
+          ></StyledButton>
+        )}
+      </View>
     </View>
   );
 };

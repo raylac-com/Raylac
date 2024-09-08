@@ -6,12 +6,13 @@ import { deleteMnemonic } from '@/lib/key';
 import { theme } from '@/lib/theme';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, Text, TouchableHighlight, View } from 'react-native';
+import { Alert, Text, TouchableHighlight, View } from 'react-native';
 import { Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Entypo } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import useSetProfileImage from '@/hooks/useSetProfileImage';
 
 interface SettingListItemProps {
   isFirst?: boolean;
@@ -40,7 +41,7 @@ const SettingListItem = (props: SettingListItemProps) => {
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
-          paddingHorizontal: 36,
+          paddingHorizontal: 28,
         }}
       >
         <View
@@ -53,14 +54,14 @@ const SettingListItem = (props: SettingListItemProps) => {
         >
           <View
             style={{
-              width: 20,
+              width: 30,
             }}
           >
             {icon}
           </View>
           <Text
             style={{
-              marginLeft: 24,
+              marginLeft: 10,
               fontSize: 16,
               textAlign: 'center',
               fontWeight: '500',
@@ -88,6 +89,7 @@ const Account = () => {
   const { mutateAsync: signOut } = useSignOut();
   const navigation = useTypedNavigation();
   const { t } = useTranslation('Account');
+  const { mutateAsync: setProfileImage } = useSetProfileImage();
 
   const onSignOutPress = useCallback(async () => {
     Alert.alert(t('confirmSignOutTitle'), '', [
@@ -146,37 +148,41 @@ const Account = () => {
             alignItems: 'center',
           }}
         >
-          <FastAvatar
-            address={publicKeyToAddress(user.spendingPubKey as Hex)}
-            size={50}
-          ></FastAvatar>
-          <Pressable
+          <View
             style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginTop: 12,
+              position: 'relative',
+              width: 64,
+              height: 64,
             }}
-            onPress={() => navigation.navigate('UpdateDisplayName')}
           >
-            <Text
-              style={{
-                fontSize: 24,
-                color: theme.text,
-              }}
-            >
-              {user.name}
-            </Text>
+            <FastAvatar
+              address={publicKeyToAddress(user.spendingPubKey as Hex)}
+              size={64}
+              imageUrl={user.profileImage}
+            ></FastAvatar>
             <AntDesign
               name="edit"
-              size={22}
+              size={20}
               color={theme.gray}
               style={{
-                marginLeft: 4,
-                marginRight: -12,
+                right: 22,
+                bottom: 22,
+                position: 'absolute',
+              }}
+              onPress={() => {
+                setProfileImage();
               }}
             />
-          </Pressable>
+          </View>
+          <Text
+            style={{
+              marginTop: 12,
+              fontSize: 24,
+              color: theme.text,
+            }}
+          >
+            {user.name}
+          </Text>
           <Text
             style={{
               marginTop: 4,

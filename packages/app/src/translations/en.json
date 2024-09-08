@@ -32,25 +32,25 @@
     "language": "Language"
   },
   "AccountInfo": {
-    "title": "",
+    "title": "Account info",
     "displayName": "Name",
     "username": "Username",
-    "edit": "Edit"
+    "edit": "Edit"  
   },
   "UpdateDisplayName": {
-    "title": "",
-    "save": "",
+    "title": "Update Name",
+    "save": "Save",
     "displayName": "Name"
   },
   "UpdateUsername": {
-    "title": "",
-    "save": "",
+    "title": "Update Username",
+    "save": "Save",  
     "username": "Username"
   },
     "SignUp": {
       "title": "Sign Up",
       "name": "Name",
-    "username": "username",
+    "username": "Username",
     "usernameLengthWarning": "Username must be at least {{minChars}} characters",
     "usernameInvalid": "Username contains invalid characters",
     "usernameTaken": "Username is not available",

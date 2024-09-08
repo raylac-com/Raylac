@@ -5,11 +5,13 @@ import {
   Text,
   ActivityIndicator,
   PressableProps,
+  StyleSheet,
 } from 'react-native';
 
 type StyledButtonProps = {
   title: string;
   isLoading?: boolean;
+  variant?: 'primary' | 'outline' | 'underline';
 } & PressableProps;
 
 const StyledButton = (props: StyledButtonProps) => {
@@ -25,19 +27,49 @@ const StyledButton = (props: StyledButtonProps) => {
     setIsPressed(false);
   };
 
+  let pressableStyle;
+  switch (props.variant) {
+    case 'primary':
+      pressableStyle = styles.primaryButton;
+      break;
+    case 'outline':
+      pressableStyle = styles.outlineButton;
+      break;
+    case 'underline':
+      pressableStyle = styles.underlineButton;
+      break;
+    default:
+      pressableStyle = styles.primaryButton;
+  }
+
+  let textStyle;
+  switch (props.variant) {
+    case 'primary':
+      textStyle = {
+        color: theme.text,
+      };
+      break;
+    case 'outline':
+      textStyle = {
+        color: theme.primary,
+      };
+      break;
+    case 'underline':
+      textStyle = styles.underlineText;
+      break;
+    default:
+      textStyle = {
+        color: theme.text,
+      };
+  }
+
   return (
     <Pressable
       {...props}
       style={{
+        ...pressableStyle,
         ...style,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: theme.primary,
         opacity: disabled || isPressed ? 0.4 : 1,
-        paddingHorizontal: 36,
-        paddingVertical: 12,
-        borderRadius: 30,
       }}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
@@ -58,6 +90,7 @@ const StyledButton = (props: StyledButtonProps) => {
           color: theme.text,
           fontWeight: 'bold',
           fontSize: 16,
+          ...textStyle,
         }}
       >
         {title}
@@ -65,5 +98,42 @@ const StyledButton = (props: StyledButtonProps) => {
     </Pressable>
   );
 };
+
+const styles = StyleSheet.create({
+  primaryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.primary,
+    paddingHorizontal: 36,
+    paddingVertical: 12,
+    borderRadius: 30,
+  },
+  outlineButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+    borderColor: theme.primary,
+    borderWidth: 1,
+    paddingHorizontal: 36,
+    paddingVertical: 12,
+    borderRadius: 30,
+  },
+  underlineButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 36,
+    paddingVertical: 12,
+  },
+  underlineText: {
+    textDecorationLine: "underline",
+    textDecorationColor: theme.primary,
+    textDecorationStyle: "solid",
+    color: theme.text,
+    opacity: 0.7,
+  },
+});
 
 export default StyledButton;

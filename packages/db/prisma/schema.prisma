@@ -34,6 +34,7 @@ model User {
   viewingPrivKey     String               @unique
   name               String
   username           String               @unique
+  profileImage       String?
   inviteCode         String?              @unique
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt

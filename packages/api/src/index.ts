@@ -16,6 +16,7 @@ import signIn from './api/signIn';
 import getUsdToJpy from './api/getUsdToJpy';
 import updateDisplayName from './api/updateDisplayName';
 import updateUsername from './api/updateUsername';
+import updateProfileImage from './api/updateProfileImage';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -162,6 +163,24 @@ const appRouter = router({
       });
     }),
 
+  updateProfileImage: authedProcedure
+    .input(
+      z.object({
+        imageBase64: z.string(),
+        mimeType: z.string(),
+      })
+    )
+    .mutation(async opts => {
+      const { input } = opts;
+
+      await updateProfileImage({
+        userId: opts.ctx.userId,
+        imageBase64: input.imageBase64,
+        mimeType: input.mimeType,
+      });
+      return 'ok';
+    }),
+
   getUsdToJpy: publicProcedure.query(async () => {
     const usdToJpy = await getUsdToJpy();
     return usdToJpy;
@@ -233,6 +252,7 @@ const appRouter = router({
           id: true,
           name: true,
           username: true,
+          profileImage: true,
           spendingPubKey: true,
           viewingPubKey: true,
         },

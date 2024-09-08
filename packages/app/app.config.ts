@@ -53,6 +53,13 @@ const config: ExpoConfig = {
         iCloudContainerEnvironment: IS_DEV ? 'Development' : 'Production',
       },
     ],
+    [
+      'expo-image-picker',
+      {
+        photosPermission:
+          'The app accesses your photos to set your profile picture.',
+      },
+    ],
   ],
   extra: {
     eas: {

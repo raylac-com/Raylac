@@ -91,3 +91,30 @@ export const getRandomBigInt = ({
   const randomValue = BigInt(Math.floor(Math.random() * Number(range))); // Generate a random number in range
   return min + randomValue;
 };
+
+const mimeTypes: {
+  [key: string]: string;
+} = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/gif': 'gif',
+  'image/webp': 'webp',
+  'image/svg+xml': 'svg',
+  'application/pdf': 'pdf',
+  'text/html': 'html',
+  'text/css': 'css',
+  'text/javascript': 'js',
+  'application/json': 'json',
+  'application/zip': 'zip',
+  'audio/mpeg': 'mp3',
+  'video/mp4': 'mp4',
+};
+
+export const mimeTypeToExtension = (mimeType: string) => {
+  const extension = mimeTypes[mimeType];
+  if (!extension) {
+    throw new Error(`Unknown MIME type: ${mimeType}`);
+  }
+
+  return extension;
+};

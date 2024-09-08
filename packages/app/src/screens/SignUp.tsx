@@ -1,15 +1,9 @@
 import StyledButton from '@/components/StyledButton';
 import StyledTextInput from '@/components/StyledTextInput';
-import useDebounce from '@/hooks/useDebounce';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import useSignUp from '@/hooks/useSignUp';
 import { theme } from '@/lib/theme';
-import { trpc } from '@/lib/trpc';
-import {
-  MIN_USERNAME_LENGTH,
-  USERNAME_REGEX,
-  isValidUsername,
-} from '@/lib/username';
+import { isValidUsername } from '@/lib/username';
 import { RootStackParamsList } from '@/navigation/types';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -19,61 +13,8 @@ import {
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
-
-interface UsernameAvailabilityIndicator {
-  username: string;
-  isUsernameAvailable: boolean;
-  isPending: boolean;
-}
-
-const UsernameAvailabilityIndicator = (
-  props: UsernameAvailabilityIndicator
-) => {
-  const { t } = useTranslation('SignUp');
-  const { username, isUsernameAvailable, isPending } = props;
-
-  if (!username || isPending) {
-    return null;
-  }
-
-  if (username.length < MIN_USERNAME_LENGTH) {
-    return (
-      <Text
-        style={{
-          color: theme.waning,
-        }}
-      >
-        {t('usernameLengthWarning', { minChars: MIN_USERNAME_LENGTH })}
-      </Text>
-    );
-  }
-
-  if (USERNAME_REGEX.test(username) === false) {
-    return (
-      <Text
-        style={{
-          color: theme.waning,
-        }}
-      >
-        {t('usernameInvalid')}
-      </Text>
-    );
-  }
-
-  if (isUsernameAvailable === false) {
-    return (
-      <Text
-        style={{
-          color: theme.waning,
-        }}
-      >
-        {t('usernameTaken')}
-      </Text>
-    );
-  }
-
-  return null;
-};
+import useCheckUsername from '@/hooks/useCheckUsername';
+import UsernameAvailabilityIndicator from '@/components/UsernameAvailabilityIndicator';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Props = NativeStackScreenProps<RootStackParamsList, 'SignUp'>;
@@ -83,25 +24,18 @@ type Props = NativeStackScreenProps<RootStackParamsList, 'SignUp'>;
  */
 const SignUp = () => {
   const { t } = useTranslation('SignUp');
-//  const { inviteCode } = route.params;
+  //  const { inviteCode } = route.params;
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   const { mutateAsync: signUp, isPending: isSigningUp } = useSignUp();
 
-  const { data: isSignedIn } = useIsSignedIn();
-
-  const { debouncedValue: debouncedUsername, isPending } = useDebounce(
-    username,
-    500
-  );
-
-  const { data: isUsernameAvailable, isPending: isCheckingUsername } =
-    trpc.isUsernameAvailable.useQuery({
-      username: debouncedUsername,
-    });
+  const { isUsernameAvailable, isCheckingUsername } =
+    useCheckUsername(username);
 
   const canGoNext =
     isValidUsername(username) && isUsernameAvailable && !isCheckingUsername;
+
+  const { data: isSignedIn } = useIsSignedIn();
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamsList>>();
@@ -133,9 +67,11 @@ const SignUp = () => {
         <Text
           style={{
             fontSize: 14,
+            fontWeight: 'bold',
             color: theme.text,
           }}
-        >{t('name')}
+        >
+          {t('name')}
         </Text>
         <StyledTextInput
           value={name}
@@ -160,6 +96,7 @@ const SignUp = () => {
           style={{
             fontSize: 14,
             color: theme.text,
+            fontWeight: 'bold',
           }}
         >
           {t('username')}
@@ -177,7 +114,7 @@ const SignUp = () => {
         ></StyledTextInput>
       </View>
       <UsernameAvailabilityIndicator
-        isPending={isPending}
+        isPending={isCheckingUsername}
         isUsernameAvailable={isUsernameAvailable}
         username={username}
       ></UsernameAvailabilityIndicator>
@@ -190,7 +127,7 @@ const SignUp = () => {
         onPress={async () => {
           await signUp({
             name,
-            inviteCode: "",
+            inviteCode: '',
             username,
           });
 
