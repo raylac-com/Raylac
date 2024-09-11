@@ -1,6 +1,6 @@
 import { StealthAddressWithEphemeral } from '@raylac/shared';
-import * as erc5564 from './erc5564';
-import { Hex } from 'viem';
+// import * as erc5564 from './erc5564';
+// import { Hex } from 'viem';
 import prisma from './prisma';
 
 /**
@@ -14,6 +14,7 @@ export const handleNewStealthAccount = async ({
   userId: number;
   stealthAccount: StealthAddressWithEphemeral;
 }) => {
+  /*
   // Submit an announcement to the ERC5564 announcer contract
   await erc5564.announce({
     stealthAddress: stealthAccount.address as Hex,
@@ -21,6 +22,7 @@ export const handleNewStealthAccount = async ({
     viewTag: stealthAccount.viewTag as Hex,
     stealthPubKey: stealthAccount.stealthPubKey as Hex,
   });
+  */
 
   // Save the stealth address to the user's linked stealth addresses
   await prisma.userStealthAddress.create({

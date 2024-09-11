@@ -4,18 +4,57 @@ import {
   SafeAreaView,
   ScrollView,
   RefreshControl,
+  Image,
 } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { formatUnits } from 'viem';
 import { theme } from '@/lib/theme';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import { useTranslation } from 'react-i18next';
 import { Transfer } from '@raylac/shared';
 import StyledPressable from '@/components/StyledPressable';
+import supportedTokens from '@raylac/shared/out/supportedTokens';
+
+interface TokenBalanceItemProps {
+  tokenSymbol: string;
+  tokenLogo;
+  balance: string;
+}
+
+const TokenBalanceItem = (props: TokenBalanceItemProps) => {
+  const { tokenSymbol, tokenLogo, balance } = props;
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        columnGap: 8,
+      }}
+    >
+      <Image
+        source={{ uri: tokenLogo }}
+        style={{
+          width: 24,
+          height: 24,
+        }}
+      />
+      <Text
+        style={{
+          color: theme.text,
+          fontSize: 20,
+        }}
+      >
+        {`${balance} ${tokenSymbol}`}
+      </Text>
+    </View>
+  );
+};
 
 interface MenuItemProps {
   icon: React.ReactNode;
@@ -67,15 +106,18 @@ const NUM_TRANSFERS_TO_SHOW = 5;
 const HomeScreen = () => {
   const { t } = useTranslation('Home');
   const { data: isSignedIn } = useIsSignedIn();
-  const { data: usdToJpy } = trpc.getUsdToJpy.useQuery();
+
+  const [aggregatedTokenBalances, setAggregatedTokenBalances] = useState<
+    Record<string, bigint>
+  >({});
 
   const {
-    data: balance,
+    data: tokenBalancesPerChain,
     refetch: refetchBalance,
     isRefetching: isRefetchingBalance,
-  } = trpc.getBalance.useQuery(null, {
+  } = trpc.getTokenBalancesPerChain.useQuery(null, {
     enabled: isSignedIn,
-    throwOnError: false, // Don't throw on error for this particular query in all environments
+    // throwOnError: false, // Don't throw on error for this particular query in all environments
     refetchOnWindowFocus: true,
   });
 
@@ -102,14 +144,30 @@ const HomeScreen = () => {
     }
   }, [isSignedIn]);
 
+  useEffect(() => {
+    if (tokenBalancesPerChain) {
+      const _aggregatedTokenBalances = {};
+
+      // Compute the sum of token balances across all chains
+      for (const tokenBalance of tokenBalancesPerChain) {
+        const tokenId = tokenBalance.tokenId;
+        const _balance = _aggregatedTokenBalances[tokenId];
+
+        if (_balance) {
+          _aggregatedTokenBalances[tokenId] =
+            _balance + BigInt(tokenBalance.balance);
+        } else {
+          _aggregatedTokenBalances[tokenId] = BigInt(tokenBalance.balance);
+        }
+      }
+
+      setAggregatedTokenBalances(_aggregatedTokenBalances);
+    }
+  }, [tokenBalancesPerChain]);
+
   if (!isSignedIn) {
     return null;
   }
-
-  const jpyBalance =
-    balance !== undefined && usdToJpy !== undefined
-      ? (BigInt(balance) * BigInt(Math.round(usdToJpy * 100))) / BigInt(100)
-      : undefined;
 
   return (
     <SafeAreaView
@@ -141,19 +199,10 @@ const HomeScreen = () => {
               color: theme.text,
             }}
           >
-            {balance !== undefined ? formatUnits(BigInt(balance), 6) : ''} USD
-          </Text>
-          <Text
-            style={{
-              fontSize: 18,
-              color: theme.text,
-              opacity: 0.6,
-              marginTop: 6,
-            }}
-          >
-            {jpyBalance !== undefined ? `${formatUnits(jpyBalance, 6)}円` : ''}
+            0 USD
           </Text>
         </View>
+        {/* Action menus (Deposit, Send, Receive) */}
         <View
           style={{
             marginTop: 24,
@@ -188,6 +237,44 @@ const HomeScreen = () => {
             }}
           />
         </View>
+        {/* Token list */}
+        <ScrollView
+          horizontal
+          style={{
+            marginTop: 12,
+            flexDirection: 'row',
+            height: 80,
+            paddingHorizontal: 20,
+          }}
+          contentContainerStyle={{
+            columnGap: 16,
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '100%',
+          }}
+        >
+          {Object.entries(aggregatedTokenBalances).map(
+            ([tokenId, balance], i) => {
+              const tokenMetadata = supportedTokens.find(
+                token => token.tokenId === tokenId
+              );
+              return (
+                <TokenBalanceItem
+                  key={i}
+                  balance={Number(
+                    formatUnits(balance, tokenMetadata.decimals)
+                  ).toLocaleString()}
+                  tokenSymbol={tokenMetadata.symbol}
+                  tokenLogo={tokenMetadata.logoURI}
+                />
+              );
+            }
+          )}
+          {aggregatedTokenBalances.length > 3 && (
+            <AntDesign name="arrowright" size={24} color={theme.gray} />
+          )}
+        </ScrollView>
+        {/* Transfer history */}
         <View
           style={{
             marginTop: 40,

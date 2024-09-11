@@ -1,14 +1,19 @@
 import { getMnemonic, getSpendingPrivKey, getViewingPrivKey } from '@/lib/key';
 import { trpc } from '@/lib/trpc';
 import { publicClient } from '@/lib/viem';
-import { RouterOutput } from '@/types';
+import { RouterOutput, User } from '@/types';
 import {
-  USDC_CONTRACT_ADDRESS,
   ERC20Abi,
+  NATIVE_TOKEN_ADDRESS,
+  RAYLAC_PAYMASTER_ADDRESS,
+  UserOperation,
+  buildUserOp,
   encodePaymasterAndData,
+  generateStealthAddress,
+  getUserOpHash,
   recoveryStealthPrivKey,
-  StealthAccount,
 } from '@raylac/shared';
+import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
 import { Hex, encodeFunctionData } from 'viem';
@@ -24,26 +29,49 @@ BigInt.prototype.toJSON = function () {
  * Hook to build and send user operations
  */
 const useSend = () => {
+  const { data: tokenBalancePerChain } =
+    trpc.getTokenBalancesPerChain.useQuery();
   const { mutateAsync: send } = trpc.send.useMutation();
-  const { mutateAsync: buildStealthTransfer } =
-    trpc.buildStealthTransfer.useMutation();
+  const { mutateAsync: signUserOp } = trpc.signUserOp.useMutation();
 
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({
       amount,
-      toUserId,
+      inputTokenId,
+      outputTokenId,
+      recipientUserOrAddress,
     }: {
       amount: bigint;
-      toUserId: number;
+      inputTokenId: string;
+      outputTokenId: string;
+      recipientUserOrAddress: Hex | User;
     }) => {
-      const stealthTransferData = await buildStealthTransfer({
-        amount: amount.toString(),
-        toUserId,
-      });
+      if (!tokenBalancePerChain) {
+        throw new Error('Token balances not loaded');
+      }
 
-      // Recover the private keys of the inputs specified in "stealthTransferData".
+      // Get addresses with the specified token balance
+      const sortedAccountsWithToken = tokenBalancePerChain
+        .filter(balance => balance.tokenId)
+        .sort((a, b) => (BigInt(b.balance) > BigInt(a.balance) ? 1 : -1));
+
+      let currentAmount = BigInt(0);
+      const sendFrom: RouterOutput['getTokenBalancesPerChain'] = [];
+
+      for (const account of sortedAccountsWithToken) {
+        sendFrom.push(account);
+        currentAmount += BigInt(account.balance);
+
+        if (currentAmount >= amount) {
+          break;
+        }
+      }
+
+      if (currentAmount < amount) {
+        throw new Error('Not enough funds');
+      }
 
       const mnemonic = await getMnemonic();
       const viewPrivKey = await getViewingPrivKey(mnemonic);
@@ -57,16 +85,74 @@ const useSend = () => {
         throw new Error('No spending key found');
       }
 
-      const signatures = await Promise.all(
-        stealthTransferData.inputs.map(async input => {
-          const transferCall = encodeFunctionData({
-            abi: ERC20Abi,
-            functionName: 'transfer',
-            args: [stealthTransferData.to.address, input.amount],
+      const to =
+        typeof recipientUserOrAddress === 'string'
+          ? recipientUserOrAddress
+          : generateStealthAddress({
+              spendingPubKey: recipientUserOrAddress.spendingPubKey as Hex,
+              viewingPubKey: recipientUserOrAddress.viewingPubKey as Hex,
+            });
+
+      const toAddress = typeof to === 'string' ? to : to.address;
+
+      let remainingAmount = amount;
+
+      const userOps = await Promise.all(
+        sendFrom.map(async account => {
+          const accountBalance = BigInt(account.balance);
+
+          const sendAmount =
+            remainingAmount > accountBalance ? accountBalance : remainingAmount;
+
+          const stealthSigner = publicKeyToAddress(
+            account.stealthAddress.stealthPubKey as Hex
+          );
+
+          const inputTokenData = supportedTokens
+            .find(token => token.tokenId === inputTokenId)
+            ?.addresses.find(
+              tokenAddress => tokenAddress.chain.id === account.chain.id
+            );
+
+          let userOp: UserOperation;
+          if (inputTokenData.address === NATIVE_TOKEN_ADDRESS) {
+            userOp = await buildUserOp({
+              client: publicClient,
+              stealthSigner,
+              value: sendAmount,
+              to: toAddress,
+              data: '0x',
+            });
+          } else {
+            const transferCall = encodeFunctionData({
+              abi: ERC20Abi,
+              functionName: 'transfer',
+              args: [toAddress, sendAmount],
+            });
+
+            userOp = await buildUserOp({
+              client: publicClient,
+              stealthSigner,
+              value: BigInt(0),
+              to: inputTokenData.address,
+              data: transferCall,
+            });
+          }
+
+          userOp.paymasterAndData = encodePaymasterAndData({
+            paymaster: RAYLAC_PAYMASTER_ADDRESS,
+            data: await signUserOp({ userOp }),
+          });
+
+          remainingAmount -= sendAmount;
+
+          const userOpHash = await getUserOpHash({
+            client: publicClient,
+            userOp,
           });
 
           const stealthPrivKey = recoveryStealthPrivKey({
-            ephemeralPubKey: input.from.ephemeralPubKey,
+            ephemeralPubKey: account.stealthAddress.ephemeralPubKey as Hex,
             viewingPrivKey: viewPrivKey as Hex,
             spendingPrivKey: spendingPrivKey as Hex,
           });
@@ -74,17 +160,20 @@ const useSend = () => {
           const sig = await signMessage({
             privateKey: stealthPrivKey,
             message: {
-              raw: transferCall,
+              raw: userOpHash,
             },
           });
 
-          return sig;
+          userOp.signature = sig;
+
+          return userOp;
         })
       );
 
+      // TODO: Publish the Stealth address ephemeral data if this is a transfer to a stealth address
+
       await send({
-        signatures,
-        stealthTransferData: stealthTransferData,
+        userOps,
       });
     },
     onSuccess: () => {

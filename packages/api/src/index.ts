@@ -10,13 +10,17 @@ import signUp from './api/signUp';
 import { webcrypto } from 'node:crypto';
 import getUsers from './api/getUsers';
 import getBalance from './api/getBalance';
-import buildStealthTransfer from './api/buildStealthTransfer';
 import getTxHistory from './api/getTxHistory';
 import signIn from './api/signIn';
 import getUsdToJpy from './api/getUsdToJpy';
 import updateDisplayName from './api/updateDisplayName';
 import updateUsername from './api/updateUsername';
 import updateProfileImage from './api/updateProfileImage';
+import { signUserOp } from './lib/paymaster';
+import { UserOperation } from '@raylac/shared';
+import send from './api/send';
+import getStealthAccounts from './api/getStealthAccounts';
+import getTokenBalancesPerChain from './api/getTokenBalancesPerChain';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -51,22 +55,21 @@ const appRouter = router({
       return unusedInviteCodeExists ? true : false;
     }),
 
-  buildStealthTransfer: authedProcedure
+  signUserOp: authedProcedure
     .input(
       z.object({
-        amount: z.string(),
-        toUserId: z.number(),
+        userOp: z.any(),
       })
     )
     .mutation(async opts => {
       const { input } = opts;
+      const userOp = input.userOp as UserOperation;
 
-      const stealthTransfer = await buildStealthTransfer({
-        amount: input.amount,
-        toUserId: input.toUserId,
-      });
+      // TODO: Validate that the user has signed this user operation
 
-      return stealthTransfer;
+      const sig = await signUserOp(userOp);
+
+      return sig;
     }),
 
   /**
@@ -75,23 +78,18 @@ const appRouter = router({
   send: authedProcedure
     .input(
       z.object({
-        stealthTransferData: z.object({
-          inputs: z.array(
-            z.object({
-              amount: z.string(),
-              from: z.object({
-                address: z.string(),
-                viewTag: z.string(),
-                stealthPubKey: z.string(),
-                ephemeralPubKey: z.string(),
-              }),
-            })
-          ),
-        }),
-        signatures: z.array(z.string()),
+        userOps: z.any(),
       })
     )
-    .mutation(async _opts => {
+    .mutation(async opts => {
+      const { input } = opts;
+
+      const userOps = input.userOps as UserOperation[];
+
+      await send({
+        userOps,
+      });
+
       return 'ok';
     }),
 
@@ -101,6 +99,28 @@ const appRouter = router({
   getUsers: publicProcedure.query(async () => {
     const users = await getUsers();
     return users;
+  }),
+
+  /**
+   * Get the balances of tokens for all chains and supported tokens
+   * for the user
+   */
+  getTokenBalancesPerChain: authedProcedure.query(async opts => {
+    const userId = opts.ctx.userId;
+
+    const balances = await getTokenBalancesPerChain({ userId });
+    return balances;
+  }),
+
+  /**
+   * Get the stealth accounts of the user
+   */
+  getStealthAccounts: authedProcedure.query(async opts => {
+    const userId = opts.ctx.userId;
+
+    const addressWithBalances = await getStealthAccounts({ userId });
+
+    return addressWithBalances;
   }),
 
   /**

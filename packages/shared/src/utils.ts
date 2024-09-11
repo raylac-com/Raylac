@@ -1,5 +1,10 @@
 import * as secp from '@noble/secp256k1';
-import { Hex, parseUnits } from 'viem';
+import { decodeFunctionData, Hex, parseUnits, zeroAddress } from 'viem';
+import { UserOperation } from './types';
+import RaylacAccountAbi from './abi/RaylacAccountAbi';
+import ERC20Abi from './abi/ERC20Abi';
+
+export const NATIVE_TOKEN_ADDRESS = zeroAddress;
 
 export const encodeERC5564Metadata = ({
   viewTag,
@@ -117,4 +122,29 @@ export const mimeTypeToExtension = (mimeType: string) => {
   }
 
   return extension;
+};
+
+/**
+ * Get ERC20 token transfer data from a user operation
+ */
+export const getTransferDataFromUserOp = (userOp: UserOperation) => {
+  const { functionName, args } = decodeFunctionData({
+    abi: RaylacAccountAbi,
+    data: userOp.callData,
+  });
+
+  if (functionName !== 'execute') {
+    throw new Error("Function name must be 'execute'");
+  }
+
+  const transferData = decodeFunctionData({
+    abi: ERC20Abi,
+    data: args[2],
+  });
+
+  const [to, amount] = transferData.args;
+  return {
+    to: to as string,
+    amount: amount as bigint,
+  };
 };

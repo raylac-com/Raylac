@@ -1,9 +1,27 @@
 import * as secp from '@noble/secp256k1';
-import { hexToBigInt, keccak256, toHex } from 'viem';
+import {
+  Chain,
+  encodeDeployData,
+  encodeFunctionData,
+  getContractAddress,
+  hexToBigInt,
+  HttpTransport,
+  keccak256,
+  PublicClient,
+  toHex,
+} from 'viem';
 import { Hex } from 'viem';
 import { hexToProjectivePoint, projectivePointToHex } from './utils';
 import { publicKeyToAddress } from 'viem/accounts';
 import { StealthAddressWithEphemeral } from './types';
+import { getInitCode, getSenderAddress } from './erc4337';
+import {
+  ACCOUNT_FACTORY_ADDRESS,
+  ACCOUNT_IMPL_ADDRESS,
+  RaylacAccountAbi,
+  RaylacAccountProxyAbi,
+  RaylacAccountProxyBytecode,
+} from '.';
 
 const g = {
   x: secp.CURVE.Gx,
@@ -65,6 +83,27 @@ export const checkStealthAddress = (input: {
 };
 
 /**
+ * Get the address of the contract account created by the given stealthPubKey.
+ * This functions calls the `getSenderAddress` function of the entry point contract.
+ */
+export const getStealthAddress = async ({
+  client,
+  stealthSigner,
+}: {
+  client: PublicClient<HttpTransport, Chain>;
+  stealthSigner: Hex;
+}) => {
+  const initCode = getInitCode({ stealthSigner });
+
+  const senderAddress = await getSenderAddress({
+    client,
+    initCode,
+  });
+
+  return senderAddress;
+};
+
+/**
  * Generate a stealth address for the given spending and viewing public keys.
  * Returns the stealth public key, ephemeral public key, and view tag.
  */
@@ -96,7 +135,27 @@ export const generateStealthAddress = (input: {
   const stealthPubKey = spendingPubKey.add(sH);
   const stealthPubKeyHex = projectivePointToHex(stealthPubKey);
 
-  const address = publicKeyToAddress(stealthPubKeyHex);
+  const stealthSigner = publicKeyToAddress(stealthPubKeyHex);
+
+  const data = encodeDeployData({
+    abi: RaylacAccountProxyAbi,
+    bytecode: RaylacAccountProxyBytecode,
+    args: [
+      ACCOUNT_IMPL_ADDRESS,
+      encodeFunctionData({
+        abi: RaylacAccountAbi,
+        functionName: 'initialize',
+        args: [stealthSigner],
+      }),
+    ],
+  });
+
+  const address = getContractAddress({
+    bytecode: data,
+    from: ACCOUNT_FACTORY_ADDRESS,
+    opcode: 'CREATE2',
+    salt: '0x0',
+  });
 
   return {
     address,

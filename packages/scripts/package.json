@@ -4,12 +4,13 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@prisma/client": "^5.12.1",
     "@noble/secp256k1": "^2.1.0",
+    "@prisma/client": "^5.12.1",
     "@raylac/api": "workspace:*",
     "@raylac/shared": "workspace:*",
     "@trpc/client": "11.0.0-rc.439",
     "@trpc/server": "11.0.0-rc.439",
+    "alchemy-sdk": "^3.3.1",
     "axios": "^1.7.2",
     "bip39": "^3.1.0",
     "dotenv": "^16.4.5",

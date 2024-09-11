@@ -5,6 +5,7 @@ import {
   createWalletClient,
   http,
 } from 'viem';
+import * as chains from 'viem/chains';
 import { Chain, anvil, base, baseSepolia } from 'viem/chains';
 
 const CHAIN = process.env.CHAIN || process.env.EXPO_PUBLIC_CHAIN;
@@ -14,9 +15,9 @@ if (CHAIN !== 'base-sepolia' && CHAIN !== 'base-mainnet' && CHAIN !== 'anvil') {
 }
 
 /**
- * Get the chain based on the environment
+ * Get the canonical chain based on the environment variable `CHAIN`.
  */
-export const getChain = (): Chain => {
+export const getCanonicalChain = (): Chain => {
   if (CHAIN === 'base-sepolia') {
     return baseSepolia;
   } else if (CHAIN === 'base-mainnet') {
@@ -28,26 +29,37 @@ export const getChain = (): Chain => {
   }
 };
 
-export const getAlchemyRpcUrl = ({
-  chain,
-  apiKey,
-}: {
-  chain: Chain;
-  apiKey: string;
-}) => {
+export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
+  const apiKey =
+    process.env.ALCHEMY_API_KEY || process.env.EXPO_PUBLIC_ALCHEMY_API_KEY;
+
   if (!apiKey) {
-    throw new Error('API key is required');
+    throw new Error('ALCHEMY_API_KEY is not set');
   }
 
-  if (chain === baseSepolia) {
-    return `https://base-sepolia.g.alchemy.com/v2/${apiKey}`;
-  } else if (chain === base) {
-    return `https://base-mainnet.g.alchemy.com/v2/${apiKey}`;
-  } else  if (chain === anvil) {
-    return `http://127.0.0.01:8545`;
-  } else {
-    throw new Error(`Unknown chain: ${chain}`);
+  let alchemySubdomain;
+
+  switch (chain.id) {
+    case chains.mainnet.id:
+      alchemySubdomain = 'eth-mainnet';
+      break;
+    case chains.baseSepolia.id:
+      alchemySubdomain = 'base-sepolia';
+      break;
+    case chains.base.id:
+      alchemySubdomain = 'base-mainnet';
+      break;
+    case chains.optimism.id:
+      alchemySubdomain = 'opt-mainnet';
+      break;
+    case chains.blast.id:
+      alchemySubdomain = 'blast-mainnet';
+      break;
+    default:
+      throw new Error(`Unknown chain id: ${chain.id}`);
   }
+
+  return `https://${alchemySubdomain}.g.alchemy.com/v2/${apiKey}`;
 };
 
 /**

@@ -1,21 +1,13 @@
-import { anvil, base, baseSepolia } from 'viem/chains';
-import { getChain } from './ethRpc';
-import { Hex } from 'viem';
+export const ACCOUNT_IMPL_ADDRESS =
+  '0xcd1Ae4e4E294f3824Abf13752A95d0D66bce6d26';
+
+export const ACCOUNT_FACTORY_ADDRESS =
+  '0x3331e3DB0c542e9B395A3C308211888190C6e0D1';
+
+export const RAYLAC_PAYMASTER_ADDRESS =
+  '0xCa7bEdEcCd6FBD68d0043bb4c4B2405B4948BC8c';
+
+export const ENTRY_POINT_ADDRESS = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
 
 export const ERC5564_ANNOUNCER_ADDRESS =
   '0x55649E01B5Df198D18D95b5cc5051630cfD45564';
-
-const chain = getChain();
-// Only support Base Sepolia or Base mainnet for now
-if (
-  chain.id !== baseSepolia.id &&
-  chain.id !== base.id &&
-  chain.id !== anvil.id
-) {
-  throw new Error('Unsupported chain');
-}
-
-export const USDC_CONTRACT_ADDRESS =
-  chain.id === baseSepolia.id || chain.id === anvil.id
-    ? ('0x036CbD53842c5426634e7929541eC2318f3dCF7e' as Hex)
-    : ('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as Hex);

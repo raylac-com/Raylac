@@ -1,52 +1,100 @@
 import StyledButton from '@/components/StyledButton';
 import StyledNumberInput from '@/components/StyledNumberInput';
 import { theme } from '@/lib/theme';
-import { trpc } from '@/lib/trpc';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
-import { FontAwesome } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
-import { formatUnits, parseUnits } from 'viem';
+import { Image, Text, View } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
+import supportedTokens from '@raylac/shared/out/supportedTokens';
+import useAggregatedTokenBalances from '@/hooks/useAggregatedTokenBalances';
+import * as chains from 'viem/chains';
+import supportedChains from '@raylac/shared/out/supportedChains';
+import { parseUnits } from 'viem';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'EnterSendAmount'>;
 
 const EnterSendAmount = ({ navigation, route }: Props) => {
-  const [inputCurrency, setInputCurrency] = useState<'jpy' | 'usd'>('usd');
-  const [inputAmount, setInputAmount] = useState<null | number>(null);
-  const { data: balance } = trpc.getBalance.useQuery();
+  const [inputTokenId, setInputTokenId] = useState('usdc');
+  const [outputTokenId, setOutputTokenId] = useState('usdc');
+  const [outputChain, setOutputChain] = useState(chains.base.id);
+
+  const [inputAmount, setInputAmount] = useState<string>('');
+  const [outputAmount, setOutputAmount] = useState<string>('');
+
+  const { aggregatedTokenBalances } = useAggregatedTokenBalances();
+
+  const [currencies, setCurrencies] = useState(
+    supportedTokens.map(token => ({
+      label: token.symbol,
+      value: token.tokenId,
+      icon: () => {
+        return (
+          <Image
+            style={{
+              width: 18,
+              height: 18,
+            }}
+            source={{ uri: token.logoURI }}
+          ></Image>
+        );
+      },
+    }))
+  );
+
   const { t } = useTranslation('EnterSendAmount');
-  const { data: jpyToUsd } = trpc.getUsdToJpy.useQuery();
+
+  const [inputPickerOpen, setInputPickerOpen] = useState(false);
+  const [outputPickerOpen, setOutputPickerOpen] = useState(false);
+  const [outputChainPickerOpen, setOutputChainPickerOpen] = useState(false);
 
   const recipientUserOrAddress = route.params.recipientUserOrAddress;
 
-  const usdAmount =
-    inputAmount !== null && jpyToUsd !== null
-      ? inputCurrency === 'usd'
-        ? inputAmount
-        : Math.round((inputAmount / jpyToUsd) * 100) / 100
-      : null;
+  const inputTokenData = supportedTokens.find(
+    token => token.tokenId === inputTokenId
+  );
+
+  const parsedInputAmount = inputAmount
+    ? parseUnits(inputAmount, inputTokenData.decimals)
+    : BigInt(0);
 
   const onNextClick = useCallback(async () => {
     navigation.navigate('ConfirmSend', {
       recipientUserOrAddress,
-      amount: usdAmount,
+      amount: parsedInputAmount.toString(),
+      inputTokenId,
+      outputTokenId,
+      outputChainId: outputChain,
     });
-  }, [inputAmount, recipientUserOrAddress, usdAmount]);
+  }, [
+    parsedInputAmount,
+    recipientUserOrAddress,
+    inputTokenId,
+    outputTokenId,
+    outputChain,
+  ]);
 
-  const parsedUsdAmount = usdAmount
-    ? parseUnits(usdAmount.toString(), 6)
+  const inputTokenBalance = aggregatedTokenBalances
+    ? aggregatedTokenBalances[inputTokenId] || BigInt(0)
     : null;
 
-  const canGoNext = balance && parsedUsdAmount && parsedUsdAmount <= balance;
+  const isBalanceSufficient =
+    inputTokenBalance !== null && inputAmount !== null
+      ? parseUnits(inputAmount, inputTokenData.decimals) <= inputTokenBalance
+      : null;
+
+  console.log(isBalanceSufficient, inputTokenBalance);
+
+  const canGoNext = isBalanceSufficient;
 
   const recipient =
     typeof recipientUserOrAddress === 'string'
       ? shortenAddress(recipientUserOrAddress)
       : recipientUserOrAddress.name;
+
+  console.log('input string', inputAmount?.toString());
 
   return (
     <View
@@ -60,21 +108,67 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
+          columnGap: 8,
         }}
       >
         <StyledNumberInput
           autoFocus
-          containerStyle={{
-            borderBottomColor: theme.gray,
-            borderBottomWidth: 1,
-          }}
-          value={inputAmount !== null ? inputAmount.toLocaleString() : ''}
+          value={inputAmount !== null ? inputAmount.toString() : ''}
           onChangeText={_amount => {
+            // Regex to match floating-point numbers (allowing one decimal point)
+            if (/^\d*\.?\d*$/.test(_amount)) {
+              setInputAmount(_amount);
+            }
+
             console.log(_amount);
             if (_amount === '') {
               setInputAmount(null);
             } else {
-              setInputAmount(Number(_amount.replaceAll(',', '')));
+              console.log('repalce all', _amount.replaceAll(',', ''));
+              setInputAmount(_amount);
+            }
+          }}
+          inputStyle={{
+            width: 180,
+            height: 32,
+            textAlign: 'right',
+          }}
+          keyboardType="numeric"
+        ></StyledNumberInput>
+        <DropDownPicker
+          open={inputPickerOpen}
+          value={inputTokenId}
+          zIndex={2000}
+          style={{
+            width: 120,
+          }}
+          containerStyle={{
+            width: 120,
+          }}
+          items={currencies}
+          setOpen={_open => {
+            if (outputPickerOpen) {
+              setOutputPickerOpen(false);
+            }
+            setInputPickerOpen(_open);
+          }}
+          setValue={setInputTokenId}
+          setItems={setCurrencies}
+        />
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
+        <StyledNumberInput
+          value={outputAmount !== null ? outputAmount.toLocaleString() : ''}
+          onChangeText={_amount => {
+            if (_amount === '') {
+              setOutputAmount(null);
+            } else {
+              setOutputAmount(_amount.replaceAll(',', ''));
             }
           }}
           inputStyle={{
@@ -83,54 +177,79 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           }}
           keyboardType="numeric"
         ></StyledNumberInput>
-        <Picker
-          selectedValue={inputCurrency}
-          onValueChange={itemValue => {
-            setInputCurrency(itemValue);
-          }}
+        <DropDownPicker
+          open={outputPickerOpen}
+          value={outputTokenId}
+          zIndex={99999}
           style={{
-            width: 100,
-            marginRight: -48,
+            width: 120,
           }}
-          itemStyle={{
-            fontSize: 16,
-            color: theme.text,
-            fontWeight: 'bold',
+          containerStyle={{
+            width: 120,
           }}
-        >
-          <Picker.Item label="USD" value="usd" />
-          <Picker.Item label="円" value="jpy" />
-        </Picker>
+          dropDownContainerStyle={{
+            backgroundColor: theme.background,
+          }}
+          items={currencies}
+          setOpen={_open => {
+            if (inputPickerOpen) {
+              setInputPickerOpen(false);
+            }
+            setOutputPickerOpen(_open);
+          }}
+          setValue={setOutputTokenId}
+          setItems={setCurrencies}
+        />
       </View>
       <View
         style={{
-          height: 20,
-          marginTop: -32,
-          opacity: 0.6,
-          marginBottom: 12,
+          alignItems: 'center',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          width: '82%',
         }}
       >
-        {inputCurrency === 'jpy' && usdAmount && (
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}
-          >
-            <FontAwesome name="exchange" size={12} color={theme.secondary} />
-            <Text
-              style={{
-                color: theme.secondary,
-                fontSize: 14,
-                marginLeft: 4,
-              }}
-            >
-              {usdAmount} USD
-            </Text>
-          </View>
-        )}
+        <Text
+          style={{
+            color: theme.text,
+          }}
+        >
+          Recipient receives on
+        </Text>
+        <DropDownPicker
+          open={outputChainPickerOpen}
+          value={outputChain}
+          style={{
+            width: 120,
+            borderWidth: 0,
+          }}
+          zIndex={1000}
+          zIndexInverse={3000}
+          textStyle={{
+            color: theme.text,
+          }}
+          theme="DARK"
+          containerStyle={{
+            width: 120,
+          }}
+          items={supportedChains.map(chain => ({
+            label: chain.name,
+            value: chain.id,
+          }))}
+          setOpen={_open => {
+            if (inputPickerOpen) {
+              setInputPickerOpen(false);
+            }
+            if (outputPickerOpen) {
+              setOutputPickerOpen(false);
+            }
+
+            setOutputChainPickerOpen(_open);
+          }}
+          setValue={setOutputChain}
+        />
       </View>
-      {balance && parsedUsdAmount > balance ? (
+      {isBalanceSufficient === false ? (
         <Text
           style={{
             color: theme.waning,
@@ -140,16 +259,6 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           {t('insufficientBalance')}
         </Text>
       ) : null}
-      <Text
-        style={{
-          color: theme.text,
-          opacity: 0.6,
-        }}
-      >
-        {t('availableBalance', {
-          amount: balance ? formatUnits(balance, 6) : '',
-        })}
-      </Text>
       <Text
         style={{
           color: theme.text,

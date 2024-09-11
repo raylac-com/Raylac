@@ -114,6 +114,12 @@ importers:
       '@react-navigation/native-stack':
         specifier: ^6.9.26
         version: 6.9.26(@react-navigation/native@6.1.17(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0))(react-native-safe-area-context@4.10.1(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0))(react-native-screens@3.31.1(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0))(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0)
+      '@reservoir0x/relay-kit-hooks':
+        specifier: ^1.2.4
+        version: 1.2.4(@tanstack/react-query@5.49.2(react@18.2.0))(react-dom@18.3.1(react@18.2.0))(react@18.2.0)(viem@2.17.0(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@5.0.10)(zod@3.23.8))
+      '@reservoir0x/relay-sdk':
+        specifier: ^1.2.1
+        version: 1.2.1(viem@2.17.0(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@5.0.10)(zod@3.23.8))
       '@sentry/cli':
         specifier: ^2.32.1
         version: 2.32.1
@@ -135,6 +141,9 @@ importers:
       '@types/react':
         specifier: ~18.2.79
         version: 18.2.79
+      axios:
+        specifier: ^1.7.2
+        version: 1.7.2
       bip39:
         specifier: ^3.1.0
         version: 3.1.0
@@ -195,12 +204,18 @@ importers:
       react-native-cloud-storage:
         specifier: ^1.4.1
         version: 1.4.1(expo@51.0.17(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(bufferutil@4.0.8)(utf-8-validate@5.0.10))(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0)
+      react-native-dropdown-picker:
+        specifier: ^5.4.6
+        version: 5.4.6(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0)
       react-native-fast-image:
         specifier: ^8.6.3
         version: 8.6.3(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0)
       react-native-get-random-values:
         specifier: ^1.11.0
         version: 1.11.0(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))
+      react-native-modal-dropdown:
+        specifier: ^1.0.2
+        version: 1.0.2
       react-native-safe-area-context:
         specifier: 4.10.1
         version: 4.10.1(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0)
@@ -308,6 +323,9 @@ importers:
       '@trpc/server':
         specifier: 11.0.0-rc.439
         version: 11.0.0-rc.439
+      alchemy-sdk:
+        specifier: ^3.3.1
+        version: 3.3.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       axios:
         specifier: ^1.7.2
         version: 1.7.2
@@ -1962,6 +1980,19 @@ packages:
 
   '@react-navigation/routers@6.1.9':
     resolution: {integrity: sha512-lTM8gSFHSfkJvQkxacGM6VJtBt61ip2XO54aNfswD+KMw6eeZ4oehl7m0me3CR9hnDE4+60iAZR8sAhvCiI3NA==}
+
+  '@reservoir0x/relay-kit-hooks@1.2.4':
+    resolution: {integrity: sha512-B5k3duxAR4I6bG+hmwUHgensZOqu61H02/ZtIXLdF3OX8Q3Bnl9JlXjV0j2gPp7b89EzuS/Pj8YVUsljM45tIw==}
+    peerDependencies:
+      '@tanstack/react-query': '>=5.0.0'
+      react: ^18.0
+      react-dom: ^18.0
+      viem: ^2.9.31
+
+  '@reservoir0x/relay-sdk@1.2.1':
+    resolution: {integrity: sha512-2HbBfSJdt8QZYFC6lnZnIUUSXfYk+zPooMp2bPjoRkdx1594Zgrv0WP/mNlKC/IIGm+RhViPNwEWbxC3pVxsfQ==}
+    peerDependencies:
+      viem: ^2.9.31
 
   '@rnx-kit/chromium-edge-launcher@1.0.0':
     resolution: {integrity: sha512-lzD84av1ZQhYUS+jsGqJiCMaJO2dn9u+RTT9n9q6D3SaKVwWqv+7AoRKqBu19bkwyE+iFRl1ymr40QS90jVFYg==}
@@ -5381,6 +5412,12 @@ packages:
       expo:
         optional: true
 
+  react-native-dropdown-picker@5.4.6:
+    resolution: {integrity: sha512-T1XBHbE++M6aRU3wFYw3MvcOuabhWZ29RK/Ivdls2r1ZkZ62iEBZknLUPeVLMX3x6iUxj4Zgr3X2DGlEGXeHsA==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+
   react-native-fast-image@8.6.3:
     resolution: {integrity: sha512-Sdw4ESidXCXOmQ9EcYguNY2swyoWmx53kym2zRsvi+VeFCHEdkO+WG1DK+6W81juot40bbfLNhkc63QnWtesNg==}
     peerDependencies:
@@ -5391,6 +5428,9 @@ packages:
     resolution: {integrity: sha512-4BTbDbRmS7iPdhYLRcz3PGFIpFJBwNZg9g42iwa2P6FOv9vZj/xJc678RZXnLNZzd0qd7Q3CCF6Yd+CU2eoXKQ==}
     peerDependencies:
       react-native: '>=0.56'
+
+  react-native-modal-dropdown@1.0.2:
+    resolution: {integrity: sha512-X13RbwoQdaOb9Ffi7fjRVwh9OXauXIJhum0uXGzYZLMyoCQ5yt5cxf27P/YZbdh80Fb7bdPx6vTA4PTpUK2WDQ==}
 
   react-native-safe-area-context@4.10.1:
     resolution: {integrity: sha512-w8tCuowDorUkPoWPXmhqosovBr33YsukkwYCDERZFHAxIkx6qBadYxfeoaJ91nCQKjkNzGrK5qhoNOeSIcYSpA==}
@@ -8903,6 +8943,26 @@ snapshots:
   '@react-navigation/routers@6.1.9':
     dependencies:
       nanoid: 3.3.7
+
+  '@reservoir0x/relay-kit-hooks@1.2.4(@tanstack/react-query@5.49.2(react@18.2.0))(react-dom@18.3.1(react@18.2.0))(react@18.2.0)(viem@2.17.0(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@5.0.10)(zod@3.23.8))':
+    dependencies:
+      '@reservoir0x/relay-sdk': 1.2.1(viem@2.17.0(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@5.0.10)(zod@3.23.8))
+      '@tanstack/react-query': 5.49.2(react@18.2.0)
+      '@types/react': 18.2.79
+      '@types/react-dom': 18.3.0
+      axios: 1.7.2
+      react: 18.2.0
+      react-dom: 18.3.1(react@18.2.0)
+      viem: 2.17.0(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@5.0.10)(zod@3.23.8)
+    transitivePeerDependencies:
+      - debug
+
+  '@reservoir0x/relay-sdk@1.2.1(viem@2.17.0(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@5.0.10)(zod@3.23.8))':
+    dependencies:
+      axios: 1.7.2
+      viem: 2.17.0(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@5.0.10)(zod@3.23.8)
+    transitivePeerDependencies:
+      - debug
 
   '@rnx-kit/chromium-edge-launcher@1.0.0':
     dependencies:
@@ -12917,6 +12977,11 @@ snapshots:
     optionalDependencies:
       expo: 51.0.17(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(bufferutil@4.0.8)(utf-8-validate@5.0.10)
 
+  react-native-dropdown-picker@5.4.6(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0):
+    dependencies:
+      react: 18.2.0
+      react-native: 0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10)
+
   react-native-fast-image@8.6.3(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0):
     dependencies:
       react: 18.2.0
@@ -12926,6 +12991,10 @@ snapshots:
     dependencies:
       fast-base64-decode: 1.0.0
       react-native: 0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10)
+
+  react-native-modal-dropdown@1.0.2:
+    dependencies:
+      prop-types: 15.8.1
 
   react-native-safe-area-context@4.10.1(react-native@0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7(@babel/core@7.24.7))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@5.0.10))(react@18.2.0):
     dependencies:

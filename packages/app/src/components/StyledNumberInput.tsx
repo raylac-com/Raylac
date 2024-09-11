@@ -21,8 +21,10 @@ const StyledNumberInput = (props: StyledNumberInputProps) => {
         alignItems: 'center',
         backgroundColor: theme.background,
         paddingVertical: 12,
-        borderRadius: 4,
+        borderRadius: 10,
         columnGap: 8,
+        borderWidth: 1,
+        borderColor: theme.gray,
         ...containerStyle,
       }}
     >
@@ -36,6 +38,7 @@ const StyledNumberInput = (props: StyledNumberInputProps) => {
           borderColor: theme.background,
           ...inputStyle,
         }}
+        keyboardType="numeric"
       ></TextInput>
       {postfix ? (
         <Text

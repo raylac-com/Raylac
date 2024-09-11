@@ -1,10 +1,10 @@
- import StyledButton from '@/components/StyledButton';
-import useGenerateStealthAccount from '@/hooks/useGenerateStealthAccount';
+import StyledButton from '@/components/StyledButton';
 import useSend from '@/hooks/useSend';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { theme } from '@/lib/theme';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
+import { generateStealthAddress } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -14,34 +14,24 @@ import { Hex, parseUnits } from 'viem';
 type Props = NativeStackScreenProps<RootStackParamsList, 'ConfirmSend'>;
 
 const ConfirmSend = ({ route }: Props) => {
-  const { amount, recipientUserOrAddress } = route.params;
+  const {
+    amount,
+    recipientUserOrAddress,
+    inputTokenId,
+    outputTokenId,
+    outputChainId,
+  } = route.params;
   const { mutateAsync: send, isPending: isSending } = useSend();
-  const { mutateAsync: generateStealthAccount } = useGenerateStealthAccount();
   const navigation = useTypedNavigation();
   const { t } = useTranslation('ConfirmSend');
 
   const onSendPress = useCallback(async () => {
-    const parsedAmount = parseUnits(amount.toString(), 6);
-    if (typeof recipientUserOrAddress === 'string') {
-      // If the recipient is an address, send directly to that address
-      await send({
-        amount: parsedAmount,
-        to: recipientUserOrAddress,
-      });
-    } else {
-      // If the recipient is a Raylac user,
-      // generate a stealth account and send to that
-      const stealthAccount = await generateStealthAccount({
-        viewingPubKey: recipientUserOrAddress.viewingPubKey as Hex,
-        spendingPubKey: recipientUserOrAddress.spendingPubKey as Hex,
-      });
-
-      await send({
-        amount: parsedAmount,
-        to: stealthAccount.address,
-        stealthAccount,
-      });
-    }
+    await send({
+      amount: BigInt(amount),
+      inputTokenId,
+      outputTokenId,
+      recipientUserOrAddress,
+    });
 
     // Navigate to the `SendSuccess` screen
     navigation.navigate('SendSuccess');
@@ -62,10 +52,12 @@ const ConfirmSend = ({ route }: Props) => {
         marginTop: -60,
       }}
     >
-      <View style={{
-        flexDirection: 'column',
-        rowGap: 12,
-      }}>
+      <View
+        style={{
+          flexDirection: 'column',
+          rowGap: 12,
+        }}
+      >
         <Text
           style={{
             fontSize: 28,
@@ -82,9 +74,9 @@ const ConfirmSend = ({ route }: Props) => {
             fontWeight: 'bold',
             textAlign: 'center',
             color: theme.text,
-          }}      
+          }}
         >
-          {amount} USDC
+          {amount.toLocaleString()} USDC
         </Text>
       </View>
       <StyledButton

@@ -1,4 +1,18 @@
-import { Hex } from 'viem';
+import { Chain, Hex } from 'viem';
+
+export interface UserOperation {
+  sender: Hex;
+  nonce: Hex;
+  initCode: Hex;
+  callData: Hex;
+  callGasLimit: Hex;
+  verificationGasLimit: Hex;
+  preVerificationGas: Hex;
+  maxFeePerGas: Hex;
+  maxPriorityFeePerGas: Hex;
+  paymasterAndData: Hex;
+  signature: Hex;
+}
 
 export interface StealthAddressWithEphemeral {
   address: Hex;
@@ -45,4 +59,82 @@ export interface User {
   id: number;
   name: string;
   username: string;
+}
+
+export interface RelayGetQuoteRequestBody {
+  user: Hex;
+  recipient: Hex;
+  originChainId: number;
+  destinationChainId: number;
+  amount: string;
+  originCurrency: string;
+  destinationCurrency: string;
+  tradeType: 'EXACT_INPUT' | 'EXACT_OUTPUT';
+}
+
+export interface RelayExecutionStepItem {
+  status: string;
+  data: {
+    to: Hex;
+    data: Hex;
+    value: string;
+    maxFeePerGas: string;
+    maxPriorityFeePerGas: string;
+    chainId: number;
+    gas: number;
+  };
+  check: {
+    endpoint: string;
+    method: string;
+  };
+}
+
+export interface RelayExecutionStep {
+  id: string;
+  action: string;
+  description: string;
+  kind: string;
+  requestId: string;
+  items: RelayExecutionStepItem[];
+}
+
+export interface RelayGasFee {
+  currency: object;
+  amount: string;
+  amountFormatted: string;
+  amountUsd: string;
+}
+
+export interface RelayGetQuoteResponseBody {
+  steps: RelayExecutionStep[];
+  fees: {
+    gas: RelayGasFee;
+    relayer: RelayGasFee;
+    relayerGas: RelayGasFee;
+    relayerService: RelayGasFee;
+    app: RelayGasFee;
+  };
+}
+
+/**
+ * Token balances of an address on a single chain
+ */
+export interface TokenBalance {
+  tokenId: string;
+  tokenAddress: Hex;
+  stealthAddress: StealthAddressWithEphemeral;
+  balance: bigint;
+  chain: Chain;
+}
+
+export interface SupportedToken {
+  tokenId: string;
+  symbol: string;
+  name: string;
+  decimals: number;
+  logoURI: string;
+  addresses: {
+    address: Hex;
+    chain: Chain;
+  }[];
 }

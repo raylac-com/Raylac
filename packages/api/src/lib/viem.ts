@@ -1,18 +1,22 @@
-import { getAlchemyRpcUrl, getChain, getPublicClient, getWalletClient } from '@raylac/shared';
+import {
+  getAlchemyRpcUrl,
+  getCanonicalChain,
+  getPublicClient,
+  getWalletClient,
+} from '@raylac/shared';
 
-const chain = getChain();
+const chain = getCanonicalChain();
 
 const rpcUrl = getAlchemyRpcUrl({
   chain,
-  apiKey: process.env.ALCHEMY_API_KEY as string,
 });
 
 export const publicClient = getPublicClient({
   chain,
-  rpcUrl
+  rpcUrl,
 });
 
 export const walletClient = getWalletClient({
   chain,
-  rpcUrl
+  rpcUrl,
 });

@@ -1,18 +1,18 @@
 import { useEffect } from 'react';
-import useGenerateStealthAccount from './useGenerateStealthAccount';
 import useSignedInUser from './useSignedInUser';
 import { Hex } from 'viem';
 import { trpc } from '@/lib/trpc';
 import Toast from 'react-native-toast-message';
 import { useMutation } from '@tanstack/react-query';
+import { generateStealthAddress } from '@raylac/shared';
 
 /**
  * Hook to generate a new deposit account
  */
 const useGetNewDepositAccount = () => {
-  const { mutateAsync: generateStealthAccount } = useGenerateStealthAccount();
   const { data: signedInUser } = useSignedInUser();
-  const { mutateAsync: addStealthAccount, error } = trpc.addStealthAccount.useMutation();
+  const { mutateAsync: addStealthAccount, error } =
+    trpc.addStealthAccount.useMutation();
 
   useEffect(() => {
     if (error) {
@@ -30,7 +30,7 @@ const useGetNewDepositAccount = () => {
         throw new Error('User not signed in');
       }
 
-      const account = await generateStealthAccount({
+      const account = generateStealthAddress({
         spendingPubKey: signedInUser.spendingPubKey as Hex,
         viewingPubKey: signedInUser.viewingPubKey as Hex,
       });

@@ -1,4 +1,3 @@
-import useSend from '@/hooks/useSend';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { useCallback, useState } from 'react';
 import { trpc } from '@/lib/trpc';
@@ -87,7 +86,6 @@ type Props = NativeStackScreenProps<RootStackParamsList, 'SendToSutoriUser'>;
 
 const SendToSutoriUser = ({ navigation }: Props) => {
   const { t } = useTranslation('SendToSutoriUser');
-  const { mutateAsync: send } = useSend();
   const { data: users } = trpc.getUsers.useQuery();
   const [username, setUsername] = useState('');
   const { data: signedInUser } = useSignedInUser();
@@ -100,7 +98,7 @@ const SendToSutoriUser = ({ navigation }: Props) => {
         recipientUserOrAddress: user,
       });
     },
-    [send]
+    []
   );
 
   return (

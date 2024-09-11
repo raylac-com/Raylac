@@ -1,18 +1,21 @@
-import { StealthTransferData } from '@raylac/shared';
-import { Hex } from 'viem';
+import { UserOperation, sendUserOperation } from '@raylac/shared';
+import { publicClient } from '../lib/viem';
 
-const send = async ({
-  data,
-  signatures,
-}: {
-  data: StealthTransferData;
-  signatures: Hex[];
-}) => {
-  // Send the transaction to the blockchain
+/**
+ * Send a transfer to a stealth account.
+ * Signed user operations should be provided.
+ */
+const send = async ({ userOps }: { userOps: UserOperation[] }) => {
+  const userOpHashes = [];
 
-  // Call the Relayer contract to send all transfers in batch
-
-  return 'ok';
+  for (const userOp of userOps) {
+    const userOpHash = await sendUserOperation({
+      client: publicClient,
+      userOp,
+    });
+    console.log('Sent user operations', userOpHash);
+    userOpHashes.push(userOpHash);
+  }
 };
 
 export default send;
