@@ -1,8 +1,9 @@
 import * as secp from '@noble/secp256k1';
-import { decodeFunctionData, Hex, parseUnits, zeroAddress } from 'viem';
+import { Chain, decodeFunctionData, Hex, parseUnits, zeroAddress } from 'viem';
 import { UserOperation } from './types';
 import RaylacAccountAbi from './abi/RaylacAccountAbi';
 import ERC20Abi from './abi/ERC20Abi';
+import * as chains from 'viem/chains';
 
 export const NATIVE_TOKEN_ADDRESS = zeroAddress;
 
@@ -44,6 +45,9 @@ export const projectivePointToHex = (point: secp.ProjectivePoint) => {
   return `0x${point.toHex(false)}` as Hex;
 };
 
+/**
+ * Concatenate paymaster address and authentication data
+ */
 export const encodePaymasterAndData = ({
   paymaster: paymasterAddress,
   data,
@@ -147,4 +151,19 @@ export const getTransferDataFromUserOp = (userOp: UserOperation) => {
     to: to as string,
     amount: amount as bigint,
   };
+};
+
+/**
+ * Returns viem's `Chain` object from a chain ID
+ */
+export const getChainFromId = (chainId: number): Chain => {
+  const chain = Object.entries(chains).find(
+    ([_, chain]) => chain.id === chainId
+  );
+
+  if (!chain) {
+    throw new Error(`Chain with ID ${chainId} not found`);
+  }
+
+  return chain[1] as Chain;
 };

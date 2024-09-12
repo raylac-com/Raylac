@@ -43,6 +43,23 @@ const supportedTokens: SupportedToken[] = [
     ],
   },
   {
+    tokenId: 'weth',
+    symbol: 'WETH',
+    name: 'Wrapped Ether',
+    decimals: 18,
+    logoURI: 'https://static.alchemyapi.io/images/assets/ETH.png',
+    addresses: [
+      {
+        address: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+        chain: chains.mainnet,
+      },
+      {
+        address: '0x4200000000000000000000000000000000000006',
+        chain: chains.baseSepolia,
+      },
+    ],
+  },
+  {
     tokenId: 'eth',
     symbol: 'ETH',
     name: 'ETH',

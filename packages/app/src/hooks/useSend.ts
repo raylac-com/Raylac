@@ -6,16 +6,23 @@ import {
   ERC20Abi,
   NATIVE_TOKEN_ADDRESS,
   RAYLAC_PAYMASTER_ADDRESS,
+  RelayGetQuoteRequestBody,
   UserOperation,
   buildUserOp,
   encodePaymasterAndData,
   generateStealthAddress,
+  getAlchemyRpcUrl,
+  getChainFromId,
+  getPublicClient,
+  getQuoteFromRelay,
+  getSenderAddress,
   getUserOpHash,
   recoveryStealthPrivKey,
 } from '@raylac/shared';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
+import { useCallback } from 'react';
 import { Hex, encodeFunctionData } from 'viem';
 import { publicKeyToAddress, signMessage } from 'viem/accounts';
 
@@ -23,6 +30,76 @@ import { publicKeyToAddress, signMessage } from 'viem/accounts';
 // @ts-ignore
 BigInt.prototype.toJSON = function () {
   return this.toString();
+};
+
+const buildUserOpsFromRelayQuote = async ({
+  signerAddress,
+  toAddress,
+  inputChainId,
+  inputTokenId,
+  outputChainId,
+  outputTokenId,
+  amount,
+}) => {
+  const inputTokenAddress = supportedTokens
+    .find(token => token.tokenId === inputTokenId)
+    ?.addresses.find(
+      tokenAddress => tokenAddress.chain.id === inputChainId
+    ).address;
+
+  const outputTokenAddress = supportedTokens
+    .find(token => token.tokenId === outputTokenId)
+    ?.addresses.find(
+      tokenAddress => tokenAddress.chain.id === outputChainId
+    ).address;
+
+  const fromAddress = getSenderAddress({
+    stealthSigner: signerAddress,
+  });
+
+  const relayQuoteRequestBody = {
+    user: fromAddress,
+    recipient: toAddress,
+    originChainId: inputChainId,
+    destinationChainId: outputChainId,
+    amount: amount.toString(),
+    originCurrency: inputTokenAddress,
+    destinationCurrency: outputTokenAddress,
+    tradeType: 'EXACT_INPUT' as RelayGetQuoteRequestBody['tradeType'],
+  };
+
+  const quote = await getQuoteFromRelay(relayQuoteRequestBody);
+
+  const inputChain = getChainFromId(inputChainId);
+
+  // Build user operations from the steps specified in the Relay quote
+  const userOps = (
+    await Promise.all(
+      quote.steps.map(async step => {
+        console.log(step.id, step.action, step.description);
+        const client = getPublicClient({
+          chain: inputChain,
+          rpcUrl: getAlchemyRpcUrl({ chain: inputChain }),
+        });
+
+        return await Promise.all(
+          step.items.map(item => {
+            console.log(item);
+            console.log('item.data', item.data);
+            return buildUserOp({
+              client,
+              stealthSigner: signerAddress,
+              to: item.data.to,
+              value: BigInt(item.data.value),
+              data: item.data.data,
+            });
+          })
+        );
+      })
+    )
+  ).flat();
+
+  return userOps;
 };
 
 /**
@@ -36,16 +113,65 @@ const useSend = () => {
 
   const queryClient = useQueryClient();
 
+  /**
+   * Get the `paymasterAndData` field for a user operation
+   */
+  const getPaymasterAndData = useCallback(
+    async ({ userOp }: { userOp: UserOperation }) => {
+      return encodePaymasterAndData({
+        paymaster: RAYLAC_PAYMASTER_ADDRESS,
+        data: await signUserOp({ userOp }),
+      });
+    },
+    [signUserOp]
+  );
+
+  const signUserOpWithStealthAccount = useCallback(
+    async ({
+      userOp,
+      stealthPrivKey,
+      chainId,
+    }: {
+      userOp: UserOperation;
+      stealthPrivKey: Hex;
+      chainId: number;
+    }) => {
+      const chain = getChainFromId(chainId);
+
+      const client = getPublicClient({
+        chain,
+        rpcUrl: getAlchemyRpcUrl({ chain }),
+      });
+
+      const userOpHash = await getUserOpHash({
+        client,
+        userOp,
+      });
+
+      const sig = await signMessage({
+        privateKey: stealthPrivKey,
+        message: {
+          raw: userOpHash,
+        },
+      });
+
+      return sig;
+    },
+    []
+  );
+
   return useMutation({
     mutationFn: async ({
       amount,
       inputTokenId,
       outputTokenId,
+      outputChainId,
       recipientUserOrAddress,
     }: {
       amount: bigint;
       inputTokenId: string;
       outputTokenId: string;
+      outputChainId: number;
       recipientUserOrAddress: Hex | User;
     }) => {
       if (!tokenBalancePerChain) {
@@ -58,10 +184,10 @@ const useSend = () => {
         .sort((a, b) => (BigInt(b.balance) > BigInt(a.balance) ? 1 : -1));
 
       let currentAmount = BigInt(0);
-      const sendFrom: RouterOutput['getTokenBalancesPerChain'] = [];
+      const sendFromAccounts: RouterOutput['getTokenBalancesPerChain'] = [];
 
       for (const account of sortedAccountsWithToken) {
-        sendFrom.push(account);
+        sendFromAccounts.push(account);
         currentAmount += BigInt(account.balance);
 
         if (currentAmount >= amount) {
@@ -97,25 +223,72 @@ const useSend = () => {
 
       let remainingAmount = amount;
 
-      const userOps = await Promise.all(
-        sendFrom.map(async account => {
-          const accountBalance = BigInt(account.balance);
+      const userOps: UserOperation[] = [];
+      for (const sendFromAccount of sendFromAccounts) {
+        const accountBalance = BigInt(sendFromAccount.balance);
 
-          const sendAmount =
-            remainingAmount > accountBalance ? accountBalance : remainingAmount;
+        // Determine the amount to send from this account
+        const sendAmount =
+          remainingAmount > accountBalance ? accountBalance : remainingAmount;
 
-          const stealthSigner = publicKeyToAddress(
-            account.stealthAddress.stealthPubKey as Hex
+        const stealthSigner = publicKeyToAddress(
+          sendFromAccount.stealthAddress.stealthPubKey as Hex
+        );
+
+        // Get the metadata of the input token
+        const inputTokenMetadata = supportedTokens
+          .find(token => token.tokenId === inputTokenId)
+          ?.addresses.find(
+            tokenAddress => tokenAddress.chain.id === sendFromAccount.chain.id
           );
 
-          const inputTokenData = supportedTokens
-            .find(token => token.tokenId === inputTokenId)
-            ?.addresses.find(
-              tokenAddress => tokenAddress.chain.id === account.chain.id
-            );
+        // Recover the stealth private key for the account
+        const stealthPrivKey = recoveryStealthPrivKey({
+          ephemeralPubKey: sendFromAccount.stealthAddress
+            .ephemeralPubKey as Hex,
+          viewingPrivKey: viewPrivKey as Hex,
+          spendingPrivKey: spendingPrivKey as Hex,
+        });
 
+        if (
+          sendFromAccount.chain.id !== outputChainId ||
+          inputTokenId !== outputTokenId
+        ) {
+          // The transfer involves a cross-chain or cross-token transfer
+          console.log('Cross-chain or cross-token transfer');
+
+          // Build user operations from the Relay quote
+          const unsignedUserOps = await buildUserOpsFromRelayQuote({
+            signerAddress: stealthSigner,
+            toAddress,
+            inputChainId: sendFromAccount.chain.id,
+            inputTokenId,
+            outputChainId,
+            outputTokenId,
+            amount: sendAmount,
+          });
+
+          // Attach `paymasterAndData` and `signature` to each user operation
+          for (const userOp of unsignedUserOps) {
+            console.log('GEtting paymaster and data');
+            userOp.paymasterAndData = await getPaymasterAndData({ userOp });
+
+            console.log('Signing user op with stealth account');
+            const sig = await signUserOpWithStealthAccount({
+              userOp,
+              stealthPrivKey,
+              chainId: sendFromAccount.chain.id,
+            });
+            console.log('got sig');
+
+            userOp.signature = sig;
+            userOps.push(userOp);
+          }
+        } else {
           let userOp: UserOperation;
-          if (inputTokenData.address === NATIVE_TOKEN_ADDRESS) {
+          if (inputTokenMetadata.address === NATIVE_TOKEN_ADDRESS) {
+            // This is a native token transfer
+            // Build a user operation to send native tokens
             userOp = await buildUserOp({
               client: publicClient,
               stealthSigner,
@@ -124,6 +297,8 @@ const useSend = () => {
               data: '0x',
             });
           } else {
+            // This is an ERC20 token transfer
+            // Build a user operation to send ERC20 tokens
             const transferCall = encodeFunctionData({
               abi: ERC20Abi,
               functionName: 'transfer',
@@ -134,44 +309,30 @@ const useSend = () => {
               client: publicClient,
               stealthSigner,
               value: BigInt(0),
-              to: inputTokenData.address,
+              to: inputTokenMetadata.address,
               data: transferCall,
             });
           }
 
-          userOp.paymasterAndData = encodePaymasterAndData({
-            paymaster: RAYLAC_PAYMASTER_ADDRESS,
-            data: await signUserOp({ userOp }),
-          });
+          userOp.paymasterAndData = await getPaymasterAndData({ userOp });
 
-          remainingAmount -= sendAmount;
-
-          const userOpHash = await getUserOpHash({
-            client: publicClient,
+          const sig = await signUserOpWithStealthAccount({
             userOp,
-          });
-
-          const stealthPrivKey = recoveryStealthPrivKey({
-            ephemeralPubKey: account.stealthAddress.ephemeralPubKey as Hex,
-            viewingPrivKey: viewPrivKey as Hex,
-            spendingPrivKey: spendingPrivKey as Hex,
-          });
-
-          const sig = await signMessage({
-            privateKey: stealthPrivKey,
-            message: {
-              raw: userOpHash,
-            },
+            stealthPrivKey,
+            chainId: sendFromAccount.chain.id,
           });
 
           userOp.signature = sig;
 
-          return userOp;
-        })
-      );
+          userOps.push(userOp);
+        }
+
+        remainingAmount -= sendAmount;
+      }
 
       // TODO: Publish the Stealth address ephemeral data if this is a transfer to a stealth address
 
+      console.log('Sending user ops', userOps);
       await send({
         userOps,
       });

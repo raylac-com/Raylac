@@ -61,6 +61,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
     : BigInt(0);
 
   const onNextClick = useCallback(async () => {
+    console.log({ outputChain });
     navigation.navigate('ConfirmSend', {
       recipientUserOrAddress,
       amount: parsedInputAmount.toString(),

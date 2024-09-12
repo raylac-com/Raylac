@@ -23,6 +23,7 @@ import {
 import { privateKeyToAccount } from 'viem/accounts';
 import axios from 'axios';
 import RaylacPaymasterAbi from './abi/RaylacPaymasterAbi';
+import { getSenderAddress } from './stealth';
 
 /**
  * Get the init code for creating a stealth contract account
@@ -58,9 +59,8 @@ export const buildUserOp = async ({
 }) => {
   const initCode = getInitCode({ stealthSigner });
 
-  const senderAddress = await getSenderAddress({
-    client,
-    initCode,
+  const senderAddress = getSenderAddress({
+    stealthSigner,
   });
 
   if (!senderAddress) {
@@ -181,6 +181,7 @@ export const getPaymasterMessageHash = async ({
   return paymasterMessageHash as Hex;
 };
 
+/*
 export const getSenderAddress = async ({
   client,
   initCode,
@@ -227,6 +228,7 @@ export const getSenderAddress = async ({
     throw err;
   }
 };
+*/
 
 export const estimateUserOperationGas = async ({
   client,

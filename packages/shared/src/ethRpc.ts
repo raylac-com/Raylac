@@ -43,14 +43,17 @@ export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
     case chains.mainnet.id:
       alchemySubdomain = 'eth-mainnet';
       break;
-    case chains.baseSepolia.id:
-      alchemySubdomain = 'base-sepolia';
-      break;
     case chains.base.id:
       alchemySubdomain = 'base-mainnet';
       break;
+    case chains.baseSepolia.id:
+      alchemySubdomain = 'base-sepolia';
+      break;
     case chains.optimism.id:
       alchemySubdomain = 'opt-mainnet';
+      break;
+    case chains.optimismSepolia.id:
+      alchemySubdomain = 'opt-sepolia';
       break;
     case chains.blast.id:
       alchemySubdomain = 'blast-mainnet';

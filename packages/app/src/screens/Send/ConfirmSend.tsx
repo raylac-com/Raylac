@@ -4,12 +4,12 @@ import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { theme } from '@/lib/theme';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
-import { generateStealthAddress } from '@raylac/shared';
+import supportedChains from '@raylac/shared/out/supportedChains';
+import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
-import { Hex, parseUnits } from 'viem';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'ConfirmSend'>;
 
@@ -26,10 +26,12 @@ const ConfirmSend = ({ route }: Props) => {
   const { t } = useTranslation('ConfirmSend');
 
   const onSendPress = useCallback(async () => {
+    console.log('send', inputTokenId, outputTokenId, outputChainId, amount);
     await send({
       amount: BigInt(amount),
       inputTokenId,
       outputTokenId,
+      outputChainId,
       recipientUserOrAddress,
     });
 
@@ -41,6 +43,18 @@ const ConfirmSend = ({ route }: Props) => {
     typeof recipientUserOrAddress === 'string'
       ? shortenAddress(recipientUserOrAddress)
       : recipientUserOrAddress.name;
+
+  const inputTokenMetadata = supportedTokens.find(
+    token => token.tokenId === inputTokenId
+  );
+
+  const outputTokenMetadata = supportedTokens.find(
+    token => token.tokenId === outputTokenId
+  );
+
+  const destinationChainMetadata = supportedChains.find(
+    chain => chain.id === outputChainId
+  );
 
   return (
     <View
@@ -76,8 +90,13 @@ const ConfirmSend = ({ route }: Props) => {
             color: theme.text,
           }}
         >
-          {amount.toLocaleString()} USDC
+          {amount.toLocaleString()} {inputTokenMetadata.symbol}{' '}
         </Text>
+        <Text>
+          Recipient receives {amount.toLocaleString()}{' '}
+          {outputTokenMetadata.symbol}
+        </Text>
+        <Text>Destination chain: {destinationChainMetadata.name}</Text>
       </View>
       <StyledButton
         title={t('send')}

@@ -9,6 +9,7 @@ const send = async ({ userOps }: { userOps: UserOperation[] }) => {
   const userOpHashes = [];
 
   for (const userOp of userOps) {
+    console.log('Sending user operation', userOp);
     const userOpHash = await sendUserOperation({
       client: publicClient,
       userOp,
