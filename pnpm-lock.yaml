@@ -363,9 +363,15 @@ importers:
       '@prisma/client':
         specifier: ^5.12.1
         version: 5.16.0(prisma@5.16.0)
+      alchemy-sdk:
+        specifier: ^3.3.1
+        version: 3.3.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       axios:
         specifier: ^1.7.2
         version: 1.7.2
+      bip39:
+        specifier: ^3.1.0
+        version: 3.1.0
       viem:
         specifier: ^2.17.0
         version: 2.17.0(bufferutil@4.0.8)(typescript@5.5.2)(utf-8-validate@5.0.10)(zod@3.23.8)

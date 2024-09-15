@@ -1,3 +1,5 @@
+import * as bip39 from 'bip39';
+import { HDKey, hdKeyToAccount } from 'viem/accounts';
 import * as secp from '@noble/secp256k1';
 import {
   encodeDeployData,
@@ -149,4 +151,40 @@ export const generateStealthAddress = (input: {
     ephemeralPubKey: projectivePointToHex(ephemeralPubKey),
     viewTag,
   };
+};
+
+/**
+ * Get the private key of an `HDKey` in hex format.
+ */
+export const hdKeyToPrivateKey = (hdKey: HDKey): Hex => {
+  return `0x${Buffer.from(hdKey.privateKey!).toString('hex')}`;
+};
+
+/**
+ * Get the spending private key from a mnemonic
+ */
+export const getSpendingPrivKey = (mnemonic: string) => {
+  const seed = bip39.mnemonicToSeedSync(mnemonic);
+
+  const hdKey = HDKey.fromMasterSeed(seed);
+
+  const spendingAccount = hdKeyToAccount(hdKey, {
+    accountIndex: 0,
+  });
+
+  return hdKeyToPrivateKey(spendingAccount.getHdKey());
+};
+
+/**
+ * Get the viewing private key from a mnemonic
+ */
+export const getViewingPrivKey = (mnemonic: string) => {
+  const seed = bip39.mnemonicToSeedSync(mnemonic);
+  const hdKey = HDKey.fromMasterSeed(seed);
+
+  const viewingAccount = hdKeyToAccount(hdKey, {
+    accountIndex: 1,
+  });
+
+  return hdKeyToPrivateKey(viewingAccount.getHdKey());
 };

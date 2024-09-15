@@ -4,6 +4,7 @@ import { UserOperation } from './types';
 import RaylacAccountAbi from './abi/RaylacAccountAbi';
 import ERC20Abi from './abi/ERC20Abi';
 import * as chains from 'viem/chains';
+import { Network } from 'alchemy-sdk';
 
 export const NATIVE_TOKEN_ADDRESS = zeroAddress;
 
@@ -131,7 +132,7 @@ export const mimeTypeToExtension = (mimeType: string) => {
 /**
  * Get ERC20 token transfer data from a user operation
  */
-export const getTransferDataFromUserOp = (userOp: UserOperation) => {
+export const getERC20TransferDataFromUserOp = (userOp: UserOperation) => {
   const { functionName, args } = decodeFunctionData({
     abi: RaylacAccountAbi,
     data: userOp.callData,
@@ -148,7 +149,7 @@ export const getTransferDataFromUserOp = (userOp: UserOperation) => {
 
   const [to, amount] = transferData.args;
   return {
-    to: to as string,
+    to: to as Hex,
     amount: amount as bigint,
   };
 };
@@ -166,4 +167,18 @@ export const getChainFromId = (chainId: number): Chain => {
   }
 
   return chain[1] as Chain;
+};
+
+/**
+ * Convert viem's `Chain` object to Alchemy's `Network` enum
+ */
+export const toAlchemyNetwork = (chainId: number) => {
+  switch (chainId) {
+    case chains.baseSepolia.id:
+      return Network.BASE_SEPOLIA;
+    case chains.optimismSepolia.id:
+      return Network.OPT_SEPOLIA;
+    default:
+      throw new Error(`Chain ${chainId} not supported`);
+  }
 };

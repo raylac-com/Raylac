@@ -7,6 +7,7 @@ import {
 } from 'viem';
 import * as chains from 'viem/chains';
 import { Chain, anvil, base, baseSepolia } from 'viem/chains';
+import { getChainFromId } from './utils';
 
 const CHAIN = process.env.CHAIN || process.env.EXPO_PUBLIC_CHAIN;
 
@@ -70,15 +71,14 @@ export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
  * The chain is determined by the environment.
  */
 export const getPublicClient = ({
-  chain,
-  rpcUrl,
+  chainId,
 }: {
-  chain: Chain;
-  rpcUrl: string;
+  chainId: number;
 }): PublicClient<HttpTransport, Chain> => {
+  const chain = getChainFromId(chainId);
   const client = createPublicClient({
     chain,
-    transport: http(rpcUrl),
+    transport: http(getAlchemyRpcUrl({ chain })),
   });
 
   return client as PublicClient<HttpTransport, Chain>;

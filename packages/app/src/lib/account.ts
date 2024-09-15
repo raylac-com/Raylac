@@ -1,11 +1,7 @@
 import * as bip39 from 'bip39';
-import { Hex } from 'viem';
 import { HDKey, hdKeyToAccount } from 'viem/accounts';
 import { saveMnemonic } from '@/lib/key';
-
-const hdKeyToPrivateKey = (hdKey: HDKey): Hex => {
-  return `0x${Buffer.from(hdKey.privateKey).toString('hex')}`;
-};
+import { hdKeyToPrivateKey } from '@raylac/shared';
 
 export const initAccountFromMnemonic = async (mnemonic: string) => {
   const seed = bip39.mnemonicToSeedSync(mnemonic);

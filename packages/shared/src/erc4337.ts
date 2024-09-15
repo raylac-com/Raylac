@@ -3,27 +3,26 @@ import {
   ENTRY_POINT_ADDRESS,
   RAYLAC_PAYMASTER_ADDRESS,
 } from './addresses';
-import { UserOperation } from './types';
+import { StealthAddressWithEphemeral, UserOperation } from './types';
 import RaylacAccountAbi from './abi/RaylacAccountAbi';
 import AccountFactoryAbi from './abi/AccountFactory';
 import EntryPointAbi from './abi/EntryPointAbi';
 import {
-  BaseError,
   Chain,
-  ContractFunctionRevertedError,
   Hex,
   HttpTransport,
   PublicClient,
   encodeFunctionData,
   hexToBigInt,
-  pad,
   toHex,
-  zeroAddress,
 } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
 import axios from 'axios';
 import RaylacPaymasterAbi from './abi/RaylacPaymasterAbi';
-import { getSenderAddress } from './stealth';
+import { getSenderAddress, recoveryStealthPrivKey } from './stealth';
+import { Alchemy } from 'alchemy-sdk';
+import { toAlchemyNetwork } from './utils';
+import { getPublicClient } from './ethRpc';
+import { signMessage } from 'viem/accounts';
 
 /**
  * Get the init code for creating a stealth contract account
@@ -38,6 +37,17 @@ export const getInitCode = ({ stealthSigner }: { stealthSigner: Hex }) => {
   const initCode = (ACCOUNT_FACTORY_ADDRESS + factoryData.slice(2)) as Hex;
 
   return initCode;
+};
+
+const increaseByPercent = ({
+  value,
+  percent,
+}: {
+  value: bigint;
+  percent: number;
+}): bigint => {
+  const buff = (value * BigInt(percent)) / BigInt(100);
+  return value + buff;
 };
 
 /**
@@ -56,7 +66,7 @@ export const buildUserOp = async ({
   to: Hex;
   value: bigint;
   data: Hex;
-}) => {
+}): Promise<UserOperation> => {
   const initCode = getInitCode({ stealthSigner });
 
   const senderAddress = getSenderAddress({
@@ -84,10 +94,22 @@ export const buildUserOp = async ({
     address: senderAddress,
   });
 
-  const gasPrice = await client.getGasPrice();
-  const gasPriceBuffer = (gasPrice * BigInt(20)) / BigInt(100);
-  const maxFeePerGas = gasPrice + gasPriceBuffer;
-  const maxPriorityFeePerGas = await rundlerMaxPriorityFeePerGas({ client });
+  const alchemy = new Alchemy({
+    apiKey: process.env.ALCHEMY_API_KEY!,
+    network: toAlchemyNetwork(client.chain.id),
+  });
+
+  const feeData = await alchemy.core.getFeeData();
+
+  const baseFee = feeData.lastBaseFeePerGas!.toBigInt();
+  const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas!.toBigInt();
+
+  const maxPriorityFeePerGasBuffed = increaseByPercent({
+    value: maxPriorityFeePerGas,
+    percent: 10,
+  });
+
+  const maxFeePerGas = baseFee + maxPriorityFeePerGasBuffed;
 
   const userOp: UserOperation = {
     sender: senderAddress,
@@ -98,23 +120,32 @@ export const buildUserOp = async ({
     verificationGasLimit: toHex(BigInt(0)),
     preVerificationGas: toHex(BigInt(0)),
     maxFeePerGas: toHex(maxFeePerGas),
-    maxPriorityFeePerGas,
+    maxPriorityFeePerGas: toHex(maxPriorityFeePerGasBuffed),
     paymasterAndData: '0x',
     // Dummy signature as specified by Alchemy https://docs.alchemy.com/reference/eth-estimateuseroperationgas
     signature:
       '0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c',
+    chainId: client.chain.id,
   };
 
+  /*
   const gasEstimation = await estimateUserOperationGas({
     client,
     userOp,
   });
+  */
+
+  // console.log('Gas estimation:', gasEstimation);
+  const gasEstimation = {
+    //    preVerificationGas: '0xb8cd' as Hex,
+    preVerificationGas: '0xa00e8' as Hex,
+    callGasLimit: '0x30d40' as Hex,
+    verificationGasLimit: '0x30d40' as Hex,
+  };
 
   userOp.callGasLimit = gasEstimation.callGasLimit;
   userOp.verificationGasLimit = gasEstimation.verificationGasLimit;
   userOp.preVerificationGas = gasEstimation.preVerificationGas;
-
-  console.log('User operation:', userOp);
 
   return userOp;
 };
@@ -281,7 +312,7 @@ export const rundlerMaxPriorityFeePerGas = async ({
   client,
 }: {
   client: PublicClient<HttpTransport, Chain>;
-}) => {
+}): Promise<bigint> => {
   const config = {
     headers: {
       accept: 'application/json',
@@ -300,7 +331,7 @@ export const rundlerMaxPriorityFeePerGas = async ({
     {
       id: 1,
       jsonrpc: '2.0',
-      method: 'rundler_maxPriorityFeePerGas',
+      method: 'eth_maxPriorityFeePerGas',
       params: [],
     },
     config
@@ -310,7 +341,7 @@ export const rundlerMaxPriorityFeePerGas = async ({
     throw new Error(JSON.stringify(result.data.error));
   }
 
-  return result.data.result!;
+  return BigInt(result.data.result!);
 };
 
 /**
@@ -348,6 +379,8 @@ export const sendUserOperation = async ({
     },
     config
   );
+
+  console.log('Send user operation result:', result.data);
 
   if (result.data.error) {
     throw new Error(JSON.stringify(result.data.error));
@@ -424,4 +457,87 @@ export const getUserOpReceipt = async ({
   }
 
   return result.data!;
+};
+
+/**
+ * Sign a user operation with a stealth account
+ */
+export const signUserOpWithStealthAccount = async ({
+  userOp,
+  stealthAccount,
+  spendingPrivKey,
+  viewingPrivKey,
+  chainId,
+}: {
+  userOp: UserOperation;
+  stealthAccount: StealthAddressWithEphemeral;
+  spendingPrivKey: Hex;
+  viewingPrivKey: Hex;
+  chainId: number;
+}): Promise<UserOperation> => {
+  const client = getPublicClient({
+    chainId,
+  });
+
+  const userOpHash = await getUserOpHash({
+    client,
+    userOp,
+  });
+
+  const stealthPrivKey = recoveryStealthPrivKey({
+    ephemeralPubKey: stealthAccount.ephemeralPubKey,
+    spendingPrivKey: spendingPrivKey,
+    viewingPrivKey: viewingPrivKey,
+  });
+
+  const sig = await signMessage({
+    privateKey: stealthPrivKey,
+    message: {
+      raw: userOpHash,
+    },
+  });
+
+  return {
+    ...userOp,
+    signature: sig,
+  };
+};
+
+/**
+ * Sign multiple user operations with stealth accounts
+ */
+export const bulkSignUserOps = async ({
+  userOps,
+  stealthAccounts,
+  spendingPrivKey,
+  viewingPrivKey,
+}: {
+  userOps: UserOperation[];
+  stealthAccounts: StealthAddressWithEphemeral[];
+  spendingPrivKey: Hex;
+  viewingPrivKey: Hex;
+}): Promise<UserOperation[]> => {
+  const signedUserOps = await Promise.all(
+    userOps.map(async userOp => {
+      const stealthAccount = stealthAccounts.find(
+        account => account.address === userOp.sender
+      );
+
+      if (!stealthAccount) {
+        throw new Error('Stealth account not found');
+      }
+
+      const singedUserOp = await signUserOpWithStealthAccount({
+        userOp,
+        stealthAccount,
+        spendingPrivKey,
+        viewingPrivKey,
+        chainId: userOp.chainId,
+      });
+
+      return singedUserOp;
+    })
+  );
+
+  return signedUserOps;
 };

@@ -1,105 +1,29 @@
-import { getMnemonic, getSpendingPrivKey, getViewingPrivKey } from '@/lib/key';
+import { getMnemonic } from '@/lib/key';
 import { trpc } from '@/lib/trpc';
-import { publicClient } from '@/lib/viem';
 import { RouterOutput, User } from '@/types';
 import {
-  ERC20Abi,
-  NATIVE_TOKEN_ADDRESS,
   RAYLAC_PAYMASTER_ADDRESS,
-  RelayGetQuoteRequestBody,
+  StealthAddressWithEphemeral,
+  TokenBalance,
   UserOperation,
-  buildUserOp,
+  buildMultiChainSendRequestBody,
+  bulkSignUserOps,
   encodePaymasterAndData,
   generateStealthAddress,
-  getAlchemyRpcUrl,
-  getChainFromId,
-  getPublicClient,
-  getQuoteFromRelay,
-  getSenderAddress,
-  getUserOpHash,
-  recoveryStealthPrivKey,
+  getSpendingPrivKey,
+  getViewingPrivKey,
+  signUserOpWithStealthAccount,
 } from '@raylac/shared';
-import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
 import { useCallback } from 'react';
-import { Hex, encodeFunctionData } from 'viem';
-import { publicKeyToAddress, signMessage } from 'viem/accounts';
+import { Hex } from 'viem';
+import useSignedInUser from './useSignedInUser';
 
 // This is a workaround for the fact that BigInts are not supported by JSON.stringify
 // @ts-ignore
 BigInt.prototype.toJSON = function () {
   return this.toString();
-};
-
-const buildUserOpsFromRelayQuote = async ({
-  signerAddress,
-  toAddress,
-  inputChainId,
-  inputTokenId,
-  outputChainId,
-  outputTokenId,
-  amount,
-}) => {
-  const inputTokenAddress = supportedTokens
-    .find(token => token.tokenId === inputTokenId)
-    ?.addresses.find(
-      tokenAddress => tokenAddress.chain.id === inputChainId
-    ).address;
-
-  const outputTokenAddress = supportedTokens
-    .find(token => token.tokenId === outputTokenId)
-    ?.addresses.find(
-      tokenAddress => tokenAddress.chain.id === outputChainId
-    ).address;
-
-  const fromAddress = getSenderAddress({
-    stealthSigner: signerAddress,
-  });
-
-  const relayQuoteRequestBody = {
-    user: fromAddress,
-    recipient: toAddress,
-    originChainId: inputChainId,
-    destinationChainId: outputChainId,
-    amount: amount.toString(),
-    originCurrency: inputTokenAddress,
-    destinationCurrency: outputTokenAddress,
-    tradeType: 'EXACT_INPUT' as RelayGetQuoteRequestBody['tradeType'],
-  };
-
-  const quote = await getQuoteFromRelay(relayQuoteRequestBody);
-
-  const inputChain = getChainFromId(inputChainId);
-
-  // Build user operations from the steps specified in the Relay quote
-  const userOps = (
-    await Promise.all(
-      quote.steps.map(async step => {
-        console.log(step.id, step.action, step.description);
-        const client = getPublicClient({
-          chain: inputChain,
-          rpcUrl: getAlchemyRpcUrl({ chain: inputChain }),
-        });
-
-        return await Promise.all(
-          step.items.map(item => {
-            console.log(item);
-            console.log('item.data', item.data);
-            return buildUserOp({
-              client,
-              stealthSigner: signerAddress,
-              to: item.data.to,
-              value: BigInt(item.data.value),
-              data: item.data.data,
-            });
-          })
-        );
-      })
-    )
-  ).flat();
-
-  return userOps;
 };
 
 /**
@@ -108,8 +32,10 @@ const buildUserOpsFromRelayQuote = async ({
 const useSend = () => {
   const { data: tokenBalancePerChain } =
     trpc.getTokenBalancesPerChain.useQuery();
+  const { data: stealthAccounts } = trpc.getStealthAccounts.useQuery();
   const { mutateAsync: send } = trpc.send.useMutation();
   const { mutateAsync: signUserOp } = trpc.signUserOp.useMutation();
+  const { data: signedInUser } = useSignedInUser();
 
   const queryClient = useQueryClient();
 
@@ -118,59 +44,28 @@ const useSend = () => {
    */
   const getPaymasterAndData = useCallback(
     async ({ userOp }: { userOp: UserOperation }) => {
-      return encodePaymasterAndData({
+      const paymasterSig = encodePaymasterAndData({
         paymaster: RAYLAC_PAYMASTER_ADDRESS,
         data: await signUserOp({ userOp }),
       });
+
+      return {
+        ...userOp,
+        paymasterAndData: paymasterSig,
+      };
     },
     [signUserOp]
-  );
-
-  const signUserOpWithStealthAccount = useCallback(
-    async ({
-      userOp,
-      stealthPrivKey,
-      chainId,
-    }: {
-      userOp: UserOperation;
-      stealthPrivKey: Hex;
-      chainId: number;
-    }) => {
-      const chain = getChainFromId(chainId);
-
-      const client = getPublicClient({
-        chain,
-        rpcUrl: getAlchemyRpcUrl({ chain }),
-      });
-
-      const userOpHash = await getUserOpHash({
-        client,
-        userOp,
-      });
-
-      const sig = await signMessage({
-        privateKey: stealthPrivKey,
-        message: {
-          raw: userOpHash,
-        },
-      });
-
-      return sig;
-    },
-    []
   );
 
   return useMutation({
     mutationFn: async ({
       amount,
-      inputTokenId,
-      outputTokenId,
+      tokenId,
       outputChainId,
       recipientUserOrAddress,
     }: {
       amount: bigint;
-      inputTokenId: string;
-      outputTokenId: string;
+      tokenId: string;
       outputChainId: number;
       recipientUserOrAddress: Hex | User;
     }) => {
@@ -200,10 +95,10 @@ const useSend = () => {
       }
 
       const mnemonic = await getMnemonic();
-      const viewPrivKey = await getViewingPrivKey(mnemonic);
+      const viewingPrivKey = await getViewingPrivKey(mnemonic);
       const spendingPrivKey = await getSpendingPrivKey(mnemonic);
 
-      if (!viewPrivKey) {
+      if (!viewingPrivKey) {
         throw new Error('No view key found');
       }
 
@@ -221,120 +116,69 @@ const useSend = () => {
 
       const toAddress = typeof to === 'string' ? to : to.address;
 
-      let remainingAmount = amount;
+      const multiChainSendData = await buildMultiChainSendRequestBody({
+        senderPubKeys: {
+          spendingPubKey: signedInUser.spendingPubKey as Hex,
+          viewingPubKey: signedInUser.viewingPubKey as Hex,
+        },
+        amount,
+        tokenId,
+        to: toAddress,
+        stealthAccountsWithTokenBalances:
+          tokenBalancePerChain as TokenBalance[],
+        outputChainId,
+      });
 
-      const userOps: UserOperation[] = [];
-      for (const sendFromAccount of sendFromAccounts) {
-        const accountBalance = BigInt(sendFromAccount.balance);
+      /**
+       * 2. Get the paymaster signatures for the user operations
+       */
 
-        // Determine the amount to send from this account
-        const sendAmount =
-          remainingAmount > accountBalance ? accountBalance : remainingAmount;
+      const paymasterSignedBridgeUserOps = await Promise.all(
+        multiChainSendData.bridgeUserOps.map(async userOp => {
+          return getPaymasterAndData({ userOp });
+        })
+      );
 
-        const stealthSigner = publicKeyToAddress(
-          sendFromAccount.stealthAddress.stealthPubKey as Hex
-        );
+      const paymasterSignedUserOpsAfterBridge = await Promise.all(
+        multiChainSendData.userOpsAfterBridge.map(async userOp => {
+          return getPaymasterAndData({ userOp });
+        })
+      );
 
-        // Get the metadata of the input token
-        const inputTokenMetadata = supportedTokens
-          .find(token => token.tokenId === inputTokenId)
-          ?.addresses.find(
-            tokenAddress => tokenAddress.chain.id === sendFromAccount.chain.id
-          );
+      const paymasterSignedFinalTransferUserOp = await getPaymasterAndData({
+        userOp: multiChainSendData.finalTransferUserOp,
+      });
 
-        // Recover the stealth private key for the account
-        const stealthPrivKey = recoveryStealthPrivKey({
-          ephemeralPubKey: sendFromAccount.stealthAddress
-            .ephemeralPubKey as Hex,
-          viewingPrivKey: viewPrivKey as Hex,
-          spendingPrivKey: spendingPrivKey as Hex,
-        });
+      console.log(`Signing bridge user ops...`);
+      const signedBridgeUserOps = await bulkSignUserOps({
+        userOps: paymasterSignedBridgeUserOps,
+        stealthAccounts: stealthAccounts as StealthAddressWithEphemeral[],
+        spendingPrivKey,
+        viewingPrivKey,
+      });
 
-        if (
-          sendFromAccount.chain.id !== outputChainId ||
-          inputTokenId !== outputTokenId
-        ) {
-          // The transfer involves a cross-chain or cross-token transfer
-          console.log('Cross-chain or cross-token transfer');
+      console.log(`Signing user ops after bridge...`);
+      const signedUserOpsAfterBridge = await bulkSignUserOps({
+        userOps: paymasterSignedUserOpsAfterBridge,
+        stealthAccounts: stealthAccounts as StealthAddressWithEphemeral[],
+        spendingPrivKey,
+        viewingPrivKey,
+      });
 
-          // Build user operations from the Relay quote
-          const unsignedUserOps = await buildUserOpsFromRelayQuote({
-            signerAddress: stealthSigner,
-            toAddress,
-            inputChainId: sendFromAccount.chain.id,
-            inputTokenId,
-            outputChainId,
-            outputTokenId,
-            amount: sendAmount,
-          });
+      console.log(`Signing final transfer user op...`);
+      const signedFinalTransferUserOp = await signUserOpWithStealthAccount({
+        userOp: paymasterSignedFinalTransferUserOp,
+        stealthAccount: multiChainSendData.consolidateToStealthAccount,
+        spendingPrivKey,
+        viewingPrivKey,
+        chainId: outputChainId,
+      });
 
-          // Attach `paymasterAndData` and `signature` to each user operation
-          for (const userOp of unsignedUserOps) {
-            console.log('GEtting paymaster and data');
-            userOp.paymasterAndData = await getPaymasterAndData({ userOp });
-
-            console.log('Signing user op with stealth account');
-            const sig = await signUserOpWithStealthAccount({
-              userOp,
-              stealthPrivKey,
-              chainId: sendFromAccount.chain.id,
-            });
-            console.log('got sig');
-
-            userOp.signature = sig;
-            userOps.push(userOp);
-          }
-        } else {
-          let userOp: UserOperation;
-          if (inputTokenMetadata.address === NATIVE_TOKEN_ADDRESS) {
-            // This is a native token transfer
-            // Build a user operation to send native tokens
-            userOp = await buildUserOp({
-              client: publicClient,
-              stealthSigner,
-              value: sendAmount,
-              to: toAddress,
-              data: '0x',
-            });
-          } else {
-            // This is an ERC20 token transfer
-            // Build a user operation to send ERC20 tokens
-            const transferCall = encodeFunctionData({
-              abi: ERC20Abi,
-              functionName: 'transfer',
-              args: [toAddress, sendAmount],
-            });
-
-            userOp = await buildUserOp({
-              client: publicClient,
-              stealthSigner,
-              value: BigInt(0),
-              to: inputTokenMetadata.address,
-              data: transferCall,
-            });
-          }
-
-          userOp.paymasterAndData = await getPaymasterAndData({ userOp });
-
-          const sig = await signUserOpWithStealthAccount({
-            userOp,
-            stealthPrivKey,
-            chainId: sendFromAccount.chain.id,
-          });
-
-          userOp.signature = sig;
-
-          userOps.push(userOp);
-        }
-
-        remainingAmount -= sendAmount;
-      }
-
-      // TODO: Publish the Stealth address ephemeral data if this is a transfer to a stealth address
-
-      console.log('Sending user ops', userOps);
       await send({
-        userOps,
+        bridgeUserOps: signedBridgeUserOps,
+        userOpsAfterBridge: signedUserOpsAfterBridge,
+        finalTransferUserOp: signedFinalTransferUserOp,
+        relayQuotes: multiChainSendData.relayQuotes,
       });
     },
     onSuccess: () => {

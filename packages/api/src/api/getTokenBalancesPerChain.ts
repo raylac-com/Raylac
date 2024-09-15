@@ -61,8 +61,8 @@ const getTokenBalancesPerChain = async ({ userId }: { userId: number }) => {
               viewTag: stealthAddress.viewTag as Hex,
               stealthPubKey: stealthAddress.stealthPubKey as Hex,
             },
-            balance,
-            chain: tokenAddress.chain,
+            balance: balance.toString(),
+            chainId: tokenAddress.chain.id,
           } as TokenBalance;
         })
       );

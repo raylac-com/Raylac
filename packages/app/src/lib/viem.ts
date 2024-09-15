@@ -1,22 +1,7 @@
-import {
-  getAlchemyRpcUrl,
-  getCanonicalChain,
-  getPublicClient,
-  getWalletClient,
-} from '@raylac/shared';
+import { getCanonicalChain, getPublicClient } from '@raylac/shared';
 
 const chain = getCanonicalChain();
 
-const rpcUrl = getAlchemyRpcUrl({
-  chain,
-});
-
 export const publicClient = getPublicClient({
-  chain,
-  rpcUrl,
-});
-
-export const walletClient = getWalletClient({
-  chain,
-  rpcUrl,
+  chainId: chain.id,
 });

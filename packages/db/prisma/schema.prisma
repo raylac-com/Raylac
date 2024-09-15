@@ -118,3 +118,30 @@ model InviteCode {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+enum RelayExecutionStatus {
+  refund
+  success
+  delayed
+  waiting
+  failure
+  pending
+}
+
+model RelayIntent {
+  requestId          String               @id
+  from               String
+  to                 String
+  status             RelayExecutionStatus
+  details            String
+  fees               Json
+  steps              Json
+  inTxHashes         String[]
+  outTxHashes        String[]
+  timestamp          DateTime
+  originTokenId      Int
+  destinationTokenId Int
+  amount             BigInt
+  originChainId      Int
+  destinationChainId Int
+}

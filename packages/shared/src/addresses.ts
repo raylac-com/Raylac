@@ -1,3 +1,13 @@
+import { Hex } from 'viem';
+import { base, baseSepolia } from 'viem/chains';
+
+export const ACROSS_SPOKE_POOL_ADDRESS: {
+  [key: number]: Hex;
+} = {
+  [base.id]: '0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64',
+  [baseSepolia.id]: '0x82B564983aE7274c86695917BBf8C99ECb6F0F8F',
+};
+
 export const ACCOUNT_IMPL_ADDRESS =
   '0xcd1Ae4e4E294f3824Abf13752A95d0D66bce6d26';
 

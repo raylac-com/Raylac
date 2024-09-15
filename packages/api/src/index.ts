@@ -17,7 +17,7 @@ import updateDisplayName from './api/updateDisplayName';
 import updateUsername from './api/updateUsername';
 import updateProfileImage from './api/updateProfileImage';
 import { signUserOp } from './lib/paymaster';
-import { UserOperation } from '@raylac/shared';
+import { RelayGetQuoteResponseBody, UserOperation } from '@raylac/shared';
 import send from './api/send';
 import getStealthAccounts from './api/getStealthAccounts';
 import getTokenBalancesPerChain from './api/getTokenBalancesPerChain';
@@ -78,16 +78,25 @@ const appRouter = router({
   send: authedProcedure
     .input(
       z.object({
-        userOps: z.any(),
+        bridgeUserOps: z.array(z.any()),
+        userOpsAfterBridge: z.array(z.any()),
+        finalTransferUserOp: z.any(),
+        relayQuotes: z.array(z.any()),
       })
     )
     .mutation(async opts => {
       const { input } = opts;
 
-      const userOps = input.userOps as UserOperation[];
+      const bridgeUserOps = input.bridgeUserOps as UserOperation[];
+      const userOpsAfterBridge = input.userOpsAfterBridge as UserOperation[];
+      const finalTransferUserOp = input.finalTransferUserOp as UserOperation;
+      const relayQuotes = input.relayQuotes as RelayGetQuoteResponseBody[];
 
       await send({
-        userOps,
+        bridgeUserOps,
+        userOpsAfterBridge,
+        relayQuotes,
+        finalTransferUserOp,
       });
 
       return 'ok';

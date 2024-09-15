@@ -13,6 +13,9 @@ const getStealthAccounts = async ({ userId }: { userId: number }) => {
     },
     where: {
       userId,
+      address: {
+        not: "0x1053192d9Db45A2676025f3D117A8a20362238b1"
+      }
     },
   });
 

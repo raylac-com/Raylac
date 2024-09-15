@@ -12,8 +12,7 @@ const rpcUrl = getAlchemyRpcUrl({
 });
 
 export const publicClient = getPublicClient({
-  chain,
-  rpcUrl,
+  chainId: chain.id,
 });
 
 export const walletClient = getWalletClient({

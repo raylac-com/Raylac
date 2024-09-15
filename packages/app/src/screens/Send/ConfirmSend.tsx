@@ -14,23 +14,16 @@ import { Text, View } from 'react-native';
 type Props = NativeStackScreenProps<RootStackParamsList, 'ConfirmSend'>;
 
 const ConfirmSend = ({ route }: Props) => {
-  const {
-    amount,
-    recipientUserOrAddress,
-    inputTokenId,
-    outputTokenId,
-    outputChainId,
-  } = route.params;
+  const { amount, recipientUserOrAddress, outputTokenId, outputChainId } =
+    route.params;
   const { mutateAsync: send, isPending: isSending } = useSend();
   const navigation = useTypedNavigation();
   const { t } = useTranslation('ConfirmSend');
 
   const onSendPress = useCallback(async () => {
-    console.log('send', inputTokenId, outputTokenId, outputChainId, amount);
     await send({
       amount: BigInt(amount),
-      inputTokenId,
-      outputTokenId,
+      tokenId: outputTokenId,
       outputChainId,
       recipientUserOrAddress,
     });
@@ -45,7 +38,7 @@ const ConfirmSend = ({ route }: Props) => {
       : recipientUserOrAddress.name;
 
   const inputTokenMetadata = supportedTokens.find(
-    token => token.tokenId === inputTokenId
+    token => token.tokenId === outputTokenId
   );
 
   const outputTokenMetadata = supportedTokens.find(

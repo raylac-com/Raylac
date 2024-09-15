@@ -2,10 +2,11 @@ import { RelayGetQuoteRequestBody, RelayGetQuoteResponseBody } from './types';
 import axios from 'axios';
 
 export const relayClient = axios.create({
-  baseURL: 'https://api.relay.link',
+  baseURL: 'https://api.testnets.relay.link',
+  //  baseURL: 'https://api.relay.link',
 });
 
-export const getQuoteFromRelay = async (options: RelayGetQuoteRequestBody) => {
+export const getQuote = async (options: RelayGetQuoteRequestBody) => {
   try {
     const result = await relayClient.post<RelayGetQuoteResponseBody>(
       '/quote',

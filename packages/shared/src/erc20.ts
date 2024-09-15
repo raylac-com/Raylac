@@ -1,20 +1,20 @@
-import { Chain, encodeFunctionData, Hex } from 'viem';
-import { ERC20Abi, getPublicClient } from '@raylac/shared';
+import { encodeFunctionData, Hex } from 'viem';
+import { ERC20Abi, getPublicClient } from './';
 
 export const getTokenBalance = async ({
   contractAddress,
-  chain,
+  chainId,
   address,
 }: {
   contractAddress: Hex;
-  chain: Chain;
+  chainId: number;
   address: Hex;
 }) => {
   const publicClient = getPublicClient({
-    chainId: chain.id,
+    chainId,
   });
 
-  console.log('Getting balance for', address, 'on chain', chain.name, chain.id);
+  console.log('Getting balance for', address, chainId);
   const balance = await publicClient.readContract({
     address: contractAddress,
     abi: ERC20Abi,

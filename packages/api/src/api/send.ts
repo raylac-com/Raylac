@@ -1,22 +1,156 @@
-import { UserOperation, sendUserOperation } from '@raylac/shared';
-import { publicClient } from '../lib/viem';
+import { sleep } from '@/utils';
+import {
+  ERC20Abi,
+  RaylacAccountAbi,
+  RelayGetQuoteResponseBody,
+  UserOperation,
+  getChainFromId,
+  getPublicClient,
+  getTokenBalance,
+  sendUserOperation,
+} from '@raylac/shared';
+import { decodeFunctionData, Hex, zeroAddress } from 'viem';
+
+const getTransferDataFromUserOp = (userOp: UserOperation) => {
+  const { functionName, args } = decodeFunctionData({
+    abi: RaylacAccountAbi,
+    data: userOp.callData,
+  });
+
+  if (functionName !== 'execute') {
+    throw new Error("Function name must be 'execute'");
+  }
+
+  const data = args[2];
+
+  if (data === '0x') {
+    return {
+      tokenAddress: zeroAddress,
+      to: args[0],
+      amount: args[1],
+    };
+  } else {
+    const transferData = decodeFunctionData({
+      abi: ERC20Abi,
+      data,
+    });
+
+    const [to, amount] = transferData.args;
+
+    return {
+      tokenAddress: args[0],
+      to: to as Hex,
+      amount: amount as bigint,
+    };
+  }
+};
 
 /**
  * Send a transfer to a stealth account.
  * Signed user operations should be provided.
  */
-const send = async ({ userOps }: { userOps: UserOperation[] }) => {
+const send = async ({
+  bridgeUserOps,
+  userOpsAfterBridge,
+  finalTransferUserOp,
+}: {
+  bridgeUserOps: UserOperation[];
+  userOpsAfterBridge: UserOperation[];
+  finalTransferUserOp: UserOperation;
+  relayQuotes: RelayGetQuoteResponseBody[];
+}) => {
+  // TODO: Validate that the user operations point to the same address on the same chain
+
+  const outputChainId = finalTransferUserOp.chainId;
+  const proxAccountAddress = finalTransferUserOp.sender;
+  const finalTransferData = getTransferDataFromUserOp(finalTransferUserOp);
+
+  const tokenAddress = finalTransferData.tokenAddress;
+  const recipient = finalTransferData.to;
+  const transferAmount = finalTransferData.amount;
+
+  console.log({
+    outputChainId,
+    proxAccountAddress,
+    tokenAddress,
+    recipient,
+    transferAmount,
+  });
+
   const userOpHashes = [];
 
-  for (const userOp of userOps) {
-    console.log('Sending user operation', userOp);
+  for (const bridgeUserOp of bridgeUserOps) {
+    console.log('Sending user operation (before bridge)', bridgeUserOp);
+    const client = getPublicClient({
+      chainId: bridgeUserOp.chainId,
+    });
+
     const userOpHash = await sendUserOperation({
-      client: publicClient,
+      client,
+      userOp: bridgeUserOp,
+    });
+
+    console.log('Sent user operation (before bridge):', userOpHash);
+    userOpHashes.push(userOpHash);
+
+    // Save the user operation hash to the database
+  }
+
+  // Wait for the bridge to complete the transfer
+  for (const userOp of userOpsAfterBridge) {
+    console.log('Sending user operation (after bridge)', userOp);
+    const client = getPublicClient({
+      chainId: userOp.chainId,
+    });
+
+    const userOpHash = await sendUserOperation({
+      client,
       userOp,
     });
-    console.log('Sent user operations', userOpHash);
+    console.log('Sent user operation (after bridge):', userOpHash);
     userOpHashes.push(userOpHash);
+
+    // Save the user operation hash to the database
   }
+
+  const outputChainClient = getPublicClient({
+    chainId: outputChainId,
+  });
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const proxyAccountTokenBalance =
+      tokenAddress === zeroAddress
+        ? await outputChainClient.getBalance({
+            address: proxAccountAddress as Hex,
+            blockTag: 'latest',
+          })
+        : await getTokenBalance({
+            chain: getChainFromId(outputChainId),
+            contractAddress: tokenAddress,
+            address: proxAccountAddress as Hex,
+          });
+
+    console.log(
+      `Polling for proxy account token balance: ${proxyAccountTokenBalance}`
+    );
+
+    if (proxyAccountTokenBalance >= transferAmount) {
+      await sleep(3000);
+      break;
+    }
+
+    await sleep(3000);
+  }
+
+  const finalUserOpHash = await sendUserOperation({
+    client: getPublicClient({
+      chainId: outputChainId,
+    }),
+    userOp: finalTransferUserOp,
+  });
+
+  console.log('Final user operation hash:', finalUserOpHash);
 };
 
 export default send;

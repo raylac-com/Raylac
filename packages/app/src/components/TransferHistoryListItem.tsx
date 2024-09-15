@@ -118,7 +118,9 @@ const OutGoingTransferListItem = (props: OutGoingTransferListItemProps) => {
             columnGap: 8,
           }}
         >
-          <FastAvatar address={tx.to} size={36}></FastAvatar>
+          {/**
+            <FastAvatar address={tx.to} size={36}></FastAvatar>
+             */}
           <Text
             style={{
               color: theme.text,

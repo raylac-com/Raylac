@@ -1,10 +1,20 @@
-import "dotenv/config";
-import { AccountFactoryAbi, ACCOUNT_FACTORY_ADDRESS } from '@raylac/shared';
-import { publicClient } from './viem';
+import 'dotenv/config';
+import {
+  AccountFactoryAbi,
+  ACCOUNT_FACTORY_ADDRESS,
+  getPublicClient,
+} from '@raylac/shared';
 import { encodeFunctionData } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
+import { baseSepolia } from 'viem/chains';
 
 const estimateGas = async () => {
+  const chainId = baseSepolia.id;
+
+  const publicClient = getPublicClient({
+    chainId,
+  });
+
   const privKey = generatePrivateKey();
   const stealthAccount = privateKeyToAccount(privKey);
 

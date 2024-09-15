@@ -110,6 +110,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           flexDirection: 'row',
           alignItems: 'center',
           columnGap: 8,
+          zIndex: 3000,
         }}
       >
         <StyledNumberInput
@@ -139,12 +140,15 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
         <DropDownPicker
           open={inputPickerOpen}
           value={inputTokenId}
-          zIndex={2000}
           style={{
             width: 120,
           }}
           containerStyle={{
             width: 120,
+          }}
+          arrowIconStyle={{
+            width: 12,
+            height: 12,
           }}
           items={currencies}
           setOpen={_open => {
@@ -161,6 +165,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
         style={{
           flexDirection: 'row',
           alignItems: 'center',
+          zIndex: 2000,
         }}
       >
         <StyledNumberInput
@@ -181,7 +186,6 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
         <DropDownPicker
           open={outputPickerOpen}
           value={outputTokenId}
-          zIndex={99999}
           style={{
             width: 120,
           }}
@@ -208,6 +212,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           flexDirection: 'row',
           justifyContent: 'space-between',
           width: '82%',
+          zIndex: 1000,
         }}
       >
         <Text
@@ -224,8 +229,6 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
             width: 120,
             borderWidth: 0,
           }}
-          zIndex={1000}
-          zIndexInverse={3000}
           textStyle={{
             color: theme.text,
           }}
