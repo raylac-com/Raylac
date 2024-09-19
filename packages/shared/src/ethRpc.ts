@@ -44,6 +44,9 @@ export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
     case chains.mainnet.id:
       alchemySubdomain = 'eth-mainnet';
       break;
+    case chains.sepolia.id:
+      alchemySubdomain = 'eth-sepolia';
+      break;
     case chains.base.id:
       alchemySubdomain = 'base-mainnet';
       break;
@@ -59,11 +62,81 @@ export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
     case chains.blast.id:
       alchemySubdomain = 'blast-mainnet';
       break;
+    case chains.blastSepolia.id:
+      alchemySubdomain = 'blast-sepolia';
+      break;
+    case chains.arbitrum.id:
+      alchemySubdomain = 'arb-mainnet';
+      break;
+    case chains.arbitrumSepolia.id:
+      alchemySubdomain = 'arb-sepolia';
+      break;
+    case chains.polygon.id:
+      alchemySubdomain = 'polygon-mainnet';
+      break;
+    case chains.polygonAmoy.id:
+      alchemySubdomain = 'polygon-amoy';
+      break;
     default:
       throw new Error(`Unknown chain id: ${chain.id}`);
   }
 
   return `https://${alchemySubdomain}.g.alchemy.com/v2/${apiKey}`;
+};
+
+export const getQuickNodeRpcUrl = ({ chain }: { chain: Chain }) => {
+  const apiKey =
+    process.env.QUICKNODE_API_KEY ||
+    process.env.EXPO_PUBLIC_QUICKNODE_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('QUICKNODE_API_KEY is not set');
+  }
+
+  let quickNodeSubdomain;
+
+  switch (chain.id) {
+    case chains.mainnet.id:
+      quickNodeSubdomain = 'eth-mainnet';
+      break;
+    case chains.sepolia.id:
+      quickNodeSubdomain = 'eth-sepolia';
+      break;
+    case chains.base.id:
+      quickNodeSubdomain = 'base-mainnet';
+      break;
+    case chains.baseSepolia.id:
+      quickNodeSubdomain = 'base-sepolia';
+      break;
+    case chains.optimism.id:
+      quickNodeSubdomain = 'optimism';
+      break;
+    case chains.optimismSepolia.id:
+      quickNodeSubdomain = 'optimism-sepolia';
+      break;
+    case chains.blast.id:
+      quickNodeSubdomain = 'blast-mainnet';
+      break;
+    case chains.blastSepolia.id:
+      quickNodeSubdomain = 'blast-sepolia';
+      break;
+    case chains.arbitrum.id:
+      quickNodeSubdomain = 'arb-mainnet';
+      break;
+    case chains.arbitrumSepolia.id:
+      quickNodeSubdomain = 'arb-sepolia';
+      break;
+    case chains.polygon.id:
+      quickNodeSubdomain = 'polygon-mainnet';
+      break;
+    case chains.polygonAmoy.id:
+      quickNodeSubdomain = 'polygon-amoy';
+      break;
+    default:
+      throw new Error(`Unknown chain id: ${chain.id}`);
+  }
+
+  return `https://shy-wild-shard.${quickNodeSubdomain}.quiknode.pro/${apiKey}`;
 };
 
 /**
@@ -88,15 +161,10 @@ export const getPublicClient = ({
  * Get a `WalletClient` viem instance.
  * The chain is determined by the environment.
  */
-export const getWalletClient = ({
-  chain,
-  rpcUrl,
-}: {
-  chain: Chain;
-  rpcUrl: string;
-}) => {
+export const getWalletClient = ({ chainId }: { chainId: number }) => {
+  const chain = getChainFromId(chainId);
   return createWalletClient({
     chain,
-    transport: http(rpcUrl),
+    transport: http(getAlchemyRpcUrl({ chain })),
   });
 };

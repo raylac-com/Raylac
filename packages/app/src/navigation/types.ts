@@ -33,8 +33,7 @@ export type RootStackParamsList = {
   };
   ConfirmSend: {
     recipientUserOrAddress: User | Hex;
-    inputTokenId: string;
-    outputTokenId: string;
+    tokenId: string;
     outputChainId: number;
     amount: string;
   };
@@ -53,4 +52,7 @@ export type RootStackParamsList = {
   BackupAccount: undefined;
   SelectLanguage: undefined;
   SendSuccess: undefined;
+
+  // Token stack
+  TokenBalance: undefined;
 };

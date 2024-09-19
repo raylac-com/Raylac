@@ -4,27 +4,41 @@ import { theme } from '@/lib/theme';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, Text, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
-import useAggregatedTokenBalances from '@/hooks/useAggregatedTokenBalances';
 import * as chains from 'viem/chains';
 import supportedChains from '@raylac/shared/out/supportedChains';
 import { parseUnits } from 'viem';
+import { trpc } from '@/lib/trpc';
+import { formatAmount } from '@raylac/shared';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'EnterSendAmount'>;
 
+const containsNonNumberChars = (str: string): boolean => {
+  return /[^\d.-]/.test(str);
+};
+
 const EnterSendAmount = ({ navigation, route }: Props) => {
-  const [inputTokenId, setInputTokenId] = useState('usdc');
-  const [outputTokenId, setOutputTokenId] = useState('usdc');
   const [outputChain, setOutputChain] = useState(chains.base.id);
+  const [amount, setAmount] = useState<string>('');
 
-  const [inputAmount, setInputAmount] = useState<string>('');
-  const [outputAmount, setOutputAmount] = useState<string>('');
+  const { data: tokenBalances } = trpc.getTokenBalances.useQuery();
 
-  const { aggregatedTokenBalances } = useAggregatedTokenBalances();
+  const [tokenId, setTokenId] = useState('usdc');
+
+  useEffect(() => {
+    if (tokenBalances) {
+      const firstTokenWithBalance =
+        tokenBalances.length > 0 ? tokenBalances[0] : null;
+
+      if (firstTokenWithBalance) {
+        setTokenId(firstTokenWithBalance.tokenId);
+      }
+    }
+  }, [tokenBalances]);
 
   const [currencies, setCurrencies] = useState(
     supportedTokens.map(token => ({
@@ -46,18 +60,17 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
 
   const { t } = useTranslation('EnterSendAmount');
 
-  const [inputPickerOpen, setInputPickerOpen] = useState(false);
-  const [outputPickerOpen, setOutputPickerOpen] = useState(false);
+  const [inputTokenPickerOpen, setInputTokenPickerOpen] = useState(false);
   const [outputChainPickerOpen, setOutputChainPickerOpen] = useState(false);
 
   const recipientUserOrAddress = route.params.recipientUserOrAddress;
 
   const inputTokenData = supportedTokens.find(
-    token => token.tokenId === inputTokenId
+    token => token.tokenId === tokenId
   );
 
-  const parsedInputAmount = inputAmount
-    ? parseUnits(inputAmount, inputTokenData.decimals)
+  const parsedInputAmount = amount
+    ? parseUnits(amount, inputTokenData.decimals)
     : BigInt(0);
 
   const onNextClick = useCallback(async () => {
@@ -65,28 +78,19 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
     navigation.navigate('ConfirmSend', {
       recipientUserOrAddress,
       amount: parsedInputAmount.toString(),
-      inputTokenId,
-      outputTokenId,
+      tokenId,
       outputChainId: outputChain,
     });
-  }, [
-    parsedInputAmount,
-    recipientUserOrAddress,
-    inputTokenId,
-    outputTokenId,
-    outputChain,
-  ]);
+  }, [parsedInputAmount, recipientUserOrAddress, tokenId, outputChain]);
 
-  const inputTokenBalance = aggregatedTokenBalances
-    ? aggregatedTokenBalances[inputTokenId] || BigInt(0)
-    : null;
+  const inputTokenBalance = BigInt(
+    tokenBalances?.find(token => token.tokenId === tokenId)?.balance || '0'
+  );
 
   const isBalanceSufficient =
-    inputTokenBalance !== null && inputAmount !== null
-      ? parseUnits(inputAmount, inputTokenData.decimals) <= inputTokenBalance
+    inputTokenBalance !== null && amount !== null
+      ? parseUnits(amount, inputTokenData.decimals) <= inputTokenBalance
       : null;
-
-  console.log(isBalanceSufficient, inputTokenBalance);
 
   const canGoNext = isBalanceSufficient;
 
@@ -94,8 +98,6 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
     typeof recipientUserOrAddress === 'string'
       ? shortenAddress(recipientUserOrAddress)
       : recipientUserOrAddress.name;
-
-  console.log('input string', inputAmount?.toString());
 
   return (
     <View
@@ -108,74 +110,32 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
       <View
         style={{
           flexDirection: 'row',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           columnGap: 8,
           zIndex: 3000,
         }}
       >
         <StyledNumberInput
           autoFocus
-          value={inputAmount !== null ? inputAmount.toString() : ''}
+          value={amount !== null ? amount.toString() : ''}
           onChangeText={_amount => {
-            // Regex to match floating-point numbers (allowing one decimal point)
-            if (/^\d*\.?\d*$/.test(_amount)) {
-              setInputAmount(_amount);
+            if (containsNonNumberChars(_amount)) {
+              return;
             }
 
-            console.log(_amount);
+            // Regex to match floating-point numbers (allowing one decimal point)
+//            if (/^\d*\.?\d*$/.test(_amount)) {
+//              setAmount(_amount);
+//            }
+
             if (_amount === '') {
-              setInputAmount(null);
+              setAmount(null);
             } else {
-              console.log('repalce all', _amount.replaceAll(',', ''));
-              setInputAmount(_amount);
+              setAmount(_amount);
             }
-          }}
-          inputStyle={{
-            width: 180,
-            height: 32,
-            textAlign: 'right',
-          }}
-          keyboardType="numeric"
-        ></StyledNumberInput>
-        <DropDownPicker
-          open={inputPickerOpen}
-          value={inputTokenId}
-          style={{
-            width: 120,
           }}
           containerStyle={{
-            width: 120,
-          }}
-          arrowIconStyle={{
-            width: 12,
-            height: 12,
-          }}
-          items={currencies}
-          setOpen={_open => {
-            if (outputPickerOpen) {
-              setOutputPickerOpen(false);
-            }
-            setInputPickerOpen(_open);
-          }}
-          setValue={setInputTokenId}
-          setItems={setCurrencies}
-        />
-      </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          zIndex: 2000,
-        }}
-      >
-        <StyledNumberInput
-          value={outputAmount !== null ? outputAmount.toLocaleString() : ''}
-          onChangeText={_amount => {
-            if (_amount === '') {
-              setOutputAmount(null);
-            } else {
-              setOutputAmount(_amount.replaceAll(',', ''));
-            }
+            height: 52,
           }}
           inputStyle={{
             width: 180,
@@ -183,29 +143,51 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           }}
           keyboardType="numeric"
         ></StyledNumberInput>
-        <DropDownPicker
-          open={outputPickerOpen}
-          value={outputTokenId}
+        <View
           style={{
-            width: 120,
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
-          containerStyle={{
-            width: 120,
-          }}
-          dropDownContainerStyle={{
-            backgroundColor: theme.background,
-          }}
-          items={currencies}
-          setOpen={_open => {
-            if (inputPickerOpen) {
-              setInputPickerOpen(false);
-            }
-            setOutputPickerOpen(_open);
-          }}
-          setValue={setOutputTokenId}
-          setItems={setCurrencies}
-        />
+        >
+          <DropDownPicker
+            open={inputTokenPickerOpen}
+            value={tokenId}
+            style={{
+              width: 120,
+              height: 52,
+            }}
+            containerStyle={{
+              width: 120,
+            }}
+            arrowIconStyle={{
+              width: 12,
+              height: 12,
+            }}
+            items={currencies}
+            setOpen={_open => {
+              setInputTokenPickerOpen(_open);
+            }}
+            setValue={setTokenId}
+            setItems={setCurrencies}
+          />
+          <Text
+            style={{
+              color: theme.text,
+              marginTop: 4,
+              textAlign: 'center',
+              opacity: 0.8,
+            }}
+          >
+            {formatAmount(
+              inputTokenBalance.toString(),
+              inputTokenData.decimals
+            )}{' '}
+            {inputTokenData.symbol}
+          </Text>
+        </View>
       </View>
+
       <View
         style={{
           alignItems: 'center',
@@ -213,6 +195,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           justifyContent: 'space-between',
           width: '82%',
           zIndex: 1000,
+          marginTop: 24,
         }}
       >
         <Text
@@ -241,11 +224,8 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
             value: chain.id,
           }))}
           setOpen={_open => {
-            if (inputPickerOpen) {
-              setInputPickerOpen(false);
-            }
-            if (outputPickerOpen) {
-              setOutputPickerOpen(false);
+            if (inputTokenPickerOpen) {
+              setInputTokenPickerOpen(false);
             }
 
             setOutputChainPickerOpen(_open);

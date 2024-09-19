@@ -1,77 +1,63 @@
-import supportedTokens from '@raylac/shared/out/supportedTokens';
-import getStealthAccounts from './getStealthAccounts';
-import { getTokenBalance } from '@/lib/erc20';
-import { Chain, createPublicClient, Hex, http } from 'viem';
-import {
-  getAlchemyRpcUrl,
-  NATIVE_TOKEN_ADDRESS,
-  TokenBalance,
-} from '@raylac/shared';
-
-/**
- * Get the ETH balance of an address on the given chain
- */
-const getETHBalance = async ({
-  address,
-  chain,
-}: {
-  address: Hex;
-  chain: Chain;
-}) => {
-  console.log('getETHBalance', address, chain.id);
-  const publicClient = createPublicClient({
-    transport: http(getAlchemyRpcUrl({ chain })),
-    chain,
-  });
-  return await publicClient.getBalance({ address });
-};
+import prisma from '@/lib/prisma';
+import { TokenBalancePerChainQueryResult } from '@raylac/shared';
 
 /**
  * Get the balances of tokens for all chains and supported tokens
  * for a user
  */
 const getTokenBalancesPerChain = async ({ userId }: { userId: number }) => {
-  const stealthAddresses = await getStealthAccounts({ userId });
+  const tokenBalancePerChain = await prisma.$queryRaw<
+    TokenBalancePerChainQueryResult[]
+  >`
+    WITH user_addresses AS (
+      SELECT
+        address
+      FROM
+        "UserStealthAddress"
+      WHERE
+        "userId" = ${userId}
+    ),
+    total_transfers_out AS (
+      SELECT
+        "tokenId",
+        "chainId",
+        sum(amount) AS amount
+      FROM
+        "TransferTrace"
+      WHERE
+        "from" in(
+          SELECT
+            address FROM user_addresses)
+      GROUP BY
+        "tokenId",
+        "chainId"
+    ),
+    total_transfers_in AS (
+      SELECT
+        "tokenId",
+        "chainId",
+        sum(amount) AS amount
+      FROM
+        "TransferTrace"
+      WHERE
+        "to" in(
+          SELECT
+            address FROM user_addresses)
+      GROUP BY
+        "tokenId",
+        "chainId"
+    )
+    SELECT
+      COALESCE(i. "chainId", o. "chainId") AS "chainId",
+      COALESCE(i. "tokenId", o. "tokenId") AS "tokenId",
+      COALESCE(i.amount, 0) - COALESCE(o.amount, 0) AS balance
+    FROM
+      total_transfers_in i
+      FULL OUTER JOIN total_transfers_out o ON i. "tokenId" = o. "tokenId"
+      AND i. "chainId" = o. "chainId"
+  `;
 
-  const allTokenBalances: TokenBalance[] = [];
-
-  for (const stealthAddress of stealthAddresses) {
-    for (const token of supportedTokens) {
-      // Get token balances across all supported chains
-      const tokenBalances = await Promise.all(
-        token.addresses.map(async tokenAddress => {
-          const balance =
-            tokenAddress.address === NATIVE_TOKEN_ADDRESS
-              ? await getETHBalance({
-                  address: stealthAddress.address as Hex,
-                  chain: tokenAddress.chain,
-                })
-              : await getTokenBalance({
-                  contractAddress: tokenAddress.address,
-                  chain: tokenAddress.chain,
-                  address: stealthAddress.address as Hex,
-                });
-
-          return {
-            tokenId: token.tokenId,
-            tokenAddress: tokenAddress.address,
-            stealthAddress: {
-              address: stealthAddress.address as Hex,
-              ephemeralPubKey: stealthAddress.ephemeralPubKey as Hex,
-              viewTag: stealthAddress.viewTag as Hex,
-              stealthPubKey: stealthAddress.stealthPubKey as Hex,
-            },
-            balance: balance.toString(),
-            chainId: tokenAddress.chain.id,
-          } as TokenBalance;
-        })
-      );
-
-      allTokenBalances.push(...tokenBalances);
-    }
-  }
-
-  return allTokenBalances;
+  return tokenBalancePerChain;
 };
 
 export default getTokenBalancesPerChain;

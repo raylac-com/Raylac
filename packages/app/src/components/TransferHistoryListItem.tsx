@@ -3,15 +3,20 @@ import { Text, View } from 'react-native';
 import FastAvatar from './FastAvatar';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
-import { Hex, getAddress } from 'viem';
-import { Transfer, TransferStatus } from '@raylac/shared';
+import { Hex } from 'viem';
+import { TransferHistoryQueryResult, formatAmount } from '@raylac/shared';
 import { useTranslation } from 'react-i18next';
+import supportedTokens from '@raylac/shared/out/supportedTokens';
 
-const SIGN_UP_BONUS_PAYER_ADDRESS =
-  '0x9D3224743435d058f4B17Da29E8673DceD1768E7';
+/**
+ *  Get the token metadata for a given token ID
+ */
+const getTokenMetadata = (tokenId: string) => {
+  return supportedTokens.find(token => token.tokenId === tokenId);
+};
 
 interface IncomingTransferListItemProps {
-  tx: Transfer;
+  tx: TransferHistoryQueryResult;
 }
 
 const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
@@ -19,6 +24,12 @@ const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
   const { t } = useTranslation();
 
   const isFromAddress = typeof tx.from === 'string';
+
+  const blockTimestamp = new Date();
+
+  const tokenMeta = getTokenMetadata(tx.tokenId);
+
+  // const amount = tx.amount;
 
   return (
     <View
@@ -50,10 +61,7 @@ const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
               color: theme.text,
             }}
           >
-            {isFromAddress &&
-            getAddress(tx.from as Hex) === SIGN_UP_BONUS_PAYER_ADDRESS
-              ? t('signUpBonus', { ns: 'common' })
-              : shortenAddress(tx.from as Hex)}
+            {isFromAddress && shortenAddress(tx.from as Hex)}
           </Text>
         </View>
         <View
@@ -71,7 +79,7 @@ const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
               color: theme.green,
             }}
           >
-            {tx.amount} USDC
+            {formatAmount(tx.amount, tokenMeta.decimals)} {tokenMeta.symbol}
           </Text>
         </View>
       </View>
@@ -83,18 +91,22 @@ const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
           opacity: 0.5,
         }}
       >
-        {new Date(tx.timestamp).toLocaleDateString()}
+        {blockTimestamp.toLocaleDateString()}
       </Text>
     </View>
   );
 };
 
 interface OutGoingTransferListItemProps {
-  tx: Transfer;
+  tx: TransferHistoryQueryResult;
 }
 
 const OutGoingTransferListItem = (props: OutGoingTransferListItemProps) => {
   const { tx } = props;
+
+  const blockTimestamp = new Date();
+
+  const tokenMeta = getTokenMetadata(tx.tokenId);
 
   return (
     <View
@@ -118,23 +130,13 @@ const OutGoingTransferListItem = (props: OutGoingTransferListItemProps) => {
             columnGap: 8,
           }}
         >
-          {/**
-            <FastAvatar address={tx.to} size={36}></FastAvatar>
-             */}
+          <FastAvatar address={tx.to} size={36}></FastAvatar>
           <Text
             style={{
               color: theme.text,
             }}
           >
             {shortenAddress(tx.to as Hex)}
-          </Text>
-          <Text
-            style={{
-              color: theme.gold,
-              opacity: 0.8,
-            }}
-          >
-            {tx.status === TransferStatus.Pending && 'pending'}
           </Text>
         </View>
         <View
@@ -152,7 +154,7 @@ const OutGoingTransferListItem = (props: OutGoingTransferListItemProps) => {
               color: theme.waning,
             }}
           >
-            {tx.amount} USDC
+            {formatAmount(tx.amount, tokenMeta.decimals)} {tokenMeta.symbol}
           </Text>
         </View>
       </View>
@@ -164,18 +166,19 @@ const OutGoingTransferListItem = (props: OutGoingTransferListItemProps) => {
           opacity: 0.5,
         }}
       >
-        {new Date(tx.timestamp).toLocaleDateString()}
+        {blockTimestamp.toLocaleDateString()}
       </Text>
     </View>
   );
 };
 
 interface TransferHistoryListItemProps {
-  tx: Transfer;
+  tx: TransferHistoryQueryResult;
+  type: 'incoming' | 'outgoing';
 }
 
 const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
-  const { tx } = props;
+  const { tx, type } = props;
 
   return (
     <View
@@ -186,7 +189,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
         padding: 12,
       }}
     >
-      {tx.type === 'incoming' ? (
+      {type === 'incoming' ? (
         <IncomingTransferListItem tx={tx} />
       ) : (
         <OutGoingTransferListItem tx={tx} />

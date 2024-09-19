@@ -9,18 +9,23 @@ import { handleNewStealthAccount } from './lib/stealthAccount';
 import signUp from './api/signUp';
 import { webcrypto } from 'node:crypto';
 import getUsers from './api/getUsers';
-import getBalance from './api/getBalance';
-import getTxHistory from './api/getTxHistory';
+import getTransferHistory from './api/getTransferHistory';
 import signIn from './api/signIn';
 import getUsdToJpy from './api/getUsdToJpy';
 import updateDisplayName from './api/updateDisplayName';
 import updateUsername from './api/updateUsername';
 import updateProfileImage from './api/updateProfileImage';
 import { signUserOp } from './lib/paymaster';
-import { RelayGetQuoteResponseBody, UserOperation } from '@raylac/shared';
+import {
+  RelayGetQuoteResponseBody,
+  StealthAddressWithEphemeral,
+  UserOperation,
+} from '@raylac/shared';
 import send from './api/send';
 import getStealthAccounts from './api/getStealthAccounts';
 import getTokenBalancesPerChain from './api/getTokenBalancesPerChain';
+import getTokenBalances from './api/getTokenBalances';
+import getAddressBalancesPerChain from './api/getAddressBalancesPerChain';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -78,25 +83,32 @@ const appRouter = router({
   send: authedProcedure
     .input(
       z.object({
-        bridgeUserOps: z.array(z.any()),
-        userOpsAfterBridge: z.array(z.any()),
+        aggregationUserOps: z.array(z.any()),
         finalTransferUserOp: z.any(),
         relayQuotes: z.array(z.any()),
+        proxyStealthAccount: z.object({
+          address: z.string(),
+          stealthPubKey: z.string(),
+          ephemeralPubKey: z.string(),
+          viewTag: z.string(),
+        }),
       })
     )
     .mutation(async opts => {
       const { input } = opts;
 
-      const bridgeUserOps = input.bridgeUserOps as UserOperation[];
-      const userOpsAfterBridge = input.userOpsAfterBridge as UserOperation[];
+      const aggregationUserOps = input.aggregationUserOps as UserOperation[];
       const finalTransferUserOp = input.finalTransferUserOp as UserOperation;
       const relayQuotes = input.relayQuotes as RelayGetQuoteResponseBody[];
+      const proxyStealthAccount =
+        input.proxyStealthAccount as StealthAddressWithEphemeral;
 
       await send({
-        bridgeUserOps,
-        userOpsAfterBridge,
+        senderUserId: opts.ctx.userId,
+        aggregationUserOps,
         relayQuotes,
         finalTransferUserOp,
+        proxyStealthAccount,
       });
 
       return 'ok';
@@ -121,6 +133,23 @@ const appRouter = router({
     return balances;
   }),
 
+  getAddressBalancesPerChain: authedProcedure.query(async opts => {
+    const userId = opts.ctx.userId;
+
+    const balances = await getAddressBalancesPerChain({ userId });
+    return balances;
+  }),
+
+  /**
+   * Get the balances of tokens for all chains and supported tokens
+   */
+  getTokenBalances: authedProcedure.query(async opts => {
+    const userId = opts.ctx.userId;
+
+    const balances = await getTokenBalances({ userId });
+    return balances;
+  }),
+
   /**
    * Get the stealth accounts of the user
    */
@@ -133,23 +162,12 @@ const appRouter = router({
   }),
 
   /**
-   * Get the USDC balance of the user
-   */
-  getBalance: authedProcedure.query(async opts => {
-    const userId = opts.ctx.userId;
-
-    const totalBalance = await getBalance({ userId });
-
-    return totalBalance;
-  }),
-
-  /**
    * Get the transaction history of the user
    */
   getTxHistory: authedProcedure.query(async opts => {
     const userId = opts.ctx.userId;
 
-    const transfers = await getTxHistory({ userId });
+    const transfers = await getTransferHistory({ userId });
 
     return transfers;
   }),
@@ -344,6 +362,7 @@ export type AppRouter = typeof appRouter;
 
 const server = createHTTPServer({
   router: appRouter,
+  // @ts-ignore
   createContext,
 });
 

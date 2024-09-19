@@ -25,6 +25,7 @@ const RaylacAccountAbi = [
       { name: 'dest', type: 'address', internalType: 'address' },
       { name: 'value', type: 'uint256', internalType: 'uint256' },
       { name: 'func', type: 'bytes', internalType: 'bytes' },
+      { name: '', type: 'bytes', internalType: 'bytes' },
     ],
     outputs: [],
     stateMutability: 'nonpayable',

@@ -54,61 +54,62 @@ model UserStealthAddress {
   updatedAt          DateTime @updatedAt
 }
 
-model ERC20Token {
-  id               Int                @id @default(autoincrement())
-  contractAddress  String
-  name             String
-  symbol           String
-  decimals         Int
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  transfers        StealthTransfer[]
-  ERC20TransferLog ERC20TransferLog[]
+enum ExecutionType {
+  Transfer
+  BridgeTransfer
+  AggregateBridgeTransfer
+  AggregateTransfer
 }
 
-/// A StealthTransfer consists of multiple ERC20 token trnasfers
-/// to disguist the destination address and the amount
-model StealthTransfer {
-  id             Int                @id @default(autoincrement())
-  txHash         String             @unique
-  token          ERC20Token         @relation(fields: [tokenId], references: [id])
-  tokenId        Int
-  innerTransfers ERC20TransferLog[]
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
+model TransferTrace {
+  from    String
+  to      String
+  amount  BigInt
+  tokenId String
+
+  blockNumber  BigInt
+  txHash       String
+  txPosition   Int
+  traceAddress String
+  chainId      Int
+
+  executionType ExecutionType
+  executionTag  String
+
+  Transaction Transaction @relation(fields: [txHash], references: [hash])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([txHash, traceAddress])
 }
 
-model ERC20TransferLog {
-  id                Int             @id @default(autoincrement())
-  token             ERC20Token      @relation(fields: [tokenId], references: [id])
-  tokenId           Int
-  from              String
-  to                String
-  amount            BigInt
-  blockNumber       BigInt
-  logIndex          Int
-  txIndex           Int
-  chainId           Int
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-  StealthTransfer   StealthTransfer @relation(fields: [stealthTransferId], references: [id])
-  stealthTransferId Int
+model Transaction {
+  hash String @id
 
-  @@unique([blockNumber, logIndex, txIndex, chainId])
+  blockNumber BigInt
+  chainId     Int
+
+  traces  TransferTrace[]
+  userOps UserOperation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model UserOperationReceipt {
-  hash          String   @id
+model UserOperation {
+  hash String @id
+
+  sender        String?
+  paymaster     String?
   nonce         BigInt?
   success       Boolean?
-  actualGasUsed BigInt?
   actualGasCost BigInt?
-  blockNumber   BigInt?
-  logIndex      Int?
-  txIndex       Int?
-  chainId       Int?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  actualGasUsed BigInt?
+  chainId       Int
+
+  Transaction     Transaction? @relation(fields: [transactionHash], references: [hash])
+  transactionHash String?
 }
 
 model InviteCode {
@@ -117,31 +118,4 @@ model InviteCode {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-enum RelayExecutionStatus {
-  refund
-  success
-  delayed
-  waiting
-  failure
-  pending
-}
-
-model RelayIntent {
-  requestId          String               @id
-  from               String
-  to                 String
-  status             RelayExecutionStatus
-  details            String
-  fees               Json
-  steps              Json
-  inTxHashes         String[]
-  outTxHashes        String[]
-  timestamp          DateTime
-  originTokenId      Int
-  destinationTokenId Int
-  amount             BigInt
-  originChainId      Int
-  destinationChainId Int
 }

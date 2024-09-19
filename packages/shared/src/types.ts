@@ -1,3 +1,4 @@
+import { $Enums } from '@prisma/client';
 import { Chain, Hex } from 'viem';
 
 export interface UserOperation {
@@ -12,19 +13,6 @@ export interface UserOperation {
   maxPriorityFeePerGas: Hex;
   paymasterAndData: Hex;
   signature: Hex;
-  chainId: number;
-}
-
-export interface UserOperation {
-  sender: Hex;
-  nonce: Hex;
-  initCode: Hex;
-  callData: Hex;
-  callGasLimit: Hex;
-  verificationGasLimit: Hex;
-  preVerificationGas: Hex;
-  maxFeePerGas: Hex;
-  maxPriorityFeePerGas: Hex;
   chainId: number;
 }
 
@@ -47,42 +35,10 @@ export interface ERC5564AnnouncementData {
   chainId: number;
 }
 
-export enum TransferStatus {
-  Success,
-  Pending,
-}
-
-export interface Transfer {
-  type: string;
-  status: TransferStatus;
-  to?: Hex | User; // Address or User
-  from?: Hex | User; // Address or User
-  amount: number;
-  timestamp: number;
-}
-
-export interface StealthInnerTransfer {
-  from: StealthAddressWithEphemeral;
-  to: StealthAddressWithEphemeral;
-  amount: number;
-}
-
-export type StealthTransferData = StealthInnerTransfer[];
-
 export interface User {
   id: number;
   name: string;
   username: string;
-}
-
-export interface RelayIntent {
-  from: Hex;
-  to: Hex;
-  inputChainId: number;
-  inputTokenId: string;
-  outputChainId: number;
-  outputTokenId: string;
-  amount: bigint;
 }
 
 export interface RelayGetQuoteRequestBody {
@@ -163,60 +119,128 @@ export interface SupportedToken {
   }[];
 }
 
-export interface AcrossSuggestedFeesQueryParams {
-  inputToken: Hex;
-  outputToken: Hex;
-  originChainId: number;
-  destinationChainId: number;
-  amount: string;
-  recipient: Hex;
-}
-
-export interface AcrossFeeDetails {
-  pct: string;
-  total: string;
-}
-
-export interface AcrossSuggestedFeesResponse {
-  totalRelayFee: AcrossFeeDetails;
-  relayerCapitalFee: AcrossFeeDetails;
-  relayerGasFee: AcrossFeeDetails;
-  lpFee: AcrossFeeDetails;
-  timestamp: string;
-  isAmountTooLow: boolean;
-  quoteBlock: string;
-  spokePoolAddress: string;
-  exclusiveRelayer: string;
-  exclusivityDeadline: string;
-  expectedFillTimeSec: string;
-  limits: {
-    minDeposit: number;
-    maxDeposit: number;
-    maxDepositInstant: number;
-    maxDepositShortDelay: number;
-    recommendedDepositInstant: number;
-  };
-}
-
-export interface AcrossDepositV3Args {
-  depositor: Hex;
-  recipient: Hex;
-  inputToken: Hex;
-  outputToken: Hex;
-  inputAmount: bigint;
-  outputAmount: bigint;
-  destinationChainId: number;
-  exclusiveRelayer?: Hex;
-  quoteTimestamp: number;
-  fillDeadline: number;
-  exclusivityDeadline?: number;
-  message: Hex;
-}
-
 export interface MultiChainTransferRequestBody {
-  bridgeUserOps: UserOperation[];
-  userOpsAfterBridge: UserOperation[];
+  aggregationUserOps: UserOperation[];
   finalTransferUserOp: UserOperation;
   consolidateToStealthAccount: StealthAddressWithEphemeral;
   relayQuotes: RelayGetQuoteResponseBody[];
+}
+
+export interface TraceInitAction {
+  from: Hex;
+  gas: Hex;
+  init: Hex;
+  value: Hex;
+}
+
+export interface TraceCallAction {
+  from: Hex;
+  callType: 'call' | 'delegatecall' | 'staticcall';
+  gas: Hex;
+  input: Hex;
+  to: Hex;
+  value: Hex;
+}
+
+type TraceResponse<T extends string, A> = {
+  action: A;
+  blockHash: Hex;
+  blockNumber: number;
+  result: { gasUsed: Hex; output: Hex };
+  subtraces: number;
+  traceAddress: number[];
+  transactionHash: Hex;
+  transactionPosition: number;
+  type: T;
+};
+
+export type TraceResponseData =
+  | TraceResponse<'call', TraceCallAction>
+  | TraceResponse<'create', TraceInitAction>;
+
+/**
+ * Decoded arguments for the `execute` function of RaylacAccount.sol
+ */
+export type RaylacAccountTransferData = {
+  type: $Enums.ExecutionType;
+  to: Hex;
+  amount: bigint;
+  tokenId: string;
+  tag: string;
+};
+
+/**
+ * Decoded arguments for the `execute` function of RaylacAccount.sol
+ */
+/*
+export type RaylacAccountExecutionArgs =
+  | RaylacAccountExecutionData<
+      ExecutionType['Transfer'],
+      {
+        to: Hex;
+        amount: bigint;
+        tokenId: string;
+        tag: string;
+      }
+    >
+  | RaylacAccountExecutionData<
+      ExecutionType['BridgeTransfer'],
+      {
+        to: Hex;
+        amount: bigint;
+        tokenId: string;
+        tag: string;
+      }
+    >
+  | RaylacAccountExecutionData<
+      ExecutionType['AggregateTransfer'],
+      {
+        to: Hex;
+        amount: bigint;
+        tokenId: string;
+      }
+    >
+  | RaylacAccountExecutionData<
+      ExecutionType['AggregateBridgeTransfer'],
+      {
+        to: Hex;
+        amount: bigint;
+        tokenId: string;
+        originChainId: number;
+        destinationChainId: number;
+      }
+    >;
+*/
+
+export interface TransferHistoryQueryResult {
+  amount: string;
+  executionType: string;
+  from: Hex;
+  to: Hex;
+  fromUserId: number;
+  toUserId: number;
+  tokenId: string;
+  chainId: number;
+  blockNumber: number;
+}
+
+export interface TokenBalanceQueryResult {
+  tokenId: string;
+  balance: string;
+}
+
+export interface AccountBalancePerChainQueryResult {
+  chainId: number;
+  balance: string;
+  address: Hex;
+  viewTag: string;
+  stealthPubKey: Hex;
+  ephemeralPubKey: Hex;
+  tokenId: string;
+}
+
+export interface TokenBalancePerChainQueryResult {
+  chainId: number;
+  tokenId: string;
+  balance: string;
 }

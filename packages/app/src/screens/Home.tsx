@@ -9,15 +9,15 @@ import {
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { formatUnits } from 'viem';
 import { theme } from '@/lib/theme';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import { useTranslation } from 'react-i18next';
-import { Transfer } from '@raylac/shared';
 import StyledPressable from '@/components/StyledPressable';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
+import useSignedInUser from '@/hooks/useSignedInUser';
+import { formatAmount, TransferHistoryQueryResult } from '@raylac/shared';
 
 interface TokenBalanceItemProps {
   tokenSymbol: string;
@@ -106,16 +106,13 @@ const NUM_TRANSFERS_TO_SHOW = 5;
 const HomeScreen = () => {
   const { t } = useTranslation('Home');
   const { data: isSignedIn } = useIsSignedIn();
-
-  const [aggregatedTokenBalances, setAggregatedTokenBalances] = useState<
-    Record<string, bigint>
-  >({});
+  const { data: signedInUser } = useSignedInUser();
 
   const {
-    data: tokenBalancesPerChain,
-    refetch: refetchBalance,
+    data: tokenBalances,
+    refetch: refetchBalances,
     isRefetching: isRefetchingBalance,
-  } = trpc.getTokenBalancesPerChain.useQuery(null, {
+  } = trpc.getTokenBalances.useQuery(null, {
     enabled: isSignedIn,
     // throwOnError: false, // Don't throw on error for this particular query in all environments
     refetchOnWindowFocus: true,
@@ -134,36 +131,15 @@ const HomeScreen = () => {
   const navigation = useTypedNavigation();
 
   const onRefresh = useCallback(() => {
-    refetchBalance();
+    refetchBalances();
     refetchTxHistory();
-  }, [refetchBalance, refetchTxHistory]);
+  }, [refetchBalances, refetchTxHistory]);
 
   useEffect(() => {
     if (isSignedIn === false) {
       navigation.navigate('Start');
     }
   }, [isSignedIn]);
-
-  useEffect(() => {
-    if (tokenBalancesPerChain) {
-      const _aggregatedTokenBalances = {};
-
-      // Compute the sum of token balances across all chains
-      for (const tokenBalance of tokenBalancesPerChain) {
-        const tokenId = tokenBalance.tokenId;
-        const _balance = _aggregatedTokenBalances[tokenId];
-
-        if (_balance) {
-          _aggregatedTokenBalances[tokenId] =
-            _balance + BigInt(tokenBalance.balance);
-        } else {
-          _aggregatedTokenBalances[tokenId] = BigInt(tokenBalance.balance);
-        }
-      }
-
-      setAggregatedTokenBalances(_aggregatedTokenBalances);
-    }
-  }, [tokenBalancesPerChain]);
 
   if (!isSignedIn) {
     return null;
@@ -253,24 +229,23 @@ const HomeScreen = () => {
             width: '100%',
           }}
         >
-          {Object.entries(aggregatedTokenBalances).map(
-            ([tokenId, balance], i) => {
-              const tokenMetadata = supportedTokens.find(
-                token => token.tokenId === tokenId
-              );
-              return (
-                <TokenBalanceItem
-                  key={i}
-                  balance={Number(
-                    formatUnits(balance, tokenMetadata.decimals)
-                  ).toLocaleString()}
-                  tokenSymbol={tokenMetadata.symbol}
-                  tokenLogo={tokenMetadata.logoURI}
-                />
-              );
-            }
-          )}
-          {aggregatedTokenBalances.length > 3 && (
+          {tokenBalances?.map(({ tokenId, balance }, i) => {
+            const tokenMetadata = supportedTokens.find(
+              token => token.tokenId === tokenId
+            );
+            return (
+              <TokenBalanceItem
+                key={i}
+                balance={formatAmount(
+                  balance.toString(),
+                  tokenMetadata.decimals
+                )}
+                tokenSymbol={tokenMetadata.symbol}
+                tokenLogo={tokenMetadata.logoURI}
+              />
+            );
+          })}
+          {tokenBalances?.length > 3 && (
             <AntDesign name="arrowright" size={24} color={theme.gray} />
           )}
         </ScrollView>
@@ -283,7 +258,11 @@ const HomeScreen = () => {
           }}
         >
           {txHistory?.map((tx, i) => (
-            <TransferHistoryListItem key={i} tx={tx as Transfer} />
+            <TransferHistoryListItem
+              key={i}
+              tx={tx as TransferHistoryQueryResult}
+              type={tx.fromUserId === signedInUser?.id ? 'outgoing' : 'incoming'}
+            />
           ))}
           {txHistory && txHistory.length > NUM_TRANSFERS_TO_SHOW ? (
             <Text

@@ -106,7 +106,7 @@
     },
     "ConfirmSend": {
       "title": "Confirm",
-      "sendToUser":  "Send to {{ name }}",  
+      "sendToUser":  "Send {{ amount }} {{ symbol }} to {{ name }}",  
       "send": "Send"
     },
     "TransferHistory": {

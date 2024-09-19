@@ -4,6 +4,7 @@ import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { theme } from '@/lib/theme';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
+import { formatAmount } from '@raylac/shared';
 import supportedChains from '@raylac/shared/out/supportedChains';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -14,7 +15,7 @@ import { Text, View } from 'react-native';
 type Props = NativeStackScreenProps<RootStackParamsList, 'ConfirmSend'>;
 
 const ConfirmSend = ({ route }: Props) => {
-  const { amount, recipientUserOrAddress, outputTokenId, outputChainId } =
+  const { amount, recipientUserOrAddress, tokenId, outputChainId } =
     route.params;
   const { mutateAsync: send, isPending: isSending } = useSend();
   const navigation = useTypedNavigation();
@@ -23,7 +24,7 @@ const ConfirmSend = ({ route }: Props) => {
   const onSendPress = useCallback(async () => {
     await send({
       amount: BigInt(amount),
-      tokenId: outputTokenId,
+      tokenId,
       outputChainId,
       recipientUserOrAddress,
     });
@@ -32,18 +33,18 @@ const ConfirmSend = ({ route }: Props) => {
     navigation.navigate('SendSuccess');
   }, [recipientUserOrAddress, send, amount]);
 
+  const tokenMeta = supportedTokens.find(token => token.tokenId === tokenId);
+
+  if (!tokenMeta) {
+    throw new Error(`Token metadata not found for token ID: ${tokenId}`);
+  }
+
+  const formattedAmount = formatAmount(amount, tokenMeta.decimals);
+
   const recipientName =
     typeof recipientUserOrAddress === 'string'
       ? shortenAddress(recipientUserOrAddress)
       : recipientUserOrAddress.name;
-
-  const inputTokenMetadata = supportedTokens.find(
-    token => token.tokenId === outputTokenId
-  );
-
-  const outputTokenMetadata = supportedTokens.find(
-    token => token.tokenId === outputTokenId
-  );
 
   const destinationChainMetadata = supportedChains.find(
     chain => chain.id === outputChainId
@@ -73,23 +74,21 @@ const ConfirmSend = ({ route }: Props) => {
             color: theme.text,
           }}
         >
-          {t('sendToUser', { name: recipientName })}
+          {t('sendToUser', {
+            name: recipientName,
+            amount: formattedAmount,
+            symbol: tokenMeta.symbol,
+          })}
         </Text>
+
         <Text
           style={{
-            fontSize: 28,
-            fontWeight: 'bold',
-            textAlign: 'center',
             color: theme.text,
           }}
         >
-          {amount.toLocaleString()} {inputTokenMetadata.symbol}{' '}
+          {recipientName} receives {formattedAmount.toLocaleString()}{' '}
+          {tokenMeta.symbol} on {destinationChainMetadata.name}
         </Text>
-        <Text>
-          Recipient receives {amount.toLocaleString()}{' '}
-          {outputTokenMetadata.symbol}
-        </Text>
-        <Text>Destination chain: {destinationChainMetadata.name}</Text>
       </View>
       <StyledButton
         title={t('send')}

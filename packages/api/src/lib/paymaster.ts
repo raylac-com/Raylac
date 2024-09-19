@@ -1,8 +1,4 @@
-import {
-  UserOperation,
-  getPaymasterMessageHash,
-  getPublicClient,
-} from '@raylac/shared';
+import { UserOperation, getPaymasterMessageHash } from '@raylac/shared';
 import { signMessage } from 'viem/accounts';
 import { Hex } from 'viem';
 
@@ -16,12 +12,7 @@ if (!PAYMASTER_PRIVATE_KEY) {
  * Sign a user operation with the paymaster's private key
  */
 export const signUserOp = async (userOp: UserOperation): Promise<Hex> => {
-  const client = getPublicClient({
-    chainId: userOp.chainId,
-  });
-
-  const userOpHash = await getPaymasterMessageHash({
-    client,
+  const userOpHash = getPaymasterMessageHash({
     userOp,
   });
 

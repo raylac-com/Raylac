@@ -42,7 +42,7 @@ importers:
         specifier: workspace:*
         version: link:../shared
       '@trpc/server':
-        specifier: ^11.0.0-next-beta.0
+        specifier: ^11.0.0-rc.439
         version: 11.0.0-rc.439
       '@types/node':
         specifier: ^20.11.17
@@ -391,6 +391,9 @@ importers:
       '@raylac/shared':
         specifier: workspace:*
         version: link:../shared
+      alchemy-sdk:
+        specifier: ^3.3.1
+        version: 3.3.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       dotenv:
         specifier: ^16.4.5
         version: 16.4.5

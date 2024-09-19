@@ -1,16 +1,16 @@
 import { getMnemonic } from '@/lib/key';
-import { trpc } from '@/lib/trpc';
+import { client, trpc } from '@/lib/trpc';
 import { RouterOutput, User } from '@/types';
 import {
   RAYLAC_PAYMASTER_ADDRESS,
   StealthAddressWithEphemeral,
-  TokenBalance,
   UserOperation,
   buildMultiChainSendRequestBody,
   bulkSignUserOps,
   encodePaymasterAndData,
   generateStealthAddress,
   getSpendingPrivKey,
+  getTokenAddressOnChain,
   getViewingPrivKey,
   signUserOpWithStealthAccount,
 } from '@raylac/shared';
@@ -30,9 +30,6 @@ BigInt.prototype.toJSON = function () {
  * Hook to build and send user operations
  */
 const useSend = () => {
-  const { data: tokenBalancePerChain } =
-    trpc.getTokenBalancesPerChain.useQuery();
-  const { data: stealthAccounts } = trpc.getStealthAccounts.useQuery();
   const { mutateAsync: send } = trpc.send.useMutation();
   const { mutateAsync: signUserOp } = trpc.signUserOp.useMutation();
   const { data: signedInUser } = useSignedInUser();
@@ -69,12 +66,13 @@ const useSend = () => {
       outputChainId: number;
       recipientUserOrAddress: Hex | User;
     }) => {
-      if (!tokenBalancePerChain) {
-        throw new Error('Token balances not loaded');
-      }
+      const addressBalancePerChain =
+        await client.getAddressBalancesPerChain.query();
+
+      const stealthAccounts = await client.getStealthAccounts.query();
 
       // Get addresses with the specified token balance
-      const sortedAccountsWithToken = tokenBalancePerChain
+      const sortedAccountsWithToken = addressBalancePerChain
         .filter(balance => balance.tokenId)
         .sort((a, b) => (BigInt(b.balance) > BigInt(a.balance) ? 1 : -1));
 
@@ -116,6 +114,7 @@ const useSend = () => {
 
       const toAddress = typeof to === 'string' ? to : to.address;
 
+      console.log(`Sending ${amount} ${tokenId} to ${toAddress}`);
       const multiChainSendData = await buildMultiChainSendRequestBody({
         senderPubKeys: {
           spendingPubKey: signedInUser.spendingPubKey as Hex,
@@ -124,8 +123,21 @@ const useSend = () => {
         amount,
         tokenId,
         to: toAddress,
-        stealthAccountsWithTokenBalances:
-          tokenBalancePerChain as TokenBalance[],
+        stealthAccountsWithTokenBalances: addressBalancePerChain.map(
+          account => ({
+            tokenId: account.tokenId!,
+            balance: account.balance!,
+            chainId: account.chainId!,
+            tokenAddress: getTokenAddressOnChain({
+              chainId: account.chainId,
+              tokenId,
+            }),
+            stealthAddress: stealthAccounts.find(
+              stealthAccount => stealthAccount.address === account.address
+            ) as StealthAddressWithEphemeral,
+          })
+        ),
+
         outputChainId,
       });
 
@@ -133,14 +145,9 @@ const useSend = () => {
        * 2. Get the paymaster signatures for the user operations
        */
 
+      console.log(`Getting paymaster signatures...`);
       const paymasterSignedBridgeUserOps = await Promise.all(
-        multiChainSendData.bridgeUserOps.map(async userOp => {
-          return getPaymasterAndData({ userOp });
-        })
-      );
-
-      const paymasterSignedUserOpsAfterBridge = await Promise.all(
-        multiChainSendData.userOpsAfterBridge.map(async userOp => {
+        multiChainSendData.aggregationUserOps.map(async userOp => {
           return getPaymasterAndData({ userOp });
         })
       );
@@ -157,33 +164,24 @@ const useSend = () => {
         viewingPrivKey,
       });
 
-      console.log(`Signing user ops after bridge...`);
-      const signedUserOpsAfterBridge = await bulkSignUserOps({
-        userOps: paymasterSignedUserOpsAfterBridge,
-        stealthAccounts: stealthAccounts as StealthAddressWithEphemeral[],
-        spendingPrivKey,
-        viewingPrivKey,
-      });
-
       console.log(`Signing final transfer user op...`);
       const signedFinalTransferUserOp = await signUserOpWithStealthAccount({
         userOp: paymasterSignedFinalTransferUserOp,
         stealthAccount: multiChainSendData.consolidateToStealthAccount,
         spendingPrivKey,
         viewingPrivKey,
-        chainId: outputChainId,
       });
 
       await send({
-        bridgeUserOps: signedBridgeUserOps,
-        userOpsAfterBridge: signedUserOpsAfterBridge,
+        aggregationUserOps: signedBridgeUserOps,
         finalTransferUserOp: signedFinalTransferUserOp,
         relayQuotes: multiChainSendData.relayQuotes,
+        proxyStealthAccount: multiChainSendData.consolidateToStealthAccount,
       });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.getBalance),
+        queryKey: getQueryKey(trpc.getTokenBalancesPerChain),
       });
     },
   });

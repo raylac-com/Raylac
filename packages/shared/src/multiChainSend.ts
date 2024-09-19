@@ -1,4 +1,4 @@
-import { encodeFunctionData, Hex } from 'viem';
+import { encodeFunctionData, Hex, toHex } from 'viem';
 import {
   MultiChainTransferRequestBody,
   RelayGetQuoteResponseBody,
@@ -7,13 +7,12 @@ import {
   UserOperation,
 } from './types';
 import { generateStealthAddress } from './stealth';
-import supportedTokens from './supportedTokens';
 import { buildUserOp } from './erc4337';
 import { getPublicClient } from './ethRpc';
 import { publicKeyToAddress } from 'viem/accounts';
-import { NATIVE_TOKEN_ADDRESS } from './utils';
+import { getTokenAddressOnChain } from './utils';
 import ERC20Abi from './abi/ERC20Abi';
-import { relay } from '.';
+import { NATIVE_TOKEN_ADDRESS, relay } from '.';
 
 interface InputStealthAccount {
   stealthAccount: StealthAddressWithEphemeral;
@@ -22,43 +21,16 @@ interface InputStealthAccount {
 }
 
 /**
- * Get the address of a token on a chain.
- */
-const getTokenAddressOnChain = ({
-  chainId,
-  tokenId,
-}: {
-  chainId: number;
-  tokenId: string;
-}) => {
-  const tokenMetadata = supportedTokens.find(
-    token => token.tokenId === tokenId
-  );
-
-  if (!tokenMetadata) {
-    throw new Error(`Token ${tokenId} not supported`);
-  }
-
-  const tokenOnChain = tokenMetadata.addresses.find(
-    token => token.chain.id === chainId
-  );
-
-  if (!tokenOnChain) {
-    throw new Error(`Token ${tokenId} not supported on chain ${chainId}`);
-  }
-
-  return tokenOnChain.address;
-};
-
-/**
  * Turn all steps in a Relay quote into executable user operations
  */
 const buildUserOpsFromRelayQuote = async ({
   stealthSigner,
   quote,
+  tag,
 }: {
   stealthSigner: Hex;
   quote: RelayGetQuoteResponseBody;
+  tag: Hex;
 }) => {
   const userOps = (
     await Promise.all(
@@ -66,6 +38,7 @@ const buildUserOpsFromRelayQuote = async ({
       quote.steps.map(async step => {
         return await Promise.all(
           step.items.map(item => {
+            console.log('Building user op for:', item);
             const client = getPublicClient({
               chainId: item.data.chainId,
             });
@@ -76,6 +49,7 @@ const buildUserOpsFromRelayQuote = async ({
               to: item.data.to,
               value: BigInt(item.data.value),
               data: item.data.data,
+              tag,
             });
           })
         );
@@ -113,8 +87,6 @@ const chooseInputStealthAccounts = ({
         stealthAccount.balance !== '0'
     );
 
-  console.log({ accountsWithNonZeroTokenBalances });
-
   // 1. Search for stealth accounts on the destination chain
   const destinationChainStealthAccounts = accountsWithNonZeroTokenBalances
     .filter(stealthAccount => stealthAccount.chainId === outputChainId)
@@ -140,13 +112,14 @@ const chooseInputStealthAccounts = ({
       });
       remainingAmount = BigInt(0);
       break;
+    } else {
+      sendFromAccounts.push({
+        stealthAccount: destinationChainStealthAccount.stealthAddress,
+        chainId: destinationChainStealthAccount.chainId,
+        amount: balance,
+      });
     }
 
-    sendFromAccounts.push({
-      stealthAccount: destinationChainStealthAccount.stealthAddress,
-      chainId: destinationChainStealthAccount.chainId,
-      amount: remainingAmount,
-    });
     remainingAmount -= balance;
   }
 
@@ -173,15 +146,18 @@ const chooseInputStealthAccounts = ({
       });
       remainingAmount = BigInt(0);
       break;
+    } else {
+      sendFromAccounts.push({
+        stealthAccount: otherChainStealthAccount.stealthAddress,
+        chainId: otherChainStealthAccount.chainId,
+        amount: balance,
+      });
     }
 
-    sendFromAccounts.push({
-      stealthAccount: otherChainStealthAccount.stealthAddress,
-      chainId: otherChainStealthAccount.chainId,
-      amount: remainingAmount,
-    });
     remainingAmount -= balance;
   }
+
+  console.log('Remaining amount:', remainingAmount);
 
   if (remainingAmount !== BigInt(0)) {
     throw new Error('Not enough funds');
@@ -193,18 +169,20 @@ const chooseInputStealthAccounts = ({
 /**
  * Build a `UserOperation` for an ERC20 transfer
  */
-const buildERC20TransferUserOp = async ({
+export const buildERC20TransferUserOp = async ({
   stealthSigner,
   to,
   tokenAddress,
   amount,
   chainId,
+  tag,
 }: {
   stealthSigner: Hex;
   to: Hex;
   tokenAddress: Hex;
   amount: bigint;
   chainId: number;
+  tag: Hex;
 }) => {
   const client = getPublicClient({
     chainId,
@@ -222,6 +200,7 @@ const buildERC20TransferUserOp = async ({
     value: BigInt(0),
     to: tokenAddress,
     data: transferCall,
+    tag,
   });
 
   return userOp;
@@ -230,16 +209,18 @@ const buildERC20TransferUserOp = async ({
 /**
  * Build a `UserOperation` for an ETH transfer
  */
-const buildETHTransferUserOp = async ({
+export const buildETHTransferUserOp = async ({
   stealthSigner,
   to,
   amount,
   chainId,
+  tag,
 }: {
   stealthSigner: Hex;
   to: Hex;
   amount: bigint;
   chainId: number;
+  tag: Hex;
 }) => {
   const client = getPublicClient({
     chainId,
@@ -251,6 +232,7 @@ const buildETHTransferUserOp = async ({
     value: amount,
     to,
     data: '0x',
+    tag,
   });
 
   return userOp;
@@ -262,12 +244,14 @@ const buildTransferUseOp = async ({
   tokenAddress,
   amount,
   chainId,
+  tag,
 }: {
   stealthSigner: Hex;
   to: Hex;
   tokenAddress: Hex;
   amount: bigint;
   chainId: number;
+  tag: Hex;
 }) => {
   if (tokenAddress === NATIVE_TOKEN_ADDRESS) {
     return buildETHTransferUserOp({
@@ -275,6 +259,7 @@ const buildTransferUseOp = async ({
       to,
       amount,
       chainId,
+      tag,
     });
   }
 
@@ -284,6 +269,7 @@ const buildTransferUseOp = async ({
     tokenAddress,
     amount,
     chainId,
+    tag,
   });
 };
 
@@ -327,6 +313,11 @@ export const buildMultiChainSendRequestBody = async ({
     tokenId,
   });
 
+  // Create a Uint8Array with 20 bytes
+  const randomBytes = new Uint8Array(20);
+  crypto.getRandomValues(randomBytes);
+  const tag = toHex(randomBytes);
+
   const unsignedBridgeUserOps: UserOperation[] = [];
   const relayQuotes: RelayGetQuoteResponseBody[] = [];
   for (const input of inputs) {
@@ -335,6 +326,8 @@ export const buildMultiChainSendRequestBody = async ({
         chainId: input.chainId,
         tokenId,
       });
+
+      console.log(input);
 
       if (!tokenAddress) {
         throw new Error('Token address not found');
@@ -345,12 +338,14 @@ export const buildMultiChainSendRequestBody = async ({
       );
 
       // Build a standard transfer user operation
+      console.log('build standard transfer user op');
       const userOp = await buildTransferUseOp({
         stealthSigner,
-        to,
+        to: consolidateToStealthAccount.address,
         tokenAddress,
-        amount,
+        amount: input.amount,
         chainId: input.chainId,
+        tag,
       });
 
       unsignedBridgeUserOps.push({
@@ -381,6 +376,7 @@ export const buildMultiChainSendRequestBody = async ({
       const userOps = await buildUserOpsFromRelayQuote({
         stealthSigner: publicKeyToAddress(input.stealthAccount.stealthPubKey),
         quote,
+        tag,
       });
 
       unsignedBridgeUserOps.push(...userOps);
@@ -395,17 +391,18 @@ export const buildMultiChainSendRequestBody = async ({
     consolidateToStealthAccount.stealthPubKey
   );
 
+  console.log('build final transfer user op');
   const finalTransferUserOp = await buildTransferUseOp({
     stealthSigner: consolidateAccountStealthSigner,
     tokenAddress: tokenAddressOnOutputChain,
     to,
     amount,
     chainId: outputChainId,
+    tag,
   });
 
   return {
-    bridgeUserOps: unsignedBridgeUserOps,
-    userOpsAfterBridge: [],
+    aggregationUserOps: unsignedBridgeUserOps,
     finalTransferUserOp,
     consolidateToStealthAccount,
     relayQuotes,

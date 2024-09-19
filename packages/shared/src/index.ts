@@ -17,6 +17,7 @@ export * from './erc4337';
 export * from './erc5564';
 export * from './ethRpc';
 export * from './siwe';
+export * from './trace';
 import * as relay from './relay';
 export { relay };
 export * from './multiChainSend';

@@ -1,10 +1,8 @@
-import * as trpcNext from '@trpc/server/adapters/next';
+import type { CreateNextContextOptions } from '@trpc/server/adapters/next';
 import { getUserIdFromToken } from './auth';
 
-export async function createContext({
-  req,
-}: trpcNext.CreateNextContextOptions) {
-  const token = req.headers['authorization']?.split(' ')[1];
+export async function createContext(opts: CreateNextContextOptions) {
+  const token = opts.req.headers['authorization']?.split(' ')[1];
 
   const userId = token ? getUserIdFromToken(token) : null;
 

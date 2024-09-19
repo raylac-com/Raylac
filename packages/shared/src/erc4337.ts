@@ -12,8 +12,11 @@ import {
   Hex,
   HttpTransport,
   PublicClient,
+  encodeAbiParameters,
   encodeFunctionData,
   hexToBigInt,
+  keccak256,
+  parseAbiParameters,
   toHex,
 } from 'viem';
 import axios from 'axios';
@@ -21,7 +24,6 @@ import RaylacPaymasterAbi from './abi/RaylacPaymasterAbi';
 import { getSenderAddress, recoveryStealthPrivKey } from './stealth';
 import { Alchemy } from 'alchemy-sdk';
 import { toAlchemyNetwork } from './utils';
-import { getPublicClient } from './ethRpc';
 import { signMessage } from 'viem/accounts';
 
 /**
@@ -60,12 +62,14 @@ export const buildUserOp = async ({
   to,
   value,
   data,
+  tag,
 }: {
   client: PublicClient<HttpTransport, Chain>;
   stealthSigner: Hex;
   to: Hex;
   value: bigint;
   data: Hex;
+  tag: Hex;
 }): Promise<UserOperation> => {
   const initCode = getInitCode({ stealthSigner });
 
@@ -87,7 +91,7 @@ export const buildUserOp = async ({
   const callData = encodeFunctionData({
     abi: RaylacAccountAbi,
     functionName: 'execute',
-    args: [to, value, data],
+    args: [to, value, data, tag],
   });
 
   const senderCode = await client.getCode({
@@ -95,21 +99,30 @@ export const buildUserOp = async ({
   });
 
   const alchemy = new Alchemy({
-    apiKey: process.env.ALCHEMY_API_KEY!,
+    apiKey:
+      process.env.ALCHEMY_API_KEY || process.env.EXPO_PUBLIC_ALCHEMY_API_KEY,
     network: toAlchemyNetwork(client.chain.id),
   });
 
   const feeData = await alchemy.core.getFeeData();
 
-  const baseFee = feeData.lastBaseFeePerGas!.toBigInt();
+  console.log('Fee data:', feeData.lastBaseFeePerGas);
+  const baseFee  = feeData.lastBaseFeePerGas!.toBigInt();
+
+//  const maxFeePerGas = feeData.maxFeePerGas!.toBigInt();
   const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas!.toBigInt();
 
   const maxPriorityFeePerGasBuffed = increaseByPercent({
     value: maxPriorityFeePerGas,
-    percent: 10,
+    percent: 20,
   });
 
-  const maxFeePerGas = baseFee + maxPriorityFeePerGasBuffed;
+  const baseFeeBuffed = increaseByPercent({
+    value: baseFee,
+    percent: 20,
+  });
+
+  const maxFeePerGasBuffed = baseFeeBuffed + maxPriorityFeePerGasBuffed;
 
   const userOp: UserOperation = {
     sender: senderAddress,
@@ -119,7 +132,7 @@ export const buildUserOp = async ({
     callGasLimit: toHex(BigInt(0)),
     verificationGasLimit: toHex(BigInt(0)),
     preVerificationGas: toHex(BigInt(0)),
-    maxFeePerGas: toHex(maxFeePerGas),
+    maxFeePerGas: toHex(maxFeePerGasBuffed),
     maxPriorityFeePerGas: toHex(maxPriorityFeePerGasBuffed),
     paymasterAndData: '0x',
     // Dummy signature as specified by Alchemy https://docs.alchemy.com/reference/eth-estimateuseroperationgas
@@ -133,14 +146,14 @@ export const buildUserOp = async ({
     client,
     userOp,
   });
+  console.log('Gas estimation:', gasEstimation);
   */
 
-  // console.log('Gas estimation:', gasEstimation);
   const gasEstimation = {
-    //    preVerificationGas: '0xb8cd' as Hex,
-    preVerificationGas: '0xa00e8' as Hex,
-    callGasLimit: '0x30d40' as Hex,
-    verificationGasLimit: '0x30d40' as Hex,
+    preVerificationGas: toHex(120_000),
+    callGasLimit: toHex(50_000),
+    // Use a higher gas limit for the verification step if the sender needs to be deployed
+    verificationGasLimit: senderCode ? toHex(70_000) : toHex(210_000),
   };
 
   userOp.callGasLimit = gasEstimation.callGasLimit;
@@ -150,7 +163,46 @@ export const buildUserOp = async ({
   return userOp;
 };
 
-export const getUserOpHash = async ({
+/**
+ * Function that mirrors the `pack` function in https://github.com/eth-infinitism/account-abstraction/blob/v0.6.0/contracts/interfaces/UserOperation.sol
+ */
+const packUserOp = ({ userOp }: { userOp: UserOperation }) => {
+  const hashInitCode = keccak256(userOp.initCode);
+  const hashCallData = keccak256(userOp.callData);
+  const hashPaymasterAndData = keccak256(userOp.paymasterAndData);
+
+  return encodeAbiParameters(
+    parseAbiParameters(
+      'address sender, uint256 nonce, bytes32 hashInitCode, bytes32 hashCallData, uint256 callGasLimit, uint256 verificationGasLimit, uint256 preVerificationGas, uint256 maxFeePerGas, uint256 maxPriorityFeePerGas, bytes32 hashPaymasterAndData'
+    ),
+    [
+      userOp.sender,
+      hexToBigInt(userOp.nonce),
+      hashInitCode,
+      hashCallData,
+      hexToBigInt(userOp.callGasLimit),
+      hexToBigInt(userOp.verificationGasLimit),
+      hexToBigInt(userOp.preVerificationGas),
+      hexToBigInt(userOp.maxFeePerGas),
+      hexToBigInt(userOp.maxPriorityFeePerGas),
+      hashPaymasterAndData,
+    ]
+  );
+};
+
+export const getUserOpHash = ({ userOp }: { userOp: UserOperation }) => {
+  const packedUserOp = packUserOp({ userOp });
+
+  return keccak256(
+    encodeAbiParameters(parseAbiParameters('bytes32, address, uint256'), [
+      keccak256(packedUserOp),
+      ENTRY_POINT_ADDRESS,
+      BigInt(userOp.chainId),
+    ])
+  );
+};
+
+export const getUserOpHashAsync = async ({
   client,
   userOp,
 }: {
@@ -181,7 +233,48 @@ export const getUserOpHash = async ({
   return userOpHash;
 };
 
-export const getPaymasterMessageHash = async ({
+/**
+ * Function that mirrors the `pack` function in RaylacPaymaster.sol
+ */
+const packPaymasterSigMessage = ({ userOp }: { userOp: UserOperation }) => {
+  return encodeAbiParameters(
+    parseAbiParameters(
+      'address sender, uint256 nonce, bytes initCode, bytes callData, uint256 callGasLimit, uint256 verificationGasLimit, uint256 preVerificationGas, uint256 maxFeePerGas, uint256 maxPriorityFeePerGas'
+    ),
+    [
+      userOp.sender,
+      hexToBigInt(userOp.nonce),
+      userOp.initCode,
+      userOp.callData,
+      hexToBigInt(userOp.callGasLimit),
+      hexToBigInt(userOp.verificationGasLimit),
+      hexToBigInt(userOp.preVerificationGas),
+      hexToBigInt(userOp.maxFeePerGas),
+      hexToBigInt(userOp.maxPriorityFeePerGas),
+    ]
+  );
+};
+
+/**
+ * Function that mirrors the `getHash` function in RaylacPaymaster.sol
+ */
+export const getPaymasterMessageHash = ({
+  userOp,
+}: {
+  userOp: UserOperation;
+}) => {
+  const packedPaymasterSigMessage = packPaymasterSigMessage({ userOp });
+
+  return keccak256(
+    encodeAbiParameters(parseAbiParameters('bytes, uint256, address'), [
+      packedPaymasterSigMessage,
+      BigInt(userOp.chainId),
+      RAYLAC_PAYMASTER_ADDRESS,
+    ])
+  );
+};
+
+export const getPaymasterMessageHashAsync = async ({
   userOp,
   client,
 }: {
@@ -467,20 +560,13 @@ export const signUserOpWithStealthAccount = async ({
   stealthAccount,
   spendingPrivKey,
   viewingPrivKey,
-  chainId,
 }: {
   userOp: UserOperation;
   stealthAccount: StealthAddressWithEphemeral;
   spendingPrivKey: Hex;
   viewingPrivKey: Hex;
-  chainId: number;
 }): Promise<UserOperation> => {
-  const client = getPublicClient({
-    chainId,
-  });
-
-  const userOpHash = await getUserOpHash({
-    client,
+  const userOpHash = getUserOpHash({
     userOp,
   });
 
@@ -532,7 +618,6 @@ export const bulkSignUserOps = async ({
         stealthAccount,
         spendingPrivKey,
         viewingPrivKey,
-        chainId: userOp.chainId,
       });
 
       return singedUserOp;

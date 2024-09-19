@@ -6,7 +6,7 @@ const IS_DEV = true;
 
 const config: ExpoConfig = {
   name: IS_DEV ? 'Raylac (dev)' : 'Raylac',
-  slug: 'raylac',
+  slug: 'sutori',
   version: '1.0.0',
   orientation: 'portrait',
   icon: IS_DEV ? './assets/icon-dev.png' : './assets/icon.png',

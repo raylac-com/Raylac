@@ -46,7 +46,12 @@ contract RaylacAccount is
    * @param value the value to pass in this call
    * @param func the calldata to pass in this call
    */
-  function execute(address dest, uint256 value, bytes calldata func) external {
+  function execute(
+    address dest,
+    uint256 value,
+    bytes calldata func,
+    bytes calldata /* tag */
+  ) external {
     // _requireFromEntryPoint();
     _call(dest, value, func);
   }

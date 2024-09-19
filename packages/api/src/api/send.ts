@@ -1,10 +1,12 @@
+import prisma from '@/lib/prisma';
+import { handleNewStealthAccount } from '@/lib/stealthAccount';
 import { sleep } from '@/utils';
 import {
   ERC20Abi,
   RaylacAccountAbi,
   RelayGetQuoteResponseBody,
+  StealthAddressWithEphemeral,
   UserOperation,
-  getChainFromId,
   getPublicClient,
   getTokenBalance,
   sendUserOperation,
@@ -46,20 +48,46 @@ const getTransferDataFromUserOp = (userOp: UserOperation) => {
 };
 
 /**
+ *  Save the UserOperation hash to the database
+ */
+const saveUserOpHash = async ({
+  userOpHash,
+  chainId,
+}: {
+  userOpHash: Hex;
+  chainId: number;
+}) => {
+  // Save the UserOperation hash to the database
+  await prisma.userOperation.create({
+    data: {
+      hash: userOpHash,
+      chainId,
+    },
+  });
+};
+
+/**
  * Send a transfer to a stealth account.
  * Signed user operations should be provided.
  */
 const send = async ({
-  bridgeUserOps,
-  userOpsAfterBridge,
+  senderUserId,
+  aggregationUserOps,
   finalTransferUserOp,
+  relayQuotes,
+  proxyStealthAccount,
 }: {
-  bridgeUserOps: UserOperation[];
-  userOpsAfterBridge: UserOperation[];
+  senderUserId: number;
+  aggregationUserOps: UserOperation[];
   finalTransferUserOp: UserOperation;
   relayQuotes: RelayGetQuoteResponseBody[];
+  proxyStealthAccount: StealthAddressWithEphemeral;
 }) => {
-  // TODO: Validate that the user operations point to the same address on the same chain
+  // Save the proxy stealth account to the database
+  await handleNewStealthAccount({
+    stealthAccount: proxyStealthAccount,
+    userId: senderUserId,
+  });
 
   const outputChainId = finalTransferUserOp.chainId;
   const proxAccountAddress = finalTransferUserOp.sender;
@@ -79,7 +107,12 @@ const send = async ({
 
   const userOpHashes = [];
 
-  for (const bridgeUserOp of bridgeUserOps) {
+  // Log the Relay request ids
+  console.log(
+    relayQuotes.map(quote => quote.steps.map(step => step.requestId))
+  );
+
+  for (const bridgeUserOp of aggregationUserOps) {
     console.log('Sending user operation (before bridge)', bridgeUserOp);
     const client = getPublicClient({
       chainId: bridgeUserOp.chainId,
@@ -90,46 +123,23 @@ const send = async ({
       userOp: bridgeUserOp,
     });
 
+    await saveUserOpHash({
+      userOpHash,
+      chainId: outputChainId,
+    });
+
     console.log('Sent user operation (before bridge):', userOpHash);
     userOpHashes.push(userOpHash);
-
     // Save the user operation hash to the database
   }
-
-  // Wait for the bridge to complete the transfer
-  for (const userOp of userOpsAfterBridge) {
-    console.log('Sending user operation (after bridge)', userOp);
-    const client = getPublicClient({
-      chainId: userOp.chainId,
-    });
-
-    const userOpHash = await sendUserOperation({
-      client,
-      userOp,
-    });
-    console.log('Sent user operation (after bridge):', userOpHash);
-    userOpHashes.push(userOpHash);
-
-    // Save the user operation hash to the database
-  }
-
-  const outputChainClient = getPublicClient({
-    chainId: outputChainId,
-  });
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const proxyAccountTokenBalance =
-      tokenAddress === zeroAddress
-        ? await outputChainClient.getBalance({
-            address: proxAccountAddress as Hex,
-            blockTag: 'latest',
-          })
-        : await getTokenBalance({
-            chain: getChainFromId(outputChainId),
-            contractAddress: tokenAddress,
-            address: proxAccountAddress as Hex,
-          });
+    const proxyAccountTokenBalance = await getTokenBalance({
+      address: proxAccountAddress,
+      tokenAddress,
+      chainId: outputChainId,
+    });
 
     console.log(
       `Polling for proxy account token balance: ${proxyAccountTokenBalance}`
@@ -149,6 +159,15 @@ const send = async ({
     }),
     userOp: finalTransferUserOp,
   });
+
+  await saveUserOpHash({
+    userOpHash: finalUserOpHash,
+    chainId: outputChainId,
+  });
+
+  // 1. Save UserOperation hash
+  // 2. The indexer will pick up the UserOperation hash and save the transaction and the related transfer traces
+  // 3. Save the transfer
 
   console.log('Final user operation hash:', finalUserOpHash);
 };

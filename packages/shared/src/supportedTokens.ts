@@ -1,7 +1,9 @@
 import supportedChains from './supportedChains';
 import { SupportedToken } from './types';
 import * as chains from 'viem/chains';
-import { NATIVE_TOKEN_ADDRESS } from './utils';
+import { zeroAddress } from 'viem';
+
+export const NATIVE_TOKEN_ADDRESS = zeroAddress;
 
 const supportedTokens: SupportedToken[] = [
   {
@@ -11,6 +13,7 @@ const supportedTokens: SupportedToken[] = [
     decimals: 6,
     logoURI: 'https://static.alchemyapi.io/images/assets/3408.png',
     addresses: [
+      // https://developers.circle.com/stablecoins/docs/usdc-on-test-networks
       {
         address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         chain: chains.mainnet,
@@ -27,8 +30,17 @@ const supportedTokens: SupportedToken[] = [
         address: '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
         chain: chains.baseSepolia,
       },
+      {
+        address: '0x5fd84259d66Cd46123540766Be93DFE6D43130D7',
+        chain: chains.optimismSepolia,
+      },
+      {
+        address: '0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d',
+        chain: chains.arbitrumSepolia,
+      },
     ],
   },
+  /*
   {
     tokenId: 'wbtc',
     symbol: 'WBTC',
@@ -59,6 +71,7 @@ const supportedTokens: SupportedToken[] = [
       },
     ],
   },
+  */
   {
     tokenId: 'eth',
     symbol: 'ETH',

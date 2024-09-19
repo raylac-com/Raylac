@@ -1,7 +1,7 @@
 import { encodeFunctionData, Hex } from 'viem';
 import { ERC20Abi, getPublicClient } from './';
 
-export const getTokenBalance = async ({
+export const getERC20TokenBalance = async ({
   contractAddress,
   chainId,
   address,
@@ -14,7 +14,6 @@ export const getTokenBalance = async ({
     chainId,
   });
 
-  console.log('Getting balance for', address, chainId);
   const balance = await publicClient.readContract({
     address: contractAddress,
     abi: ERC20Abi,

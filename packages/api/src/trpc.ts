@@ -9,9 +9,8 @@ export const publicProcedure = t.procedure;
 // procedure that asserts that the user is logged in
 export const authedProcedure = t.procedure.use(async opts => {
   const { ctx } = opts;
-  
+
   if (!ctx.userId) {
-    console.log({opts});
     throw new Error('User not logged in');
   }
 
@@ -19,6 +18,6 @@ export const authedProcedure = t.procedure.use(async opts => {
     ctx: {
       ...ctx,
       userId: ctx.userId,
-    }
+    },
   });
 });

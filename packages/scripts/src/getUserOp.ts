@@ -1,10 +1,11 @@
 import 'dotenv/config';
 import { getPublicClient, getUserOpReceipt } from '@raylac/shared';
-import { baseSepolia } from 'viem/chains';
+import { arbitrumSepolia, baseSepolia } from 'viem/chains';
 
 const getUserOp = async () => {
   const hash =
-    '0x9667bf3041090ae7c159184cbbd8a2f86b9799a08d6060dbd4aa14ced9d086f7';
+    //    '0x38180819964cce753fad66def22cafe6ae0cd434ec3d4bc5723543b1dd80e839';
+    '0x3fbce0670229750dea937b0409cb313216a2ff4368a523388f5286c96b6ed807';
 
   const client = getPublicClient({
     chainId: baseSepolia.id,
