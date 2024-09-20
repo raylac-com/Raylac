@@ -1,12 +1,14 @@
 import 'dotenv/config';
-// import syncAnnouncements from './syncAnnouncements';
 import syncUserOps from './syncUserOps';
-import syncTransfers from './syncTransfers';
-import syncTransactionTraces from './syncTransactions';
+import syncIncomingTransfers from './syncIncomingTransfers';
+import syncOutgoingTransfers from './syncOutgoingTransfers';
 
 const sync = async () => {
-  // await syncAnnouncements();
-  await Promise.all([syncUserOps(), syncTransfers(), syncTransactionTraces()]);
+  await Promise.all([
+    syncUserOps(),
+    syncIncomingTransfers(),
+    syncOutgoingTransfers(),
+  ]);
 };
 
 sync();

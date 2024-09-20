@@ -114,13 +114,16 @@ const decodeExecuteAsTransfer = ({
   }
 };
 
-const syncTransactionTraces = async () => {
+const syncOutgoingTransfers = async () => {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const txHashes = await prisma.transaction.findMany({
       select: {
         hash: true,
         chainId: true,
+      },
+      where: {
+        synchedTraces: false,
       },
     });
 
@@ -198,10 +201,20 @@ const syncTransactionTraces = async () => {
         data: decodedTraces,
         skipDuplicates: true,
       });
+
+      // Mark the transaction as synched
+      await prisma.transaction.update({
+        where: {
+          hash,
+        },
+        data: {
+          synchedTraces: true,
+        },
+      });
     }
 
-    await sleep(10000); // 10 seconds
+    await sleep(10000); // Sleep for 10 seconds
   }
 };
 
-export default syncTransactionTraces;
+export default syncOutgoingTransfers;

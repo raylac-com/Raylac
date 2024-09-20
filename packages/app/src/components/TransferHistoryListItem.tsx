@@ -173,7 +173,9 @@ const OutGoingTransferListItem = (props: OutGoingTransferListItemProps) => {
           opacity: 0.5,
         }}
       >
-        {blockTimestamp ? new Date(blockTimestamp).toLocaleDateString() : ''}
+        {blockTimestamp
+          ? new Date(Number(blockTimestamp) * 1000).toLocaleDateString()
+          : ''}
       </Text>
     </View>
   );

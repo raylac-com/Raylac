@@ -12,7 +12,7 @@ export const traceFilter = async ({
   fromBlock,
   chainId,
 }: {
-  toAddress: Hex;
+  toAddress: Hex[];
   fromBlock: Hex;
   chainId: number;
 }) => {
@@ -40,7 +40,7 @@ export const traceFilter = async ({
       params: [
         {
           fromBlock,
-          toAddress: [toAddress],
+          toAddress,
         },
       ],
     },
