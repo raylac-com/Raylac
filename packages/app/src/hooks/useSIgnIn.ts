@@ -1,11 +1,15 @@
 import { saveAuthToken } from '@/lib/auth';
 import { trpc } from '@/lib/trpc';
 import { setSignedInUser } from '@/lib/utils';
-import { publicClient } from '@/lib/viem';
 import userKeys from '@/queryKeys/userKeys';
-import { buildSiweMessage, getSpendingPrivKey } from '@raylac/shared';
+import {
+  buildSiweMessage,
+  getPublicClient,
+  getSpendingPrivKey,
+} from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { privateKeyToAccount } from 'viem/accounts';
+import { baseSepolia } from 'viem/chains';
 
 export const useSignIn = () => {
   const { mutateAsync: signIn } = trpc.signIn.useMutation();
@@ -18,6 +22,10 @@ export const useSignIn = () => {
       );
 
       const issuedAt = new Date();
+
+      const publicClient = getPublicClient({
+        chainId: baseSepolia.id,
+      });
 
       const message = buildSiweMessage({
         issuedAt,

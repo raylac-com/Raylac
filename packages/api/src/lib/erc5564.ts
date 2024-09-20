@@ -4,10 +4,12 @@ import {
   ERC5564_ANNOUNCER_ADDRESS,
   ERC5564AnnouncerAbi,
   formatERC5564AnnouncementLog,
+  getPublicClient,
+  getWalletClient,
 } from '@raylac/shared';
 import { privateKeyToAccount } from 'viem/accounts';
-import { publicClient, walletClient } from './viem';
 import prisma from './prisma';
+import { baseSepolia } from 'viem/chains';
 
 const SCHEME_ID = BigInt(1);
 
@@ -36,6 +38,10 @@ export const announce = async ({
     stealthPubKey: stealthPubKey as Hex,
   });
 
+  const walletClient = getWalletClient({
+    chainId: baseSepolia.id,
+  });
+
   const txHash = await walletClient.writeContract({
     account: announcerAccount,
     abi: ERC5564AnnouncerAbi,
@@ -46,6 +52,10 @@ export const announce = async ({
   console.log('Tx hash', txHash);
 
   // TODO: Handle tx being dropped
+
+  const publicClient = getPublicClient({
+    chainId: baseSepolia.id,
+  });
 
   const txReceipt = await publicClient.waitForTransactionReceipt({
     hash: txHash,

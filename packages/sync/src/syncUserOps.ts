@@ -3,7 +3,6 @@ import {
   ENTRY_POINT_ADDRESS,
   getPublicClient,
 } from '@raylac/shared';
-import { publicClient } from './lib/viem';
 import { getAddress, Hex, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
 import { baseSepolia } from 'viem/chains';
@@ -59,6 +58,8 @@ const syncUserOpsForAddress = async (senderAddress: Hex) => {
     console.log(
       `Found ${logs.length} UserOperationEvent logs for address ${senderAddress} on chain ${chainId}`
     );
+
+    const publicClient = getPublicClient({ chainId });
 
     for (const log of logs) {
       const {
