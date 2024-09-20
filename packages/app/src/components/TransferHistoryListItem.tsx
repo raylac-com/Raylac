@@ -15,12 +15,13 @@ const getTokenMetadata = (tokenId: string) => {
   return supportedTokens.find(token => token.tokenId === tokenId);
 };
 
-interface IncomingTransferListItemProps {
+interface TransferHistoryListItemProps {
   tx: TransferHistoryQueryResult;
+  type: 'incoming' | 'outgoing';
 }
 
-const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
-  const { tx } = props;
+const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
+  const { tx, type } = props;
 
   const isFromAddress = typeof tx.from === 'string';
 
@@ -29,15 +30,24 @@ const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
     blockNumber: tx.blockNumber,
   });
 
-  console.log('blockTimestamp', blockTimestamp);
-
   const tokenMeta = getTokenMetadata(tx.tokenId);
+  const formattedAmount = formatAmount(tx.amount, tokenMeta.decimals);
+
+  /*
+  const { data: tokenPrice } = useTokenPrice(tx.tokenId);
+
+  const formattedUsdAmount = tokenPrice
+    ? (tokenPrice * parseFloat(formattedAmount)).toFixed(2)
+    : '';
+  */
 
   return (
     <View
       style={{
         flex: 1,
         flexDirection: 'column',
+        borderBottomWidth: 1,
+        padding: 12,
       }}
     >
       <View
@@ -66,25 +76,46 @@ const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
             {isFromAddress && shortenAddress(tx.from as Hex)}
           </Text>
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            columnGap: 4,
-          }}
-        >
-          <Ionicons name="arrow-down-outline" size={18} color={theme.green} />
-          <Text
+        <View>
+          <View
             style={{
-              fontWeight: 'bold',
-              fontSize: 16,
-              color: theme.green,
+              flexDirection: 'row',
+              alignItems: 'center',
+              columnGap: 4,
             }}
           >
-            {formatAmount(tx.amount, tokenMeta.decimals)} {tokenMeta.symbol}
+            <Ionicons
+              name={
+                type === 'outgoing' ? 'arrow-up-outline' : 'arrow-down-outline'
+              }
+              size={18}
+              color={type === 'outgoing' ? theme.waning : theme.green}
+            />
+            <Text
+              style={{
+                fontWeight: 'bold',
+                fontSize: 16,
+                color: type === 'incoming' ? theme.green : theme.waning,
+              }}
+            >
+              {formattedAmount} {tokenMeta.symbol}
+            </Text>
+          </View>
+          {/**
+              <Text
+            style={{
+              fontWeight: 'bold',
+              fontSize: 12,
+              color: theme.gray,
+              textAlign: 'right',
+            }}
+          >
+            {formattedUsdAmount} USD
           </Text>
+             */}
         </View>
       </View>
+
       <Text
         style={{
           color: theme.text,
@@ -97,112 +128,6 @@ const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
           ? new Date(Number(blockTimestamp) * 1000).toLocaleDateString()
           : ''}
       </Text>
-    </View>
-  );
-};
-
-interface OutGoingTransferListItemProps {
-  tx: TransferHistoryQueryResult;
-}
-
-const OutGoingTransferListItem = (props: OutGoingTransferListItemProps) => {
-  const { tx } = props;
-
-  const { data: blockTimestamp } = trpc.getBlockTimestamp.useQuery({
-    chainId: tx.chainId,
-    blockNumber: tx.blockNumber,
-  });
-
-  const tokenMeta = getTokenMetadata(tx.tokenId);
-
-  return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'column',
-      }}
-    >
-      <View
-        style={{
-          flex: 1,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            columnGap: 8,
-          }}
-        >
-          <FastAvatar address={tx.to} size={36}></FastAvatar>
-          <Text
-            style={{
-              color: theme.text,
-            }}
-          >
-            {shortenAddress(tx.to as Hex)}
-          </Text>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            columnGap: 4,
-          }}
-        >
-          <Ionicons name="arrow-up-outline" size={18} color={theme.waning} />
-          <Text
-            style={{
-              fontWeight: 'bold',
-              fontSize: 16,
-              color: theme.waning,
-            }}
-          >
-            {formatAmount(tx.amount, tokenMeta.decimals)} {tokenMeta.symbol}
-          </Text>
-        </View>
-      </View>
-      <Text
-        style={{
-          color: theme.text,
-          marginTop: 4,
-          textAlign: 'right',
-          opacity: 0.5,
-        }}
-      >
-        {blockTimestamp
-          ? new Date(Number(blockTimestamp) * 1000).toLocaleDateString()
-          : ''}
-      </Text>
-    </View>
-  );
-};
-
-interface TransferHistoryListItemProps {
-  tx: TransferHistoryQueryResult;
-  type: 'incoming' | 'outgoing';
-}
-
-const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
-  const { tx, type } = props;
-
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        borderBottomWidth: 1,
-        padding: 12,
-      }}
-    >
-      {type === 'incoming' ? (
-        <IncomingTransferListItem tx={tx} />
-      ) : (
-        <OutGoingTransferListItem tx={tx} />
-      )}
     </View>
   );
 };

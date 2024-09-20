@@ -18,15 +18,34 @@ import StyledPressable from '@/components/StyledPressable';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import { formatAmount, TransferHistoryQueryResult } from '@raylac/shared';
+import { formatUnits } from 'viem';
+import useTokenPrice from '@/hooks/useTokenPrice';
 
 interface TokenBalanceItemProps {
-  tokenSymbol: string;
-  tokenLogo;
+  tokenId: string;
   balance: string;
 }
 
 const TokenBalanceItem = (props: TokenBalanceItemProps) => {
-  const { tokenSymbol, tokenLogo, balance } = props;
+  const { tokenId, balance } = props;
+
+  const { data: tokenPrice } = useTokenPrice(tokenId);
+
+  const tokenMetadata = supportedTokens.find(
+    token => token.tokenId === tokenId
+  );
+
+  const usdBalance = tokenPrice
+    ? tokenPrice *
+      parseFloat(formatUnits(BigInt(balance), tokenMetadata.decimals))
+    : null;
+
+  const formattedBalance = formatAmount(
+    balance.toString(),
+    tokenMetadata.decimals
+  );
+
+  const formattedUsdBalance = usdBalance ? usdBalance.toFixed(2) : '';
 
   return (
     <View
@@ -38,20 +57,38 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
       }}
     >
       <Image
-        source={{ uri: tokenLogo }}
+        source={{ uri: tokenMetadata.logoURI }}
         style={{
           width: 24,
           height: 24,
         }}
       />
-      <Text
+      <View
         style={{
-          color: theme.text,
-          fontSize: 20,
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          rowGap: 4,
         }}
       >
-        {`${balance} ${tokenSymbol}`}
-      </Text>
+        <Text
+          style={{
+            color: theme.text,
+            fontSize: 20,
+          }}
+        >
+          {`${formattedBalance} ${tokenMetadata.symbol}`}
+        </Text>
+        <Text
+          style={{
+            color: theme.text,
+            fontSize: 16,
+            opacity: 0.5,
+          }}
+        >
+          {`${formattedUsdBalance} USD`}
+        </Text>
+      </View>
     </View>
   );
 };
@@ -209,7 +246,7 @@ const HomeScreen = () => {
             }
             title={t('send')}
             onPress={() => {
-              navigation.navigate('SelectSend');
+              navigation.navigate('SelectRecipient');
             }}
           />
         </View>
@@ -230,19 +267,8 @@ const HomeScreen = () => {
           }}
         >
           {tokenBalances?.map(({ tokenId, balance }, i) => {
-            const tokenMetadata = supportedTokens.find(
-              token => token.tokenId === tokenId
-            );
             return (
-              <TokenBalanceItem
-                key={i}
-                balance={formatAmount(
-                  balance.toString(),
-                  tokenMetadata.decimals
-                )}
-                tokenSymbol={tokenMetadata.symbol}
-                tokenLogo={tokenMetadata.logoURI}
-              />
+              <TokenBalanceItem key={i} balance={balance} tokenId={tokenId} />
             );
           })}
           {tokenBalances?.length > 3 && (

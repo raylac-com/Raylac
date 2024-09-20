@@ -80,11 +80,6 @@
       "sendAmountToAddress": "Send USDC to the following address on Base",
       "confirm": "I made the transfer"
     },
-    "SelectSend": {
-      "title": "Select Send",
-      "sendToSutoriUser": "Send to Raylac user",
-      "sendToNonSutoriUser": "Send to non-Raylac User"
-    },
     "SendSuccess": {
       "title": "",
       "transferSuccessful": "Transfer successful",
@@ -96,13 +91,9 @@
        "insufficientBalance": "Insufficient balance",
       "sendToUser": "Send to {{ name }}"
     },
-    "SendToSutoriUser": {
-      "title": "Send to Raylac User",
-      "searchUser": "Search by username"
-    },
-    "SendToNonSutoriUser": {
-      "title": "Enter recipient details",
-      "invalidAddress": "Invalid address"
+    "SelectRecipient": {
+      "title": "Select recipient",
+      "searchUser": "Search user or Ethereum address"
     },
     "ConfirmSend": {
       "title": "Confirm",

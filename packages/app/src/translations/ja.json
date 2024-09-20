@@ -78,12 +78,6 @@
     "sendAmountToAddress": "下記のアドレスに \n USDCをBase で送金してください",
     "confirm": "送金しました"
   },
-  "SelectSend": {
-    "title": "送金先を選択",
-    "sendToSutoriUser": "Sutoriユーザーに送金",
-      "sendToNonSutoriUser": "Sutoriユーザー以外に送金"
-  },
- 
   "SendSuccess": {
       "title": "",
       "transferSuccessful": "送金完了",
@@ -95,13 +89,9 @@
     "insufficientBalance": "残高が足りません",
     "sendToUser": "{{ name }} へ送金"
   },
-  "SendToSutoriUser": {
-    "title": "Sutoriユーザーに送金",
+  "SelectRecipient": {
+    "title": "送金先を選択",
     "searchUser": "ユーザー名で検索"
-  },
-  "SendToNonSutoriUser": {
-    "title": "受取人を入力",
-    "invalidAddress": "無効なアドレスです"
   },
   "ConfirmSend": {
     "title": "確認",

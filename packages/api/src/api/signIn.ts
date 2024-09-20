@@ -1,10 +1,10 @@
 import prisma from '@/lib/prisma';
-import { publicClient } from '@/lib/viem';
 import { JWT_PRIV_KEY } from '@/utils';
-import { buildSiweMessage } from '@raylac/shared';
+import { buildSiweMessage, getPublicClient } from '@raylac/shared';
 import jwt from 'jsonwebtoken';
 import { Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
+import { baseSepolia } from 'viem/chains';
 import { verifySiweMessage } from 'viem/siwe';
 
 /**
@@ -31,6 +31,10 @@ const signIn = async ({
   }
 
   const userAddress = publicKeyToAddress(user.spendingPubKey as Hex);
+
+  const publicClient = getPublicClient({
+    chainId: baseSepolia.id,
+  });
 
   const message = buildSiweMessage({
     issuedAt: new Date(issuedAt),

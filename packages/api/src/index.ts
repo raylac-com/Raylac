@@ -27,6 +27,7 @@ import getTokenBalancesPerChain from './api/getTokenBalancesPerChain';
 import getTokenBalances from './api/getTokenBalances';
 import getAddressBalancesPerChain from './api/getAddressBalancesPerChain';
 import { getBlockTimestamp } from './utils';
+import getTokenPrices from './api/getTokenPrices';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -376,6 +377,11 @@ const appRouter = router({
 
       return { userId: user.id, token };
     }),
+
+  getTokenPrices: publicProcedure.query(async () => {
+    const prices = await getTokenPrices();
+    return prices;
+  }),
 });
 
 export type AppRouter = typeof appRouter;

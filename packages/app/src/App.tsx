@@ -14,11 +14,9 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc, rpcLinks } from './lib/trpc';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ConfirmDeposit from './screens/Deposit/ConfirmDeposit';
-import SelectSend from './screens/Send/SelectSend';
 import ConfirmSend from './screens/Send/ConfirmSend';
 import Account from './screens/Account';
-import SendToSutoriUser from './screens/Send/SendToSutoriUser';
-import SendToNonSutoriUser from './screens/Send/SendToNonSutoriUser';
+import SelectRecipient from './screens/Send/SelectRecipient';
 import Toast from 'react-native-toast-message';
 import TransferHistory from './screens/TransferHistory';
 import * as Sentry from '@sentry/react-native';
@@ -193,26 +191,10 @@ const Screens = () => {
         }}
       >
         <RootStack.Screen
-          name="SelectSend"
-          component={SelectSend}
+          name="SelectRecipient"
+          component={SelectRecipient}
           options={{
-            title: t('title', { ns: 'SelectSend' }),
-            headerBackVisible: true,
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="SendToSutoriUser"
-          component={SendToSutoriUser}
-          options={{
-            title: t('title', { ns: 'SendToSutoriUser' }),
-            headerBackVisible: true,
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="SendToNonSutoriUser"
-          component={SendToNonSutoriUser}
-          options={{
-            title: t('title', { ns: 'SendToNonSutoriUser' }),
+            title: t('title', { ns: 'SelectRecipient' }),
             headerBackVisible: true,
           }}
         ></RootStack.Screen>

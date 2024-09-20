@@ -25,9 +25,7 @@ export type RootStackParamsList = {
   UpdateUsername: undefined;
 
   // Send stack
-  SelectSend: undefined;
-  SendToNonSutoriUser: undefined;
-  SendToSutoriUser: undefined;
+  SelectRecipient: undefined;
   EnterSendAmount: {
     recipientUserOrAddress: User | Hex;
   };

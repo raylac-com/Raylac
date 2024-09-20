@@ -244,3 +244,9 @@ export interface TokenBalancePerChainQueryResult {
   tokenId: string;
   balance: string;
 }
+
+export interface CoingeckoTokenPriceResponse {
+  [key: string]: {
+    usd: number;
+  };
+}

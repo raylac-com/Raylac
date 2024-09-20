@@ -284,7 +284,6 @@ export const getTokenBalance = async ({
   return balance;
 };
 
-
 export const formatAmount = (amount: string, decimals: number): string => {
   const formatted = Number(
     formatUnits(BigInt(amount), decimals)
@@ -297,4 +296,16 @@ export const formatAmount = (amount: string, decimals: number): string => {
   }
 
   return formatted;
+};
+
+/**
+ * Convert a Coingecko token ID to a Raylac token ID
+ */
+export const toCoingeckoTokenId = (tokenId: string) => {
+  switch (tokenId) {
+    case 'eth':
+      return 'ethereum';
+    default:
+      throw new Error(`Unsupported Coingecko token ID: ${tokenId}`);
+  }
 };
