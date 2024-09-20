@@ -19,7 +19,6 @@ const useSetProfileImage = () => {
 
       if (!result.canceled) {
         const image = result.assets[0];
-        console.log(image);
 
         const resizedImage = await ImageManipulator.manipulateAsync(
           image.uri,

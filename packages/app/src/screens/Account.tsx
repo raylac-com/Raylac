@@ -2,7 +2,6 @@ import FastAvatar from '@/components/FastAvatar';
 import useSignOut from '@/hooks/useSignOut';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { deleteMnemonic } from '@/lib/key';
 import { theme } from '@/lib/theme';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -113,25 +112,6 @@ const Account = () => {
     navigation.navigate('SelectLanguage');
   }, []);
 
-  const onDeletePress = useCallback(async () => {
-    Alert.alert('Delete account', '', [
-      {
-        text: 'Cancel',
-        onPress: () => {},
-        style: 'cancel',
-      },
-      {
-        text: 'Delete',
-        onPress: async () => {
-          await signOut();
-          await deleteMnemonic();
-          navigation.navigate('Start');
-        },
-        style: 'destructive',
-      },
-    ]);
-  }, []);
-
   return (
     <View
       style={{
@@ -230,21 +210,6 @@ const Account = () => {
           onPress={onSignOutPress}
           color={theme.waning}
         />
-      </View>
-      <View
-        style={{
-          marginTop: 40,
-        }}
-      >
-        <Text
-          onPress={onDeletePress}
-          style={{
-            color: theme.waning,
-            opacity: 0.6,
-          }}
-        >
-          delete account
-        </Text>
       </View>
     </View>
   );

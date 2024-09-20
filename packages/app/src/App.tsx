@@ -35,9 +35,15 @@ import Receive from './screens/Receive';
 import AccountInfo from './screens/AccountInfo/AccountInfo';
 import UpdateDisplayName from './screens/AccountInfo/UpdateDisplayName';
 import UpdateUsername from './screens/AccountInfo/UpdateUsername';
+import useSignedInUser from './hooks/useSignedInUser';
+import useTypedNavigation from './hooks/useTypedNavigation';
+import useSignOut from './hooks/useSignOut';
+// import { deleteSignInAvailableUserId } from './lib/key';
+// import { ServerId } from './types';
 
+console.log('NODE_ENV', process.env.NODE_ENV);
 Sentry.init({
-  dsn: 'https://adc4c437047fef7e4ebe5d0d77df3ff5@o1348995.ingest.us.sentry.io/4507536730030080',
+  dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
   debug: process.env.NODE_ENV === 'development',
   enabled: process.env.NODE_ENV !== 'development',
 });
@@ -77,6 +83,38 @@ const Tabs = () => {
 const Screens = () => {
   const { t } = useTranslation();
 
+  const { data: signedInUser, isLoading: isLoadingUser } = useSignedInUser();
+  const { mutateAsync: signOut } = useSignOut();
+
+  const navigation = useTypedNavigation();
+
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    (async () => {
+      /*
+      await deleteSignInAvailableUserId({
+        userId: 0,
+        serverId: ServerId.Production,
+      });
+      */
+      const lang = await getSelectedLanguage();
+      i18n.changeLanguage(lang);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (signedInUser === null && !isLoadingUser) {
+        console.log(
+          "Couldn't find signed in user on server, navigating to start"
+        );
+        await signOut();
+        navigation.navigate('Start');
+      }
+    })();
+  }, [signedInUser, isLoadingUser]);
+
   return (
     <RootStack.Navigator initialRouteName="Tabs">
       <RootStack.Screen
@@ -91,7 +129,7 @@ const Screens = () => {
         component={SignUp}
         options={{
           title: t('title', { ns: 'SignUp' }),
-          headerBackVisible: false,
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
       ></RootStack.Screen>
       <RootStack.Screen
@@ -274,18 +312,10 @@ const queryClient = new QueryClient({
   },
 });
 
-export default function App() {
+const App = () => {
   const trpcClient = trpc.createClient({
     links: rpcLinks,
   });
-  const { i18n } = useTranslation();
-
-  useEffect(() => {
-    (async () => {
-      const lang = await getSelectedLanguage();
-      i18n.changeLanguage(lang);
-    })();
-  }, []);
 
   return (
     <NavigationContainer>
@@ -300,4 +330,6 @@ export default function App() {
       </trpc.Provider>
     </NavigationContainer>
   );
-}
+};
+
+export default Sentry.wrap(App);

@@ -5,8 +5,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
 import { Hex } from 'viem';
 import { TransferHistoryQueryResult, formatAmount } from '@raylac/shared';
-import { useTranslation } from 'react-i18next';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
+import { trpc } from '@/lib/trpc';
 
 /**
  *  Get the token metadata for a given token ID
@@ -21,15 +21,17 @@ interface IncomingTransferListItemProps {
 
 const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
   const { tx } = props;
-  const { t } = useTranslation();
 
   const isFromAddress = typeof tx.from === 'string';
 
-  const blockTimestamp = new Date();
+  const { data: blockTimestamp } = trpc.getBlockTimestamp.useQuery({
+    chainId: tx.chainId,
+    blockNumber: tx.blockNumber,
+  });
+
+  console.log('blockTimestamp', blockTimestamp);
 
   const tokenMeta = getTokenMetadata(tx.tokenId);
-
-  // const amount = tx.amount;
 
   return (
     <View
@@ -91,7 +93,9 @@ const IncomingTransferListItem = (props: IncomingTransferListItemProps) => {
           opacity: 0.5,
         }}
       >
-        {blockTimestamp.toLocaleDateString()}
+        {blockTimestamp
+          ? new Date(Number(blockTimestamp) * 1000).toLocaleDateString()
+          : ''}
       </Text>
     </View>
   );
@@ -104,7 +108,10 @@ interface OutGoingTransferListItemProps {
 const OutGoingTransferListItem = (props: OutGoingTransferListItemProps) => {
   const { tx } = props;
 
-  const blockTimestamp = new Date();
+  const { data: blockTimestamp } = trpc.getBlockTimestamp.useQuery({
+    chainId: tx.chainId,
+    blockNumber: tx.blockNumber,
+  });
 
   const tokenMeta = getTokenMetadata(tx.tokenId);
 
@@ -166,7 +173,7 @@ const OutGoingTransferListItem = (props: OutGoingTransferListItemProps) => {
           opacity: 0.5,
         }}
       >
-        {blockTimestamp.toLocaleDateString()}
+        {blockTimestamp ? new Date(blockTimestamp).toLocaleDateString() : ''}
       </Text>
     </View>
   );

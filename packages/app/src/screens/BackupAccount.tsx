@@ -7,13 +7,20 @@ import { theme } from '@/lib/theme';
 import { copyToClipboard } from '@/lib/utils';
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
+import useSignedInUser from '@/hooks/useSignedInUser';
 
 const BackupAccount = () => {
   const { t } = useTranslation('BackupAccount');
   const [mnemonic, setMnemonic] = useState<string | null>(null);
+
+  const { data: signedInUser } = useSignedInUser();
   const onRevealPress = useCallback(async () => {
-    setMnemonic(await getMnemonic());
-  }, [setMnemonic]);
+    if (!signedInUser) {
+      throw new Error('User not signed in');
+    }
+
+    setMnemonic(await getMnemonic(signedInUser.id));
+  }, [setMnemonic, signedInUser]);
 
   const onHidePress = useCallback(() => {
     setMnemonic(null);

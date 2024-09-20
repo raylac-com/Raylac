@@ -11,6 +11,7 @@ const getSignedInUser = async (): Promise<User | null> => {
     const user = await client.getUser.query({
       userId: signedInUserId,
     });
+
     return user;
   }
 

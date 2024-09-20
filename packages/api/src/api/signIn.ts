@@ -37,7 +37,6 @@ const signIn = async ({
     address: userAddress,
     chainId: publicClient.chain.id,
   });
-  console.log('Message:', message);
 
   const isSigValid = await verifySiweMessage(publicClient, {
     address: userAddress,

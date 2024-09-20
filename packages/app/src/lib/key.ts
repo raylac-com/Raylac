@@ -1,20 +1,107 @@
 import * as SecureStore from 'expo-secure-store';
+import { getServerId } from './utils';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ServerId } from '@/types';
 
-const MNEMONIC_STORAGE_KEY = 'mnemonic';
+const SIGN_IN_AVAILABLE_USER_IDS_STORAGE_KEY = 'userIds';
+const MNEMONIC_STORAGE_KEY_PREFIX = 'mnemonic';
 
 const REQUIRE_AUTHENTICATION = process.env.NODE_ENV !== 'development';
 
+export const getSignInAvailableUserIds = async () => {
+  const ids = await AsyncStorage.getItem(
+    SIGN_IN_AVAILABLE_USER_IDS_STORAGE_KEY
+  );
+  console.log({ ids });
+
+  // Only return the user IDs that are on the currently connected server
+  const serverId = getServerId();
+
+  const userIds = ids
+    ? (JSON.parse(ids) as string[])
+        .filter(id => id.startsWith(`${serverId}_`))
+        .map(userId => Number(userId.split('_')[1]))
+    : [];
+
+  return userIds;
+};
+
+export const deleteSignInAvailableUserId = async ({
+  userId,
+  serverId,
+}: {
+  userId: number;
+  serverId: ServerId;
+}) => {
+  const userIdKey = `${serverId}_${userId}`;
+
+  const idsRaw = await AsyncStorage.getItem(
+    SIGN_IN_AVAILABLE_USER_IDS_STORAGE_KEY
+  );
+
+  const ids = idsRaw ? JSON.parse(idsRaw) : [];
+
+  const newIds = ids.filter(id => id !== userIdKey);
+
+  await AsyncStorage.setItem(
+    SIGN_IN_AVAILABLE_USER_IDS_STORAGE_KEY,
+    JSON.stringify(newIds)
+  );
+};
+
+const addSignInAvailableUserId = async ({
+  userId,
+  serverId,
+}: {
+  userId: number;
+  serverId: ServerId;
+}) => {
+  const userIdKey = `${serverId}_${userId}`;
+
+  const idsRaw = await AsyncStorage.getItem(
+    SIGN_IN_AVAILABLE_USER_IDS_STORAGE_KEY
+  );
+
+  const ids = idsRaw ? JSON.parse(idsRaw) : [];
+
+  if (!ids.includes(userIdKey)) {
+    ids.push(userIdKey);
+
+    await AsyncStorage.setItem(
+      SIGN_IN_AVAILABLE_USER_IDS_STORAGE_KEY,
+      JSON.stringify(ids)
+    );
+  }
+};
+
 /**
- * Save a mnemonic to secure storage.
- * Throws if a different mnemonic is already saved.
+ * Get the key to store the mnemonic in secure storage.
+ * The key is a combination of the user ID and the server ID.
+ * The server ID is necessary since user IDs are auto-incremented numbers and not unique across servers.
  */
-export const saveMnemonic = async (mnemonic: string) => {
-  const existingMnemonic = await getMnemonic();
+const getMnemonicKey = ({ userId, serverId }) => {
+  return `${MNEMONIC_STORAGE_KEY_PREFIX}_${userId}_${serverId}`;
+};
+
+/**
+ * Save a mnemonic to secure storage for the given userId.
+ * Throws if a different mnemonic is already saved for the userId.
+ */
+export const saveMnemonic = async (mnemonic: string, userId: number) => {
+  const existingMnemonic = await getMnemonic(userId);
+
   if (existingMnemonic !== null && existingMnemonic !== mnemonic) {
     throw new Error('Trying to overwrite existing mnemonic');
   }
 
-  await SecureStore.setItemAsync(MNEMONIC_STORAGE_KEY, mnemonic, {
+  const key = getMnemonicKey({ userId, serverId: getServerId() });
+
+  await addSignInAvailableUserId({
+    userId,
+    serverId: getServerId(),
+  });
+
+  await SecureStore.setItemAsync(key, mnemonic, {
     requireAuthentication: REQUIRE_AUTHENTICATION,
   });
 };
@@ -22,15 +109,10 @@ export const saveMnemonic = async (mnemonic: string) => {
 /**
  * Get the mnemonic from secure storage.
  */
-export const getMnemonic = async () => {
-  return await SecureStore.getItemAsync(MNEMONIC_STORAGE_KEY, {
+export const getMnemonic = async (userId: number) => {
+  const key = getMnemonicKey({ userId, serverId: getServerId() });
+
+  return await SecureStore.getItemAsync(key, {
     requireAuthentication: REQUIRE_AUTHENTICATION,
   });
-};
-
-/**
- * Delete the mnemonic from secure storage.
- */
-export const deleteMnemonic = async () => {
-  await SecureStore.deleteItemAsync(MNEMONIC_STORAGE_KEY);
 };

@@ -2,23 +2,33 @@ import { useQuery } from '@tanstack/react-query';
 import userKeys from '@/queryKeys/userKeys';
 import { getSignedInUserId } from '@/lib/utils';
 import { getAuthToken } from '@/lib/auth';
+import { client } from '@/lib/trpc';
 
 const useIsSignedIn = () => {
   return useQuery({
     queryKey: userKeys.isSignedIn,
     queryFn: async () => {
-      const signedInUser = await getSignedInUserId();
+      const signedInUserId = await getSignedInUserId();
       const authToken = await getAuthToken();
 
-      if (!signedInUser) {
+      if (!signedInUserId) {
         console.log('No signed in user');
+        return false;
       }
 
       if (!authToken) {
         console.log('No auth token');
+        return false;
       }
 
-      return !!signedInUser && !!authToken;
+      const user = await client.getUser.query({ userId: signedInUserId });
+
+      if (!user) {
+        console.log('User not found');
+        return false;
+      }
+
+      return true;
     },
   });
 };

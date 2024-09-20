@@ -26,6 +26,7 @@ import getStealthAccounts from './api/getStealthAccounts';
 import getTokenBalancesPerChain from './api/getTokenBalancesPerChain';
 import getTokenBalances from './api/getTokenBalances';
 import getAddressBalancesPerChain from './api/getAddressBalancesPerChain';
+import { getBlockTimestamp } from './utils';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -282,6 +283,24 @@ const appRouter = router({
       return user ? false : true;
     }),
 
+  getBlockTimestamp: publicProcedure
+    .input(
+      z.object({
+        chainId: z.number(),
+        blockNumber: z.number(),
+      })
+    )
+    .query(async opts => {
+      const { input } = opts;
+
+      const timestamp = await getBlockTimestamp(
+        input.blockNumber,
+        input.chainId
+      );
+
+      return timestamp;
+    }),
+
   /**
    * Get user by id
    */
@@ -307,6 +326,7 @@ const appRouter = router({
           id: input.userId,
         },
       });
+
       return user;
     }),
 

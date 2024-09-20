@@ -9,7 +9,7 @@ type Props = {
 };
 
 const FastAvatar = (props: Props) => {
-  const { imageUrl,address,  size } = props;
+  const { imageUrl, address, size } = props;
 
   if (imageUrl) {
     return (
@@ -38,7 +38,7 @@ const FastAvatar = (props: Props) => {
           uri: makeBlockie(address),
         }}
       ></Image>
-    )
+    );
   }
 
   return null;

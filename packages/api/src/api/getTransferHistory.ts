@@ -1,5 +1,4 @@
 import prisma from '@/lib/prisma';
-import { getBlockTimestamp } from '@/utils';
 import { TransferHistoryQueryResult } from '@raylac/shared';
 
 /**
@@ -33,21 +32,11 @@ const getTransferHistory = async ({
       "txPosition" DESC
   `;
 
-  const withTimestamps = await Promise.all(
-    result.map(async transfer => {
-      const timestamp = await getBlockTimestamp(
-        transfer.blockNumber,
-        transfer.chainId
-      );
-
-      return {
-        ...transfer,
-        timestamp,
-      };
-    })
-  );
-
-  return withTimestamps;
+  return result.map(row => ({
+    ...row,
+    // Convert BigInt to Number
+    blockNumber: Number(row.blockNumber),
+  }));
 };
 
 export default getTransferHistory;

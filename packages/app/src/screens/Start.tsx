@@ -1,12 +1,81 @@
+import FastAvatar from '@/components/FastAvatar';
 import StyledButton from '@/components/StyledButton';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import { useSignIn } from '@/hooks/useSIgnIn';
-import useSignOut from '@/hooks/useSignOut';
+import useSignInAvailableUsers from '@/hooks/useSignInAvailableUsers';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { deleteMnemonic, getMnemonic } from '@/lib/key';
-import { useCallback, useEffect, useState } from 'react';
+import { getMnemonic } from '@/lib/key';
+import { theme } from '@/lib/theme';
+import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Image, View } from 'react-native';
+import { Image, ScrollView, Text, View } from 'react-native';
+import { Hex } from 'viem';
+import { publicKeyToAddress } from 'viem/accounts';
+
+interface SignInAsUserListItemProps {
+  onPress: () => void;
+  user: {
+    spendingPubKey: Hex;
+    displayName: string;
+    username: string;
+    profileImage?: string;
+  };
+}
+
+const SignInAsUserListItem = (props: SignInAsUserListItemProps) => {
+  const { onPress, user } = props;
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '90%',
+      }}
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
+        <FastAvatar
+          address={publicKeyToAddress(user.spendingPubKey)}
+          size={40}
+          imageUrl={user.profileImage}
+        ></FastAvatar>
+        <View
+          style={{
+            flexDirection: 'column',
+            marginLeft: 8,
+          }}
+        >
+          <Text
+            style={{
+              color: theme.text,
+            }}
+          >
+            {user.displayName}
+          </Text>
+          <Text
+            style={{
+              color: theme.text,
+              opacity: 0.6,
+              fontSize: 12,
+            }}
+          >
+            @{user.username}
+          </Text>
+        </View>
+      </View>
+      <StyledButton
+        variant="underline"
+        title="Sign in"
+        onPress={onPress}
+      ></StyledButton>
+    </View>
+  );
+};
 
 /**
  * This screen in shown when the user is not signed in.
@@ -17,60 +86,30 @@ const Start = () => {
   const navigation = useTypedNavigation();
   const { data: isSignedIn } = useIsSignedIn();
   const { mutateAsync: signIn } = useSignIn();
-  const { mutateAsync: signOut } = useSignOut();
-  const [isSigningIn, setIsSigningIn] = useState(false);
-  const [mnemonicExists, setMnemonicExists] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      const mnemonic = await getMnemonic();
-      setMnemonicExists(!!mnemonic);
-    })();
+  const { data: signInAvailableUsers } = useSignInAvailableUsers();
+
+  const onCreateAccountPress = useCallback(() => {
+    navigation.navigate('SignUp');
+  }, [navigation]);
+
+  const onSignInPress = useCallback(async (userId: number) => {
+    const mnemonic = await getMnemonic(userId);
+
+    if (!mnemonic) {
+      throw new Error('Mnemonic not found');
+    }
+
+    await signIn({ mnemonic });
   }, []);
 
-  const onSignInPress = useCallback(async () => {
-    setIsSigningIn(true);
-    const mnemonic = await getMnemonic();
-
-    if (mnemonic) {
-      // If mnemonic exists, sign in with it
-      await signIn({ mnemonic });
-      setIsSigningIn(false);
+  useEffect(() => {
+    if (isSignedIn) {
       navigation.navigate('Tabs', {
         screen: 'Home',
       });
-    } else {
-      navigation.navigate('SignIn');
-      setIsSigningIn(false);
     }
-  }, [setIsSigningIn]);
-
-  const onDeletePress = useCallback(async () => {
-    Alert.alert('Delete account', '', [
-      {
-        text: 'Cancel',
-        onPress: () => {},
-        style: 'cancel',
-      },
-      {
-        text: 'Delete',
-        onPress: async () => {
-          await signOut();
-          await deleteMnemonic();
-          navigation.navigate('Start');
-        },
-        style: 'destructive',
-      },
-    ]);
-  }, []);
-
-  if (isSignedIn) {
-    navigation.navigate('Tabs', {
-      screen: 'Home',
-    });
-
-    return null;
-  }
+  }, [isSignedIn]);
 
   return (
     <View
@@ -78,68 +117,36 @@ const Start = () => {
         flex: 1,
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
       }}
     >
-      <View
-        style={{
-          height: '62%',
-          alignItems: 'center',
-          justifyContent: 'center',
+      <ScrollView
+        contentContainerStyle={{
+          rowGap: 8,
         }}
       >
-        <Image
-          source={require('../../assets/adaptive-icon.png')}
-          style={{
-            width: 240,
-            height: 240,
-          }}
-        ></Image>
-      </View>
-      <View
+        {signInAvailableUsers?.map(user => (
+          <SignInAsUserListItem
+            key={user.id}
+            user={{
+              spendingPubKey: user.spendingPubKey as Hex,
+              displayName: user.name,
+              username: user.username,
+              profileImage: user.profileImage,
+            }}
+            onPress={() => onSignInPress(user.id)}
+          ></SignInAsUserListItem>
+        ))}
+      </ScrollView>
+      <StyledButton
+        title={t('createAccount')}
+        onPress={onCreateAccountPress}
         style={{
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          rowGap: 24,
-          paddingBottom: 92,
-          width: '100%',
+          width: '90%',
+          height: 48,
+          marginBottom: 32,
         }}
-      >
-        <StyledButton
-          title={t('signIn')}
-          onPress={onSignInPress}
-          isLoading={isSigningIn}
-          style={{
-            width: '90%',
-            height: 48,
-          }}
-        ></StyledButton>
-        {mnemonicExists ? (
-          <StyledButton
-            title={t('deleteAccount')}
-            variant="outline"
-            style={{
-              height: 48,
-              width: '90%',
-            }}
-            onPress={onDeletePress}
-          ></StyledButton>
-        ) : (
-          // Don't show the "Create account" button if the mnemonic exists
-          <StyledButton
-            title={t('createAccount')}
-            onPress={() => {
-              navigation.navigate('SignUp');
-            }}
-            variant="outline"
-            style={{
-              justifyContent: 'center',
-              width: '90%',
-              height: 48,
-            }}
-          ></StyledButton>
-        )}
-      </View>
+      ></StyledButton>
     </View>
   );
 };

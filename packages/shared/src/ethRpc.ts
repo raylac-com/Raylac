@@ -86,8 +86,7 @@ export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
 
 export const getQuickNodeRpcUrl = ({ chain }: { chain: Chain }) => {
   const apiKey =
-    process.env.QUICKNODE_API_KEY ||
-    process.env.EXPO_PUBLIC_QUICKNODE_API_KEY;
+    process.env.QUICKNODE_API_KEY || process.env.EXPO_PUBLIC_QUICKNODE_API_KEY;
 
   if (!apiKey) {
     throw new Error('QUICKNODE_API_KEY is not set');

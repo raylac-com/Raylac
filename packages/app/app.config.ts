@@ -1,12 +1,10 @@
 import type { ExpoConfig } from '@expo/config';
 
-//const IS_DEV = process.env.APP_VARIANT === 'development';
-const IS_DEV = true;
-// console.log('process.env.APP_VARIANT', process.env.APP_VARIANT);
+const IS_DEV = process.env.APP_VARIANT === 'development';
 
 const config: ExpoConfig = {
   name: IS_DEV ? 'Raylac (dev)' : 'Raylac',
-  slug: 'sutori',
+  slug: 'raylac',
   version: '1.0.0',
   orientation: 'portrait',
   icon: IS_DEV ? './assets/icon-dev.png' : './assets/icon.png',
@@ -44,7 +42,7 @@ const config: ExpoConfig = {
       '@sentry/react-native/expo',
       {
         organization: 'raylac',
-        project: 'raylac',
+        project: 'raylac-app',
       },
     ],
     [
@@ -63,7 +61,7 @@ const config: ExpoConfig = {
   ],
   extra: {
     eas: {
-      projectId: '8c208206-1d5b-45a4-9cf7-724b76fde97b',
+      projectId: 'f1bcc97f-3192-41c1-a32e-5b1dd12049cd',
     },
   },
   owner: 'raylac',

@@ -8,7 +8,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "SENTRY_AUTH_TOKEN": "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",
+        "SENTRY_AUTH_TOKEN": "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",
         "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
         "EXPO_PUBLIC_ALCHEMY_API_KEY": "UfWNqNlX3Wq4oJtE0iObWWgcenwyICcp",
         "EXPO_PUBLIC_CHAIN": "base-sepolia",
@@ -18,29 +18,24 @@
     "preview": {
       "distribution": "internal",
       "env": {
-        "SENTRY_AUTH_TOKEN": "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",
+        "SENTRY_AUTH_TOKEN": "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",
         "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
         "EXPO_PUBLIC_ALCHEMY_API_KEY": "UfWNqNlX3Wq4oJtE0iObWWgcenwyICcp",
-        "EXPO_PUBLIC_CHAIN": "base-mainnet"
+        "EXPO_PUBLIC_CHAIN": "base-mainnet",
+        "APP_VARIANT": "preview"
       }
     },
     "production": {
       "env": {
-        "SENTRY_AUTH_TOKEN": "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",
+        "SENTRY_AUTH_TOKEN": "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",
         "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
         "EXPO_PUBLIC_ALCHEMY_API_KEY": "UfWNqNlX3Wq4oJtE0iObWWgcenwyICcp",
-        "EXPO_PUBLIC_CHAIN": "base-mainnet"
+        "EXPO_PUBLIC_CHAIN": "base-mainnet",
+        "APP_VARIANT": "production"
       },
       "autoIncrement": true
     }
   },
   "submit": {
-    "production": {
-      "ios": {
-        "appleId": "dan00300@icloud.com",
-        "ascAppId": "6523419670",
-        "appleTeamId": "D7H78Z8FX2"
-      }
-    }
   }
 }

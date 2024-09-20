@@ -1,48 +1,15 @@
-import { HDKey, hdKeyToAccount } from 'viem/accounts';
+import { privateKeyToAccount } from 'viem/accounts';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { trpc } from '@/lib/trpc';
 import { Buffer } from 'buffer';
 import * as bip39 from 'bip39';
 import userKeys from '@/queryKeys/userKeys';
-import { getMnemonic, saveMnemonic } from '@/lib/key';
-import { Hex } from 'viem';
+import { saveMnemonic } from '@/lib/key';
 import { saveAuthToken } from '@/lib/auth';
-import { saveSignedInUser } from '@/lib/utils';
+import { setSignedInUser } from '@/lib/utils';
+import { getSpendingPrivKey, getViewingPrivKey } from '@raylac/shared';
 
 globalThis.Buffer = Buffer;
-
-const hdKeyToPrivateKey = (hdKey: HDKey): Hex => {
-  return `0x${Buffer.from(hdKey.privateKey).toString('hex')}`;
-};
-
-const initAccount = async (): Promise<{
-  spendingPubKey: Hex;
-  viewingPrivKey: Hex;
-}> => {
-  const mnemonicInStore = await getMnemonic();
-
-  const mnemonic = mnemonicInStore ? mnemonicInStore : bip39.generateMnemonic();
-  const seed = bip39.mnemonicToSeedSync(mnemonic);
-
-  const hdKey = HDKey.fromMasterSeed(seed);
-
-  const spendingAccount = hdKeyToAccount(hdKey, {
-    accountIndex: 0,
-  });
-
-  const viewingAccount = hdKeyToAccount(hdKey, {
-    accountIndex: 1,
-  });
-
-  const viewingPrivKey = hdKeyToPrivateKey(viewingAccount.getHdKey());
-
-  await saveMnemonic(mnemonic);
-
-  return {
-    spendingPubKey: spendingAccount.publicKey,
-    viewingPrivKey,
-  };
-};
 
 const useSignUp = () => {
   const { mutateAsync: signUp } = trpc.signUp.useMutation();
@@ -58,7 +25,12 @@ const useSignUp = () => {
       inviteCode: string;
       username: string;
     }) => {
-      const { spendingPubKey, viewingPrivKey } = await initAccount();
+      const mnemonic = bip39.generateMnemonic();
+
+      const spendingPubKey = privateKeyToAccount(
+        getSpendingPrivKey(mnemonic)
+      ).publicKey;
+      const viewingPrivKey = getViewingPrivKey(mnemonic);
 
       const { userId, token } = await signUp({
         name,
@@ -68,7 +40,8 @@ const useSignUp = () => {
         viewingPrivKey,
       });
 
-      await saveSignedInUser(userId);
+      await saveMnemonic(mnemonic, userId);
+      await setSignedInUser(userId);
       await saveAuthToken(token);
 
       await queryClient.invalidateQueries({

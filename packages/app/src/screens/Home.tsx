@@ -114,7 +114,7 @@ const HomeScreen = () => {
     isRefetching: isRefetchingBalance,
   } = trpc.getTokenBalances.useQuery(null, {
     enabled: isSignedIn,
-    // throwOnError: false, // Don't throw on error for this particular query in all environments
+    throwOnError: false, // Don't throw on error for this particular query in all environments
     refetchOnWindowFocus: true,
   });
 
@@ -261,7 +261,9 @@ const HomeScreen = () => {
             <TransferHistoryListItem
               key={i}
               tx={tx as TransferHistoryQueryResult}
-              type={tx.fromUserId === signedInUser?.id ? 'outgoing' : 'incoming'}
+              type={
+                tx.fromUserId === signedInUser?.id ? 'outgoing' : 'incoming'
+              }
             />
           ))}
           {txHistory && txHistory.length > NUM_TRANSFERS_TO_SHOW ? (
