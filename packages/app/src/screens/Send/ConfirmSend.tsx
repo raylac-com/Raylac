@@ -1,3 +1,4 @@
+import FastAvatar from '@/components/FastAvatar';
 import StyledButton from '@/components/StyledButton';
 import useSend from '@/hooks/useSend';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -11,6 +12,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
+import { Hex } from 'viem';
+import { publicKeyToAddress } from 'viem/accounts';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'ConfirmSend'>;
 
@@ -55,19 +58,33 @@ const ConfirmSend = ({ route }: Props) => {
       style={{
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
         padding: 24,
-        marginTop: -60,
       }}
     >
       <View
         style={{
           flexDirection: 'column',
+          alignItems: 'center',
           rowGap: 12,
+          marginTop: 48,
         }}
       >
+        <FastAvatar
+          address={
+            typeof recipientUserOrAddress === 'string'
+              ? recipientUserOrAddress
+              : publicKeyToAddress(recipientUserOrAddress.spendingPubKey as Hex)
+          }
+          imageUrl={
+            typeof recipientUserOrAddress === 'string'
+              ? undefined
+              : recipientUserOrAddress.profileImage
+          }
+          size={64}
+        ></FastAvatar>
         <Text
           style={{
+            marginTop: 24,
             fontSize: 28,
             fontWeight: 'bold',
             textAlign: 'center',
@@ -97,7 +114,7 @@ const ConfirmSend = ({ route }: Props) => {
           onSendPress();
         }}
         style={{
-          marginTop: 24,
+          marginTop: 48,
         }}
       ></StyledButton>
     </View>

@@ -11,9 +11,11 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import * as chains from 'viem/chains';
 import supportedChains from '@raylac/shared/out/supportedChains';
-import { parseUnits } from 'viem';
+import { Hex, parseUnits } from 'viem';
 import { trpc } from '@/lib/trpc';
 import { formatAmount } from '@raylac/shared';
+import FastAvatar from '@/components/FastAvatar';
+import { publicKeyToAddress } from 'viem/accounts';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'EnterSendAmount'>;
 
@@ -74,7 +76,6 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
     : BigInt(0);
 
   const onNextClick = useCallback(async () => {
-    console.log({ outputChain });
     navigation.navigate('ConfirmSend', {
       recipientUserOrAddress,
       amount: parsedInputAmount.toString(),
@@ -92,9 +93,9 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
       ? parseUnits(amount, inputTokenData.decimals) <= inputTokenBalance
       : null;
 
-  const canGoNext = isBalanceSufficient;
+  const canGoNext = isBalanceSufficient && parsedInputAmount > BigInt(0);
 
-  const recipient =
+  const recipientDisplayName =
     typeof recipientUserOrAddress === 'string'
       ? shortenAddress(recipientUserOrAddress)
       : recipientUserOrAddress.name;
@@ -109,6 +110,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
     >
       <View
         style={{
+          marginTop: 16,
           flexDirection: 'row',
           alignItems: 'flex-start',
           columnGap: 8,
@@ -124,9 +126,9 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
             }
 
             // Regex to match floating-point numbers (allowing one decimal point)
-//            if (/^\d*\.?\d*$/.test(_amount)) {
-//              setAmount(_amount);
-//            }
+            //            if (/^\d*\.?\d*$/.test(_amount)) {
+            //              setAmount(_amount);
+            //            }
 
             if (_amount === '') {
               setAmount(null);
@@ -192,19 +194,43 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
         style={{
           alignItems: 'center',
           flexDirection: 'row',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           width: '82%',
           zIndex: 1000,
           marginTop: 24,
         }}
       >
-        <Text
+        <View
           style={{
-            color: theme.text,
+            flexDirection: 'row',
+            alignItems: 'center',
+            columnGap: 8,
+            marginRight: 12,
           }}
         >
-          Recipient receives on
-        </Text>
+          <FastAvatar
+            imageUrl={
+              typeof recipientUserOrAddress === 'string'
+                ? null
+                : recipientUserOrAddress.profileImage
+            }
+            address={
+              typeof recipientUserOrAddress === 'string'
+                ? recipientUserOrAddress
+                : publicKeyToAddress(
+                    recipientUserOrAddress.spendingPubKey as Hex
+                  )
+            }
+            size={24}
+          ></FastAvatar>
+          <Text
+            style={{
+              color: theme.text,
+            }}
+          >
+            {recipientDisplayName} receives on
+          </Text>
+        </View>
         <DropDownPicker
           open={outputChainPickerOpen}
           value={outputChain}
@@ -243,16 +269,6 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           {t('insufficientBalance')}
         </Text>
       ) : null}
-      <Text
-        style={{
-          color: theme.text,
-          fontSize: 14,
-          marginTop: 8,
-          opacity: 0.6,
-        }}
-      >
-        {t('sendToUser', { name: recipient })}
-      </Text>
       <StyledButton
         style={{
           marginTop: 24,
