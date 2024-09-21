@@ -13,6 +13,7 @@ import { publicKeyToAddress } from 'viem/accounts';
 import { Hex, isAddress } from 'viem';
 import { useTranslation } from 'react-i18next';
 import { shortenAddress } from '@/lib/utils';
+// import useEnsName from '@/hooks/useEnsName';
 
 interface UserListItemProps {
   user: RouterOutput['getUsers'][number];
@@ -74,6 +75,8 @@ interface AddressListItemProps {
 
 const AddressListItem = (props: AddressListItemProps) => {
   const { onPress, address } = props;
+
+  // const { data: ensName } = useEnsName(address);
 
   return (
     <Pressable
@@ -154,6 +157,8 @@ const SelectRecipient = ({ navigation }: Props) => {
       setInputAddress(null);
     }
   }, [searchInput]);
+
+  console.log({ inputAddress });
 
   const usersToRender = users
     ?.filter(

@@ -7,6 +7,7 @@ import { Hex } from 'viem';
 import { TransferHistoryQueryResult, formatAmount } from '@raylac/shared';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { trpc } from '@/lib/trpc';
+// import useEnsName from '@/hooks/useEnsName';
 
 /**
  *  Get the token metadata for a given token ID
@@ -23,8 +24,6 @@ interface TransferHistoryListItemProps {
 const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
   const { tx, type } = props;
 
-  const isFromAddress = typeof tx.from === 'string';
-
   const { data: blockTimestamp } = trpc.getBlockTimestamp.useQuery({
     chainId: tx.chainId,
     blockNumber: tx.blockNumber,
@@ -40,6 +39,8 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
     ? (tokenPrice * parseFloat(formattedAmount)).toFixed(2)
     : '';
   */
+
+  // const { data: ensName } = useEnsName(tx.from as Hex);
 
   return (
     <View
@@ -65,15 +66,13 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
             columnGap: 8,
           }}
         >
-          {isFromAddress && (
-            <FastAvatar address={tx.from as Hex} size={36}></FastAvatar>
-          )}
+          <FastAvatar address={tx.from as Hex} size={36}></FastAvatar>
           <Text
             style={{
               color: theme.text,
             }}
           >
-            {isFromAddress && shortenAddress(tx.from as Hex)}
+            {shortenAddress(tx.from as Hex)}
           </Text>
         </View>
         <View>
