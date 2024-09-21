@@ -137,8 +137,9 @@ const appRouter = router({
 
   getAddressBalancesPerChain: authedProcedure.query(async opts => {
     const userId = opts.ctx.userId;
+    const isDevMode = opts.ctx.isDevMode;
 
-    const balances = await getAddressBalancesPerChain({ userId });
+    const balances = await getAddressBalancesPerChain({ userId, isDevMode });
     return balances;
   }),
 
@@ -147,8 +148,9 @@ const appRouter = router({
    */
   getTokenBalances: authedProcedure.query(async opts => {
     const userId = opts.ctx.userId;
+    const isDevMode = opts.ctx.isDevMode;
 
-    const balances = await getTokenBalances({ userId });
+    const balances = await getTokenBalances({ userId, isDevMode });
     return balances;
   }),
 
@@ -168,8 +170,9 @@ const appRouter = router({
    */
   getTxHistory: authedProcedure.query(async opts => {
     const userId = opts.ctx.userId;
+    const isDevMode = opts.ctx.isDevMode;
 
-    const transfers = await getTransferHistory({ userId });
+    const transfers = await getTransferHistory({ userId, isDevMode });
 
     return transfers;
   }),
@@ -322,6 +325,7 @@ const appRouter = router({
           profileImage: true,
           spendingPubKey: true,
           viewingPubKey: true,
+          devModeEnabled: true,
         },
         where: {
           id: input.userId,

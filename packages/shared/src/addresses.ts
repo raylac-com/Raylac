@@ -12,7 +12,7 @@ export const ACCOUNT_IMPL_ADDRESS =
   '0x0C1dC4F8Def401c3DeE76Cdef590BB99F63b3015';
 
 export const ACCOUNT_FACTORY_ADDRESS =
-  '0xB684AfF834189094FD28a45323Ee3dc70A276EbF';
+  '0x80eBd03E432B44a3DFE98c0A3bBD5b0c1F0269Cf';
 
 export const RAYLAC_PAYMASTER_ADDRESS =
   '0xCa7bEdEcCd6FBD68d0043bb4c4B2405B4948BC8c';
@@ -23,7 +23,7 @@ export const ERC5564_ANNOUNCER_ADDRESS =
   '0x55649E01B5Df198D18D95b5cc5051630cfD45564';
 
 export const ACCOUNT_IMPL_DEPLOYED_BLOCK: {
-    [key: number]: bigint;
+  [key: number]: bigint;
 } = {
   [baseSepolia.id]: BigInt(15433556),
 };

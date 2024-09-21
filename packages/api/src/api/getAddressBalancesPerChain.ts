@@ -1,11 +1,23 @@
 import prisma from '@/lib/prisma';
-import { AccountBalancePerChainQueryResult } from '@raylac/shared';
+import { Prisma } from '@prisma/client';
+import {
+  AccountBalancePerChainQueryResult,
+  getChainsForMode,
+} from '@raylac/shared';
 
 /**
  * Get the balances of tokens for all chains and supported tokens
  * for a user
  */
-const getAddressBalancesPerChain = async ({ userId }: { userId: number }) => {
+const getAddressBalancesPerChain = async ({
+  userId,
+  isDevMode,
+}: {
+  userId: number;
+  isDevMode: boolean;
+}) => {
+  const chainIds = getChainsForMode(isDevMode).map(chain => chain.id);
+
   const accountBalancePerChain = await prisma.$queryRaw<
     AccountBalancePerChainQueryResult[]
   >`
@@ -26,6 +38,7 @@ const getAddressBalancesPerChain = async ({ userId }: { userId: number }) => {
         FROM
             "TransferTrace"
         WHERE
+          AND "chainId" in (${Prisma.join(chainIds)})
             "from" in(
                 SELECT
                     address FROM user_addresses)
@@ -43,6 +56,7 @@ const getAddressBalancesPerChain = async ({ userId }: { userId: number }) => {
         FROM
             "TransferTrace"
         WHERE
+            "chainId" in (${Prisma.join(chainIds)}) AND
             "to" in(
                 SELECT
                     address FROM user_addresses)

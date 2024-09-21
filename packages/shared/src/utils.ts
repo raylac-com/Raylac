@@ -8,6 +8,7 @@ import { Network } from 'alchemy-sdk';
 import supportedTokens, { NATIVE_TOKEN_ADDRESS } from './supportedTokens';
 import { getPublicClient } from './ethRpc';
 import { getERC20TokenBalance } from '.';
+import supportedChains from './supportedChains';
 
 export const encodeERC5564Metadata = ({
   viewTag,
@@ -308,4 +309,13 @@ export const toCoingeckoTokenId = (tokenId: string) => {
     default:
       throw new Error(`Unsupported Coingecko token ID: ${tokenId}`);
   }
+};
+
+/**
+ * Get the chains to use based on the mode (dev or prod)
+ */
+export const getChainsForMode = (isDevMode: boolean) => {
+  return isDevMode
+    ? supportedChains.filter(chain => chain.testnet)
+    : supportedChains.filter(chain => !chain.testnet);
 };

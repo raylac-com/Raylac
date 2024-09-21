@@ -9,13 +9,12 @@ import { useTranslation } from 'react-i18next';
 import { Image, Text, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
-import * as chains from 'viem/chains';
-import supportedChains from '@raylac/shared/out/supportedChains';
 import { Hex, parseUnits } from 'viem';
 import { trpc } from '@/lib/trpc';
-import { formatAmount } from '@raylac/shared';
+import { formatAmount, getChainsForMode } from '@raylac/shared';
 import FastAvatar from '@/components/FastAvatar';
 import { publicKeyToAddress } from 'viem/accounts';
+import useSignedInUser from '@/hooks/useSignedInUser';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'EnterSendAmount'>;
 
@@ -24,7 +23,11 @@ const containsNonNumberChars = (str: string): boolean => {
 };
 
 const EnterSendAmount = ({ navigation, route }: Props) => {
-  const [outputChain, setOutputChain] = useState(chains.base.id);
+  const { data: signedInUser } = useSignedInUser();
+
+  const chains = getChainsForMode(signedInUser?.devModeEnabled || false);
+
+  const [outputChain, setOutputChain] = useState(chains[0].id);
   const [amount, setAmount] = useState<string>('');
 
   const { data: tokenBalances } = trpc.getTokenBalances.useQuery();
@@ -245,7 +248,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           containerStyle={{
             width: 120,
           }}
-          items={supportedChains.map(chain => ({
+          items={chains.map(chain => ({
             label: chain.name,
             value: chain.id,
           }))}

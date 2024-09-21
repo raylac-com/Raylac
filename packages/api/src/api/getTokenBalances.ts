@@ -1,11 +1,21 @@
 import prisma from '@/lib/prisma';
-import { TokenBalanceQueryResult } from '@raylac/shared';
+import { Prisma } from '@prisma/client';
+import { getChainsForMode, TokenBalanceQueryResult } from '@raylac/shared';
 
 /**
  * Get the balances of tokens for all chains and supported tokens
  * for a user
  */
-const getTokenBalances = async ({ userId }: { userId: number }) => {
+const getTokenBalances = async ({
+  userId,
+  isDevMode,
+}: {
+  userId: number;
+  isDevMode: boolean;
+}) => {
+  const chainIds = getChainsForMode(isDevMode).map(chain => chain.id);
+  console.log('chainIds', chainIds);
+
   const tokenBalancePerChain = await prisma.$queryRaw<
     TokenBalanceQueryResult[]
   >`
@@ -27,6 +37,7 @@ const getTokenBalances = async ({ userId }: { userId: number }) => {
                 "from" in(
                     SELECT
                         address FROM user_addresses)
+                AND "chainId" in (${Prisma.join(chainIds)})
             GROUP BY
                 "tokenId"
         ),
@@ -40,6 +51,7 @@ const getTokenBalances = async ({ userId }: { userId: number }) => {
                 "to" in(
                     SELECT
                         address FROM user_addresses)
+                AND "chainId" in (${Prisma.join(chainIds)})
             GROUP BY
                 "tokenId"
         )

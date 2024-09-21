@@ -36,6 +36,8 @@ model User {
   username           String               @unique
   profileImage       String?
   inviteCode         String?              @unique
+  devModeEnabled     Boolean              @default(false)
+  
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   UserStealthAddress UserStealthAddress[]

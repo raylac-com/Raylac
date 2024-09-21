@@ -8,7 +8,7 @@ contract RaylacAccountProxy is Proxy {
   constructor(address impl, bytes memory data) payable {
     implementation = impl;
     (bool success, ) = implementation.delegatecall(data);
-    require(success, 'SutoriAccountProxy: failed to initialize');
+    require(success, 'RaylacAccountProxy: failed to initialize');
   }
 
   function _implementation()

@@ -18,16 +18,16 @@ contract Deploy is Script, Utils {
     // Deploy RaylacAccount
 
     RaylacAccount raylacAccount;
-    address sutoriAccountAddress = getDeployedAddress(
+    address raylacAccountAddress = getDeployedAddress(
       type(RaylacAccount).creationCode,
       ''
     );
 
-    if (sutoriAccountAddress == address(0)) {
+    if (raylacAccountAddress == address(0)) {
       raylacAccount = new RaylacAccount{ salt: 0 }();
       console.log('RaylacAccount deployed at:', address(raylacAccount));
     } else {
-      raylacAccount = RaylacAccount(payable(sutoriAccountAddress));
+      raylacAccount = RaylacAccount(payable(raylacAccountAddress));
       console.log('RaylacAccount already deployed at:', address(raylacAccount));
     }
 
