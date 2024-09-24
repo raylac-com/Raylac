@@ -53,4 +53,7 @@ export type RootStackParamsList = {
 
   // Token stack
   TokenBalance: undefined;
+
+  // Address stack
+  Addresses: undefined;
 };

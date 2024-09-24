@@ -199,6 +199,13 @@ const Account = () => {
           color={theme.text}
         />
         <SettingListItem
+          isFirst
+          icon={<MaterialIcons name="list" size={24} color={theme.gray} />}
+          title={t('addresses')}
+          onPress={() => navigation.navigate('Addresses')}
+          color={theme.text}
+        />
+        <SettingListItem
           icon={<Entypo name="language" size={24} color={theme.gray} />}
           title={t('language')}
           onPress={onChangeLanguagePress}

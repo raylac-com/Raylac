@@ -36,6 +36,7 @@ import UpdateUsername from './screens/AccountInfo/UpdateUsername';
 import useSignedInUser from './hooks/useSignedInUser';
 import useTypedNavigation from './hooks/useTypedNavigation';
 import useSignOut from './hooks/useSignOut';
+import Addresses from './screens/Addresses';
 // import { deleteSignInAvailableUserId } from './lib/key';
 // import { ServerId } from './types';
 
@@ -144,6 +145,15 @@ const Screens = () => {
         options={{
           title: t('title', { ns: 'Start' }),
           headerBackVisible: false,
+        }}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="Addresses"
+        component={Addresses}
+        options={{
+          title: t('title', { ns: 'Addresses' }),
+          headerBackVisible: true,
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
       ></RootStack.Screen>
       <RootStack.Screen

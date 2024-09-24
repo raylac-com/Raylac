@@ -27,6 +27,7 @@
     "confirmSignOutTitle": "Sign out?",
     "confirmSignOut": "Confirm",
     "backupAccount": "Backup account",
+    "addresses": "Addresses",
     "accountInfo": "Account info",
     "cancel": "Cancel",
     "language": "Language"
@@ -113,6 +114,9 @@
     },
     "SelectLanguage": {
       "title": "Select Language"
+    },
+    "Addresses": {
+      "title": "Addresses"
     },
     "common": {
       "next": "Next",

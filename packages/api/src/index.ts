@@ -28,6 +28,7 @@ import getTokenBalances from './api/getTokenBalances';
 import getAddressBalancesPerChain from './api/getAddressBalancesPerChain';
 import { getBlockTimestamp } from './utils';
 import getTokenPrices from './api/getTokenPrices';
+import getUserAddresses from './api/getUserAddresses';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -175,6 +176,14 @@ const appRouter = router({
     const transfers = await getTransferHistory({ userId, isDevMode });
 
     return transfers;
+  }),
+
+  getUserAddresses: authedProcedure.query(async opts => {
+    const userId = opts.ctx.userId;
+
+    const userAddresses = await getUserAddresses({ userId });
+
+    return userAddresses;
   }),
 
   /**
