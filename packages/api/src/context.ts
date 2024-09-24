@@ -17,7 +17,6 @@ export async function createContext(opts: CreateNextContextOptions) {
     : null;
 
   const isDevMode = user ? user.devModeEnabled : false;
-  console.log('isDevMode', isDevMode);
 
   return {
     userId,

@@ -4,7 +4,6 @@ export { default as RaylacAccountAbi } from './abi/RaylacAccountAbi';
 export { default as RaylacAccountProxyAbi } from './abi/RaylacAccountProxyAbi';
 export { default as ERC1967ProxyAbi } from './abi/ERC1967ProxyAbi';
 export { default as RaylacPaymasterAbi } from './abi/RaylacPaymasterAbi';
-export { default as ERC1967Bytecode } from './bytecode/ERC1967Proxy';
 export { default as ERC5564AnnouncerAbi } from './abi/ERC5564AnnouncerAbi';
 export { default as ERC20Abi } from './abi/ERC20Abi';
 export { default as RaylacAccountProxyBytecode } from './bytecode/RaylacAccountProxyBytecode';

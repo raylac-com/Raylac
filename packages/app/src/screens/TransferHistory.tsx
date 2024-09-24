@@ -1,10 +1,12 @@
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
+import useSignedInUser from '@/hooks/useSignedInUser';
 import { trpc } from '@/lib/trpc';
-import { Transfer } from '@raylac/shared';
+import { TransferHistoryQueryResult } from '@raylac/shared';
 import { FlatList, Text, View } from 'react-native';
 
 const TransferHistory = () => {
   const { data: txHistory } = trpc.getTxHistory.useQuery();
+  const { data: signedInUser } = useSignedInUser();
 
   return (
     <View
@@ -17,7 +19,10 @@ const TransferHistory = () => {
       <FlatList
         data={txHistory}
         renderItem={({ item }) => (
-          <TransferHistoryListItem tx={item as Transfer} />
+          <TransferHistoryListItem 
+          tx={item as TransferHistoryQueryResult}
+          type={item.fromUserId === signedInUser?.id ? 'outgoing' : 'incoming'}
+        />
         )}
       />
       {txHistory?.length === 0 ? (

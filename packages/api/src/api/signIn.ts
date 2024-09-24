@@ -4,7 +4,7 @@ import { buildSiweMessage, getPublicClient } from '@raylac/shared';
 import jwt from 'jsonwebtoken';
 import { Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
-import { baseSepolia } from 'viem/chains';
+import { mainnet } from 'viem/chains';
 import { verifySiweMessage } from 'viem/siwe';
 
 /**
@@ -33,7 +33,7 @@ const signIn = async ({
   const userAddress = publicKeyToAddress(user.spendingPubKey as Hex);
 
   const publicClient = getPublicClient({
-    chainId: baseSepolia.id,
+    chainId: mainnet.id,
   });
 
   const message = buildSiweMessage({
@@ -41,6 +41,7 @@ const signIn = async ({
     address: userAddress,
     chainId: publicClient.chain.id,
   });
+  console.log('message', message);
 
   const isSigValid = await verifySiweMessage(publicClient, {
     address: userAddress,

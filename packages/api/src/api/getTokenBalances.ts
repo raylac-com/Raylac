@@ -14,7 +14,6 @@ const getTokenBalances = async ({
   isDevMode: boolean;
 }) => {
   const chainIds = getChainsForMode(isDevMode).map(chain => chain.id);
-  console.log('chainIds', chainIds);
 
   const tokenBalancePerChain = await prisma.$queryRaw<
     TokenBalanceQueryResult[]

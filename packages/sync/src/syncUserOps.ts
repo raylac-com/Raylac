@@ -5,7 +5,7 @@ import {
 } from '@raylac/shared';
 import { getAddress, Hex, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
-import { baseSepolia } from 'viem/chains';
+import { base, baseSepolia } from 'viem/chains';
 import { sleep } from './lib/utils';
 import { Prisma } from '@prisma/client';
 
@@ -14,7 +14,7 @@ const userOpEvent = parseAbiItem(
 );
 
 const syncUserOpsForAddress = async (senderAddress: Hex) => {
-  for (const chainId of [baseSepolia.id]) {
+  for (const chainId of [baseSepolia.id, base.id]) {
     const client = getPublicClient({ chainId });
 
     // Get the latest synched user operation receipt for the address

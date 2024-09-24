@@ -9,7 +9,7 @@ import {
 } from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { privateKeyToAccount } from 'viem/accounts';
-import { baseSepolia } from 'viem/chains';
+import { mainnet } from 'viem/chains';
 
 export const useSignIn = () => {
   const { mutateAsync: signIn } = trpc.signIn.useMutation();
@@ -24,7 +24,7 @@ export const useSignIn = () => {
       const issuedAt = new Date();
 
       const publicClient = getPublicClient({
-        chainId: baseSepolia.id,
+        chainId: mainnet.id,
       });
 
       const message = buildSiweMessage({
@@ -32,6 +32,8 @@ export const useSignIn = () => {
         address: spendingAccount.address,
         chainId: publicClient.chain.id,
       });
+
+      console.log('message', message);
 
       // Sign in and get the JWT token
       const { userId, token } = await signIn({

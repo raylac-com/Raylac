@@ -38,7 +38,7 @@ const getAddressBalancesPerChain = async ({
         FROM
             "TransferTrace"
         WHERE
-          AND "chainId" in (${Prisma.join(chainIds)})
+        "chainId" in (${Prisma.join(chainIds)}) AND
             "from" in(
                 SELECT
                     address FROM user_addresses)

@@ -25,6 +25,7 @@ import { getSenderAddress, recoveryStealthPrivKey } from './stealth';
 import { Alchemy } from 'alchemy-sdk';
 import { toAlchemyNetwork } from './utils';
 import { signMessage } from 'viem/accounts';
+import { getPublicClient } from './ethRpc';
 
 /**
  * Get the init code for creating a stealth contract account
@@ -105,24 +106,40 @@ export const buildUserOp = async ({
   });
 
   const feeData = await alchemy.core.getFeeData();
+//  console.log("alchemy network", alchemy.config.network)
 
-  console.log('Fee data:', feeData.lastBaseFeePerGas);
-  const baseFee  = feeData.lastBaseFeePerGas!.toBigInt();
+  const baseFee = feeData.lastBaseFeePerGas!.toBigInt();
+  console.log('Base fee:', baseFee);
 
-//  const maxFeePerGas = feeData.maxFeePerGas!.toBigInt();
-  const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas!.toBigInt();
 
+  const maxPriorityFeePerGas = await rundlerMaxPriorityFeePerGas({client:getPublicClient({
+    chainId: client.chain.id
+  })});
+
+
+  //  const maxFeePerGas = feeData.maxFeePerGas!.toBigInt();
+//  const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas!.toBigInt();
+  console.log('Max priority fee per gas:', maxPriorityFeePerGas);
+
+  /*
   const maxPriorityFeePerGasBuffed = increaseByPercent({
     value: maxPriorityFeePerGas,
     percent: 20,
   });
+  */
 
+  const maxFeePerGas = baseFee + maxPriorityFeePerGas;
+
+  /*
   const baseFeeBuffed = increaseByPercent({
     value: baseFee,
     percent: 20,
   });
+  */
 
-  const maxFeePerGasBuffed = baseFeeBuffed + maxPriorityFeePerGasBuffed;
+//  const maxFeePerGasBuffed = baseFeeBuffed + maxPriorityFeePerGasBuffed;
+
+//  console.log('Max priority fee per gas buffed:', maxPriorityFeePerGasBuffed);
 
   const userOp: UserOperation = {
     sender: senderAddress,
@@ -132,8 +149,8 @@ export const buildUserOp = async ({
     callGasLimit: toHex(BigInt(0)),
     verificationGasLimit: toHex(BigInt(0)),
     preVerificationGas: toHex(BigInt(0)),
-    maxFeePerGas: toHex(maxFeePerGasBuffed),
-    maxPriorityFeePerGas: toHex(maxPriorityFeePerGasBuffed),
+    maxFeePerGas: toHex(maxFeePerGas),
+    maxPriorityFeePerGas: toHex(maxPriorityFeePerGas),
     paymasterAndData: '0x',
     // Dummy signature as specified by Alchemy https://docs.alchemy.com/reference/eth-estimateuseroperationgas
     signature:
@@ -605,6 +622,7 @@ export const bulkSignUserOps = async ({
 }): Promise<UserOperation[]> => {
   const signedUserOps = await Promise.all(
     userOps.map(async userOp => {
+      console.log({ stealthAccounts, sender: userOp.sender });
       const stealthAccount = stealthAccounts.find(
         account => account.address === userOp.sender
       );

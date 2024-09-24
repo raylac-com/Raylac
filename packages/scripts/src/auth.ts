@@ -1,6 +1,6 @@
 import { buildSiweMessage, getSpendingPrivKey } from '@raylac/shared';
 import { privateKeyToAccount } from 'viem/accounts';
-import { baseSepolia } from 'viem/chains';
+import { mainnet } from 'viem/chains';
 import { client } from './rpc';
 
 export const signInWithMnemonic = async ({
@@ -17,7 +17,7 @@ export const signInWithMnemonic = async ({
   const message = buildSiweMessage({
     issuedAt,
     address: spendingAccount.address,
-    chainId: baseSepolia.id,
+    chainId: mainnet.id,
   });
 
   // Sign in and get the JWT token

@@ -14,6 +14,7 @@ const supportedTokens: SupportedToken[] = [
     logoURI: 'https://static.alchemyapi.io/images/assets/3408.png',
     addresses: [
       // https://developers.circle.com/stablecoins/docs/usdc-on-test-networks
+      /*
       {
         address: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
         chain: chains.mainnet,
@@ -22,10 +23,12 @@ const supportedTokens: SupportedToken[] = [
         address: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85',
         chain: chains.optimism,
       },
+      */
       {
         address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
         chain: chains.base,
       },
+      /*
       {
         address: '0x036CbD53842c5426634e7929541eC2318f3dCF7e',
         chain: chains.baseSepolia,
@@ -38,6 +41,7 @@ const supportedTokens: SupportedToken[] = [
         address: '0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d',
         chain: chains.arbitrumSepolia,
       },
+      */
     ],
   },
   /*
