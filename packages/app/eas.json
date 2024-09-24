@@ -11,7 +11,6 @@
         "SENTRY_AUTH_TOKEN": "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",
         "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
         "EXPO_PUBLIC_ALCHEMY_API_KEY": "UfWNqNlX3Wq4oJtE0iObWWgcenwyICcp",
-        "EXPO_PUBLIC_CHAIN": "base-sepolia",
         "APP_VARIANT": "development"
       }
     },
@@ -21,7 +20,6 @@
         "SENTRY_AUTH_TOKEN": "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",
         "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
         "EXPO_PUBLIC_ALCHEMY_API_KEY": "UfWNqNlX3Wq4oJtE0iObWWgcenwyICcp",
-        "EXPO_PUBLIC_CHAIN": "base-mainnet",
         "APP_VARIANT": "preview"
       }
     },
@@ -30,7 +28,6 @@
         "SENTRY_AUTH_TOKEN": "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",
         "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
         "EXPO_PUBLIC_ALCHEMY_API_KEY": "UfWNqNlX3Wq4oJtE0iObWWgcenwyICcp",
-        "EXPO_PUBLIC_CHAIN": "base-mainnet",
         "APP_VARIANT": "production"
       },
       "autoIncrement": true

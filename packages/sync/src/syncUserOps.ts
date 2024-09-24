@@ -5,16 +5,16 @@ import {
 } from '@raylac/shared';
 import { getAddress, Hex, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
-import { base, baseSepolia } from 'viem/chains';
 import { sleep } from './lib/utils';
 import { Prisma } from '@prisma/client';
+import supportedChains from '@raylac/shared/out/supportedChains';
 
 const userOpEvent = parseAbiItem(
   'event UserOperationEvent(bytes32 indexed userOpHash, address indexed sender, address indexed paymaster, uint256 nonce, bool success, uint256 actualGasCost, uint256 actualGasUsed)'
 );
 
 const syncUserOpsForAddress = async (senderAddress: Hex) => {
-  for (const chainId of [baseSepolia.id, base.id]) {
+  for (const chainId of supportedChains.map(chain => chain.id)) {
     const client = getPublicClient({ chainId });
 
     // Get the latest synched user operation receipt for the address

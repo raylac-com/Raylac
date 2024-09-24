@@ -6,29 +6,11 @@ import {
   http,
 } from 'viem';
 import * as chains from 'viem/chains';
-import { Chain, anvil, base, baseSepolia } from 'viem/chains';
+import { Chain,  } from 'viem/chains';
 import { getChainFromId } from './utils';
 
-const CHAIN = process.env.CHAIN || process.env.EXPO_PUBLIC_CHAIN;
 
-if (CHAIN !== 'base-sepolia' && CHAIN !== 'base-mainnet' && CHAIN !== 'anvil') {
-  throw new Error(`Unknown chain: ${CHAIN}`);
-}
 
-/**
- * Get the canonical chain based on the environment variable `CHAIN`.
- */
-export const getCanonicalChain = (): Chain => {
-  if (CHAIN === 'base-sepolia') {
-    return baseSepolia;
-  } else if (CHAIN === 'base-mainnet') {
-    return base;
-  } else if (CHAIN === 'anvil') {
-    return anvil;
-  } else {
-    throw new Error(`Unknown chain: ${CHAIN}`);
-  }
-};
 
 export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
   const apiKey =

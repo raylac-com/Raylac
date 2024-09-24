@@ -32,7 +32,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
 
   const { data: tokenBalances } = trpc.getTokenBalances.useQuery();
 
-  const [tokenId, setTokenId] = useState('usdc');
+  const [tokenId, setTokenId] = useState('eth');
 
   useEffect(() => {
     if (tokenBalances) {
