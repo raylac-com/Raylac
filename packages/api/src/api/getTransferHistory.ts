@@ -32,6 +32,7 @@ const getTransferHistory = async ({
     WHERE
       (u1. "userId" = ${userId}
       OR u2. "userId" = ${userId})
+      AND u1. "userId" IS DISTINCT FROM u2. "userId"
       AND "chainId" in (${Prisma.join(chainIds)})
     ORDER BY
       "blockNumber" DESC,

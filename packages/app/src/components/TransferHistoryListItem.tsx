@@ -66,13 +66,16 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
             columnGap: 8,
           }}
         >
-          <FastAvatar address={tx.from as Hex} size={36}></FastAvatar>
+          <FastAvatar
+            address={type === 'outgoing' ? (tx.to as Hex) : (tx.from as Hex)}
+            size={36}
+          ></FastAvatar>
           <Text
             style={{
               color: theme.text,
             }}
           >
-            {shortenAddress(tx.from as Hex)}
+            {shortenAddress((type === 'outgoing' ? tx.to : tx.from) as Hex)}
           </Text>
         </View>
         <View>

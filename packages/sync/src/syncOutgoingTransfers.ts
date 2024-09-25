@@ -1,4 +1,5 @@
 import {
+  ENTRY_POINT_ADDRESS,
   ERC20Abi,
   RaylacAccountAbi,
   RaylacAccountTransferData,
@@ -133,17 +134,20 @@ const syncOutgoingTransfers = async () => {
         chainId,
       });
 
-      const callTraces = traces
+      const callsFromEntryPoint = traces
         // Get the `type: call` traces
         .filter(trace => trace.type === 'call')
-        // Get the traces that are possibly function calls
+        // Get the traces that are possibly function calls (i.e., the `input` field is not `0x`)
         .filter(trace => trace.action.input !== '0x')
-        .filter(trace => trace.action.callType === 'call');
+        .filter(trace => trace.action.callType === 'call')
+        .filter(
+          trace => trace.action.from === ENTRY_POINT_ADDRESS.toLowerCase()
+        );
 
-      const decodedTraces = callTraces
+      const decodedTraces = callsFromEntryPoint
         .map(trace => {
           try {
-            // Decode the `data` field of the trace
+            // Decode the `input` field of the trace
             const decoded = decodeFunctionData({
               abi: RaylacAccountAbi,
               data: trace.action.input,
