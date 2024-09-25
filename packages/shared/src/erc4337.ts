@@ -23,7 +23,7 @@ import axios from 'axios';
 import RaylacPaymasterAbi from './abi/RaylacPaymasterAbi';
 import { getSenderAddress, recoveryStealthPrivKey } from './stealth';
 import { Alchemy } from 'alchemy-sdk';
-import { toAlchemyNetwork } from './utils';
+import { increaseByPercent, toAlchemyNetwork } from './utils';
 import { signMessage } from 'viem/accounts';
 import { getPublicClient } from './ethRpc';
 
@@ -40,17 +40,6 @@ export const getInitCode = ({ stealthSigner }: { stealthSigner: Hex }) => {
   const initCode = (ACCOUNT_FACTORY_ADDRESS + factoryData.slice(2)) as Hex;
 
   return initCode;
-};
-
-const increaseByPercent = ({
-  value,
-  percent,
-}: {
-  value: bigint;
-  percent: number;
-}): bigint => {
-  const buff = (value * BigInt(percent)) / BigInt(100);
-  return value + buff;
 };
 
 /**
@@ -106,40 +95,26 @@ export const buildUserOp = async ({
   });
 
   const feeData = await alchemy.core.getFeeData();
-//  console.log("alchemy network", alchemy.config.network)
 
   const baseFee = feeData.lastBaseFeePerGas!.toBigInt();
-  console.log('Base fee:', baseFee);
 
-
-  const maxPriorityFeePerGas = await rundlerMaxPriorityFeePerGas({client:getPublicClient({
-    chainId: client.chain.id
-  })});
-
-
-  //  const maxFeePerGas = feeData.maxFeePerGas!.toBigInt();
-//  const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas!.toBigInt();
-  console.log('Max priority fee per gas:', maxPriorityFeePerGas);
-
-  /*
-  const maxPriorityFeePerGasBuffed = increaseByPercent({
-    value: maxPriorityFeePerGas,
-    percent: 20,
-  });
-  */
-
-  const maxFeePerGas = baseFee + maxPriorityFeePerGas;
-
-  /*
   const baseFeeBuffed = increaseByPercent({
     value: baseFee,
-    percent: 20,
+    percent: 10,
   });
-  */
 
-//  const maxFeePerGasBuffed = baseFeeBuffed + maxPriorityFeePerGasBuffed;
+  const maxPriorityFeePerGas = await rundlerMaxPriorityFeePerGas({
+    client: getPublicClient({
+      chainId: client.chain.id,
+    }),
+  });
 
-//  console.log('Max priority fee per gas buffed:', maxPriorityFeePerGasBuffed);
+  const maxPriorityFeePerGasBuffed = increaseByPercent({
+    value: maxPriorityFeePerGas,
+    percent: 10,
+  });
+
+  const maxFeePerGas = baseFeeBuffed + maxPriorityFeePerGasBuffed;
 
   const userOp: UserOperation = {
     sender: senderAddress,
@@ -150,7 +125,7 @@ export const buildUserOp = async ({
     verificationGasLimit: toHex(BigInt(0)),
     preVerificationGas: toHex(BigInt(0)),
     maxFeePerGas: toHex(maxFeePerGas),
-    maxPriorityFeePerGas: toHex(maxPriorityFeePerGas),
+    maxPriorityFeePerGas: toHex(maxPriorityFeePerGasBuffed),
     paymasterAndData: '0x',
     // Dummy signature as specified by Alchemy https://docs.alchemy.com/reference/eth-estimateuseroperationgas
     signature:
@@ -167,7 +142,7 @@ export const buildUserOp = async ({
   */
 
   const gasEstimation = {
-    preVerificationGas: toHex(120_000),
+    preVerificationGas: toHex(210_000),
     callGasLimit: toHex(50_000),
     // Use a higher gas limit for the verification step if the sender needs to be deployed
     verificationGasLimit: senderCode ? toHex(70_000) : toHex(210_000),
@@ -489,8 +464,6 @@ export const sendUserOperation = async ({
     },
     config
   );
-
-  console.log('Send user operation result:', result.data);
 
   if (result.data.error) {
     throw new Error(JSON.stringify(result.data.error));

@@ -338,7 +338,6 @@ export const buildMultiChainSendRequestBody = async ({
       );
 
       // Build a standard transfer user operation
-      console.log('build standard transfer user op');
       const userOp = await buildTransferUseOp({
         stealthSigner,
         to: consolidateToStealthAccount.address,
@@ -391,7 +390,6 @@ export const buildMultiChainSendRequestBody = async ({
     consolidateToStealthAccount.stealthPubKey
   );
 
-  console.log('build final transfer user op');
   const finalTransferUserOp = await buildTransferUseOp({
     stealthSigner: consolidateAccountStealthSigner,
     tokenAddress: tokenAddressOnOutputChain,

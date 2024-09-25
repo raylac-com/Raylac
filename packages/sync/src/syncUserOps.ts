@@ -4,9 +4,8 @@ import {
   getPublicClient,
   RAYLAC_PAYMASTER_ADDRESS,
 } from '@raylac/shared';
-import { getAddress, parseAbiItem } from 'viem';
+import { parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
-import { Prisma } from '@prisma/client';
 import supportedChains from '@raylac/shared/out/supportedChains';
 import { updateJobLatestSyncedBlock } from './utils';
 import { sleep } from './lib/utils';
@@ -90,75 +89,12 @@ const syncUserOpsByPaymaster = async () => {
       }
     }
 
-    await sleep(10000); // Sleep for 10 seconds
+    await sleep(60000); // Sleep for 60 seconds
   }
 };
 
-const watchUserOpEvents = async () => {
-  // eslint-disable-next-line no-constant-condition
-  await Promise.all(
-    supportedChains.map(async chain => {
-      const chainId = chain.id;
-      const client = getPublicClient({ chainId });
-
-      await client.watchEvent({
-        address: ENTRY_POINT_ADDRESS,
-        event: userOpEvent,
-        args: {
-          paymaster: RAYLAC_PAYMASTER_ADDRESS,
-        },
-        onLogs: async logs => {
-          for (const log of logs) {
-            const {
-              userOpHash,
-              sender,
-              nonce,
-              success,
-              actualGasCost,
-              actualGasUsed,
-              paymaster,
-            } = log.args;
-
-            const data: Prisma.UserOperationCreateInput = {
-              sender: getAddress(sender!),
-              hash: userOpHash!,
-              nonce: nonce!,
-              actualGasCost: actualGasCost!,
-              actualGasUsed: actualGasUsed!,
-              success: success!,
-              chainId: chainId,
-              paymaster: getAddress(paymaster!),
-              Transaction: {
-                connectOrCreate: {
-                  where: {
-                    hash: log.transactionHash,
-                  },
-                  create: {
-                    hash: log.transactionHash,
-                    blockNumber: log.blockNumber,
-                    chainId,
-                  },
-                },
-              },
-            };
-
-            console.log(`Filling UserOperation ${userOpHash}`);
-            await prisma.userOperation.upsert({
-              where: {
-                hash: userOpHash!,
-              },
-              update: data,
-              create: data,
-            });
-          }
-        },
-      });
-    })
-  );
-};
-
 const syncUserOps = async () => {
-  await Promise.all([syncUserOpsByPaymaster(), watchUserOpEvents()]);
+  await Promise.all([syncUserOpsByPaymaster()]);
 };
 
 export default syncUserOps;

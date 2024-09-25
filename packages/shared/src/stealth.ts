@@ -140,8 +140,6 @@ export const generateStealthAddress = (input: {
   const stealthPubKeyHex = projectivePointToHex(stealthPubKey);
 
   const stealthSigner = publicKeyToAddress(stealthPubKeyHex);
-  console.log('stealthPubKeyHex', stealthPubKeyHex);
-  console.log('Stealth signer:', stealthSigner);
 
   const address = getSenderAddress({
     stealthSigner,

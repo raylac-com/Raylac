@@ -2,21 +2,17 @@ import { getMnemonic } from '@/lib/key';
 import { client, trpc } from '@/lib/trpc';
 import { RouterOutput, User } from '@/types';
 import {
-  RAYLAC_PAYMASTER_ADDRESS,
   StealthAddressWithEphemeral,
-  UserOperation,
   buildMultiChainSendRequestBody,
-  bulkSignUserOps,
-  encodePaymasterAndData,
   generateStealthAddress,
   getSpendingPrivKey,
   getTokenAddressOnChain,
   getViewingPrivKey,
-  signUserOpWithStealthAccount,
+  sleep,
 } from '@raylac/shared';
+import useSubmitUserOpWithRetry from '@/hooks/useSubmitUserOpWithRetry';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
-import { useCallback } from 'react';
 import { Hex } from 'viem';
 import useSignedInUser from './useSignedInUser';
 
@@ -30,29 +26,15 @@ BigInt.prototype.toJSON = function () {
  * Hook to build and send user operations
  */
 const useSend = () => {
-  const { mutateAsync: send } = trpc.send.useMutation();
-  const { mutateAsync: signUserOp } = trpc.signUserOp.useMutation();
   const { data: signedInUser } = useSignedInUser();
 
+  //  const { mutateAsync: submitUserOp } = trpc.submitUserOperation.useMutation();
+  const { mutateAsync: submitUserOpWithRetry } = useSubmitUserOpWithRetry();
+
+  const { mutateAsync: addNewStealthAccount } =
+    trpc.addStealthAccount.useMutation();
+
   const queryClient = useQueryClient();
-
-  /**
-   * Get the `paymasterAndData` field for a user operation
-   */
-  const getPaymasterAndData = useCallback(
-    async ({ userOp }: { userOp: UserOperation }) => {
-      const paymasterSig = encodePaymasterAndData({
-        paymaster: RAYLAC_PAYMASTER_ADDRESS,
-        data: await signUserOp({ userOp }),
-      });
-
-      return {
-        ...userOp,
-        paymasterAndData: paymasterSig,
-      };
-    },
-    [signUserOp]
-  );
 
   return useMutation({
     mutationFn: async ({
@@ -141,42 +123,73 @@ const useSend = () => {
         outputChainId,
       });
 
-      /**
-       * 2. Get the paymaster signatures for the user operations
-       */
+      // Save the proxy stealth account to the database
+      const proxyAccount = multiChainSendData.consolidateToStealthAccount;
+      await addNewStealthAccount({
+        address: proxyAccount.address,
+        stealthPubKey: proxyAccount.stealthPubKey,
+        ephemeralPubKey: proxyAccount.ephemeralPubKey,
+        viewTag: proxyAccount.viewTag,
+      });
 
-      console.log(`Getting paymaster signatures...`);
-      const paymasterSignedBridgeUserOps = await Promise.all(
-        multiChainSendData.aggregationUserOps.map(async userOp => {
-          return getPaymasterAndData({ userOp });
-        })
-      );
+      // Submit the user operations
+      for (const aggregationUserOp of multiChainSendData.aggregationUserOps) {
+        const signerAccount = stealthAccounts.find(
+          account => account.address === aggregationUserOp.sender
+        );
 
-      const paymasterSignedFinalTransferUserOp = await getPaymasterAndData({
+        if (!signerAccount) {
+          throw new Error('Signer account not found');
+        }
+
+        await submitUserOpWithRetry({
+          userOp: aggregationUserOp,
+          stealthAccount: signerAccount as StealthAddressWithEphemeral,
+          spendingPrivKey,
+          viewingPrivKey,
+        });
+
+        console.log(
+          `Success sneding user operation from ${aggregationUserOp.sender}`
+        );
+      }
+
+      // wait for the balance to be updated
+      await sleep(2000);
+
+      const finalUserOpSigner = multiChainSendData.consolidateToStealthAccount;
+
+      /*
+      // Poll the proxy account balance
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await waitForAccountBalance({
+          address: multiChainSendData.consolidateToStealthAccount.address,
+          tokenAddress: getTokenAddressOnChain({
+            chainId: outputChainId,
+            tokenId,
+          }),
+
+          chainId: outputChainId,
+        });
+
+        console.log(
+          `Polling for proxy account token balance: ${proxyAccountTokenBalance}`
+        );
+
+        if (proxyAccountTokenBalance >= amount) {
+          break;
+        }
+
+        await sleep(3000);
+      }
+      */
+
+      await submitUserOpWithRetry({
         userOp: multiChainSendData.finalTransferUserOp,
-      });
-
-      console.log(`Signing bridge user ops...`);
-      const signedBridgeUserOps = await bulkSignUserOps({
-        userOps: paymasterSignedBridgeUserOps,
-        stealthAccounts: stealthAccounts as StealthAddressWithEphemeral[],
+        stealthAccount: finalUserOpSigner as StealthAddressWithEphemeral,
         spendingPrivKey,
         viewingPrivKey,
-      });
-
-      console.log(`Signing final transfer user op...`);
-      const signedFinalTransferUserOp = await signUserOpWithStealthAccount({
-        userOp: paymasterSignedFinalTransferUserOp,
-        stealthAccount: multiChainSendData.consolidateToStealthAccount,
-        spendingPrivKey,
-        viewingPrivKey,
-      });
-
-      await send({
-        aggregationUserOps: signedBridgeUserOps,
-        finalTransferUserOp: signedFinalTransferUserOp,
-        relayQuotes: multiChainSendData.relayQuotes,
-        proxyStealthAccount: multiChainSendData.consolidateToStealthAccount,
       });
     },
     onSuccess: () => {

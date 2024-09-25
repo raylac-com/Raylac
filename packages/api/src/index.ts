@@ -16,12 +16,7 @@ import updateDisplayName from './api/updateDisplayName';
 import updateUsername from './api/updateUsername';
 import updateProfileImage from './api/updateProfileImage';
 import { signUserOp } from './lib/paymaster';
-import {
-  RelayGetQuoteResponseBody,
-  StealthAddressWithEphemeral,
-  UserOperation,
-} from '@raylac/shared';
-import send from './api/send';
+import { UserOperation } from '@raylac/shared';
 import getStealthAccounts from './api/getStealthAccounts';
 import getTokenBalancesPerChain from './api/getTokenBalancesPerChain';
 import getTokenBalances from './api/getTokenBalances';
@@ -29,6 +24,7 @@ import getAddressBalancesPerChain from './api/getAddressBalancesPerChain';
 import { getBlockTimestamp } from './utils';
 import getTokenPrices from './api/getTokenPrices';
 import getUserAddresses from './api/getUserAddresses';
+import submitUserOperation from './api/submitUserOperation';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -80,38 +76,17 @@ const appRouter = router({
       return sig;
     }),
 
-  /**
-   * Send a transfer to a stealth address
-   */
-  send: authedProcedure
+  submitUserOperation: authedProcedure
     .input(
       z.object({
-        aggregationUserOps: z.array(z.any()),
-        finalTransferUserOp: z.any(),
-        relayQuotes: z.array(z.any()),
-        proxyStealthAccount: z.object({
-          address: z.string(),
-          stealthPubKey: z.string(),
-          ephemeralPubKey: z.string(),
-          viewTag: z.string(),
-        }),
+        userOp: z.any(),
       })
     )
     .mutation(async opts => {
       const { input } = opts;
 
-      const aggregationUserOps = input.aggregationUserOps as UserOperation[];
-      const finalTransferUserOp = input.finalTransferUserOp as UserOperation;
-      const relayQuotes = input.relayQuotes as RelayGetQuoteResponseBody[];
-      const proxyStealthAccount =
-        input.proxyStealthAccount as StealthAddressWithEphemeral;
-
-      await send({
-        senderUserId: opts.ctx.userId,
-        aggregationUserOps,
-        relayQuotes,
-        finalTransferUserOp,
-        proxyStealthAccount,
+      await submitUserOperation({
+        userOp: input.userOp as UserOperation,
       });
 
       return 'ok';

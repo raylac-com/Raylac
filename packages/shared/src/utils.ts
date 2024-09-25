@@ -319,3 +319,17 @@ export const getChainsForMode = (isDevMode: boolean) => {
     ? supportedChains.filter(chain => chain.testnet)
     : supportedChains.filter(chain => !chain.testnet);
 };
+
+export const sleep = (ms: number) =>
+  new Promise(resolve => setTimeout(resolve, ms));
+
+export const increaseByPercent = ({
+  value,
+  percent,
+}: {
+  value: bigint;
+  percent: number;
+}): bigint => {
+  const buff = (value * BigInt(percent)) / BigInt(100);
+  return value + buff;
+};
