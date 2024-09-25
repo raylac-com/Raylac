@@ -37,6 +37,7 @@ import useSignedInUser from './hooks/useSignedInUser';
 import useTypedNavigation from './hooks/useTypedNavigation';
 import useSignOut from './hooks/useSignOut';
 import Addresses from './screens/Addresses';
+import TransferDetails from './screens/TransferDetails';
 // import { deleteSignInAvailableUserId } from './lib/key';
 // import { ServerId } from './types';
 
@@ -232,6 +233,14 @@ const Screens = () => {
         component={TransferHistory}
         options={{
           title: t('title', { ns: 'TransferHistory' }),
+          headerBackVisible: true,
+        }}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="TransferDetails"
+        component={TransferDetails}
+        options={{
+          title: t('title', { ns: 'TransferDetails' }),
           headerBackVisible: true,
         }}
       ></RootStack.Screen>
