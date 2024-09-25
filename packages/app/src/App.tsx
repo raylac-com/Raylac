@@ -8,7 +8,6 @@ import { RootStackParamsList, RootTabsParamsList } from './navigation/types';
 import Home from './screens/Home';
 import SignUp from './screens/SignUp';
 import SignIn from './screens/SignIn';
-import EnterInviteCode from './screens/EnterInviteCode';
 import { NavigationContainer, ThemeProvider } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc, rpcLinks } from './lib/trpc';
@@ -38,13 +37,11 @@ import useTypedNavigation from './hooks/useTypedNavigation';
 import useSignOut from './hooks/useSignOut';
 import Addresses from './screens/Addresses';
 import TransferDetails from './screens/TransferDetails';
-// import { deleteSignInAvailableUserId } from './lib/key';
-// import { ServerId } from './types';
 
 console.log('NODE_ENV', process.env.NODE_ENV);
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
-  debug: process.env.NODE_ENV === 'development',
+  debug: false,
   enabled: process.env.NODE_ENV !== 'development',
 });
 
@@ -153,15 +150,6 @@ const Screens = () => {
         component={Addresses}
         options={{
           title: t('title', { ns: 'Addresses' }),
-          headerBackVisible: true,
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="EnterInviteCode"
-        component={EnterInviteCode}
-        options={{
-          title: t('title', { ns: 'EnterInviteCode' }),
           headerBackVisible: true,
           headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}

@@ -18,17 +18,6 @@
     "noTransfers": "",
     "seeAll": "全て表示"
   },
-  "Card": {
-    "title": "カード",
-    "cardInfo" : "カード情報"
-  },
-  "CardInfo": {
-    "title": "カード情報",
-    "cardHolder": "カード名義",
-    "cardNumber": "カード番号",
-    "expirationDate": "有効期限",
-    "cvv": "セキュリティコード"
-  },
   "Account": {
     "title": "アカウント",
     "signOut": "ログアウト",
@@ -63,15 +52,6 @@
     "usernameInvalid": "ユーザー名は英数字のみ使用できます",
     "usernameTaken": "このユーザー名は既に使用されています",
     "signUp": "次へ"
-  },
-  "EnterInviteCode": {
-    "title": "招待コードを入力",
-    "inviteCode": "招待コード",
-    "validInviteCode": "有効",
-      "invalidInviteCode": "無効な招待コードです"
-  },
-  "EnterDepositAmount": {
-    "title": "金額を入力"
   },
   "ConfirmDeposit": {
     "title": "確認",

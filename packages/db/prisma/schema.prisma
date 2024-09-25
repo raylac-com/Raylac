@@ -35,7 +35,6 @@ model User {
   name           String
   username       String  @unique
   profileImage   String?
-  inviteCode     String? @unique
   devModeEnabled Boolean @default(false)
 
   createdAt          DateTime             @default(now())
@@ -114,14 +113,6 @@ model UserOperation {
 
   Transaction     Transaction? @relation(fields: [transactionHash], references: [hash])
   transactionHash String?
-}
-
-model InviteCode {
-  inviteCode String  @id
-  isUsed     Boolean @default(false)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }
 
 enum SyncJob {

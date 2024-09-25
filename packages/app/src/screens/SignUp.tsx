@@ -24,7 +24,6 @@ type Props = NativeStackScreenProps<RootStackParamsList, 'SignUp'>;
  */
 const SignUp = () => {
   const { t } = useTranslation('SignUp');
-  //  const { inviteCode } = route.params;
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
   const { mutateAsync: signUp, isPending: isSigningUp } = useSignUp();
@@ -127,7 +126,6 @@ const SignUp = () => {
         onPress={async () => {
           await signUp({
             name,
-            inviteCode: '',
             username,
           });
 

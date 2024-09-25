@@ -36,29 +36,6 @@ BigInt.prototype.toJSON = function () {
 };
 
 const appRouter = router({
-  /**
-   * Returns whether an invite code is valid
-   */
-  isInviteCodeValid: publicProcedure
-    .input(
-      z.object({
-        inviteCode: z.string(),
-      })
-    )
-    .query(async opts => {
-      const { input } = opts;
-      console.log(`Checking invite code ${input.inviteCode}`);
-
-      const unusedInviteCodeExists = await prisma.inviteCode.findFirst({
-        where: {
-          inviteCode: input.inviteCode,
-          isUsed: false,
-        },
-      });
-
-      return unusedInviteCodeExists ? true : false;
-    }),
-
   signUserOp: authedProcedure
     .input(
       z.object({
@@ -347,7 +324,6 @@ const appRouter = router({
       z.object({
         name: z.string(),
         username: z.string(),
-        inviteCode: z.string(),
         spendingPubKey: z.string(),
         viewingPrivKey: z.string(),
       })
@@ -358,7 +334,6 @@ const appRouter = router({
       const { user, token } = await signUp({
         name: input.name,
         username: input.username,
-        inviteCode: input.inviteCode,
         spendingPubKey: input.spendingPubKey as Hex,
         viewingPrivKey: input.viewingPrivKey as Hex,
       });

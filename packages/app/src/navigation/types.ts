@@ -4,21 +4,15 @@ import { Hex } from 'viem';
 export type RootTabsParamsList = {
   Home: undefined;
   Account: undefined;
-  Card: undefined;
 };
 
 export type RootStackParamsList = {
   Tabs: { screen: keyof RootTabsParamsList; params?: any };
   Start: undefined;
   SignIn: undefined;
-  SignUp: {
-    inviteCode: string;
-  };
-  EnterInviteCode: undefined;
+  SignUp: undefined;
 
   SignInWithMnemonic: undefined;
-
-  CardInfo: undefined;
 
   AccountInfo: undefined;
   UpdateDisplayName: undefined;
@@ -37,7 +31,6 @@ export type RootStackParamsList = {
   };
 
   // Deposit stack
-  EnterDepositAmount: undefined;
   ConfirmDeposit: {
     address: string;
     amount: number;
@@ -50,9 +43,6 @@ export type RootStackParamsList = {
   BackupAccount: undefined;
   SelectLanguage: undefined;
   SendSuccess: undefined;
-
-  // Token stack
-  TokenBalance: undefined;
 
   // Address stack
   Addresses: undefined;

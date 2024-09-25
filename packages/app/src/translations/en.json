@@ -57,22 +57,6 @@
     "usernameTaken": "Username is not available",
     "signUp": "Sign up"
     },
-    "EnterInviteCode": {
-      "title": "Enter Invite Code",
-      "inviteCode": "Invite Code",
-      "validInviteCode": "Valid invite code",
-      "invalidInviteCode": "Invalid invite code"
-    },
-    "Card": {
-      "title": "Card"
-    },
-    "CardInfo": {
-      "title": "Card details",
-      "cardHolder": "Card holder",
-      "cardNumber": "Card number",
-      "expirationDate": "Expiration date",
-      "cvv": "Security code"
-    },
     "EnterDepositAmount": {
       "title": "Enter Amount"
     },

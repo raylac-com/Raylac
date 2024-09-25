@@ -18,11 +18,9 @@ const useSignUp = () => {
   return useMutation({
     mutationFn: async ({
       name,
-      inviteCode,
       username,
     }: {
       name: string;
-      inviteCode: string;
       username: string;
     }) => {
       const mnemonic = bip39.generateMnemonic();
@@ -35,7 +33,6 @@ const useSignUp = () => {
       const { userId, token } = await signUp({
         name,
         username,
-        inviteCode,
         spendingPubKey,
         viewingPrivKey,
       });
