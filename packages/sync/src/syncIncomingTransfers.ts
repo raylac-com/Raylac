@@ -77,9 +77,11 @@ const syncTransfersForAddresses = async (addresses: Hex[]) => {
       // Get the traces with a non-zero value
       .filter(trace => trace.action.value !== '0x0');
 
-    console.log(
-      `Found ${callTracesWithValue.length} incoming transfers for ${addresses.length} addresses on chain ${chainId}`
-    );
+    if (callTracesWithValue.length !== 0) {
+      console.log(
+        `Found ${callTracesWithValue.length} incoming transfers for ${addresses.length} addresses on chain ${chainId}`
+      );
+    }
 
     const decodedTraces = callTracesWithValue.map(trace => {
       const transferData: RaylacAccountTransferData = {

@@ -250,3 +250,5 @@ export interface CoingeckoTokenPriceResponse {
     usd: number;
   };
 }
+
+export type SyncJob = 'UserOps' | 'Traces';

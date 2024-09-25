@@ -28,16 +28,16 @@ model ERC5564Announcement {
 }
 
 model User {
-  id                 Int                  @id @default(autoincrement())
-  spendingPubKey     String               @unique
-  viewingPubKey      String               @unique
-  viewingPrivKey     String               @unique
-  name               String
-  username           String               @unique
-  profileImage       String?
-  inviteCode         String?              @unique
-  devModeEnabled     Boolean              @default(false)
-  
+  id             Int     @id @default(autoincrement())
+  spendingPubKey String  @unique
+  viewingPubKey  String  @unique
+  viewingPrivKey String  @unique
+  name           String
+  username       String  @unique
+  profileImage   String?
+  inviteCode     String? @unique
+  devModeEnabled Boolean @default(false)
+
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   UserStealthAddress UserStealthAddress[]
@@ -122,4 +122,21 @@ model InviteCode {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum SyncJob {
+  Traces
+  UserOps
+}
+
+model SyncStatus {
+  id                 Int     @id @default(autoincrement())
+  lastSyncedBlockNum BigInt
+  chainId            Int
+  job                SyncJob
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([chainId, job])
 }

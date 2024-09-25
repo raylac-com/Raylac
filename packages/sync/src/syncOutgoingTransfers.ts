@@ -217,7 +217,7 @@ const syncOutgoingTransfers = async () => {
       });
     }
 
-    await sleep(10000); // Sleep for 10 seconds
+    await sleep(3000); // Sleep for 3 seconds
   }
 };
 
