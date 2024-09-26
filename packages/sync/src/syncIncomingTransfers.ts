@@ -1,11 +1,14 @@
-import { RaylacAccountTransferData, traceFilter } from '@raylac/shared';
+import {
+  ACCOUNT_IMPL_DEPLOYED_BLOCK,
+  getPublicClient,
+  RaylacAccountTransferData,
+  traceFilter,
+} from '@raylac/shared';
 import { getAddress, Hex, toHex } from 'viem';
 import prisma from './lib/prisma';
 import { $Enums, Prisma } from '@prisma/client';
 import supportedChains from '@raylac/shared/out/supportedChains';
 import { sleep } from './lib/utils';
-
-const ACCOUNT_IMPL_DEPLOYED_BLOCK = 15099210;
 
 /**
  * Convert a decoded trace to a `TransferTrace` record in the Postgres database.
@@ -49,27 +52,24 @@ const traceToPostgresRecord = ({
  * Sync all calls made to the `execute` function in RaylacAccount.sol
  * for a given address.
  */
-const syncTransfersForAddresses = async (addresses: Hex[]) => {
-  // Get the latest synched traces for the address
-  /*
-  const latestTrace = await prisma.transferTrace.findFirst({
-    where: { to: address },
-    orderBy: { blockNumber: 'desc' },
-  });
-
-  const syncFromBlock = latestTrace
-    ? BigInt(latestTrace.blockNumber) + BigInt(1)
-    : BigInt(ACCOUNT_IMPL_DEPLOYED_BLOCK);
-  */
-
-  const syncFromBlock = BigInt(ACCOUNT_IMPL_DEPLOYED_BLOCK);
-
+const syncTransfersForAddresses = async ({
+  addresses,
+  fromBlock,
+  toBlock,
+}: {
+  addresses: Hex[];
+  fromBlock: bigint;
+  toBlock: bigint;
+}) => {
   for (const chainId of supportedChains.map(chain => chain.id)) {
+    console.time(`trace_filter ${chainId}`);
     const traces = await traceFilter({
-      fromBlock: toHex(syncFromBlock),
+      fromBlock: toHex(fromBlock),
+      toBlock: toHex(toBlock),
       toAddress: addresses,
       chainId,
     });
+    console.timeEnd(`trace_filter ${chainId}`);
 
     const callTracesWithValue = traces
       // Get the `type: call` traces
@@ -124,20 +124,108 @@ const syncTransfersForAddresses = async (addresses: Hex[]) => {
   }
 };
 
+const getAddressesSyncStatus = async ({
+  addresses,
+  chainId,
+}: {
+  addresses: Hex[];
+  chainId: number;
+}) => {
+  const traceSyncStatus = await prisma.traceSyncStatus.findMany({
+    select: {
+      address: true,
+      lastSyncedBlockNum: true,
+    },
+    where: {
+      address: {
+        in: addresses,
+      },
+      chainId,
+    },
+  });
+
+  return addresses.map(
+    address =>
+      traceSyncStatus.find(status => status.address === address) || {
+        // If the address is not found in the sync status table, return a default object
+        address,
+        lastSyncedBlockNum: ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId],
+      }
+  );
+};
+
 const syncIncomingTransfers = async () => {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const addresses = await prisma.userStealthAddress.findMany({
-      select: { address: true },
+      select: {
+        address: true,
+      },
     });
 
-    // Sync incoming transfers in 100 address batches
-    for (let i = 0; i < addresses.length; i += 100) {
-      const batch = addresses
-        .slice(i, i + 100)
-        .map(({ address }) => address as Hex);
+    for (const chainId of supportedChains.map(chain => chain.id)) {
+      // Sync incoming transfers in 100 address batches
+      for (let i = 0; i < addresses.length; i += 100) {
+        const batch = addresses
+          .slice(i, i + 100)
+          .map(address => address.address as Hex);
 
-      await syncTransfersForAddresses(batch);
+        const addressesWithSyncStatus = await getAddressesSyncStatus({
+          addresses: batch,
+          chainId,
+        });
+
+        // Get the minimum block height in the batch
+        const minBlockHeightInBatch = addressesWithSyncStatus.sort((a, b) =>
+          a.lastSyncedBlockNum > b.lastSyncedBlockNum ? 1 : -1
+        )[0].lastSyncedBlockNum;
+
+        const client = getPublicClient({ chainId });
+
+        const toBlock = await client.getBlockNumber();
+
+        if (minBlockHeightInBatch < toBlock) {
+          await syncTransfersForAddresses({
+            addresses: batch,
+            fromBlock: minBlockHeightInBatch,
+            toBlock,
+          });
+
+          // Update the last synced block number for the addresses
+          const createSyncStatusRecords = addressesWithSyncStatus.filter(
+            address =>
+              address.lastSyncedBlockNum ===
+              ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId]
+          );
+
+          const updateSyncStatusRecords = addressesWithSyncStatus.filter(
+            address =>
+              address.lastSyncedBlockNum !==
+              ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId]
+          );
+
+          await prisma.traceSyncStatus.createMany({
+            data: createSyncStatusRecords.map(address => ({
+              address: address.address,
+              chainId,
+              lastSyncedBlockNum: toBlock,
+            })),
+            skipDuplicates: true,
+          });
+
+          await prisma.traceSyncStatus.updateMany({
+            data: {
+              lastSyncedBlockNum: toBlock,
+            },
+            where: {
+              address: {
+                in: updateSyncStatusRecords.map(address => address.address),
+              },
+              chainId,
+            },
+          });
+        }
+      }
     }
 
     await sleep(10000); // Sleep for 10 seconds

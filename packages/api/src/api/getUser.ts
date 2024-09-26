@@ -8,6 +8,7 @@ const getUser = async ({ userId }: { userId: number }) => {
       username: true,
       profileImage: true,
       spendingPubKey: true,
+      viewingPubKey: true,
     },
     where: {
       id: userId,

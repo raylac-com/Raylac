@@ -43,16 +43,15 @@ model User {
 }
 
 model UserStealthAddress {
-  id                 Int      @id @default(autoincrement())
-  user               User     @relation(fields: [userId], references: [id])
-  userId             Int
-  address            String
-  ephemeralPubKey    String
-  viewTag            String
-  stealthPubKey      String
-  lastSyncedBlockNum BigInt?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  user            User     @relation(fields: [userId], references: [id])
+  userId          Int
+  address         String   @unique
+  ephemeralPubKey String
+  viewTag         String
+  stealthPubKey   String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 enum ExecutionType {
@@ -83,6 +82,19 @@ model TransferTrace {
   updatedAt DateTime @updatedAt
 
   @@id([txHash, traceAddress])
+}
+
+model TraceSyncStatus {
+  id Int @id @default(autoincrement())
+
+  address            String
+  lastSyncedBlockNum BigInt
+  chainId            Int
+
+  @@unique([address, chainId])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Transaction {

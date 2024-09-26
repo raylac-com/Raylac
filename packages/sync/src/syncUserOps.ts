@@ -70,9 +70,11 @@ const syncUserOpsByPaymaster = async () => {
             toBlock: endBlock,
           });
 
-          console.log(
-            `Found ${chunkLogs.length} logs from block ${startBlock.toLocaleString()} to ${endBlock.toLocaleString()}`
-          );
+          if (chunkLogs.length !== 0) {
+            console.log(
+              `Found ${chunkLogs.length} logs from block ${startBlock.toLocaleString()} to ${endBlock.toLocaleString()}`
+            );
+          }
         } catch (error) {
           console.error(
             `Error fetching logs from block ${startBlock.toString()} to ${endBlock.toString()}:`,
@@ -89,7 +91,7 @@ const syncUserOpsByPaymaster = async () => {
       }
     }
 
-    await sleep(60000); // Sleep for 60 seconds
+    await sleep(60 * 1000 * 10); // Sleep for 10 minutes
   }
 };
 

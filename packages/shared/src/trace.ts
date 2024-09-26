@@ -10,10 +10,12 @@ import { getChainFromId } from './utils';
 export const traceFilter = async ({
   toAddress,
   fromBlock,
+  toBlock,
   chainId,
 }: {
   toAddress: Hex[];
   fromBlock: Hex;
+  toBlock: Hex;
   chainId: number;
 }) => {
   const config = {
@@ -40,6 +42,7 @@ export const traceFilter = async ({
       params: [
         {
           fromBlock,
+          toBlock,
           toAddress,
         },
       ],
