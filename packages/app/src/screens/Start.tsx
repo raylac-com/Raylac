@@ -117,36 +117,56 @@ const Start = () => {
         flex: 1,
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'flex-end',
+        justifyContent: 'space-between',
+        height: '100%',
       }}
     >
-      <ScrollView
-        contentContainerStyle={{
-          rowGap: 8,
+      <Image
+        source={require('../../assets/adaptive-icon.png')}
+        style={{
+          width: 240,
+          height: 240,
+          resizeMode: 'contain',
+          marginTop: 64,
+        }}
+      ></Image>
+      <View
+        style={{
+          width: '100%',
+          alignItems: 'center',
+          flexDirection: 'column',
+          marginTop: 32,
         }}
       >
-        {signInAvailableUsers?.map(user => (
-          <SignInAsUserListItem
-            key={user.id}
-            user={{
-              spendingPubKey: user.spendingPubKey as Hex,
-              displayName: user.name,
-              username: user.username,
-              profileImage: user.profileImage,
-            }}
-            onPress={() => onSignInPress(user.id)}
-          ></SignInAsUserListItem>
-        ))}
-      </ScrollView>
-      <StyledButton
-        title={t('createAccount')}
-        onPress={onCreateAccountPress}
-        style={{
-          width: '90%',
-          height: 48,
-          marginBottom: 32,
-        }}
-      ></StyledButton>
+        <ScrollView
+          contentContainerStyle={{
+            rowGap: 12,
+          }}
+        >
+          {signInAvailableUsers?.map(user => (
+            <SignInAsUserListItem
+              key={user.id}
+              user={{
+                spendingPubKey: user.spendingPubKey as Hex,
+                displayName: user.name,
+                username: user.username,
+                profileImage: user.profileImage,
+              }}
+              onPress={() => onSignInPress(user.id)}
+            ></SignInAsUserListItem>
+          ))}
+        </ScrollView>
+        <StyledButton
+          title={t('createAccount')}
+          onPress={onCreateAccountPress}
+          style={{
+            marginTop: 32,
+            width: '90%',
+            height: 48,
+            marginBottom: 32,
+          }}
+        ></StyledButton>
+      </View>
     </View>
   );
 };
