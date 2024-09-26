@@ -141,10 +141,11 @@ const Account = () => {
               imageUrl={user.profileImage}
             ></FastAvatar>
             <AntDesign
-              name="edit"
+              name="camera"
               size={20}
-              color={theme.gray}
+              color={theme.text}
               style={{
+                opacity: 0.9,
                 right: 22,
                 bottom: 22,
                 position: 'absolute',

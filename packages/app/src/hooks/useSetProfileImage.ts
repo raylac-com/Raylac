@@ -1,11 +1,13 @@
 import { trpc } from '@/lib/trpc';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
+import userKeys from '@/queryKeys/userKeys';
 
 const useSetProfileImage = () => {
   const { mutateAsync: updateProfileImage } =
     trpc.updateProfileImage.useMutation();
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async () => {
@@ -35,6 +37,11 @@ const useSetProfileImage = () => {
           imageBase64: resizedImage.base64,
         });
       }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: userKeys.signedInUser,
+      });
     },
   });
 };
