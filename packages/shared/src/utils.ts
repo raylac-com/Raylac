@@ -1,6 +1,13 @@
 import * as secp from '@noble/secp256k1';
-import { Chain, decodeFunctionData, formatUnits, Hex, parseUnits } from 'viem';
-import { UserOperation } from './types';
+import {
+  Chain,
+  decodeFunctionData,
+  formatUnits,
+  getAddress,
+  Hex,
+  parseUnits,
+} from 'viem';
+import { RaylacAccountTransferData, UserOperation } from './types';
 import RaylacAccountAbi from './abi/RaylacAccountAbi';
 import ERC20Abi from './abi/ERC20Abi';
 import * as chains from 'viem/chains';
@@ -9,6 +16,7 @@ import supportedTokens, { NATIVE_TOKEN_ADDRESS } from './supportedTokens';
 import { getPublicClient } from './ethRpc';
 import { getERC20TokenBalance } from '.';
 import supportedChains from './supportedChains';
+import { Prisma } from '@prisma/client';
 
 export const encodeERC5564Metadata = ({
   viewTag,
@@ -344,3 +352,109 @@ export const getBlockExplorerUrl = (chainId: number) => {
       throw new Error(`Chain ${chainId} not supported`);
   }
 };
+
+/**
+ * Decode the `data` field of the `execute` function in RaylacAccount.sol as a token transfer.
+ * If the `to` field of the call is an ERC20 token, decode the `data` field as an ERC20 transfer.
+ * Otherwise, decode the `data` field as an ETH transfer.
+ */
+export const decodeExecuteAsTransfer = ({
+  executeArgs,
+  chainId,
+}: {
+  executeArgs: {
+    to: Hex;
+    value: bigint;
+    data: Hex;
+    tag: Hex;
+  };
+  chainId: number;
+}): RaylacAccountTransferData | null => {
+  // Check if the `to` field of the call is an ERC20 token
+  const erc20TokenData = supportedTokens.find(token =>
+    token.addresses.find(
+      address =>
+        address.chain.id === chainId && address.address === executeArgs.to
+    )
+  );
+
+  const tag = executeArgs.tag;
+
+  if (erc20TokenData) {
+    // This is a call to an ERC20 token
+
+    // Decode the data field of the call
+    const decodedData = decodeFunctionData({
+      abi: ERC20Abi,
+      data: executeArgs.data,
+    });
+
+    if (decodedData.functionName === 'transfer') {
+      return {
+        type: 'Transfer',
+        to: decodedData.args[0],
+        amount: BigInt(decodedData.args[1]),
+        tokenId: erc20TokenData.tokenId,
+        tag,
+      };
+    } else {
+      return null;
+    }
+  } else if (executeArgs.data === '0x') {
+    return {
+      type: 'Transfer',
+      to: executeArgs.to,
+      amount: executeArgs.value,
+      tokenId: 'eth',
+      tag,
+    };
+  } else {
+    return {
+      type: 'Transfer',
+      to: executeArgs.to,
+      amount: executeArgs.value,
+      tokenId: 'eth',
+      tag,
+    };
+  }
+};
+
+/**
+ * Convert a decoded trace to a `TransferTrace` record in the Postgres database.
+ */
+export const traceToPostgresRecord = ({
+  transferData,
+  traceTxHash,
+  traceTxPosition,
+  traceAddress,
+  blockNumber,
+  fromAddress,
+  chainId,
+}: {
+  transferData: RaylacAccountTransferData;
+  traceTxHash: Hex;
+  traceTxPosition: number;
+  traceAddress: number[];
+  blockNumber: bigint;
+  fromAddress: Hex;
+  chainId: number;
+}): Prisma.TransferTraceCreateManyInput => {
+  const to = transferData.to;
+  const amount = transferData.amount;
+
+  return {
+    from: getAddress(fromAddress),
+    to: getAddress(to),
+    amount,
+    tokenId: transferData.tokenId,
+    blockNumber,
+    txHash: traceTxHash,
+    txPosition: traceTxPosition,
+    traceAddress: traceAddress.join('_'),
+    executionType: transferData.type,
+    executionTag: transferData.tag,
+    chainId,
+  };
+};
+
+export const RAYLAC_ACCOUNT_EXECUTE_FUNC_SIG = '0xda0980c7';

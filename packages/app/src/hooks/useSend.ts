@@ -94,9 +94,18 @@ const useSend = () => {
               viewingPubKey: recipientUserOrAddress.viewingPubKey as Hex,
             });
 
+      if (typeof to !== 'string') {
+        await addNewStealthAccount({
+          userId: (recipientUserOrAddress as User).id,
+          address: to.address,
+          stealthPubKey: to.stealthPubKey,
+          ephemeralPubKey: to.ephemeralPubKey,
+          viewTag: to.viewTag,
+        });
+      }
+
       const toAddress = typeof to === 'string' ? to : to.address;
 
-      console.log(`Sending ${amount} ${tokenId} to ${toAddress}`);
       const multiChainSendData = await buildMultiChainSendRequestBody({
         senderPubKeys: {
           spendingPubKey: signedInUser.spendingPubKey as Hex,
@@ -126,6 +135,7 @@ const useSend = () => {
       // Save the proxy stealth account to the database
       const proxyAccount = multiChainSendData.consolidateToStealthAccount;
       await addNewStealthAccount({
+        userId: signedInUser.id,
         address: proxyAccount.address,
         stealthPubKey: proxyAccount.stealthPubKey,
         ephemeralPubKey: proxyAccount.ephemeralPubKey,
@@ -195,6 +205,12 @@ const useSend = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: getQueryKey(trpc.getTokenBalancesPerChain),
+      });
+      queryClient.invalidateQueries({
+        queryKey: getQueryKey(trpc.getTokenBalances),
+      })
+      queryClient.invalidateQueries({
+        queryKey: getQueryKey(trpc.getTxHistory),
       });
     },
   });

@@ -253,21 +253,21 @@ const appRouter = router({
    * Add a new stealth account to the user.
    * This is called when the user wants to receive/deposit funds to a new stealth address.
    */
-  addStealthAccount: authedProcedure
+  addStealthAccount: publicProcedure
     .input(
       z.object({
         address: z.string(),
         stealthPubKey: z.string(),
         ephemeralPubKey: z.string(),
         viewTag: z.string(),
+        userId: z.number(),
       })
     )
     .mutation(async opts => {
       const { input } = opts;
-      const userId = opts.ctx.userId;
 
       await handleNewStealthAccount({
-        userId,
+        userId: input.userId,
         stealthAccount: {
           address: input.address as Hex,
           stealthPubKey: input.stealthPubKey as Hex,

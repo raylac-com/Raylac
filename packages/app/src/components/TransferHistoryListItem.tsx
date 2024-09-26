@@ -8,6 +8,7 @@ import { TransferHistoryQueryResult, formatAmount } from '@raylac/shared';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
+import { publicKeyToAddress } from 'viem/accounts';
 // import useEnsName from '@/hooks/useEnsName';
 
 /**
@@ -35,6 +36,18 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
 
   const navigation = useTypedNavigation();
 
+  const transferUserId = type === 'outgoing' ? tx?.toUserId : tx?.fromUserId;
+
+  const { data: transferUser } = trpc.getUser.useQuery(
+    {
+      userId: transferUserId,
+    },
+    {
+      enabled: !!transferUserId,
+      throwOnError: false,
+    }
+  );
+
   /*
   const { data: tokenPrice } = useTokenPrice(tx.tokenId);
 
@@ -44,6 +57,8 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
   */
 
   // const { data: ensName } = useEnsName(tx.from as Hex);
+
+  const avatarAddress = transferUser ? publicKeyToAddress(transferUser.spendingPubKey as Hex) : (type === 'outgoing' ? tx.to : tx.from) as Hex;
 
   return (
     <Pressable
@@ -82,7 +97,8 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           }}
         >
           <FastAvatar
-            address={type === 'outgoing' ? (tx.to as Hex) : (tx.from as Hex)}
+            address={avatarAddress}
+            imageUrl={transferUser ? transferUser.profileImage : undefined}
             size={36}
           ></FastAvatar>
           <Text
@@ -90,7 +106,9 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
               color: theme.text,
             }}
           >
-            {shortenAddress((type === 'outgoing' ? tx.to : tx.from) as Hex)}
+            {transferUser
+              ? transferUser.name
+              : shortenAddress((type === 'outgoing' ? tx.to : tx.from) as Hex)}
           </Text>
         </View>
         <View>

@@ -153,6 +153,7 @@ const HomeScreen = () => {
     enabled: isSignedIn,
     throwOnError: false, // Don't throw on error for this particular query in all environments
     refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
   const {
@@ -163,6 +164,7 @@ const HomeScreen = () => {
     enabled: isSignedIn,
     throwOnError: false, // Don't throw on error for this particular query in all environments
     refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
 
   const navigation = useTypedNavigation();

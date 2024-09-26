@@ -37,6 +37,7 @@ const useGetNewDepositAccount = () => {
 
       /// Submit the deposit account to the server
       await addStealthAccount({
+        userId: signedInUser.id,
         address: account.address,
         stealthPubKey: account.stealthPubKey,
         ephemeralPubKey: account.ephemeralPubKey,

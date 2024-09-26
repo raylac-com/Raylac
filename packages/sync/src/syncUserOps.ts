@@ -91,7 +91,7 @@ const syncUserOpsByPaymaster = async () => {
       }
     }
 
-    await sleep(60 * 1000 * 10); // Sleep for 10 minutes
+    await sleep(15 * 1000); // Sleep for 15 seconds
   }
 };
 

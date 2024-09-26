@@ -8,6 +8,7 @@ const getUsers = async () => {
       username: true,
       spendingPubKey: true,
       viewingPubKey: true,
+      profileImage: true,
     },
   });
 

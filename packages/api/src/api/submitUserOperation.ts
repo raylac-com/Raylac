@@ -1,13 +1,18 @@
 import { TRPCError } from '@trpc/server';
 import {
+  decodeExecuteAsTransfer,
   ENTRY_POINT_ADDRESS,
   getPublicClient,
+  RAYLAC_ACCOUNT_EXECUTE_FUNC_SIG,
   RAYLAC_PAYMASTER_ADDRESS,
+  RaylacAccountAbi,
   sendUserOperation,
+  TraceCallAction,
+  traceToPostgresRecord,
   traceTransaction,
   UserOperation,
 } from '@raylac/shared';
-import { Hex, hexToBigInt, Log, parseAbiItem } from 'viem';
+import { decodeFunctionData, Hex, hexToBigInt, Log, parseAbiItem } from 'viem';
 import prisma from '../lib/prisma';
 
 const userOpEvent = parseAbiItem(
@@ -135,12 +140,88 @@ const submitUserOperation = async ({ userOp }: { userOp: UserOperation }) => {
     },
   });
 
-  await traceTransaction({
+  const traces = await traceTransaction({
     chainId: userOp.chainId,
     txHash,
   });
 
+  const executeCallTrace = traces // Get the `type: call` traces
+    .find(
+      trace =>
+        'input' in trace.action &&
+        trace.action.callType === 'call' &&
+        trace.action.input.startsWith(RAYLAC_ACCOUNT_EXECUTE_FUNC_SIG)
+    );
+
+  if (!executeCallTrace) {
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Transfer trace not found',
+    });
+  }
+
+  const decoded = decodeFunctionData({
+    abi: RaylacAccountAbi,
+    data: (executeCallTrace.action as TraceCallAction).input,
+  });
+
+  if (decoded.functionName !== 'execute') {
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Function name is not `execute`',
+    });
+  }
+
+  const transferData = decodeExecuteAsTransfer({
+    executeArgs: {
+      to: decoded.args[0] as Hex,
+      value: BigInt(decoded.args[1]),
+      data: decoded.args[2] as Hex,
+      tag: decoded.args[3] as Hex,
+    },
+    chainId: userOp.chainId,
+  })!;
+
+  console.log('Transfer data:', transferData);
+
   // Decode and save the trace
+
+  const record = traceToPostgresRecord({
+    transferData,
+    traceTxHash: txHash,
+    traceTxPosition: executeCallTrace.transactionPosition,
+    traceAddress: [...executeCallTrace.traceAddress, 0, 0],
+    blockNumber,
+    fromAddress: userOp.sender,
+    chainId: userOp.chainId,
+  });
+
+  console.log('Record:', record);
+
+  const txData = {
+    hash: txHash,
+    blockNumber,
+    chainId: userOp.chainId,
+  };
+  // Create the transaction record
+  await prisma.transaction.upsert({
+    create: txData,
+    update: txData,
+    where: {
+      hash: txHash,
+    },
+  });
+
+  await prisma.transferTrace.upsert({
+    create: record,
+    update: record,
+    where: {
+      txHash_traceAddress: {
+        txHash: txHash,
+        traceAddress: record.traceAddress,
+      },
+    },
+  });
 };
 
 export default submitUserOperation;

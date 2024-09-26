@@ -14,6 +14,8 @@ export const handleNewStealthAccount = async ({
   userId: number;
   stealthAccount: StealthAddressWithEphemeral;
 }) => {
+  // TODO: Verify that the stealth account corresponds to the specified user
+
   /*
   // Submit an announcement to the ERC5564 announcer contract
   await erc5564.announce({
