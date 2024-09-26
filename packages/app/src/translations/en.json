@@ -11,7 +11,7 @@
     },
     "Home": {
       "title": "Home",
-      "deposit": "Add money",
+      "deposit": "Deposit",
       "receive": "Receive",
     "send": "Send",
     "noTransfers": "No transfers yet.",

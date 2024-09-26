@@ -208,9 +208,12 @@ const useSend = () => {
       });
       queryClient.invalidateQueries({
         queryKey: getQueryKey(trpc.getTokenBalances),
-      })
+      });
       queryClient.invalidateQueries({
         queryKey: getQueryKey(trpc.getTxHistory),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['tokenBalances'],
       });
     },
   });

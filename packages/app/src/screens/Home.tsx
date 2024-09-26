@@ -20,6 +20,7 @@ import useSignedInUser from '@/hooks/useSignedInUser';
 import { formatAmount, TransferHistoryQueryResult } from '@raylac/shared';
 import { formatUnits } from 'viem';
 import useTokenPrice from '@/hooks/useTokenPrice';
+import useTokenBalances from '@/hooks/useTokenBalance';
 
 interface TokenBalanceItemProps {
   tokenId: string;
@@ -149,12 +150,7 @@ const HomeScreen = () => {
     data: tokenBalances,
     refetch: refetchBalances,
     isRefetching: isRefetchingBalance,
-  } = trpc.getTokenBalances.useQuery(null, {
-    enabled: isSignedIn,
-    throwOnError: false, // Don't throw on error for this particular query in all environments
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-  });
+  } = useTokenBalances();
 
   const {
     data: txHistory,
@@ -179,6 +175,12 @@ const HomeScreen = () => {
       navigation.navigate('Start');
     }
   }, [isSignedIn]);
+
+  const totalUsdBalance =
+    tokenBalances?.reduce(
+      (acc, { formattedUsdBalance }) => acc + parseFloat(formattedUsdBalance),
+      0
+    ) || null;
 
   if (!isSignedIn) {
     return null;
@@ -214,7 +216,7 @@ const HomeScreen = () => {
               color: theme.text,
             }}
           >
-            0 USD
+            {totalUsdBalance} USD
           </Text>
         </View>
         {/* Action menus (Deposit, Send, Receive) */}
@@ -223,7 +225,7 @@ const HomeScreen = () => {
             marginTop: 24,
             flexDirection: 'row',
             justifyContent: 'center',
-            columnGap: 30,
+            columnGap: 40,
           }}
         >
           <MenuItem

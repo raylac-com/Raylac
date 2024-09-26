@@ -2,7 +2,6 @@ import { FlatList, Pressable, Text, View } from 'react-native';
 import { useCallback, useEffect, useState } from 'react';
 import { trpc } from '@/lib/trpc';
 import StyledTextInput from '@/components/StyledTextInput';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import { RouterOutput } from '@/types';
 import { theme } from '@/lib/theme';
 import { RootStackParamsList } from '@/navigation/types';
@@ -114,6 +113,7 @@ const AddressListItem = (props: AddressListItemProps) => {
   );
 };
 
+/*
 const FloatingScanButton = () => {
   return (
     <Pressable
@@ -129,6 +129,7 @@ const FloatingScanButton = () => {
     </Pressable>
   );
 };
+*/
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'SelectRecipient'>;
 
@@ -219,7 +220,11 @@ const SelectRecipient = ({ navigation }: Props) => {
           />
         )}
       ></FlatList>
-      <FloatingScanButton></FloatingScanButton>
+        {
+          /**
+            <FloatingScanButton></FloatingScanButton>
+          */
+        }
     </View>
   );
 };
