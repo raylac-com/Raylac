@@ -333,3 +333,14 @@ export const increaseByPercent = ({
   const buff = (value * BigInt(percent)) / BigInt(100);
   return value + buff;
 };
+
+export const getBlockExplorerUrl = (chainId: number) => {
+  switch (chainId) {
+    case chains.baseSepolia.id:
+      return `https://sepolia.basescan.org`;
+    case chains.base.id:
+      return `https://basescan.org`;
+    default:
+      throw new Error(`Chain ${chainId} not supported`);
+  }
+};

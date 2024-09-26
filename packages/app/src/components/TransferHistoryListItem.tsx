@@ -1,5 +1,5 @@
 import { shortenAddress } from '@/lib/utils';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import FastAvatar from './FastAvatar';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
@@ -7,6 +7,7 @@ import { Hex } from 'viem';
 import { TransferHistoryQueryResult, formatAmount } from '@raylac/shared';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { trpc } from '@/lib/trpc';
+import useTypedNavigation from '@/hooks/useTypedNavigation';
 // import useEnsName from '@/hooks/useEnsName';
 
 /**
@@ -32,6 +33,8 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
   const tokenMeta = getTokenMetadata(tx.tokenId);
   const formattedAmount = formatAmount(tx.amount, tokenMeta.decimals);
 
+  const navigation = useTypedNavigation();
+
   /*
   const { data: tokenPrice } = useTokenPrice(tx.tokenId);
 
@@ -43,12 +46,24 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
   // const { data: ensName } = useEnsName(tx.from as Hex);
 
   return (
-    <View
+    <Pressable
       style={{
         flex: 1,
         flexDirection: 'column',
         borderBottomWidth: 1,
         padding: 12,
+      }}
+      onPress={() => {
+        if (tx.executionTag) {
+          navigation.navigate('RaylacTransferDetails', {
+            executionTag: tx.executionTag,
+          });
+        } else {
+          navigation.navigate('NativeTransferDetails', {
+            txHash: tx.txHash,
+            traceAddress: tx.traceAddress,
+          });
+        }
       }}
     >
       <View
@@ -130,7 +145,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           ? new Date(Number(blockTimestamp) * 1000).toLocaleDateString()
           : ''}
       </Text>
-    </View>
+    </Pressable>
   );
 };
 

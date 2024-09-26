@@ -222,6 +222,76 @@ export interface TransferHistoryQueryResult {
   tokenId: string;
   chainId: number;
   blockNumber: number;
+  executionTag: Hex | null;
+  txHash: Hex;
+  traceAddress: string;
+}
+
+export interface TransferDetailsQueryResult {
+  amount: string;
+  executionType: string;
+  from: Hex;
+  to: Hex;
+  fromUserId: number;
+  toUserId: number;
+  tokenId: string;
+  chainId: number;
+  blockNumber: number;
+  executionTag: Hex | null;
+  txHash: Hex;
+  traceAddress: string;
+}
+
+export interface TransferWithExecutionTagQueryResult {
+  amount: string;
+  from: Hex;
+  to: Hex;
+  tokenId: string;
+  fromUserId: number;
+  toUserId: number;
+  blockNumber: string;
+  executionTag: Hex;
+  txHash: Hex;
+  traceAddress: string;
+  success: boolean;
+  chainId: number;
+}
+
+export interface TransferTraceQueryResult {
+  amount: string;
+  from: Hex;
+  to: Hex;
+  tokenId: string;
+  chainId: number;
+  blockNumber: string;
+  txHash: Hex;
+  traceAddress: string;
+}
+
+export interface RaylacTransferDetailsReturnType {
+  fromUserId: number;
+  toUserId: number;
+  toAddress: Hex;
+  tokenId: string;
+  amount: string;
+  traces: {
+    chainId: number;
+    txHash: Hex;
+    from: Hex;
+    to: Hex;
+    amount: string;
+    blockNumber: string;
+  }[];
+}
+
+export interface NativeTransferDetailsReturnType {
+  from: Hex;
+  to: Hex;
+  tokenId: string;
+  amount: string;
+  txHash: Hex;
+  chainId: number;
+  blockNumber: string;
 }
 
 export interface TokenBalanceQueryResult {

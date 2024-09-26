@@ -36,7 +36,8 @@ import useSignedInUser from './hooks/useSignedInUser';
 import useTypedNavigation from './hooks/useTypedNavigation';
 import useSignOut from './hooks/useSignOut';
 import Addresses from './screens/Addresses';
-import TransferDetails from './screens/TransferDetails';
+import RaylacTransferDetails from './screens/RaylacTransferDetails';
+import NativeTransferDetails from './screens/NativeTransferDetails';
 
 console.log('NODE_ENV', process.env.NODE_ENV);
 Sentry.init({
@@ -225,10 +226,18 @@ const Screens = () => {
         }}
       ></RootStack.Screen>
       <RootStack.Screen
-        name="TransferDetails"
-        component={TransferDetails}
+        name="RaylacTransferDetails"
+        component={RaylacTransferDetails}
         options={{
-          title: t('title', { ns: 'TransferDetails' }),
+          title: t('title', { ns: 'RaylacTransferDetails' }),
+          headerBackVisible: true,
+        }}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="NativeTransferDetails"
+        component={NativeTransferDetails}
+        options={{
+          title: t('title', { ns: 'NativeTransferDetails' }),
           headerBackVisible: true,
         }}
       ></RootStack.Screen>

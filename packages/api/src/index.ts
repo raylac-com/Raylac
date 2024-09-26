@@ -25,6 +25,9 @@ import { getBlockTimestamp } from './utils';
 import getTokenPrices from './api/getTokenPrices';
 import getUserAddresses from './api/getUserAddresses';
 import submitUserOperation from './api/submitUserOperation';
+import getRaylacTransferDetails from './api/getRaylacTransferDetails';
+import getNativeTransferDetails from './api/getNativeTransferDetails';
+import getUser from './api/getUser';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -76,6 +79,19 @@ const appRouter = router({
     const users = await getUsers();
     return users;
   }),
+
+  getUser: publicProcedure
+    .input(
+      z.object({
+        userId: z.number(),
+      })
+    )
+    .query(async opts => {
+      const { input } = opts;
+      const user = await getUser({ userId: input.userId });
+
+      return user;
+    }),
 
   /**
    * Get the balances of tokens for all chains and supported tokens
@@ -129,6 +145,40 @@ const appRouter = router({
 
     return transfers;
   }),
+
+  getRaylacTransferDetails: authedProcedure
+    .input(
+      z.object({
+        executionTag: z.string(),
+      })
+    )
+    .query(async opts => {
+      const { input } = opts;
+
+      const details = await getRaylacTransferDetails({
+        executionTag: input.executionTag as Hex,
+      });
+
+      return details;
+    }),
+
+  getNativeTransferDetails: authedProcedure
+    .input(
+      z.object({
+        txHash: z.string(),
+        traceAddress: z.string(),
+      })
+    )
+    .query(async opts => {
+      const { input } = opts;
+
+      const details = await getNativeTransferDetails({
+        txHash: input.txHash as Hex,
+        traceAddress: input.traceAddress,
+      });
+
+      return details;
+    }),
 
   getUserAddresses: authedProcedure.query(async opts => {
     const userId = opts.ctx.userId;
@@ -264,36 +314,6 @@ const appRouter = router({
       );
 
       return timestamp;
-    }),
-
-  /**
-   * Get user by id
-   */
-  getUser: publicProcedure
-    .input(
-      z.object({
-        userId: z.number(),
-      })
-    )
-    .query(async opts => {
-      const { input } = opts;
-
-      const user = await prisma.user.findUnique({
-        select: {
-          id: true,
-          name: true,
-          username: true,
-          profileImage: true,
-          spendingPubKey: true,
-          viewingPubKey: true,
-          devModeEnabled: true,
-        },
-        where: {
-          id: input.userId,
-        },
-      });
-
-      return user;
     }),
 
   signIn: publicProcedure

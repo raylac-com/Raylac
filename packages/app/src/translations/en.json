@@ -88,6 +88,12 @@
     "TransferHistory": {
       "title": "Transfer History"
     },
+    "RaylacTransferDetails": {
+      "title": "Transfer Details"
+    },
+    "NativeTransferDetails": {
+      "title": "Transfer Details"
+    },
     "BackupAccount": {
       "title": "Backup Account",
       "backupWarning1": "Anyone who has your backup phrase can access and spend your balance.",

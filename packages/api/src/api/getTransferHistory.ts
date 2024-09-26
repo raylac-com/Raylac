@@ -24,7 +24,10 @@ const getTransferHistory = async ({
     	"chainId",  
       u1. "userId" AS "fromUserId",
       u2. "userId" AS "toUserId",
-      "blockNumber"
+      "blockNumber",
+      "executionTag",
+    	"txHash",
+    	"traceAddress"
     FROM
       "TransferTrace" t
       LEFT JOIN "UserStealthAddress" u1 ON u1.address = t. "from"

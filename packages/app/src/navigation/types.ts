@@ -36,8 +36,12 @@ export type RootStackParamsList = {
     amount: number;
   };
   TransferHistory: undefined;
-  TransferDetails: {
-    transferIdOrTxHash: string;
+  RaylacTransferDetails: {
+    executionTag: Hex;
+  };
+  NativeTransferDetails: {
+    txHash: string;
+    traceAddress: string;
   };
   Receive: undefined;
   BackupAccount: undefined;
