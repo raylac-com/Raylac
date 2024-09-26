@@ -1,12 +1,11 @@
 import StyledButton from '@/components/StyledButton';
-import StyledNumberInput from '@/components/StyledNumberInput';
 import { theme } from '@/lib/theme';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image, Text, View } from 'react-native';
+import { Image, Text, TextInput, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { Hex, parseUnits } from 'viem';
@@ -108,7 +107,6 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
       style={{
         flex: 1,
         alignItems: 'center',
-        marginTop: 40,
       }}
     >
       <View
@@ -118,36 +116,44 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           alignItems: 'flex-start',
           columnGap: 8,
           zIndex: 3000,
+          paddingHorizontal: 16,
         }}
       >
-        <StyledNumberInput
-          autoFocus
-          value={amount !== null ? amount.toString() : ''}
-          onChangeText={_amount => {
-            if (containsNonNumberChars(_amount)) {
-              return;
-            }
-
-            // Regex to match floating-point numbers (allowing one decimal point)
-            //            if (/^\d*\.?\d*$/.test(_amount)) {
-            //              setAmount(_amount);
-            //            }
-
-            if (_amount === '') {
-              setAmount(null);
-            } else {
-              setAmount(_amount);
-            }
-          }}
-          containerStyle={{
+        <View
+          style={{
+            flex: 1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+            backgroundColor: theme.background,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: theme.gray,
             height: 52,
           }}
-          inputStyle={{
-            width: 180,
-            textAlign: 'right',
-          }}
-          keyboardType="numeric"
-        ></StyledNumberInput>
+        >
+          <TextInput
+            autoFocus
+            value={amount !== null ? amount.toString() : ''}
+            onChangeText={_amount => {
+              if (containsNonNumberChars(_amount)) {
+                return;
+              }
+
+              if (_amount === '') {
+                setAmount(null);
+              } else {
+                setAmount(_amount);
+              }
+            }}
+            style={{
+              fontSize: 28,
+              textAlign: 'right',
+              color: theme.text,
+            }}
+            keyboardType="numeric"
+          ></TextInput>
+        </View>
         <View
           style={{
             flexDirection: 'column',
@@ -192,21 +198,22 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           </Text>
         </View>
       </View>
-
       <View
         style={{
           alignItems: 'center',
           flexDirection: 'row',
           justifyContent: 'flex-end',
-          width: '82%',
+          paddingHorizontal: 16,
           zIndex: 1000,
           marginTop: 24,
         }}
       >
         <View
           style={{
+            flex: 1,
             flexDirection: 'row',
             alignItems: 'center',
+            justifyContent: 'flex-end',
             columnGap: 8,
             marginRight: 12,
           }}
@@ -272,14 +279,20 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           {t('insufficientBalance')}
         </Text>
       ) : null}
-      <StyledButton
-        style={{
-          marginTop: 24,
-        }}
-        title={t('next', { ns: 'common' })}
-        onPress={onNextClick}
-        disabled={!canGoNext}
-      ></StyledButton>
+      <View style={{
+        width: '100%',
+        paddingHorizontal: 16,
+        marginTop: 32,
+      }}>
+        <StyledButton
+          style={{
+            width: '100%',
+          }}
+          title={t('next', { ns: 'common' })}
+          onPress={onNextClick}
+          disabled={!canGoNext}
+        ></StyledButton>
+      </View>
     </View>
   );
 };

@@ -176,11 +176,12 @@ const HomeScreen = () => {
     }
   }, [isSignedIn]);
 
-  const totalUsdBalance =
-    tokenBalances?.reduce(
-      (acc, { formattedUsdBalance }) => acc + parseFloat(formattedUsdBalance),
-      0
-    ) || null;
+  const totalUsdBalance = tokenBalances
+    ? tokenBalances.reduce(
+        (acc, { formattedUsdBalance }) => acc + parseFloat(formattedUsdBalance),
+        0
+      )
+    : null;
 
   if (!isSignedIn) {
     return null;
