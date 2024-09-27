@@ -26,7 +26,8 @@ const SignUp = () => {
   const { t } = useTranslation('SignUp');
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
-  const { mutateAsync: signUp, isPending: isSigningUp } = useSignUp();
+  const { mutateAsync: signUp } = useSignUp();
+  const [isSigningUp, setIsSigningUp] = useState(false);
 
   const { isUsernameAvailable, isCheckingUsername } =
     useCheckUsername(username);
@@ -73,6 +74,7 @@ const SignUp = () => {
           {t('name')}
         </Text>
         <StyledTextInput
+          autoCapitalize="none"
           value={name}
           placeholder={t('name')}
           style={{
@@ -124,10 +126,12 @@ const SignUp = () => {
         disabled={!canGoNext}
         isLoading={isSigningUp}
         onPress={async () => {
+          setIsSigningUp(true);
           await signUp({
             name,
             username,
           });
+          setIsSigningUp(false);
 
           navigation.navigate('Tabs', {
             screen: 'Home',

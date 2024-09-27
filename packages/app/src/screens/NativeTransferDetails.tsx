@@ -5,13 +5,15 @@ import { theme } from '@/lib/theme';
 import { trpc } from '@/lib/trpc';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
+import { Entypo } from '@expo/vector-icons';
 import {
   formatAmount,
   getBlockExplorerUrl,
   getChainFromId,
 } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScrollView, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 type Props = NativeStackScreenProps<
   RootStackParamsList,
@@ -20,6 +22,7 @@ type Props = NativeStackScreenProps<
 
 const NativeTransferDetails = ({ route }: Props) => {
   const { txHash, traceAddress } = route.params;
+  const [showDetails, setShowDetails] = useState(false);
 
   const { data: transferDetail } = trpc.getNativeTransferDetails.useQuery({
     txHash,
@@ -46,9 +49,10 @@ const NativeTransferDetails = ({ route }: Props) => {
         flex: 1,
         flexDirection: 'column',
         alignItems: 'center',
+        rowGap: 10,
       }}
       style={{
-        paddingTop: 40,
+        paddingTop: 60,
       }}
     >
       <FastAvatar address={transferDetail.from} size={80}></FastAvatar>
@@ -56,16 +60,15 @@ const NativeTransferDetails = ({ route }: Props) => {
         style={{
           color: theme.text,
           fontSize: 14,
-          marginTop: 16,
         }}
       >
-        {shortenAddress(transferDetail.from)}
+        Received from {shortenAddress(transferDetail.from)}
       </Text>
       <Text
         style={{
           color: theme.text,
           fontSize: 24,
-          marginTop: 4,
+          fontWeight: 'bold',
         }}
       >
         {formatAmount(transferDetail.amount, 18)} ETH
@@ -80,53 +83,70 @@ const NativeTransferDetails = ({ route }: Props) => {
           ? new Date(Number(blockTimestamp) * 1000).toLocaleString()
           : ''}
       </Text>
-      <Text
-        style={{
-          color: theme.text,
-          fontSize: 16,
-          fontWeight: 'bold',
-          marginTop: 32,
-        }}
-      >
-        Details
-      </Text>
-      <View
+      <Pressable
         style={{
           alignItems: 'center',
-          rowGap: 8,
+          flexDirection: 'row',
+          justifyContent: 'center',
+          columnGap: 4,
+          marginTop: 32,
         }}
+        onPress={() => setShowDetails(!showDetails)}
       >
-        <TransferDetailListItem
-          label="To"
-          value={
-            <LinkText
-              text={shortenAddress(transferDetail.to)}
-              url={`${getBlockExplorerUrl(transferDetail.chainId)}/address/${transferDetail.to}`}
-            ></LinkText>
-          }
+        <Text
+          style={{
+            color: theme.text,
+            fontSize: 16,
+            fontWeight: 'bold',
+          }}
+        >
+          Details
+        </Text>
+        <Entypo
+          name={showDetails ? 'chevron-up' : 'chevron-down'}
+          size={18}
+          color={theme.gray}
         />
-        <TransferDetailListItem
-          label="Tx Hash"
-          value={
-            <LinkText
-              text={shortenAddress(transferDetail.txHash)}
-              url={`${getBlockExplorerUrl(transferDetail.chainId)}/tx/${txHash}`}
-            ></LinkText>
-          }
-        />
-        <TransferDetailListItem
-          label="Chain"
-          value={
-            <Text
-              style={{
-                color: theme.text,
-              }}
-            >
-              {getChainFromId(transferDetail.chainId).name}
-            </Text>
-          }
-        />
-      </View>
+      </Pressable>
+      {showDetails && (
+        <View
+          style={{
+            alignItems: 'center',
+            rowGap: 8,
+          }}
+        >
+          <TransferDetailListItem
+            label={'From'}
+            value={
+              <LinkText
+                text={shortenAddress(transferDetail.to)}
+                url={`${getBlockExplorerUrl(transferDetail.chainId)}/address/${transferDetail.to}`}
+              ></LinkText>
+            }
+          />
+          <TransferDetailListItem
+            label="Tx Hash"
+            value={
+              <LinkText
+                text={shortenAddress(transferDetail.txHash)}
+                url={`${getBlockExplorerUrl(transferDetail.chainId)}/tx/${txHash}`}
+              ></LinkText>
+            }
+          />
+          <TransferDetailListItem
+            label="Chain"
+            value={
+              <Text
+                style={{
+                  color: theme.text,
+                }}
+              >
+                {getChainFromId(transferDetail.chainId).name}
+              </Text>
+            }
+          />
+        </View>
+      )}
     </ScrollView>
   );
 };

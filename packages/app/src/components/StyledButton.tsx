@@ -69,7 +69,7 @@ const StyledButton = (props: StyledButtonProps) => {
       style={{
         ...pressableStyle,
         ...style,
-        opacity: disabled || isPressed ? 0.4 : 1,
+        opacity: (disabled || isPressed || isLoading) ? 0.4 : 1,
       }}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}

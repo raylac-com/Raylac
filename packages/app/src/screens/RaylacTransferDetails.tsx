@@ -6,13 +6,15 @@ import { theme } from '@/lib/theme';
 import { trpc } from '@/lib/trpc';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
+import { Entypo } from '@expo/vector-icons';
 import {
   formatAmount,
   getBlockExplorerUrl,
   RaylacTransferDetailsReturnType,
 } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ScrollView, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
 
@@ -74,6 +76,7 @@ const TraceListItem = ({
 const RaylacTransferDetails = ({ route }: Props) => {
   const { executionTag } = route.params;
   const { data: signedInUser } = useSignedInUser();
+  const [showTraces, setShowTraces] = useState(false);
 
   const { data: transferDetail } = trpc.getRaylacTransferDetails.useQuery({
     executionTag,
@@ -122,10 +125,11 @@ const RaylacTransferDetails = ({ route }: Props) => {
         flex: 1,
         flexDirection: 'column',
         alignItems: 'center',
+        rowGap: 10,
       }}
       style={{
         backgroundColor: theme.background,
-        paddingTop: 40,
+        paddingTop: 60,
       }}
     >
       <FastAvatar
@@ -141,9 +145,9 @@ const RaylacTransferDetails = ({ route }: Props) => {
         style={{
           color: theme.text,
           fontSize: 14,
-          marginTop: 16,
         }}
       >
+        {type === 'outgoing' ? 'Sent to ' : 'Received from '}
         {transferUser
           ? transferUser.name
           : shortenAddress(transferDetail.toAddress)}
@@ -152,12 +156,11 @@ const RaylacTransferDetails = ({ route }: Props) => {
         style={{
           color: theme.text,
           fontSize: 24,
-          marginTop: 4,
+          fontWeight: 'bold',
         }}
       >
         {formatAmount(transferDetail.amount, 18)} ETH
       </Text>
-
       <Text
         style={{
           color: theme.text,
@@ -166,29 +169,46 @@ const RaylacTransferDetails = ({ route }: Props) => {
       >
         {timestamp ? new Date(Number(timestamp) * 1000).toLocaleString() : ''}
       </Text>
-      <Text
+      <Pressable
         style={{
-          color: theme.text,
-          fontSize: 14,
-          fontWeight: 'bold',
+          alignItems: 'center',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          columnGap: 4,
           marginTop: 32,
         }}
+        onPress={() => setShowTraces(!showTraces)}
       >
-        Traces
-      </Text>
+        <Text
+          style={{
+            color: theme.text,
+            fontSize: 14,
+            fontWeight: 'bold',
+          }}
+        >
+          Traces
+        </Text>
+        <Entypo
+          name={showTraces ? 'chevron-up' : 'chevron-down'}
+          size={18}
+          color={theme.gray}
+        />
+      </Pressable>
 
-      <View
-        style={{
-          rowGap: 10,
-        }}
-      >
-        {transferDetail.traces.map((trace, i) => (
-          <TraceListItem
-            trace={trace as RaylacTransferDetailsReturnType['traces'][0]}
-            key={i}
-          />
-        ))}
-      </View>
+      {showTraces && (
+        <View
+          style={{
+            rowGap: 10,
+          }}
+        >
+          {transferDetail.traces.map((trace, i) => (
+            <TraceListItem
+              trace={trace as RaylacTransferDetailsReturnType['traces'][0]}
+              key={i}
+            />
+          ))}
+        </View>
+      )}
     </ScrollView>
   );
 };
