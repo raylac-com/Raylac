@@ -38,6 +38,7 @@ import useSignOut from './hooks/useSignOut';
 import Addresses from './screens/Addresses';
 import RaylacTransferDetails from './screens/RaylacTransferDetails';
 import NativeTransferDetails from './screens/NativeTransferDetails';
+import Advanced from './screens/Advanced';
 
 console.log('NODE_ENV', process.env.NODE_ENV);
 Sentry.init({
@@ -160,6 +161,14 @@ const Screens = () => {
         component={BackupAccount}
         options={{
           title: t('title', { ns: 'BackupAccount' }),
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+        }}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="Advanced"
+        component={Advanced}
+        options={{
+          title: t('title', { ns: 'Advanced' }),
           headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
       ></RootStack.Screen>

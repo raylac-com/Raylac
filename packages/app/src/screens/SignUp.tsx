@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import useCheckUsername from '@/hooks/useCheckUsername';
 import UsernameAvailabilityIndicator from '@/components/UsernameAvailabilityIndicator';
+import { sleep } from '@raylac/shared';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Props = NativeStackScreenProps<RootStackParamsList, 'SignUp'>;
@@ -124,10 +125,11 @@ const SignUp = () => {
         style={{
           marginTop: 20,
         }}
-        disabled={!canGoNext}
-        isLoading={isSigningUp}
+        disabled={!canGoNext || isSigningUp}
         onPress={async () => {
           setIsSigningUp(true);
+          await sleep(300);
+
           await signUp({
             name,
             username,
@@ -138,7 +140,7 @@ const SignUp = () => {
             screen: 'Home',
           });
         }}
-        title={t('signUp')}
+        title={isSigningUp ? 'Creating wallet...' : t('signUp')}
       ></StyledButton>
     </View>
   );

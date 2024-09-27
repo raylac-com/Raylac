@@ -31,7 +31,8 @@
     "addresses": "Addresses",
     "accountInfo": "Account info",
     "cancel": "Cancel",
-    "language": "Language"
+    "language": "Language",
+    "advanced": "Advanced"
   },
   "AccountInfo": {
     "title": "Account info",
@@ -108,6 +109,9 @@
     },
     "Addresses": {
       "title": "Addresses"
+    },
+    "Advanced": {
+      "title": "Advanced"
     },
     "common": {
       "next": "Next",

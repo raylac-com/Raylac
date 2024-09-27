@@ -194,6 +194,7 @@ const SelectRecipient = ({ navigation }: Props) => {
         <View
           style={{
             marginTop: 24,
+            width: '100%',
           }}
         >
           <AddressListItem

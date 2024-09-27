@@ -14,7 +14,6 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import useSetProfileImage from '@/hooks/useSetProfileImage';
 
 interface SettingListItemProps {
-  isFirst?: boolean;
   icon: React.ReactNode;
   title: string;
   onPress: () => void;
@@ -188,7 +187,6 @@ const Account = () => {
         }}
       >
         <SettingListItem
-          isFirst
           icon={
             <MaterialIcons name="account-circle" size={24} color={theme.gray} />
           }
@@ -197,17 +195,21 @@ const Account = () => {
           color={theme.text}
         />
         <SettingListItem
-          isFirst
           icon={<MaterialIcons name="backup" size={24} color={theme.gray} />}
           title={t('backupAccount')}
           onPress={() => navigation.navigate('BackupAccount')}
           color={theme.text}
         />
         <SettingListItem
-          isFirst
           icon={<MaterialIcons name="list" size={24} color={theme.gray} />}
           title={t('addresses')}
           onPress={() => navigation.navigate('Addresses')}
+          color={theme.text}
+        />
+        <SettingListItem
+          icon={<MaterialIcons name="settings" size={24} color={theme.gray} />}
+          title={t('advanced')}
+          onPress={() => navigation.navigate('Advanced')}
           color={theme.text}
         />
         {/**

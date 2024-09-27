@@ -45,6 +45,7 @@ export type RootStackParamsList = {
   };
   Receive: undefined;
   BackupAccount: undefined;
+  Advanced: undefined;
   SelectLanguage: undefined;
   SendSuccess: undefined;
 

@@ -2,7 +2,8 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { trpc } from '@/lib/trpc';
 import { Buffer } from 'buffer';
-import * as bip39 from 'bip39';
+import * as bip39 from '@scure/bip39';
+import { wordlist } from '@scure/bip39/wordlists/english';
 import userKeys from '@/queryKeys/userKeys';
 import { saveMnemonic } from '@/lib/key';
 import { saveAuthToken } from '@/lib/auth';
@@ -23,7 +24,7 @@ const useSignUp = () => {
       name: string;
       username: string;
     }) => {
-      const mnemonic = bip39.generateMnemonic();
+      const mnemonic = bip39.generateMnemonic(wordlist);
 
       const spendingPubKey = privateKeyToAccount(
         getSpendingPrivKey(mnemonic)

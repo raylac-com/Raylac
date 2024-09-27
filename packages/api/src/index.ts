@@ -28,6 +28,7 @@ import submitUserOperation from './api/submitUserOperation';
 import getRaylacTransferDetails from './api/getRaylacTransferDetails';
 import getNativeTransferDetails from './api/getNativeTransferDetails';
 import getUser from './api/getUser';
+import deleteAccount from './api/deleteAccount';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -364,6 +365,11 @@ const appRouter = router({
   getTokenPrices: publicProcedure.query(async () => {
     const prices = await getTokenPrices();
     return prices;
+  }),
+
+  deleteAccount: authedProcedure.mutation(async opts => {
+    const userId = opts.ctx.userId;
+    await deleteAccount({ userId });
   }),
 });
 
