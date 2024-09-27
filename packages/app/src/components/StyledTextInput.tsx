@@ -22,9 +22,8 @@ const StyledTextInput = (props: StyledTextInputProps) => {
         backgroundColor: theme.text,
         paddingHorizontal: 24,
         paddingVertical: 12,
-        borderRadius: 20,
+        borderRadius: 12,
         columnGap: 8,
-        width: '85%',
         ...containerStyle,
       }}
     >

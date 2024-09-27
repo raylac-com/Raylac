@@ -9,6 +9,7 @@ import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { publicKeyToAddress } from 'viem/accounts';
+import { formatDistanceToNowStrict } from 'date-fns';
 // import useEnsName from '@/hooks/useEnsName';
 
 /**
@@ -22,6 +23,10 @@ interface TransferHistoryListItemProps {
   tx: TransferHistoryQueryResult;
   type: 'incoming' | 'outgoing';
 }
+
+const formatDate = (date: Date) => {
+  return formatDistanceToNowStrict(date, { addSuffix: true });
+};
 
 const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
   const { tx, type } = props;
@@ -58,7 +63,9 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
 
   // const { data: ensName } = useEnsName(tx.from as Hex);
 
-  const avatarAddress = transferUser ? publicKeyToAddress(transferUser.spendingPubKey as Hex) : (type === 'outgoing' ? tx.to : tx.from) as Hex;
+  const avatarAddress = transferUser
+    ? publicKeyToAddress(transferUser.spendingPubKey as Hex)
+    : ((type === 'outgoing' ? tx.to : tx.from) as Hex);
 
   return (
     <Pressable
@@ -66,7 +73,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
         flex: 1,
         flexDirection: 'column',
         borderBottomWidth: 1,
-        padding: 12,
+        paddingVertical: 12,
       }}
       onPress={() => {
         if (tx.executionTag) {
@@ -150,17 +157,15 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
              */}
         </View>
       </View>
-
       <Text
         style={{
           color: theme.text,
-          marginTop: 4,
           textAlign: 'right',
           opacity: 0.5,
         }}
       >
         {blockTimestamp
-          ? new Date(Number(blockTimestamp) * 1000).toLocaleDateString()
+          ? formatDate(new Date(Number(blockTimestamp) * 1000))
           : ''}
       </Text>
     </Pressable>

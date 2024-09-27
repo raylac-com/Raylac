@@ -17,12 +17,17 @@ const TransferHistory = () => {
       }}
     >
       <FlatList
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+        }}
         data={txHistory}
         renderItem={({ item }) => (
-          <TransferHistoryListItem 
-          tx={item as TransferHistoryQueryResult}
-          type={item.fromUserId === signedInUser?.id ? 'outgoing' : 'incoming'}
-        />
+          <TransferHistoryListItem
+            tx={item as TransferHistoryQueryResult}
+            type={
+              item.fromUserId === signedInUser?.id ? 'outgoing' : 'incoming'
+            }
+          />
         )}
       />
       {txHistory?.length === 0 ? (

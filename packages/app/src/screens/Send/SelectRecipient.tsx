@@ -173,9 +173,10 @@ const SelectRecipient = ({ navigation }: Props) => {
     <View
       style={{
         flex: 1,
+        flexDirection: 'column',
         position: 'relative',
         alignItems: 'center',
-        width: '100%',
+        paddingHorizontal: 16,
       }}
     >
       <StyledTextInput
@@ -183,14 +184,15 @@ const SelectRecipient = ({ navigation }: Props) => {
         placeholder={t('searchUser')}
         containerStyle={{
           marginTop: 12,
-          width: '80%',
+        }}
+        inputStyle={{
+          height: 24,
         }}
         onChangeText={setSearchInput}
       ></StyledTextInput>
       {inputAddress && (
         <View
           style={{
-            width: '80%',
             marginTop: 24,
           }}
         >
@@ -206,8 +208,8 @@ const SelectRecipient = ({ navigation }: Props) => {
       )}
       <FlatList
         style={{
+          width: '100%',
           marginTop: 24,
-          width: '80%',
         }}
         data={usersToRender}
         renderItem={({ item }) => (
@@ -220,11 +222,9 @@ const SelectRecipient = ({ navigation }: Props) => {
           />
         )}
       ></FlatList>
-        {
-          /**
+      {/**
             <FloatingScanButton></FloatingScanButton>
-          */
-        }
+          */}
     </View>
   );
 };

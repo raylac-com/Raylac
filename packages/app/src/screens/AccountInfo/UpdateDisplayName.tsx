@@ -43,6 +43,7 @@ const UpdateDisplayName = () => {
       style={{
         marginTop: 12,
         alignItems: 'center',
+        paddingHorizontal: 16,
       }}
     >
       <StyledTextInput

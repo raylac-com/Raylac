@@ -182,6 +182,7 @@ const Screens = () => {
           options={{
             title: t('title', { ns: 'ConfirmDeposit' }),
             headerBackVisible: true,
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
           }}
         ></RootStack.Screen>
       </RootStack.Group>
@@ -223,6 +224,7 @@ const Screens = () => {
         options={{
           title: t('title', { ns: 'TransferHistory' }),
           headerBackVisible: true,
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
       ></RootStack.Screen>
       <RootStack.Screen
@@ -231,6 +233,7 @@ const Screens = () => {
         options={{
           title: t('title', { ns: 'RaylacTransferDetails' }),
           headerBackVisible: true,
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
       ></RootStack.Screen>
       <RootStack.Screen
@@ -239,6 +242,7 @@ const Screens = () => {
         options={{
           title: t('title', { ns: 'NativeTransferDetails' }),
           headerBackVisible: true,
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
       ></RootStack.Screen>
       <RootStack.Screen

@@ -17,36 +17,21 @@ import { useTranslation } from 'react-i18next';
 import StyledPressable from '@/components/StyledPressable';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import useSignedInUser from '@/hooks/useSignedInUser';
-import { formatAmount, TransferHistoryQueryResult } from '@raylac/shared';
-import { formatUnits } from 'viem';
-import useTokenPrice from '@/hooks/useTokenPrice';
+import { TransferHistoryQueryResult } from '@raylac/shared';
 import useTokenBalances from '@/hooks/useTokenBalance';
 
 interface TokenBalanceItemProps {
+  formattedBalance: string;
+  formattedUsdBalance: string;
   tokenId: string;
-  balance: string;
 }
 
 const TokenBalanceItem = (props: TokenBalanceItemProps) => {
-  const { tokenId, balance } = props;
-
-  const { data: tokenPrice } = useTokenPrice(tokenId);
+  const { tokenId, formattedBalance, formattedUsdBalance } = props;
 
   const tokenMetadata = supportedTokens.find(
     token => token.tokenId === tokenId
   );
-
-  const usdBalance = tokenPrice
-    ? tokenPrice *
-      parseFloat(formatUnits(BigInt(balance), tokenMetadata.decimals))
-    : null;
-
-  const formattedBalance = formatAmount(
-    balance.toString(),
-    tokenMetadata.decimals
-  );
-
-  const formattedUsdBalance = usdBalance ? usdBalance.toFixed(2) : '';
 
   return (
     <View
@@ -55,6 +40,10 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
         alignItems: 'center',
         justifyContent: 'center',
         columnGap: 8,
+        borderRadius: 8,
+        borderWidth: 1,
+        padding: 12,
+        borderColor: theme.gray,
       }}
     >
       <Image
@@ -78,7 +67,7 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
             fontSize: 20,
           }}
         >
-          {`${formattedBalance} ${tokenMetadata.symbol}`}
+          {`${formattedUsdBalance} USD`}
         </Text>
         <Text
           style={{
@@ -87,7 +76,7 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
             opacity: 0.5,
           }}
         >
-          {`${formattedUsdBalance} USD`}
+          {`${formattedBalance} ${tokenMetadata.symbol}`}
         </Text>
       </View>
     </View>
@@ -195,6 +184,10 @@ const HomeScreen = () => {
       }}
     >
       <ScrollView
+        contentContainerStyle={{
+          rowGap: 24,
+          paddingHorizontal: 16,
+        }}
         refreshControl={
           <RefreshControl
             tintColor={theme.primary}
@@ -223,7 +216,6 @@ const HomeScreen = () => {
         {/* Action menus (Deposit, Send, Receive) */}
         <View
           style={{
-            marginTop: 24,
             flexDirection: 'row',
             justifyContent: 'center',
             columnGap: 40,
@@ -259,7 +251,6 @@ const HomeScreen = () => {
         <ScrollView
           horizontal
           style={{
-            marginTop: 12,
             flexDirection: 'row',
             height: 80,
             paddingHorizontal: 20,
@@ -271,11 +262,18 @@ const HomeScreen = () => {
             width: '100%',
           }}
         >
-          {tokenBalances?.map(({ tokenId, balance }, i) => {
-            return (
-              <TokenBalanceItem key={i} balance={balance} tokenId={tokenId} />
-            );
-          })}
+          {tokenBalances?.map(
+            ({ tokenId, formattedBalance, formattedUsdBalance }, i) => {
+              return (
+                <TokenBalanceItem
+                  key={i}
+                  formattedBalance={formattedBalance}
+                  formattedUsdBalance={formattedUsdBalance}
+                  tokenId={tokenId}
+                />
+              );
+            }
+          )}
           {tokenBalances?.length > 3 && (
             <AntDesign name="arrowright" size={24} color={theme.gray} />
           )}
@@ -283,7 +281,6 @@ const HomeScreen = () => {
         {/* Transfer history */}
         <View
           style={{
-            marginTop: 40,
             flex: 1,
             flexDirection: 'column',
           }}

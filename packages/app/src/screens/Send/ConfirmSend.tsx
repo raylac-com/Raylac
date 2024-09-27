@@ -113,7 +113,7 @@ const ConfirmSend = ({ route }: Props) => {
         </Text>
       </View>
       <StyledButton
-        title={'Sent'}
+        title={'Send'}
         isLoading={isSending}
         onPress={() => {
           onSendPress();

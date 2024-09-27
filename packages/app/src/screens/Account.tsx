@@ -28,7 +28,10 @@ const SettingListItem = (props: SettingListItemProps) => {
     <TouchableHighlight
       style={{
         width: '100%',
-        height: 60,
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: 56,
       }}
       onPress={onPress}
       underlayColor={theme.backgroundHover}
@@ -36,11 +39,9 @@ const SettingListItem = (props: SettingListItemProps) => {
       <View
         style={{
           width: '100%',
-          height: '100%',
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
-          paddingHorizontal: 28,
         }}
       >
         <View
@@ -48,7 +49,6 @@ const SettingListItem = (props: SettingListItemProps) => {
             flexDirection: 'row',
             justifyContent: 'flex-start',
             alignItems: 'center',
-            height: '100%',
           }}
         >
           <View
@@ -108,9 +108,15 @@ const Account = () => {
     ]);
   }, [signOut, navigation]);
 
+  if (!user) {
+    return null;
+  }
+
+  /*
   const onChangeLanguagePress = useCallback(() => {
     navigation.navigate('SelectLanguage');
   }, []);
+  */
 
   return (
     <View
@@ -118,69 +124,67 @@ const Account = () => {
         flex: 1,
         flexDirection: 'column',
         alignItems: 'center',
-        marginTop: 24,
+        marginTop: 40,
+        paddingHorizontal: 16,
       }}
     >
-      {user ? (
-        <View
-          style={{
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <View
-            style={{
-              position: 'relative',
-              width: 64,
-              height: 64,
-            }}
-          >
-            <FastAvatar
-              address={publicKeyToAddress(user.spendingPubKey as Hex)}
-              size={64}
-              imageUrl={user.profileImage}
-            ></FastAvatar>
-            <AntDesign
-              name="camera"
-              size={20}
-              color={theme.text}
-              style={{
-                opacity: 0.9,
-                right: 22,
-                bottom: 22,
-                position: 'absolute',
-              }}
-              onPress={() => {
-                setProfileImage();
-              }}
-            />
-          </View>
-          <Text
-            style={{
-              marginTop: 12,
-              fontSize: 24,
-              color: theme.text,
-            }}
-          >
-            {user.name}
-          </Text>
-          <Text
-            style={{
-              marginTop: 4,
-              opacity: 0.5,
-              color: theme.text,
-            }}
-          >
-            @{user.username}
-          </Text>
-        </View>
-      ) : null}
       <View
         style={{
-          width: '100%',
           flexDirection: 'column',
           alignItems: 'center',
-          marginTop: 24,
+          rowGap: 8,
+        }}
+      >
+        <View
+          style={{
+            position: 'relative',
+            width: 64,
+            height: 64,
+          }}
+        >
+          <FastAvatar
+            address={publicKeyToAddress(user.spendingPubKey as Hex)}
+            size={64}
+            imageUrl={user.profileImage}
+          ></FastAvatar>
+          <AntDesign
+            name="camera"
+            size={20}
+            color={theme.text}
+            style={{
+              opacity: 0.9,
+              right: 22,
+              bottom: 22,
+              position: 'absolute',
+            }}
+            onPress={() => {
+              setProfileImage();
+            }}
+          />
+        </View>
+        <Text
+          style={{
+            fontSize: 24,
+            color: theme.text,
+          }}
+        >
+          {user.name}
+        </Text>
+        <Text
+          style={{
+            opacity: 0.5,
+            color: theme.text,
+          }}
+        >
+          @{user.username}
+        </Text>
+      </View>
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'column',
+          alignItems: 'center',
+          marginTop: 40,
         }}
       >
         <SettingListItem
@@ -206,12 +210,16 @@ const Account = () => {
           onPress={() => navigation.navigate('Addresses')}
           color={theme.text}
         />
+        {/**
+           * 
+          
         <SettingListItem
           icon={<Entypo name="language" size={24} color={theme.gray} />}
           title={t('language')}
           onPress={onChangeLanguagePress}
           color={theme.text}
         />
+         */}
         <SettingListItem
           icon={<MaterialIcons name="logout" size={24} color={theme.waning} />}
           title={t('signOut')}

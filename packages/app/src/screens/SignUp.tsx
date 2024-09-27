@@ -55,6 +55,7 @@ const SignUp = () => {
         alignItems: 'center',
         rowGap: 8,
         marginTop: 24,
+        paddingHorizontal: 16,
       }}
     >
       <View

@@ -19,7 +19,8 @@
     },
     "Receive": {
       "title": "Receive",
-      "backToHome": "Back to home"
+      "backToHome": "Back to home",
+      "sendAmountToAddress": "Send ETH to the following address on Base"
     },
     "Account": {
     "title": "Account",
@@ -62,7 +63,7 @@
     },
     "ConfirmDeposit": {
       "title": "Confirm",
-      "sendAmountToAddress": "Send USDC to the following address on Base",
+      "sendAmountToAddress": "Send ETH to the following address on Base",
       "confirm": "I made the transfer"
     },
     "SendSuccess": {
@@ -89,10 +90,10 @@
       "title": "Transfer History"
     },
     "RaylacTransferDetails": {
-      "title": "Transfer Details"
+      "title": "Transfer details"
     },
     "NativeTransferDetails": {
-      "title": "Transfer Details"
+      "title": "Transfer details"
     },
     "BackupAccount": {
       "title": "Backup Account",
