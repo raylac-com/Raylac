@@ -100,9 +100,9 @@
       "title": "Backup Account",
       "backupWarning1": "Anyone who has your backup phrase can access and spend your balance.",
       "backupWarning2": "Make sure no one can see your screen when you reveal your backup phrase.",
-      "revealBackupPhrase": "復元フレーズを表示",
-      "hideBackupPhrase": "閉じる",
-      "copyBackupPhrase": "コピー"
+      "revealBackupPhrase": "Reveal backup phrase",
+      "hideBackupPhrase": "Hide backup phrase",
+      "copyBackupPhrase": "Copy"
     },
     "SelectLanguage": {
       "title": "Select Language"

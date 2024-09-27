@@ -64,6 +64,12 @@ const config: ExpoConfig = {
       projectId: 'f1bcc97f-3192-41c1-a32e-5b1dd12049cd',
     },
   },
+  updates: {
+    url: 'https://u.expo.dev/f1bcc97f-3192-41c1-a32e-5b1dd12049cd',
+  },
+  runtimeVersion: {
+    policy: 'appVersion',
+  },
   owner: 'raylac',
 };
 
