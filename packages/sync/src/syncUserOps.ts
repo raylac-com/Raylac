@@ -75,6 +75,32 @@ const syncUserOpsByPaymaster = async () => {
               `Found ${chunkLogs.length} logs from block ${startBlock.toLocaleString()} to ${endBlock.toLocaleString()}`
             );
           }
+
+          const txs = [...new Set(chunkLogs.map(log => log.transactionHash))];
+
+          await prisma.transaction.createMany({
+            data: txs.map(txHash => ({
+              chainId,
+              hash: txHash,
+              blockNumber: chunkLogs.find(log => log.transactionHash === txHash)!.blockNumber
+            })),
+            skipDuplicates: true,
+          });
+
+          await prisma.userOperation.createMany({
+            data: chunkLogs.map(log => ({
+              chainId,
+              hash: log.args.userOpHash!,
+              sender: log.args.sender,
+              paymaster: log.args.paymaster,
+              nonce: Number(log.args.nonce),
+              success: log.args.success,
+              actualGasCost: log.args.actualGasCost,
+              actualGasUsed: log.args.actualGasUsed,
+              transactionHash: log.transactionHash,
+            })),
+            skipDuplicates: true,
+          });
         } catch (error) {
           console.error(
             `Error fetching logs from block ${startBlock.toString()} to ${endBlock.toString()}:`,
