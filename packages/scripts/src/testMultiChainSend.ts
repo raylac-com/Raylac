@@ -15,6 +15,7 @@ import {
   getTokenBalance,
   NATIVE_TOKEN_ADDRESS,
   decodeUserOpCalldata,
+  getGasInfo,
 } from '@raylac/shared';
 import { webcrypto } from 'node:crypto';
 import * as chains from 'viem/chains';
@@ -27,7 +28,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 
 const mnemonic =
-  'first flat achieve eight course potato common idea fuel brief torch album';
+  'member rescue creek have fly rail surprise table same trip expand vapor';
 
 const FUNDER_PRIV_KEY = process.env.FUNDER_PRIV_KEY as Hex;
 
@@ -104,8 +105,10 @@ const testMultiChainSend = async () => {
 
   const stealthAccounts = await authedClient.getStealthAccounts.query();
 
+  console.time('getAddressBalancesPerChain');
   const addressBalancePerChain =
     await authedClient.getAddressBalancesPerChain.query();
+  console.timeEnd('getAddressBalancesPerChain');
 
   const signedInUser = await authedClient.getUser.query({
     userId,
@@ -120,6 +123,7 @@ const testMultiChainSend = async () => {
   const amount = parseUnits('0.0001', 18);
 
   const testCases = [
+    /*
     {
       // Transfer from two accounts on Optimism Sepolia to Base Sepolia
       inputAccounts: addressBalancePerChain
@@ -138,7 +142,6 @@ const testMultiChainSend = async () => {
       outputChain: chains.baseSepolia.id,
       tokenId,
     },
-    /*
     {
       // Transfer from Optimism Sepolia and Base Sepolia to Optimism Sepolia
       inputAccounts: [
@@ -161,6 +164,7 @@ const testMultiChainSend = async () => {
       outputChain: chains.optimismSepolia.id,
       tokenId: 'eth',
     },
+    */
     {
       // Transfer from two accounts on Base Sepolia to Base Sepolia
       inputAccounts: addressBalancePerChain
@@ -179,6 +183,7 @@ const testMultiChainSend = async () => {
       outputChain: chains.baseSepolia.id,
       tokenId: 'eth',
     },
+    /*
     {
       // Transfer from two accounts on Optimism Sepolia and Base Sepolia to Arbitrum Sepolia
       inputAccounts: [
@@ -204,6 +209,10 @@ const testMultiChainSend = async () => {
     */
   ];
 
+  const gasInfo = await getGasInfo({
+    isDevMode: true,
+  });
+
   for (const testCase of testCases) {
     /**
      * 1. Build the multi-chain send request body
@@ -221,6 +230,7 @@ const testMultiChainSend = async () => {
         tokenId: account.tokenId!,
         balance: account.balance!,
         chainId: account.chainId!,
+        nonce: account.nonce,
         tokenAddress: getTokenAddressOnChain({
           chainId: account.chainId,
           tokenId,
@@ -231,6 +241,7 @@ const testMultiChainSend = async () => {
       })),
       outputChainId: testCase.outputChain,
       tokenId: testCase.tokenId,
+      gasInfo,
       to,
       amount,
     });
@@ -272,6 +283,7 @@ const testMultiChainSend = async () => {
      * 3. Sign the user operations with the stealth accounts
      */
 
+    /*
     const signedBridgeUserOps = await bulkSignUserOps({
       userOps: paymasterSignedBridgeUserOps,
       stealthAccounts: stealthAccounts as StealthAddressWithEphemeral[],
@@ -323,6 +335,7 @@ const testMultiChainSend = async () => {
       relayQuotes: multiChainSendData.relayQuotes,
       proxyStealthAccount: multiChainSendData.consolidateToStealthAccount,
     });
+    */
   }
 };
 

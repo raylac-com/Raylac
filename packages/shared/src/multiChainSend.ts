@@ -1,5 +1,6 @@
 import { encodeFunctionData, Hex, toHex } from 'viem';
 import {
+  ChainGasInfo,
   MultiChainTransferRequestBody,
   RelayGetQuoteResponseBody,
   StealthAddressWithEphemeral,
@@ -18,6 +19,7 @@ interface InputStealthAccount {
   stealthAccount: StealthAddressWithEphemeral;
   chainId: number;
   amount: bigint;
+  nonce: number | null;
 }
 
 /**
@@ -25,10 +27,14 @@ interface InputStealthAccount {
  */
 const buildUserOpsFromRelayQuote = async ({
   stealthSigner,
+  signerNonce,
+  gasInfo,
   quote,
   tag,
 }: {
   stealthSigner: Hex;
+  signerNonce: number | null;
+  gasInfo: ChainGasInfo[];
   quote: RelayGetQuoteResponseBody;
   tag: Hex;
 }) => {
@@ -47,9 +53,11 @@ const buildUserOpsFromRelayQuote = async ({
               client,
               stealthSigner,
               to: item.data.to,
+              nonce: signerNonce,
               value: BigInt(item.data.value),
               data: item.data.data,
               tag,
+              gasInfo,
             });
           })
         );
@@ -109,6 +117,7 @@ const chooseInputStealthAccounts = ({
         stealthAccount: destinationChainStealthAccount.stealthAddress,
         chainId: destinationChainStealthAccount.chainId,
         amount: remainingAmount,
+        nonce: destinationChainStealthAccount.nonce,
       });
       remainingAmount = BigInt(0);
       break;
@@ -117,6 +126,7 @@ const chooseInputStealthAccounts = ({
         stealthAccount: destinationChainStealthAccount.stealthAddress,
         chainId: destinationChainStealthAccount.chainId,
         amount: balance,
+        nonce: destinationChainStealthAccount.nonce,
       });
     }
 
@@ -143,6 +153,7 @@ const chooseInputStealthAccounts = ({
         stealthAccount: otherChainStealthAccount.stealthAddress,
         chainId: otherChainStealthAccount.chainId,
         amount: remainingAmount,
+        nonce: otherChainStealthAccount.nonce,
       });
       remainingAmount = BigInt(0);
       break;
@@ -151,6 +162,7 @@ const chooseInputStealthAccounts = ({
         stealthAccount: otherChainStealthAccount.stealthAddress,
         chainId: otherChainStealthAccount.chainId,
         amount: balance,
+        nonce: otherChainStealthAccount.nonce,
       });
     }
 
@@ -175,6 +187,8 @@ export const buildERC20TransferUserOp = async ({
   tokenAddress,
   amount,
   chainId,
+  nonce,
+  gasInfo,
   tag,
 }: {
   stealthSigner: Hex;
@@ -182,6 +196,8 @@ export const buildERC20TransferUserOp = async ({
   tokenAddress: Hex;
   amount: bigint;
   chainId: number;
+  nonce: number | null;
+  gasInfo: ChainGasInfo[];
   tag: Hex;
 }) => {
   const client = getPublicClient({
@@ -200,7 +216,9 @@ export const buildERC20TransferUserOp = async ({
     value: BigInt(0),
     to: tokenAddress,
     data: transferCall,
+    nonce,
     tag,
+    gasInfo,
   });
 
   return userOp;
@@ -214,12 +232,16 @@ export const buildETHTransferUserOp = async ({
   to,
   amount,
   chainId,
+  nonce,
+  gasInfo,
   tag,
 }: {
   stealthSigner: Hex;
   to: Hex;
   amount: bigint;
   chainId: number;
+  gasInfo: ChainGasInfo[];
+  nonce: number | null;
   tag: Hex;
 }) => {
   const client = getPublicClient({
@@ -231,8 +253,10 @@ export const buildETHTransferUserOp = async ({
     stealthSigner,
     value: amount,
     to,
+    nonce,
     data: '0x',
     tag,
+    gasInfo,
   });
 
   return userOp;
@@ -244,6 +268,8 @@ const buildTransferUseOp = async ({
   tokenAddress,
   amount,
   chainId,
+  nonce,
+  gasInfo,
   tag,
 }: {
   stealthSigner: Hex;
@@ -251,6 +277,8 @@ const buildTransferUseOp = async ({
   tokenAddress: Hex;
   amount: bigint;
   chainId: number;
+  nonce: number | null;
+  gasInfo: ChainGasInfo[];
   tag: Hex;
 }) => {
   if (tokenAddress === NATIVE_TOKEN_ADDRESS) {
@@ -259,6 +287,8 @@ const buildTransferUseOp = async ({
       to,
       amount,
       chainId,
+      nonce,
+      gasInfo,
       tag,
     });
   }
@@ -269,6 +299,8 @@ const buildTransferUseOp = async ({
     tokenAddress,
     amount,
     chainId,
+    nonce,
+    gasInfo,
     tag,
   });
 };
@@ -284,6 +316,7 @@ export const buildMultiChainSendRequestBody = async ({
   to,
   amount,
   stealthAccountsWithTokenBalances,
+  gasInfo,
 }: {
   senderPubKeys: {
     spendingPubKey: Hex;
@@ -294,6 +327,7 @@ export const buildMultiChainSendRequestBody = async ({
   to: Hex;
   amount: bigint;
   stealthAccountsWithTokenBalances: TokenBalance[];
+  gasInfo: ChainGasInfo[];
 }): Promise<MultiChainTransferRequestBody> => {
   const inputs = chooseInputStealthAccounts({
     outputChainId,
@@ -307,6 +341,8 @@ export const buildMultiChainSendRequestBody = async ({
     spendingPubKey: senderPubKeys.spendingPubKey as Hex,
     viewingPubKey: senderPubKeys.viewingPubKey as Hex,
   });
+
+  const sendTo = inputs.length > 1 ? consolidateToStealthAccount.address : to;
 
   const tokenAddressOnOutputChain = getTokenAddressOnChain({
     chainId: outputChainId,
@@ -327,8 +363,6 @@ export const buildMultiChainSendRequestBody = async ({
         tokenId,
       });
 
-      console.log(input);
-
       if (!tokenAddress) {
         throw new Error('Token address not found');
       }
@@ -340,11 +374,13 @@ export const buildMultiChainSendRequestBody = async ({
       // Build a standard transfer user operation
       const userOp = await buildTransferUseOp({
         stealthSigner,
-        to: consolidateToStealthAccount.address,
+        to: sendTo,
         tokenAddress,
         amount: input.amount,
         chainId: input.chainId,
+        nonce: input.nonce,
         tag,
+        gasInfo,
       });
 
       unsignedBridgeUserOps.push({
@@ -361,7 +397,7 @@ export const buildMultiChainSendRequestBody = async ({
 
       const quote = await relay.getQuote({
         user: input.stealthAccount.address,
-        recipient: consolidateToStealthAccount.address,
+        recipient: sendTo,
         originChainId: input.chainId,
         destinationChainId: outputChainId,
         amount: input.amount.toString(),
@@ -375,29 +411,32 @@ export const buildMultiChainSendRequestBody = async ({
       const userOps = await buildUserOpsFromRelayQuote({
         stealthSigner: publicKeyToAddress(input.stealthAccount.stealthPubKey),
         quote,
+        signerNonce: input.nonce,
         tag,
+        gasInfo,
       });
 
       unsignedBridgeUserOps.push(...userOps);
     }
-
-    console.log(
-      `Sending ${input.amount} from ${input.stealthAccount.address} on chain ${input.chainId}`
-    );
   }
 
-  const consolidateAccountStealthSigner = publicKeyToAddress(
-    consolidateToStealthAccount.stealthPubKey
-  );
+  let finalTransferUserOp;
+  if (inputs.length > 1) {
+    const consolidateAccountStealthSigner = publicKeyToAddress(
+      consolidateToStealthAccount.stealthPubKey
+    );
 
-  const finalTransferUserOp = await buildTransferUseOp({
-    stealthSigner: consolidateAccountStealthSigner,
-    tokenAddress: tokenAddressOnOutputChain,
-    to,
-    amount,
-    chainId: outputChainId,
-    tag,
-  });
+    finalTransferUserOp = await buildTransferUseOp({
+      stealthSigner: consolidateAccountStealthSigner,
+      tokenAddress: tokenAddressOnOutputChain,
+      to,
+      amount,
+      chainId: outputChainId,
+      nonce: null,
+      gasInfo,
+      tag,
+    });
+  }
 
   return {
     aggregationUserOps: unsignedBridgeUserOps,

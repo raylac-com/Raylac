@@ -117,7 +117,7 @@ model UserOperation {
 
   sender        String?
   paymaster     String?
-  nonce         BigInt?
+  nonce         Int?
   success       Boolean?
   actualGasCost BigInt?
   actualGasUsed BigInt?

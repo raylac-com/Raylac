@@ -7,14 +7,18 @@ import {
   Hex,
   parseUnits,
 } from 'viem';
-import { RaylacAccountTransferData, UserOperation } from './types';
+import {
+  ChainGasInfo,
+  RaylacAccountTransferData,
+  UserOperation,
+} from './types';
 import RaylacAccountAbi from './abi/RaylacAccountAbi';
 import ERC20Abi from './abi/ERC20Abi';
 import * as chains from 'viem/chains';
 import { Network } from 'alchemy-sdk';
 import supportedTokens, { NATIVE_TOKEN_ADDRESS } from './supportedTokens';
 import { getPublicClient } from './ethRpc';
-import { getERC20TokenBalance } from '.';
+import { getERC20TokenBalance, rundlerMaxPriorityFeePerGas } from '.';
 import supportedChains from './supportedChains';
 import { Prisma } from '@prisma/client';
 
@@ -458,3 +462,33 @@ export const traceToPostgresRecord = ({
 };
 
 export const RAYLAC_ACCOUNT_EXECUTE_FUNC_SIG = '0xda0980c7';
+
+/**
+ * Get the gas info for all supported chains
+ */
+export const getGasInfo = async ({
+  isDevMode,
+}: {
+  isDevMode: boolean;
+}): Promise<ChainGasInfo[]> => {
+  const chains = getChainsForMode(isDevMode);
+
+  const gasInfo: ChainGasInfo[] = [];
+  for (const chain of chains) {
+    const client = getPublicClient({ chainId: chain.id });
+    const block = await client.getBlock({ blockTag: 'latest' });
+    const maxPriorityFeePerGas = await rundlerMaxPriorityFeePerGas({ client });
+
+    if (block.baseFeePerGas === null) {
+      throw new Error('baseFeePerGas is null');
+    }
+
+    gasInfo.push({
+      chainId: chain.id,
+      baseFeePerGas: block.baseFeePerGas,
+      maxPriorityFeePerGas,
+    });
+  }
+
+  return gasInfo;
+};

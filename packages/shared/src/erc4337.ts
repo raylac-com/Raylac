@@ -3,7 +3,11 @@ import {
   ENTRY_POINT_ADDRESS,
   RAYLAC_PAYMASTER_ADDRESS,
 } from './addresses';
-import { StealthAddressWithEphemeral, UserOperation } from './types';
+import {
+  ChainGasInfo,
+  StealthAddressWithEphemeral,
+  UserOperation,
+} from './types';
 import RaylacAccountAbi from './abi/RaylacAccountAbi';
 import AccountFactoryAbi from './abi/AccountFactory';
 import EntryPointAbi from './abi/EntryPointAbi';
@@ -22,10 +26,8 @@ import {
 import axios from 'axios';
 import RaylacPaymasterAbi from './abi/RaylacPaymasterAbi';
 import { getSenderAddress, recoveryStealthPrivKey } from './stealth';
-import { Alchemy } from 'alchemy-sdk';
-import { increaseByPercent, toAlchemyNetwork } from './utils';
+import { increaseByPercent } from './utils';
 import { signMessage } from 'viem/accounts';
-import { getPublicClient } from './ethRpc';
 
 /**
  * Get the init code for creating a stealth contract account
@@ -53,6 +55,8 @@ export const buildUserOp = async ({
   value,
   data,
   tag,
+  gasInfo,
+  nonce,
 }: {
   client: PublicClient<HttpTransport, Chain>;
   stealthSigner: Hex;
@@ -60,7 +64,17 @@ export const buildUserOp = async ({
   value: bigint;
   data: Hex;
   tag: Hex;
+  gasInfo: ChainGasInfo[];
+  nonce: number | null;
 }): Promise<UserOperation> => {
+  const chainId = client.chain.id;
+
+  const chainGasInfo = gasInfo.find(gasInfo => gasInfo.chainId === chainId);
+
+  if (!chainGasInfo) {
+    throw new Error('Chain gas info not found');
+  }
+
   const initCode = getInitCode({ stealthSigner });
 
   const senderAddress = getSenderAddress({
@@ -71,12 +85,9 @@ export const buildUserOp = async ({
     throw new Error('Failed to get sender address');
   }
 
-  const nonce = await client.readContract({
-    address: ENTRY_POINT_ADDRESS,
-    abi: EntryPointAbi,
-    functionName: 'getNonce',
-    args: [senderAddress, BigInt(0)],
-  });
+  console.log({ nonce });
+  const nextNonce = nonce === null ? 0 : Number(nonce) + 1;
+  console.log({ nextNonce });
 
   const callData = encodeFunctionData({
     abi: RaylacAccountAbi,
@@ -84,33 +95,13 @@ export const buildUserOp = async ({
     args: [to, value, data, tag],
   });
 
-  const senderCode = await client.getCode({
-    address: senderAddress,
-  });
-
-  const alchemy = new Alchemy({
-    apiKey:
-      process.env.ALCHEMY_API_KEY || process.env.EXPO_PUBLIC_ALCHEMY_API_KEY,
-    network: toAlchemyNetwork(client.chain.id),
-  });
-
-  const feeData = await alchemy.core.getFeeData();
-
-  const baseFee = feeData.lastBaseFeePerGas!.toBigInt();
-
   const baseFeeBuffed = increaseByPercent({
-    value: baseFee,
+    value: chainGasInfo.baseFeePerGas,
     percent: 10,
   });
 
-  const maxPriorityFeePerGas = await rundlerMaxPriorityFeePerGas({
-    client: getPublicClient({
-      chainId: client.chain.id,
-    }),
-  });
-
   const maxPriorityFeePerGasBuffed = increaseByPercent({
-    value: maxPriorityFeePerGas,
+    value: chainGasInfo.maxPriorityFeePerGas,
     percent: 10,
   });
 
@@ -118,8 +109,8 @@ export const buildUserOp = async ({
 
   const userOp: UserOperation = {
     sender: senderAddress,
-    nonce: toHex(nonce),
-    initCode: senderCode ? '0x' : initCode,
+    nonce: toHex(nextNonce),
+    initCode: nonce === null ? initCode : '0x',
     callData,
     callGasLimit: toHex(BigInt(0)),
     verificationGasLimit: toHex(BigInt(0)),
@@ -142,10 +133,10 @@ export const buildUserOp = async ({
   */
 
   const gasEstimation = {
-    preVerificationGas: toHex(210_000),
+    preVerificationGas: toHex(1_500_000),
     callGasLimit: toHex(50_000),
     // Use a higher gas limit for the verification step if the sender needs to be deployed
-    verificationGasLimit: senderCode ? toHex(70_000) : toHex(210_000),
+    verificationGasLimit: nonce === null ? toHex(210_000) : toHex(70_000),
   };
 
   userOp.callGasLimit = gasEstimation.callGasLimit;

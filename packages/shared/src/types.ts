@@ -105,6 +105,7 @@ export interface TokenBalance {
   stealthAddress: StealthAddressWithEphemeral;
   balance: string;
   chainId: number;
+  nonce: number | null;
 }
 
 export interface SupportedToken {
@@ -121,8 +122,8 @@ export interface SupportedToken {
 
 export interface MultiChainTransferRequestBody {
   aggregationUserOps: UserOperation[];
-  finalTransferUserOp: UserOperation;
-  consolidateToStealthAccount: StealthAddressWithEphemeral;
+  finalTransferUserOp?: UserOperation;
+  consolidateToStealthAccount?: StealthAddressWithEphemeral;
   relayQuotes: RelayGetQuoteResponseBody[];
 }
 
@@ -307,6 +308,7 @@ export interface AccountBalancePerChainQueryResult {
   stealthPubKey: Hex;
   ephemeralPubKey: Hex;
   tokenId: string;
+  nonce: number | null;
 }
 
 export interface TokenBalancePerChainQueryResult {
@@ -322,3 +324,9 @@ export interface CoingeckoTokenPriceResponse {
 }
 
 export type SyncJob = 'UserOps' | 'Traces';
+
+export interface ChainGasInfo {
+  baseFeePerGas: bigint;
+  maxPriorityFeePerGas: bigint;
+  chainId: number;
+}

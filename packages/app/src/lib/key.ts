@@ -12,7 +12,6 @@ export const getSignInAvailableUserIds = async () => {
   const ids = await AsyncStorage.getItem(
     SIGN_IN_AVAILABLE_USER_IDS_STORAGE_KEY
   );
-  console.log({ ids });
 
   // Only return the user IDs that are on the currently connected server
   const serverId = getServerId();

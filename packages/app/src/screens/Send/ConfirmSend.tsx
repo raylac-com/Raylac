@@ -1,5 +1,6 @@
 import FastAvatar from '@/components/FastAvatar';
 import StyledButton from '@/components/StyledButton';
+import useGasInfo from '@/hooks/useGasInfo';
 import useSend from '@/hooks/useSend';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { theme } from '@/lib/theme';
@@ -22,6 +23,9 @@ const ConfirmSend = ({ route }: Props) => {
     route.params;
   const { mutateAsync: send, isPending: isSending } = useSend();
   const navigation = useTypedNavigation();
+
+  const { data: gasInfo } = useGasInfo();
+
   const { t } = useTranslation('ConfirmSend');
 
   const onSendPress = useCallback(async () => {
@@ -30,11 +34,12 @@ const ConfirmSend = ({ route }: Props) => {
       tokenId,
       outputChainId,
       recipientUserOrAddress,
+      gasInfo,
     });
 
     // Navigate to the `SendSuccess` screen
     navigation.navigate('SendSuccess');
-  }, [recipientUserOrAddress, send, amount]);
+  }, [recipientUserOrAddress, send, amount, gasInfo]);
 
   const tokenMeta = supportedTokens.find(token => token.tokenId === tokenId);
 
@@ -108,7 +113,7 @@ const ConfirmSend = ({ route }: Props) => {
         </Text>
       </View>
       <StyledButton
-        title={t('send')}
+        title={'Sent'}
         isLoading={isSending}
         onPress={() => {
           onSendPress();
@@ -116,7 +121,58 @@ const ConfirmSend = ({ route }: Props) => {
         style={{
           marginTop: 48,
         }}
+        disabled={gasInfo ? false : true}
       ></StyledButton>
+      {/**
+         * 
+     
+      <View
+        style={{
+          flexDirection: 'column',
+          alignItems: "center",
+          marginTop: 24,
+          rowGap: 18,
+        }}
+      >
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            columnGap: 12,
+          }}
+        >
+          <AntDesign name="checkcircle" size={24} color={theme.primary} />
+          <Text
+            style={{
+              color: theme.text,
+              fontWeight: 'bold',
+              fontSize: 20,
+            }}
+          >
+            Sent
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: "flex-start",
+            columnGap: 12,
+          }}
+        >
+          <LoadingIndicator size={24}></LoadingIndicator>
+          <Text
+            style={{
+              color: theme.text,
+              fontWeight: 'bold',
+              fontSize: 20,
+            }}
+          >
+            Confirming
+          </Text>
+        </View>
+      </View>
+       */}
     </View>
   );
 };

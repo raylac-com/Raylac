@@ -12,7 +12,7 @@ import {
   traceTransaction,
   UserOperation,
 } from '@raylac/shared';
-import { decodeFunctionData, Hex, hexToBigInt, Log, parseAbiItem } from 'viem';
+import { decodeFunctionData, Hex, Log, parseAbiItem } from 'viem';
 import prisma from '../lib/prisma';
 
 const userOpEvent = parseAbiItem(
@@ -81,17 +81,21 @@ const pollUserOpEvent = ({
 
 const submitUserOperation = async ({ userOp }: { userOp: UserOperation }) => {
   const client = getPublicClient({ chainId: userOp.chainId });
-
+  
+  console.time('sendUserOperation');
   const userOpHash = await sendUserOperation({
     client,
     userOp,
   });
+  console.timeEnd('sendUserOperation');
 
+  console.time('pollUserOpEvent');
   const userOpEventLog = await pollUserOpEvent({
     userOpHash,
     chainId: userOp.chainId,
     timeout: 15000,
   });
+  console.timeEnd('pollUserOpEvent');
 
   const success = userOpEventLog.args.success!;
 
@@ -120,9 +124,10 @@ const submitUserOperation = async ({ userOp }: { userOp: UserOperation }) => {
     chainId: userOp.chainId,
     sender: userOp.sender,
     paymaster: RAYLAC_PAYMASTER_ADDRESS,
-    nonce: hexToBigInt(userOp.nonce),
+    nonce: parseInt(userOp.nonce, 16),
     actualGasUsed,
     actualGasCost,
+    success,
     Transaction: {
       create: {
         hash: txHash,

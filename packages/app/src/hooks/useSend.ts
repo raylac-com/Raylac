@@ -2,6 +2,7 @@ import { getMnemonic } from '@/lib/key';
 import { client, trpc } from '@/lib/trpc';
 import { RouterOutput, User } from '@/types';
 import {
+  ChainGasInfo,
   StealthAddressWithEphemeral,
   buildMultiChainSendRequestBody,
   generateStealthAddress,
@@ -42,11 +43,13 @@ const useSend = () => {
       tokenId,
       outputChainId,
       recipientUserOrAddress,
+      gasInfo,
     }: {
       amount: bigint;
       tokenId: string;
       outputChainId: number;
       recipientUserOrAddress: Hex | User;
+      gasInfo: ChainGasInfo[];
     }) => {
       const addressBalancePerChain =
         await client.getAddressBalancesPerChain.query();
@@ -75,7 +78,9 @@ const useSend = () => {
       }
 
       const mnemonic = await getMnemonic(signedInUser.id);
+
       const viewingPrivKey = await getViewingPrivKey(mnemonic);
+
       const spendingPrivKey = await getSpendingPrivKey(mnemonic);
 
       if (!viewingPrivKey) {
@@ -126,21 +131,25 @@ const useSend = () => {
             stealthAddress: stealthAccounts.find(
               stealthAccount => stealthAccount.address === account.address
             ) as StealthAddressWithEphemeral,
+            nonce: account.nonce,
           })
         ),
-
         outputChainId,
+        gasInfo,
       });
 
       // Save the proxy stealth account to the database
       const proxyAccount = multiChainSendData.consolidateToStealthAccount;
-      await addNewStealthAccount({
-        userId: signedInUser.id,
-        address: proxyAccount.address,
-        stealthPubKey: proxyAccount.stealthPubKey,
-        ephemeralPubKey: proxyAccount.ephemeralPubKey,
-        viewTag: proxyAccount.viewTag,
-      });
+
+      if (proxyAccount) {
+        await addNewStealthAccount({
+          userId: signedInUser.id,
+          address: proxyAccount.address,
+          stealthPubKey: proxyAccount.stealthPubKey,
+          ephemeralPubKey: proxyAccount.ephemeralPubKey,
+          viewTag: proxyAccount.viewTag,
+        });
+      }
 
       // Submit the user operations
       for (const aggregationUserOp of multiChainSendData.aggregationUserOps) {
@@ -152,6 +161,7 @@ const useSend = () => {
           throw new Error('Signer account not found');
         }
 
+        console.log(`Submitting user`);
         await submitUserOpWithRetry({
           userOp: aggregationUserOp,
           stealthAccount: signerAccount as StealthAddressWithEphemeral,
@@ -164,43 +174,20 @@ const useSend = () => {
         );
       }
 
-      // wait for the balance to be updated
-      await sleep(2000);
+      if (multiChainSendData.finalTransferUserOp) {
+        // wait for the balance to be updated
+        await sleep(2000);
 
-      const finalUserOpSigner = multiChainSendData.consolidateToStealthAccount;
+        const finalUserOpSigner =
+          multiChainSendData.consolidateToStealthAccount;
 
-      /*
-      // Poll the proxy account balance
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        await waitForAccountBalance({
-          address: multiChainSendData.consolidateToStealthAccount.address,
-          tokenAddress: getTokenAddressOnChain({
-            chainId: outputChainId,
-            tokenId,
-          }),
-
-          chainId: outputChainId,
+        await submitUserOpWithRetry({
+          userOp: multiChainSendData.finalTransferUserOp,
+          stealthAccount: finalUserOpSigner as StealthAddressWithEphemeral,
+          spendingPrivKey,
+          viewingPrivKey,
         });
-
-        console.log(
-          `Polling for proxy account token balance: ${proxyAccountTokenBalance}`
-        );
-
-        if (proxyAccountTokenBalance >= amount) {
-          break;
-        }
-
-        await sleep(3000);
       }
-      */
-
-      await submitUserOpWithRetry({
-        userOp: multiChainSendData.finalTransferUserOp,
-        stealthAccount: finalUserOpSigner as StealthAddressWithEphemeral,
-        spendingPrivKey,
-        viewingPrivKey,
-      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

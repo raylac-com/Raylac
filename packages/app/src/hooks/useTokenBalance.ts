@@ -2,7 +2,6 @@ import { trpc } from '@/lib/trpc';
 import useIsSignedIn from './useIsSignedIn';
 import { useCallback } from 'react';
 import { formatAmount, toCoingeckoTokenId } from '@raylac/shared';
-import { useQuery } from '@tanstack/react-query';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { formatUnits } from 'viem';
 
@@ -10,7 +9,11 @@ const useTokenBalances = () => {
   const { data: isSignedIn } = useIsSignedIn();
   const { data: tokenPrices } = trpc.getTokenPrices.useQuery();
 
-  const { data: tokenBalances } = trpc.getTokenBalances.useQuery(null, {
+  const {
+    data: tokenBalances,
+    refetch,
+    isRefetching,
+  } = trpc.getTokenBalances.useQuery(null, {
     enabled: isSignedIn,
     throwOnError: false, // Don't throw on error for this particular query in all environments
     refetchOnWindowFocus: true,
@@ -34,38 +37,37 @@ const useTokenBalances = () => {
     [tokenPrices]
   );
 
-  return useQuery({
-    queryKey: ['tokenBalances'],
-    queryFn: () => {
-      return tokenBalances?.map(tokenBalance => {
-        const balance = BigInt(tokenBalance.balance);
-        const tokenPrice = getTokenPrice(tokenBalance.tokenId);
+  const data = tokenBalances?.map(tokenBalance => {
+    const balance = BigInt(tokenBalance.balance);
+    const tokenPrice = getTokenPrice(tokenBalance.tokenId);
 
-        const tokenMetadata = supportedTokens.find(
-          token => token.tokenId === tokenBalance.tokenId
-        );
+    const tokenMetadata = supportedTokens.find(
+      token => token.tokenId === tokenBalance.tokenId
+    );
 
-        const usdBalance = tokenPrice
-          ? tokenPrice *
-            parseFloat(formatUnits(balance, tokenMetadata.decimals))
-          : null;
+    const usdBalance = tokenPrice
+      ? tokenPrice * parseFloat(formatUnits(balance, tokenMetadata.decimals))
+      : null;
 
-        const formattedBalance = formatAmount(
-          balance.toString(),
-          tokenMetadata.decimals
-        );
+    const formattedBalance = formatAmount(
+      balance.toString(),
+      tokenMetadata.decimals
+    );
 
-        const formattedUsdBalance = usdBalance ? usdBalance.toFixed(2) : '';
+    const formattedUsdBalance = usdBalance ? usdBalance.toFixed(2) : '';
 
-        return {
-          ...tokenBalance,
-          formattedBalance,
-          formattedUsdBalance,
-        };
-      });
-    },
-    enabled: !!(tokenBalances && tokenPrices),
+    return {
+      ...tokenBalance,
+      formattedBalance,
+      formattedUsdBalance,
+    };
   });
+
+  return {
+    data,
+    refetch,
+    isRefetching,
+  };
 };
 
 export default useTokenBalances;

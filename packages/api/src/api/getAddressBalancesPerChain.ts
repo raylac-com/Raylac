@@ -81,15 +81,31 @@ const getAddressBalancesPerChain = async ({
         FULL OUTER JOIN total_transfers_out o ON i. "tokenId" = o. "tokenId"
         AND i. "chainId" = o. "chainId"
         AND i. "to" = o. "from"
+    ),
+    account_nonces AS (
+        SELECT
+            sender AS "address",
+            "chainId",
+            max(nonce) AS nonce
+        FROM
+            "UserOperation"
+    WHERE
+        success = TRUE
+    GROUP BY
+        sender,
+        "chainId"
     )
     SELECT
         a.*,
         u. "ephemeralPubKey",
         u. "stealthPubKey",
-        u. "viewTag"
+        u. "viewTag",
+        an.nonce
     FROM
         address_balances a
         LEFT JOIN "UserStealthAddress" u ON a.address = u.address
+        LEFT JOIN account_nonces an ON an.address = a.address
+		AND an. "chainId" = a. "chainId"
   `;
 
   return accountBalancePerChain;
