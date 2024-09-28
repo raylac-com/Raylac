@@ -63,6 +63,17 @@ const Addresses = () => {
       }}
     >
       <FlatList
+        ListEmptyComponent={
+          <Text
+            style={{
+              color: theme.text,
+              textAlign: 'center',
+              padding: 16,
+            }}
+          >
+            No addresses
+          </Text>
+        }
         data={addressesWithBalances}
         renderItem={({ item }) => (
           <AddressListItem address={item.address as Hex} />
