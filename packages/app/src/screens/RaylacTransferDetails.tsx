@@ -149,9 +149,10 @@ const RaylacTransferDetails = ({ route }: Props) => {
       >
         {type === 'outgoing' ? 'Sent to ' : 'Received from '}
         {transferUser
-          ? transferUser.name
+          ? `${transferUser.name}`
           : shortenAddress(transferDetail.toAddress)}
       </Text>
+
       <Text
         style={{
           color: theme.text,
@@ -201,6 +202,17 @@ const RaylacTransferDetails = ({ route }: Props) => {
             rowGap: 10,
           }}
         >
+          <Text
+            style={{
+              opacity: 0.6,
+              color: theme.text,
+              fontSize: 14,
+              textAlign: 'center',
+            }}
+          >
+            {type === 'outgoing' ? 'Sent to ' : 'Received from '}@
+            {transferUser.username}
+          </Text>
           {transferDetail.traces.map((trace, i) => (
             <TraceListItem
               trace={trace as RaylacTransferDetailsReturnType['traces'][0]}
