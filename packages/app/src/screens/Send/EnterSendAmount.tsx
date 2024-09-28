@@ -18,7 +18,7 @@ import useSignedInUser from '@/hooks/useSignedInUser';
 type Props = NativeStackScreenProps<RootStackParamsList, 'EnterSendAmount'>;
 
 const containsNonNumberChars = (str: string): boolean => {
-  return /[^\d.-]/.test(str);
+  return !/^(-?)([0-9]*)\.?([0-9]*)$/.test(str);
 };
 
 const EnterSendAmount = ({ navigation, route }: Props) => {
@@ -279,11 +279,13 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           {t('insufficientBalance')}
         </Text>
       ) : null}
-      <View style={{
-        width: '100%',
-        paddingHorizontal: 16,
-        marginTop: 32,
-      }}>
+      <View
+        style={{
+          width: '100%',
+          paddingHorizontal: 16,
+          marginTop: 32,
+        }}
+      >
         <StyledButton
           style={{
             width: '100%',
