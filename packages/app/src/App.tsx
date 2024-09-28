@@ -35,6 +35,7 @@ import UpdateUsername from './screens/AccountInfo/UpdateUsername';
 import useSignedInUser from './hooks/useSignedInUser';
 import useTypedNavigation from './hooks/useTypedNavigation';
 import useSignOut from './hooks/useSignOut';
+import useFetchUpdates from './hooks/useFetchUpdates';
 import Addresses from './screens/Addresses';
 import RaylacTransferDetails from './screens/RaylacTransferDetails';
 import NativeTransferDetails from './screens/NativeTransferDetails';
@@ -88,6 +89,8 @@ const Screens = () => {
   const navigation = useTypedNavigation();
 
   const { i18n } = useTranslation();
+
+  useFetchUpdates();
 
   useEffect(() => {
     (async () => {
