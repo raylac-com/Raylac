@@ -2,11 +2,12 @@ import * as SecureStore from 'expo-secure-store';
 import { getServerId } from './utils';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ServerId } from '@/types';
+import Constants from 'expo-constants';
 
 const SIGN_IN_AVAILABLE_USER_IDS_STORAGE_KEY = 'userIds';
 const MNEMONIC_STORAGE_KEY_PREFIX = 'mnemonic';
 
-const REQUIRE_AUTHENTICATION = process.env.NODE_ENV !== 'development';
+const REQUIRE_AUTHENTICATION = Constants.appOwnership !== 'expo';
 
 export const getSignInAvailableUserIds = async () => {
   const ids = await AsyncStorage.getItem(

@@ -21,7 +21,6 @@
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.9.26",
-    "@scure/bip39": "^1.4.0",
     "@sentry/cli": "^2.32.1",
     "@sentry/react-native": "^5.22.3",
     "@tanstack/react-query": "^5.48.0",
