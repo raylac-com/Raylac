@@ -8,12 +8,16 @@ import { getServerId } from '@/lib/utils';
 import userKeys from '@/queryKeys/userKeys';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { Alert, View } from 'react-native';
+import { Alert, Text, View } from 'react-native';
+import * as Updates from 'expo-updates';
 
 const Advanced = () => {
   const { data: signedInUser } = useSignedInUser();
   const { mutateAsync: deleteAccount } = trpc.deleteAccount.useMutation();
   const queryClient = useQueryClient();
+
+  const { currentlyRunning,  isUpdateAvailable, isUpdatePending } =
+    Updates.useUpdates();
 
   const navigation = useTypedNavigation();
 
@@ -42,7 +46,7 @@ const Advanced = () => {
             await queryClient.invalidateQueries({
               queryKey: userKeys.signedInUser,
             });
-      
+
             await queryClient.invalidateQueries({
               queryKey: userKeys.isSignedIn,
             });
@@ -66,6 +70,7 @@ const Advanced = () => {
         justifyContent: 'flex-end',
         marginTop: 16,
         padding: 16,
+        rowGap: 16,
       }}
     >
       <StyledButton
@@ -75,6 +80,63 @@ const Advanced = () => {
           backgroundColor: theme.waning,
         }}
       ></StyledButton>
+      <View
+        style={{
+          opacity: 0.5,
+          flexDirection: 'column',
+          justifyContent: 'center',
+          rowGap: 4,
+        }}
+      >
+        <Text
+          style={{
+            color: theme.text,
+            fontSize: 14,
+          }}
+        >
+          user: {signedInUser.id}
+        </Text>
+        <Text
+          style={{
+            color: theme.text,
+            fontSize: 14,
+          }}
+        >
+          runtime: {currentlyRunning.runtimeVersion}
+        </Text>
+        <Text
+          style={{
+            color: theme.text,
+            fontSize: 14,
+          }}
+        >
+          uuid: {currentlyRunning.updateId}
+        </Text>
+        <Text
+          style={{
+            color: theme.text,
+            fontSize: 14,
+          }}
+        >
+          channel: {currentlyRunning.channel}
+        </Text>
+        <Text
+          style={{
+            color: theme.text,
+            fontSize: 14,
+          }}
+        >
+          update available: {isUpdateAvailable ? 'yes' : 'no'}
+        </Text>
+        <Text
+          style={{
+            color: theme.text,
+            fontSize: 14,
+          }}
+        >
+          update pending: {isUpdatePending ? 'yes' : 'no'}
+        </Text>
+      </View>
     </View>
   );
 };
