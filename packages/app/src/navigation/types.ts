@@ -31,7 +31,7 @@ export type RootStackParamsList = {
   };
 
   // Deposit stack
-  ConfirmDeposit: {
+  Deposit: {
     address: string;
     amount: number;
   };

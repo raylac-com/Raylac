@@ -12,7 +12,7 @@ import { NavigationContainer, ThemeProvider } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc, rpcLinks } from './lib/trpc';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import ConfirmDeposit from './screens/Deposit/ConfirmDeposit';
+import Deposit from './screens/Deposit';
 import ConfirmSend from './screens/Send/ConfirmSend';
 import Account from './screens/Account';
 import SelectRecipient from './screens/Send/SelectRecipient';
@@ -195,10 +195,10 @@ const Screens = () => {
         }}
       >
         <RootStack.Screen
-          name="ConfirmDeposit"
-          component={ConfirmDeposit}
+          name="Deposit"
+          component={Deposit}
           options={{
-            title: t('title', { ns: 'ConfirmDeposit' }),
+            title: t('title', { ns: 'Deposit' }),
             headerBackVisible: true,
             headerBackTitle: t('headerBackTitle', { ns: 'common' }),
           }}

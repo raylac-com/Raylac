@@ -53,7 +53,7 @@ const Receive = () => {
   }, [setDepositAddress, setLabel, stealthAccounts]);
 
   const navigation = useTypedNavigation();
-  const { t } = useTranslation('ConfirmDeposit');
+  const { t } = useTranslation('Deposit');
 
   const onCopyClick = useCallback(() => {
     if (depositAddress) {

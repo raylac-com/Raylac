@@ -13,7 +13,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
 import { Feather } from '@expo/vector-icons';
 
-const ConfirmDeposit = () => {
+const Deposit = () => {
   const [depositAddress, setDepositAddress] = useState<Hex | null>(null);
   const [label, setLabel] = useState<string>('');
 
@@ -54,7 +54,7 @@ const ConfirmDeposit = () => {
   }, [setDepositAddress, setLabel, stealthAccounts]);
 
   const navigation = useTypedNavigation();
-  const { t } = useTranslation('ConfirmDeposit');
+  const { t } = useTranslation('Deposit');
 
   const onCopyClick = useCallback(() => {
     if (depositAddress) {
@@ -62,7 +62,7 @@ const ConfirmDeposit = () => {
       Toast.show({
         type: 'success',
         text1: t('copied', { ns: 'common' }),
-        position: "top",
+        position: 'top',
         visibilityTime: 1000,
       });
     }
@@ -130,7 +130,7 @@ const ConfirmDeposit = () => {
             }}
           >
             <Image
-              source={require('../../../assets/base.png')}
+              source={require('../../assets/base.png')}
               style={{ width: 20, height: 20 }}
             ></Image>
             <Text
@@ -190,4 +190,4 @@ const ConfirmDeposit = () => {
   );
 };
 
-export default ConfirmDeposit;
+export default Deposit;

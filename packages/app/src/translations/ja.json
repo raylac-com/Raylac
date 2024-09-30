@@ -53,7 +53,7 @@
     "usernameTaken": "このユーザー名は既に使用されています",
     "signUp": "次へ"
   },
-  "ConfirmDeposit": {
+  "Deposit": {
     "title": "確認",
     "sendAmountToAddress": "下記のアドレスに \n USDCをBase で送金してください",
     "confirm": "送金しました"

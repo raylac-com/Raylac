@@ -225,7 +225,7 @@ const HomeScreen = () => {
             icon={<AntDesign name="plus" size={24} color={theme.background} />}
             title={t('deposit')}
             onPress={() => {
-              navigation.navigate('ConfirmDeposit');
+              navigation.navigate('Deposit');
             }}
           />
           <MenuItem

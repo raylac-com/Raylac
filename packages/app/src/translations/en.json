@@ -62,7 +62,7 @@
     "EnterDepositAmount": {
       "title": "Enter Amount"
     },
-    "ConfirmDeposit": {
+    "Deposit": {
       "title": "Deposit",
       "sendAmountToAddress": "Send ETH to the following address on Base",
       "confirm": "I made the transfer"
