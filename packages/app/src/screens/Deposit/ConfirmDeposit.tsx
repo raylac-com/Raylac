@@ -11,6 +11,7 @@ import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
 import { trpc } from '@/lib/trpc';
 import { useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
+import { Feather } from '@expo/vector-icons';
 
 const ConfirmDeposit = () => {
   const [depositAddress, setDepositAddress] = useState<Hex | null>(null);
@@ -61,7 +62,8 @@ const ConfirmDeposit = () => {
       Toast.show({
         type: 'success',
         text1: t('copied', { ns: 'common' }),
-        position: 'bottom',
+        position: "top",
+        visibilityTime: 1000,
       });
     }
   }, [depositAddress]);
@@ -151,6 +153,7 @@ const ConfirmDeposit = () => {
             variant="underline"
             title={'Create new address'}
             onPress={onCreateNewAddressPress}
+            icon={<Feather name="refresh-cw" size={16} color={theme.gray} />}
           ></StyledButton>
         </View>
       </View>
@@ -171,18 +174,16 @@ const ConfirmDeposit = () => {
           style={{
             width: '100%',
           }}
-          variant="outline"
         ></StyledButton>
         <StyledButton
-          title={'Back'}
+          title={'Other addresses'}
           onPress={() => {
-            navigation.navigate('Tabs', {
-              screen: 'Home',
-            });
+            navigation.navigate('Addresses');
           }}
           style={{
             width: '100%',
           }}
+          variant="outline"
         ></StyledButton>
       </View>
     </View>

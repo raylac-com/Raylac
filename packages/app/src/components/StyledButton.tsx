@@ -1,17 +1,19 @@
 import { theme } from '@/lib/theme';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Pressable,
   Text,
   ActivityIndicator,
   PressableProps,
   StyleSheet,
+  View,
 } from 'react-native';
 
 type StyledButtonProps = {
   title: string;
   isLoading?: boolean;
   variant?: 'primary' | 'outline' | 'underline';
+  icon?: React.ReactNode;
 } & PressableProps;
 
 const StyledButton = (props: StyledButtonProps) => {
@@ -83,6 +85,18 @@ const StyledButton = (props: StyledButtonProps) => {
               marginRight: 10,
             }}
           ></ActivityIndicator>
+        )
+      }
+      {
+        // Show an icon if provided
+        props.icon && (
+          <View
+            style={{
+              marginRight: 10,
+            }}
+          >
+            {props.icon}
+          </View>
         )
       }
       <Text
