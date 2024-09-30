@@ -3,8 +3,9 @@ import useSignedInUser from './useSignedInUser';
 import { Hex } from 'viem';
 import { trpc } from '@/lib/trpc';
 import Toast from 'react-native-toast-message';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { generateStealthAddress } from '@raylac/shared';
+import { getQueryKey } from '@trpc/react-query';
 
 /**
  * Hook to generate a new deposit account
@@ -13,6 +14,8 @@ const useGetNewDepositAccount = () => {
   const { data: signedInUser } = useSignedInUser();
   const { mutateAsync: addStealthAccount, error } =
     trpc.addStealthAccount.useMutation();
+
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (error) {
@@ -25,7 +28,7 @@ const useGetNewDepositAccount = () => {
   }, [error]);
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (label: string) => {
       if (!signedInUser) {
         throw new Error('User not signed in');
       }
@@ -42,9 +45,15 @@ const useGetNewDepositAccount = () => {
         stealthPubKey: account.stealthPubKey,
         ephemeralPubKey: account.ephemeralPubKey,
         viewTag: account.viewTag,
+        label
       });
 
       return account;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: getQueryKey(trpc.getStealthAccounts),
+      });
     },
   });
 };

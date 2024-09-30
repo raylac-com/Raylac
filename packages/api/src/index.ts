@@ -12,6 +12,7 @@ import getUsers from './api/getUsers';
 import getTransferHistory from './api/getTransferHistory';
 import signIn from './api/signIn';
 import getUsdToJpy from './api/getUsdToJpy';
+import updateAddressLabel from './api/updateAddressLabel';
 import updateDisplayName from './api/updateDisplayName';
 import updateUsername from './api/updateUsername';
 import updateProfileImage from './api/updateProfileImage';
@@ -189,6 +190,23 @@ const appRouter = router({
     return userAddresses;
   }),
 
+  updateAddressLabel: authedProcedure
+    .input(
+      z.object({
+        address: z.string(),
+        label: z.string(),
+      })
+    )
+    .mutation(async opts => {
+      const { input } = opts;
+
+      await updateAddressLabel({
+        userId: opts.ctx.userId,
+        address: input.address as Hex,
+        label: input.label,
+      });
+    }),
+
   /**
    * Update the display name of the user
    */
@@ -262,6 +280,7 @@ const appRouter = router({
         ephemeralPubKey: z.string(),
         viewTag: z.string(),
         userId: z.number(),
+        label: z.string(),
       })
     )
     .mutation(async opts => {
@@ -275,6 +294,7 @@ const appRouter = router({
           ephemeralPubKey: input.ephemeralPubKey as Hex,
           viewTag: input.viewTag as Hex,
         },
+        label: input.label,
       });
     }),
 

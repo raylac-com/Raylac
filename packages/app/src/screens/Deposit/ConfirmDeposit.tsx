@@ -1,7 +1,6 @@
-import { ActivityIndicator, Text, View, Image } from 'react-native';
+import { ActivityIndicator, Text, View, Image, TextInput } from 'react-native';
 import { copyToClipboard, shortenAddress } from '@/lib/utils';
 import { Hex } from 'viem';
-import { Feather } from '@expo/vector-icons';
 import { useCallback, useEffect, useState } from 'react';
 import Toast from 'react-native-toast-message';
 import StyledButton from '@/components/StyledButton';
@@ -9,25 +8,52 @@ import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { theme } from '@/lib/theme';
 import { useTranslation } from 'react-i18next';
 import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
-import useSignedInUser from '@/hooks/useSignedInUser';
+import { trpc } from '@/lib/trpc';
+import { useQueryClient } from '@tanstack/react-query';
+import { getQueryKey } from '@trpc/react-query';
 
 const ConfirmDeposit = () => {
   const [depositAddress, setDepositAddress] = useState<Hex | null>(null);
-  const { data: signedInUser } = useSignedInUser();
+  const [label, setLabel] = useState<string>('');
 
+  const queryClient = useQueryClient();
   const { mutateAsync: getNewDepositAccount } = useGetNewDepositAccount();
+  const { mutateAsync: updateAddressLabel } =
+    trpc.updateAddressLabel.useMutation({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: getQueryKey(trpc.getStealthAccounts),
+        });
+      },
+    });
 
-  const navigation = useTypedNavigation();
-  const { t } = useTranslation('ConfirmDeposit');
+  const { data: stealthAccounts } = trpc.getStealthAccounts.useQuery();
 
   useEffect(() => {
     (async () => {
-      if (signedInUser) {
-        const account = await getNewDepositAccount();
-        setDepositAddress(account.address);
+      if (stealthAccounts && depositAddress === null) {
+        const defaultLabel = `Address ${stealthAccounts.length + 1}`;
+        if (stealthAccounts.length > 0) {
+          setDepositAddress(stealthAccounts[0].address as Hex);
+          setLabel(stealthAccounts[0].label || defaultLabel);
+        } else {
+          const account = await getNewDepositAccount(defaultLabel);
+          setDepositAddress(account.address);
+          setLabel(defaultLabel);
+        }
       }
     })();
-  }, [setDepositAddress, signedInUser]);
+  }, [stealthAccounts]);
+
+  const onCreateNewAddressPress = useCallback(async () => {
+    const defaultLabel = `Address ${stealthAccounts.length + 2}`;
+    const account = await getNewDepositAccount(defaultLabel);
+    setDepositAddress(account.address);
+    setLabel(defaultLabel);
+  }, [setDepositAddress, setLabel, stealthAccounts]);
+
+  const navigation = useTypedNavigation();
+  const { t } = useTranslation('ConfirmDeposit');
 
   const onCopyClick = useCallback(() => {
     if (depositAddress) {
@@ -46,63 +72,119 @@ const ConfirmDeposit = () => {
         flex: 1,
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: 24,
-        rowGap: 24,
+        justifyContent: 'space-between',
+        padding: 16,
       }}
     >
-      <Text
-        style={{
-          fontSize: 18,
-          textAlign: 'center',
-          color: theme.text,
-        }}
-      >
-        {t('sendAmountToAddress')}
-      </Text>
       <View
         style={{
-          flexDirection: 'row',
-          alignItems: 'center',
+          flex: 2,
           justifyContent: 'center',
-          columnGap: 8,
+          flexDirection: 'column',
+          rowGap: 16,
         }}
       >
-        <Image
-          source={require('../../../assets/base.png')}
-          style={{ width: 20, height: 20 }}
-        ></Image>
         <Text
           style={{
-            fontSize: 18,
-            fontWeight: 'bold',
+            fontSize: 24,
             textAlign: 'center',
+            fontWeight: 'bold',
             color: theme.text,
           }}
-          onPress={onCopyClick}
         >
-          {depositAddress ? (
-            shortenAddress(depositAddress)
-          ) : (
-            <ActivityIndicator></ActivityIndicator>
-          )}
+          {t('sendAmountToAddress')}
         </Text>
-        <Feather
-          name="copy"
-          size={20}
-          color={theme.primary}
-          onPress={onCopyClick}
-        />
+        <View
+          style={{
+            flexDirection: 'column',
+            rowGap: 16,
+          }}
+        >
+          <TextInput
+            autoCapitalize="none"
+            autoFocus
+            style={{
+              color: theme.gray,
+              fontSize: 24,
+              fontWeight: 'bold',
+              textAlign: 'center',
+            }}
+            placeholder="Label"
+            value={label}
+            onChangeText={setLabel}
+            onEndEditing={() => {
+              updateAddressLabel({
+                address: depositAddress as Hex,
+                label,
+              });
+            }}
+          ></TextInput>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              columnGap: 8,
+            }}
+          >
+            <Image
+              source={require('../../../assets/base.png')}
+              style={{ width: 20, height: 20 }}
+            ></Image>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: 'bold',
+                textAlign: 'center',
+                color: theme.text,
+              }}
+              onPress={onCopyClick}
+            >
+              {depositAddress ? (
+                shortenAddress(depositAddress)
+              ) : (
+                <ActivityIndicator></ActivityIndicator>
+              )}
+            </Text>
+          </View>
+          <StyledButton
+            variant="underline"
+            title={'Create new address'}
+            onPress={onCreateNewAddressPress}
+          ></StyledButton>
+        </View>
       </View>
-      <View></View>
-      <StyledButton
-        title={t('confirm')}
-        onPress={async () => {
-          navigation.navigate('Tabs', {
-            screen: 'Home',
-          });
+      <View
+        style={{
+          flex: 1,
+          width: '100%',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          rowGap: 16,
         }}
-      ></StyledButton>
+      >
+        <StyledButton
+          title={'Copy address'}
+          onPress={() => {
+            onCopyClick();
+          }}
+          style={{
+            width: '100%',
+          }}
+          variant="outline"
+        ></StyledButton>
+        <StyledButton
+          title={'Back'}
+          onPress={() => {
+            navigation.navigate('Tabs', {
+              screen: 'Home',
+            });
+          }}
+          style={{
+            width: '100%',
+          }}
+        ></StyledButton>
+      </View>
     </View>
   );
 };

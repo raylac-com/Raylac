@@ -10,9 +10,11 @@ import prisma from './prisma';
 export const handleNewStealthAccount = async ({
   userId,
   stealthAccount,
+  label
 }: {
   userId: number;
   stealthAccount: StealthAddressWithEphemeral;
+  label: string;
 }) => {
   // TODO: Verify that the stealth account corresponds to the specified user
 
@@ -34,6 +36,7 @@ export const handleNewStealthAccount = async ({
       stealthPubKey: stealthAccount.stealthPubKey,
       viewTag: stealthAccount.viewTag,
       ephemeralPubKey: stealthAccount.ephemeralPubKey,
+      label
     },
   });
 };

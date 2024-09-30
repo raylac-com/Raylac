@@ -10,13 +10,14 @@ const getStealthAccounts = async ({ userId }: { userId: number }) => {
       stealthPubKey: true,
       viewTag: true,
       ephemeralPubKey: true,
+      label: true,
     },
     where: {
-      userId,
-      address: {
-        not: "0x1053192d9Db45A2676025f3D117A8a20362238b1"
-      }
+      userId
     },
+    orderBy: {
+      createdAt: 'desc'
+    }
   });
 
   return addresses;
