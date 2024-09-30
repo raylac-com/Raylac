@@ -19,7 +19,7 @@ const BackupAccount = () => {
       throw new Error('User not signed in');
     }
 
-    setMnemonic(await getMnemonic(signedInUser.id));
+    setMnemonic(await getMnemonic());
   }, [setMnemonic, signedInUser]);
 
   const onHidePress = useCallback(() => {

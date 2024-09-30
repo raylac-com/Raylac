@@ -37,7 +37,7 @@ const useSignUp = () => {
         viewingPrivKey,
       });
 
-      await saveMnemonic(mnemonic, userId);
+      await saveMnemonic(mnemonic);
       await setSignedInUser(userId);
       await saveAuthToken(token);
 

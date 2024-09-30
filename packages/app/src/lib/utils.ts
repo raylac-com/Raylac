@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Hex } from 'viem';
 import * as Clipboard from 'expo-clipboard';
-import { ACCOUNT_INDEX_STORAGE_KEY_PREFIX } from './account';
 import { ServerId } from '@/types';
 
 export const ACCOUNT_SPENDING_PUB_KEY_STORAGE_KEY = 'account_spending_pub_key';
@@ -24,29 +23,6 @@ export const getServerId = (): ServerId => {
     default:
       throw new Error('Unknown server');
   }
-};
-
-/**
- * Save the local account index for the given user
- */
-export const saveAccountIndex = async ({
-  userId,
-  accountIndex,
-}: {
-  userId: number;
-  accountIndex: number;
-}) => {
-  await AsyncStorage.setItem(
-    `${ACCOUNT_INDEX_STORAGE_KEY_PREFIX}_${userId}`,
-    accountIndex.toString()
-  );
-};
-
-/**
- * Get the local account index for the given user
- */
-export const getAccountIndexFromUserId = (userId: number) => {
-  return AsyncStorage.getItem(`${ACCOUNT_INDEX_STORAGE_KEY_PREFIX}_${userId}`);
 };
 
 export const setSignedInUser = async (userId: number) => {

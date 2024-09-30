@@ -1,4 +1,5 @@
 import { saveAuthToken } from '@/lib/auth';
+import { saveMnemonic } from '@/lib/key';
 import { trpc } from '@/lib/trpc';
 import { setSignedInUser } from '@/lib/utils';
 import userKeys from '@/queryKeys/userKeys';
@@ -33,8 +34,6 @@ export const useSignIn = () => {
         chainId: publicClient.chain.id,
       });
 
-      console.log('message', message);
-
       // Sign in and get the JWT token
       const { userId, token } = await signIn({
         issuedAt: issuedAt.toISOString(),
@@ -44,6 +43,7 @@ export const useSignIn = () => {
         }),
       });
 
+      await saveMnemonic(mnemonic);
       await setSignedInUser(userId);
       await saveAuthToken(token);
 

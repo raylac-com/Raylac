@@ -77,7 +77,7 @@ const useSend = () => {
         throw new Error('Not enough funds');
       }
 
-      const mnemonic = await getMnemonic(signedInUser.id);
+      const mnemonic = await getMnemonic();
 
       const viewingPrivKey = await getViewingPrivKey(mnemonic);
 

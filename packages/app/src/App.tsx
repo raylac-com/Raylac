@@ -313,8 +313,7 @@ const Screens = () => {
         component={SaveBackupPhrase}
         options={{
           title: t('title', { ns: 'SaveBackupPhrase' }),
-          headerBackVisible: true,
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          headerBackVisible: false,
         }}
       ></RootStack.Screen>
       <RootStack.Screen

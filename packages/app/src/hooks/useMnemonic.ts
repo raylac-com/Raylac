@@ -9,7 +9,7 @@ const useMnemonic = () => {
   useEffect(() => {
     (async () => {
       if (signedInUser) {
-        const _mnemonic = await getMnemonic(signedInUser.id);
+        const _mnemonic = await getMnemonic();
         if (_mnemonic) {
           setMnemonic(_mnemonic);
         } else {
