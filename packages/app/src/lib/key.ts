@@ -6,8 +6,20 @@ import Constants from 'expo-constants';
 
 const SIGN_IN_AVAILABLE_USER_IDS_STORAGE_KEY = 'userIds';
 const MNEMONIC_STORAGE_KEY_PREFIX = 'mnemonic';
+const BACKUP_VERIFICATION_COMPLETE_STORAGE_KEY = 'backupVerificationComplete';
 
 const REQUIRE_AUTHENTICATION = Constants.appOwnership !== 'expo';
+
+export const isBackupVerificationComplete = async (): Promise<boolean> => {
+  return (
+    (await AsyncStorage.getItem(BACKUP_VERIFICATION_COMPLETE_STORAGE_KEY)) ===
+    'true'
+  );
+};
+
+export const setBackupVerificationComplete = async () => {
+  await AsyncStorage.setItem(BACKUP_VERIFICATION_COMPLETE_STORAGE_KEY, 'true');
+};
 
 export const getSignInAvailableUserIds = async () => {
   const ids = await AsyncStorage.getItem(

@@ -1,6 +1,5 @@
 import StyledButton from '@/components/StyledButton';
 import StyledTextInput from '@/components/StyledTextInput';
-import useIsSignedIn from '@/hooks/useIsSignedIn';
 import useSignUp from '@/hooks/useSignUp';
 import { theme } from '@/lib/theme';
 import { isValidUsername } from '@/lib/username';
@@ -10,7 +9,7 @@ import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import useCheckUsername from '@/hooks/useCheckUsername';
@@ -36,18 +35,20 @@ const SignUp = () => {
   const canGoNext =
     isValidUsername(username) && isUsernameAvailable && !isCheckingUsername;
 
-  const { data: isSignedIn } = useIsSignedIn();
+  // const { data: isSignedIn } = useIsSignedIn();
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamsList>>();
 
-  useEffect(() => {
+  /*
+    useEffect(() => {
     if (isSignedIn === true) {
       navigation.navigate('Tabs', {
         screen: 'Home',
       });
     }
   }, [isSignedIn]);
+  */
 
   return (
     <View
@@ -136,9 +137,7 @@ const SignUp = () => {
           });
           setIsSigningUp(false);
 
-          navigation.navigate('Tabs', {
-            screen: 'Home',
-          });
+          navigation.navigate('SaveBackupPhrase');
         }}
         title={isSigningUp ? 'Creating wallet...' : t('signUp')}
       ></StyledButton>

@@ -113,6 +113,14 @@
     "Advanced": {
       "title": "Advanced"
     },
+    "SaveBackupPhrase": {
+      "title": "Save Backup Phrase",
+      "backupPhrase": "Backup phrase",
+      "save": "Save"
+    },
+    "ConfirmBackupPhrase": {
+      "title": "Confirm Backup"
+    },
     "common": {
       "next": "Next",
     "headerBackTitle": "Back",

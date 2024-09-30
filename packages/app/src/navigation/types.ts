@@ -51,4 +51,7 @@ export type RootStackParamsList = {
 
   // Address stack
   Addresses: undefined;
+
+  SaveBackupPhrase: undefined;
+  ConfirmBackupPhrase: undefined;
 };

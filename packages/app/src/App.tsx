@@ -40,6 +40,9 @@ import Addresses from './screens/Addresses';
 import RaylacTransferDetails from './screens/RaylacTransferDetails';
 import NativeTransferDetails from './screens/NativeTransferDetails';
 import Advanced from './screens/Advanced';
+import ConfirmBackupPhrase from './screens/ConfirmBackupPhrase';
+import { isBackupVerificationComplete } from './lib/key';
+import SaveBackupPhrase from './screens/SaveBackupPhrase';
 
 console.log('NODE_ENV', process.env.NODE_ENV);
 Sentry.init({
@@ -113,6 +116,9 @@ const Screens = () => {
         );
         await signOut();
         navigation.navigate('Start');
+      } else if (!(await isBackupVerificationComplete())) {
+        console.log('Backup not verified, navigating to backup account');
+        navigation.navigate('SaveBackupPhrase');
       }
     })();
   }, [signedInUser, isLoadingUser]);
@@ -298,6 +304,24 @@ const Screens = () => {
         component={UpdateUsername}
         options={{
           title: t('title', { ns: 'UpdateUsername' }),
+          headerBackVisible: true,
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+        }}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="SaveBackupPhrase"
+        component={SaveBackupPhrase}
+        options={{
+          title: t('title', { ns: 'SaveBackupPhrase' }),
+          headerBackVisible: true,
+          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+        }}
+      ></RootStack.Screen>
+      <RootStack.Screen
+        name="ConfirmBackupPhrase"
+        component={ConfirmBackupPhrase}
+        options={{
+          title: t('title', { ns: 'ConfirmBackupPhrase' }),
           headerBackVisible: true,
           headerBackTitle: t('headerBackTitle', { ns: 'common' }),
         }}
