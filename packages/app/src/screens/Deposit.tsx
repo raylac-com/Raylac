@@ -1,7 +1,7 @@
 import { ActivityIndicator, Text, View, Image, TextInput } from 'react-native';
 import { copyToClipboard, shortenAddress } from '@/lib/utils';
 import { Hex } from 'viem';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Toast from 'react-native-toast-message';
 import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -16,6 +16,7 @@ import { Feather } from '@expo/vector-icons';
 const Deposit = () => {
   const [depositAddress, setDepositAddress] = useState<Hex | null>(null);
   const [label, setLabel] = useState<string>('');
+  const inputRef = useRef<TextInput>();
 
   const queryClient = useQueryClient();
   const { mutateAsync: getNewDepositAccount } = useGetNewDepositAccount();
@@ -102,25 +103,44 @@ const Deposit = () => {
             rowGap: 16,
           }}
         >
-          <TextInput
-            autoCapitalize="none"
-            autoFocus
+          <View
             style={{
-              color: theme.gray,
-              fontSize: 24,
-              fontWeight: 'bold',
-              textAlign: 'center',
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+              columnGap: 8,
             }}
-            placeholder="Label"
-            value={label}
-            onChangeText={setLabel}
-            onEndEditing={() => {
-              updateAddressLabel({
-                address: depositAddress as Hex,
-                label,
-              });
-            }}
-          ></TextInput>
+          >
+            <TextInput
+              ref={inputRef}
+              autoCapitalize="none"
+              style={{
+                color: theme.gray,
+                fontSize: 24,
+                fontWeight: 'bold',
+                textAlign: 'center',
+              }}
+              placeholder="Label"
+              value={label}
+              onChangeText={setLabel}
+              onEndEditing={() => {
+                updateAddressLabel({
+                  address: depositAddress as Hex,
+                  label,
+                });
+              }}
+            ></TextInput>
+            <Feather
+              name="edit-2"
+              size={16}
+              color={theme.gray}
+              onPress={() => {
+                if (inputRef.current) {
+                  inputRef.current.focus();
+                }
+              }}
+            />
+          </View>
           <View
             style={{
               flexDirection: 'row',
