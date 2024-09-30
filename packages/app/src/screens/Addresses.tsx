@@ -10,9 +10,11 @@ import { Hex } from 'viem';
 
 interface AddressListItemProps {
   address: Hex;
+  label: string;
 }
 
-const AddressListItem = ({ address }: AddressListItemProps) => {
+const AddressListItem = (props: AddressListItemProps) => {
+  const { address, label } = props;
   const { t } = useTranslation();
 
   const onCopyPress = useCallback(() => {
@@ -34,19 +36,46 @@ const AddressListItem = ({ address }: AddressListItemProps) => {
         borderBottomColor: theme.gray,
       }}
     >
-      <Text
+      <View
         style={{
-          color: theme.text,
+          flex: 1.5,
         }}
       >
-        {shortenAddress(address)}
-      </Text>
-      <Feather
-        name="copy"
-        size={20}
-        color={theme.primary}
-        onPress={onCopyPress}
-      />
+        <Text
+          style={{
+            color: theme.text,
+            fontWeight: 'bold',
+          }}
+        >
+          {label || ''}
+        </Text>
+      </View>
+      <View
+        style={{
+          flex: 1,
+        }}
+      >
+        <Text
+          style={{
+            color: theme.text,
+          }}
+        >
+          {shortenAddress(address)}
+        </Text>
+      </View>
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'flex-end',
+        }}
+      >
+        <Feather
+          name="copy"
+          size={20}
+          color={theme.primary}
+          onPress={onCopyPress}
+        />
+      </View>
     </View>
   );
 };
@@ -76,7 +105,7 @@ const Addresses = () => {
         }
         data={addressesWithBalances}
         renderItem={({ item }) => (
-          <AddressListItem address={item.address as Hex} />
+          <AddressListItem address={item.address as Hex} label={item.label} />
         )}
       />
     </View>
