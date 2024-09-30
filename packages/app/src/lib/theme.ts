@@ -7,7 +7,7 @@ export const theme = {
   secondary: '#41B9E0',
   background: '#1A1A1A',
   backgroundHover: '#171717',
-  card: '#171717',
+  card: '#1A1A1A',
   text: '#E5E5E5',
   border: '#171717',
   notification: '#285181',

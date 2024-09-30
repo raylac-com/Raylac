@@ -1,11 +1,4 @@
-import {
-  Text,
-  View,
-  SafeAreaView,
-  ScrollView,
-  RefreshControl,
-  Image,
-} from 'react-native';
+import { Text, View, ScrollView, RefreshControl, Image } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -177,7 +170,7 @@ const HomeScreen = () => {
   }
 
   return (
-    <SafeAreaView
+    <View
       style={{
         flex: 1,
         flexDirection: 'column',
@@ -325,7 +318,7 @@ const HomeScreen = () => {
           ) : null}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -43,6 +43,7 @@ import Advanced from './screens/Advanced';
 import ConfirmBackupPhrase from './screens/ConfirmBackupPhrase';
 import { isBackupVerificationComplete } from './lib/key';
 import SaveBackupPhrase from './screens/SaveBackupPhrase';
+import { SafeAreaView } from 'react-native';
 
 console.log('NODE_ENV', process.env.NODE_ENV);
 Sentry.init({
@@ -97,12 +98,6 @@ const Screens = () => {
 
   useEffect(() => {
     (async () => {
-      /*
-      await deleteSignInAvailableUserId({
-        userId: 0,
-        serverId: ServerId.Production,
-      });
-      */
       const lang = await getSelectedLanguage();
       i18n.changeLanguage(lang);
     })();
@@ -124,208 +119,215 @@ const Screens = () => {
   }, [signedInUser, isLoadingUser]);
 
   return (
-    <RootStack.Navigator initialRouteName="Tabs">
-      <RootStack.Screen
-        name="Tabs"
-        component={Tabs}
-        options={{
-          headerShown: false,
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="SignUp"
-        component={SignUp}
-        options={{
-          title: t('title', { ns: 'SignUp' }),
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="SignIn"
-        component={SignIn}
-        options={{
-          headerBackVisible: true,
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="Start"
-        component={Start}
-        options={{
-          title: t('title', { ns: 'Start' }),
-          headerBackVisible: false,
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="Addresses"
-        component={Addresses}
-        options={{
-          title: t('title', { ns: 'Addresses' }),
-          headerBackVisible: true,
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="BackupAccount"
-        component={BackupAccount}
-        options={{
-          title: t('title', { ns: 'BackupAccount' }),
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="Advanced"
-        component={Advanced}
-        options={{
-          title: t('title', { ns: 'Advanced' }),
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="Receive"
-        component={Receive}
-        options={{
-          title: t('title', { ns: 'Receive' }),
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-      <RootStack.Group
-        screenOptions={{
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      >
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: theme.background,
+      }}
+    >
+      <RootStack.Navigator initialRouteName="Tabs">
         <RootStack.Screen
-          name="Deposit"
-          component={Deposit}
+          name="Tabs"
+          component={Tabs}
           options={{
-            title: t('title', { ns: 'Deposit' }),
-            headerBackVisible: true,
+            headerShown: false,
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="SignUp"
+          component={SignUp}
+          options={{
+            title: t('title', { ns: 'SignUp' }),
             headerBackTitle: t('headerBackTitle', { ns: 'common' }),
           }}
         ></RootStack.Screen>
-      </RootStack.Group>
-      <RootStack.Group
-        screenOptions={{
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      >
         <RootStack.Screen
-          name="SelectRecipient"
-          component={SelectRecipient}
+          name="SignIn"
+          component={SignIn}
           options={{
-            title: t('title', { ns: 'SelectRecipient' }),
-            headerBackVisible: true,
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="EnterSendAmount"
-          component={EnterSendAmount}
-          options={{
-            title: t('title', { ns: 'EnterSendAmount' }),
             headerBackVisible: true,
             headerBackTitle: t('headerBackTitle', { ns: 'common' }),
           }}
         ></RootStack.Screen>
         <RootStack.Screen
-          name="ConfirmSend"
-          component={ConfirmSend}
+          name="Start"
+          component={Start}
           options={{
-            title: t('title', { ns: 'ConfirmSend' }),
+            title: t('title', { ns: 'Start' }),
+            headerBackVisible: false,
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="Addresses"
+          component={Addresses}
+          options={{
+            title: t('title', { ns: 'Addresses' }),
             headerBackVisible: true,
             headerBackTitle: t('headerBackTitle', { ns: 'common' }),
           }}
         ></RootStack.Screen>
-      </RootStack.Group>
-      <RootStack.Screen
-        name="TransferHistory"
-        component={TransferHistory}
-        options={{
-          title: t('title', { ns: 'TransferHistory' }),
-          headerBackVisible: true,
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="RaylacTransferDetails"
-        component={RaylacTransferDetails}
-        options={{
-          title: t('title', { ns: 'RaylacTransferDetails' }),
-          headerBackVisible: true,
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="NativeTransferDetails"
-        component={NativeTransferDetails}
-        options={{
-          title: t('title', { ns: 'NativeTransferDetails' }),
-          headerBackVisible: true,
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="SelectLanguage"
-        component={SelectLanguage}
-        options={{
-          title: t('title', { ns: 'SelectLanguage' }),
-          headerBackVisible: true,
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="SendSuccess"
-        component={SendSuccess}
-        options={{
-          title: t('title', { ns: 'SendSuccess' }),
-          headerBackVisible: true,
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="AccountInfo"
-        component={AccountInfo}
-        options={{
-          title: t('title', { ns: 'AccountInfo' }),
-          headerBackVisible: true,
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="UpdateDisplayName"
-        component={UpdateDisplayName}
-        options={{
-          title: t('title', { ns: 'UpdateDisplayName' }),
-          headerBackVisible: true,
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="UpdateUsername"
-        component={UpdateUsername}
-        options={{
-          title: t('title', { ns: 'UpdateUsername' }),
-          headerBackVisible: true,
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="SaveBackupPhrase"
-        component={SaveBackupPhrase}
-        options={{
-          title: t('title', { ns: 'SaveBackupPhrase' }),
-          headerBackVisible: false,
-        }}
-      ></RootStack.Screen>
-      <RootStack.Screen
-        name="ConfirmBackupPhrase"
-        component={ConfirmBackupPhrase}
-        options={{
-          title: t('title', { ns: 'ConfirmBackupPhrase' }),
-          headerBackVisible: true,
-          headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-        }}
-      ></RootStack.Screen>
-    </RootStack.Navigator>
+        <RootStack.Screen
+          name="BackupAccount"
+          component={BackupAccount}
+          options={{
+            title: t('title', { ns: 'BackupAccount' }),
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="Advanced"
+          component={Advanced}
+          options={{
+            title: t('title', { ns: 'Advanced' }),
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="Receive"
+          component={Receive}
+          options={{
+            title: t('title', { ns: 'Receive' }),
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Group
+          screenOptions={{
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        >
+          <RootStack.Screen
+            name="Deposit"
+            component={Deposit}
+            options={{
+              title: t('title', { ns: 'Deposit' }),
+              headerBackVisible: true,
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+        </RootStack.Group>
+        <RootStack.Group
+          screenOptions={{
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        >
+          <RootStack.Screen
+            name="SelectRecipient"
+            component={SelectRecipient}
+            options={{
+              title: t('title', { ns: 'SelectRecipient' }),
+              headerBackVisible: true,
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="EnterSendAmount"
+            component={EnterSendAmount}
+            options={{
+              title: t('title', { ns: 'EnterSendAmount' }),
+              headerBackVisible: true,
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="ConfirmSend"
+            component={ConfirmSend}
+            options={{
+              title: t('title', { ns: 'ConfirmSend' }),
+              headerBackVisible: true,
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+        </RootStack.Group>
+        <RootStack.Screen
+          name="TransferHistory"
+          component={TransferHistory}
+          options={{
+            title: t('title', { ns: 'TransferHistory' }),
+            headerBackVisible: true,
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="RaylacTransferDetails"
+          component={RaylacTransferDetails}
+          options={{
+            title: t('title', { ns: 'RaylacTransferDetails' }),
+            headerBackVisible: true,
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="NativeTransferDetails"
+          component={NativeTransferDetails}
+          options={{
+            title: t('title', { ns: 'NativeTransferDetails' }),
+            headerBackVisible: true,
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="SelectLanguage"
+          component={SelectLanguage}
+          options={{
+            title: t('title', { ns: 'SelectLanguage' }),
+            headerBackVisible: true,
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="SendSuccess"
+          component={SendSuccess}
+          options={{
+            title: t('title', { ns: 'SendSuccess' }),
+            headerBackVisible: true,
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="AccountInfo"
+          component={AccountInfo}
+          options={{
+            title: t('title', { ns: 'AccountInfo' }),
+            headerBackVisible: true,
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="UpdateDisplayName"
+          component={UpdateDisplayName}
+          options={{
+            title: t('title', { ns: 'UpdateDisplayName' }),
+            headerBackVisible: true,
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="UpdateUsername"
+          component={UpdateUsername}
+          options={{
+            title: t('title', { ns: 'UpdateUsername' }),
+            headerBackVisible: true,
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="SaveBackupPhrase"
+          component={SaveBackupPhrase}
+          options={{
+            title: t('title', { ns: 'SaveBackupPhrase' }),
+            headerBackVisible: false,
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="ConfirmBackupPhrase"
+          component={ConfirmBackupPhrase}
+          options={{
+            title: t('title', { ns: 'ConfirmBackupPhrase' }),
+            headerBackVisible: true,
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+      </RootStack.Navigator>
+    </SafeAreaView>
   );
 };
 
