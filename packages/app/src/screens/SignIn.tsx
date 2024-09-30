@@ -1,6 +1,7 @@
 import StyledButton from '@/components/StyledButton';
 import StyledTextInput from '@/components/StyledTextInput';
 import { useSignIn } from '@/hooks/useSIgnIn';
+import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -14,9 +15,11 @@ const SignIn = () => {
   const [mnemonic, setMnemonic] = useState('');
   const [isMnemonicValid, setIsMnemonicValid] = useState(false);
   const { mutateAsync: signIn, isPending: isSigningIn } = useSignIn();
+  const navigation = useTypedNavigation();
 
   const onSignInPress = useCallback(async () => {
     await signIn({ mnemonic });
+    navigation.navigate('Tabs', { screen: 'Home' });
   }, [signIn, mnemonic]);
 
   useEffect(() => {
@@ -38,6 +41,7 @@ const SignIn = () => {
       }}
     >
       <StyledTextInput
+        autoCapitalize="none"
         multiline
         placeholder={t('enterYourMnemonic')}
         value={mnemonic}
