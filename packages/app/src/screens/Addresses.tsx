@@ -81,7 +81,7 @@ const AddressListItem = (props: AddressListItemProps) => {
 };
 
 const Addresses = () => {
-  const { data: addressesWithBalances } = trpc.getUserAddresses.useQuery();
+  const { data: addressesWithBalances } = trpc.getStealthAccounts.useQuery();
 
   return (
     <View

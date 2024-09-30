@@ -24,7 +24,6 @@ import getTokenBalances from './api/getTokenBalances';
 import getAddressBalancesPerChain from './api/getAddressBalancesPerChain';
 import { getBlockTimestamp } from './utils';
 import getTokenPrices from './api/getTokenPrices';
-import getUserAddresses from './api/getUserAddresses';
 import submitUserOperation from './api/submitUserOperation';
 import getRaylacTransferDetails from './api/getRaylacTransferDetails';
 import getNativeTransferDetails from './api/getNativeTransferDetails';
@@ -182,13 +181,7 @@ const appRouter = router({
       return details;
     }),
 
-  getUserAddresses: authedProcedure.query(async opts => {
-    const userId = opts.ctx.userId;
-
-    const userAddresses = await getUserAddresses({ userId });
-
-    return userAddresses;
-  }),
+ 
 
   updateAddressLabel: authedProcedure
     .input(
