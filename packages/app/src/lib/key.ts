@@ -42,3 +42,12 @@ export const getMnemonic = async () => {
     requireAuthentication: REQUIRE_AUTHENTICATION,
   });
 };
+
+/**
+ * Delete the mnemonic from secure storage.
+ */
+export const deleteMnemonic = async () => {
+  await SecureStore.deleteItemAsync(MNEMONIC_STORAGE_KEY, {
+    requireAuthentication: REQUIRE_AUTHENTICATION,
+  });
+};

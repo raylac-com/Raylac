@@ -1,9 +1,11 @@
 import { deleteAuthToken } from '@/lib/auth';
+import { deleteMnemonic } from '@/lib/key';
 import { deleteSignedInUser } from '@/lib/utils';
 import userKeys from '@/queryKeys/userKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const signOut = async () => {
+  await deleteMnemonic();
   await deleteAuthToken();
   await deleteSignedInUser();
 };
