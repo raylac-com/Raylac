@@ -1,5 +1,4 @@
 import * as SecureStore from 'expo-secure-store';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
 const MNEMONIC_STORAGE_KEY = 'mnemonic';
@@ -9,13 +8,18 @@ const REQUIRE_AUTHENTICATION = Constants.appOwnership !== 'expo';
 
 export const isBackupVerificationComplete = async (): Promise<boolean> => {
   return (
-    (await AsyncStorage.getItem(BACKUP_VERIFICATION_COMPLETE_STORAGE_KEY)) ===
+    (await SecureStore.getItem(BACKUP_VERIFICATION_COMPLETE_STORAGE_KEY)) ===
     'true'
   );
 };
 
-export const setBackupVerificationComplete = async () => {
-  await AsyncStorage.setItem(BACKUP_VERIFICATION_COMPLETE_STORAGE_KEY, 'true');
+export const setBackupVerificationStatus = async (
+  status: 'complete' | 'incomplete'
+) => {
+  await SecureStore.setItem(
+    BACKUP_VERIFICATION_COMPLETE_STORAGE_KEY,
+    status === 'complete' ? 'true' : 'false'
+  );
 };
 
 /**

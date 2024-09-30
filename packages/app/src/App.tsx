@@ -34,7 +34,6 @@ import UpdateDisplayName from './screens/AccountInfo/UpdateDisplayName';
 import UpdateUsername from './screens/AccountInfo/UpdateUsername';
 import useSignedInUser from './hooks/useSignedInUser';
 import useTypedNavigation from './hooks/useTypedNavigation';
-import useSignOut from './hooks/useSignOut';
 import useFetchUpdates from './hooks/useFetchUpdates';
 import Addresses from './screens/Addresses';
 import RaylacTransferDetails from './screens/RaylacTransferDetails';
@@ -88,7 +87,6 @@ const Screens = () => {
   const { t } = useTranslation();
 
   const { data: signedInUser, isLoading: isLoadingUser } = useSignedInUser();
-  const { mutateAsync: signOut } = useSignOut();
 
   const navigation = useTypedNavigation();
 
@@ -106,12 +104,9 @@ const Screens = () => {
   useEffect(() => {
     (async () => {
       if (signedInUser === null && !isLoadingUser) {
-        console.log(
-          "Couldn't find signed in user on server, navigating to start"
-        );
-        await signOut();
+        console.log("Couldn't find signed in user");
         navigation.navigate('Start');
-      } else if (!(await isBackupVerificationComplete())) {
+      } else if (signedInUser && !(await isBackupVerificationComplete())) {
         console.log('Backup not verified, navigating to backup account');
         navigation.navigate('SaveBackupPhrase');
       }
@@ -357,7 +352,14 @@ const App = () => {
   });
 
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      onStateChange={state => {
+        if (state) {
+          const currentRoute = state.routes[state.index];
+          console.log('Navigated to:', currentRoute.name);
+        }
+      }}
+    >
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider value={NavigationTheme}>

@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { Hex } from 'viem';
 import * as Clipboard from 'expo-clipboard';
 import { ServerId } from '@/types';
@@ -26,23 +26,23 @@ export const getServerId = (): ServerId => {
 };
 
 export const setSignedInUser = async (userId: number) => {
-  if (await AsyncStorage.getItem(SIGNED_IN_USER_STORAGE_KEY)) {
+  if (await SecureStore.getItemAsync(SIGNED_IN_USER_STORAGE_KEY)) {
     throw new Error('User already signed in');
   }
 
-  await AsyncStorage.setItem(SIGNED_IN_USER_STORAGE_KEY, userId.toString());
+  await SecureStore.setItemAsync(SIGNED_IN_USER_STORAGE_KEY, userId.toString());
 };
 
 /**
- * Get the signed in userId saved in AsyncStorage
+ * Get the signed in userId saved in SecureStorage.
  */
 export const getSignedInUserId = async (): Promise<number | null> => {
-  const userId = await AsyncStorage.getItem(SIGNED_IN_USER_STORAGE_KEY);
+  const userId = await SecureStore.getItemAsync(SIGNED_IN_USER_STORAGE_KEY);
   return userId ? parseInt(userId) : null;
 };
 
 export const deleteSignedInUser = async () => {
-  await AsyncStorage.removeItem(SIGNED_IN_USER_STORAGE_KEY);
+  await SecureStore.deleteItemAsync(SIGNED_IN_USER_STORAGE_KEY);
 };
 
 export const copyToClipboard = async (text: string) => {

@@ -1,23 +1,24 @@
 import StyledButton from '@/components/StyledButton';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { deleteSignInAvailableUserId } from '@/lib/key';
 import { theme } from '@/lib/theme';
 import { trpc } from '@/lib/trpc';
-import { getServerId } from '@/lib/utils';
 import userKeys from '@/queryKeys/userKeys';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { Alert, Text, View } from 'react-native';
 import * as Updates from 'expo-updates';
+import useSignOut from '@/hooks/useSignOut';
 
 const Advanced = () => {
   const { data: signedInUser } = useSignedInUser();
   const { mutateAsync: deleteAccount } = trpc.deleteAccount.useMutation();
   const queryClient = useQueryClient();
 
-  const { currentlyRunning,  isUpdateAvailable, isUpdatePending } =
+  const { currentlyRunning, isUpdateAvailable, isUpdatePending } =
     Updates.useUpdates();
+
+  const { mutateAsync: signOut } = useSignOut();
 
   const navigation = useTypedNavigation();
 
@@ -37,11 +38,8 @@ const Advanced = () => {
         {
           text: 'Delete account',
           onPress: async () => {
-            await deleteSignInAvailableUserId({
-              userId: signedInUser.id,
-              serverId: getServerId(),
-            });
             await deleteAccount();
+            await signOut();
 
             await queryClient.invalidateQueries({
               queryKey: userKeys.signedInUser,

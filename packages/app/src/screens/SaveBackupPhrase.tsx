@@ -34,7 +34,7 @@ const SaveBackupPhrase = () => {
     Toast.show({
       type: 'success',
       text1: 'Copied backup phrase',
-      position: 'bottom',
+      position: 'top',
     });
   }, [mnemonic]);
 
@@ -76,11 +76,11 @@ const SaveBackupPhrase = () => {
 
       <View
         style={{
-          flex: 2,
+          flex: 1.5,
           alignItems: 'center',
-          justifyContent: 'center',
           flexDirection: 'column',
-          rowGap: 16,
+          justifyContent: 'center',
+          rowGap: 8,
         }}
       >
         {mnemonic && (

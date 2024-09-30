@@ -139,6 +139,7 @@ const SignUp = () => {
 
           navigation.navigate('SaveBackupPhrase');
         }}
+        isLoading={isSigningUp}
         title={isSigningUp ? 'Creating wallet...' : t('signUp')}
       ></StyledButton>
     </View>

@@ -6,7 +6,7 @@ import * as bip39 from 'bip39';
 import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import Toast from 'react-native-toast-message';
-import { setBackupVerificationComplete } from '@/lib/key';
+import { setBackupVerificationStatus } from '@/lib/key';
 import MnemonicWord from '@/components/MnemonicWord';
 
 const generateRandomNumbers = ({
@@ -98,10 +98,10 @@ const ConfirmBackupPhrase = () => {
           Toast.show({
             type: 'success',
             text1: 'Backup phrase confirmed',
-            visibilityTime: 2000,
+            visibilityTime: 1500,
           });
 
-          await setBackupVerificationComplete();
+          await setBackupVerificationStatus('complete');
 
           navigation.navigate('Tabs', {
             screen: 'Home',

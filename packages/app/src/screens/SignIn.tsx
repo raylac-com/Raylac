@@ -5,7 +5,8 @@ import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
-import { mnemonicToAccount } from 'viem/accounts';
+import * as bip39 from 'bip39';
+import { sleep } from '@raylac/shared';
 
 /**
  * Sign in screen
@@ -14,18 +15,22 @@ const SignIn = () => {
   const { t } = useTranslation('SignIn');
   const [mnemonic, setMnemonic] = useState('');
   const [isMnemonicValid, setIsMnemonicValid] = useState(false);
-  const { mutateAsync: signIn, isPending: isSigningIn } = useSignIn();
+  const { mutateAsync: signIn } = useSignIn();
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const navigation = useTypedNavigation();
 
   const onSignInPress = useCallback(async () => {
+    setIsSigningIn(true);
+    await sleep(100);
     await signIn({ mnemonic });
+    setIsSigningIn(false);
     navigation.navigate('Tabs', { screen: 'Home' });
   }, [signIn, mnemonic]);
 
   useEffect(() => {
     try {
-      mnemonicToAccount(mnemonic);
-      setIsMnemonicValid(true);
+      const _mnemonicValid = bip39.validateMnemonic(mnemonic);
+      setIsMnemonicValid(_mnemonicValid);
     } catch (_e) {
       setIsMnemonicValid(false);
     }

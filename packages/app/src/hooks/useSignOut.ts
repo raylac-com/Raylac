@@ -1,5 +1,5 @@
 import { deleteAuthToken } from '@/lib/auth';
-import { deleteMnemonic } from '@/lib/key';
+import { deleteMnemonic, setBackupVerificationStatus } from '@/lib/key';
 import { deleteSignedInUser } from '@/lib/utils';
 import userKeys from '@/queryKeys/userKeys';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -11,7 +11,7 @@ const signOut = async () => {
 };
 
 /**
- * Hook to delete the auth token from SecureStorage and the signed in user from AsyncStorage.
+ * Hook to delete the auth token  and the signed in user from SecureStorage.
  * This doesn't delete the mnemonic, so the user can sign in again.
  */
 const useSignOut = () => {
@@ -19,6 +19,7 @@ const useSignOut = () => {
   return useMutation({
     mutationFn: async () => {
       await signOut();
+      await setBackupVerificationStatus('incomplete');
       await queryClient.invalidateQueries({
         queryKey: userKeys.signedInUser,
       });
