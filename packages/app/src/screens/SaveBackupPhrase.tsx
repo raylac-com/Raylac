@@ -65,7 +65,7 @@ const SaveBackupPhrase = () => {
         </Text>
         <Text
           style={{
-            fontSize: 14,
+            fontSize: 16,
             textAlign: 'center',
             color: theme.gray,
           }}
@@ -73,14 +73,12 @@ const SaveBackupPhrase = () => {
           Write down your backup phrase, or save it in a secure place.
         </Text>
       </View>
-
       <View
         style={{
-          flex: 1.5,
           alignItems: 'center',
           flexDirection: 'column',
           justifyContent: 'center',
-          rowGap: 8,
+          rowGap: 28,
         }}
       >
         {mnemonic && (

@@ -26,10 +26,6 @@ export const getServerId = (): ServerId => {
 };
 
 export const setSignedInUser = async (userId: number) => {
-  if (await SecureStore.getItemAsync(SIGNED_IN_USER_STORAGE_KEY)) {
-    throw new Error('User already signed in');
-  }
-
   await SecureStore.setItemAsync(SIGNED_IN_USER_STORAGE_KEY, userId.toString());
 };
 

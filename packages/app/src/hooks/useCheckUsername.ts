@@ -4,7 +4,7 @@ import useDebounce from './useDebounce';
 const useCheckUsername = (username: string) => {
   const { debouncedValue: debouncedUsername, isPending } = useDebounce(
     username,
-    500
+    150
   );
 
   const { data: isUsernameAvailable, isPending: isCheckingUsername } =

@@ -28,6 +28,17 @@ const generateRandomNumbers = ({
   return randomNumbers;
 };
 
+const generateRandomConsecutiveNumbers = ({
+  max,
+  count,
+}: {
+  max: number;
+  count: number;
+}) => {
+  const start = Math.floor(Math.random() * (max - count));
+  return Array.from({ length: count }, (_, index) => start + index);
+};
+
 const shuffleArray = (array: any[]) => {
   const newArray = [...array];
   for (let i = newArray.length - 1; i > 0; i--) {
@@ -49,10 +60,7 @@ const ConfirmBackupPhrase = () => {
   const mnemonic = useMnemonic();
   const [userInputs, setUserInputs] = useState<string[]>([]);
   const [hideIndices, _setHideIndices] = useState<number[]>(
-    generateRandomNumbers({
-      max: 11,
-      count: 3,
-    }).sort((a, b) => a - b)
+    generateRandomConsecutiveNumbers({ max: 11, count: 3 })
   );
 
   const [choices, _setChoices] = useState([]);

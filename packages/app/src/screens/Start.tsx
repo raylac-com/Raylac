@@ -1,7 +1,6 @@
 import StyledButton from '@/components/StyledButton';
-import useIsSignedIn from '@/hooks/useIsSignedIn';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, View } from 'react-native';
 
@@ -12,7 +11,6 @@ import { Image, View } from 'react-native';
 const Start = () => {
   const { t } = useTranslation('Start');
   const navigation = useTypedNavigation();
-  const { data: isSignedIn } = useIsSignedIn();
 
   const onCreateAccountPress = useCallback(() => {
     navigation.navigate('SignUp');
@@ -21,14 +19,6 @@ const Start = () => {
   const onSignInPress = useCallback(() => {
     navigation.navigate('SignIn');
   }, [navigation]);
-
-  useEffect(() => {
-    if (isSignedIn) {
-      navigation.navigate('Tabs', {
-        screen: 'Home',
-      });
-    }
-  }, [isSignedIn]);
 
   return (
     <View
