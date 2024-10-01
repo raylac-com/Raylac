@@ -9,6 +9,10 @@ jobs:
       - name: 🏗 Setup repo
         uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.4
+
       - name: 🏗 Setup Node
         uses: actions/setup-node@v4
         with:
@@ -26,3 +30,6 @@ jobs:
       - name: 🚀 Create update
         run: eas update --auto --non-interactive
         working-directory: packages/app
+        env:
+          EXPO_PUBLIC_RPC_URL: https://raylac-api.onrender.com
+          EXPO_PUBLIC_ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
