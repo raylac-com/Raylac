@@ -119,6 +119,15 @@ const NativeTransferDetails = ({ route }: Props) => {
             label={'From'}
             value={
               <LinkText
+                text={shortenAddress(transferDetail.from)}
+                url={`${getBlockExplorerUrl(transferDetail.chainId)}/address/${transferDetail.from}`}
+              ></LinkText>
+            }
+          />
+          <TransferDetailListItem
+            label={'To'}
+            value={
+              <LinkText
                 text={shortenAddress(transferDetail.to)}
                 url={`${getBlockExplorerUrl(transferDetail.chainId)}/address/${transferDetail.to}`}
               ></LinkText>
