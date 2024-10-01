@@ -304,7 +304,7 @@ export const formatAmount = (amount: string, decimals: number): string => {
     maximumFractionDigits: 6,
   });
 
-  if (formatted === '0') {
+  if (formatted === '0' && amount !== '0') {
     return '< 0';
   }
 
