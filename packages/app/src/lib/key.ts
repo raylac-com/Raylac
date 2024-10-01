@@ -27,12 +27,6 @@ export const setBackupVerificationStatus = async (
  * Throws if a different mnemonic is already saved for the userId.
  */
 export const saveMnemonic = async (mnemonic: string) => {
-  const existingMnemonic = await getMnemonic();
-
-  if (existingMnemonic !== null && existingMnemonic !== mnemonic) {
-    // throw new Error('Trying to overwrite existing mnemonic');
-  }
-
   await SecureStore.setItemAsync(MNEMONIC_STORAGE_KEY, mnemonic, {
     requireAuthentication: REQUIRE_AUTHENTICATION,
   });

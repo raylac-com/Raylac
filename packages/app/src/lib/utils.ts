@@ -1,7 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import { Hex } from 'viem';
 import * as Clipboard from 'expo-clipboard';
-import { ServerId } from '@/types';
 
 export const ACCOUNT_SPENDING_PUB_KEY_STORAGE_KEY = 'account_spending_pub_key';
 export const ACCOUNT_VIEWING_PUB_KEY_STORAGE_KEY = 'account_viewing_pub_key';
@@ -13,17 +12,6 @@ export const shortenAddress = (address: Hex) => {
 };
 
 const SIGNED_IN_USER_STORAGE_KEY = 'signedInUser';
-
-export const getServerId = (): ServerId => {
-  switch (process.env.EXPO_PUBLIC_RPC_URL) {
-    case 'https://dantehrani.ngrok.app':
-      return ServerId.Local;
-    case 'https://raylac-api.onrender.com':
-      return ServerId.Production;
-    default:
-      throw new Error('Unknown server');
-  }
-};
 
 export const setSignedInUser = async (userId: number) => {
   await SecureStore.setItemAsync(SIGNED_IN_USER_STORAGE_KEY, userId.toString());
