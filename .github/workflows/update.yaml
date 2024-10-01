@@ -17,6 +17,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18.17.0
+          cache: 'pnpm'
 
       - name: 🏗 Setup EAS
         uses: expo/expo-github-action@v8
