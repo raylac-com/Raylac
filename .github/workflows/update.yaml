@@ -29,7 +29,7 @@ jobs:
         run: pnpm i
 
       - name: 🚀 Create update
-        run: eas update --auto --non-interactive
+        run: eas update --channel production --non-interactive
         working-directory: packages/app
         env:
           EXPO_PUBLIC_RPC_URL: https://raylac-api.onrender.com
