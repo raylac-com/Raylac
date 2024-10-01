@@ -92,7 +92,7 @@ const Advanced = () => {
             fontSize: 14,
           }}
         >
-          user: {signedInUser.id}
+          user id: {signedInUser.id}
         </Text>
         <Text
           style={{
