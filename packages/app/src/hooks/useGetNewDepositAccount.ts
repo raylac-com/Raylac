@@ -19,7 +19,6 @@ const useGetNewDepositAccount = () => {
 
   useEffect(() => {
     if (error) {
-      console.error(error);
       Toast.show({
         type: 'error',
         text1: error.message,
@@ -45,7 +44,7 @@ const useGetNewDepositAccount = () => {
         stealthPubKey: account.stealthPubKey,
         ephemeralPubKey: account.ephemeralPubKey,
         viewTag: account.viewTag,
-        label
+        label,
       });
 
       return account;

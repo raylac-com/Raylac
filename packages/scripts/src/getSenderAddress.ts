@@ -14,7 +14,7 @@ import {
   zeroAddress,
 } from 'viem';
 import { privateKeyToAccount, publicKeyToAddress } from 'viem/accounts';
-import { base, baseSepolia } from 'viem/chains';
+import { base } from 'viem/chains';
 
 export const getSenderAddressAsync = async ({
   chainId,

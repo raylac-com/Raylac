@@ -128,6 +128,7 @@ const Receive = () => {
             }}
           >
             <Image
+              // eslint-disable-next-line @typescript-eslint/no-require-imports
               source={require('../../assets/base.png')}
               style={{ width: 20, height: 20 }}
             ></Image>

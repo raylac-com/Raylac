@@ -116,7 +116,6 @@ const decodeExecuteAsTransfer = ({
 };
 
 const syncOutgoingTransfers = async () => {
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const txHashes = await prisma.transaction.findMany({
       select: {
@@ -156,7 +155,7 @@ const syncOutgoingTransfers = async () => {
               trace,
               decoded,
             };
-          } catch (err) {
+          } catch (_err) {
             return null;
           }
         })

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import 'dotenv/config';
 import {
   buildMultiChainSendRequestBody,
@@ -275,9 +276,11 @@ const testMultiChainSend = async () => {
       })
     );
 
+    /*
     const paymasterSignedFinalTransferUserOp = await getPaymasterAndData({
       userOp: multiChainSendData.finalTransferUserOp,
     });
+    */
 
     /**
      * 3. Sign the user operations with the stealth accounts

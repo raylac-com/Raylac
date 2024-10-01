@@ -11,7 +11,6 @@ const useEnsName = (address: Hex) => {
   return useQuery({
     queryKey: ['ensName', address],
     queryFn: async () => {
-      console.log('Fetching ENS name for', address);
       const name = await client.getEnsName({ address });
       // Fetch the ENS name for the given address
       // For now, we'll just return the address itself

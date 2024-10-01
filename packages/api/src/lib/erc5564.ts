@@ -32,7 +32,6 @@ export const announce = async ({
   viewTag: Hex;
   stealthPubKey: Hex;
 }) => {
-  console.log('Announcing', stealthAddress, ephemeralPubKey);
   const metadata = encodeERC5564Metadata({
     viewTag: viewTag as Hex,
     stealthPubKey: stealthPubKey as Hex,
@@ -49,7 +48,6 @@ export const announce = async ({
     functionName: 'announce',
     args: [SCHEME_ID, stealthAddress, ephemeralPubKey, metadata],
   });
-  console.log('Tx hash', txHash);
 
   // TODO: Handle tx being dropped
 

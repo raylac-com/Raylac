@@ -41,6 +41,7 @@ const Start = () => {
       }}
     >
       <Image
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         source={require('../../assets/adaptive-icon.png')}
         style={{
           width: 240,

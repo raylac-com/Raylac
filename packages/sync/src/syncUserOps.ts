@@ -34,11 +34,11 @@ const getLatestSynchedUserOpBlock = async (
 };
 
 const syncUserOpsByPaymaster = async () => {
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     for (const chainId of supportedChains.map(chain => chain.id)) {
       const fromBlock =
         (await getLatestSynchedUserOpBlock(chainId)) ||
+        // eslint-disable-next-line security/detect-object-injection
         ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId];
 
       const client = getPublicClient({ chainId });
@@ -82,7 +82,9 @@ const syncUserOpsByPaymaster = async () => {
             data: txs.map(txHash => ({
               chainId,
               hash: txHash,
-              blockNumber: chunkLogs.find(log => log.transactionHash === txHash)!.blockNumber
+              blockNumber: chunkLogs.find(
+                log => log.transactionHash === txHash
+              )!.blockNumber,
             })),
             skipDuplicates: true,
           });

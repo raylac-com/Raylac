@@ -144,18 +144,24 @@ const getAddressesSyncStatus = async ({
     },
   });
 
+  // eslint-disable-next-line security/detect-object-injection
+  const defaultFromBlock = ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId];
+
+  if (!defaultFromBlock) {
+    throw new Error(`No default from block for chain ${chainId}`);
+  }
+
   return addresses.map(
     address =>
       traceSyncStatus.find(status => status.address === address) || {
         // If the address is not found in the sync status table, return a default object
         address,
-        lastSyncedBlockNum: ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId],
+        lastSyncedBlockNum: defaultFromBlock,
       }
   );
 };
 
 const syncIncomingTransfers = async () => {
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const addresses = await prisma.userStealthAddress.findMany({
       select: {
@@ -195,12 +201,14 @@ const syncIncomingTransfers = async () => {
           const createSyncStatusRecords = addressesWithSyncStatus.filter(
             address =>
               address.lastSyncedBlockNum ===
+              // eslint-disable-next-line security/detect-object-injection
               ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId]
           );
 
           const updateSyncStatusRecords = addressesWithSyncStatus.filter(
             address =>
               address.lastSyncedBlockNum !==
+              // eslint-disable-next-line security/detect-object-injection
               ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId]
           );
 

@@ -32,6 +32,7 @@ const shuffleArray = (array: any[]) => {
   const newArray = [...array];
   for (let i = newArray.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
+    // eslint-disable-next-line security/detect-object-injection
     [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
   }
 
@@ -40,6 +41,7 @@ const shuffleArray = (array: any[]) => {
 
 const pickRandom = ({ array, count }: { array: any[]; count: number }) => {
   const indices = generateRandomNumbers({ max: array.length - 1, count });
+  // eslint-disable-next-line security/detect-object-injection
   return indices.map(index => array[index]);
 };
 
@@ -89,6 +91,7 @@ const ConfirmBackupPhrase = () => {
         const mnemonicWords = mnemonic.split(' ');
         const filledMnemonic = mnemonicWords.map((word, index) => {
           const hideIndex = hideIndices.indexOf(index);
+          // eslint-disable-next-line security/detect-object-injection
           return hideIndex !== -1 ? userInputs[hideIndex] : word;
         });
 
@@ -136,6 +139,7 @@ const ConfirmBackupPhrase = () => {
           const hide = hideIndices.includes(index);
 
           const hideIndex = hideIndices.indexOf(index);
+          // eslint-disable-next-line security/detect-object-injection
           const fillWord = hideIndex !== -1 ? userInputs[hideIndex] : '';
 
           return (

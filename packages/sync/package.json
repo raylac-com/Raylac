@@ -5,7 +5,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@prisma/client": "^5.12.1",
+    "@prisma/client": "5.12.1",
     "@raylac/shared": "workspace:*",
     "alchemy-sdk": "^3.3.1",
     "dotenv": "^16.4.5",

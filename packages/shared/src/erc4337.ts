@@ -85,9 +85,7 @@ export const buildUserOp = async ({
     throw new Error('Failed to get sender address');
   }
 
-  console.log({ nonce });
   const nextNonce = nonce === null ? 0 : Number(nonce) + 1;
-  console.log({ nextNonce });
 
   const callData = encodeFunctionData({
     abi: RaylacAccountAbi,
@@ -586,7 +584,6 @@ export const bulkSignUserOps = async ({
 }): Promise<UserOperation[]> => {
   const signedUserOps = await Promise.all(
     userOps.map(async userOp => {
-      console.log({ stealthAccounts, sender: userOp.sender });
       const stealthAccount = stealthAccounts.find(
         account => account.address === userOp.sender
       );

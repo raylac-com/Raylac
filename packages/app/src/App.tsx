@@ -44,7 +44,6 @@ import { isBackupVerificationComplete } from './lib/key';
 import SaveBackupPhrase from './screens/SaveBackupPhrase';
 import { SafeAreaView } from 'react-native';
 
-console.log('NODE_ENV', process.env.NODE_ENV);
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
   debug: false,
@@ -104,10 +103,8 @@ const Screens = () => {
   useEffect(() => {
     (async () => {
       if (signedInUser === null && !isLoadingUser) {
-        console.log("Couldn't find signed in user");
         navigation.navigate('Start');
       } else if (signedInUser && !(await isBackupVerificationComplete())) {
-        console.log('Backup not verified, navigating to backup account');
         navigation.navigate('SaveBackupPhrase');
       }
     })();
@@ -352,14 +349,7 @@ const App = () => {
   });
 
   return (
-    <NavigationContainer
-      onStateChange={state => {
-        if (state) {
-          const currentRoute = state.routes[state.index];
-          console.log('Navigated to:', currentRoute.name);
-        }
-      }}
-    >
+    <NavigationContainer>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
           <ThemeProvider value={NavigationTheme}>

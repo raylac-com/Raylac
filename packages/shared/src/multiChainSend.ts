@@ -44,7 +44,6 @@ const buildUserOpsFromRelayQuote = async ({
       quote.steps.map(async step => {
         return await Promise.all(
           step.items.map(item => {
-            console.log('Building user op for:', item);
             const client = getPublicClient({
               chainId: item.data.chainId,
             });
@@ -168,8 +167,6 @@ const chooseInputStealthAccounts = ({
 
     remainingAmount -= balance;
   }
-
-  console.log('Remaining amount:', remainingAmount);
 
   if (remainingAmount !== BigInt(0)) {
     throw new Error('Not enough funds');

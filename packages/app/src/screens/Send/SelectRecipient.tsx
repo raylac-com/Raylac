@@ -160,8 +160,6 @@ const SelectRecipient = ({ navigation }: Props) => {
     }
   }, [searchInput]);
 
-  console.log({ inputAddress });
-
   const usersToRender = users
     ?.filter(
       user =>

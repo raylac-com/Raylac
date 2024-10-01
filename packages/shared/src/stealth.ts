@@ -70,9 +70,9 @@ export const checkStealthAddress = (input: {
   const secretHash = BigInt(secretHashHex);
 
   if (viewTag !== secretHashHex.slice(2, 4)) {
-    console.log('View tag does not match');
     return false;
   }
+
   const sH = secp.ProjectivePoint.fromAffine(g).multiply(secretHash);
 
   const recoveredPubKey = spendingPubKey.add(sH);

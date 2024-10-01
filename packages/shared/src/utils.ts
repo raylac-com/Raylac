@@ -135,6 +135,7 @@ const mimeTypes: {
 };
 
 export const mimeTypeToExtension = (mimeType: string) => {
+  // eslint-disable-next-line security/detect-object-injection
   const extension = mimeTypes[mimeType];
   if (!extension) {
     throw new Error(`Unknown MIME type: ${mimeType}`);

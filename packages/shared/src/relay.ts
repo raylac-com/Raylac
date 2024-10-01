@@ -7,19 +7,12 @@ export const relayClient = axios.create({
 });
 
 export const getQuote = async (options: RelayGetQuoteRequestBody) => {
-  try {
-    const result = await relayClient.post<RelayGetQuoteResponseBody>(
-      '/quote',
-      options
-    );
+  const result = await relayClient.post<RelayGetQuoteResponseBody>(
+    '/quote',
+    options
+  );
 
-    return result.data;
-  } catch (err) {
-    // TODO: Report error to Sentry
-    console.error(err);
-
-    throw err;
-  }
+  return result.data;
 };
 
 export const getCurrencies = async ({

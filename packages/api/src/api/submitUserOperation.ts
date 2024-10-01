@@ -53,7 +53,6 @@ const pollUserOpEvent = ({
           const log = logs[0];
 
           if (timer) {
-            console.log('Clearing timeout');
             clearTimeout(timer);
           }
 
@@ -81,25 +80,19 @@ const pollUserOpEvent = ({
 
 const submitUserOperation = async ({ userOp }: { userOp: UserOperation }) => {
   const client = getPublicClient({ chainId: userOp.chainId });
-  
-  console.time('sendUserOperation');
+
   const userOpHash = await sendUserOperation({
     client,
     userOp,
   });
-  console.timeEnd('sendUserOperation');
 
-  console.time('pollUserOpEvent');
   const userOpEventLog = await pollUserOpEvent({
     userOpHash,
     chainId: userOp.chainId,
     timeout: 15000,
   });
-  console.timeEnd('pollUserOpEvent');
 
   const success = userOpEventLog.args.success!;
-
-  console.log(`User operation ${userOpHash} success: ${success}`);
 
   if (!success) {
     throw new TRPCError({
@@ -187,8 +180,6 @@ const submitUserOperation = async ({ userOp }: { userOp: UserOperation }) => {
     chainId: userOp.chainId,
   })!;
 
-  console.log('Transfer data:', transferData);
-
   // Decode and save the trace
 
   const record = traceToPostgresRecord({
@@ -200,8 +191,6 @@ const submitUserOperation = async ({ userOp }: { userOp: UserOperation }) => {
     fromAddress: userOp.sender,
     chainId: userOp.chainId,
   });
-
-  console.log('Record:', record);
 
   const txData = {
     hash: txHash,

@@ -54,14 +54,6 @@ const useSubmitUserOpWithRetry = () => {
                 })
               ),
             };
-
-            console.log(`Retrying with increased gas fees...`);
-            console.log(
-              `maxFeePerGas: ${hexToBigInt(userOp.maxFeePerGas).toLocaleString()}`
-            );
-            console.log(
-              `maxPriorityFeePerGas: ${hexToBigInt(userOp.maxPriorityFeePerGas).toLocaleString()}`
-            );
           }
 
           // Get the paymaster signature
@@ -85,9 +77,6 @@ const useSubmitUserOpWithRetry = () => {
           return;
         } catch (error) {
           if (error.message === 'replacement underpriced') {
-            console.log(`Replacement underpriced}`);
-            console.log(error.data);
-
             // Assign the current maxFeePerGas and maxPriorityFeePerGas from the error
             currentMaxFeePerGas = hexToBigInt(error.data.currentMaxFee);
             currentMaxPriorityFeePerGas = hexToBigInt(
@@ -102,8 +91,6 @@ const useSubmitUserOpWithRetry = () => {
           }
 
           retries++;
-          console.log(`Error submitting user op. Retrying...`);
-          console.log(error);
         }
       }
 

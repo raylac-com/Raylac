@@ -7,7 +7,6 @@ const writeToCloud = async (recoveryPhrase: string) => {
     recoveryPhrase,
     CloudStorageScope.AppData
   );
-  console.log('Successfully wrote file to cloud');
 };
 
 const useBackupRecoveryPhraseToCloud = () => {

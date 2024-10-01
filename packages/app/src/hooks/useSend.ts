@@ -106,6 +106,7 @@ const useSend = () => {
           stealthPubKey: to.stealthPubKey,
           ephemeralPubKey: to.ephemeralPubKey,
           viewTag: to.viewTag,
+          label: '',
         });
       }
 
@@ -148,6 +149,7 @@ const useSend = () => {
           stealthPubKey: proxyAccount.stealthPubKey,
           ephemeralPubKey: proxyAccount.ephemeralPubKey,
           viewTag: proxyAccount.viewTag,
+          label: '',
         });
       }
 
@@ -161,17 +163,12 @@ const useSend = () => {
           throw new Error('Signer account not found');
         }
 
-        console.log(`Submitting user`);
         await submitUserOpWithRetry({
           userOp: aggregationUserOp,
           stealthAccount: signerAccount as StealthAddressWithEphemeral,
           spendingPrivKey,
           viewingPrivKey,
         });
-
-        console.log(
-          `Success sneding user operation from ${aggregationUserOp.sender}`
-        );
       }
 
       if (multiChainSendData.finalTransferUserOp) {

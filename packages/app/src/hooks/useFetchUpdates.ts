@@ -12,6 +12,7 @@ const fetchUpdateAsync = async () => {
       await Updates.reloadAsync();
     }
   } else {
+    // eslint-disable-next-line no-console
     console.log('Skipping update check in Expo Go');
   }
 };

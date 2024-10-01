@@ -7,22 +7,24 @@
     "packages/*"
   ],
   "scripts": {
-    "prepare": "if [ \"$NODE_ENV\" != \"production\" ]; then husky; fi",
-    "lint": "eslint . --ext .ts,.tsx,.js"
+    "prepare": "husky",
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@eslint/js": "^9.11.1",
     "@types/node": "^20.14.2",
-    "@typescript-eslint/eslint-plugin": "^7.0.1",
-    "@typescript-eslint/parser": "^7.0.1",
-    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^8.8.0",
+    "@typescript-eslint/parser": "^8.8.0",
+    "eslint": "^9.11.1",
     "eslint-plugin-security": "^3.0.1",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "prettier": "^3.3.2",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^8.8.0"
   },
   "lint-staged": {
     "*.{ts,tsx,js}": [

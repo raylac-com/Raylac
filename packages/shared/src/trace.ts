@@ -74,7 +74,6 @@ export const traceTransaction = async ({
     },
   };
 
-  console.time(`trace_transaction ${txHash}`);
   const result = await axios.post<{
     result: TraceResponseData[];
     error?: {
@@ -93,7 +92,6 @@ export const traceTransaction = async ({
     },
     config
   );
-  console.timeEnd(`trace_transaction ${txHash}`);
 
   if (result.data.error) {
     throw new Error(result.data.error.message);

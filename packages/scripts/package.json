@@ -5,7 +5,7 @@
   },
   "dependencies": {
     "@noble/secp256k1": "^2.1.0",
-    "@prisma/client": "^5.12.1",
+    "@prisma/client": "5.12.1",
     "@raylac/api": "workspace:*",
     "@raylac/shared": "workspace:*",
     "@trpc/client": "11.0.0-rc.439",

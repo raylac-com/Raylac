@@ -46,7 +46,6 @@ const assignStealthAddressToUser = async ({
 const scanStealthAddresses = async () => {
   // For all view keys, check if any of the announcements match the view key
 
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const users = await prisma.user.findMany();
 

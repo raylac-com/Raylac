@@ -38,7 +38,6 @@ const syncERC20TransfersForAddresses = async (addresses: Hex[]) => {
 };
 
 const syncERC20Transfers = async () => {
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const addresses = await prisma.userStealthAddress.findMany({
       select: { address: true },

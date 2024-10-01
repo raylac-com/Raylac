@@ -12,19 +12,16 @@ const useIsSignedIn = () => {
       const authToken = await getAuthToken();
 
       if (!signedInUserId) {
-        console.log('No signed in user');
         return false;
       }
 
       if (!authToken) {
-        console.log('No auth token');
         return false;
       }
 
       const user = await client.getUser.query({ userId: signedInUserId });
 
       if (!user) {
-        console.log('User not found');
         return false;
       }
 
