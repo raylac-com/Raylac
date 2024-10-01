@@ -1,58 +1,73 @@
-import { ActivityIndicator, Text, View, Image, TextInput } from 'react-native';
+import { ActivityIndicator, Text, View, Image } from 'react-native';
 import { copyToClipboard, shortenAddress } from '@/lib/utils';
 import { Hex } from 'viem';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import Toast from 'react-native-toast-message';
 import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { theme } from '@/lib/theme';
 import { useTranslation } from 'react-i18next';
 import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
-import { trpc } from '@/lib/trpc';
-import { useQueryClient } from '@tanstack/react-query';
-import { getQueryKey } from '@trpc/react-query';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
+
+interface AddressWithChainIconProps {
+  address: Hex;
+  onCopyClick: () => void;
+  isLoading: boolean;
+}
+
+const AddressWithChainIcon = (props: AddressWithChainIconProps) => {
+  const { address, onCopyClick, isLoading } = props;
+  return (
+    <View
+      style={{
+        flexDirection: 'column',
+        rowGap: 16,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          columnGap: 8,
+        }}
+      >
+        <Image
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
+          source={require('../../assets/base.png')}
+          style={{ width: 20, height: 20 }}
+        ></Image>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: 'bold',
+            textAlign: 'center',
+            color: theme.text,
+          }}
+          onPress={onCopyClick}
+        >
+          {isLoading ? (
+            <ActivityIndicator></ActivityIndicator>
+          ) : (
+            shortenAddress(address)
+          )}
+        </Text>
+        <Feather
+          name="copy"
+          size={16}
+          color={theme.text}
+          onPress={onCopyClick}
+        />
+      </View>
+    </View>
+  );
+};
 
 const Deposit = () => {
   const [depositAddress, setDepositAddress] = useState<Hex | null>(null);
-  const [label, setLabel] = useState<string>('');
-  const inputRef = useRef<TextInput>();
-
-  const queryClient = useQueryClient();
-  const { mutateAsync: getNewDepositAccount } = useGetNewDepositAccount();
-  const { mutateAsync: updateAddressLabel } =
-    trpc.updateAddressLabel.useMutation({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: getQueryKey(trpc.getStealthAccounts),
-        });
-      },
-    });
-
-  const { data: stealthAccounts } = trpc.getStealthAccounts.useQuery();
-
-  useEffect(() => {
-    (async () => {
-      if (stealthAccounts && depositAddress === null) {
-        const defaultLabel = `Address ${stealthAccounts.length + 1}`;
-        if (stealthAccounts.length > 0) {
-          setDepositAddress(stealthAccounts[0].address as Hex);
-          setLabel(stealthAccounts[0].label || defaultLabel);
-        } else {
-          const account = await getNewDepositAccount(defaultLabel);
-          setDepositAddress(account.address);
-          setLabel(defaultLabel);
-        }
-      }
-    })();
-  }, [stealthAccounts]);
-
-  const onCreateNewAddressPress = useCallback(async () => {
-    const defaultLabel = `Address ${stealthAccounts.length + 2}`;
-    const account = await getNewDepositAccount(defaultLabel);
-    setDepositAddress(account.address);
-    setLabel(defaultLabel);
-  }, [setDepositAddress, setLabel, stealthAccounts]);
+  const { mutateAsync: getNewDepositAccount, isPending: isGeneratingAddress } =
+    useGetNewDepositAccount();
 
   const navigation = useTypedNavigation();
   const { t } = useTranslation('Deposit');
@@ -83,99 +98,68 @@ const Deposit = () => {
         style={{
           flex: 2,
           justifyContent: 'center',
+          alignItems: 'center',
           flexDirection: 'column',
           rowGap: 16,
         }}
       >
-        <Text
-          style={{
-            fontSize: 24,
-            textAlign: 'center',
-            fontWeight: 'bold',
-            color: theme.text,
-          }}
-        >
-          {t('sendAmountToAddress')}
-        </Text>
         <View
           style={{
             flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
             rowGap: 16,
           }}
         >
           <View
             style={{
               flexDirection: 'row',
-              justifyContent: 'center',
               alignItems: 'center',
+              justifyContent: 'center',
               columnGap: 8,
             }}
           >
-            <TextInput
-              ref={inputRef}
-              autoCapitalize="none"
-              style={{
-                color: theme.gray,
-                fontSize: 24,
-                fontWeight: 'bold',
-                textAlign: 'center',
-              }}
-              placeholder="Label"
-              value={label}
-              onChangeText={setLabel}
-              onEndEditing={() => {
-                updateAddressLabel({
-                  address: depositAddress as Hex,
-                  label,
-                });
-              }}
-            ></TextInput>
-            <Feather
-              name="edit-2"
-              size={16}
-              color={theme.gray}
-              onPress={() => {
-                if (inputRef.current) {
-                  inputRef.current.focus();
-                }
-              }}
+            <Ionicons
+              name="add-circle-outline"
+              size={32}
+              color={theme.primary}
             />
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              columnGap: 8,
-            }}
-          >
-            <Image
-              // eslint-disable-next-line @typescript-eslint/no-require-imports
-              source={require('../../assets/base.png')}
-              style={{ width: 20, height: 20 }}
-            ></Image>
             <Text
               style={{
-                fontSize: 18,
-                fontWeight: 'bold',
+                fontSize: 24,
                 textAlign: 'center',
+                fontWeight: 'bold',
                 color: theme.text,
               }}
-              onPress={onCopyClick}
             >
-              {depositAddress ? (
-                shortenAddress(depositAddress)
-              ) : (
-                <ActivityIndicator></ActivityIndicator>
-              )}
+              Deposit ETH on Base
             </Text>
           </View>
-          <StyledButton
-            variant="underline"
-            title={'Create new address'}
-            onPress={onCreateNewAddressPress}
-            icon={<Feather name="refresh-cw" size={16} color={theme.gray} />}
-          ></StyledButton>
+          <Text
+            style={{
+              fontSize: 16,
+              textAlign: 'center',
+              color: theme.text,
+            }}
+          >
+            Deposit to a fresh address to keep your balance private
+          </Text>
+        </View>
+
+        <View
+          style={{
+            height: 16,
+            flexDirection: 'column',
+            rowGap: 16,
+          }}
+        >
+          {depositAddress && (
+            <AddressWithChainIcon
+              address={depositAddress}
+              onCopyClick={onCopyClick}
+              isLoading={isGeneratingAddress}
+            />
+          )}
         </View>
       </View>
       <View
@@ -187,24 +171,37 @@ const Deposit = () => {
           rowGap: 16,
         }}
       >
+        {!depositAddress || isGeneratingAddress ? (
+          <StyledButton
+            title="Get deposit address"
+            onPress={async () => {
+              const account = await getNewDepositAccount('');
+              setDepositAddress(account.address);
+            }}
+            style={{
+              width: '100%',
+            }}
+          ></StyledButton>
+        ) : (
+          <StyledButton
+            title={'Copy address'}
+            onPress={() => {
+              onCopyClick();
+            }}
+            style={{
+              width: '100%',
+            }}
+          ></StyledButton>
+        )}
         <StyledButton
-          title={'Copy address'}
-          onPress={() => {
-            onCopyClick();
-          }}
-          style={{
-            width: '100%',
-          }}
-        ></StyledButton>
-        <StyledButton
-          title={'Other addresses'}
+          title={'Past deposit addresses'}
           onPress={() => {
             navigation.navigate('Addresses');
           }}
           style={{
             width: '100%',
           }}
-          variant="outline"
+          variant="underline"
         ></StyledButton>
       </View>
     </View>

@@ -28,7 +28,6 @@ import SelectLanguage from './screens/SelectLanguage';
 import SendSuccess from './screens/Send/SendSuccess';
 import { useEffect } from 'react';
 import { getSelectedLanguage } from './i18n';
-import Receive from './screens/Receive';
 import AccountInfo from './screens/AccountInfo/AccountInfo';
 import UpdateDisplayName from './screens/AccountInfo/UpdateDisplayName';
 import UpdateUsername from './screens/AccountInfo/UpdateUsername';
@@ -43,6 +42,7 @@ import ConfirmBackupPhrase from './screens/ConfirmBackupPhrase';
 import { isBackupVerificationComplete } from './lib/key';
 import SaveBackupPhrase from './screens/SaveBackupPhrase';
 import { SafeAreaView } from 'react-native';
+import Receive from './screens/Receive';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',

@@ -1,56 +1,76 @@
-import { ActivityIndicator, Text, View, Image, TextInput } from 'react-native';
+import { ActivityIndicator, Text, View, Image, Pressable } from 'react-native';
 import { copyToClipboard, shortenAddress } from '@/lib/utils';
 import { Hex } from 'viem';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import Toast from 'react-native-toast-message';
 import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { theme } from '@/lib/theme';
 import { useTranslation } from 'react-i18next';
 import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
-import { trpc } from '@/lib/trpc';
-import { useQueryClient } from '@tanstack/react-query';
-import { getQueryKey } from '@trpc/react-query';
+import { Feather } from '@expo/vector-icons';
+import useSignedInUser from '@/hooks/useSignedInUser';
+
+interface AddressWithChainIconProps {
+  address: Hex;
+  onCopyClick: () => void;
+  isLoading: boolean;
+}
+
+const AddressWithChainIcon = (props: AddressWithChainIconProps) => {
+  const { address, onCopyClick, isLoading } = props;
+  return (
+    <View
+      style={{
+        flexDirection: 'column',
+        rowGap: 16,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          columnGap: 8,
+        }}
+      >
+        <Image
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
+          source={require('../../assets/base.png')}
+          style={{ width: 20, height: 20 }}
+        ></Image>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: 'bold',
+            textAlign: 'center',
+            color: theme.text,
+          }}
+          onPress={onCopyClick}
+        >
+          {isLoading ? (
+            <ActivityIndicator></ActivityIndicator>
+          ) : (
+            shortenAddress(address)
+          )}
+        </Text>
+        <Feather
+          name="copy"
+          size={16}
+          color={theme.text}
+          onPress={onCopyClick}
+        />
+      </View>
+    </View>
+  );
+};
 
 const Receive = () => {
   const [depositAddress, setDepositAddress] = useState<Hex | null>(null);
-  const [label, setLabel] = useState<string>('');
+  const { mutateAsync: getNewDepositAccount, isPending: isGeneratingAddress } =
+    useGetNewDepositAccount();
 
-  const queryClient = useQueryClient();
-  const { mutateAsync: getNewDepositAccount } = useGetNewDepositAccount();
-  const { mutateAsync: updateAddressLabel } =
-    trpc.updateAddressLabel.useMutation({
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: getQueryKey(trpc.getStealthAccounts),
-        });
-      },
-    });
-
-  const { data: stealthAccounts } = trpc.getStealthAccounts.useQuery();
-
-  useEffect(() => {
-    (async () => {
-      if (stealthAccounts && depositAddress === null) {
-        const defaultLabel = `Address ${stealthAccounts.length + 1}`;
-        if (stealthAccounts.length > 0) {
-          setDepositAddress(stealthAccounts[0].address as Hex);
-          setLabel(stealthAccounts[0].label || defaultLabel);
-        } else {
-          const account = await getNewDepositAccount(defaultLabel);
-          setDepositAddress(account.address);
-          setLabel(defaultLabel);
-        }
-      }
-    })();
-  }, [stealthAccounts]);
-
-  const onCreateNewAddressPress = useCallback(async () => {
-    const defaultLabel = `Address ${stealthAccounts.length + 2}`;
-    const account = await getNewDepositAccount(defaultLabel);
-    setDepositAddress(account.address);
-    setLabel(defaultLabel);
-  }, [setDepositAddress, setLabel, stealthAccounts]);
+  const { data: signedInUser } = useSignedInUser();
 
   const navigation = useTypedNavigation();
   const { t } = useTranslation('Deposit');
@@ -61,10 +81,21 @@ const Receive = () => {
       Toast.show({
         type: 'success',
         text1: t('copied', { ns: 'common' }),
-        position: 'bottom',
+        position: 'top',
+        visibilityTime: 1000,
       });
     }
   }, [depositAddress]);
+
+  const onUsernameCopyClick = useCallback(() => {
+    copyToClipboard(signedInUser.username);
+    Toast.show({
+      type: 'success',
+      text1: t('copied', { ns: 'common' }),
+      position: 'top',
+      visibilityTime: 1000,
+    });
+  }, [signedInUser]);
 
   return (
     <View
@@ -78,10 +109,9 @@ const Receive = () => {
     >
       <View
         style={{
-          flex: 2,
+          flex: 1,
           justifyContent: 'center',
-          flexDirection: 'column',
-          rowGap: 16,
+          alignItems: 'center',
         }}
       >
         <Text
@@ -92,68 +122,56 @@ const Receive = () => {
             color: theme.text,
           }}
         >
-          {t('sendAmountToAddress')}
+          Receive ETH on Base
         </Text>
-        <View
+      </View>
+      <View
+        style={{
+          flex: 2,
+          alignItems: 'center',
+          flexDirection: 'column',
+          rowGap: 16,
+        }}
+      >
+        <Text
           style={{
-            flexDirection: 'column',
-            rowGap: 16,
+            fontSize: 16,
+            textAlign: 'center',
+            color: theme.text,
+            fontWeight: 'bold',
           }}
         >
-          <TextInput
-            autoCapitalize="none"
-            autoFocus
+          Receive from a Raylac user
+        </Text>
+
+        <Text
+          style={{
+            fontSize: 16,
+            textAlign: 'center',
+            color: theme.text,
+          }}
+        >
+          Your Raylac username
+        </Text>
+        <Pressable
+          style={{
+            borderRadius: 16,
+            paddingVertical: 8,
+            paddingHorizontal: 16,
+            backgroundColor: theme.text,
+          }}
+          onPress={onUsernameCopyClick}
+        >
+          <Text
             style={{
-              color: theme.gray,
-              fontSize: 24,
-              fontWeight: 'bold',
+              fontSize: 16,
               textAlign: 'center',
-            }}
-            placeholder="Label"
-            value={label}
-            onChangeText={setLabel}
-            onEndEditing={() => {
-              updateAddressLabel({
-                address: depositAddress as Hex,
-                label,
-              });
-            }}
-          ></TextInput>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'center',
-              columnGap: 8,
+              color: theme.gray,
             }}
           >
-            <Image
-              // eslint-disable-next-line @typescript-eslint/no-require-imports
-              source={require('../../assets/base.png')}
-              style={{ width: 20, height: 20 }}
-            ></Image>
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: 'bold',
-                textAlign: 'center',
-                color: theme.text,
-              }}
-              onPress={onCopyClick}
-            >
-              {depositAddress ? (
-                shortenAddress(depositAddress)
-              ) : (
-                <ActivityIndicator></ActivityIndicator>
-              )}
-            </Text>
-          </View>
-          <StyledButton
-            variant="underline"
-            title={'Create new address'}
-            onPress={onCreateNewAddressPress}
-          ></StyledButton>
-        </View>
+            @{signedInUser.username}
+          </Text>
+        </Pressable>
       </View>
       <View
         style={{
@@ -164,26 +182,89 @@ const Receive = () => {
           rowGap: 16,
         }}
       >
+        <View
+          style={{
+            height: 24,
+            flexDirection: 'column',
+            rowGap: 16,
+          }}
+        >
+          {depositAddress && (
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                columnGap: 8,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  textAlign: 'center',
+                  color: theme.text,
+                }}
+              >
+                Receive to
+              </Text>
+              <AddressWithChainIcon
+                address={depositAddress}
+                onCopyClick={onCopyClick}
+                isLoading={isGeneratingAddress}
+              />
+            </View>
+          )}
+        </View>
+        <Text
+          style={{
+            fontSize: 16,
+            textAlign: 'center',
+            color: theme.text,
+            fontWeight: 'bold',
+          }}
+        >
+          Or receive from anyone
+        </Text>
+        <Text
+          style={{
+            color: theme.text,
+            fontSize: 14,
+            textAlign: 'center',
+          }}
+        >
+          Receive to a fresh address to keep your transfers private
+        </Text>
+        {!depositAddress || isGeneratingAddress ? (
+          <StyledButton
+            title="Get receiving address"
+            onPress={async () => {
+              const account = await getNewDepositAccount('');
+              setDepositAddress(account.address);
+            }}
+            style={{
+              width: '100%',
+            }}
+          ></StyledButton>
+        ) : (
+          <StyledButton
+            title={'Copy address'}
+            onPress={() => {
+              onCopyClick();
+            }}
+            style={{
+              width: '100%',
+            }}
+          ></StyledButton>
+        )}
         <StyledButton
-          title={'Copy address'}
+          title={'Past receiving addresses'}
           onPress={() => {
-            onCopyClick();
+            navigation.navigate('Addresses');
           }}
           style={{
             width: '100%',
           }}
-          variant="outline"
-        ></StyledButton>
-        <StyledButton
-          title={'Back'}
-          onPress={() => {
-            navigation.navigate('Tabs', {
-              screen: 'Home',
-            });
-          }}
-          style={{
-            width: '100%',
-          }}
+          variant="underline"
         ></StyledButton>
       </View>
     </View>

@@ -31,10 +31,7 @@ export type RootStackParamsList = {
   };
 
   // Deposit stack
-  Deposit: {
-    address: string;
-    amount: number;
-  };
+  Deposit: undefined;
   TransferHistory: undefined;
   RaylacTransferDetails: {
     executionTag: Hex;
