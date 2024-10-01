@@ -211,7 +211,7 @@ const RaylacTransferDetails = ({ route }: Props) => {
             }}
           >
             {type === 'outgoing' ? 'Sent to ' : 'Received from '}@
-            {transferUser.username}
+            {transferUser?.username}
           </Text>
           {transferDetail.traces.map((trace, i) => (
             <TraceListItem
