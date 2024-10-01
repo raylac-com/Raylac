@@ -41,6 +41,7 @@ const config: ExpoConfig = {
     [
       '@sentry/react-native/expo',
       {
+        url: 'https://sentry.io/',
         organization: 'raylac',
         project: 'raylac-app',
       },

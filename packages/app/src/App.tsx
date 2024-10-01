@@ -319,6 +319,7 @@ const Screens = () => {
           }}
         ></RootStack.Screen>
       </RootStack.Navigator>
+      <Toast></Toast>
     </SafeAreaView>
   );
 };
@@ -355,7 +356,6 @@ const App = () => {
           <ThemeProvider value={NavigationTheme}>
             <Screens></Screens>
             <StatusBar style="light" />
-            <Toast></Toast>
           </ThemeProvider>
         </QueryClientProvider>
       </trpc.Provider>

@@ -3,7 +3,7 @@ import useSignOut from '@/hooks/useSignOut';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { theme } from '@/lib/theme';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Text, TouchableHighlight, View } from 'react-native';
 import { Hex } from 'viem';
@@ -12,6 +12,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Entypo } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import useSetProfileImage from '@/hooks/useSetProfileImage';
+import Toast from 'react-native-toast-message';
 
 interface SettingListItemProps {
   icon: React.ReactNode;
@@ -87,7 +88,12 @@ const Account = () => {
   const { mutateAsync: signOut } = useSignOut();
   const navigation = useTypedNavigation();
   const { t } = useTranslation('Account');
-  const { mutateAsync: setProfileImage } = useSetProfileImage();
+  const {
+    mutateAsync: setProfileImage,
+    isPending: isSettingProfileImage,
+    status: setProfileImageStatus,
+    reset: resetSetProfileImage,
+  } = useSetProfileImage();
 
   const onSignOutPress = useCallback(async () => {
     Alert.alert(t('confirmSignOutTitle'), '', [
@@ -106,6 +112,30 @@ const Account = () => {
       },
     ]);
   }, [signOut, navigation]);
+
+  useEffect(() => {
+    if (isSettingProfileImage) {
+      Toast.show({
+        type: 'info',
+        text1: 'Uploading profile image...',
+        autoHide: false,
+      });
+    }
+
+    if (!isSettingProfileImage) {
+      Toast.hide();
+      resetSetProfileImage();
+    }
+  }, [isSettingProfileImage]);
+
+  useEffect(() => {
+    if (setProfileImageStatus === 'error') {
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to upload profile image',
+      });
+    }
+  }, [setProfileImageStatus]);
 
   if (!user) {
     return null;

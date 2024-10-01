@@ -5,6 +5,7 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 import { mimeTypeToExtension } from '@raylac/shared';
+import { v4 as uuidv4 } from 'uuid';
 
 if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
   throw new Error('GOOGLE_APPLICATION_CREDENTIALS must be set');
@@ -27,7 +28,7 @@ const updateProfileImage = async ({
   imageBase64: string;
 }) => {
   const extension = mimeTypeToExtension(mimeType);
-  const fileName = `${userId}.${extension}`;
+  const fileName = `${uuidv4()}.${extension}`;
   const tempFilePath = path.join(os.tmpdir(), fileName);
 
   fs.writeFileSync(tempFilePath, imageBase64, 'base64');
