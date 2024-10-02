@@ -11,7 +11,6 @@ import { webcrypto } from 'node:crypto';
 import getUsers from './api/getUsers';
 import getTransferHistory from './api/getTransferHistory';
 import signIn from './api/signIn';
-import getUsdToJpy from './api/getUsdToJpy';
 import updateAddressLabel from './api/updateAddressLabel';
 import updateDisplayName from './api/updateDisplayName';
 import updateUsername from './api/updateUsername';
@@ -181,8 +180,6 @@ const appRouter = router({
       return details;
     }),
 
- 
-
   updateAddressLabel: authedProcedure
     .input(
       z.object({
@@ -255,11 +252,6 @@ const appRouter = router({
       });
       return 'ok';
     }),
-
-  getUsdToJpy: publicProcedure.query(async () => {
-    const usdToJpy = await getUsdToJpy();
-    return usdToJpy;
-  }),
 
   /**
    * Add a new stealth account to the user.
