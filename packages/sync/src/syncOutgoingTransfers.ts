@@ -19,7 +19,6 @@ const traceToPostgresRecord = ({
   traceTxHash,
   traceTxPosition,
   traceAddress,
-  blockNumber,
   fromAddress,
   chainId,
 }: {
@@ -27,7 +26,6 @@ const traceToPostgresRecord = ({
   traceTxHash: Hex;
   traceTxPosition: number;
   traceAddress: number[];
-  blockNumber: bigint;
   fromAddress: Hex;
   chainId: number;
 }): Prisma.TransferTraceCreateManyInput => {
@@ -39,7 +37,6 @@ const traceToPostgresRecord = ({
     to: getAddress(to),
     amount,
     tokenId: transferData.tokenId,
-    blockNumber,
     txHash: traceTxHash,
     txPosition: traceTxPosition,
     traceAddress: traceAddress.join('_'),
@@ -190,7 +187,6 @@ const syncOutgoingTransfers = async () => {
             traceAddress: [...trace.traceAddress, 0, 0],
             // The trace is a call to the `execute` function, so the `from` address of a transfer is the `to` address that's being called.
             fromAddress: trace.action.to,
-            blockNumber: BigInt(trace.blockNumber),
             chainId,
           });
         })

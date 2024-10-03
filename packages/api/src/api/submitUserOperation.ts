@@ -106,6 +106,20 @@ const submitUserOperation = async ({ userOp }: { userOp: UserOperation }) => {
 
   const txHash = userOpEventLog.transactionHash!;
   const blockNumber = userOpEventLog.blockNumber!;
+  const blockHash = userOpEventLog.blockHash!;
+
+  // Upsert the block first
+  await prisma.block.upsert({
+    create: {
+      hash: blockHash,
+      number: blockNumber,
+      chainId: userOp.chainId,
+    },
+    update: {},
+    where: {
+      hash: blockHash,
+    },
+  });
 
   // Return 400 if the transaction fails
 
@@ -125,6 +139,7 @@ const submitUserOperation = async ({ userOp }: { userOp: UserOperation }) => {
       create: {
         hash: txHash,
         blockNumber,
+        blockHash,
         chainId: userOp.chainId,
       },
     },
@@ -187,7 +202,6 @@ const submitUserOperation = async ({ userOp }: { userOp: UserOperation }) => {
     traceTxHash: txHash,
     traceTxPosition: executeCallTrace.transactionPosition,
     traceAddress: [...executeCallTrace.traceAddress, 0, 0],
-    blockNumber,
     fromAddress: userOp.sender,
     chainId: userOp.chainId,
   });
@@ -195,6 +209,7 @@ const submitUserOperation = async ({ userOp }: { userOp: UserOperation }) => {
   const txData = {
     hash: txHash,
     blockNumber,
+    blockHash,
     chainId: userOp.chainId,
   };
   // Create the transaction record

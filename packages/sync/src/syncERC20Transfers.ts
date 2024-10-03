@@ -31,7 +31,6 @@ const syncERC20TransfersForAddresses = async (addresses: Hex[]) => {
         toBlock: 'latest',
       });
 
-      console.log(addresses);
       console.log(logs);
     }
   }
@@ -41,9 +40,6 @@ const syncERC20Transfers = async () => {
   while (true) {
     const addresses = await prisma.userStealthAddress.findMany({
       select: { address: true },
-      where: {
-        address: '0x65495c80a882F0AD62647f48038630ee6f6E2801',
-      },
     });
 
     // Sync incoming transfers in 100 address batches

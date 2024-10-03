@@ -432,7 +432,6 @@ export const traceToPostgresRecord = ({
   traceTxHash,
   traceTxPosition,
   traceAddress,
-  blockNumber,
   fromAddress,
   chainId,
 }: {
@@ -440,7 +439,6 @@ export const traceToPostgresRecord = ({
   traceTxHash: Hex;
   traceTxPosition: number;
   traceAddress: number[];
-  blockNumber: bigint;
   fromAddress: Hex;
   chainId: number;
 }): Prisma.TransferTraceCreateManyInput => {
@@ -452,7 +450,6 @@ export const traceToPostgresRecord = ({
     to: getAddress(to),
     amount,
     tokenId: transferData.tokenId,
-    blockNumber,
     txHash: traceTxHash,
     txPosition: traceTxPosition,
     traceAddress: traceAddress.join('_'),
@@ -492,4 +489,16 @@ export const getGasInfo = async ({
   }
 
   return gasInfo;
+};
+
+/**
+ * Return the minimum BigInt from an array of BigInts
+ */
+export const bigIntMin = (values: bigint[]) => {
+  // Use reduce to find the minimum BigInt
+  const minBigInt = values.reduce((min, current) =>
+    current < min ? current : min
+  );
+
+  return minBigInt;
 };
