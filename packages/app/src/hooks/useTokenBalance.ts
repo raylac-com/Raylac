@@ -39,7 +39,8 @@ const useTokenBalances = () => {
 
   const data = tokenBalances?.map(tokenBalance => {
     const balance = BigInt(tokenBalance.balance);
-    const tokenPrice = getTokenPrice(tokenBalance.tokenId);
+    const tokenPrice =
+      tokenBalance.tokenId === 'usdc' ? 1 : getTokenPrice(tokenBalance.tokenId);
 
     const tokenMetadata = supportedTokens.find(
       token => token.tokenId === tokenBalance.tokenId
@@ -54,7 +55,7 @@ const useTokenBalances = () => {
       tokenMetadata.decimals
     );
 
-    const formattedUsdBalance = usdBalance ? usdBalance.toFixed(2) : '';
+    const formattedUsdBalance = usdBalance ? usdBalance.toFixed(2) : '0';
 
     return {
       ...tokenBalance,
