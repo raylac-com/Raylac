@@ -88,19 +88,33 @@ const syncBlocksForChain = async (chainId: number) => {
       `Fetching ${latestBlock.number - fromBlock} blocks for chain ${chainId} from ${fromBlock.toLocaleString()} to ${latestBlock.number.toLocaleString()}`
     );
 
+    const chunkSize = BigInt(100);
     for (
       let blockNumber = fromBlock;
       blockNumber <= latestBlock.number;
-      blockNumber++
+      blockNumber += chunkSize
     ) {
-      const block = await publicClient.getBlock({
-        blockNumber,
-      });
+      const chunk = Array.from(
+        { length: Number(chunkSize) },
+        (_, i) => blockNumber + BigInt(i)
+      );
 
-      await saveBlock(block, chainId);
+      await Promise.all(
+        chunk.map(async blockNumber => {
+          if (blockNumber > latestBlock.number) {
+            return;
+          }
+
+          const block = await publicClient.getBlock({
+            blockNumber,
+          });
+
+          await saveBlock(block, chainId);
+        })
+      );
     }
 
-    await sleep(12 * 1000);
+    await sleep(10 * 1000);
   }
 };
 

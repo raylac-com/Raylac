@@ -111,8 +111,9 @@ model Transaction {
 
   synchedTraces Boolean @default(false)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  ERC20TransferLog ERC20TransferLog[]
 }
 
 model UserOperation {
@@ -156,4 +157,26 @@ model Block {
   Transaction Transaction[]
 
   @@unique([number, chainId])
+}
+
+model ERC20TransferLog {
+  from    String
+  to      String
+  amount  BigInt
+  tokenId String
+
+  executionTag String?
+
+  logIndex    Int
+  txIndex     Int
+  blockNumber Int
+  chainId     Int
+
+  transactionHash String
+  Transaction     Transaction @relation(fields: [transactionHash], references: [hash])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([txIndex, logIndex, blockNumber, chainId])
 }

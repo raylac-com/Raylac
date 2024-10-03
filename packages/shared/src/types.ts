@@ -117,6 +117,7 @@ export interface SupportedToken {
   addresses: {
     address: Hex;
     chain: Chain;
+    syncFrom?: bigint;
   }[];
 }
 
