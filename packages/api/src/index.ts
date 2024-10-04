@@ -18,7 +18,6 @@ import updateProfileImage from './api/updateProfileImage';
 import { signUserOp } from './lib/paymaster';
 import { UserOperation } from '@raylac/shared';
 import getStealthAccounts from './api/getStealthAccounts';
-import getTokenBalancesPerChain from './api/getTokenBalancesPerChain';
 import getTokenBalances from './api/getTokenBalances';
 import getAddressBalancesPerChain from './api/getAddressBalancesPerChain';
 import { getBlockTimestamp } from './utils';
@@ -92,17 +91,6 @@ const appRouter = router({
 
       return user;
     }),
-
-  /**
-   * Get the balances of tokens for all chains and supported tokens
-   * for the user
-   */
-  getTokenBalancesPerChain: authedProcedure.query(async opts => {
-    const userId = opts.ctx.userId;
-
-    const balances = await getTokenBalancesPerChain({ userId });
-    return balances;
-  }),
 
   getAddressBalancesPerChain: authedProcedure.query(async opts => {
     const userId = opts.ctx.userId;

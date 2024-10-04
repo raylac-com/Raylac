@@ -331,3 +331,10 @@ export interface ChainGasInfo {
   maxPriorityFeePerGas: bigint;
   chainId: number;
 }
+
+export interface RaylacAccountExecuteArgs {
+  to: Hex;
+  value: bigint;
+  data: Hex;
+  tag: Hex;
+}

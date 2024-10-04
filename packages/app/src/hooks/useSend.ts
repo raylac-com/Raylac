@@ -62,7 +62,7 @@ const useSend = () => {
         .sort((a, b) => (BigInt(b.balance) > BigInt(a.balance) ? 1 : -1));
 
       let currentAmount = BigInt(0);
-      const sendFromAccounts: RouterOutput['getTokenBalancesPerChain'] = [];
+      const sendFromAccounts: RouterOutput['getAddressBalancesPerChain'] = [];
 
       for (const account of sortedAccountsWithToken) {
         sendFromAccounts.push(account);
@@ -187,9 +187,6 @@ const useSend = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.getTokenBalancesPerChain),
-      });
       queryClient.invalidateQueries({
         queryKey: getQueryKey(trpc.getTokenBalances),
       });
