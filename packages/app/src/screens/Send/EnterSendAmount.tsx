@@ -14,11 +14,52 @@ import { formatAmount, getChainsForMode } from '@raylac/shared';
 import FastAvatar from '@/components/FastAvatar';
 import { publicKeyToAddress } from 'viem/accounts';
 import useSignedInUser from '@/hooks/useSignedInUser';
+import useTokenPrice from '@/hooks/useTokenPrice';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'EnterSendAmount'>;
 
 const containsNonNumberChars = (str: string): boolean => {
   return !/^(-?)([0-9]*)\.?([0-9]*)$/.test(str);
+};
+
+interface AmountInputProps {
+  amount: string;
+  onInputChange: (amount: string) => void;
+  autoFocus: boolean;
+}
+
+const AmountInput = (props: AmountInputProps) => {
+  const { amount, onInputChange } = props;
+  return (
+    <View
+      style={{
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        backgroundColor: theme.background,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: theme.gray,
+        height: 52,
+      }}
+    >
+      <TextInput
+        value={amount !== null ? amount.toString() : ''}
+        onChangeText={_amount => {
+          if (!containsNonNumberChars(_amount)) {
+            onInputChange(_amount);
+          }
+        }}
+        style={{
+          fontSize: 28,
+          textAlign: 'right',
+          color: theme.text,
+        }}
+        keyboardType="numeric"
+      ></TextInput>
+    </View>
+  );
 };
 
 const EnterSendAmount = ({ navigation, route }: Props) => {
@@ -28,10 +69,13 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
 
   const [outputChain, setOutputChain] = useState(chains[0].id);
   const [amount, setAmount] = useState<string>('');
+  const [usdAmount, setUsdAmount] = useState<string>('');
 
   const { data: tokenBalances } = trpc.getTokenBalances.useQuery();
 
   const [tokenId, setTokenId] = useState('eth');
+
+  const { data: tokenPrice } = useTokenPrice(tokenId);
 
   useEffect(() => {
     if (tokenBalances) {
@@ -86,6 +130,40 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
     });
   }, [parsedInputAmount, recipientUserOrAddress, tokenId, outputChain]);
 
+  const onUsdAmountChange = useCallback(
+    (amount: string) => {
+      if (!containsNonNumberChars(amount)) {
+        setUsdAmount(amount);
+
+        if (tokenPrice) {
+          const _amount = Number(amount) / tokenPrice;
+
+          setAmount(
+            _amount.toLocaleString('en-US', {
+              maximumFractionDigits: 6,
+            })
+          );
+        }
+      }
+    },
+    [tokenPrice]
+  );
+
+  const onTokenAmountChange = useCallback(
+    (amount: string) => {
+      if (!containsNonNumberChars(amount)) {
+        setAmount(amount);
+
+        if (tokenPrice) {
+          const _usdAmount = tokenPrice * Number(amount);
+
+          setUsdAmount(_usdAmount.toFixed(2));
+        }
+      }
+    },
+    [tokenPrice]
+  );
+
   const inputTokenBalance = BigInt(
     tokenBalances?.find(token => token.tokenId === tokenId)?.balance || '0'
   );
@@ -107,6 +185,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
       style={{
         flex: 1,
         alignItems: 'center',
+        paddingHorizontal: 16,
       }}
     >
       <View
@@ -116,44 +195,13 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           alignItems: 'flex-start',
           columnGap: 8,
           zIndex: 3000,
-          paddingHorizontal: 16,
         }}
       >
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            backgroundColor: theme.background,
-            borderRadius: 8,
-            borderWidth: 1,
-            borderColor: theme.gray,
-            height: 52,
-          }}
-        >
-          <TextInput
-            autoFocus
-            value={amount !== null ? amount.toString() : ''}
-            onChangeText={_amount => {
-              if (containsNonNumberChars(_amount)) {
-                return;
-              }
-
-              if (_amount === '') {
-                setAmount(null);
-              } else {
-                setAmount(_amount);
-              }
-            }}
-            style={{
-              fontSize: 28,
-              textAlign: 'right',
-              color: theme.text,
-            }}
-            keyboardType="numeric"
-          ></TextInput>
-        </View>
+        <AmountInput
+          amount={amount}
+          onInputChange={onTokenAmountChange}
+          autoFocus={true}
+        />
         <View
           style={{
             flexDirection: 'column',
@@ -197,6 +245,31 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
             {inputTokenData.symbol}
           </Text>
         </View>
+      </View>
+      <View
+        style={{
+          marginTop: 16,
+          flexDirection: 'row',
+          alignItems: 'center',
+          columnGap: 8,
+          zIndex: 3000,
+        }}
+      >
+        <AmountInput
+          amount={usdAmount}
+          onInputChange={onUsdAmountChange}
+          autoFocus={false}
+        />
+        <Text
+          style={{
+            color: theme.text,
+            textAlign: 'center',
+            opacity: 0.8,
+            width: 120,
+          }}
+        >
+          USD
+        </Text>
       </View>
       <View
         style={{
@@ -282,7 +355,6 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
       <View
         style={{
           width: '100%',
-          paddingHorizontal: 16,
           marginTop: 32,
         }}
       >

@@ -12,6 +12,10 @@ const useTokenPrice = (tokenId: string) => {
         return null;
       }
 
+      if (tokenId === 'usdc') {
+        return 1;
+      }
+
       const tokenPrice = tokenPrices[toCoingeckoTokenId(tokenId)];
 
       if (!tokenPrice) {
