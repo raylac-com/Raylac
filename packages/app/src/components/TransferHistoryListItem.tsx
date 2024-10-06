@@ -53,16 +53,6 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
     }
   );
 
-  /*
-  const { data: tokenPrice } = useTokenPrice(tx.tokenId);
-
-  const formattedUsdAmount = tokenPrice
-    ? (tokenPrice * parseFloat(formattedAmount)).toFixed(2)
-    : '';
-  */
-
-  // const { data: ensName } = useEnsName(tx.from as Hex);
-
   const avatarAddress = transferUser
     ? publicKeyToAddress(transferUser.spendingPubKey as Hex)
     : ((type === 'outgoing' ? tx.to : tx.from) as Hex);

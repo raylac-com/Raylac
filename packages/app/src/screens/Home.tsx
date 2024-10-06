@@ -201,6 +201,7 @@ const HomeScreen = () => {
             style={{
               fontSize: 24,
               color: theme.text,
+              fontWeight: 500,
             }}
           >
             {totalUsdBalance} USD
