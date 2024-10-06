@@ -45,6 +45,7 @@ const AmountInput = (props: AmountInputProps) => {
       }}
     >
       <TextInput
+        autoFocus={props.autoFocus}
         value={amount !== null ? amount.toString() : ''}
         onChangeText={_amount => {
           if (!containsNonNumberChars(_amount)) {
@@ -200,7 +201,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
         <AmountInput
           amount={amount}
           onInputChange={onTokenAmountChange}
-          autoFocus={true}
+          autoFocus={false}
         />
         <View
           style={{
@@ -227,7 +228,11 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
             setOpen={_open => {
               setInputTokenPickerOpen(_open);
             }}
-            setValue={setTokenId}
+            setValue={_tokenId => {
+              setAmount('');
+              setUsdAmount('');
+              setTokenId(_tokenId);
+            }}
             setItems={setCurrencies}
           />
           <Text
@@ -258,7 +263,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
         <AmountInput
           amount={usdAmount}
           onInputChange={onUsdAmountChange}
-          autoFocus={false}
+          autoFocus={true}
         />
         <Text
           style={{

@@ -35,6 +35,7 @@ const useSubmitUserOpWithRetry = () => {
       let currentMaxFeePerGas;
       let currentMaxPriorityFeePerGas;
 
+      let errAfterRetries;
       while (retries < maxRetries) {
         try {
           if (retries > 0) {
@@ -90,11 +91,15 @@ const useSubmitUserOpWithRetry = () => {
             );
           }
 
+          errAfterRetries = error;
+
           retries++;
         }
       }
 
-      throw new Error('Failed to submit user operation');
+      throw new Error(
+        `Failed to submit user operation: ${errAfterRetries.message}`
+      );
     },
   });
 };
