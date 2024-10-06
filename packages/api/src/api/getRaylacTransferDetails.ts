@@ -20,7 +20,6 @@ const getRaylacTransferDetails = async ({
           "txHash",
           u1. "userId" AS "fromUserId",
           u2. "userId" AS "toUserId",
-          "blockNumber",
           "executionTag",
           "traceAddress",
           "chainId"

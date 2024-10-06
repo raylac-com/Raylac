@@ -18,12 +18,14 @@ const getNativeTransferDetails = async ({
         "from",
         "to",
         "tokenId",
-        "chainId",
-        "blockNumber",
+        b. "chainId",
+      	b. "number" AS "blockNumber",
         "txHash",
         "traceAddress"
     FROM
-        "TransferTrace"
+        "TransferTrace" t
+      	LEFT JOIN "Transaction" tx ON t. "txHash" = tx.hash
+      	LEFT JOIN "Block" b ON b.hash = tx. "blockHash"
     WHERE
         "txHash" = ${txHash} AND "traceAddress" = ${traceAddress}
   `;
@@ -41,7 +43,7 @@ const getNativeTransferDetails = async ({
     amount,
     txHash,
     chainId,
-    blockNumber
+    blockNumber,
   };
 };
 

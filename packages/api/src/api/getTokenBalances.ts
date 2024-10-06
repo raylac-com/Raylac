@@ -44,7 +44,7 @@ const getTokenBalances = async ({
             "to" in(
                 SELECT
                     address FROM user_addresses)
-            AND "chainId" in (${Prisma.join(chainIds)})
+            AND "chainId" in(${Prisma.join(chainIds)})
     ),
     erc20_transfers_in AS (
         SELECT
@@ -56,7 +56,7 @@ const getTokenBalances = async ({
             "to" in(
                 SELECT
                     address FROM user_addresses)
-            AND "chainId" in (${Prisma.join(chainIds)})
+            AND "chainId" in(${Prisma.join(chainIds)})
         GROUP BY
             "tokenId"
     ),
@@ -70,14 +70,13 @@ const getTokenBalances = async ({
             "from" in(
                 SELECT
                     address FROM user_addresses)
-            AND "chainId" in (${Prisma.join(chainIds)})
+            AND "chainId" in(${Prisma.join(chainIds)})
         GROUP BY
             "tokenId"
     ),
     native_balance AS (
         SELECT
-            COALESCE((native_transfers_in.amount - native_transfers_out.amount),
-            0) AS balance,
+            COALESCE(native_transfers_in.amount, 0) - COALESCE(native_transfers_out.amount, 0) AS balance,
             'eth' AS "tokenId"
         FROM
             native_transfers_in,
@@ -87,9 +86,7 @@ const getTokenBalances = async ({
         SELECT
             COALESCE(i. "tokenId",
                 o. "tokenId") AS "tokenId",
-            COALESCE(i.amount,
-                0) - COALESCE(o.amount,
-                0) AS balance
+            COALESCE(i.amount, 0) - COALESCE(o.amount, 0) AS balance
         FROM
             erc20_transfers_in i
         FULL OUTER JOIN erc20_transfers_out o ON i. "tokenId" = o. "tokenId"

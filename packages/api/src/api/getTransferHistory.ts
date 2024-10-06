@@ -21,24 +21,26 @@ const getTransferHistory = async ({
       "from",
       "to",
       "tokenId",
-    	"chainId",  
+      b.number as "blockNumber",
+      b."chainId" as "chainId",
+      tx. "chainId",
       u1. "userId" AS "fromUserId",
       u2. "userId" AS "toUserId",
-      "blockNumber",
       "executionTag",
-    	"txHash",
-    	"traceAddress"
+      "txHash",
+      "traceAddress"
     FROM
       "TransferTrace" t
+      LEFT JOIN "Transaction" tx ON tx.hash = t. "txHash"
+      LEFT JOIN "Block" b ON b.hash = tx. "blockHash"
       LEFT JOIN "UserStealthAddress" u1 ON u1.address = t. "from"
       LEFT JOIN "UserStealthAddress" u2 ON u2.address = t. "to"
-    WHERE
-      (u1. "userId" = ${userId}
+    WHERE (u1. "userId" = ${userId}
       OR u2. "userId" = ${userId})
-      AND u1. "userId" IS DISTINCT FROM u2. "userId"
-      AND "chainId" in (${Prisma.join(chainIds)})
+    AND u1. "userId" IS DISTINCT FROM u2. "userId"
+    AND tx. "chainId" in(${Prisma.join(chainIds)})
     ORDER BY
-      "blockNumber" DESC,
+      b. "number" DESC,
       "txPosition" DESC
   `;
 
