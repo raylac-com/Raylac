@@ -28,6 +28,7 @@ import { saveERC20TransferLog, updateJobLatestSyncedBlock } from './utils';
 import { sleep } from './lib/utils';
 import { Prisma } from '@prisma/client';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
+import logger from './lib/logger';
 
 const userOpEvent = parseAbiItem(
   'event UserOperationEvent(bytes32 indexed userOpHash, address indexed sender, address indexed paymaster, uint256 nonce, bool success, uint256 actualGasCost, uint256 actualGasUsed)'
@@ -205,7 +206,7 @@ export const upsertTransfersForTx = async ({
 
       upserts.push(upsertTraces);
     } else {
-      console.log(
+      logger.error(
         `Unknown execute calldata for tx ${txHash} on chain ${chainId}`
       );
     }
@@ -390,7 +391,7 @@ export const handleUserOpEvent = async ({
     upsertUserOpQuery,
   ]);
 
-  console.log(
+  logger.info(
     `Upserted UserOperation ${decodedLog.args.userOpHash} for tx ${txHash} on chain ${chainId}`
   );
 };
@@ -427,10 +428,10 @@ const syncUserOpsByPaymaster = async () => {
 
       const toBlock = await client.getBlockNumber();
 
-      console.log(
+      logger.info(
         `Syncing UserOperations from block ${fromBlock.toLocaleString()} to ${toBlock.toLocaleString()} on chain ${chainId}`
       );
-      console.log(`((${(toBlock - fromBlock).toLocaleString()}) blocks)`);
+      logger.info(`((${(toBlock - fromBlock).toLocaleString()}) blocks)`);
 
       const chunkSize = 10000n;
 
@@ -442,7 +443,7 @@ const syncUserOpsByPaymaster = async () => {
         const endBlock =
           startBlock + chunkSize <= toBlock ? startBlock + chunkSize : toBlock;
 
-        console.log(
+        logger.info(
           `Fetching logs from block ${startBlock.toLocaleString()} to ${endBlock.toLocaleString()} on chain ${chainId}`
         );
 

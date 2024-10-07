@@ -8,6 +8,7 @@ import {
   getMinSynchedBlockForAddresses,
   updateAddressesSyncStatus,
 } from './utils';
+import logger from './lib/logger';
 
 const batchSyncIncomingERC20Transfers = async ({
   addresses,
@@ -40,7 +41,7 @@ const batchSyncIncomingERC20Transfers = async ({
     chainId,
   });
 
-  console.log(
+  logger.info(
     `Syncing ERC20 transfers for ${addresses.length} addresses. ${fromBlock} -> ${toBlock} on chain ${chainId}`
   );
 

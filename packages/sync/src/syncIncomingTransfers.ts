@@ -11,6 +11,7 @@ import {
   upsertBlock,
   upsertTransaction,
 } from './utils';
+import logger from './lib/logger';
 
 /**
  * Sync incoming native transfers for a batch of addresses
@@ -27,7 +28,7 @@ const batchSyncIncomingNativeTransfers = async ({
   chainId: number;
 }) => {
   console.time(`trace_filter ${chainId}`);
-  console.log(`tracing from ${fromBlock} to ${toBlock} on chain ${chainId}`);
+  logger.info(`tracing from ${fromBlock} to ${toBlock} on chain ${chainId}`);
   const traces = await traceFilter({
     fromBlock: toHex(fromBlock),
     toBlock: toHex(toBlock),
