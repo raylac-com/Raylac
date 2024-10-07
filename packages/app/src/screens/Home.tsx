@@ -158,10 +158,12 @@ const HomeScreen = () => {
   }, [isSignedIn]);
 
   const totalUsdBalance = tokenBalances
-    ? tokenBalances.reduce(
-        (acc, { formattedUsdBalance }) => acc + parseFloat(formattedUsdBalance),
-        0
-      )
+    ? tokenBalances.reduce((acc, { formattedUsdBalance }) => {
+        const balance = parseFloat(formattedUsdBalance);
+
+        // Round to 2 decimal places
+        return Math.round((acc + balance) * 100) / 100;
+      }, 0)
     : null;
 
   if (!isSignedIn) {

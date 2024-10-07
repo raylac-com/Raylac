@@ -53,12 +53,13 @@ const AmountInput = (props: AmountInputProps) => {
           }
         }}
         style={{
+          flex: 1,
           fontSize: 28,
           textAlign: 'right',
           color: theme.text,
         }}
         keyboardType="numeric"
-      ></TextInput>
+      />
     </View>
   );
 };
@@ -169,6 +170,15 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
     tokenBalances?.find(token => token.tokenId === tokenId)?.balance || '0'
   );
 
+  const inputTokenUsdBalance = tokenPrice
+    ? (
+        tokenPrice *
+        Number(
+          formatAmount(inputTokenBalance.toString(), inputTokenData.decimals)
+        )
+      ).toFixed(2)
+    : '0';
+
   const isBalanceSufficient =
     inputTokenBalance !== null && amount !== null
       ? parseUnits(amount, inputTokenData.decimals) <= inputTokenBalance
@@ -214,10 +224,12 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
             open={inputTokenPickerOpen}
             value={tokenId}
             style={{
+              zIndex: 3001,
               width: 120,
               height: 52,
             }}
             containerStyle={{
+              zIndex: 3001,
               width: 120,
             }}
             arrowIconStyle={{
@@ -228,10 +240,13 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
             setOpen={_open => {
               setInputTokenPickerOpen(_open);
             }}
-            setValue={_tokenId => {
-              setAmount('');
-              setUsdAmount('');
-              setTokenId(_tokenId);
+            setValue={setTokenId}
+            onSelectItem={selection => {
+              if (selection.value !== tokenId) {
+                setAmount('');
+                setUsdAmount('');
+                setTokenId(selection.value);
+              }
             }}
             setItems={setCurrencies}
           />
@@ -243,11 +258,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
               opacity: 0.8,
             }}
           >
-            {formatAmount(
-              inputTokenBalance.toString(),
-              inputTokenData.decimals
-            )}{' '}
-            {inputTokenData.symbol}
+            ${inputTokenUsdBalance} available
           </Text>
         </View>
       </View>
@@ -257,13 +268,13 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           flexDirection: 'row',
           alignItems: 'center',
           columnGap: 8,
-          zIndex: 3000,
+          zIndex: 2000,
         }}
       >
         <AmountInput
+          autoFocus={true}
           amount={usdAmount}
           onInputChange={onUsdAmountChange}
-          autoFocus={true}
         />
         <Text
           style={{
@@ -271,6 +282,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
             textAlign: 'center',
             opacity: 0.8,
             width: 120,
+            zIndex: 1000,
           }}
         >
           USD

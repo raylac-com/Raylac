@@ -2,6 +2,7 @@ import FastAvatar from '@/components/FastAvatar';
 import StyledButton from '@/components/StyledButton';
 import useGasInfo from '@/hooks/useGasInfo';
 import useSend from '@/hooks/useSend';
+import useTokenPrice from '@/hooks/useTokenPrice';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { theme } from '@/lib/theme';
 import { shortenAddress } from '@/lib/utils';
@@ -10,10 +11,9 @@ import { formatAmount } from '@raylac/shared';
 import supportedChains from '@raylac/shared/out/supportedChains';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useCallback, useEffect, useState } from 'react';
 import { Text, View } from 'react-native';
-import { Hex } from 'viem';
+import { formatUnits, Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'ConfirmSend'>;
@@ -23,10 +23,10 @@ const ConfirmSend = ({ route }: Props) => {
     route.params;
   const { mutateAsync: send, isPending: isSending } = useSend();
   const navigation = useTypedNavigation();
+  const [usdAmount, setUsdAmount] = useState<string | null>(null);
+  const { data: tokenPrice } = useTokenPrice(tokenId);
 
   const { data: gasInfo } = useGasInfo();
-
-  const { t } = useTranslation('ConfirmSend');
 
   const onSendPress = useCallback(async () => {
     await send({
@@ -49,6 +49,15 @@ const ConfirmSend = ({ route }: Props) => {
 
   const formattedAmount = formatAmount(amount, tokenMeta.decimals);
 
+  useEffect(() => {
+    if (tokenPrice) {
+      const formattedAmount = formatUnits(BigInt(amount), tokenMeta.decimals);
+      const _usdAmount = tokenPrice * Number(formattedAmount);
+
+      setUsdAmount(_usdAmount.toFixed(2));
+    }
+  }, [tokenPrice]);
+
   const recipientName =
     typeof recipientUserOrAddress === 'string'
       ? shortenAddress(recipientUserOrAddress)
@@ -62,16 +71,18 @@ const ConfirmSend = ({ route }: Props) => {
     <View
       style={{
         flex: 1,
-        alignItems: 'center',
-        padding: 24,
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: 16,
       }}
     >
       <View
         style={{
+          flex: 0.62,
           flexDirection: 'column',
           alignItems: 'center',
-          rowGap: 12,
-          marginTop: 48,
+          justifyContent: 'center',
+          rowGap: 16,
         }}
       >
         <FastAvatar
@@ -85,27 +96,40 @@ const ConfirmSend = ({ route }: Props) => {
               ? undefined
               : recipientUserOrAddress.profileImage
           }
-          size={64}
+          size={80}
         ></FastAvatar>
         <Text
           style={{
-            marginTop: 24,
-            fontSize: 28,
+            fontSize: 20,
+            textAlign: 'center',
+            color: theme.text,
+          }}
+        >
+          Send to {recipientName}
+        </Text>
+        <Text
+          style={{
+            fontSize: 32,
             fontWeight: 'bold',
             textAlign: 'center',
             color: theme.text,
           }}
         >
-          {t('sendToUser', {
-            name: recipientName,
-            amount: formattedAmount,
-            symbol: tokenMeta.symbol,
-          })}
+          {formattedAmount.toLocaleString()} {tokenMeta.symbol}
         </Text>
-
         <Text
           style={{
             color: theme.text,
+            fontSize: 20,
+            opacity: 0.6,
+          }}
+        >
+          ~${usdAmount}
+        </Text>
+        <Text
+          style={{
+            color: theme.text,
+            fontSize: 16,
           }}
         >
           {recipientName} receives {formattedAmount.toLocaleString()}{' '}
@@ -119,60 +143,10 @@ const ConfirmSend = ({ route }: Props) => {
           onSendPress();
         }}
         style={{
-          marginTop: 48,
+          width: '100%',
         }}
         disabled={gasInfo ? false : true}
       ></StyledButton>
-      {/**
-         * 
-     
-      <View
-        style={{
-          flexDirection: 'column',
-          alignItems: "center",
-          marginTop: 24,
-          rowGap: 18,
-        }}
-      >
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            columnGap: 12,
-          }}
-        >
-          <AntDesign name="checkcircle" size={24} color={theme.primary} />
-          <Text
-            style={{
-              color: theme.text,
-              fontWeight: 'bold',
-              fontSize: 20,
-            }}
-          >
-            Sent
-          </Text>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: "flex-start",
-            columnGap: 12,
-          }}
-        >
-          <LoadingIndicator size={24}></LoadingIndicator>
-          <Text
-            style={{
-              color: theme.text,
-              fontWeight: 'bold',
-              fontSize: 20,
-            }}
-          >
-            Confirming
-          </Text>
-        </View>
-      </View>
-       */}
     </View>
   );
 };
