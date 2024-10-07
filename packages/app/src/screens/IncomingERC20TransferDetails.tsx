@@ -18,23 +18,25 @@ import { Hex } from 'viem';
 
 type Props = NativeStackScreenProps<
   RootStackParamsList,
-  'NativeTransferDetails'
+  'IncomingERC20TransferDetails'
 >;
 
-const NativeTransferDetails = ({ route }: Props) => {
-  const { txHash, traceAddress } = route.params;
+const IncomingERC20TransferDetails = ({ route }: Props) => {
+  const { txIndex, logIndex, blockNumber, chainId } = route.params;
   const [showDetails, setShowDetails] = useState(false);
 
   const { data: transferDetail } =
-    trpc.getIncomingNativeTransferDetails.useQuery({
-      txHash,
-      traceAddress,
+    trpc.getIncomingERC20TransferDetails.useQuery({
+      txIndex,
+      logIndex,
+      blockNumber,
+      chainId,
     });
 
   const { data: blockTimestamp } = trpc.getBlockTimestamp.useQuery(
     {
       chainId: transferDetail?.chainId,
-      blockNumber: Number(transferDetail?.Transaction?.block?.number),
+      blockNumber: Number(transferDetail?.blockNumber),
     },
     {
       enabled: !!transferDetail,
@@ -73,7 +75,7 @@ const NativeTransferDetails = ({ route }: Props) => {
           fontWeight: 'bold',
         }}
       >
-        {formatAmount(transferDetail.amount, 18)} ETH
+        {formatAmount(transferDetail.amount, 6)} USDC
       </Text>
       <Text
         style={{
@@ -139,8 +141,8 @@ const NativeTransferDetails = ({ route }: Props) => {
             label="Tx Hash"
             value={
               <LinkText
-                text={shortenAddress(transferDetail.Transaction?.hash as Hex)}
-                url={`${getBlockExplorerUrl(transferDetail.chainId)}/tx/${transferDetail.Transaction?.hash}`}
+                text={shortenAddress(transferDetail.transactionHash as Hex)}
+                url={`${getBlockExplorerUrl(transferDetail.chainId)}/tx/${transferDetail.transactionHash}`}
               ></LinkText>
             }
           />
@@ -162,4 +164,4 @@ const NativeTransferDetails = ({ route }: Props) => {
   );
 };
 
-export default NativeTransferDetails;
+export default IncomingERC20TransferDetails;

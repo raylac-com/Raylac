@@ -1,23 +1,21 @@
-import {
-  ACCOUNT_IMPL_DEPLOYED_BLOCK,
-  bigIntMin,
-  getPublicClient,
-  RaylacAccountTransferData,
-  traceFilter,
-  traceToPostgresRecord,
-} from '@raylac/shared';
-import { Hex, toHex } from 'viem';
+import { bigIntMin, getPublicClient, traceFilter } from '@raylac/shared';
+import { getAddress, Hex, toHex } from 'viem';
 import prisma from './lib/prisma';
-import { $Enums } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import supportedChains from '@raylac/shared/out/supportedChains';
 import { sleep } from './lib/utils';
-import { getLatestBlockHeight } from './utils';
+import {
+  getLatestBlockHeight,
+  getMinSynchedBlockForAddresses,
+  updateAddressesSyncStatus,
+  upsertBlock,
+  upsertTransaction,
+} from './utils';
 
 /**
- * Sync all calls made to the `execute` function in RaylacAccount.sol
- * for a given address.
+ * Sync incoming native transfers for a batch of addresses
  */
-const syncTransfersForAddresses = async ({
+const batchSyncIncomingNativeTransfers = async ({
   addresses,
   fromBlock,
   toBlock,
@@ -29,6 +27,7 @@ const syncTransfersForAddresses = async ({
   chainId: number;
 }) => {
   console.time(`trace_filter ${chainId}`);
+  console.log(`tracing from ${fromBlock} to ${toBlock} on chain ${chainId}`);
   const traces = await traceFilter({
     fromBlock: toHex(fromBlock),
     toBlock: toHex(toBlock),
@@ -37,115 +36,61 @@ const syncTransfersForAddresses = async ({
   });
   console.timeEnd(`trace_filter ${chainId}`);
 
-  const callTracesWithValue = traces
-    // Get the `type: call` traces
-    .filter(trace => trace.type === 'call')
-    // Get the traces with a non-zero value
-    .filter(trace => trace.action.value !== '0x0');
-
-  if (callTracesWithValue.length !== 0) {
-    console.log(
-      `Found ${callTracesWithValue.length} incoming transfers for ${addresses.length} addresses on chain ${chainId}`
-    );
-  }
-
-  const decodedTraces = callTracesWithValue.map(trace => {
-    const transferData: RaylacAccountTransferData = {
-      type: $Enums.ExecutionType.Transfer,
-      to: trace.action.to,
-      amount: BigInt(trace.action.value),
-      tokenId: 'eth',
-      tag: '',
-    };
-
-    return traceToPostgresRecord({
-      transferData,
-      traceTxHash: trace.transactionHash,
-      traceTxPosition: trace.transactionPosition,
-      traceAddress: trace.traceAddress,
-      fromAddress: trace.action.from,
-      chainId,
-    });
-  });
-
-  const txHashes = [...new Set(decodedTraces.map(trace => trace.txHash))];
-
-  // TODO: Use Promise.all
-  for (const txHash of txHashes) {
-    const trace = traces.find(trace => trace.transactionHash === txHash);
-
-    if (!trace) {
-      throw new Error(`Trace not found for transaction ${txHash}`);
+  for (const trace of traces) {
+    if (trace.type === 'create') {
+      // `type` can be either 'call' or 'create'.
+      // Skip all 'create' traces.
+      continue;
     }
 
-    await prisma.transaction.upsert({
-      create: {
-        hash: txHash,
-        chainId,
-        block: {
-          connectOrCreate: {
-            create: {
-              number: trace.blockNumber,
-              hash: trace.blockHash,
-              chainId,
-            },
-            where: {
-              hash: trace.blockHash,
-            },
-          },
+    if (trace.action.value === '0x0') {
+      // Skip all traces with a zero value
+      continue;
+    }
+
+    await upsertBlock({
+      blockNumber: BigInt(trace.blockNumber),
+      blockHash: trace.blockHash,
+      chainId,
+    });
+
+    await upsertTransaction({
+      txHash: trace.transactionHash,
+      blockHash: trace.blockHash,
+      chainId,
+    });
+
+    const data: Prisma.TransferTraceCreateInput = {
+      from: getAddress(trace.action.from),
+      to: getAddress(trace.action.to),
+      amount: BigInt(trace.action.value),
+      tokenId: 'eth',
+      Transaction: {
+        connect: {
+          hash: trace.transactionHash,
         },
       },
-      update: {},
+      txPosition: trace.transactionPosition,
+      traceAddress: trace.traceAddress.join('_'),
+      executionType: 'Transfer',
+      executionTag: '',
+      chainId,
+    };
+
+    await prisma.transferTrace.upsert({
+      create: data,
+      update: data,
       where: {
-        hash: txHash,
+        txHash_traceAddress: {
+          txHash: trace.transactionHash,
+          traceAddress: trace.traceAddress.join('_'),
+        },
       },
     });
   }
-
-  await prisma.transferTrace.createMany({
-    data: decodedTraces,
-    skipDuplicates: true,
-  });
 };
 
-const getAddressesSyncStatus = async ({
-  addresses,
-  chainId,
-}: {
-  addresses: Hex[];
-  chainId: number;
-}) => {
-  const traceSyncStatus = await prisma.traceSyncStatus.findMany({
-    select: {
-      address: true,
-      lastSyncedBlockNum: true,
-    },
-    where: {
-      address: {
-        in: addresses,
-      },
-      chainId,
-    },
-  });
-
-  // eslint-disable-next-line security/detect-object-injection
-  const defaultFromBlock = ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId];
-
-  if (!defaultFromBlock) {
-    throw new Error(`No default from block for chain ${chainId}`);
-  }
-
-  return addresses.map(
-    address =>
-      traceSyncStatus.find(status => status.address === address) || {
-        // If the address is not found in the sync status table, return a default object
-        address,
-        lastSyncedBlockNum: defaultFromBlock,
-      }
-  );
-};
-
-const syncIncomingTransfers = async () => {
+const syncIncomingNativeTransfers = async () => {
   while (true) {
     const addresses = await prisma.userStealthAddress.findMany({
       select: {
@@ -169,16 +114,13 @@ const syncIncomingTransfers = async () => {
           .slice(i, i + 100)
           .map(address => address.address as Hex);
 
-        const addressesWithSyncStatus = await getAddressesSyncStatus({
+        const minBlockHeightInBatch = await getMinSynchedBlockForAddresses({
           addresses: batch,
           chainId,
+          tokenId: 'eth',
         });
 
         // Get the minimum block height in the batch
-        const minBlockHeightInBatch = addressesWithSyncStatus.sort((a, b) =>
-          a.lastSyncedBlockNum > b.lastSyncedBlockNum ? 1 : -1
-        )[0].lastSyncedBlockNum;
-
         const fromBlock = bigIntMin([
           minBlockHeightInBatch,
           finalizedBlockNumber.number,
@@ -190,47 +132,18 @@ const syncIncomingTransfers = async () => {
           throw new Error(`fromBlock (${fromBlock}) >= toBlock (${toBlock})`);
         }
 
-        await syncTransfersForAddresses({
+        await batchSyncIncomingNativeTransfers({
           addresses: batch,
           fromBlock,
           toBlock,
           chainId,
         });
 
-        // Update the last synced block number for the addresses
-        const createSyncStatusRecords = addressesWithSyncStatus.filter(
-          address =>
-            address.lastSyncedBlockNum ===
-            // eslint-disable-next-line security/detect-object-injection
-            ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId]
-        );
-
-        const updateSyncStatusRecords = addressesWithSyncStatus.filter(
-          address =>
-            address.lastSyncedBlockNum !==
-            // eslint-disable-next-line security/detect-object-injection
-            ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId]
-        );
-
-        await prisma.traceSyncStatus.createMany({
-          data: createSyncStatusRecords.map(address => ({
-            address: address.address,
-            chainId,
-            lastSyncedBlockNum: toBlock,
-          })),
-          skipDuplicates: true,
-        });
-
-        await prisma.traceSyncStatus.updateMany({
-          data: {
-            lastSyncedBlockNum: toBlock,
-          },
-          where: {
-            address: {
-              in: updateSyncStatusRecords.map(address => address.address),
-            },
-            chainId,
-          },
+        await updateAddressesSyncStatus({
+          addresses: batch,
+          chainId,
+          tokenId: 'eth',
+          blockNum: toBlock,
         });
       }
     }
@@ -239,4 +152,4 @@ const syncIncomingTransfers = async () => {
   }
 };
 
-export default syncIncomingTransfers;
+export default syncIncomingNativeTransfers;

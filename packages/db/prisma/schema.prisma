@@ -52,8 +52,9 @@ model UserStealthAddress {
   stealthPubKey   String
   label           String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  AddressSyncStatus AddressSyncStatus[]
 }
 
 enum ExecutionType {
@@ -85,17 +86,19 @@ model TransferTrace {
   @@id([txHash, traceAddress])
 }
 
-model TraceSyncStatus {
+model AddressSyncStatus {
   id Int @id @default(autoincrement())
 
   address            String
+  UserStealthAddress UserStealthAddress @relation(fields: [address], references: [address])
   lastSyncedBlockNum BigInt
+  tokenId            String
   chainId            Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([address, chainId])
+  @@unique([address, chainId, tokenId])
 }
 
 model Transaction {

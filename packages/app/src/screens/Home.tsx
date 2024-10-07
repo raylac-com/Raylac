@@ -140,7 +140,6 @@ const HomeScreen = () => {
     isRefetching: isRefetchingTxHistory,
   } = trpc.getTxHistory.useQuery(null, {
     enabled: isSignedIn,
-    throwOnError: false, // Don't throw on error for this particular query in all environments
     refetchOnWindowFocus: true,
     refetchOnMount: true,
   });

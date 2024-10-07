@@ -1,9 +1,14 @@
 {
-  "name": "@cred/sync",
+  "name": "@raylac/sync",
+  "main": "./out/index.js",
+  "types": "out/index.d.ts",
   "scripts": {
     "start": "tsx src/sync.ts",
     "lint": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc -d",
+    "build:watch": "tsc -d --watch",
+    "postinstall": "pnpm build"
   },
   "dependencies": {
     "@prisma/client": "5.12.1",

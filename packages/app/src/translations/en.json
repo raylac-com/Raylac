@@ -96,6 +96,9 @@
     "NativeTransferDetails": {
       "title": "Transfer details"
     },
+    "IncomingERC20TransferDetails": {
+      "title": "Transfer details"
+    },
     "BackupAccount": {
       "title": "Backup Account",
       "backupWarning1": "Anyone who has your backup phrase can access and spend your balance.",

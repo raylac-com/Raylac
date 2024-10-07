@@ -70,6 +70,13 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           navigation.navigate('RaylacTransferDetails', {
             executionTag: tx.executionTag,
           });
+        } else if (tx.txIndex && tx.logIndex) {
+          navigation.navigate('IncomingERC20TransferDetails', {
+            txIndex: tx.txIndex,
+            logIndex: tx.logIndex,
+            blockNumber: tx.blockNumber,
+            chainId: tx.chainId,
+          });
         } else {
           navigation.navigate('NativeTransferDetails', {
             txHash: tx.txHash,

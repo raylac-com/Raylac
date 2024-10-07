@@ -1,4 +1,3 @@
-import { $Enums } from '@prisma/client';
 import { Chain, Hex } from 'viem';
 
 export interface UserOperation {
@@ -163,17 +162,6 @@ export type TraceResponseData =
 /**
  * Decoded arguments for the `execute` function of RaylacAccount.sol
  */
-export type RaylacAccountTransferData = {
-  type: $Enums.ExecutionType;
-  to: Hex;
-  amount: bigint;
-  tokenId: string;
-  tag: string;
-};
-
-/**
- * Decoded arguments for the `execute` function of RaylacAccount.sol
- */
 /*
 export type RaylacAccountExecutionArgs =
   | RaylacAccountExecutionData<
@@ -224,6 +212,8 @@ export interface TransferHistoryQueryResult {
   tokenId: string;
   chainId: number;
   blockNumber: number;
+  txIndex: number | null;
+  logIndex: number | null;
   executionTag: Hex | null;
   txHash: Hex;
   traceAddress: string;

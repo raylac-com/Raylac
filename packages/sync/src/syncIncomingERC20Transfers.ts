@@ -3,9 +3,13 @@ import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { Hex, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
 import { sleep } from './lib/utils';
-import { getLatestBlockHeight } from './utils';
+import {
+  getLatestBlockHeight,
+  getMinSynchedBlockForAddresses,
+  updateAddressesSyncStatus,
+} from './utils';
 
-const syncERC20TransfersForAddresses = async ({
+const batchSyncIncomingERC20Transfers = async ({
   addresses,
   fromBlock,
   toBlock,
@@ -37,10 +41,10 @@ const syncERC20TransfersForAddresses = async ({
   });
 
   console.log(
-    `Syncing ERC20 transfers for ${addresses.length} addresses. ${fromBlock} -> ${toBlock}`
+    `Syncing ERC20 transfers for ${addresses.length} addresses. ${fromBlock} -> ${toBlock} on chain ${chainId}`
   );
 
-  const incomingTransferLogs = await publicClient.getLogs({
+  const logs = await publicClient.getLogs({
     address: tokenAddress.address,
     event: parseAbiItem(
       'event Transfer(address indexed from, address indexed to, uint256 value)'
@@ -51,20 +55,6 @@ const syncERC20TransfersForAddresses = async ({
     fromBlock,
     toBlock,
   });
-
-  const outgoingTransferLogs = await publicClient.getLogs({
-    address: tokenAddress.address,
-    event: parseAbiItem(
-      'event Transfer(address indexed from, address indexed to, uint256 value)'
-    ),
-    args: {
-      from: addresses,
-    },
-    fromBlock,
-    toBlock,
-  });
-
-  const logs = [...incomingTransferLogs, ...outgoingTransferLogs];
 
   const txHashes = logs.map(log => log.transactionHash);
 
@@ -117,34 +107,6 @@ const syncERC20TransfersForAddresses = async ({
   });
 };
 
-const getMinSynchedBlockForAddresses = async ({
-  addresses,
-  tokenId,
-  chainId,
-}: {
-  addresses: Hex[];
-  tokenId: string;
-  chainId: number;
-}) => {
-  const record = await prisma.eRC20TransferLog.findFirst({
-    where: {
-      to: {
-        in: addresses,
-      },
-      tokenId,
-      chainId,
-    },
-    select: {
-      blockNumber: true,
-    },
-    orderBy: {
-      blockNumber: 'asc',
-    },
-  });
-
-  return record ? BigInt(record.blockNumber) : null;
-};
-
 const syncERC20Transfers = async () => {
   const erc20Tokens = supportedTokens.filter(token => token.tokenId !== 'eth');
 
@@ -154,7 +116,7 @@ const syncERC20Transfers = async () => {
     });
 
     for (const token of erc20Tokens) {
-      for (const { chain, syncFrom } of token.addresses) {
+      for (const { chain } of token.addresses) {
         const chainId = chain.id;
         const client = getPublicClient({ chainId });
 
@@ -168,12 +130,11 @@ const syncERC20Transfers = async () => {
             .slice(i, i + 100)
             .map(({ address }) => address as Hex);
 
-          const minSynchedBlockInBatch =
-            (await getMinSynchedBlockForAddresses({
-              tokenId: token.tokenId,
-              addresses: batch,
-              chainId,
-            })) || syncFrom;
+          const minSynchedBlockInBatch = await getMinSynchedBlockForAddresses({
+            tokenId: token.tokenId,
+            addresses: batch,
+            chainId,
+          });
 
           if (!minSynchedBlockInBatch) {
             throw new Error(
@@ -188,7 +149,7 @@ const syncERC20Transfers = async () => {
 
           const latestBlock = await getLatestBlockHeight(chainId);
 
-          const chunkSize = BigInt(2000);
+          const chunkSize = BigInt(10000);
           for (
             let fromBlock = _fromBlock;
             fromBlock < latestBlock;
@@ -196,19 +157,26 @@ const syncERC20Transfers = async () => {
           ) {
             const toBlock = bigIntMin([fromBlock + chunkSize, latestBlock]);
 
-            await syncERC20TransfersForAddresses({
+            await batchSyncIncomingERC20Transfers({
               addresses: batch,
               fromBlock,
               toBlock,
               chainId,
               tokenId: token.tokenId,
             });
+
+            await updateAddressesSyncStatus({
+              addresses: batch,
+              chainId,
+              tokenId: token.tokenId,
+              blockNum: toBlock,
+            });
           }
         }
       }
     }
 
-    await sleep(10 * 1000); // Sleep for 10 seconds
+    await sleep(5 * 1000); // Sleep for 10 seconds
   }
 };
 

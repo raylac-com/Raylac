@@ -7,11 +7,7 @@ import {
   Hex,
   parseUnits,
 } from 'viem';
-import {
-  ChainGasInfo,
-  RaylacAccountTransferData,
-  UserOperation,
-} from './types';
+import { ChainGasInfo, UserOperation } from './types';
 import RaylacAccountAbi from './abi/RaylacAccountAbi';
 import ERC20Abi from './abi/ERC20Abi';
 import * as chains from 'viem/chains';
@@ -20,7 +16,6 @@ import supportedTokens, { NATIVE_TOKEN_ADDRESS } from './supportedTokens';
 import { getPublicClient } from './ethRpc';
 import { getERC20TokenBalance, rundlerMaxPriorityFeePerGas } from '.';
 import supportedChains from './supportedChains';
-import { Prisma } from '@prisma/client';
 
 export const encodeERC5564Metadata = ({
   viewTag,
@@ -358,108 +353,14 @@ export const getBlockExplorerUrl = (chainId: number) => {
   }
 };
 
-/**
- * Decode the `data` field of the `execute` function in RaylacAccount.sol as a token transfer.
- * If the `to` field of the call is an ERC20 token, decode the `data` field as an ERC20 transfer.
- * Otherwise, decode the `data` field as an ETH transfer.
- */
-export const decodeExecuteAsTransfer = ({
-  executeArgs,
-  chainId,
-}: {
-  executeArgs: {
-    to: Hex;
-    value: bigint;
-    data: Hex;
-    tag: Hex;
-  };
-  chainId: number;
-}): RaylacAccountTransferData | null => {
-  // Check if the `to` field of the call is an ERC20 token
-  const erc20TokenData = supportedTokens.find(token =>
-    token.addresses.find(
-      address =>
-        address.chain.id === chainId && address.address === executeArgs.to
-    )
-  );
-
-  const tag = executeArgs.tag;
-
-  if (erc20TokenData) {
-    // This is a call to an ERC20 token
-
-    // Decode the data field of the call
-    const decodedData = decodeFunctionData({
-      abi: ERC20Abi,
-      data: executeArgs.data,
-    });
-
-    if (decodedData.functionName === 'transfer') {
-      return {
-        type: 'Transfer',
-        to: decodedData.args[0],
-        amount: BigInt(decodedData.args[1]),
-        tokenId: erc20TokenData.tokenId,
-        tag,
-      };
-    } else {
-      return null;
-    }
-  } else if (executeArgs.data === '0x') {
-    return {
-      type: 'Transfer',
-      to: executeArgs.to,
-      amount: executeArgs.value,
-      tokenId: 'eth',
-      tag,
-    };
-  } else {
-    return {
-      type: 'Transfer',
-      to: executeArgs.to,
-      amount: executeArgs.value,
-      tokenId: 'eth',
-      tag,
-    };
-  }
-};
-
-/**
- * Convert a decoded trace to a `TransferTrace` record in the Postgres database.
- */
-export const traceToPostgresRecord = ({
-  transferData,
-  traceTxHash,
-  traceTxPosition,
-  traceAddress,
-  fromAddress,
-  chainId,
-}: {
-  transferData: RaylacAccountTransferData;
-  traceTxHash: Hex;
-  traceTxPosition: number;
-  traceAddress: number[];
-  fromAddress: Hex;
-  chainId: number;
-}): Prisma.TransferTraceCreateManyInput => {
-  const to = transferData.to;
-  const amount = transferData.amount;
-
-  return {
-    from: getAddress(fromAddress),
-    to: getAddress(to),
-    amount,
-    tokenId: transferData.tokenId,
-    txHash: traceTxHash,
-    txPosition: traceTxPosition,
-    traceAddress: traceAddress.join('_'),
-    executionType: transferData.type,
-    executionTag: transferData.tag,
-    chainId,
-  };
-};
-
+// Function signature of the `execute` function in RaylacAccount.sol
 export const RAYLAC_ACCOUNT_EXECUTE_FUNC_SIG = '0xda0980c7';
+
+// Function signature of the `transfer` function in ERC20.sol
+export const ERC20_TRANSFER_FUNC_SIG = '0xa9059cbb';
+
+export const USER_OP_EVENT_SIG =
+  '0x49628fd1471006c1482da88028e9ce4dbb080b815c9b0344d39e5a8e6ec1419f';
 
 /**
  * Get the gas info for all supported chains
@@ -501,4 +402,31 @@ export const bigIntMin = (values: bigint[]) => {
   );
 
   return minBigInt;
+};
+
+/**
+ * Get the token ID of a token with a given address on a chain
+ */
+export const getTokenId = ({
+  chainId,
+  tokenAddress,
+}: {
+  chainId: number;
+  tokenAddress: Hex;
+}) => {
+  const token = supportedTokens.find(token =>
+    token.addresses.find(
+      address =>
+        address.chain.id === chainId &&
+        address.address === getAddress(tokenAddress)
+    )
+  );
+
+  if (!token) {
+    throw new Error(
+      `Token with address ${tokenAddress} on chain ${chainId} not found`
+    );
+  }
+
+  return token.tokenId;
 };

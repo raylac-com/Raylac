@@ -40,6 +40,12 @@ export type RootStackParamsList = {
     txHash: string;
     traceAddress: string;
   };
+  IncomingERC20TransferDetails: {
+    txIndex: number;
+    logIndex: number;
+    blockNumber: number;
+    chainId: number;
+  };
   Receive: undefined;
   BackupAccount: undefined;
   Advanced: undefined;
