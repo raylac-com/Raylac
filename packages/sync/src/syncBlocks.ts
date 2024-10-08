@@ -20,7 +20,7 @@ const saveBlock = async (block: Block, chainId: number) => {
   if (conflictingBlock) {
     console.log(`Reorg detected for chain ${chainId} at block ${block.number}`);
     await prisma.$transaction([
-      prisma.transferTrace.deleteMany({
+      prisma.trace.deleteMany({
         where: {
           Transaction: {
             blockHash: conflictingBlock.hash,

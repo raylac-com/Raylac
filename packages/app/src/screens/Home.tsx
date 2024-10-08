@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 import StyledPressable from '@/components/StyledPressable';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import useSignedInUser from '@/hooks/useSignedInUser';
-import { TransferHistoryQueryResult } from '@raylac/shared';
 import useTokenBalances from '@/hooks/useTokenBalance';
 
 interface TokenBalanceItemProps {
@@ -280,12 +279,14 @@ const HomeScreen = () => {
             flexDirection: 'column',
           }}
         >
-          {txHistory?.map((tx, i) => (
+          {txHistory?.map((transfer, i) => (
             <TransferHistoryListItem
               key={i}
-              tx={tx as TransferHistoryQueryResult}
+              transfer={transfer}
               type={
-                tx.fromUserId === signedInUser?.id ? 'outgoing' : 'incoming'
+                transfer.fromUser?.id === signedInUser?.id
+                  ? 'outgoing'
+                  : 'incoming'
               }
             />
           ))}

@@ -1,4 +1,9 @@
-import { bigIntMin, getPublicClient, traceFilter } from '@raylac/shared';
+import {
+  bigIntMin,
+  getPublicClient,
+  getTraceId,
+  traceFilter,
+} from '@raylac/shared';
 import { getAddress, Hex, toHex } from 'viem';
 import prisma from './lib/prisma';
 import { Prisma } from '@prisma/client';
@@ -61,31 +66,87 @@ const batchSyncIncomingNativeTransfers = async ({
       chainId,
     });
 
-    const data: Prisma.TransferTraceCreateInput = {
+    const traceId = getTraceId({
+      txHash: trace.transactionHash,
+      traceAddress: trace.traceAddress,
+    });
+
+    const transferId = traceId;
+
+    const data: Prisma.TransferCreateInput = {
+      transferId,
+      maxBlockNumber: trace.blockNumber,
+    };
+
+    const fromUser = await prisma.userStealthAddress.findUnique({
+      select: {
+        userId: true,
+      },
+      where: {
+        address: getAddress(trace.action.from),
+      },
+    });
+
+    const toUser = await prisma.userStealthAddress.findUnique({
+      select: {
+        userId: true,
+      },
+      where: {
+        address: getAddress(trace.action.to),
+      },
+    });
+
+    if (fromUser) {
+      data.fromUser = {
+        connect: {
+          id: fromUser.userId,
+        },
+      };
+    } else {
+      data.fromAddress = getAddress(trace.action.from);
+    }
+
+    if (toUser) {
+      data.toUser = {
+        connect: {
+          id: toUser.userId,
+        },
+      };
+    } else {
+      data.toAddress = getAddress(trace.action.to);
+    }
+
+    await prisma.transfer.upsert({
+      create: data,
+      update: data,
+      where: {
+        transferId,
+      },
+    });
+
+    const traceUpsertArgs: Prisma.TraceCreateInput = {
+      id: traceId,
       from: getAddress(trace.action.from),
       to: getAddress(trace.action.to),
       amount: BigInt(trace.action.value),
       tokenId: 'eth',
+      Transfer: {
+        connect: {
+          transferId,
+        },
+      },
       Transaction: {
         connect: {
           hash: trace.transactionHash,
         },
       },
-      txPosition: trace.transactionPosition,
-      traceAddress: trace.traceAddress.join('_'),
-      executionType: 'Transfer',
-      executionTag: '',
-      chainId,
     };
 
-    await prisma.transferTrace.upsert({
-      create: data,
-      update: data,
+    await prisma.trace.upsert({
+      create: traceUpsertArgs,
+      update: traceUpsertArgs,
       where: {
-        txHash_traceAddress: {
-          txHash: trace.transactionHash,
-          traceAddress: trace.traceAddress.join('_'),
-        },
+        id: traceId,
       },
     });
   }

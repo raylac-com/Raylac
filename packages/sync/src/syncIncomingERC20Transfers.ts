@@ -1,6 +1,6 @@
-import { bigIntMin, getPublicClient } from '@raylac/shared';
+import { bigIntMin, getPublicClient, getTraceId } from '@raylac/shared';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
-import { Hex, parseAbiItem } from 'viem';
+import { getAddress, Hex, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
 import { sleep } from './lib/utils';
 import {
@@ -9,6 +9,7 @@ import {
   updateAddressesSyncStatus,
 } from './utils';
 import logger from './lib/logger';
+import { Prisma } from '@prisma/client';
 
 const batchSyncIncomingERC20Transfers = async ({
   addresses,
@@ -57,18 +58,11 @@ const batchSyncIncomingERC20Transfers = async ({
     toBlock,
   });
 
-  const txHashes = logs.map(log => log.transactionHash);
-
-  for (const txHash of txHashes) {
-    const log = logs.find(log => log.transactionHash === txHash);
-
-    if (!log) {
-      throw new Error(`log not found for transaction ${txHash}`);
-    }
-
+  for (const log of logs) {
+    // TODO: User the `upsertTranasction` function
     await prisma.transaction.upsert({
       create: {
-        hash: txHash,
+        hash: log.transactionHash,
         chainId,
         block: {
           connectOrCreate: {
@@ -85,27 +79,97 @@ const batchSyncIncomingERC20Transfers = async ({
       },
       update: {},
       where: {
-        hash: txHash,
+        hash: log.transactionHash,
+      },
+    });
+
+    const traceId = getTraceId({
+      txHash: log.transactionHash,
+      traceAddress: log.logIndex,
+    });
+
+    const transferId = traceId;
+
+    const data: Prisma.TransferCreateInput = {
+      transferId,
+      maxBlockNumber: log.blockNumber,
+    };
+
+    const fromAddress = getAddress(log.args.from!);
+    const toAddress = getAddress(log.args.to!);
+
+    const fromUser = await prisma.userStealthAddress.findUnique({
+      select: {
+        userId: true,
+      },
+      where: {
+        address: fromAddress,
+      },
+    });
+
+    const toUser = await prisma.userStealthAddress.findUnique({
+      select: {
+        userId: true,
+      },
+      where: {
+        address: toAddress,
+      },
+    });
+
+    if (fromUser) {
+      data.fromUser = {
+        connect: {
+          id: fromUser.userId,
+        },
+      };
+    } else {
+      data.fromAddress = fromAddress;
+    }
+
+    if (toUser) {
+      data.toUser = {
+        connect: {
+          id: toUser.userId,
+        },
+      };
+    } else {
+      data.toAddress = toAddress;
+    }
+
+    await prisma.transfer.upsert({
+      create: data,
+      update: data,
+      where: {
+        transferId,
+      },
+    });
+
+    const traceUpsertArgs: Prisma.TraceCreateInput = {
+      id: traceId,
+      tokenId,
+      from: fromAddress,
+      to: toAddress,
+      amount: BigInt(log.args.value!),
+      Transfer: {
+        connect: {
+          transferId,
+        },
+      },
+      Transaction: {
+        connect: {
+          hash: log.transactionHash,
+        },
+      },
+    };
+
+    await prisma.trace.upsert({
+      create: traceUpsertArgs,
+      update: traceUpsertArgs,
+      where: {
+        id: traceId,
       },
     });
   }
-
-  await prisma.eRC20TransferLog.createMany({
-    data: logs.map(log => {
-      return {
-        tokenId,
-        from: log.args.from!,
-        to: log.args.to!,
-        amount: BigInt(log.args.value!),
-        logIndex: log.logIndex,
-        blockNumber: Number(log.blockNumber),
-        txIndex: log.transactionIndex,
-        chainId,
-        transactionHash: log.transactionHash,
-      };
-    }),
-    skipDuplicates: true,
-  });
 };
 
 const syncERC20Transfers = async () => {

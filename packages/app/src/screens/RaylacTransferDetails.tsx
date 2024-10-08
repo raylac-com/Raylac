@@ -6,11 +6,12 @@ import { theme } from '@/lib/theme';
 import { trpc } from '@/lib/trpc';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
+import { TraceItem } from '@/types';
 import { Entypo } from '@expo/vector-icons';
 import {
   formatAmount,
   getBlockExplorerUrl,
-  RaylacTransferDetailsReturnType,
+  getTokenMetadata,
 } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState } from 'react';
@@ -23,19 +24,24 @@ type Props = NativeStackScreenProps<
   'RaylacTransferDetails'
 >;
 
-const TraceListItem = ({
-  trace,
-}: {
-  trace: RaylacTransferDetailsReturnType['traces'][0];
-}) => {
+const TraceListItem = ({ trace }: { trace: TraceItem }) => {
+  const from = trace.from as Hex;
+  const to = trace.to as Hex;
+  const amount = trace.amount as string;
+  const chainId = trace.Transaction?.block?.chainId;
+  const txHash = trace.Transaction.hash as Hex;
+
+  const tokenId = trace.tokenId as string;
+  const tokenMeta = getTokenMetadata(tokenId);
+
   return (
     <View>
       <TransferDetailListItem
         label="from"
         value={
           <LinkText
-            text={shortenAddress(trace.from)}
-            url={`${getBlockExplorerUrl(trace.chainId)}/address/${trace.from}`}
+            text={shortenAddress(from)}
+            url={`${getBlockExplorerUrl(chainId)}/address/${from}`}
           ></LinkText>
         }
       ></TransferDetailListItem>
@@ -43,8 +49,8 @@ const TraceListItem = ({
         label="to"
         value={
           <LinkText
-            text={shortenAddress(trace.to)}
-            url={`${getBlockExplorerUrl(trace.chainId)}/address/${trace.to}`}
+            text={shortenAddress(to)}
+            url={`${getBlockExplorerUrl(chainId)}/address/${to}`}
           ></LinkText>
         }
       ></TransferDetailListItem>
@@ -56,7 +62,7 @@ const TraceListItem = ({
               color: theme.text,
             }}
           >
-            {formatAmount(trace.amount, 18)} ETH
+            {formatAmount(amount, tokenMeta.decimals)} {tokenMeta.symbol}
           </Text>
         }
       ></TransferDetailListItem>
@@ -64,8 +70,8 @@ const TraceListItem = ({
         label="txHash"
         value={
           <LinkText
-            text={shortenAddress(trace.txHash)}
-            url={`${getBlockExplorerUrl(trace.chainId)}/tx/${trace.txHash}`}
+            text={shortenAddress(txHash)}
+            url={`${getBlockExplorerUrl(chainId)}/tx/${txHash}`}
           ></LinkText>
         }
       ></TransferDetailListItem>
@@ -73,47 +79,46 @@ const TraceListItem = ({
   );
 };
 
+const tryPublicKeyToAddress = (publicKey: Hex | undefined) => {
+  if (!publicKey) {
+    return undefined;
+  }
+
+  return publicKeyToAddress(publicKey);
+};
+
 const RaylacTransferDetails = ({ route }: Props) => {
-  const { executionTag } = route.params;
+  const { transferId } = route.params;
   const { data: signedInUser } = useSignedInUser();
   const [showTraces, setShowTraces] = useState(false);
 
-  const { data: transferDetail } = trpc.getRaylacTransferDetails.useQuery({
-    executionTag,
+  const { data: transferDetail } = trpc.getTransferDetails.useQuery({
+    transferId,
   });
 
-  const sortedTrace = transferDetail?.traces.sort((a, b) => {
-    return Number(b.blockNumber) - Number(a.blockNumber);
-  });
+  const blockNumber = transferDetail?.maxBlockNumber;
+  const chainId = transferDetail?.traces[0].Transaction.block.chainId;
+  const tokenId = transferDetail?.traces[0].tokenId;
 
-  const latestTrace = sortedTrace ? sortedTrace[0] : null;
+  const tokenMeta = getTokenMetadata(tokenId);
 
   const { data: timestamp } = trpc.getBlockTimestamp.useQuery(
     {
-      blockNumber: Number(latestTrace?.blockNumber),
-      chainId: latestTrace?.chainId,
+      blockNumber,
+      chainId,
     },
     {
-      enabled: !!latestTrace,
+      enabled: !!blockNumber && !!chainId,
       throwOnError: false,
     }
   );
 
   const type =
-    transferDetail?.fromUserId === signedInUser?.id ? 'outgoing' : 'incoming';
+    transferDetail?.fromUser?.id === signedInUser?.id ? 'outgoing' : 'incoming';
 
-  const transferUserId =
-    type === 'outgoing' ? transferDetail?.toUserId : transferDetail?.fromUserId;
-
-  const { data: transferUser } = trpc.getUser.useQuery(
-    {
-      userId: transferUserId,
-    },
-    {
-      enabled: !!transferUserId,
-      throwOnError: false,
-    }
-  );
+  const transferAmount = transferDetail?.traces.reduce((acc, trace) => {
+    return acc + BigInt(trace.amount);
+  }, BigInt(0));
 
   if (!transferDetail) {
     return null;
@@ -134,11 +139,19 @@ const RaylacTransferDetails = ({ route }: Props) => {
     >
       <FastAvatar
         address={
-          transferUser
-            ? publicKeyToAddress(transferUser.spendingPubKey as Hex)
-            : transferDetail.toAddress
+          type === 'outgoing'
+            ? tryPublicKeyToAddress(
+                transferDetail.toUser?.spendingPubKey as Hex
+              ) || transferDetail.toAddress
+            : tryPublicKeyToAddress(
+                transferDetail.fromUser?.spendingPubKey as Hex
+              ) || transferDetail.fromAddress
         }
-        imageUrl={transferUser?.profileImage}
+        imageUrl={
+          type === 'outgoing'
+            ? transferDetail.toUser?.profileImage
+            : transferDetail.fromUser?.profileImage
+        }
         size={80}
       ></FastAvatar>
       <Text
@@ -148,11 +161,10 @@ const RaylacTransferDetails = ({ route }: Props) => {
         }}
       >
         {type === 'outgoing' ? 'Sent to ' : 'Received from '}
-        {transferUser
-          ? `${transferUser.name}`
-          : shortenAddress(transferDetail.toAddress)}
+        {type === 'outgoing'
+          ? `${transferDetail.toUser?.name || shortenAddress(transferDetail.toAddress as Hex)}`
+          : `${transferDetail.fromUser?.name || shortenAddress(transferDetail.fromAddress as Hex)}`}
       </Text>
-
       <Text
         style={{
           color: theme.text,
@@ -160,7 +172,8 @@ const RaylacTransferDetails = ({ route }: Props) => {
           fontWeight: 'bold',
         }}
       >
-        {formatAmount(transferDetail.amount, 18)} ETH
+        {formatAmount(transferAmount.toString(), tokenMeta.decimals)}{' '}
+        {tokenMeta.symbol}
       </Text>
       <Text
         style={{
@@ -210,14 +223,13 @@ const RaylacTransferDetails = ({ route }: Props) => {
               textAlign: 'center',
             }}
           >
-            {type === 'outgoing' ? 'Sent to ' : 'Received from '}@
-            {transferUser?.username}
+            {type === 'outgoing' ? 'Sent to ' : 'Received from '}
+            {type === 'outgoing'
+              ? transferDetail.toUser?.username
+              : transferDetail.fromUser?.username}
           </Text>
           {transferDetail.traces.map((trace, i) => (
-            <TraceListItem
-              trace={trace as RaylacTransferDetailsReturnType['traces'][0]}
-              key={i}
-            />
+            <TraceListItem trace={trace} key={i} />
           ))}
         </View>
       )}

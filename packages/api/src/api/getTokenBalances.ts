@@ -16,92 +16,42 @@ const getTokenBalances = async ({
   const chainIds = getChainsForMode(isDevMode).map(chain => chain.id);
 
   const tokenBalances = await prisma.$queryRaw<TokenBalanceQueryResult[]>`
-    WITH user_addresses AS (
+    WITH incoming_transfers AS (
 	SELECT
-		address
+		tc. "tokenId",
+		SUM(tc.amount) AS "amount"
 	FROM
-		"UserStealthAddress"
-	WHERE
-		"userId" = ${userId}
+		"Transfer" t
+	LEFT JOIN "Trace" tc ON t. "transferId" = tc. "transferId"
+	LEFT JOIN "Transaction" tx ON tc. "transactionHash" = tx.hash
+	LEFT JOIN "Block" b ON tx. "blockHash" = b.hash
+    WHERE
+        t. "toUserId" = ${userId}
+        AND b. "chainId" in(${Prisma.join(chainIds)})
+    GROUP BY
+        "tokenId"
     ),
-    native_transfers_out AS (
+    outgoing_transfers AS (
         SELECT
-            sum(amount) AS amount
+            tc. "tokenId",
+            SUM(tc.amount) AS "amount"
         FROM
-            "TransferTrace"
-        WHERE
-            "from" in(
-                SELECT
-                    address FROM user_addresses)
-            AND "chainId" in (${Prisma.join(chainIds)})
-    ),
-    native_transfers_in AS (
-        SELECT
-            sum(amount) AS amount
-        FROM
-            "TransferTrace"
-        WHERE
-            "to" in(
-                SELECT
-                    address FROM user_addresses)
-            AND "chainId" in(${Prisma.join(chainIds)})
-    ),
-    erc20_transfers_in AS (
-        SELECT
-            "tokenId",
-            sum(amount) AS amount
-        FROM
-            "ERC20TransferLog"
-        WHERE
-            "to" in(
-                SELECT
-                    address FROM user_addresses)
-            AND "chainId" in(${Prisma.join(chainIds)})
-        GROUP BY
-            "tokenId"
-    ),
-    erc20_transfers_out AS (
-        SELECT
-            "tokenId",
-            sum(amount) AS amount
-        FROM
-            "ERC20TransferLog"
-        WHERE
-            "from" in(
-                SELECT
-                    address FROM user_addresses)
-            AND "chainId" in(${Prisma.join(chainIds)})
-        GROUP BY
-            "tokenId"
-    ),
-    native_balance AS (
-        SELECT
-            COALESCE(native_transfers_in.amount, 0) - COALESCE(native_transfers_out.amount, 0) AS balance,
-            'eth' AS "tokenId"
-        FROM
-            native_transfers_in,
-            native_transfers_out
-    ),
-    erc20_balance AS (
-        SELECT
-            COALESCE(i. "tokenId",
-                o. "tokenId") AS "tokenId",
-            COALESCE(i.amount, 0) - COALESCE(o.amount, 0) AS balance
-        FROM
-            erc20_transfers_in i
-        FULL OUTER JOIN erc20_transfers_out o ON i. "tokenId" = o. "tokenId"
+            "Transfer" t
+        LEFT JOIN "Trace" tc ON t. "transferId" = tc. "transferId"
+        LEFT JOIN "Transaction" tx ON tc. "transactionHash" = tx.hash
+        LEFT JOIN "Block" b ON tx. "blockHash" = b.hash
+    WHERE
+        t. "fromUserId" = ${userId}
+        AND b. "chainId" in(${Prisma.join(chainIds)})
+    GROUP BY
+        "tokenId"
     )
     SELECT
-        "tokenId",
-        balance
+        COALESCE(i. "tokenId", o. "tokenId") AS "tokenId",
+        COALESCE(i.amount, 0) - COALESCE(o.amount, 0) AS balance
     FROM
-        erc20_balance
-    UNION
-    SELECT
-        "tokenId",
-        balance
-    FROM
-        native_balance
+        incoming_transfers i
+        LEFT JOIN outgoing_transfers o ON i. "tokenId" = o. "tokenId"
   `;
 
   return tokenBalances;

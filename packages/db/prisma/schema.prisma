@@ -40,6 +40,9 @@ model User {
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   UserStealthAddress UserStealthAddress[]
+
+  outgoingTransfers Transfer[] @relation("outgoing")
+  incomingTransfers Transfer[] @relation("incoming")
 }
 
 model UserStealthAddress {
@@ -57,33 +60,42 @@ model UserStealthAddress {
   AddressSyncStatus AddressSyncStatus[]
 }
 
-enum ExecutionType {
-  Transfer
-  BridgeTransfer
-  AggregateBridgeTransfer
-  AggregateTransfer
+model Transfer {
+  transferId String @id
+
+  fromUserId Int?
+  toUserId   Int?
+
+  fromUser User? @relation("outgoing", fields: [fromUserId], references: [id])
+  toUser   User? @relation("incoming", fields: [toUserId], references: [id])
+
+  fromAddress String?
+  toAddress   String?
+
+  maxBlockNumber BigInt
+
+  traces Trace[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model TransferTrace {
+model Trace {
+  id String @id
+
   from    String
   to      String
   amount  BigInt
   tokenId String
 
-  txHash       String
-  txPosition   Int
-  traceAddress String
-  chainId      Int
+  transferId String
+  Transfer   Transfer @relation(fields: [transferId], references: [transferId])
 
-  executionType ExecutionType
-  executionTag  String
+  transactionHash String
 
-  Transaction Transaction @relation(fields: [txHash], references: [hash])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@id([txHash, traceAddress])
+  logIndex     Int? // For debugging purposes
+  traceAddress String? // For debugging purposes
+  Transaction  Transaction @relation(fields: [transactionHash], references: [hash])
 }
 
 model AddressSyncStatus {
@@ -109,14 +121,11 @@ model Transaction {
 
   chainId Int
 
-  traces  TransferTrace[]
   userOps UserOperation[]
+  traces  Trace[]
 
-  synchedTraces Boolean @default(false)
-
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  ERC20TransferLog ERC20TransferLog[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model UserOperation {
@@ -160,26 +169,4 @@ model Block {
   Transaction Transaction[]
 
   @@unique([number, chainId])
-}
-
-model ERC20TransferLog {
-  from    String
-  to      String
-  amount  BigInt
-  tokenId String
-
-  executionTag String?
-
-  logIndex    Int
-  txIndex     Int
-  blockNumber Int
-  chainId     Int
-
-  transactionHash String
-  Transaction     Transaction @relation(fields: [transactionHash], references: [hash])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@id([txIndex, logIndex, blockNumber, chainId])
 }

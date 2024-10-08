@@ -5,6 +5,7 @@ import {
   ACCOUNT_IMPL_DEPLOYED_BLOCK,
   ERC20Abi,
   getTokenId,
+  getTraceId,
 } from '@raylac/shared';
 
 export const updateJobLatestSyncedBlock = async ({
@@ -273,9 +274,13 @@ export const upsertTransaction = ({
 export const saveERC20TransferLog = ({
   log,
   chainId,
+  traceAddress,
+  executionTag,
 }: {
   log: ERC20TransferLogType;
   chainId: number;
+  traceAddress: number[];
+  executionTag: Hex;
 }) => {
   const tokenId = getTokenId({
     chainId,
@@ -286,16 +291,24 @@ export const saveERC20TransferLog = ({
   const to = log.args.to;
   const amount = log.args.value;
 
-  const data: Prisma.ERC20TransferLogCreateInput = {
-    tokenId,
-    from,
-    to,
+  const transferId = executionTag;
+
+  const traceId = getTraceId({
+    txHash: log.transactionHash,
+    traceAddress,
+  });
+
+  const traceData: Prisma.TraceCreateInput = {
+    id: traceId,
+    from: from,
+    to: to,
     amount,
-    logIndex: log.logIndex,
-    blockNumber: Number(log.blockNumber),
-    txIndex: log.transactionIndex,
-    chainId,
-    // This function expects the transaction to already exist in the database
+    tokenId,
+    Transfer: {
+      connect: {
+        transferId,
+      },
+    },
     Transaction: {
       connect: {
         hash: log.transactionHash,
@@ -303,18 +316,13 @@ export const saveERC20TransferLog = ({
     },
   };
 
-  const upsertLog = prisma.eRC20TransferLog.upsert({
-    create: data,
-    update: data,
+  const upsertTrace = prisma.trace.upsert({
+    create: traceData,
+    update: traceData,
     where: {
-      txIndex_logIndex_blockNumber_chainId: {
-        txIndex: log.transactionIndex,
-        logIndex: log.logIndex,
-        blockNumber: Number(log.blockNumber),
-        chainId,
-      },
+      id: traceId,
     },
   });
 
-  return upsertLog;
+  return upsertTrace;
 };

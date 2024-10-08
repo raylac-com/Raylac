@@ -5,6 +5,7 @@ import {
   formatUnits,
   getAddress,
   Hex,
+  keccak256,
   parseUnits,
 } from 'viem';
 import { ChainGasInfo, UserOperation } from './types';
@@ -429,4 +430,88 @@ export const getTokenId = ({
   }
 
   return token.tokenId;
+};
+
+/*
+const getOutgoingTransferId = ({
+  txHash,
+  executionTag,
+  traceAddress,
+}: {
+  txHash: Hex;
+  executionTag: Hex;
+  traceAddress: number[];
+}) => {
+  const input = `${txHash}-${executionTag}-${traceAddress.join('_')}`;
+  const encoded = new TextEncoder().encode(input);
+  return keccak256(encoded);
+};
+
+export const getIncomingNativeTransferId = ({
+  txHash,
+  traceAddress,
+}: {
+  txHash: Hex;
+  traceAddress: number[];
+}) => {
+  const input = `${txHash}-${traceAddress.join('_')}`;
+  const encoded = new TextEncoder().encode(input);
+  return keccak256(encoded);
+};
+
+export const getOutgoingNativeTransferId = ({
+  txHash,
+  executionTag,
+  traceAddress,
+}: {
+  txHash: Hex;
+  traceAddress: number[];
+}) => {
+  return getOutgoingTransferId({ txHash, executionTag, traceAddress });
+};
+
+export const getIncomingERC20TransferId = ({
+  txHash,
+  logIndex,
+}: {
+  txHash: Hex;
+  logIndex: number;
+}) => {
+  const input = `${txHash}-${logIndex}`;
+  const encoded = new TextEncoder().encode(input);
+  return keccak256(encoded);
+};
+
+export const getOutgoingERC20TransferId = ({
+  txHash,
+  executionTag,
+}: {
+  txHash: Hex;
+  executionTag: Hex;
+}) => {
+  return getOutgoingTransferId({ txHash, executionTag });
+};
+*/
+
+export const getTraceId = ({
+  txHash,
+  traceAddress, // TODO: Rename to traceAddressOrLogIndex
+}: {
+  txHash: Hex;
+  traceAddress: number[] | number;
+}) => {
+  const traceAddressString = Array.isArray(traceAddress)
+    ? traceAddress.join('_')
+    : traceAddress;
+
+  const input = `${txHash}-${traceAddressString}`;
+  const encoded = new TextEncoder().encode(input);
+  return keccak256(encoded);
+};
+
+/**
+ *  Get the token metadata for a given token ID
+ */
+export const getTokenMetadata = (tokenId: string) => {
+  return supportedTokens.find(token => token.tokenId === tokenId);
 };

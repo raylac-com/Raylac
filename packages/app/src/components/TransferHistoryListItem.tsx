@@ -4,23 +4,16 @@ import FastAvatar from './FastAvatar';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
 import { Hex } from 'viem';
-import { TransferHistoryQueryResult, formatAmount } from '@raylac/shared';
-import supportedTokens from '@raylac/shared/out/supportedTokens';
+import { formatAmount, getTokenMetadata } from '@raylac/shared';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { publicKeyToAddress } from 'viem/accounts';
 import { formatDistanceToNowStrict } from 'date-fns';
+import { TransferItem } from '@/types';
 // import useEnsName from '@/hooks/useEnsName';
 
-/**
- *  Get the token metadata for a given token ID
- */
-const getTokenMetadata = (tokenId: string) => {
-  return supportedTokens.find(token => token.tokenId === tokenId);
-};
-
 interface TransferHistoryListItemProps {
-  tx: TransferHistoryQueryResult;
+  transfer: TransferItem;
   type: 'incoming' | 'outgoing';
 }
 
@@ -29,33 +22,34 @@ const formatDate = (date: Date) => {
 };
 
 const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
-  const { tx, type } = props;
+  const { transfer, type } = props;
+
+  const chainId = transfer.traces[0].Transaction?.block?.chainId;
+  const tokenId = transfer.traces[0].tokenId;
+
+  const amount = transfer.traces.reduce(
+    (acc, trace) => acc + BigInt(trace.amount),
+    BigInt(0)
+  );
 
   const { data: blockTimestamp } = trpc.getBlockTimestamp.useQuery({
-    chainId: tx.chainId,
-    blockNumber: tx.blockNumber,
+    chainId,
+    blockNumber: transfer.maxBlockNumber,
   });
 
-  const tokenMeta = getTokenMetadata(tx.tokenId);
-  const formattedAmount = formatAmount(tx.amount, tokenMeta.decimals);
+  const tokenMeta = getTokenMetadata(tokenId);
+  const formattedAmount = formatAmount(amount.toString(), tokenMeta.decimals);
 
   const navigation = useTypedNavigation();
 
-  const transferUserId = type === 'outgoing' ? tx?.toUserId : tx?.fromUserId;
-
-  const { data: transferUser } = trpc.getUser.useQuery(
-    {
-      userId: transferUserId,
-    },
-    {
-      enabled: !!transferUserId,
-      throwOnError: false,
-    }
-  );
+  const transferUser =
+    type === 'outgoing' ? transfer?.toUser : transfer?.fromUser;
 
   const avatarAddress = transferUser
     ? publicKeyToAddress(transferUser.spendingPubKey as Hex)
-    : ((type === 'outgoing' ? tx.to : tx.from) as Hex);
+    : ((type === 'outgoing'
+        ? transfer.toAddress
+        : transfer.fromAddress) as Hex);
 
   return (
     <Pressable
@@ -66,23 +60,9 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
         paddingVertical: 12,
       }}
       onPress={() => {
-        if (tx.executionTag) {
-          navigation.navigate('RaylacTransferDetails', {
-            executionTag: tx.executionTag,
-          });
-        } else if (tx.txIndex && tx.logIndex) {
-          navigation.navigate('IncomingERC20TransferDetails', {
-            txIndex: tx.txIndex,
-            logIndex: tx.logIndex,
-            blockNumber: tx.blockNumber,
-            chainId: tx.chainId,
-          });
-        } else {
-          navigation.navigate('NativeTransferDetails', {
-            txHash: tx.txHash,
-            traceAddress: tx.traceAddress,
-          });
-        }
+        navigation.navigate('RaylacTransferDetails', {
+          transferId: transfer.transferId,
+        });
       }}
     >
       <View
@@ -112,7 +92,11 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           >
             {transferUser
               ? transferUser.name
-              : shortenAddress((type === 'outgoing' ? tx.to : tx.from) as Hex)}
+              : shortenAddress(
+                  (type === 'outgoing'
+                    ? transfer.toAddress
+                    : transfer.fromAddress) as Hex
+                )}
           </Text>
         </View>
         <View>

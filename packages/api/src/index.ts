@@ -23,11 +23,9 @@ import getAddressBalancesPerChain from './api/getAddressBalancesPerChain';
 import { getBlockTimestamp } from './utils';
 import getTokenPrices from './api/getTokenPrices';
 import submitUserOperation from './api/submitUserOperation';
-import getRaylacTransferDetails from './api/getRaylacTransferDetails';
-import getIncomingNativeTransferDetails from './api/getIncomingNativeTransferDetails';
 import getUser from './api/getUser';
 import deleteAccount from './api/deleteAccount';
-import getIncomingERC20TransferDetails from './api/getIncomingERC20TransferDetails';
+import getTransferDetails from './api/getTransferDetails';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -135,57 +133,17 @@ const appRouter = router({
     return transfers;
   }),
 
-  getRaylacTransferDetails: authedProcedure
+  getTransferDetails: authedProcedure
     .input(
       z.object({
-        executionTag: z.string(),
+        transferId: z.string(),
       })
     )
     .query(async opts => {
       const { input } = opts;
 
-      const details = await getRaylacTransferDetails({
-        executionTag: input.executionTag as Hex,
-      });
-
-      return details;
-    }),
-
-  getIncomingNativeTransferDetails: authedProcedure
-    .input(
-      z.object({
-        txHash: z.string(),
-        traceAddress: z.string(),
-      })
-    )
-    .query(async opts => {
-      const { input } = opts;
-
-      const details = await getIncomingNativeTransferDetails({
-        txHash: input.txHash as Hex,
-        traceAddress: input.traceAddress,
-      });
-
-      return details;
-    }),
-
-  getIncomingERC20TransferDetails: authedProcedure
-    .input(
-      z.object({
-        txIndex: z.number(),
-        logIndex: z.number(),
-        blockNumber: z.number(),
-        chainId: z.number(),
-      })
-    )
-    .query(async opts => {
-      const { input } = opts;
-
-      const details = await getIncomingERC20TransferDetails({
-        txIndex: input.txIndex,
-        logIndex: input.logIndex,
-        blockNumber: input.blockNumber,
-        chainId: input.chainId,
+      const details = await getTransferDetails({
+        transferId: input.transferId,
       });
 
       return details;
