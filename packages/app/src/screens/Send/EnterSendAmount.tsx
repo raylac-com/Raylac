@@ -191,6 +191,8 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
       ? shortenAddress(recipientUserOrAddress)
       : recipientUserOrAddress.name;
 
+  const isRaylacRecipient = typeof recipientUserOrAddress !== 'string';
+
   return (
     <View
       style={{
@@ -369,6 +371,22 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           {t('insufficientBalance')}
         </Text>
       ) : null}
+      {isRaylacRecipient && (
+        <View>
+          <Text
+            style={{
+              color: theme.text,
+              textAlign: 'center',
+              opacity: 0.8,
+              marginTop: 32,
+            }}
+          >
+            {recipientDisplayName} receives to a fresh stealth address.
+            {`\n`}
+            No one can determine that the recipient is {recipientDisplayName}.
+          </Text>
+        </View>
+      )}
       <View
         style={{
           width: '100%',
