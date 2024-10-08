@@ -211,9 +211,6 @@ export interface AccountBalancePerChainQueryResult {
   chainId: number;
   balance: string;
   address: Hex;
-  viewTag: string;
-  stealthPubKey: Hex;
-  ephemeralPubKey: Hex;
   tokenId: string;
   nonce: number | null;
 }

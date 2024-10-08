@@ -21,149 +21,81 @@ const getAddressBalancesPerChain = async ({
   const accountBalancePerChain = await prisma.$queryRaw<
     AccountBalancePerChainQueryResult[]
   >`
-    WITH user_addresses AS (
-	SELECT
-		address
-	FROM
-		"UserStealthAddress"
-	WHERE
-		"userId" = ${userId}
-),
-    native_transfers_out AS (
-        SELECT
-            "chainId",
-            "from",
-            sum(amount) AS amount
-        FROM
-            "TransferTrace"
-        WHERE
-            "chainId" in(${Prisma.join(chainIds)})
-            AND "from" in(
-                SELECT
-                    address FROM user_addresses)
-        GROUP BY
-            "chainId",
-            "from"
-    ),
-    native_transfers_in AS (
-        SELECT
-            "chainId",
-            "to",
-            sum(amount) AS amount
-        FROM
-            "TransferTrace"
-        WHERE
-            "chainId" in(${Prisma.join(chainIds)})
-            AND "to" in(
-                SELECT
-                    address FROM user_addresses)
-        GROUP BY
-            "chainId",
-            "to"
-    ),
-    native_balances AS (
-        SELECT
-            COALESCE(i. "chainId",
-                o. "chainId") AS "chainId",
-            COALESCE(i.amount,
-                0) - COALESCE(o.amount,
-                0) AS balance,
-            COALESCE(i. "to",
-                o. "from") AS address,
-            'eth' AS "tokenId"
-        FROM
-            native_transfers_in i
-        FULL OUTER JOIN native_transfers_out o ON i. "chainId" = o. "chainId"
-        AND i. "to" = o. "from"
-    ),
-    erc20_transfers_out AS (
-        SELECT
-            "chainId",
-            "from",
-            "tokenId",
-            sum(amount) AS amount
-        FROM
-            "ERC20TransferLog"
-    WHERE
-        "chainId" in(${Prisma.join(chainIds)})
-        AND "from" in(
+        WITH incoming_transfers AS (
             SELECT
-                address FROM user_addresses)
-    GROUP BY
-        "chainId",
-        "from",
-        "tokenId"
-    ),
-    erc20_transfers_in AS (
-        SELECT
-            "chainId",
-            "to",
-            "tokenId",
-            sum(amount) AS amount
-        FROM
-            "ERC20TransferLog"
+                tc. "tokenId",
+                tc. "to",
+                b. "chainId",
+                SUM(tc.amount) AS "amount"
+            FROM
+                "Transfer" t
+            LEFT JOIN "Trace" tc ON t. "transferId" = tc. "transferId"
+            LEFT JOIN "Transaction" tx ON tc. "transactionHash" = tx.hash
+            LEFT JOIN "Block" b ON tx. "blockHash" = b.hash
         WHERE
-            "chainId" in(${Prisma.join(chainIds)})
-            AND "to" in(
-                SELECT
-                    address FROM user_addresses)
+            t. "toUserId" = ${userId}
+            AND b. "chainId" in(${Prisma.join(chainIds)})
         GROUP BY
-            "chainId",
-            "to",
-            "tokenId"
-    ),
-    erc20_balances AS (
+            "tokenId",
+            b. "chainId",
+            tc.to
+        ),
+        outgoing_transfers AS (
+            SELECT
+                tc. "tokenId",
+                tc. "from",
+                b. "chainId",
+                SUM(tc.amount) AS "amount"
+            FROM
+                "Transfer" t
+            LEFT JOIN "Trace" tc ON t. "transferId" = tc. "transferId"
+            LEFT JOIN "Transaction" tx ON tc. "transactionHash" = tx.hash
+            LEFT JOIN "Block" b ON tx. "blockHash" = b.hash
+        WHERE
+            t. "fromUserId" = ${userId}
+            AND b. "chainId" in(${Prisma.join(chainIds)})
+        GROUP BY
+            tc. "tokenId",
+            b. "chainId",
+            tc. "from"
+        ),
+        address_balances AS (
+            SELECT
+                COALESCE(i. "tokenId",
+                    o. "tokenId") AS "tokenId",
+                COALESCE(i.amount,
+                    0) - COALESCE(o.amount,
+                    0) AS balance,
+                COALESCE(i. "to",
+                    o. "from") AS address,
+                COALESCE(i. "chainId",
+                    o. "chainId") AS "chainId"
+            FROM
+                incoming_transfers i
+            LEFT JOIN outgoing_transfers o ON i. "tokenId" = o. "tokenId"
+                AND i. "chainId" = o. "chainId"
+                AND i. "to" = o. "from"
+        ),
+        account_nonces AS (
+            SELECT
+                sender AS "address",
+                "chainId",
+                max(nonce) AS nonce
+            FROM
+                "UserOperation"
+        WHERE
+            success = TRUE
+        GROUP BY
+            sender,
+            "chainId"
+        )
         SELECT
-            COALESCE(i. "chainId",
-                o. "chainId") AS "chainId",
-            COALESCE(i.amount,
-                0) - COALESCE(o.amount,
-                0) AS balance,
-            COALESCE(i. "to",
-                o. "from") AS address,
-            COALESCE(i. "tokenId",
-                o. "tokenId") AS "tokenId"
+            a.*,
+            an.nonce
         FROM
-            erc20_transfers_in i
-        FULL OUTER JOIN erc20_transfers_out o ON i. "tokenId" = o. "tokenId"
-        AND i. "chainId" = o. "chainId"
-        AND i. "to" = o. "from"
-    ),
-    address_balances AS (
-        SELECT
-            *
-        FROM
-            erc20_balances
-        UNION
-        SELECT
-            *
-        FROM
-            native_balances
-    ),
-    account_nonces AS (
-        SELECT
-            sender AS "address",
-            "chainId",
-            max(nonce) AS nonce
-        FROM
-            "UserOperation"
-    WHERE
-        success = TRUE
-    GROUP BY
-        sender,
-        "chainId"
-    )
-    SELECT
-        a.*,
-        u. "ephemeralPubKey",
-        u. "stealthPubKey",
-        u. "viewTag",
-        an.nonce
-    FROM
-        address_balances a
-        LEFT JOIN "UserStealthAddress" u ON a.address = u.address
-        LEFT JOIN account_nonces an ON an.address = a.address
-            AND an. "chainId" = a. "chainId"
+            address_balances a
+            LEFT JOIN account_nonces an ON an.address = a.address
+                AND an. "chainId" = a. "chainId"
   `;
 
   return accountBalancePerChain;
