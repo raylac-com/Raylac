@@ -68,6 +68,49 @@ const saveBlock = async (block: Block, chainId: number) => {
   }
 };
 
+/**
+ * Save the block number and hash to the database.
+ */
+const syncBlock = async ({
+  blockNumber,
+  chainId,
+}: {
+  blockNumber: bigint;
+  chainId: number;
+}) => {
+  const publicClient = getPublicClient({
+    chainId,
+  });
+
+  const block = await publicClient.getBlock({
+    blockNumber,
+  });
+
+  await saveBlock(block, chainId);
+};
+
+/**
+ * Sync blocks in a range.
+ * This function is used to sync blocks in a given range concurrently.
+ */
+export const syncBlocksInRange = async ({
+  fromBlock,
+  toBlock,
+  chainId,
+}: {
+  fromBlock: bigint;
+  toBlock: bigint;
+  chainId: number;
+}) => {
+  const promises = [];
+
+  for (let blockNumber = fromBlock; blockNumber <= toBlock; blockNumber++) {
+    promises.push(syncBlock({ blockNumber, chainId }));
+  }
+
+  await Promise.all(promises);
+};
+
 const syncBlocksForChain = async (chainId: number) => {
   const publicClient = getPublicClient({
     chainId,
@@ -78,7 +121,7 @@ const syncBlocksForChain = async (chainId: number) => {
       blockTag: 'finalized',
     });
 
-    const fromBlock = bigIntMin([finalizedBlock.number]);
+    const fromBlock = finalizedBlock.number + BigInt(1);
 
     const latestBlock = await publicClient.getBlock({
       blockTag: 'latest',
@@ -94,24 +137,11 @@ const syncBlocksForChain = async (chainId: number) => {
       blockNumber <= latestBlock.number;
       blockNumber += chunkSize
     ) {
-      const chunk = Array.from(
-        { length: Number(chunkSize) },
-        (_, i) => blockNumber + BigInt(i)
-      );
-
-      await Promise.all(
-        chunk.map(async blockNumber => {
-          if (blockNumber > latestBlock.number) {
-            return;
-          }
-
-          const block = await publicClient.getBlock({
-            blockNumber,
-          });
-
-          await saveBlock(block, chainId);
-        })
-      );
+      await syncBlocksInRange({
+        fromBlock: blockNumber,
+        toBlock: bigIntMin([blockNumber + chunkSize, latestBlock.number]),
+        chainId,
+      });
     }
 
     await sleep(10 * 1000);

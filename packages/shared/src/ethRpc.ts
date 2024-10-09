@@ -6,11 +6,8 @@ import {
   http,
 } from 'viem';
 import * as chains from 'viem/chains';
-import { Chain,  } from 'viem/chains';
+import { Chain } from 'viem/chains';
 import { getChainFromId } from './utils';
-
-
-
 
 export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
   const apiKey =
@@ -132,7 +129,11 @@ export const getPublicClient = ({
   const chain = getChainFromId(chainId);
   const client = createPublicClient({
     chain,
-    transport: http(getAlchemyRpcUrl({ chain })),
+    transport: http(
+      chainId === chains.anvil.id
+        ? 'http://127.0.0.1:8545'
+        : getAlchemyRpcUrl({ chain })
+    ),
   });
 
   return client as PublicClient<HttpTransport, Chain>;
