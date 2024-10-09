@@ -87,6 +87,12 @@ const batchSyncIncomingNativeTransfers = async ({
       },
     });
 
+    if (fromUser) {
+      // The transfer should be indexed by `syncUserOps`
+      // so we can skip it here
+      continue;
+    }
+
     const toUser = await prisma.userStealthAddress.findUnique({
       select: {
         userId: true,
@@ -96,15 +102,7 @@ const batchSyncIncomingNativeTransfers = async ({
       },
     });
 
-    if (fromUser) {
-      data.fromUser = {
-        connect: {
-          id: fromUser.userId,
-        },
-      };
-    } else {
-      data.fromAddress = getAddress(trace.action.from);
-    }
+    data.fromAddress = getAddress(trace.action.from);
 
     if (toUser) {
       data.toUser = {

@@ -107,6 +107,12 @@ const batchSyncIncomingERC20Transfers = async ({
       },
     });
 
+    if (fromUser) {
+      // The transfer should be indexed by `syncUserOps`
+      // so we can skip it here
+      continue;
+    }
+
     const toUser = await prisma.userStealthAddress.findUnique({
       select: {
         userId: true,
@@ -116,15 +122,7 @@ const batchSyncIncomingERC20Transfers = async ({
       },
     });
 
-    if (fromUser) {
-      data.fromUser = {
-        connect: {
-          id: fromUser.userId,
-        },
-      };
-    } else {
-      data.fromAddress = fromAddress;
-    }
+    data.fromAddress = fromAddress;
 
     if (toUser) {
       data.toUser = {
