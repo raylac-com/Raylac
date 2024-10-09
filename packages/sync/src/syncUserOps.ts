@@ -529,80 +529,89 @@ export const handleUserOpEvent = async ({
   );
 };
 
+/**
+ * Sync user operations for the given chain,
+ * from either the latest synched block or the finalized block (from the earlier block)
+ * to the latest block
+ */
+export const syncUserOpsForChain = async (chainId: number) => {
+  const client = getPublicClient({ chainId });
+
+  // eslint-disable-next-line security/detect-object-injection
+  const accountDeployedBlock = ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId];
+
+  if (!accountDeployedBlock) {
+    throw new Error(
+      `ACCOUNT_IMPL_DEPLOYED_BLOCK not found for chain ${chainId}`
+    );
+  }
+
+  const latestSynchedBlock =
+    (await getLatestSynchedUserOpBlock(chainId)) || accountDeployedBlock;
+
+  const finalizedBlockNumber = await client.getBlock({
+    blockTag: 'finalized',
+  });
+
+  if (finalizedBlockNumber.number === null) {
+    throw new Error('Finalized block number is null');
+  }
+
+  const fromBlock = bigIntMin([
+    latestSynchedBlock,
+    finalizedBlockNumber.number,
+  ]);
+
+  const toBlock = await client.getBlockNumber();
+
+  logger.info(
+    `Syncing UserOperations from block ${fromBlock.toLocaleString()} to ${toBlock.toLocaleString()} on chain ${chainId}`
+  );
+  logger.info(`((${(toBlock - fromBlock).toLocaleString()}) blocks)`);
+
+  const chunkSize = 10000n;
+
+  for (
+    let startBlock = fromBlock;
+    startBlock <= toBlock;
+    startBlock += chunkSize + 1n
+  ) {
+    const endBlock =
+      startBlock + chunkSize <= toBlock ? startBlock + chunkSize : toBlock;
+
+    logger.info(
+      `Fetching logs from block ${startBlock.toLocaleString()} to ${endBlock.toLocaleString()} on chain ${chainId}`
+    );
+
+    const chunkLogs = await client.getLogs({
+      address: ENTRY_POINT_ADDRESS,
+      event: userOpEvent,
+      args: {
+        paymaster: RAYLAC_PAYMASTER_ADDRESS,
+      },
+      fromBlock: startBlock,
+      toBlock: endBlock,
+    });
+
+    for (const log of chunkLogs) {
+      await handleUserOpEvent({
+        log,
+        chainId,
+      });
+    }
+
+    await updateJobLatestSyncedBlock({
+      chainId,
+      syncJob: 'UserOps',
+      blockNumber: endBlock,
+    });
+  }
+};
+
 const syncUserOpsByPaymaster = async () => {
   while (true) {
     for (const chainId of supportedChains.map(chain => chain.id)) {
-      const client = getPublicClient({ chainId });
-
-      // eslint-disable-next-line security/detect-object-injection
-      const accountDeployedBlock = ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId];
-
-      if (!accountDeployedBlock) {
-        throw new Error(
-          `ACCOUNT_IMPL_DEPLOYED_BLOCK not found for chain ${chainId}`
-        );
-      }
-
-      const latestSynchedBlock =
-        (await getLatestSynchedUserOpBlock(chainId)) || accountDeployedBlock;
-
-      const finalizedBlockNumber = await client.getBlock({
-        blockTag: 'finalized',
-      });
-
-      if (finalizedBlockNumber.number === null) {
-        throw new Error('Finalized block number is null');
-      }
-
-      const fromBlock = bigIntMin([
-        latestSynchedBlock,
-        finalizedBlockNumber.number,
-      ]);
-
-      const toBlock = await client.getBlockNumber();
-
-      logger.info(
-        `Syncing UserOperations from block ${fromBlock.toLocaleString()} to ${toBlock.toLocaleString()} on chain ${chainId}`
-      );
-      logger.info(`((${(toBlock - fromBlock).toLocaleString()}) blocks)`);
-
-      const chunkSize = 10000n;
-
-      for (
-        let startBlock = fromBlock;
-        startBlock <= toBlock;
-        startBlock += chunkSize + 1n
-      ) {
-        const endBlock =
-          startBlock + chunkSize <= toBlock ? startBlock + chunkSize : toBlock;
-
-        logger.info(
-          `Fetching logs from block ${startBlock.toLocaleString()} to ${endBlock.toLocaleString()} on chain ${chainId}`
-        );
-
-        const chunkLogs = await client.getLogs({
-          address: ENTRY_POINT_ADDRESS,
-          event: userOpEvent,
-          args: {
-            paymaster: RAYLAC_PAYMASTER_ADDRESS,
-          },
-          fromBlock: startBlock,
-          toBlock: endBlock,
-        });
-
-        for (const log of chunkLogs) {
-          await handleUserOpEvent({
-            log,
-            chainId,
-          });
-        }
-
-        await updateJobLatestSyncedBlock({
-          chainId,
-          syncJob: 'UserOps',
-          blockNumber: endBlock,
-        });
-      }
+      await syncUserOpsForChain(chainId);
     }
 
     await sleep(15 * 1000); // Sleep for 15 seconds

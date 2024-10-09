@@ -1,15 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { createTestClient, http } from 'viem';
-import { anvil, foundry } from 'viem/chains';
+import { anvil } from 'viem/chains';
 import { getPublicClient } from '@raylac/shared';
 import { syncBlocksInRange } from '../src/syncBlocks';
 import prisma from '../src/lib/prisma';
-
-export const testClient = createTestClient({
-  chain: foundry,
-  mode: 'anvil',
-  transport: http(),
-});
+import { testClient } from './utils';
 
 const client = getPublicClient({ chainId: anvil.id });
 
