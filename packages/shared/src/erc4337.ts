@@ -28,6 +28,7 @@ import RaylacPaymasterAbi from './abi/RaylacPaymasterAbi';
 import { getSenderAddress, recoveryStealthPrivKey } from './stealth';
 import { increaseByPercent } from './utils';
 import { signMessage } from 'viem/accounts';
+import { handleOps } from './bundler';
 
 /**
  * Get the init code for creating a stealth contract account
@@ -430,35 +431,12 @@ export const sendUserOperation = async ({
   client: PublicClient<HttpTransport, Chain>;
   userOp: UserOperation;
 }): Promise<Hex> => {
-  const config = {
-    headers: {
-      accept: 'application/json',
-      'content-type': 'application/json',
-    },
-  };
+  const userOpHashes = await handleOps({
+    userOps: [userOp],
+    chainId: client.chain.id,
+  });
 
-  const result = await axios.post<{
-    result?: Hex;
-    error?: {
-      code: number;
-      message: string;
-    };
-  }>(
-    client.transport.url as string,
-    {
-      id: 1,
-      jsonrpc: '2.0',
-      method: 'eth_sendUserOperation',
-      params: [userOp, ENTRY_POINT_ADDRESS],
-    },
-    config
-  );
-
-  if (result.data.error) {
-    throw new Error(JSON.stringify(result.data.error));
-  }
-
-  return result.data.result!;
+  return userOpHashes[0];
 };
 
 /**

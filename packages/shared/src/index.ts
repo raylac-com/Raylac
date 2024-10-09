@@ -22,3 +22,4 @@ export { relay };
 export * from './multiChainSend';
 export * from './supportedTokens';
 export * from './supportedChains';
+export * from './bundler';
