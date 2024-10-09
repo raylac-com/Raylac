@@ -1,0 +1,22 @@
+{
+  "name": "@raylac/tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./out/index.js",
+  "types": "out/index.d.ts",
+  "scripts": {
+    "test": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@raylac/api": "workspace:*",
+    "@types/node": "^20.11.17",
+    "vitest": "^2.1.2"
+  },
+  "dependencies": {
+    "@prisma/client": "5.12.1",
+    "viem": "^2.17.0"
+  }
+}

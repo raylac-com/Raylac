@@ -3,7 +3,12 @@ import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { z } from 'zod';
 import prisma from './lib/prisma';
 import { Hex } from 'viem';
-import { authedProcedure, publicProcedure, router } from './trpc';
+import {
+  authedProcedure,
+  publicProcedure,
+  router,
+  createCallerFactory,
+} from './trpc';
 import { createContext } from './context';
 import { handleNewStealthAccount } from './lib/stealthAccount';
 import signUp from './api/signUp';
@@ -36,7 +41,7 @@ BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
-const appRouter = router({
+export const appRouter = router({
   signUserOp: authedProcedure
     .input(
       z.object({
@@ -346,6 +351,8 @@ const appRouter = router({
     await deleteAccount({ userId });
   }),
 });
+
+export const createCaller = createCallerFactory(appRouter);
 
 export type AppRouter = typeof appRouter;
 

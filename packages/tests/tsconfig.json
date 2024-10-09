@@ -4,7 +4,7 @@
   ],
   "compilerOptions": {
     "outDir": "out",
-    "module": "ES2020",
+    "module": "CommonJS",
     "target": "ES2020",
     "strict": true,
     "moduleResolution": "node",

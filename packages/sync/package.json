@@ -2,6 +2,7 @@
   "name": "@raylac/sync",
   "main": "./out/index.js",
   "types": "out/index.d.ts",
+  "type": "module",
   "scripts": {
     "start": "tsx src/sync.ts",
     "lint": "tsc --noEmit",

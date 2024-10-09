@@ -5,6 +5,7 @@
   "main": "./out/index.js",
   "types": "out/index.d.ts",
   "private": true,
+  "type": "module",
   "scripts": {
     "start": "tsx --watch ./src/index",
     "build": "tsc -d",

@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma';
+import prisma from '../lib/prisma';
 
 const getTransferDetails = async ({ transferId }: { transferId: string }) => {
   const transfer = await prisma.transfer.findUnique({

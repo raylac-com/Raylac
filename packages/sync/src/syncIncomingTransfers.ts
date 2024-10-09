@@ -191,7 +191,8 @@ const syncIncomingNativeTransfers = async () => {
         const toBlock = await getLatestBlockHeight(chainId);
 
         if (fromBlock >= toBlock) {
-          throw new Error(`fromBlock (${fromBlock}) >= toBlock (${toBlock})`);
+          // Wait for the blocks to be synced
+          continue;
         }
 
         await batchSyncIncomingNativeTransfers({

@@ -438,7 +438,8 @@ export const buildMultiChainSendRequestBody = async ({
   return {
     aggregationUserOps: unsignedBridgeUserOps,
     finalTransferUserOp,
-    consolidateToStealthAccount,
+    consolidateToStealthAccount:
+      inputs.length > 1 ? consolidateToStealthAccount : undefined,
     relayQuotes,
   };
 };

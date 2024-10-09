@@ -1,5 +1,5 @@
-import prisma from '@/lib/prisma';
-import { JWT_PRIV_KEY } from '@/utils';
+import prisma from '../lib/prisma';
+import { JWT_PRIV_KEY } from '../utils';
 import { buildSiweMessage, getPublicClient } from '@raylac/shared';
 import jwt from 'jsonwebtoken';
 import { Hex } from 'viem';

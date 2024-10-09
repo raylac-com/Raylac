@@ -1,5 +1,5 @@
 import { Hex } from 'viem';
-import prisma from '@/lib/prisma';
+import prisma from '../lib/prisma';
 
 const updateAddressLabel = async ({
   userId,

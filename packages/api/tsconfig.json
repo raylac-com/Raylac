@@ -8,8 +8,5 @@
     "strict": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    }
   }
 }

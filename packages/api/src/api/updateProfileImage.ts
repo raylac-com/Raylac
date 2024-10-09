@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma';
+import prisma from '../lib/prisma';
 import { applicationDefault, initializeApp } from 'firebase-admin/app';
 import { getStorage } from 'firebase-admin/storage';
 import os from 'os';
@@ -31,6 +31,7 @@ const updateProfileImage = async ({
   const fileName = `${uuidv4()}.${extension}`;
   const tempFilePath = path.join(os.tmpdir(), fileName);
 
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   fs.writeFileSync(tempFilePath, imageBase64, 'base64');
 
   await bucket.upload(tempFilePath, {

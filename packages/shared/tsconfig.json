@@ -2,8 +2,8 @@
   "include": ["src/**/*.ts"],
   "compilerOptions": {
     "outDir": "out",
-    "target": "ESNext",
-    "module": "ESNext",
+    "target": "ES2020",
+    "module": "ES2020",
     "moduleResolution": "Bundler",
     "strict": true,
     "resolveJsonModule": true,
