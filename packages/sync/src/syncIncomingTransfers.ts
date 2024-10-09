@@ -190,6 +190,11 @@ const syncIncomingNativeTransfers = async () => {
 
         const toBlock = await getLatestBlockHeight(chainId);
 
+        if (!toBlock) {
+          // No blocks have been synced yet
+          continue;
+        }
+
         if (fromBlock >= toBlock) {
           // Wait for the blocks to be synced
           continue;

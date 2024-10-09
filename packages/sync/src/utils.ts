@@ -104,11 +104,7 @@ export const getLatestBlockHeight = async (chainId: number) => {
     },
   });
 
-  if (!block) {
-    throw new Error(`No block found for chain ${chainId}`);
-  }
-
-  return block.number;
+  return block?.number;
 };
 
 export type ERC20TransferLogType = ParseEventLogsReturnType<

@@ -214,6 +214,11 @@ const syncERC20Transfers = async () => {
 
           const latestBlock = await getLatestBlockHeight(chainId);
 
+          if (!latestBlock) {
+            // No blocks have been synced yet
+            continue;
+          }
+
           const chunkSize = BigInt(10000);
           for (
             let fromBlock = _fromBlock;
