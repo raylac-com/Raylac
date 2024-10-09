@@ -3,7 +3,7 @@ import {
   EntryPointAbi,
   getUserOpHash,
   UserOperation,
-} from '@raylac/shared';
+} from '.';
 import { Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { getWalletClient } from './ethRpc';
