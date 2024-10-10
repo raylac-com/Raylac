@@ -26,6 +26,7 @@ services:
   - type: worker
     name: raylac-sync
     plan: standard
+    previewPlan: starter
     runtime: node
     region: oregon
     buildCommand: pnpm i
