@@ -84,15 +84,14 @@ const chooseInputStealthAccounts = ({
   amount: bigint;
   stealthAccountsWithTokenBalances: TokenBalance[];
 }): InputStealthAccount[] => {
-  // TODO: Only choose mainnet accounts if the output chain is mainnet
-
   // Filter out stealth accounts with non-zero balance of the output token
-  const accountsWithNonZeroTokenBalances =
-    stealthAccountsWithTokenBalances.filter(
+  const accountsWithNonZeroTokenBalances = stealthAccountsWithTokenBalances
+    .filter(
       stealthAccount =>
         stealthAccount.tokenId === outputTokenId &&
         stealthAccount.balance !== '0'
-    );
+    )
+    .filter(stealthAccount => stealthAccount.chainId === outputChainId);
 
   // 1. Search for stealth accounts on the destination chain
   const destinationChainStealthAccounts = accountsWithNonZeroTokenBalances
