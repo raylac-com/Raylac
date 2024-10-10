@@ -10,11 +10,10 @@ import { Hex } from 'viem';
 
 interface AddressListItemProps {
   address: Hex;
-  label: string;
 }
 
 const AddressListItem = (props: AddressListItemProps) => {
-  const { address, label } = props;
+  const { address } = props;
   const { t } = useTranslation();
 
   const onCopyPress = useCallback(() => {
@@ -36,20 +35,6 @@ const AddressListItem = (props: AddressListItemProps) => {
         borderBottomColor: theme.gray,
       }}
     >
-      <View
-        style={{
-          flex: 1.5,
-        }}
-      >
-        <Text
-          style={{
-            color: theme.text,
-            fontWeight: 'bold',
-          }}
-        >
-          {label || ''}
-        </Text>
-      </View>
       <View
         style={{
           flex: 1,
@@ -83,6 +68,10 @@ const AddressListItem = (props: AddressListItemProps) => {
 const Addresses = () => {
   const { data: addressesWithBalances } = trpc.getStealthAccounts.useQuery();
 
+  if (!addressesWithBalances) {
+    return null;
+  }
+
   return (
     <View
       style={{
@@ -105,7 +94,7 @@ const Addresses = () => {
         }
         data={addressesWithBalances}
         renderItem={({ item }) => (
-          <AddressListItem address={item.address as Hex} label={item.label} />
+          <AddressListItem address={item.address as Hex} />
         )}
       />
     </View>
