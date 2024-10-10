@@ -1,5 +1,7 @@
 name: preview
-on: pull_request
+on:
+  pull_request:
+    types: [opened, reopened]
 
 jobs:
   update:
@@ -11,6 +13,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.4
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -27,10 +33,19 @@ jobs:
       - name: Install dependencies
         run: pnpm i
 
+      - name: Create new preview channel
+        run: eas channel:create ${{ github.event.pull_request.head.ref }}
+        working-directory: packages/app
+        continue-on-error: true
+
+      - name: Link branch to channel
+        run: eas channel:edit ${{ github.event.pull_request.head.ref }} --branch ${{ github.event.pull_request.head.ref }}
+        working-directory: packages/app
+
       - name: Create preview
         uses: expo/expo-github-action/preview@v8
         with:
-          command: eas update --auto
+          command: eas update --auto --channel ${{ github.event.pull_request.head.ref }}
           working-directory: packages/app
         env:
           EXPO_PUBLIC_RPC_URL: https://raylac-api.onrender.com
