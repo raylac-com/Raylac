@@ -13,12 +13,17 @@ const signUpTestUser = async () => {
   ).publicKey;
   const viewingPrivKey = getViewingPrivKey(MNEMONIC);
 
-  const { token: _token } = await client.signUp.mutate({
-    name: TEST_USER_NAME,
-    username: TEST_USER_USERNAME,
-    spendingPubKey,
-    viewingPrivKey,
-  });
+  try {
+    const { token: _token } = await client.signUp.mutate({
+      name: TEST_USER_NAME,
+      username: TEST_USER_USERNAME,
+      spendingPubKey,
+      viewingPrivKey,
+    });
+  } catch (e: any) {
+    // eslint-disable-next-line no-console
+    console.log(e.message);
+  }
 
   /*
   const authedClient = getAuthedClient(token);
@@ -61,4 +66,4 @@ const setup = async () => {
   }
 };
 
-export default setup;
+await setup();
