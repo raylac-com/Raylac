@@ -51,5 +51,5 @@ databases:
     databaseName: raylac
     region: oregon
     plan: basic-1gb
-    previewPlan: free
+    previewPlan: basic-256mb
     postgresMajorVersion: 15
