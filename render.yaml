@@ -52,5 +52,5 @@ databases:
     region: oregon
     plan: basic-1gb
     diskSizeGb: 20
-    previewPlan: starter
+    previewPlan: free
     postgresMajorVersion: 15
