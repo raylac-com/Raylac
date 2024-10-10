@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import { webcrypto } from 'node:crypto';
 import { beforeAll, expect, test } from 'vitest';
 import {
   getGasInfo,
@@ -10,30 +9,23 @@ import {
   RAYLAC_PAYMASTER_ADDRESS,
   signUserOpWithStealthAccount,
   StealthAddressWithEphemeral,
+  submitUserOpWithRetry,
   toCoingeckoTokenId,
 } from '@raylac/shared';
 import { buildMultiChainSendRequestBody } from '@raylac/shared/src/multiChainSend';
 import { parseUnits, Hex } from 'viem';
-import { base } from 'viem/chains';
+import { baseSepolia } from 'viem/chains';
 import { encodePaymasterAndData } from '@raylac/shared/src/utils';
 import prisma from '../lib/prisma';
 import { client, getAuthedClient } from '../lib/rpc';
 import { describe } from 'node:test';
-import { signInWithMnemonic } from '../lib/auth';
+import { MNEMONIC, signInAsTestUser } from '../lib/auth';
 import { getAddressBalance } from '../lib/utils';
 import supportedTokens from '@raylac/shared/src/supportedTokens';
 import { CoingeckoTokenPriceResponse } from '@raylac/shared/src/types';
 
-// @ts-ignore
-if (!globalThis.crypto) globalThis.crypto = webcrypto;
-
-const mnemonic = process.env.TEST_ACCOUNT_MNEMONIC as string;
-
-if (!mnemonic) {
-  throw new Error('Mnemonic not found');
-}
-
-const IS_DEV_MODE = false;
+const IS_DEV_MODE = true;
+const chainId = baseSepolia.id;
 
 const buildRequestBody = async ({
   amount,
@@ -48,8 +40,8 @@ const buildRequestBody = async ({
   userId: number;
   bearerToken: string;
 }) => {
-  const spendingPrivKey = await getSpendingPrivKey(mnemonic);
-  const viewingPrivKey = await getViewingPrivKey(mnemonic);
+  const spendingPrivKey = await getSpendingPrivKey(MNEMONIC);
+  const viewingPrivKey = await getViewingPrivKey(MNEMONIC);
 
   const authedClient = getAuthedClient(bearerToken);
 
@@ -90,7 +82,7 @@ const buildRequestBody = async ({
     })),
     gasInfo,
     amount,
-    outputChainId: base.id,
+    outputChainId: chainId,
     to,
     tokenId,
   });
@@ -180,9 +172,7 @@ describe('send', () => {
   let tokenPrices: CoingeckoTokenPriceResponse;
 
   beforeAll(async () => {
-    const { userId: _userId, token: _token } = await signInWithMnemonic({
-      mnemonic,
-    });
+    const { userId: _userId, token: _token } = await signInAsTestUser();
 
     tokenPrices = await client.getTokenPrices.query();
 
@@ -191,7 +181,7 @@ describe('send', () => {
   });
 
   for (const tokenId of supportedTokens.map(token => token.tokenId)) {
-    test.only(`should be able to send ${tokenId}`, async () => {
+    test.concurrent(`should be able to send ${tokenId}`, async () => {
       const authedClient = getAuthedClient(token);
       const user = await authedClient.getUser.query({
         userId,
@@ -232,7 +222,7 @@ describe('send', () => {
       const recipientBalanceBefore = await getAddressBalance({
         tokenId,
         address: to,
-        chainId: base.id,
+        chainId: chainId,
       });
 
       const userOps = await buildRequestBody({
@@ -247,9 +237,43 @@ describe('send', () => {
 
       const userOp = userOps[0];
 
-      await authedClient.submitUserOperation.mutate({ userOp });
+      const stealthAccounts = await authedClient.getStealthAccounts.query();
 
-      const userOpHash = await getUserOpHash({ userOp });
+      const spendingPrivKey = await getSpendingPrivKey(MNEMONIC);
+      const viewingPrivKey = await getViewingPrivKey(MNEMONIC);
+
+      const userOpHash = await submitUserOpWithRetry({
+        signAndSubmitUserOp: async userOp => {
+          const paymasterAndData = encodePaymasterAndData({
+            paymaster: RAYLAC_PAYMASTER_ADDRESS,
+            data: await authedClient.signUserOp.mutate({ userOp }),
+          });
+          userOp.paymasterAndData = paymasterAndData;
+
+          const stealthAccount = stealthAccounts.find(
+            stealthAccount => stealthAccount.address === userOp.sender
+          );
+
+          if (!stealthAccount) {
+            throw new Error('Stealth account not found');
+          }
+
+          // Sign the user operation with the stealth account
+          const signedUserOp = await signUserOpWithStealthAccount({
+            userOp,
+            stealthAccount: stealthAccount as StealthAddressWithEphemeral,
+            spendingPrivKey,
+            viewingPrivKey,
+          });
+
+          await authedClient.submitUserOperation.mutate({
+            userOp: signedUserOp,
+          });
+
+          return getUserOpHash({ userOp: signedUserOp });
+        },
+        userOp,
+      });
 
       // 1. Check that the user operation is correctly saved in the db.
       const savedUserOp = await prisma.userOperation.findUnique({
@@ -258,10 +282,22 @@ describe('send', () => {
         },
       });
 
-      expect(savedUserOp).not.toBeNull();
-      expect(savedUserOp?.sender).toEqual(userOp.sender);
-      expect(savedUserOp?.nonce).toEqual(parseInt(userOp.nonce, 16));
-      expect(savedUserOp?.chainId).toEqual(base.id);
+      expect(
+        savedUserOp,
+        `User operation not found for ${userOpHash}`
+      ).not.toBeNull();
+      expect(
+        savedUserOp?.sender,
+        `Sender does not match for ${userOpHash}`
+      ).toEqual(userOp.sender);
+      expect(
+        savedUserOp?.nonce,
+        `Nonce does not match for ${userOpHash}`
+      ).toEqual(parseInt(userOp.nonce, 16));
+      expect(
+        savedUserOp?.chainId,
+        `Chain ID does not match for ${userOpHash}`
+      ).toEqual(chainId);
 
       // 2. Check that the trace is correctly saved in the db.
       const traces = await prisma.trace.findMany({
@@ -300,7 +336,7 @@ describe('send', () => {
 
       await checkTx({
         txHash: savedUserOp!.transactionHash as Hex,
-        chainId: base.id,
+        chainId: chainId,
       });
 
       const senderBalanceAfter = await getSenderBalance({
@@ -313,86 +349,10 @@ describe('send', () => {
       const recipientBalanceAfter = await getAddressBalance({
         tokenId,
         address: to,
-        chainId: base.id,
+        chainId: chainId,
       });
 
       expect(recipientBalanceAfter).toEqual(recipientBalanceBefore + amount);
     });
   }
-
-  /*
-  test('should be able to send erc20', async () => {
-    const authedClient = getAuthedClient(token);
-    const amount = parseUnits('0.01', 6);
-    const tokenId = 'usdc';
-
-    const to = '0x400EA6522867456E988235675b9Cb5b1Cf5b79C8';
-
-    const userOps = await buildRequestBody({
-      amount,
-      tokenId,
-      to,
-      userId,
-      bearerToken: token,
-    });
-
-    const userOp = userOps[0];
-
-    await authedClient.submitUserOperation.mutate({ userOp });
-
-    const userOpHash = await getUserOpHash({ userOp });
-
-    // 1. Check that the user operation is correctly saved in the db.
-    const savedUserOp = await prisma.userOperation.findUnique({
-      where: {
-        hash: userOpHash,
-      },
-    });
-
-    expect(savedUserOp).not.toBeNull();
-    expect(savedUserOp?.sender).toEqual(userOp.sender);
-    expect(savedUserOp?.nonce).toEqual(parseInt(userOp.nonce, 16));
-    expect(savedUserOp?.chainId).toEqual(base.id);
-
-    // 2. Check that the trace is correctly saved in the db.
-    const traces = await prisma.trace.findMany({
-      select: {
-        from: true,
-        to: true,
-        tokenId: true,
-        amount: true,
-        transferId: true,
-      },
-      where: {
-        transactionHash: savedUserOp!.transactionHash as string,
-      },
-    });
-
-    expect(traces.length).toEqual(1);
-    const trace = traces[0];
-
-    expect(trace.from).toEqual(userOp.sender);
-    expect(trace.to).toEqual(to);
-    expect(trace.tokenId).toEqual(tokenId);
-    expect(trace.amount).toEqual(amount);
-
-    const transferId = trace.transferId;
-
-    // 3. Check that the transfer is correctly saved in the db.
-    const transfer = await prisma.transfer.findUnique({
-      where: {
-        transferId,
-      },
-    });
-
-    expect(transfer).not.toBeNull();
-    expect(transfer!.fromUserId).toEqual(userId);
-    expect(transfer!.toAddress).toEqual(to);
-
-    await checkTx({
-      txHash: savedUserOp!.transactionHash as Hex,
-      chainId: base.id,
-    });
-  });
-  */
 });

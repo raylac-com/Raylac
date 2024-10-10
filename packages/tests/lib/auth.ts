@@ -5,12 +5,14 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { mainnet } from 'viem/chains';
 import { client } from './rpc';
 
-export const signInWithMnemonic = async ({
-  mnemonic,
-}: {
-  mnemonic: string;
-}) => {
-  const spendingPrivKey = await getSpendingPrivKey(mnemonic);
+export const MNEMONIC = process.env.TEST_ACCOUNT_MNEMONIC as string;
+
+if (!MNEMONIC) {
+  throw new Error('MNEMONIC not found');
+}
+
+export const signInAsTestUser = async () => {
+  const spendingPrivKey = await getSpendingPrivKey(MNEMONIC);
 
   // Sign the SIWE message
   const spendingAccount = privateKeyToAccount(spendingPrivKey);

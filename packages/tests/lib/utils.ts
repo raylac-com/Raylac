@@ -1,9 +1,13 @@
+import { webcrypto } from 'node:crypto';
 import {
   ERC20Abi,
   getPublicClient,
   getTokenAddressOnChain,
 } from '@raylac/shared';
 import { Hex } from 'viem';
+
+// @ts-ignore
+if (!globalThis.crypto) globalThis.crypto = webcrypto;
 
 const getNativeBalance = async ({
   address,
