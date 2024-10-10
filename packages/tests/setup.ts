@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import { getSpendingPrivKey, getViewingPrivKey } from '@raylac/shared';
+import { getSpendingPrivKey, getViewingPrivKey, sleep } from '@raylac/shared';
 import { privateKeyToAccount } from 'viem/accounts';
 import { client } from './lib/rpc';
 import { MNEMONIC } from './lib/auth';
@@ -29,7 +29,27 @@ const signUpTestUser = async () => {
   */
 };
 
+const waitForServer = async () => {
+  while (true) {
+    try {
+      await client.getUsers.query();
+      break;
+    } catch (_e: any) {
+      // eslint-disable-next-line no-console
+      console.log(`Server not ready yet, waiting...`);
+    }
+
+    await sleep(5000);
+  }
+};
+
 const setup = async () => {
+  // eslint-disable-next-line no-console
+  console.log(`Testing RPC_URL ${process.env.RPC_URL}`);
+
+  // Wait for the server to get ready
+  await waitForServer();
+
   const users = await client.getUsers.query();
 
   const testUserExists = users.find(
