@@ -91,6 +91,12 @@ const upsertERC20Transfer = async ({
       chainSupportedTokenAddresses.includes(getAddress(log.address) as Hex)
     );
 
+  if (transferLogs.length === 0) {
+    // Add warning log
+    logger.warn(`No transfer logs found for tx ${txHash} on chain ${chainId}`);
+    return [];
+  }
+
   const from = getAddress(transferLogs[0].args.from);
   const to = getAddress(transferLogs[0].args.to);
 
