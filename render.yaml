@@ -51,6 +51,6 @@ databases:
     databaseName: raylac
     region: oregon
     plan: basic-1gb
-    diskSizeGb: 5
+    diskSizeGb: 20
     previewPlan: starter
     postgresMajorVersion: 15
