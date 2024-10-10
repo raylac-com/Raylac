@@ -50,5 +50,6 @@ databases:
   - name: raylac
     databaseName: raylac
     region: oregon
-    plan: standard
+    plan: basic-1gb
+    previewPlan: starter
     postgresMajorVersion: 15
