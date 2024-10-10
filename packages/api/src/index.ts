@@ -31,6 +31,7 @@ import submitUserOperation from './api/submitUserOperation';
 import getUser from './api/getUser';
 import deleteAccount from './api/deleteAccount';
 import getTransferDetails from './api/getTransferDetails';
+import toggleDevMode from './api/toggleDevMode';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -350,6 +351,21 @@ export const appRouter = router({
     const userId = opts.ctx.userId;
     await deleteAccount({ userId });
   }),
+
+  toggleDevMode: authedProcedure
+    .input(
+      z.object({
+        devModeEnabled: z.boolean(),
+      })
+    )
+    .mutation(async opts => {
+      const { input } = opts;
+
+      await toggleDevMode({
+        userId: opts.ctx.userId,
+        devModeEnabled: input.devModeEnabled,
+      });
+    }),
 });
 
 export const createCaller = createCallerFactory(appRouter);

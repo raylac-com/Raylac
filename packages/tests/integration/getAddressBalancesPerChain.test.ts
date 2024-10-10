@@ -7,6 +7,8 @@ import { getAddressBalance } from '../lib/utils';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { getChainsForMode } from '@raylac/shared';
 
+const IS_DEV_MODE = false;
+
 /**
  * Check if the given balance of the address
  * matches the actual balance
@@ -52,7 +54,7 @@ describe('getAddressBalancesPerChain', () => {
         supportedTokens.map(async token => {
           return Promise.all(
             // Iterate over all supported chains
-            getChainsForMode(true).map(async chain => {
+            getChainsForMode(IS_DEV_MODE).map(async chain => {
               const tokenBalance =
                 balances.find(
                   balance =>

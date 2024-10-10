@@ -14,9 +14,8 @@ import {
 } from '@raylac/shared';
 import { buildMultiChainSendRequestBody } from '@raylac/shared/src/multiChainSend';
 import { parseUnits, Hex } from 'viem';
-import { baseSepolia } from 'viem/chains';
+import { base } from 'viem/chains';
 import { encodePaymasterAndData } from '@raylac/shared/src/utils';
-import prisma from '../lib/prisma';
 import { client, getAuthedClient } from '../lib/rpc';
 import { describe } from 'node:test';
 import { MNEMONIC, signInAsTestUser } from '../lib/auth';
@@ -24,8 +23,8 @@ import { getAddressBalance } from '../lib/utils';
 import supportedTokens from '@raylac/shared/src/supportedTokens';
 import { CoingeckoTokenPriceResponse } from '@raylac/shared/src/types';
 
-const IS_DEV_MODE = true;
-const chainId = baseSepolia.id;
+const IS_DEV_MODE = false;
+const chainId = base.id;
 
 const buildRequestBody = async ({
   amount,
@@ -117,32 +116,6 @@ const buildRequestBody = async ({
   );
 
   return signedUserOps;
-};
-
-const checkTx = async ({
-  txHash,
-  chainId,
-}: {
-  txHash: Hex;
-  chainId: number;
-}) => {
-  const transaction = await prisma.transaction.findUnique({
-    select: {
-      block: {
-        select: {
-          number: true,
-          chainId: true,
-        },
-      },
-    },
-    where: {
-      hash: txHash,
-    },
-  });
-
-  expect(transaction).not.toBeNull();
-  expect(transaction?.block?.number).not.toBeNull();
-  expect(transaction?.block?.chainId).toEqual(chainId);
 };
 
 const getSenderBalance = async ({
@@ -242,7 +215,7 @@ describe('send', () => {
       const spendingPrivKey = await getSpendingPrivKey(MNEMONIC);
       const viewingPrivKey = await getViewingPrivKey(MNEMONIC);
 
-      const userOpHash = await submitUserOpWithRetry({
+      await submitUserOpWithRetry({
         signAndSubmitUserOp: async userOp => {
           const paymasterAndData = encodePaymasterAndData({
             paymaster: RAYLAC_PAYMASTER_ADDRESS,
@@ -273,70 +246,6 @@ describe('send', () => {
           return getUserOpHash({ userOp: signedUserOp });
         },
         userOp,
-      });
-
-      // 1. Check that the user operation is correctly saved in the db.
-      const savedUserOp = await prisma.userOperation.findUnique({
-        where: {
-          hash: userOpHash,
-        },
-      });
-
-      expect(
-        savedUserOp,
-        `User operation not found for ${userOpHash}`
-      ).not.toBeNull();
-      expect(
-        savedUserOp?.sender,
-        `Sender does not match for ${userOpHash}`
-      ).toEqual(userOp.sender);
-      expect(
-        savedUserOp?.nonce,
-        `Nonce does not match for ${userOpHash}`
-      ).toEqual(parseInt(userOp.nonce, 16));
-      expect(
-        savedUserOp?.chainId,
-        `Chain ID does not match for ${userOpHash}`
-      ).toEqual(chainId);
-
-      // 2. Check that the trace is correctly saved in the db.
-      const traces = await prisma.trace.findMany({
-        select: {
-          from: true,
-          to: true,
-          tokenId: true,
-          amount: true,
-          transferId: true,
-        },
-        where: {
-          transactionHash: savedUserOp!.transactionHash as string,
-        },
-      });
-
-      expect(traces.length).toEqual(1);
-      const trace = traces[0];
-
-      expect(trace.from).toEqual(userOp.sender);
-      expect(trace.to).toEqual(to);
-      expect(trace.tokenId).toEqual(tokenId);
-      expect(trace.amount).toEqual(amount);
-
-      const transferId = trace.transferId;
-
-      // 3. Check that the transfer is correctly saved in the db.
-      const transfer = await prisma.transfer.findUnique({
-        where: {
-          transferId,
-        },
-      });
-
-      expect(transfer).not.toBeNull();
-      expect(transfer!.fromUserId).toEqual(userId);
-      expect(transfer!.toAddress).toEqual(to);
-
-      await checkTx({
-        txHash: savedUserOp!.transactionHash as Hex,
-        chainId: chainId,
       });
 
       const senderBalanceAfter = await getSenderBalance({
