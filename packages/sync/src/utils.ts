@@ -175,12 +175,12 @@ export const updateAddressesSyncStatus = async ({
     },
   });
 
-  // Addresses that don't have a sync status record
+  // Get addresses that don't have a sync status record
   const addressesWithoutSyncStatus = addresses.filter(
     address => !currentSyncStatus.find(status => status.address === address)
   );
 
-  // Addresses that have a sync status record
+  // Get addresses that have a sync status record
   const addressesWithSyncStatus = addresses.filter(address =>
     currentSyncStatus.find(status => status.address === address)
   );
