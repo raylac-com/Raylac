@@ -546,40 +546,58 @@ export const signUserOpWithStealthAccount = async ({
   };
 };
 
-/**
- * Sign multiple user operations with stealth accounts
- */
-export const bulkSignUserOps = async ({
-  userOps,
-  stealthAccounts,
-  spendingPrivKey,
-  viewingPrivKey,
+export const submitUserOpWithRetry = async ({
+  signAndSubmitUserOp,
+  userOp,
 }: {
-  userOps: UserOperation[];
-  stealthAccounts: StealthAddressWithEphemeral[];
-  spendingPrivKey: Hex;
-  viewingPrivKey: Hex;
-}): Promise<UserOperation[]> => {
-  const signedUserOps = await Promise.all(
-    userOps.map(async userOp => {
-      const stealthAccount = stealthAccounts.find(
-        account => account.address === userOp.sender
-      );
+  signAndSubmitUserOp: (userOp: UserOperation) => Promise<Hex>;
+  userOp: UserOperation;
+}): Promise<Hex> => {
+  const maxRetries = 5;
 
-      if (!stealthAccount) {
-        throw new Error('Stealth account not found');
+  let retries = 0;
+
+  let currentMaxFeePerGas = hexToBigInt(userOp.maxFeePerGas);
+  let currentMaxPriorityFeePerGas = hexToBigInt(userOp.maxPriorityFeePerGas);
+
+  let errAfterRetries;
+  while (retries < maxRetries) {
+    try {
+      userOp = {
+        ...userOp,
+        maxFeePerGas: toHex(currentMaxFeePerGas),
+        maxPriorityFeePerGas: toHex(currentMaxPriorityFeePerGas),
+      };
+
+      const userOpHash = await signAndSubmitUserOp(userOp);
+
+      return userOpHash;
+    } catch (error: any) {
+      if (error.message.includes('replacement transaction underpriced')) {
+        // eslint-disable-next-line no-console
+        console.log('Replacement underpriced, increasing gas prices');
+
+        currentMaxFeePerGas = increaseByPercent({
+          value: currentMaxFeePerGas,
+          percent: 10,
+        });
+
+        currentMaxPriorityFeePerGas = increaseByPercent({
+          value: currentMaxPriorityFeePerGas,
+          percent: 10,
+        });
+      } else {
+        // eslint-disable-next-line no-console
+        console.log('Error sending user op:', error.message);
       }
 
-      const singedUserOp = await signUserOpWithStealthAccount({
-        userOp,
-        stealthAccount,
-        spendingPrivKey,
-        viewingPrivKey,
-      });
+      errAfterRetries = error;
 
-      return singedUserOp;
-    })
+      retries++;
+    }
+  }
+
+  throw new Error(
+    `Failed to submit user operation: ${errAfterRetries.message}`
   );
-
-  return signedUserOps;
 };

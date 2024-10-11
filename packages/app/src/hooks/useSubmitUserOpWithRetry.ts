@@ -2,13 +2,14 @@ import { trpc } from '@/lib/trpc';
 import { useMutation } from '@tanstack/react-query';
 import {
   encodePaymasterAndData,
-  increaseByPercent,
+  getUserOpHash,
   RAYLAC_PAYMASTER_ADDRESS,
   signUserOpWithStealthAccount,
   StealthAddressWithEphemeral,
+  submitUserOpWithRetry,
   UserOperation,
 } from '@raylac/shared';
-import { Hex, hexToBigInt, toHex } from 'viem';
+import { Hex } from 'viem';
 
 const useSubmitUserOpWithRetry = () => {
   const { mutateAsync: submitUserOp } = trpc.submitUserOperation.useMutation({
@@ -29,34 +30,9 @@ const useSubmitUserOpWithRetry = () => {
       spendingPrivKey: Hex;
       viewingPrivKey: Hex;
     }) => {
-      const maxRetries = 5;
-      let retries = 0;
-
-      let currentMaxFeePerGas;
-      let currentMaxPriorityFeePerGas;
-
-      let errAfterRetries;
-      while (retries < maxRetries) {
-        try {
-          if (retries > 0) {
-            // Increase maxFeePerGas and maxPriorityFeePerGas by 10%
-            userOp = {
-              ...userOp,
-              maxFeePerGas: toHex(
-                increaseByPercent({
-                  value: currentMaxFeePerGas,
-                  percent: 10,
-                })
-              ),
-              maxPriorityFeePerGas: toHex(
-                increaseByPercent({
-                  value: currentMaxPriorityFeePerGas,
-                  percent: 10,
-                })
-              ),
-            };
-          }
-
+      await submitUserOpWithRetry({
+        userOp,
+        signAndSubmitUserOp: async userOp => {
           // Get the paymaster signature
           const paymasterAndData = encodePaymasterAndData({
             paymaster: RAYLAC_PAYMASTER_ADDRESS,
@@ -75,31 +51,9 @@ const useSubmitUserOpWithRetry = () => {
           // Submit the user operation
           await submitUserOp({ userOp: signedUserOp });
 
-          return;
-        } catch (error) {
-          if (error.message === 'replacement underpriced') {
-            // Assign the current maxFeePerGas and maxPriorityFeePerGas from the error
-            currentMaxFeePerGas = hexToBigInt(error.data.currentMaxFee);
-            currentMaxPriorityFeePerGas = hexToBigInt(
-              error.data.currentMaxPriorityFee
-            );
-          } else {
-            // Assign the current maxFeePerGas and maxPriorityFeePerGas from the userOp
-            currentMaxFeePerGas = hexToBigInt(userOp.maxFeePerGas);
-            currentMaxPriorityFeePerGas = hexToBigInt(
-              userOp.maxPriorityFeePerGas
-            );
-          }
-
-          errAfterRetries = error;
-
-          retries++;
-        }
-      }
-
-      throw new Error(
-        `Failed to submit user operation: ${errAfterRetries.message}`
-      );
+          return getUserOpHash({ userOp: signedUserOp });
+        },
+      });
     },
   });
 };

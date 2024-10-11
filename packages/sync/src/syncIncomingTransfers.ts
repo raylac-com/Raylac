@@ -158,61 +158,67 @@ const syncIncomingNativeTransfers = async () => {
       },
     });
 
-    for (const chainId of supportedChains.map(chain => chain.id)) {
-      const client = getPublicClient({ chainId });
-      const finalizedBlockNumber = await client.getBlock({
-        blockTag: 'finalized',
-      });
-
-      if (finalizedBlockNumber.number === null) {
-        throw new Error('Finalized block number is null');
-      }
-
-      // Sync incoming transfers in 100 address batches
-      for (let i = 0; i < addresses.length; i += 100) {
-        const batch = addresses
-          .slice(i, i + 100)
-          .map(address => address.address as Hex);
-
-        const minBlockHeightInBatch = await getMinSynchedBlockForAddresses({
-          addresses: batch,
-          chainId,
-          tokenId: 'eth',
+    await Promise.all(
+      supportedChains.map(async ({ id: chainId }) => {
+        const client = getPublicClient({ chainId });
+        const finalizedBlockNumber = await client.getBlock({
+          blockTag: 'finalized',
         });
 
-        // Get the minimum block height in the batch
-        const fromBlock = bigIntMin([
-          minBlockHeightInBatch,
-          finalizedBlockNumber.number,
-        ]);
-
-        const toBlock = await getLatestBlockHeight(chainId);
-
-        if (!toBlock) {
-          // No blocks have been synced yet
-          continue;
+        if (finalizedBlockNumber.number === null) {
+          throw new Error('Finalized block number is null');
         }
 
-        if (fromBlock >= toBlock) {
-          // Wait for the blocks to be synced
-          continue;
+        // Sync incoming transfers in 100 address batches
+        for (let i = 0; i < addresses.length; i += 100) {
+          const batch = addresses
+            .slice(i, i + 100)
+            .map(address => address.address as Hex);
+
+          const minBlockHeightInBatch = await getMinSynchedBlockForAddresses({
+            addresses: batch,
+            chainId,
+            tokenId: 'eth',
+          });
+
+          // Get the minimum block height in the batch
+          const fromBlock = bigIntMin([
+            minBlockHeightInBatch,
+            finalizedBlockNumber.number,
+          ]);
+
+          const toBlock = await getLatestBlockHeight(chainId);
+
+          if (!toBlock) {
+            // No blocks have been synced yet
+            logger.info(`No blocks have been synced yet for chain ${chainId}`);
+            continue;
+          }
+
+          if (fromBlock >= toBlock) {
+            // Wait for the blocks to be synced
+            logger.info(
+              `No new blocks to sync for chain ${chainId} from ${fromBlock} to ${toBlock}`
+            );
+            continue;
+          }
+
+          await batchSyncIncomingNativeTransfers({
+            addresses: batch,
+            fromBlock,
+            toBlock,
+            chainId,
+          });
+
+          await updateAddressesSyncStatus({
+            addresses: batch,
+            chainId,
+            tokenId: 'eth',
+            blockNum: toBlock,
+          });
         }
-
-        await batchSyncIncomingNativeTransfers({
-          addresses: batch,
-          fromBlock,
-          toBlock,
-          chainId,
-        });
-
-        await updateAddressesSyncStatus({
-          addresses: batch,
-          chainId,
-          tokenId: 'eth',
-          blockNum: toBlock,
-        });
-      }
-    }
+      })
+    );
 
     await sleep(10000); // Sleep for 10 seconds
   }

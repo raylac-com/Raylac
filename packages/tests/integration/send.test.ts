@@ -1,5 +1,5 @@
-import { expect, test } from 'vitest';
-import { createCaller } from '@raylac/api';
+import 'dotenv/config';
+import { beforeAll, expect, test } from 'vitest';
 import {
   getGasInfo,
   getSpendingPrivKey,
@@ -9,53 +9,57 @@ import {
   RAYLAC_PAYMASTER_ADDRESS,
   signUserOpWithStealthAccount,
   StealthAddressWithEphemeral,
+  submitUserOpWithRetry,
+  toCoingeckoTokenId,
 } from '@raylac/shared';
 import { buildMultiChainSendRequestBody } from '@raylac/shared/src/multiChainSend';
 import { parseUnits, Hex } from 'viem';
 import { base } from 'viem/chains';
 import { encodePaymasterAndData } from '@raylac/shared/src/utils';
-import prisma from '../lib/prisma';
+import { client, getAuthedClient } from '../lib/rpc';
+import { describe } from 'node:test';
+import { MNEMONIC, signInAsTestUser } from '../lib/auth';
+import { getAddressBalance } from '../lib/utils';
+import supportedTokens from '@raylac/shared/src/supportedTokens';
+import { CoingeckoTokenPriceResponse } from '@raylac/shared/src/types';
 
-const context = {
-  userId: 97,
-  isDevMode: false,
-};
-
-const caller = createCaller(context);
-
-const mnemonic = process.env.TEST_ACCOUNT_MNEMONIC as string;
-
-if (!mnemonic) {
-  throw new Error('Mnemonic not found');
-}
+const IS_DEV_MODE = false;
+const chainId = base.id;
 
 const buildRequestBody = async ({
   amount,
   tokenId,
   to,
+  userId,
+  bearerToken,
 }: {
   amount: bigint;
   tokenId: string;
   to: Hex;
+  userId: number;
+  bearerToken: string;
 }) => {
-  const spendingPrivKey = await getSpendingPrivKey(mnemonic);
-  const viewingPrivKey = await getViewingPrivKey(mnemonic);
+  const spendingPrivKey = await getSpendingPrivKey(MNEMONIC);
+  const viewingPrivKey = await getViewingPrivKey(MNEMONIC);
 
-  const addressBalancePerChain = await caller.getAddressBalancesPerChain();
+  const authedClient = getAuthedClient(bearerToken);
+
+  const addressBalancePerChain =
+    await authedClient.getAddressBalancesPerChain.query();
 
   const gasInfo = await getGasInfo({
-    isDevMode: context.isDevMode,
+    isDevMode: IS_DEV_MODE,
   });
 
-  const user = await caller.getUser({
-    userId: context.userId,
+  const user = await authedClient.getUser.query({
+    userId,
   });
 
   if (!user) {
     throw new Error('User not found');
   }
 
-  const stealthAccounts = await caller.getStealthAccounts();
+  const stealthAccounts = await authedClient.getStealthAccounts.query();
 
   const requestBody = await buildMultiChainSendRequestBody({
     senderPubKeys: {
@@ -77,7 +81,7 @@ const buildRequestBody = async ({
     })),
     gasInfo,
     amount,
-    outputChainId: base.id,
+    outputChainId: chainId,
     to,
     tokenId,
   });
@@ -87,7 +91,7 @@ const buildRequestBody = async ({
       // Get the paymaster signature
       const paymasterAndData = encodePaymasterAndData({
         paymaster: RAYLAC_PAYMASTER_ADDRESS,
-        data: await caller.signUserOp({ userOp }),
+        data: await authedClient.signUserOp.mutate({ userOp }),
       });
       userOp.paymasterAndData = paymasterAndData;
 
@@ -114,180 +118,150 @@ const buildRequestBody = async ({
   return signedUserOps;
 };
 
-const checkTx = async ({
-  txHash,
-  chainId,
+const getSenderBalance = async ({
+  tokenId,
+  bearerToken,
 }: {
-  txHash: Hex;
-  chainId: number;
+  tokenId: string;
+  bearerToken: string;
 }) => {
-  const transaction = await prisma.transaction.findUnique({
-    select: {
-      block: {
-        select: {
-          number: true,
-          chainId: true,
-        },
-      },
-    },
-    where: {
-      hash: txHash,
-    },
-  });
+  const authedClient = getAuthedClient(bearerToken);
+  const senderTokenBalances = await authedClient.getTokenBalances.query();
 
-  expect(transaction).not.toBeNull();
-  expect(transaction?.block?.number).not.toBeNull();
-  expect(transaction?.block?.chainId).toEqual(chainId);
-};
+  const senderBalance = senderTokenBalances.find(
+    balance => balance.tokenId === tokenId
+  )?.balance;
 
-test('should be able to send eth', async () => {
-  const user = await caller.getUser({
-    userId: context.userId,
-  });
-
-  if (!user) {
-    throw new Error('User not found');
+  if (!senderBalance) {
+    throw new Error(`Sender does not have ${tokenId} balance`);
   }
 
-  const amount = parseUnits('0.00001', 18);
-  const tokenId = 'eth';
+  return BigInt(senderBalance);
+};
 
-  const to = '0x400EA6522867456E988235675b9Cb5b1Cf5b79C8';
+describe('send', () => {
+  let token;
+  let userId;
+  let tokenPrices: CoingeckoTokenPriceResponse;
 
-  const userOps = await buildRequestBody({
-    amount,
-    tokenId,
-    to,
+  beforeAll(async () => {
+    const { userId: _userId, token: _token } = await signInAsTestUser();
+
+    tokenPrices = await client.getTokenPrices.query();
+
+    token = _token;
+    userId = _userId;
   });
 
-  expect(userOps.length).toEqual(1);
+  for (const tokenId of supportedTokens.map(token => token.tokenId)) {
+    test.concurrent(`should be able to send ${tokenId}`, async () => {
+      const authedClient = getAuthedClient(token);
+      const user = await authedClient.getUser.query({
+        userId,
+      });
 
-  const userOp = userOps[0];
+      if (!user) {
+        throw new Error('User not found');
+      }
 
-  await caller.submitUserOperation({ userOp });
+      const tokenPrice =
+        tokenId === 'usdc'
+          ? { usd: 1 }
+          : tokenPrices[toCoingeckoTokenId(tokenId)];
 
-  const userOpHash = await getUserOpHash({ userOp });
+      if (!tokenPrice) {
+        throw new Error(`Token price not found for ${tokenId}`);
+      }
 
-  // 1. Check that the user operation is correctly saved in the db.
-  const savedUserOp = await prisma.userOperation.findUnique({
-    where: {
-      hash: userOpHash,
-    },
-  });
+      const tokenMeta = supportedTokens.find(
+        token => token.tokenId === tokenId
+      );
 
-  expect(savedUserOp).not.toBeNull();
-  expect(savedUserOp?.sender).toEqual(userOp.sender);
-  expect(savedUserOp?.nonce).toEqual(parseInt(userOp.nonce, 16));
-  expect(savedUserOp?.chainId).toEqual(base.id);
+      if (!tokenMeta) {
+        throw new Error(`Token metadata not found for ${tokenId}`);
+      }
 
-  // 2. Check that the trace is correctly saved in the db.
-  const traces = await prisma.trace.findMany({
-    select: {
-      from: true,
-      to: true,
-      tokenId: true,
-      amount: true,
-      transferId: true,
-    },
-    where: {
-      transactionHash: savedUserOp!.transactionHash as string,
-    },
-  });
+      const amountFormatted = (0.01 / tokenPrice.usd).toString();
 
-  expect(traces.length).toEqual(1);
-  const trace = traces[0];
+      const amount = parseUnits(amountFormatted, tokenMeta.decimals);
 
-  expect(trace.from).toEqual(userOp.sender);
-  expect(trace.to).toEqual(to);
-  expect(trace.tokenId).toEqual(tokenId);
-  expect(trace.amount).toEqual(amount);
+      const to = '0x400EA6522867456E988235675b9Cb5b1Cf5b79C8';
 
-  const transferId = trace.transferId;
+      const senderBalanceBefore = await getSenderBalance({
+        tokenId,
+        bearerToken: token,
+      });
 
-  // 3. Check that the transfer is correctly saved in the db.
-  const transfer = await prisma.transfer.findUnique({
-    where: {
-      transferId,
-    },
-  });
+      const recipientBalanceBefore = await getAddressBalance({
+        tokenId,
+        address: to,
+        chainId: chainId,
+      });
 
-  expect(transfer).not.toBeNull();
-  expect(transfer!.fromUserId).toEqual(context.userId);
-  expect(transfer!.toAddress).toEqual(to);
+      const userOps = await buildRequestBody({
+        amount,
+        tokenId,
+        to,
+        userId,
+        bearerToken: token,
+      });
 
-  await checkTx({
-    txHash: savedUserOp!.transactionHash as Hex,
-    chainId: base.id,
-  });
-});
+      expect(userOps.length).toEqual(1);
 
-test('should be able to send erc20', async () => {
-  const amount = parseUnits('0.01', 6);
-  const tokenId = 'usdc';
+      const userOp = userOps[0];
 
-  const to = '0x400EA6522867456E988235675b9Cb5b1Cf5b79C8';
+      const stealthAccounts = await authedClient.getStealthAccounts.query();
 
-  const userOps = await buildRequestBody({
-    amount,
-    tokenId,
-    to,
-  });
+      const spendingPrivKey = await getSpendingPrivKey(MNEMONIC);
+      const viewingPrivKey = await getViewingPrivKey(MNEMONIC);
 
-  const userOp = userOps[0];
+      await submitUserOpWithRetry({
+        signAndSubmitUserOp: async userOp => {
+          const paymasterAndData = encodePaymasterAndData({
+            paymaster: RAYLAC_PAYMASTER_ADDRESS,
+            data: await authedClient.signUserOp.mutate({ userOp }),
+          });
+          userOp.paymasterAndData = paymasterAndData;
 
-  await caller.submitUserOperation({ userOp });
+          const stealthAccount = stealthAccounts.find(
+            stealthAccount => stealthAccount.address === userOp.sender
+          );
 
-  const userOpHash = await getUserOpHash({ userOp });
+          if (!stealthAccount) {
+            throw new Error('Stealth account not found');
+          }
 
-  // 1. Check that the user operation is correctly saved in the db.
-  const savedUserOp = await prisma.userOperation.findUnique({
-    where: {
-      hash: userOpHash,
-    },
-  });
+          // Sign the user operation with the stealth account
+          const signedUserOp = await signUserOpWithStealthAccount({
+            userOp,
+            stealthAccount: stealthAccount as StealthAddressWithEphemeral,
+            spendingPrivKey,
+            viewingPrivKey,
+          });
 
-  expect(savedUserOp).not.toBeNull();
-  expect(savedUserOp?.sender).toEqual(userOp.sender);
-  expect(savedUserOp?.nonce).toEqual(parseInt(userOp.nonce, 16));
-  expect(savedUserOp?.chainId).toEqual(base.id);
+          await authedClient.submitUserOperation.mutate({
+            userOp: signedUserOp,
+          });
 
-  // 2. Check that the trace is correctly saved in the db.
-  const traces = await prisma.trace.findMany({
-    select: {
-      from: true,
-      to: true,
-      tokenId: true,
-      amount: true,
-      transferId: true,
-    },
-    where: {
-      transactionHash: savedUserOp!.transactionHash as string,
-    },
-  });
+          return getUserOpHash({ userOp: signedUserOp });
+        },
+        userOp,
+      });
 
-  expect(traces.length).toEqual(1);
-  const trace = traces[0];
+      const senderBalanceAfter = await getSenderBalance({
+        tokenId,
+        bearerToken: token,
+      });
 
-  expect(trace.from).toEqual(userOp.sender);
-  expect(trace.to).toEqual(to);
-  expect(trace.tokenId).toEqual(tokenId);
-  expect(trace.amount).toEqual(amount);
+      expect(senderBalanceAfter).toEqual(senderBalanceBefore - amount);
 
-  const transferId = trace.transferId;
+      const recipientBalanceAfter = await getAddressBalance({
+        tokenId,
+        address: to,
+        chainId: chainId,
+      });
 
-  // 3. Check that the transfer is correctly saved in the db.
-  const transfer = await prisma.transfer.findUnique({
-    where: {
-      transferId,
-    },
-  });
-
-  expect(transfer).not.toBeNull();
-  expect(transfer!.fromUserId).toEqual(context.userId);
-  expect(transfer!.toAddress).toEqual(to);
-
-  await checkTx({
-    txHash: savedUserOp!.transactionHash as Hex,
-    chainId: base.id,
-  });
+      expect(recipientBalanceAfter).toEqual(recipientBalanceBefore + amount);
+    });
+  }
 });

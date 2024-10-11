@@ -179,69 +179,73 @@ const syncERC20Transfers = async () => {
     });
 
     for (const token of erc20Tokens) {
-      for (const { chain } of token.addresses) {
-        const chainId = chain.id;
-        const client = getPublicClient({ chainId });
+      await Promise.all(
+        token.addresses.map(async ({ chain }) => {
+          const chainId = chain.id;
+          const client = getPublicClient({ chainId });
 
-        const finalizedBlockNumber = await client.getBlock({
-          blockTag: 'finalized',
-        });
-
-        // Sync incoming transfers in 100 address batches
-        for (let i = 0; i < addresses.length; i += 100) {
-          const batch = addresses
-            .slice(i, i + 100)
-            .map(({ address }) => address as Hex);
-
-          const minSynchedBlockInBatch = await getMinSynchedBlockForAddresses({
-            tokenId: token.tokenId,
-            addresses: batch,
-            chainId,
+          const finalizedBlockNumber = await client.getBlock({
+            blockTag: 'finalized',
           });
 
-          if (!minSynchedBlockInBatch) {
-            throw new Error(
-              `No min synched block found for token ${token.tokenId}`
+          // Sync incoming transfers in 100 address batches
+          for (let i = 0; i < addresses.length; i += 100) {
+            const batch = addresses
+              .slice(i, i + 100)
+              .map(({ address }) => address as Hex);
+
+            const minSynchedBlockInBatch = await getMinSynchedBlockForAddresses(
+              {
+                tokenId: token.tokenId,
+                addresses: batch,
+                chainId,
+              }
             );
+
+            if (!minSynchedBlockInBatch) {
+              throw new Error(
+                `No min synched block found for token ${token.tokenId}`
+              );
+            }
+
+            const _fromBlock = bigIntMin([
+              minSynchedBlockInBatch,
+              finalizedBlockNumber.number,
+            ]);
+
+            const latestBlock = await getLatestBlockHeight(chainId);
+
+            if (!latestBlock) {
+              // No blocks have been synced yet
+              continue;
+            }
+
+            const chunkSize = BigInt(10000);
+            for (
+              let fromBlock = _fromBlock;
+              fromBlock < latestBlock;
+              fromBlock += chunkSize
+            ) {
+              const toBlock = bigIntMin([fromBlock + chunkSize, latestBlock]);
+
+              await batchSyncIncomingERC20Transfers({
+                addresses: batch,
+                fromBlock,
+                toBlock,
+                chainId,
+                tokenId: token.tokenId,
+              });
+
+              await updateAddressesSyncStatus({
+                addresses: batch,
+                chainId,
+                tokenId: token.tokenId,
+                blockNum: toBlock,
+              });
+            }
           }
-
-          const _fromBlock = bigIntMin([
-            minSynchedBlockInBatch,
-            finalizedBlockNumber.number,
-          ]);
-
-          const latestBlock = await getLatestBlockHeight(chainId);
-
-          if (!latestBlock) {
-            // No blocks have been synced yet
-            continue;
-          }
-
-          const chunkSize = BigInt(10000);
-          for (
-            let fromBlock = _fromBlock;
-            fromBlock < latestBlock;
-            fromBlock += chunkSize
-          ) {
-            const toBlock = bigIntMin([fromBlock + chunkSize, latestBlock]);
-
-            await batchSyncIncomingERC20Transfers({
-              addresses: batch,
-              fromBlock,
-              toBlock,
-              chainId,
-              tokenId: token.tokenId,
-            });
-
-            await updateAddressesSyncStatus({
-              addresses: batch,
-              chainId,
-              tokenId: token.tokenId,
-              blockNum: toBlock,
-            });
-          }
-        }
-      }
+        })
+      );
     }
 
     await sleep(5 * 1000); // Sleep for 10 seconds
