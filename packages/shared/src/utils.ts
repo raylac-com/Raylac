@@ -12,7 +12,6 @@ import { ChainGasInfo, UserOperation } from './types';
 import RaylacAccountAbi from './abi/RaylacAccountAbi';
 import ERC20Abi from './abi/ERC20Abi';
 import * as chains from 'viem/chains';
-import { Network } from 'alchemy-sdk';
 import supportedTokens, { NATIVE_TOKEN_ADDRESS } from './supportedTokens';
 import { getPublicClient } from './ethRpc';
 import { getERC20TokenBalance, rundlerMaxPriorityFeePerGas } from '.';
@@ -193,28 +192,6 @@ export const getChainFromId = (chainId: number): Chain => {
   }
 
   return chain[1] as Chain;
-};
-
-/**
- * Convert viem's `Chain` object to Alchemy's `Network` enum
- */
-export const toAlchemyNetwork = (chainId: number) => {
-  switch (chainId) {
-    case chains.base.id:
-      return Network.BASE_MAINNET;
-    case chains.baseSepolia.id:
-      return Network.BASE_SEPOLIA;
-    case chains.optimism.id:
-      return Network.OPT_MAINNET;
-    case chains.optimismSepolia.id:
-      return Network.OPT_SEPOLIA;
-    case chains.arbitrum.id:
-      return Network.ARB_MAINNET;
-    case chains.arbitrumSepolia.id:
-      return Network.ARB_SEPOLIA;
-    default:
-      throw new Error(`Chain ${chainId} not supported`);
-  }
 };
 
 /**

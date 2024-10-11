@@ -97,6 +97,12 @@ model Trace {
   logIndex     Int? // For debugging purposes
   traceAddress String? // For debugging purposes
   Transaction  Transaction @relation(fields: [transactionHash], references: [hash])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([transactionHash, logIndex])
+  @@unique([transactionHash, traceAddress])
 }
 
 model AddressSyncStatus {
