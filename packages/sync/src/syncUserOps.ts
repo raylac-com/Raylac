@@ -448,9 +448,12 @@ export const handleBundleTransaction = async ({
 
   const publicClient = getPublicClient({ chainId });
 
+  const start = Date.now();
   const tx = await publicClient.getTransaction({
     hash: txReceipt.transactionHash,
   });
+  const end = Date.now();
+  logger.info(`getTransaction ${end - start}ms`);
 
   const txInput = tx.input;
 

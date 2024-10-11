@@ -3,8 +3,9 @@ import { EntryPointAbi, getPublicClient, UserOperation } from '@raylac/shared';
 import { parseEventLogs } from 'viem';
 import { handleBundleTransaction } from '@raylac/sync';
 import { handleOps } from '../lib/bundler';
+import logger from '../lib/logger';
 
-const submitUserOperation = async (userOps: UserOperation[]) => {
+const submitUserOps = async (userOps: UserOperation[]) => {
   // Sanity check that all user ops have the same chainId
   const chainIds = userOps.map(userOp => userOp.chainId);
   if (new Set(chainIds).size !== 1) {
@@ -23,9 +24,13 @@ const submitUserOperation = async (userOps: UserOperation[]) => {
 
   const publicClient = getPublicClient({ chainId });
 
+  const start = Date.now();
   const txReceipt = await publicClient.waitForTransactionReceipt({
     hash: txHash,
   });
+
+  const end = Date.now();
+  logger.info(`waitForTransactionReceipt ${end - start}ms`);
 
   const userOpEventLogs = parseEventLogs({
     abi: EntryPointAbi,
@@ -42,10 +47,13 @@ const submitUserOperation = async (userOps: UserOperation[]) => {
     });
   }
 
+  const start2 = Date.now();
   await handleBundleTransaction({
     txReceipt,
     chainId,
   });
+  const end2 = Date.now();
+  logger.info(`handleBundleTransaction ${end2 - start2}ms`);
 };
 
-export default submitUserOperation;
+export default submitUserOps;

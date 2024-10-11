@@ -7,6 +7,7 @@ import {
 } from '@raylac/shared';
 import { Hex } from 'viem';
 import { privateKeyToAccount, nonceManager } from 'viem/accounts';
+import logger from './logger';
 
 const BUNDLER_PRIV_KEY = process.env.BUNDLER_PRIV_KEY as Hex;
 
@@ -27,6 +28,7 @@ export const handleOps = async ({
 
   const walletClient = getWalletClient({ chainId });
 
+  const start = Date.now();
   const txHash = await walletClient.writeContract({
     address: ENTRY_POINT_ADDRESS,
     abi: EntryPointAbi,
@@ -45,6 +47,9 @@ export const handleOps = async ({
       beneficiary,
     ],
   });
+  const end = Date.now();
+
+  logger.info(`EntryPoint.handleOps ${end - start}ms`);
 
   const userOpHashes = userOps.map(userOp => getUserOpHash({ userOp }));
 
