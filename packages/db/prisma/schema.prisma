@@ -52,7 +52,8 @@ model UserStealthAddress {
   address         String  @unique
   ephemeralPubKey String
   viewTag         String
-  stealthPubKey   String
+  stealthPubKey   String?
+  signerAddress   String?
   label           String?
 
   createdAt         DateTime            @default(now())

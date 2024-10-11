@@ -18,34 +18,27 @@ import { getPublicClient } from './ethRpc';
 import { getERC20TokenBalance, rundlerMaxPriorityFeePerGas } from '.';
 import supportedChains from './supportedChains';
 
-export const encodeERC5564Metadata = ({
-  viewTag,
-  stealthPubKey,
-}: {
-  viewTag: Hex;
-  stealthPubKey: Hex;
-}): Hex => {
+export const encodeERC5564Metadata = (viewTag: Hex): Hex => {
   if (viewTag.length !== 4) {
     throw new Error(
       `viewTag must be exactly 4 bytes, got ${viewTag.length} hex chars`
     );
   }
 
-  const metadata = `${viewTag}${stealthPubKey.replace('0x', '')}` as Hex;
+  const metadata = viewTag;
   return metadata;
 };
 
-export const decodeERC5564Metadata = (metadata: Hex) => {
-  if (metadata.length !== 70) {
+export const decodeERC5564MetadataAsViewTag = (metadata: Hex) => {
+  if (metadata.length !== 4) {
     throw new Error(
-      `metadata must be exactly 66 bytes, got ${metadata.length} hex chars`
+      `metadata must be exactly 1 byte, got ${metadata.length} hex chars`
     );
   }
 
   const viewTag = metadata.slice(0, 4) as Hex;
-  const stealthPubKey = `0x${metadata.slice(4)}` as Hex;
 
-  return { viewTag, stealthPubKey };
+  return { viewTag };
 };
 
 export const hexToProjectivePoint = (hex: Hex) => {

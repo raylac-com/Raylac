@@ -103,7 +103,7 @@ const useSend = () => {
         await addNewStealthAccount({
           userId: (recipientUserOrAddress as User).id,
           address: to.address,
-          stealthPubKey: to.stealthPubKey,
+          signerAddress: to.signerAddress,
           ephemeralPubKey: to.ephemeralPubKey,
           viewTag: to.viewTag,
           label: '',
@@ -146,7 +146,7 @@ const useSend = () => {
         await addNewStealthAccount({
           userId: signedInUser.id,
           address: proxyAccount.address,
-          stealthPubKey: proxyAccount.stealthPubKey,
+          signerAddress: proxyAccount.signerAddress,
           ephemeralPubKey: proxyAccount.ephemeralPubKey,
           viewTag: proxyAccount.viewTag,
           label: '',

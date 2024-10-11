@@ -1,6 +1,6 @@
 import { StealthAddressWithEphemeral } from '@raylac/shared';
-// import * as erc5564 from './erc5564';
-// import { Hex } from 'viem';
+import * as erc5564 from './erc5564';
+import { Hex } from 'viem';
 import prisma from './prisma';
 
 /**
@@ -10,7 +10,7 @@ import prisma from './prisma';
 export const handleNewStealthAccount = async ({
   userId,
   stealthAccount,
-  label
+  label,
 }: {
   userId: number;
   stealthAccount: StealthAddressWithEphemeral;
@@ -18,25 +18,23 @@ export const handleNewStealthAccount = async ({
 }) => {
   // TODO: Verify that the stealth account corresponds to the specified user
 
-  /*
-  // Submit an announcement to the ERC5564 announcer contract
-  await erc5564.announce({
-    stealthAddress: stealthAccount.address as Hex,
-    ephemeralPubKey: stealthAccount.ephemeralPubKey as Hex,
-    viewTag: stealthAccount.viewTag as Hex,
-    stealthPubKey: stealthAccount.stealthPubKey as Hex,
-  });
-  */
-
   // Save the stealth address to the user's linked stealth addresses
   await prisma.userStealthAddress.create({
     data: {
       userId,
       address: stealthAccount.address,
-      stealthPubKey: stealthAccount.stealthPubKey,
+      signerAddress: stealthAccount.signerAddress,
       viewTag: stealthAccount.viewTag,
       ephemeralPubKey: stealthAccount.ephemeralPubKey,
-      label
+      label,
     },
+  });
+
+  // Submit an announcement to the ERC5564 announcer contract.
+  // We don't await this because it's slow and we don't want to block the response.
+  erc5564.announce({
+    signerAddress: stealthAccount.signerAddress as Hex,
+    ephemeralPubKey: stealthAccount.ephemeralPubKey as Hex,
+    viewTag: stealthAccount.viewTag as Hex,
   });
 };

@@ -10,7 +10,6 @@ import {
 import { generateStealthAddress } from './stealth';
 import { buildUserOp } from './erc4337';
 import { getPublicClient } from './ethRpc';
-import { publicKeyToAddress } from 'viem/accounts';
 import { getTokenAddressOnChain } from './utils';
 import ERC20Abi from './abi/ERC20Abi';
 import { NATIVE_TOKEN_ADDRESS, relay } from '.';
@@ -363,9 +362,7 @@ export const buildMultiChainSendRequestBody = async ({
         throw new Error('Token address not found');
       }
 
-      const stealthSigner = publicKeyToAddress(
-        input.stealthAccount.stealthPubKey
-      );
+      const stealthSigner = input.stealthAccount.signerAddress;
 
       // Build a standard transfer user operation
       const userOp = await buildTransferUseOp({
@@ -405,7 +402,7 @@ export const buildMultiChainSendRequestBody = async ({
       relayQuotes.push(quote);
 
       const userOps = await buildUserOpsFromRelayQuote({
-        stealthSigner: publicKeyToAddress(input.stealthAccount.stealthPubKey),
+        stealthSigner: input.stealthAccount.signerAddress,
         quote,
         signerNonce: input.nonce,
         tag,
@@ -418,9 +415,8 @@ export const buildMultiChainSendRequestBody = async ({
 
   let finalTransferUserOp;
   if (inputs.length > 1) {
-    const consolidateAccountStealthSigner = publicKeyToAddress(
-      consolidateToStealthAccount.stealthPubKey
-    );
+    const consolidateAccountStealthSigner =
+      consolidateToStealthAccount.signerAddress;
 
     finalTransferUserOp = await buildTransferUseOp({
       stealthSigner: consolidateAccountStealthSigner,

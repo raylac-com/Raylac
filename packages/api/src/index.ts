@@ -236,7 +236,7 @@ export const appRouter = router({
     .input(
       z.object({
         address: z.string(),
-        stealthPubKey: z.string(),
+        signerAddress: z.string(),
         ephemeralPubKey: z.string(),
         viewTag: z.string(),
         userId: z.number(),
@@ -250,7 +250,7 @@ export const appRouter = router({
         userId: input.userId,
         stealthAccount: {
           address: input.address as Hex,
-          stealthPubKey: input.stealthPubKey as Hex,
+          signerAddress: input.signerAddress as Hex,
           ephemeralPubKey: input.ephemeralPubKey as Hex,
           viewTag: input.viewTag as Hex,
         },

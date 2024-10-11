@@ -1,5 +1,13 @@
 import { Log, decodeEventLog, parseAbi } from 'viem';
 import { ERC5564AnnouncementData } from './types';
+import { base } from 'viem/chains';
+
+export const ERC5564_ANNOUNCEMENT_CHAIN = base;
+
+export const ERC5564_SCHEME_ID = BigInt(1);
+
+/** Block number of the deployment of the ERC5564 announcer contract on Base */
+export const ERC5564_ANNOUNCER_DEPLOYED_BLOCK = BigInt(15502414);
 
 export const formatERC5564AnnouncementLog = ({
   log,

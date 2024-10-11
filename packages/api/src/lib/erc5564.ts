@@ -1,17 +1,13 @@
 import { Hex } from 'viem';
 import {
   encodeERC5564Metadata,
+  ERC5564_ANNOUNCEMENT_CHAIN,
   ERC5564_ANNOUNCER_ADDRESS,
+  ERC5564_SCHEME_ID,
   ERC5564AnnouncerAbi,
-  formatERC5564AnnouncementLog,
-  getPublicClient,
   getWalletClient,
 } from '@raylac/shared';
 import { privateKeyToAccount } from 'viem/accounts';
-import prisma from './prisma';
-import { baseSepolia } from 'viem/chains';
-
-const SCHEME_ID = BigInt(1);
 
 const ANNOUNCER_PRIVATE_KEY = process.env.ANNOUNCER_PRIVATE_KEY;
 
@@ -22,63 +18,29 @@ if (!ANNOUNCER_PRIVATE_KEY) {
 const announcerAccount = privateKeyToAccount(ANNOUNCER_PRIVATE_KEY as Hex);
 
 export const announce = async ({
-  stealthAddress,
+  signerAddress,
   ephemeralPubKey,
   viewTag,
-  stealthPubKey,
 }: {
-  stealthAddress: Hex;
+  signerAddress: Hex;
   ephemeralPubKey: Hex;
   viewTag: Hex;
-  stealthPubKey: Hex;
 }) => {
-  const metadata = encodeERC5564Metadata({
-    viewTag: viewTag as Hex,
-    stealthPubKey: stealthPubKey as Hex,
-  });
+  const metadata = encodeERC5564Metadata(viewTag);
 
   const walletClient = getWalletClient({
-    chainId: baseSepolia.id,
+    chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
   });
 
-  const txHash = await walletClient.writeContract({
-    account: announcerAccount,
-    abi: ERC5564AnnouncerAbi,
-    address: ERC5564_ANNOUNCER_ADDRESS,
-    functionName: 'announce',
-    args: [SCHEME_ID, stealthAddress, ephemeralPubKey, metadata],
-  });
-
-  // TODO: Handle tx being dropped
-
-  const publicClient = getPublicClient({
-    chainId: baseSepolia.id,
-  });
-
-  const txReceipt = await publicClient.waitForTransactionReceipt({
-    hash: txHash,
-  });
-
-  for (const log of txReceipt.logs) {
-    // If it does, add the stealth address to the user's linked stealth addresses
-    const data = formatERC5564AnnouncementLog({
-      log,
-      chainId: publicClient.chain.id,
+  try {
+    await walletClient.writeContract({
+      account: announcerAccount,
+      abi: ERC5564AnnouncerAbi,
+      address: ERC5564_ANNOUNCER_ADDRESS,
+      functionName: 'announce',
+      args: [ERC5564_SCHEME_ID, signerAddress, ephemeralPubKey, metadata],
     });
-
-    await prisma.eRC5564Announcement.upsert({
-      create: data,
-      update: data,
-      where: {
-        blockNumber_logIndex_txIndex_chainId: {
-          blockNumber: log.blockNumber,
-          logIndex: log.logIndex,
-          txIndex: log.transactionIndex,
-          chainId: publicClient.chain.id,
-        },
-      },
-    });
+  } catch (_err) {
+    // TODO: Log warning
   }
-
-  return txHash;
 };

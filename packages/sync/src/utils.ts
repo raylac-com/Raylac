@@ -1,12 +1,16 @@
 import { Prisma, SyncJob } from '@prisma/client';
 import prisma from './lib/prisma';
-import { Hex, ParseEventLogsReturnType } from 'viem';
+import { Hex, parseAbiItem, ParseEventLogsReturnType } from 'viem';
 import {
   ACCOUNT_IMPL_DEPLOYED_BLOCK,
   ERC20Abi,
   getTokenId,
   getTraceId,
 } from '@raylac/shared';
+
+export const announcementAbiItem = parseAbiItem(
+  'event Announcement(uint256 indexed schemeId, address indexed stealthAddress, address indexed caller, bytes viewTag, bytes ephemeralPubKey)'
+);
 
 export const updateJobLatestSyncedBlock = async ({
   chainId,

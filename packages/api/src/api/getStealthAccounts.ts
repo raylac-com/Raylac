@@ -7,17 +7,17 @@ const getStealthAccounts = async ({ userId }: { userId: number }) => {
   const addresses = await prisma.userStealthAddress.findMany({
     select: {
       address: true,
-      stealthPubKey: true,
+      signerAddress: true,
       viewTag: true,
       ephemeralPubKey: true,
       label: true,
     },
     where: {
-      userId
+      userId,
     },
     orderBy: {
-      createdAt: 'desc'
-    }
+      createdAt: 'desc',
+    },
   });
 
   return addresses;
