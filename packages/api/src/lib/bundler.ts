@@ -3,10 +3,18 @@ import {
   EntryPointAbi,
   getUserOpHash,
   UserOperation,
-} from '.';
+  getWalletClient,
+} from '@raylac/shared';
 import { Hex } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
-import { getWalletClient } from './ethRpc';
+import { privateKeyToAccount, nonceManager } from 'viem/accounts';
+
+const BUNDLER_PRIV_KEY = process.env.BUNDLER_PRIV_KEY as Hex;
+
+if (!BUNDLER_PRIV_KEY) {
+  throw new Error('BUNDLER_PRIV_KEY is not set');
+}
+
+const bundlerAccount = privateKeyToAccount(BUNDLER_PRIV_KEY, { nonceManager });
 
 export const handleOps = async ({
   userOps,
@@ -15,19 +23,11 @@ export const handleOps = async ({
   userOps: UserOperation[];
   chainId: number;
 }) => {
-  const BUNDLER_PRIV_KEY = process.env.BUNDLER_PRIV_KEY as Hex;
-
-  if (!BUNDLER_PRIV_KEY) {
-    throw new Error('BUNDLER_PRIV_KEY is not set');
-  }
-
-  const bundlerAccount = privateKeyToAccount(BUNDLER_PRIV_KEY);
-
   const beneficiary = bundlerAccount.address;
 
   const walletClient = getWalletClient({ chainId });
 
-  const _txHash = await walletClient.writeContract({
+  const txHash = await walletClient.writeContract({
     address: ENTRY_POINT_ADDRESS,
     abi: EntryPointAbi,
     functionName: 'handleOps',
@@ -48,5 +48,5 @@ export const handleOps = async ({
 
   const userOpHashes = userOps.map(userOp => getUserOpHash({ userOp }));
 
-  return userOpHashes;
+  return { txHash, userOpHashes };
 };

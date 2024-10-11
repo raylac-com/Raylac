@@ -26,9 +26,8 @@ import {
 import axios from 'axios';
 import RaylacPaymasterAbi from './abi/RaylacPaymasterAbi';
 import { getSenderAddress, recoveryStealthPrivKey } from './stealth';
-import { increaseByPercent } from './utils';
+import { increaseByPercent, sleep } from './utils';
 import { signMessage } from 'viem/accounts';
-import { handleOps } from './bundler';
 
 /**
  * Get the init code for creating a stealth contract account
@@ -420,26 +419,6 @@ export const rundlerMaxPriorityFeePerGas = async ({
 };
 
 /**
- * Send a user operation to the Alchemy bundler.
- * Calls the `eth_sendUserOperation` JSON-RPC method
- * @returns user operation hash
- */
-export const sendUserOperation = async ({
-  client,
-  userOp,
-}: {
-  client: PublicClient<HttpTransport, Chain>;
-  userOp: UserOperation;
-}): Promise<Hex> => {
-  const userOpHashes = await handleOps({
-    userOps: [userOp],
-    chainId: client.chain.id,
-  });
-
-  return userOpHashes[0];
-};
-
-/**
  * Get a user operation by its hash.
  * Calls the `eth_getUserOperationByHash` JSON-RPC method
  */
@@ -593,6 +572,7 @@ export const submitUserOpWithRetry = async ({
 
       errAfterRetries = error;
 
+      await sleep(1500);
       retries++;
     }
   }
