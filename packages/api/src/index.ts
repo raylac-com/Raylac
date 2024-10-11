@@ -27,7 +27,7 @@ import getTokenBalances from './api/getTokenBalances';
 import getAddressBalancesPerChain from './api/getAddressBalancesPerChain';
 import { getBlockTimestamp } from './utils';
 import getTokenPrices from './api/getTokenPrices';
-import submitUserOperation from './api/submitUserOperation';
+import submitUserOps from './api/submitUserOps';
 import getUser from './api/getUser';
 import deleteAccount from './api/deleteAccount';
 import getTransferDetails from './api/getTransferDetails';
@@ -60,18 +60,16 @@ export const appRouter = router({
       return sig;
     }),
 
-  submitUserOperation: authedProcedure
+  submitUserOps: authedProcedure
     .input(
       z.object({
-        userOp: z.any(),
+        userOps: z.array(z.any()),
       })
     )
     .mutation(async opts => {
       const { input } = opts;
 
-      await submitUserOperation({
-        userOp: input.userOp as UserOperation,
-      });
+      await submitUserOps(input.userOps as UserOperation[]);
 
       return 'ok';
     }),

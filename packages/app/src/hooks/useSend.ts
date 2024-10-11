@@ -1,6 +1,6 @@
 import { getMnemonic } from '@/lib/key';
 import { client, trpc } from '@/lib/trpc';
-import { RouterOutput, User } from '@/types';
+import { User } from '@/types';
 import {
   ChainGasInfo,
   StealthAddressWithEphemeral,
@@ -9,13 +9,10 @@ import {
   getSpendingPrivKey,
   getTokenAddressOnChain,
   getViewingPrivKey,
-  sleep,
 } from '@raylac/shared';
-import useSubmitUserOpWithRetry from '@/hooks/useSubmitUserOpWithRetry';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
 import { Hex } from 'viem';
-import useSignedInUser from './useSignedInUser';
 
 // This is a workaround for the fact that BigInts are not supported by JSON.stringify
 // @ts-ignore
@@ -27,10 +24,7 @@ BigInt.prototype.toJSON = function () {
  * Hook to build and send user operations
  */
 const useSend = () => {
-  const { data: signedInUser } = useSignedInUser();
-
-  //  const { mutateAsync: submitUserOp } = trpc.submitUserOperation.useMutation();
-  const { mutateAsync: submitUserOpWithRetry } = useSubmitUserOpWithRetry();
+  const { mutateAsync: submitUserOps } = trpc.submitUserOps.useMutation();
 
   const { mutateAsync: addNewStealthAccount } =
     trpc.addStealthAccount.useMutation();
@@ -55,27 +49,6 @@ const useSend = () => {
         await client.getAddressBalancesPerChain.query();
 
       const stealthAccounts = await client.getStealthAccounts.query();
-
-      // Get addresses with the specified token balance
-      const sortedAccountsWithToken = addressBalancePerChain
-        .filter(balance => balance.tokenId)
-        .sort((a, b) => (BigInt(b.balance) > BigInt(a.balance) ? 1 : -1));
-
-      let currentAmount = BigInt(0);
-      const sendFromAccounts: RouterOutput['getAddressBalancesPerChain'] = [];
-
-      for (const account of sortedAccountsWithToken) {
-        sendFromAccounts.push(account);
-        currentAmount += BigInt(account.balance);
-
-        if (currentAmount >= amount) {
-          break;
-        }
-      }
-
-      if (currentAmount < amount) {
-        throw new Error('Not enough funds');
-      }
 
       const mnemonic = await getMnemonic();
 
@@ -112,11 +85,7 @@ const useSend = () => {
 
       const toAddress = typeof to === 'string' ? to : to.address;
 
-      const multiChainSendData = await buildMultiChainSendRequestBody({
-        senderPubKeys: {
-          spendingPubKey: signedInUser.spendingPubKey as Hex,
-          viewingPubKey: signedInUser.viewingPubKey as Hex,
-        },
+      const userOps = await buildMultiChainSendRequestBody({
         amount,
         tokenId,
         to: toAddress,
@@ -139,52 +108,9 @@ const useSend = () => {
         gasInfo,
       });
 
-      // Save the proxy stealth account to the database
-      const proxyAccount = multiChainSendData.consolidateToStealthAccount;
-
-      if (proxyAccount) {
-        await addNewStealthAccount({
-          userId: signedInUser.id,
-          address: proxyAccount.address,
-          signerAddress: proxyAccount.signerAddress,
-          ephemeralPubKey: proxyAccount.ephemeralPubKey,
-          viewTag: proxyAccount.viewTag,
-          label: '',
-        });
-      }
-
-      // Submit the user operations
-      for (const aggregationUserOp of multiChainSendData.aggregationUserOps) {
-        const signerAccount = stealthAccounts.find(
-          account => account.address === aggregationUserOp.sender
-        );
-
-        if (!signerAccount) {
-          throw new Error('Signer account not found');
-        }
-
-        await submitUserOpWithRetry({
-          userOp: aggregationUserOp,
-          stealthAccount: signerAccount as StealthAddressWithEphemeral,
-          spendingPrivKey,
-          viewingPrivKey,
-        });
-      }
-
-      if (multiChainSendData.finalTransferUserOp) {
-        // wait for the balance to be updated
-        await sleep(2000);
-
-        const finalUserOpSigner =
-          multiChainSendData.consolidateToStealthAccount;
-
-        await submitUserOpWithRetry({
-          userOp: multiChainSendData.finalTransferUserOp,
-          stealthAccount: finalUserOpSigner as StealthAddressWithEphemeral,
-          spendingPrivKey,
-          viewingPrivKey,
-        });
-      }
+      await submitUserOps({
+        userOps,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

@@ -6,6 +6,7 @@ import {
   ERC20_TRANSFER_FUNC_SIG,
   ERC20Abi,
   getPublicClient,
+  getTokenId,
   getTraceId,
   RAYLAC_ACCOUNT_EXECUTE_FUNC_SIG,
   RAYLAC_PAYMASTER_ADDRESS,
@@ -16,25 +17,46 @@ import {
   traceTransaction,
 } from '@raylac/shared';
 import {
-  decodeEventLog,
   decodeFunctionData,
   getAddress,
   Hex,
   Log,
   parseAbiItem,
   parseEventLogs,
+  TransactionReceipt,
 } from 'viem';
 import prisma from './lib/prisma';
 import supportedChains from '@raylac/shared/out/supportedChains';
-import { saveERC20TransferLog, updateJobLatestSyncedBlock } from './utils';
+import { updateJobLatestSyncedBlock } from './utils';
 import { sleep } from './lib/utils';
 import { Prisma } from '@prisma/client';
-import supportedTokens from '@raylac/shared/out/supportedTokens';
 import logger from './lib/logger';
 
 const userOpEvent = parseAbiItem(
   'event UserOperationEvent(bytes32 indexed userOpHash, address indexed sender, address indexed paymaster, uint256 nonce, bool success, uint256 actualGasCost, uint256 actualGasUsed)'
 );
+
+/**
+ * Decode the arguments of the `execute` function in RaylacAccount.sol
+ * Throws an error if the decoded function is not `execute`
+ */
+const decodeExecuteArgs = (data: Hex): RaylacAccountExecuteArgs => {
+  const func = decodeFunctionData({
+    abi: RaylacAccountAbi,
+    data,
+  });
+
+  if (func.functionName !== 'execute') {
+    throw new Error('Function name is not `execute`');
+  }
+
+  return {
+    to: func.args[0],
+    value: func.args[1],
+    data: func.args[2],
+    executionTag: func.args[3],
+  };
+};
 
 const getExecuteArgs = (trace: TraceResponseData): RaylacAccountExecuteArgs => {
   const func = decodeFunctionData({
@@ -59,190 +81,27 @@ const getExecuteArgs = (trace: TraceResponseData): RaylacAccountExecuteArgs => {
   };
 };
 
-const upsertERC20Transfer = async ({
-  txHash,
-  trace,
-  chainId,
-}: {
-  txHash: Hex;
-  trace: TraceResponseData;
-  chainId: number;
-}) => {
-  const client = getPublicClient({
-    chainId,
-  });
-  const txReceipt = await client.getTransactionReceipt({
-    hash: txHash,
-  });
-
-  const logs = parseEventLogs({
-    abi: ERC20Abi,
-    logs: txReceipt.logs,
-  });
-
-  const chainSupportedTokenAddresses = supportedTokens
-    .map(token => token.addresses.find(address => address.chain.id === chainId))
-    .filter(token => token !== undefined)
-    .map(token => token.address);
-
-  const transferLogs = logs
-    .filter(log => log.eventName === 'Transfer')
-    .filter(log =>
-      chainSupportedTokenAddresses.includes(getAddress(log.address) as Hex)
-    );
-
-  if (transferLogs.length === 0) {
-    // Add warning log
-    logger.warn(`No transfer logs found for tx ${txHash} on chain ${chainId}`);
-    return [];
-  }
-
-  const from = getAddress(transferLogs[0].args.from);
-  const to = getAddress(transferLogs[0].args.to);
-
-  const { executionTag } = getExecuteArgs(trace);
-  console.log(`from: ${from}, to: ${to}, executionTag: ${executionTag}`);
-
-  const transferId = executionTag;
-
-  const fromUser = await prisma.userStealthAddress.findUnique({
-    select: {
-      userId: true,
-    },
-    where: {
-      address: from,
-    },
-  });
-
-  const toUser = await prisma.userStealthAddress.findUnique({
-    select: {
-      userId: true,
-    },
-    where: {
-      address: to,
-    },
-  });
-
-  const data: Prisma.TransferCreateInput = {
-    transferId,
-    maxBlockNumber: transferLogs.sort(
-      (a, b) => Number(b.blockNumber) - Number(a.blockNumber)
-    )[0].blockNumber,
-  };
-
-  if (fromUser) {
-    data.fromUser = {
-      connect: {
-        id: fromUser.userId,
-      },
-    };
-  } else {
-    data.fromAddress = from;
-  }
-
-  if (toUser) {
-    data.toUser = {
-      connect: {
-        id: toUser.userId,
-      },
-    };
-  } else {
-    data.toAddress = to;
-  }
-
-  const upsertTransfer = prisma.transfer.upsert({
-    create: data,
-    update: data,
-    where: {
-      transferId,
-    },
-  });
-
-  return [
-    upsertTransfer,
-    ...transferLogs.map(log => {
-      return saveERC20TransferLog({
-        log,
-        chainId,
-        executionTag,
-        traceAddress: trace.traceAddress,
-      });
-    }),
-  ];
-};
-
 /**
  * Return the transfer trace upsert db write transaction
  */
-const upsertNativeTransfer = async ({
+const upsertNativeTransferTrace = ({
   trace,
+  transferId,
 }: {
   trace: TraceResponseData;
+  transferId: string;
 }) => {
   // The `to` field of the trace is the contract address which the `execute` function is called.
   // So the `from` of the transfer is the `to` of the trace.
   const from = getAddress((trace.action as TraceCallAction).to);
 
-  const { to, value, data, executionTag } = getExecuteArgs(trace);
+  const { to, value, data } = getExecuteArgs(trace);
 
   if (data !== '0x') {
     throw new Error(
       `Native transfer call should have empty calldata tx: ${trace.transactionHash}`
     );
   }
-
-  const transferId = executionTag;
-
-  const upsertTransferArgs: Prisma.TransferCreateInput = {
-    transferId,
-    maxBlockNumber: trace.blockNumber,
-  };
-
-  const fromUser = await prisma.userStealthAddress.findUnique({
-    select: {
-      userId: true,
-    },
-    where: {
-      address: from,
-    },
-  });
-
-  const toUser = await prisma.userStealthAddress.findUnique({
-    select: {
-      userId: true,
-    },
-    where: {
-      address: to,
-    },
-  });
-
-  if (fromUser) {
-    upsertTransferArgs.fromUser = {
-      connect: {
-        id: fromUser.userId,
-      },
-    };
-  } else {
-    upsertTransferArgs.fromAddress = from;
-  }
-
-  if (toUser) {
-    upsertTransferArgs.toUser = {
-      connect: {
-        id: toUser.userId,
-      },
-    };
-  } else {
-    upsertTransferArgs.toAddress = to;
-  }
-
-  const upsertTransfer = prisma.transfer.upsert({
-    create: upsertTransferArgs,
-    update: upsertTransferArgs,
-    where: {
-      transferId,
-    },
-  });
 
   const traceId = getTraceId({
     txHash: trace.transactionHash,
@@ -275,89 +134,61 @@ const upsertNativeTransfer = async ({
     },
   });
 
-  return [upsertTransfer, upsertTrace];
+  return upsertTrace;
 };
 
-/**
- * Return the query to upsert the transaction and transfer trace
- */
-export const upsertTransfersForTx = async ({
-  txHash,
+const upsertERC20TransferTraces = ({
+  txReceipt,
   chainId,
+  transferId,
 }: {
-  txHash: Hex;
+  txReceipt: TransactionReceipt;
   chainId: number;
+  transferId: string;
 }) => {
-  const traces = await traceTransaction({
-    txHash,
-    chainId,
+  const logs = parseEventLogs({
+    abi: ERC20Abi,
+    logs: txReceipt.logs,
+    eventName: 'Transfer',
   });
 
-  if (!traces) {
-    // Sometimes traces is null.
-    // TODO: Do something about this
-    return [];
-  }
-
-  const upserts = [];
-  for (const trace of traces) {
-    // Boolean indicating if the call is from the entry point
-    const isCallFromEntryPoint =
-      trace.action.from === ENTRY_POINT_ADDRESS.toLowerCase();
-
-    // Boolean indicating if the trace is a call (and not a `create`)
-    const isCall = trace.type === 'call';
-
-    if (!isCallFromEntryPoint || !isCall) {
-      // Skip the trace if it is not a call from the entry point
-      //or if it is not a call
-      continue;
-    }
-
-    // Boolean indicating if the call is to the `execute` function in RaylacAccount.sol
-    const isExecuteCall = trace.action.input.startsWith(
-      RAYLAC_ACCOUNT_EXECUTE_FUNC_SIG
-    );
-
-    if (!isExecuteCall) {
-      // Skip the trace if it is not a call to the `execute` function
-      continue;
-    }
-
-    // Decode the arguments of the `execute` function
-
-    const decoded = decodeFunctionData({
-      abi: RaylacAccountAbi,
-      data: trace.action.input,
+  return logs.map(log => {
+    const traceId = getTraceId({
+      txHash: log.transactionHash,
+      traceAddress: log.logIndex,
     });
 
-    const executeCalldata = decoded.args[2] as Hex;
-
-    const isNativeTransfer = executeCalldata === '0x';
-    const isERC20Transfer = executeCalldata.startsWith(ERC20_TRANSFER_FUNC_SIG);
-
-    if (isERC20Transfer) {
-      const upsertTraces = await upsertERC20Transfer({
-        txHash,
+    const traceData: Prisma.TraceCreateInput = {
+      id: traceId,
+      from: getAddress(log.args.from),
+      to: getAddress(log.args.to),
+      amount: log.args.value,
+      tokenId: getTokenId({
         chainId,
-        trace,
-      });
+        tokenAddress: getAddress(log.address),
+      }),
+      Transfer: {
+        connect: {
+          transferId,
+        },
+      },
+      Transaction: {
+        connect: {
+          hash: log.transactionHash,
+        },
+      },
+    };
 
-      upserts.push(...upsertTraces);
-    } else if (isNativeTransfer) {
-      const upsertTraces = await upsertNativeTransfer({
-        trace,
-      });
+    const upsertTrace = prisma.trace.upsert({
+      create: traceData,
+      update: traceData,
+      where: {
+        id: traceId,
+      },
+    });
 
-      upserts.push(...upsertTraces);
-    } else {
-      logger.error(
-        `Unknown execute calldata for tx ${txHash} on chain ${chainId}`
-      );
-    }
-  }
-
-  return upserts;
+    return upsertTrace;
+  });
 };
 
 /**
@@ -477,6 +308,261 @@ const upsertUserOp = ({
   });
 };
 
+const saveTransfer = async ({
+  fromUserId,
+  to,
+  txReceipt,
+  transferId,
+}: {
+  fromUserId: number;
+  to: Hex;
+  txReceipt: TransactionReceipt;
+  transferId: string;
+}) => {
+  const upsertTransferArgs: Prisma.TransferCreateInput = {
+    fromUser: {
+      connect: {
+        id: fromUserId,
+      },
+    },
+    transferId,
+    maxBlockNumber: txReceipt.blockNumber,
+  };
+
+  const toUser = await prisma.userStealthAddress.findUnique({
+    select: {
+      userId: true,
+    },
+    where: {
+      address: to,
+    },
+  });
+
+  if (toUser) {
+    upsertTransferArgs.toUser = {
+      connect: {
+        id: toUser.userId,
+      },
+    };
+  } else {
+    upsertTransferArgs.toAddress = to;
+  }
+
+  return prisma.transfer.upsert({
+    create: upsertTransferArgs,
+    update: upsertTransferArgs,
+    where: {
+      transferId,
+    },
+  });
+};
+
+const saveTraces = async ({
+  transferId,
+  txReceipt,
+  chainId,
+}: {
+  transferId: string;
+  txReceipt: TransactionReceipt;
+  chainId: number;
+}) => {
+  const traces = await traceTransaction({
+    txHash: txReceipt.transactionHash,
+    chainId,
+  });
+
+  const raylacAccountExecuteCall = traces.find(trace => {
+    return (
+      trace.type === 'call' &&
+      trace.action.from.toLowerCase() === ENTRY_POINT_ADDRESS.toLowerCase() &&
+      trace.action.input.startsWith(RAYLAC_ACCOUNT_EXECUTE_FUNC_SIG)
+    );
+  });
+
+  if (!raylacAccountExecuteCall) {
+    throw new Error(
+      `RaylacAccount execute call not found for tx ${txReceipt.transactionHash} on chain ${chainId}`
+    );
+  }
+
+  const decoded = decodeFunctionData({
+    abi: RaylacAccountAbi,
+    data: (raylacAccountExecuteCall.action as TraceCallAction).input,
+  });
+
+  if (decoded.functionName !== 'execute') {
+    throw new Error('Decoded function name is not `execute`');
+  }
+
+  const executeCalldata = decoded.args[2] as Hex;
+
+  const isNativeTransfer = executeCalldata === '0x';
+  const isERC20Transfer = executeCalldata.startsWith(ERC20_TRANSFER_FUNC_SIG);
+
+  const upserts = [];
+  if (isNativeTransfer) {
+    const upsertTrace = upsertNativeTransferTrace({
+      trace: raylacAccountExecuteCall,
+      transferId,
+    });
+
+    upserts.push(upsertTrace);
+  } else if (isERC20Transfer) {
+    const upsertTraces = await upsertERC20TransferTraces({
+      txReceipt,
+      chainId,
+      transferId,
+    });
+
+    upserts.push(...upsertTraces);
+  } else {
+    logger.error(
+      `Unknown execute calldata for tx ${txReceipt.transactionHash} on chain ${chainId}`
+    );
+  }
+
+  return upserts;
+};
+
+export const handleBundleTransaction = async ({
+  txReceipt,
+  chainId,
+}: {
+  txReceipt: TransactionReceipt;
+  chainId: number;
+}) => {
+  const userOpEventLogs = parseEventLogs({
+    abi: EntryPointAbi,
+    logs: txReceipt.logs,
+    eventName: 'UserOperationEvent',
+  });
+
+  const success = userOpEventLogs.every(log => log.args.success);
+
+  if (!success) {
+    logger.warn(
+      `User operation failed with success=false for tx ${txReceipt.transactionHash} on chain ${chainId}`
+    );
+    return;
+  }
+
+  const publicClient = getPublicClient({ chainId });
+
+  const tx = await publicClient.getTransaction({
+    hash: txReceipt.transactionHash,
+  });
+
+  const txInput = tx.input;
+
+  // Decode the bundle transaction input
+  const decoded = decodeFunctionData({
+    abi: EntryPointAbi,
+    data: txInput,
+  });
+
+  if (decoded.functionName !== 'handleOps') {
+    throw new Error('Transaction is not a bundle transaction');
+  }
+
+  const userOps = decoded.args[0].filter(userOp =>
+    userOp.callData.startsWith(RAYLAC_ACCOUNT_EXECUTE_FUNC_SIG)
+  );
+
+  const fromAddresses = userOps.map(userOp => getAddress(userOp.sender));
+
+  const fromUsers = await prisma.userStealthAddress.findMany({
+    select: {
+      userId: true,
+      address: true,
+    },
+    where: {
+      address: { in: fromAddresses },
+    },
+  });
+
+  if (fromUsers.length === 0) {
+    logger.error(
+      `No sender found for bundle transaction ${txReceipt.transactionHash} on chain ${chainId}`
+    );
+    return;
+  }
+
+  // Sanity check
+  // Check that all from addresses point to the same user
+  const fromUserId = fromUsers[0].userId;
+
+  if (!fromUsers.every(user => user.userId === fromUserId)) {
+    throw new Error('Sending from multiple users');
+  }
+
+  const userOpsExecutionArgs = userOps.map(userOp =>
+    decodeExecuteArgs(userOp.callData)
+  );
+
+  const executionTag = userOpsExecutionArgs[0].executionTag;
+
+  // Sanity check
+  // Check that all user ops have the same execution tag
+  if (userOpsExecutionArgs.some(arg => arg.executionTag !== executionTag)) {
+    throw new Error('User ops have different execution tags');
+  }
+
+  const transferId = executionTag;
+
+  const txHash = txReceipt.transactionHash;
+  const blockNumber = txReceipt.blockNumber;
+  const blockHash = txReceipt.blockHash;
+
+  const upsertBlockQuery = upsertBlock({
+    blockNumber,
+    blockHash,
+    chainId,
+  });
+
+  const upsertTxQuery = upsertTransaction({
+    txHash,
+    blockHash,
+    chainId,
+  });
+
+  const finalExecutionArg =
+    userOpsExecutionArgs[userOpsExecutionArgs.length - 1];
+
+  const upsertTransfer = await saveTransfer({
+    fromUserId,
+    to: finalExecutionArg.to,
+    txReceipt,
+    transferId,
+  });
+
+  const upsertTraces = await saveTraces({
+    transferId,
+    txReceipt,
+    chainId,
+  });
+
+  // Upsert user ops
+  const upsertUserOpsQuery = userOpEventLogs.map(log => {
+    return upsertUserOp({
+      userOpHash: log.args.userOpHash,
+      sender: log.args.sender,
+      paymaster: log.args.paymaster,
+      nonce: log.args.nonce,
+      success: log.args.success,
+      actualGasCost: log.args.actualGasCost,
+      actualGasUsed: log.args.actualGasUsed,
+      chainId,
+      txHash,
+    });
+  });
+
+  await upsertBlockQuery;
+  await upsertTxQuery;
+  await upsertTransfer;
+  await Promise.all(upsertTraces);
+  await Promise.all(upsertUserOpsQuery);
+};
+
 export const handleUserOpEvent = async ({
   log,
   chainId,
@@ -484,6 +570,19 @@ export const handleUserOpEvent = async ({
   log: Log<bigint, number, false>;
   chainId: number;
 }) => {
+  const txHash = log.transactionHash;
+
+  const publicClient = getPublicClient({ chainId });
+  const txReceipt = await publicClient.getTransactionReceipt({
+    hash: txHash,
+  });
+
+  await handleBundleTransaction({
+    txReceipt,
+    chainId,
+  });
+
+  /*
   const decodedLog = decodeEventLog({
     abi: EntryPointAbi,
     data: log.data,
@@ -539,6 +638,7 @@ export const handleUserOpEvent = async ({
   logger.info(
     `Upserted UserOperation ${decodedLog.args.userOpHash} for tx ${txHash} on chain ${chainId}`
   );
+  */
 };
 
 /**
