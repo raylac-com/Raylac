@@ -154,7 +154,7 @@ describe('send', () => {
   });
 
   for (const tokenId of supportedTokens.map(token => token.tokenId)) {
-    test.concurrent(`should be able to send ${tokenId}`, async () => {
+    test(`should be able to send ${tokenId}`, async () => {
       const authedClient = getAuthedClient(token);
       const user = await authedClient.getUser.query({
         userId,
