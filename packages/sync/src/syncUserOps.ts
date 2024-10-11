@@ -293,6 +293,12 @@ export const upsertTransfersForTx = async ({
     chainId,
   });
 
+  if (!traces) {
+    // Sometimes traces is null.
+    // TODO: Do something about this
+    return [];
+  }
+
   const upserts = [];
   for (const trace of traces) {
     // Boolean indicating if the call is from the entry point
