@@ -19,7 +19,7 @@ import updateAddressLabel from './api/updateAddressLabel';
 import updateDisplayName from './api/updateDisplayName';
 import updateUsername from './api/updateUsername';
 import updateProfileImage from './api/updateProfileImage';
-import { signUserOp } from './lib/paymaster';
+import paymasterSignUserOp from './api/paymasterSignUserOp';
 import { UserOperation } from '@raylac/shared';
 import getStealthAccounts from './api/getStealthAccounts';
 import getTokenBalances from './api/getTokenBalances';
@@ -43,7 +43,7 @@ BigInt.prototype.toJSON = function () {
 };
 
 export const appRouter = router({
-  signUserOp: authedProcedure
+  paymasterSignUserOp: authedProcedure
     .input(
       z.object({
         userOp: z.any(),
@@ -53,9 +53,7 @@ export const appRouter = router({
       const { input } = opts;
       const userOp = input.userOp as UserOperation;
 
-      // TODO: Validate that the user has signed this user operation
-
-      const sig = await signUserOp(userOp);
+      const sig = await paymasterSignUserOp(userOp);
 
       return sig;
     }),

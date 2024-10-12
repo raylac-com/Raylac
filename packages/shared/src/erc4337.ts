@@ -44,6 +44,18 @@ export const getInitCode = ({ stealthSigner }: { stealthSigner: Hex }) => {
   return initCode;
 };
 
+/** preVerificationGas for a transfer operation */
+export const TRANSFER_OP_PRE_VERIFICATION_GAS = toHex(1_500_000);
+
+/** callGasLimit for a transfer operation */
+export const TRANSFER_OP_CALL_GAS_LIMIT = toHex(50_000);
+
+/** verificationGasLimit for a transfer operation */
+export const TRANSFER_OP_VERIFICATION_GAS_LIMIT = toHex(70_000);
+
+/** verificationGasLimit for a transfer operation when the sender needs to be deployed */
+export const TRANSFER_OP_INIT_VERIFICATION_GAS_LIMIT = toHex(210_000);
+
 /**
  * Build an unsigned user operation.
  * The sender of the operation is determined by the given stealthSigner.
@@ -110,10 +122,13 @@ export const buildUserOp = ({
     nonce: toHex(nextNonce),
     initCode: nonce === null ? initCode : '0x',
     callData,
-    preVerificationGas: toHex(1_500_000),
-    callGasLimit: toHex(50_000),
+    preVerificationGas: TRANSFER_OP_PRE_VERIFICATION_GAS,
+    callGasLimit: TRANSFER_OP_CALL_GAS_LIMIT,
     // Use a higher gas limit for the verification step if the sender needs to be deployed
-    verificationGasLimit: nonce === null ? toHex(210_000) : toHex(70_000),
+    verificationGasLimit:
+      nonce === null
+        ? TRANSFER_OP_INIT_VERIFICATION_GAS_LIMIT
+        : TRANSFER_OP_VERIFICATION_GAS_LIMIT,
     maxFeePerGas: toHex(maxFeePerGas),
     maxPriorityFeePerGas: toHex(maxPriorityFeePerGasBuffed),
     paymasterAndData: '0x',
