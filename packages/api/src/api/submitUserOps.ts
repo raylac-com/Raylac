@@ -4,8 +4,38 @@ import { parseEventLogs } from 'viem';
 import { handleBundleTransaction } from '@raylac/sync';
 import { handleOps } from '../lib/bundler';
 import logger from '../lib/logger';
+import prisma from '../lib/prisma';
 
-const submitUserOps = async (userOps: UserOperation[]) => {
+const MAX_TRANSFERS = 1000;
+
+const canUserSubmitOps = async (userId: number) => {
+  // TODO Implement monthly limit
+
+  const numTransfers = await prisma.transfer.count({
+    where: {
+      fromUserId: userId,
+    },
+  });
+
+  return numTransfers < MAX_TRANSFERS;
+};
+
+const submitUserOps = async ({
+  userId,
+  userOps,
+}: {
+  userId: number;
+  userOps: UserOperation[];
+}) => {
+  const canSubmit = await canUserSubmitOps(userId);
+
+  if (!canSubmit) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'User has exceeded the maximum number of transfers',
+    });
+  }
+
   // Sanity check that all user ops have the same chainId
   const chainIds = userOps.map(userOp => userOp.chainId);
   if (new Set(chainIds).size !== 1) {

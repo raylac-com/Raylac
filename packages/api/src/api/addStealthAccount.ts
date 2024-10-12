@@ -1,13 +1,24 @@
 import { StealthAddressWithEphemeral } from '@raylac/shared';
-import * as erc5564 from './erc5564';
+import prisma from '../lib/prisma';
+import * as erc5564 from '../lib/erc5564';
 import { Hex } from 'viem';
-import prisma from './prisma';
+import { TRPCError } from '@trpc/server';
 
-/**
- * Announce a new stealth account to the ERC5564 announcer contract
- * and save the account to the database
- */
-export const handleNewStealthAccount = async ({
+const MAX_STEALTH_ACCOUNTS = 500;
+
+const canUserAddStealthAccount = async (userId: number) => {
+  // TODO Implement limit
+
+  const numStealthAccounts = await prisma.userStealthAddress.count({
+    where: {
+      userId,
+    },
+  });
+
+  return numStealthAccounts < MAX_STEALTH_ACCOUNTS;
+};
+
+const addStealthAccount = async ({
   userId,
   stealthAccount,
   label,
@@ -16,7 +27,14 @@ export const handleNewStealthAccount = async ({
   stealthAccount: StealthAddressWithEphemeral;
   label: string;
 }) => {
-  // TODO: Verify that the stealth account corresponds to the specified user
+  const canAdd = await canUserAddStealthAccount(userId);
+
+  if (!canAdd) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'User has exceeded the maximum number of stealth accounts',
+    });
+  }
 
   // Save the stealth address to the user's linked stealth addresses
   await prisma.userStealthAddress.create({
@@ -38,3 +56,5 @@ export const handleNewStealthAccount = async ({
     viewTag: stealthAccount.viewTag as Hex,
   });
 };
+
+export default addStealthAccount;

@@ -10,7 +10,6 @@ import {
   createCallerFactory,
 } from './trpc';
 import { createContext } from './context';
-import { handleNewStealthAccount } from './lib/stealthAccount';
 import signUp from './api/signUp';
 import { webcrypto } from 'node:crypto';
 import getUsers from './api/getUsers';
@@ -32,6 +31,7 @@ import getUser from './api/getUser';
 import deleteAccount from './api/deleteAccount';
 import getTransferDetails from './api/getTransferDetails';
 import toggleDevMode from './api/toggleDevMode';
+import addStealthAccount from './api/addStealthAccount';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -69,7 +69,10 @@ export const appRouter = router({
     .mutation(async opts => {
       const { input } = opts;
 
-      await submitUserOps(input.userOps as UserOperation[]);
+      await submitUserOps({
+        userId: opts.ctx.userId,
+        userOps: input.userOps as UserOperation[],
+      });
 
       return 'ok';
     }),
@@ -244,7 +247,7 @@ export const appRouter = router({
     .mutation(async opts => {
       const { input } = opts;
 
-      await handleNewStealthAccount({
+      await addStealthAccount({
         userId: input.userId,
         stealthAccount: {
           address: input.address as Hex,
@@ -269,6 +272,9 @@ export const appRouter = router({
       const { input } = opts;
 
       const user = await prisma.user.findFirst({
+        select: {
+          id: true,
+        },
         where: {
           username: input.username,
         },
