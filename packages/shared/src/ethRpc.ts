@@ -129,11 +129,7 @@ export const getPublicClient = ({
   const chain = getChainFromId(chainId);
   const client = createPublicClient({
     chain,
-    transport: http(
-      chainId === chains.anvil.id
-        ? 'http://127.0.0.1:8545'
-        : getAlchemyRpcUrl({ chain })
-    ),
+    transport: http(getAlchemyRpcUrl({ chain })),
   });
 
   return client as PublicClient<HttpTransport, Chain>;

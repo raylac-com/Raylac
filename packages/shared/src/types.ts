@@ -120,13 +120,6 @@ export interface SupportedToken {
   }[];
 }
 
-export interface MultiChainTransferRequestBody {
-  aggregationUserOps: UserOperation[];
-  finalTransferUserOp?: UserOperation;
-  consolidateToStealthAccount?: StealthAddressWithEphemeral;
-  relayQuotes: RelayGetQuoteResponseBody[];
-}
-
 export interface TraceInitAction {
   from: Hex;
   gas: Hex;
@@ -159,49 +152,6 @@ export type TraceResponseData =
   | TraceResponse<'call', TraceCallAction>
   | TraceResponse<'create', TraceInitAction>;
 
-/**
- * Decoded arguments for the `execute` function of RaylacAccount.sol
- */
-/*
-export type RaylacAccountExecutionArgs =
-  | RaylacAccountExecutionData<
-      ExecutionType['Transfer'],
-      {
-        to: Hex;
-        amount: bigint;
-        tokenId: string;
-        tag: string;
-      }
-    >
-  | RaylacAccountExecutionData<
-      ExecutionType['BridgeTransfer'],
-      {
-        to: Hex;
-        amount: bigint;
-        tokenId: string;
-        tag: string;
-      }
-    >
-  | RaylacAccountExecutionData<
-      ExecutionType['AggregateTransfer'],
-      {
-        to: Hex;
-        amount: bigint;
-        tokenId: string;
-      }
-    >
-  | RaylacAccountExecutionData<
-      ExecutionType['AggregateBridgeTransfer'],
-      {
-        to: Hex;
-        amount: bigint;
-        tokenId: string;
-        originChainId: number;
-        destinationChainId: number;
-      }
-    >;
-*/
-
 export interface TokenBalanceQueryResult {
   tokenId: string;
   balance: string;
@@ -213,12 +163,6 @@ export interface AccountBalancePerChainQueryResult {
   address: Hex;
   tokenId: string;
   nonce: number | null;
-}
-
-export interface TokenBalancePerChainQueryResult {
-  chainId: number;
-  tokenId: string;
-  balance: string;
 }
 
 export interface CoingeckoTokenPriceResponse {

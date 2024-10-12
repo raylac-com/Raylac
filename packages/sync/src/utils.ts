@@ -39,65 +39,6 @@ export const updateJobLatestSyncedBlock = async ({
   });
 };
 
-/*
-export const getReorgedTxs = async (
-  expectedBlockHashes: {
-    blockNumber: bigint;
-    blockHash: Hex;
-    chainId: number;
-  }[]
-) => {
-  const txs = await prisma.transaction.findMany({
-    select: {
-      hash: true,
-      blockNumber: true,
-      blockHash: true,
-    },
-    where: {
-      blockNumber: {
-        in: expectedBlockHashes.map(tx => tx.blockNumber),
-      },
-    },
-  });
-
-  return txs.filter(tx => {
-    const expectedBlockHash = expectedBlockHashes.find(
-      e => e.blockNumber === tx.blockNumber
-    )?.blockHash;
-
-    if (!expectedBlockHash) {
-      throw new Error(
-        `Expected block hash not found for block number ${tx.blockNumber}`
-      );
-    }
-
-    return tx.blockHash !== expectedBlockHash;
-  });
-};
-
-export const buildReorgedTxsWhereClause = (
-  txs: {
-    blockNumber: bigint;
-    blockHash: Hex;
-    chainId: number;
-  }[]
-) => {
-  const blocks = txs.map(tx => ({
-    AND: {
-      blockNumber: tx.blockNumber,
-      blockHash: tx.blockHash,
-      chainId: tx.chainId,
-    },
-  }));
-
-  return {
-    NOT: {
-      OR: blocks,
-    },
-  };
-};
-*/
-
 export const getLatestBlockHeight = async (chainId: number) => {
   const block = await prisma.block.findFirst({
     where: {
