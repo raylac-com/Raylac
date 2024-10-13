@@ -167,7 +167,7 @@ const HomeScreen = () => {
       }, 0)
     : null;
 
-  if (!isSignedIn) {
+  if (!isSignedIn || !signedInUser) {
     return null;
   }
 
