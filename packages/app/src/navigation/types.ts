@@ -33,18 +33,8 @@ export type RootStackParamsList = {
   // Deposit stack
   Deposit: undefined;
   TransferHistory: undefined;
-  RaylacTransferDetails: {
+  TransferDetails: {
     txHash: string;
-  };
-  NativeTransferDetails: {
-    txHash: string;
-    traceAddress: string;
-  };
-  IncomingERC20TransferDetails: {
-    txIndex: number;
-    logIndex: number;
-    blockNumber: number;
-    chainId: number;
   };
   Receive: undefined;
   BackupAccount: undefined;

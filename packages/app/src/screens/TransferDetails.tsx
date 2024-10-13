@@ -25,10 +25,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Hex } from 'viem';
 
-type Props = NativeStackScreenProps<
-  RootStackParamsList,
-  'RaylacTransferDetails'
->;
+type Props = NativeStackScreenProps<RootStackParamsList, 'TransferDetails'>;
 
 const TraceListItem = ({ trace }: { trace: TraceItem }) => {
   const from = trace.from as Hex;
@@ -85,7 +82,7 @@ const TraceListItem = ({ trace }: { trace: TraceItem }) => {
   );
 };
 
-const RaylacTransferDetails = ({ route }: Props) => {
+const TransferDetails = ({ route }: Props) => {
   const { txHash } = route.params;
   const { data: signedInUser } = useSignedInUser();
   const [showTraces, setShowTraces] = useState(false);
@@ -229,4 +226,4 @@ const RaylacTransferDetails = ({ route }: Props) => {
   );
 };
 
-export default RaylacTransferDetails;
+export default TransferDetails;

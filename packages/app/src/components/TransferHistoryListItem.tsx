@@ -59,7 +59,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
         paddingVertical: 12,
       }}
       onPress={() => {
-        navigation.navigate('RaylacTransferDetails', {
+        navigation.navigate('TransferDetails', {
           txHash: transfer.hash,
         });
       }}

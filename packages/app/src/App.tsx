@@ -35,15 +35,13 @@ import useSignedInUser from './hooks/useSignedInUser';
 import useTypedNavigation from './hooks/useTypedNavigation';
 import useFetchUpdates from './hooks/useFetchUpdates';
 import Addresses from './screens/Addresses';
-import RaylacTransferDetails from './screens/RaylacTransferDetails';
-import NativeTransferDetails from './screens/NativeTransferDetails';
+import TransferDetails from './screens/TransferDetails';
 import Advanced from './screens/Advanced';
 import ConfirmBackupPhrase from './screens/ConfirmBackupPhrase';
 import { isBackupVerificationComplete } from './lib/key';
 import SaveBackupPhrase from './screens/SaveBackupPhrase';
 import { SafeAreaView } from 'react-native';
 import Receive from './screens/Receive';
-import IncomingERC20TransferDetails from './screens/IncomingERC20TransferDetails';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -240,28 +238,10 @@ const Screens = () => {
           }}
         ></RootStack.Screen>
         <RootStack.Screen
-          name="RaylacTransferDetails"
-          component={RaylacTransferDetails}
+          name="TransferDetails"
+          component={TransferDetails}
           options={{
-            title: t('title', { ns: 'RaylacTransferDetails' }),
-            headerBackVisible: true,
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="NativeTransferDetails"
-          component={NativeTransferDetails}
-          options={{
-            title: t('title', { ns: 'NativeTransferDetails' }),
-            headerBackVisible: true,
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="IncomingERC20TransferDetails"
-          component={IncomingERC20TransferDetails}
-          options={{
-            title: t('title', { ns: 'IncomingERC20TransferDetails' }),
+            title: t('title', { ns: 'TransferDetails' }),
             headerBackVisible: true,
             headerBackTitle: t('headerBackTitle', { ns: 'common' }),
           }}
