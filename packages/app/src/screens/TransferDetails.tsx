@@ -91,22 +91,13 @@ const TransferDetails = ({ route }: Props) => {
     txHash,
   });
 
-  const blockNumber = transferDetail?.block?.number;
-  const chainId = transferDetail?.traces[0].chainId;
+  const blockTimestamp = new Date(
+    Number(transferDetail?.block?.timestamp) * 1000
+  );
+
   const tokenId = transferDetail?.traces[0].tokenId;
 
   const tokenMeta = getTokenMetadata(tokenId);
-
-  const { data: timestamp } = trpc.getBlockTimestamp.useQuery(
-    {
-      blockNumber,
-      chainId,
-    },
-    {
-      enabled: !!blockNumber && !!chainId,
-      throwOnError: false,
-    }
-  );
 
   if (!transferDetail) {
     return null;
@@ -173,7 +164,7 @@ const TransferDetails = ({ route }: Props) => {
           opacity: 0.5,
         }}
       >
-        {timestamp ? new Date(Number(timestamp) * 1000).toLocaleString() : ''}
+        {blockTimestamp.toLocaleString()}
       </Text>
       <Pressable
         style={{

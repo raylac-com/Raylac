@@ -48,6 +48,7 @@ const saveBlock = async (block: Block, chainId: number) => {
         data: {
           hash: block.hash,
           number: Number(block.number),
+          timestamp: block.timestamp,
           chainId,
         },
       }),
@@ -56,6 +57,7 @@ const saveBlock = async (block: Block, chainId: number) => {
     const data = {
       hash: block.hash,
       number: Number(block.number),
+      timestamp: block.timestamp,
       chainId,
     };
     await prisma.block.upsert({

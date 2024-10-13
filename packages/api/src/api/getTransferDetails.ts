@@ -15,6 +15,7 @@ const getTransferDetails = async ({
       block: {
         select: {
           number: true,
+          timestamp: true,
         },
       },
       traces: {

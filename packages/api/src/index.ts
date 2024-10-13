@@ -24,7 +24,6 @@ import { UserOperation } from '@raylac/shared';
 import getStealthAccounts from './api/getStealthAccounts';
 import getTokenBalances from './api/getTokenBalances';
 import getAddressBalancesPerChain from './api/getAddressBalancesPerChain';
-import { getBlockTimestamp } from './utils';
 import getTokenPrices from './api/getTokenPrices';
 import submitUserOps from './api/submitUserOps';
 import getUser from './api/getUser';
@@ -280,24 +279,6 @@ export const appRouter = router({
       });
 
       return user ? false : true;
-    }),
-
-  getBlockTimestamp: publicProcedure
-    .input(
-      z.object({
-        chainId: z.number(),
-        blockNumber: z.number(),
-      })
-    )
-    .query(async opts => {
-      const { input } = opts;
-
-      const timestamp = await getBlockTimestamp(
-        input.blockNumber,
-        input.chainId
-      );
-
-      return timestamp;
     }),
 
   signIn: publicProcedure

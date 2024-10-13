@@ -18,6 +18,7 @@ const getTransferHistory = async ({
       block: {
         select: {
           number: true,
+          timestamp: true,
         },
       },
       traces: {

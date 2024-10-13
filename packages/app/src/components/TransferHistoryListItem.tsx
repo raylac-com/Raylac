@@ -9,7 +9,6 @@ import FastAvatar from './FastAvatar';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
 import { formatAmount, getTokenMetadata } from '@raylac/shared';
-import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { TransferItem } from '@/types';
@@ -27,13 +26,7 @@ const formatDate = (date: Date) => {
 const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
   const { transfer, type } = props;
 
-  const chainId = transfer.traces[0].chainId;
   const tokenId = transfer.traces[0].tokenId;
-
-  const { data: blockTimestamp } = trpc.getBlockTimestamp.useQuery({
-    chainId,
-    blockNumber: Number(transfer.block.number),
-  });
 
   const finalTransfer = getFinalTransfer(transfer);
 
@@ -49,6 +42,8 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
 
   const avatarAddress =
     type === 'outgoing' ? getAvatarAddress(to) : getAvatarAddress(from);
+
+  const blockTimestamp = new Date(Number(transfer.block.timestamp) * 1000);
 
   return (
     <Pressable
@@ -140,9 +135,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           opacity: 0.5,
         }}
       >
-        {blockTimestamp
-          ? formatDate(new Date(Number(blockTimestamp) * 1000))
-          : ''}
+        {blockTimestamp ? formatDate(blockTimestamp) : ''}
       </Text>
     </Pressable>
   );

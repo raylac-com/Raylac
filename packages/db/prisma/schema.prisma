@@ -158,8 +158,9 @@ model SyncStatus {
 model Block {
   hash String @id
 
-  number  BigInt
-  chainId Int
+  number    BigInt
+  chainId   Int
+  timestamp BigInt
 
   Transaction Transaction[]
 

@@ -178,6 +178,10 @@ export const upsertTransaction = async ({
     hash: txHash,
   });
 
+  const block = await client.getBlock({
+    blockNumber: tx.blockNumber,
+  });
+
   const data: Prisma.TransactionCreateInput = {
     hash: txHash,
     fromAddress: tx.from,
@@ -191,6 +195,7 @@ export const upsertTransaction = async ({
         create: {
           number: tx.blockNumber,
           hash: tx.blockHash,
+          timestamp: block.timestamp,
           chainId,
         },
       },
