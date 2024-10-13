@@ -144,7 +144,7 @@ const syncBlocksForChain = async (chainId: number) => {
       });
     }
 
-    await sleep(20 * 1000);
+    await sleep(60 * 1000);
   }
 };
 
