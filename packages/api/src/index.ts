@@ -141,14 +141,15 @@ export const appRouter = router({
   getTransferDetails: authedProcedure
     .input(
       z.object({
-        transferId: z.string(),
+        txHash: z.string(),
       })
     )
     .query(async opts => {
       const { input } = opts;
 
       const details = await getTransferDetails({
-        transferId: input.transferId,
+        userId: opts.ctx.userId,
+        txHash: input.txHash,
       });
 
       return details;

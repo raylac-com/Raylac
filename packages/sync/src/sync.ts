@@ -13,7 +13,7 @@ const sync = async () => {
     syncUserOps(),
     syncIncomingNativeTransfers(),
     syncIncomingERC20Transfers(),
-    // announceStealthAccounts(),
+    //   announceStealthAccounts(),
     syncAnnouncements(),
     scanStealthAddresses(),
   ]);

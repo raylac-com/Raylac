@@ -5,7 +5,6 @@ import {
   formatUnits,
   getAddress,
   Hex,
-  keccak256,
   parseUnits,
 } from 'viem';
 import { ChainGasInfo, UserOperation } from './types';
@@ -400,22 +399,6 @@ export const getTokenId = ({
   }
 
   return token.tokenId;
-};
-
-export const getTraceId = ({
-  txHash,
-  traceAddress, // TODO: Rename to traceAddressOrLogIndex
-}: {
-  txHash: Hex;
-  traceAddress: number[] | number;
-}) => {
-  const traceAddressString = Array.isArray(traceAddress)
-    ? traceAddress.join('_')
-    : traceAddress;
-
-  const input = `${txHash}-${traceAddressString}`;
-  const encoded = new TextEncoder().encode(input);
-  return keccak256(encoded);
 };
 
 /**

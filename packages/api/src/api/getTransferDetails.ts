@@ -1,56 +1,76 @@
 import prisma from '../lib/prisma';
 
-const getTransferDetails = async ({ transferId }: { transferId: string }) => {
-  const transfer = await prisma.transfer.findUnique({
+/**
+ * Get the details of a transfer by its transaction hash and trace address
+ */
+const getTransferDetails = async ({
+  userId,
+  txHash,
+}: {
+  userId: number;
+  txHash: string;
+}) => {
+  const tx = await prisma.transaction.findUnique({
     select: {
-      maxBlockNumber: true,
-      fromUser: {
+      block: {
         select: {
-          id: true,
-          name: true,
-          username: true,
-          profileImage: true,
-          spendingPubKey: true,
+          number: true,
         },
       },
-      toUser: {
-        select: {
-          id: true,
-          name: true,
-          username: true,
-          profileImage: true,
-          spendingPubKey: true,
-        },
-      },
-      fromAddress: true,
-      toAddress: true,
       traces: {
         select: {
-          id: true,
-          from: true,
-          to: true,
+          traceAddress: true,
           tokenId: true,
-          amount: true,
-          Transaction: {
+          chainId: true,
+          UserStealthAddressFrom: {
             select: {
-              hash: true,
-              block: {
+              userId: true,
+              address: true,
+              user: {
                 select: {
-                  chainId: true,
-                  number: true,
+                  spendingPubKey: true,
+                  name: true,
+                  username: true,
+                  profileImage: true,
                 },
               },
             },
           },
+          UserStealthAddressTo: {
+            select: {
+              userId: true,
+              address: true,
+              user: {
+                select: {
+                  spendingPubKey: true,
+                  name: true,
+                  username: true,
+                  profileImage: true,
+                },
+              },
+            },
+          },
+          from: true,
+          to: true,
+          amount: true,
+          transactionHash: true,
         },
       },
+      hash: true,
     },
     where: {
-      transferId,
+      hash: txHash,
     },
   });
 
-  return transfer;
+  return {
+    ...tx,
+    traces: tx?.traces.filter(
+      trace =>
+        trace.UserStealthAddressTo?.userId === userId ||
+        trace.UserStealthAddressFrom?.userId === userId
+    ),
+  };
 };
 
 export default getTransferDetails;

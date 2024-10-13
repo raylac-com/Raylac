@@ -11,6 +11,7 @@ import StyledPressable from '@/components/StyledPressable';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTokenBalances from '@/hooks/useTokenBalance';
+import { getTransferType } from '@/lib/utils';
 
 interface TokenBalanceItemProps {
   formattedBalance: string;
@@ -141,6 +142,7 @@ const HomeScreen = () => {
     enabled: isSignedIn,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
+    throwOnError: false,
   });
 
   const navigation = useTypedNavigation();
@@ -283,11 +285,7 @@ const HomeScreen = () => {
             <TransferHistoryListItem
               key={i}
               transfer={transfer}
-              type={
-                transfer.fromUser?.id === signedInUser?.id
-                  ? 'outgoing'
-                  : 'incoming'
-              }
+              type={getTransferType(transfer, signedInUser.id)}
             />
           ))}
           {txHistory && txHistory.length > NUM_TRANSFERS_TO_SHOW ? (

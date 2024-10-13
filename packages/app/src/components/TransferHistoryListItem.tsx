@@ -1,13 +1,16 @@
-import { shortenAddress } from '@/lib/utils';
+import {
+  getAvatarAddress,
+  getDisplayName,
+  getFinalTransfer,
+  getProfileImage,
+} from '@/lib/utils';
 import { Pressable, Text, View } from 'react-native';
 import FastAvatar from './FastAvatar';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
-import { Hex } from 'viem';
 import { formatAmount, getTokenMetadata } from '@raylac/shared';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { publicKeyToAddress } from 'viem/accounts';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { TransferItem } from '@/types';
 // import useEnsName from '@/hooks/useEnsName';
@@ -24,32 +27,28 @@ const formatDate = (date: Date) => {
 const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
   const { transfer, type } = props;
 
-  const chainId = transfer.traces[0].Transaction?.block?.chainId;
+  const chainId = transfer.traces[0].chainId;
   const tokenId = transfer.traces[0].tokenId;
-
-  const amount = transfer.traces.reduce(
-    (acc, trace) => acc + BigInt(trace.amount),
-    BigInt(0)
-  );
 
   const { data: blockTimestamp } = trpc.getBlockTimestamp.useQuery({
     chainId,
-    blockNumber: transfer.maxBlockNumber,
+    blockNumber: Number(transfer.block.number),
   });
 
+  const finalTransfer = getFinalTransfer(transfer);
+
+  const amount = finalTransfer.amount as string;
+
   const tokenMeta = getTokenMetadata(tokenId);
-  const formattedAmount = formatAmount(amount.toString(), tokenMeta.decimals);
+  const formattedAmount = formatAmount(amount, tokenMeta.decimals);
 
   const navigation = useTypedNavigation();
 
-  const transferUser =
-    type === 'outgoing' ? transfer?.toUser : transfer?.fromUser;
+  const from = finalTransfer.UserStealthAddressFrom?.user || finalTransfer.from;
+  const to = finalTransfer.UserStealthAddressTo?.user || finalTransfer.to;
 
-  const avatarAddress = transferUser
-    ? publicKeyToAddress(transferUser.spendingPubKey as Hex)
-    : ((type === 'outgoing'
-        ? transfer.toAddress
-        : transfer.fromAddress) as Hex);
+  const avatarAddress =
+    type === 'outgoing' ? getAvatarAddress(to) : getAvatarAddress(from);
 
   return (
     <Pressable
@@ -61,7 +60,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
       }}
       onPress={() => {
         navigation.navigate('RaylacTransferDetails', {
-          transferId: transfer.transferId,
+          txHash: transfer.hash,
         });
       }}
     >
@@ -82,7 +81,9 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
         >
           <FastAvatar
             address={avatarAddress}
-            imageUrl={transferUser ? transferUser.profileImage : undefined}
+            imageUrl={
+              type === 'outgoing' ? getProfileImage(to) : getProfileImage(from)
+            }
             size={36}
           ></FastAvatar>
           <Text
@@ -90,13 +91,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
               color: theme.text,
             }}
           >
-            {transferUser
-              ? transferUser.name
-              : shortenAddress(
-                  (type === 'outgoing'
-                    ? transfer.toAddress
-                    : transfer.fromAddress) as Hex
-                )}
+            {getDisplayName(type === 'outgoing' ? to : from)}
           </Text>
         </View>
         <View>

@@ -22,59 +22,38 @@ const getAddressBalancesPerChain = async ({
     AccountBalancePerChainQueryResult[]
   >`
         WITH incoming_transfers AS (
-            SELECT
-                tc. "tokenId",
-                tc. "to",
-                b. "chainId",
-                SUM(tc.amount) AS "amount"
-            FROM
-                "Transfer" t
-            LEFT JOIN "Trace" tc ON t. "transferId" = tc. "transferId"
-            LEFT JOIN "Transaction" tx ON tc. "transactionHash" = tx.hash
-            LEFT JOIN "Block" b ON tx. "blockHash" = b.hash
+	SELECT
+		sum(amount) AS amount,
+		"tokenId",
+                "chainId",
+                "address"
+	FROM
+		"Trace" t
+	LEFT JOIN "UserStealthAddress" u ON t. "toStealthAddress" = u.address
         WHERE
-            t. "toUserId" = ${userId}
-            AND b. "chainId" in(${Prisma.join(chainIds)})
+            u. "userId" = ${userId}
+            AND "chainId" in (${Prisma.join(chainIds)})
         GROUP BY
             "tokenId",
-            b. "chainId",
-            tc.to
+            "address",
+            "chainId"
         ),
         outgoing_transfers AS (
             SELECT
-                tc. "tokenId",
-                tc. "from",
-                b. "chainId",
-                SUM(tc.amount) AS "amount"
+                sum(amount) AS amount,
+                "tokenId",
+                "chainId",
+                "address"
             FROM
-                "Transfer" t
-            LEFT JOIN "Trace" tc ON t. "transferId" = tc. "transferId"
-            LEFT JOIN "Transaction" tx ON tc. "transactionHash" = tx.hash
-            LEFT JOIN "Block" b ON tx. "blockHash" = b.hash
+                "Trace" t
+            LEFT JOIN "UserStealthAddress" u ON t. "fromStealthAddress" = u.address
         WHERE
-            t. "fromUserId" = ${userId}
-            AND b. "chainId" in(${Prisma.join(chainIds)})
+            u. "userId" = ${userId}
+            AND "chainId" in (${Prisma.join(chainIds)})
         GROUP BY
-            tc. "tokenId",
-            b. "chainId",
-            tc. "from"
-        ),
-        address_balances AS (
-            SELECT
-                COALESCE(i. "tokenId",
-                    o. "tokenId") AS "tokenId",
-                COALESCE(i.amount,
-                    0) - COALESCE(o.amount,
-                    0) AS balance,
-                COALESCE(i. "to",
-                    o. "from") AS address,
-                COALESCE(i. "chainId",
-                    o. "chainId") AS "chainId"
-            FROM
-                incoming_transfers i
-            LEFT JOIN outgoing_transfers o ON i. "tokenId" = o. "tokenId"
-                AND i. "chainId" = o. "chainId"
-                AND i. "to" = o. "from"
+            "tokenId",
+            "chainId",
+            "address"
         ),
         account_nonces AS (
             SELECT
@@ -90,12 +69,18 @@ const getAddressBalancesPerChain = async ({
             "chainId"
         )
         SELECT
-            a.*,
+            COALESCE(i. "tokenId", o. "tokenId") AS "tokenId",
+            COALESCE(i.amount, 0) - COALESCE(o.amount, 0) AS balance,
+            i."chainId",
+            i."address",
             an.nonce
         FROM
-            address_balances a
-            LEFT JOIN account_nonces an ON an.address = a.address
-                AND an. "chainId" = a. "chainId"
+            incoming_transfers i
+            LEFT JOIN outgoing_transfers o ON i. "tokenId" = o. "tokenId"
+            AND i. "chainId" = o. "chainId"
+            AND i. "address" = o. "address"
+            LEFT JOIN account_nonces an ON i. "address" = an. "address"
+            AND i. "chainId" = an. "chainId"
   `;
 
   return accountBalancePerChain;

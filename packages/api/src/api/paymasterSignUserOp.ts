@@ -46,8 +46,8 @@ const validateUserOp = (userOp: UserOperation) => {
     throw new Error('Invalid preVerificationGas');
   }
 
-  if (userOp.verificationGasLimit !== TRANSFER_OP_VERIFICATION_GAS_LIMIT) {
-    throw new Error('Invalid verificationGasLimit');
+  if (userOp.callGasLimit !== TRANSFER_OP_CALL_GAS_LIMIT) {
+    throw new Error('Invalid callGasLimit');
   }
 
   logger.info('userOp.maxFeePerGas : maxFee', userOp.maxFeePerGas, maxFee);

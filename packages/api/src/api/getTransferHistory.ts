@@ -13,83 +13,95 @@ const getTransferHistory = async ({
 }) => {
   const chainIds = getChainsForMode(isDevMode).map(chain => chain.id);
 
-  const result = await prisma.transfer.findMany({
+  const transactions = await prisma.transaction.findMany({
     select: {
-      fromUser: {
+      block: {
         select: {
-          id: true,
-          name: true,
-          username: true,
-          profileImage: true,
-          spendingPubKey: true,
+          number: true,
         },
       },
-      toUser: {
-        select: {
-          id: true,
-          name: true,
-          username: true,
-          profileImage: true,
-          spendingPubKey: true,
-        },
-      },
-      fromAddress: true,
-      toAddress: true,
-      transferId: true,
-      maxBlockNumber: true,
       traces: {
         select: {
-          id: true,
-          from: true,
-          to: true,
-          amount: true,
           tokenId: true,
-          Transaction: {
+          chainId: true,
+          traceAddress: true,
+          UserStealthAddressFrom: {
             select: {
-              block: {
+              userId: true,
+              address: true,
+              user: {
                 select: {
-                  chainId: true,
+                  spendingPubKey: true,
+                  name: true,
+                  profileImage: true,
                 },
               },
             },
           },
+          UserStealthAddressTo: {
+            select: {
+              userId: true,
+              address: true,
+              user: {
+                select: {
+                  spendingPubKey: true,
+                  name: true,
+                  profileImage: true,
+                },
+              },
+            },
+          },
+          from: true,
+          to: true,
+          amount: true,
+          transactionHash: true,
         },
       },
+      hash: true,
     },
     where: {
       OR: [
         {
-          fromUser: {
-            id: userId,
-          },
-        },
-        {
-          toUser: {
-            id: userId,
-          },
-        },
-      ],
-      traces: {
-        some: {
-          Transaction: {
-            block: {
-              chainId: {
-                in: chainIds,
+          traces: {
+            some: {
+              UserStealthAddressFrom: {
+                userId,
               },
             },
           },
         },
-      },
+        {
+          traces: {
+            some: {
+              UserStealthAddressTo: {
+                userId,
+              },
+            },
+          },
+        },
+      ],
+      chainId: { in: chainIds },
     },
     orderBy: {
-      maxBlockNumber: 'desc',
+      block: {
+        number: 'desc',
+      },
     },
   });
 
-  return result.map(row => ({
-    ...row,
-    maxBlockNumber: Number(row.maxBlockNumber),
-  }));
+  // Filter out the traces that are not to the user's stealth address
+  const filteredTransactions = transactions.map(tx => {
+    return {
+      ...tx,
+      traces: tx.traces.filter(
+        trace =>
+          trace.UserStealthAddressTo?.userId === userId ||
+          trace.UserStealthAddressFrom?.userId === userId
+      ),
+    };
+  });
+
+  return filteredTransactions;
 };
 
 export default getTransferHistory;

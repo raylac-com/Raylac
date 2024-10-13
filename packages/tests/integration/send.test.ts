@@ -108,7 +108,7 @@ const buildRequestBody = async ({
       // Get the paymaster signature
       const paymasterAndData = encodePaymasterAndData({
         paymaster: RAYLAC_PAYMASTER_ADDRESS,
-        data: await authedClient.signUserOp.mutate({ userOp }),
+        data: await authedClient.paymasterSignUserOp.mutate({ userOp }),
       });
       userOp.paymasterAndData = paymasterAndData;
 

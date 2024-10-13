@@ -3,12 +3,15 @@ import { client, trpc } from '@/lib/trpc';
 import { User } from '@/types';
 import {
   ChainGasInfo,
+  RAYLAC_PAYMASTER_ADDRESS,
   StealthAddressWithEphemeral,
   buildMultiChainSendRequestBody,
+  encodePaymasterAndData,
   generateStealthAddress,
   getSpendingPrivKey,
   getTokenAddressOnChain,
   getViewingPrivKey,
+  signUserOpWithStealthAccount,
 } from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
@@ -30,6 +33,9 @@ const useSend = () => {
     trpc.addStealthAccount.useMutation();
 
   const queryClient = useQueryClient();
+
+  const { mutateAsync: paymasterSignUserOp } =
+    trpc.paymasterSignUserOp.useMutation();
 
   return useMutation({
     mutationFn: async ({
@@ -108,8 +114,35 @@ const useSend = () => {
         gasInfo,
       });
 
+      const signedUserOps = [];
+      for (const userOp of userOps) {
+        const paymasterAndData = encodePaymasterAndData({
+          paymaster: RAYLAC_PAYMASTER_ADDRESS,
+          data: await paymasterSignUserOp({ userOp }),
+        });
+        userOp.paymasterAndData = paymasterAndData;
+
+        const stealthAccount = stealthAccounts.find(
+          stealthAccount => stealthAccount.address === userOp.sender
+        ) as StealthAddressWithEphemeral;
+
+        if (!stealthAccount) {
+          throw new Error('Stealth account not found');
+        }
+
+        // Sign the user operation with the stealth account
+        const signedUserOp = await signUserOpWithStealthAccount({
+          userOp,
+          stealthAccount,
+          spendingPrivKey,
+          viewingPrivKey,
+        });
+
+        signedUserOps.push(signedUserOp);
+      }
+
       await submitUserOps({
-        userOps,
+        userOps: signedUserOps,
       });
     },
     onSuccess: () => {

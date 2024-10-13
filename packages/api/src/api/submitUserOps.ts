@@ -1,19 +1,32 @@
 import { TRPCError } from '@trpc/server';
-import { EntryPointAbi, getPublicClient, UserOperation } from '@raylac/shared';
+import {
+  decodeUserOpCalldata,
+  EntryPointAbi,
+  ERC20Abi,
+  getPublicClient,
+  getTokenId,
+  traceTransaction,
+  UserOperation,
+} from '@raylac/shared';
 import { parseEventLogs } from 'viem';
-import { handleBundleTransaction } from '@raylac/sync';
 import { handleOps } from '../lib/bundler';
+import { handleERC20TransferLog, handleNewTrace } from '@raylac/sync';
 import logger from '../lib/logger';
 import prisma from '../lib/prisma';
+import { handleUserOpEvent } from '@raylac/sync/src/syncUserOps';
 
 const MAX_TRANSFERS = 1000;
 
 const canUserSubmitOps = async (userId: number) => {
   // TODO Implement monthly limit
 
-  const numTransfers = await prisma.transfer.count({
+  const numTransfers = await prisma.transaction.count({
     where: {
-      fromUserId: userId,
+      traces: {
+        some: {
+          UserStealthAddressFrom: { userId },
+        },
+      },
     },
   });
 
@@ -43,6 +56,28 @@ const submitUserOps = async ({
       code: 'BAD_REQUEST',
       message: 'All user ops must have the same chainId',
     });
+  }
+
+  // Sanity check that all user ops are pointing to the same token
+  const executeArgs = userOps.map(decodeUserOpCalldata);
+  const isNativeTransfer = executeArgs[0].data === '0x';
+
+  if (isNativeTransfer) {
+    if (!executeArgs.every(args => args.data === '0x')) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'Native transfers must have empty data',
+      });
+    }
+  } else {
+    const tokenAddresses = executeArgs[0].to;
+
+    if (!executeArgs.every(args => args.to === tokenAddresses)) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'All user ops must point to the same token',
+      });
+    }
   }
 
   const chainId = userOps[0].chainId;
@@ -77,13 +112,51 @@ const submitUserOps = async ({
     });
   }
 
-  const start2 = Date.now();
-  await handleBundleTransaction({
-    txReceipt,
-    chainId,
-  });
-  const end2 = Date.now();
-  logger.info(`handleBundleTransaction ${end2 - start2}ms`);
+  // Save user ops and traces to the db
+
+  try {
+    await Promise.all(
+      userOpEventLogs.map(log => handleUserOpEvent({ log, chainId }))
+    );
+
+    logger.info(`tracing tx ${txHash}`);
+
+    if (isNativeTransfer) {
+      const start = Date.now();
+      const traces = await traceTransaction({
+        txHash,
+        chainId,
+      });
+      const end = Date.now();
+      logger.info(`traceTransaction ${end - start}ms`);
+
+      await Promise.all(
+        traces.map(trace => handleNewTrace({ trace, chainId }))
+      );
+    } else {
+      const tokenAddresses = executeArgs[0].to;
+
+      const tokenId = getTokenId({
+        chainId,
+        tokenAddress: tokenAddresses,
+      });
+
+      const transferLogs = parseEventLogs({
+        abi: ERC20Abi,
+        logs: txReceipt.logs,
+        eventName: 'Transfer',
+      });
+
+      await Promise.all(
+        transferLogs.map(log =>
+          handleERC20TransferLog({ log, tokenId, chainId })
+        )
+      );
+    }
+  } catch (err) {
+    logger.error(err);
+    // TODO Report to Sentry
+  }
 };
 
 export default submitUserOps;

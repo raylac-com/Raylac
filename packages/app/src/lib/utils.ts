@@ -1,6 +1,8 @@
 import * as SecureStore from 'expo-secure-store';
 import { Hex } from 'viem';
 import * as Clipboard from 'expo-clipboard';
+import { AddressOrUser, TransferItem } from '@/types';
+import { publicKeyToAddress } from 'viem/accounts';
 
 export const ACCOUNT_SPENDING_PUB_KEY_STORAGE_KEY = 'account_spending_pub_key';
 export const ACCOUNT_VIEWING_PUB_KEY_STORAGE_KEY = 'account_viewing_pub_key';
@@ -36,4 +38,53 @@ export const copyToClipboard = async (text: string) => {
 export const getClipboardText = async () => {
   const text = await Clipboard.getStringAsync();
   return text;
+};
+
+export const getFinalTransfer = (transfer: TransferItem) => {
+  const senders = new Set<string>();
+
+  transfer.traces.forEach(trace => {
+    senders.add(trace.from);
+  });
+
+  const finalTransfer = transfer.traces.find(trace => !senders.has(trace.to));
+
+  if (!finalTransfer) {
+    throw new Error('No final transfer found');
+  }
+
+  return finalTransfer;
+};
+
+export const getTransferType = (
+  transfer: TransferItem,
+  signedInUserId: number
+): 'incoming' | 'outgoing' => {
+  const finalTransfer = getFinalTransfer(transfer);
+
+  return finalTransfer.UserStealthAddressFrom?.userId === signedInUserId
+    ? 'outgoing'
+    : 'incoming';
+};
+
+export const isAddress = (
+  addressOrUser: AddressOrUser
+): addressOrUser is string => {
+  return typeof addressOrUser === 'string';
+};
+
+export const getAvatarAddress = (addressOrUser: AddressOrUser) => {
+  return isAddress(addressOrUser)
+    ? addressOrUser
+    : publicKeyToAddress(addressOrUser.spendingPubKey as Hex);
+};
+
+export const getProfileImage = (addressOrUser: AddressOrUser) => {
+  return isAddress(addressOrUser) ? undefined : addressOrUser.profileImage;
+};
+
+export const getDisplayName = (addressOrUser: AddressOrUser) => {
+  return isAddress(addressOrUser)
+    ? shortenAddress(addressOrUser as Hex)
+    : addressOrUser.name;
 };

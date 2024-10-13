@@ -34,7 +34,7 @@ export type RootStackParamsList = {
   Deposit: undefined;
   TransferHistory: undefined;
   RaylacTransferDetails: {
-    transferId: string;
+    txHash: string;
   };
   NativeTransferDetails: {
     txHash: string;
