@@ -2,6 +2,7 @@ name: preview
 on:
   pull_request:
     types: [opened, reopened]
+  workflow_dispatch:
 
 jobs:
   update:
@@ -48,5 +49,4 @@ jobs:
           command: eas update --auto --channel ${{ github.event.pull_request.head.ref }}
           working-directory: packages/app
         env:
-          EXPO_PUBLIC_RPC_URL: https://raylac-api.onrender.com
-          EXPO_PUBLIC_ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          EXPO_PUBLIC_RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
