@@ -9,63 +9,8 @@ import * as chains from 'viem/chains';
 import { Chain } from 'viem/chains';
 import { getChainFromId } from './utils';
 
-export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
-  const apiKey =
-    process.env.ALCHEMY_API_KEY || process.env.EXPO_PUBLIC_ALCHEMY_API_KEY;
-
-  if (!apiKey) {
-    throw new Error('ALCHEMY_API_KEY is not set');
-  }
-
-  let alchemySubdomain;
-
-  switch (chain.id) {
-    case chains.mainnet.id:
-      alchemySubdomain = 'eth-mainnet';
-      break;
-    case chains.sepolia.id:
-      alchemySubdomain = 'eth-sepolia';
-      break;
-    case chains.base.id:
-      alchemySubdomain = 'base-mainnet';
-      break;
-    case chains.baseSepolia.id:
-      alchemySubdomain = 'base-sepolia';
-      break;
-    case chains.optimism.id:
-      alchemySubdomain = 'opt-mainnet';
-      break;
-    case chains.optimismSepolia.id:
-      alchemySubdomain = 'opt-sepolia';
-      break;
-    case chains.blast.id:
-      alchemySubdomain = 'blast-mainnet';
-      break;
-    case chains.blastSepolia.id:
-      alchemySubdomain = 'blast-sepolia';
-      break;
-    case chains.arbitrum.id:
-      alchemySubdomain = 'arb-mainnet';
-      break;
-    case chains.arbitrumSepolia.id:
-      alchemySubdomain = 'arb-sepolia';
-      break;
-    case chains.polygon.id:
-      alchemySubdomain = 'polygon-mainnet';
-      break;
-    case chains.polygonAmoy.id:
-      alchemySubdomain = 'polygon-amoy';
-      break;
-    default:
-      throw new Error(`Unknown chain id: ${chain.id}`);
-  }
-
-  return `https://${alchemySubdomain}.g.alchemy.com/v2/${apiKey}`;
-};
-
 export const getQuickNodeRpcUrl = ({ chain }: { chain: Chain }) => {
-  const apiKey =
-    process.env.QUICKNODE_API_KEY || process.env.EXPO_PUBLIC_QUICKNODE_API_KEY;
+  const apiKey = process.env.QUICKNODE_API_KEY;
 
   if (!apiKey) {
     throw new Error('QUICKNODE_API_KEY is not set');
@@ -129,7 +74,7 @@ export const getPublicClient = ({
   const chain = getChainFromId(chainId);
   const client = createPublicClient({
     chain,
-    transport: http(getAlchemyRpcUrl({ chain })),
+    transport: http(getQuickNodeRpcUrl({ chain })),
   });
 
   return client as PublicClient<HttpTransport, Chain>;
@@ -143,6 +88,6 @@ export const getWalletClient = ({ chainId }: { chainId: number }) => {
   const chain = getChainFromId(chainId);
   return createWalletClient({
     chain,
-    transport: http(getAlchemyRpcUrl({ chain })),
+    transport: http(getQuickNodeRpcUrl({ chain })),
   });
 };
