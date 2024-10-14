@@ -93,9 +93,9 @@ export const handleNewTrace = async ({
 };
 
 /**
- * Sync incoming native transfers for a batch of addresses
+ * Sync native transfers for a batch of addresses
  */
-const batchSyncIncomingNativeTransfers = async ({
+const batchSyncNativeTransfers = async ({
   addresses,
   fromBlock,
   toBlock,
@@ -129,7 +129,7 @@ const batchSyncIncomingNativeTransfers = async ({
   }
 };
 
-const syncIncomingNativeTransfers = async () => {
+const syncNativeTransfers = async () => {
   while (true) {
     const addresses = await prisma.userStealthAddress.findMany({
       select: {
@@ -148,7 +148,7 @@ const syncIncomingNativeTransfers = async () => {
           throw new Error('Finalized block number is null');
         }
 
-        // Sync incoming transfers in 100 address batches
+        // Sync native transfers in 100 address batches
         for (let i = 0; i < addresses.length; i += 100) {
           const batch = addresses
             .slice(i, i + 100)
@@ -182,7 +182,7 @@ const syncIncomingNativeTransfers = async () => {
             continue;
           }
 
-          await batchSyncIncomingNativeTransfers({
+          await batchSyncNativeTransfers({
             addresses: batch,
             fromBlock,
             toBlock,
@@ -203,4 +203,4 @@ const syncIncomingNativeTransfers = async () => {
   }
 };
 
-export default syncIncomingNativeTransfers;
+export default syncNativeTransfers;

@@ -1,4 +1,4 @@
 export * from './syncUserOps';
 export * from './syncBlocks';
-export * from './syncIncomingTransfers';
-export * from './syncIncomingERC20Transfers';
+export * from './syncNativeTransfers';
+export * from './syncERC20Transfers';

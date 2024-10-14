@@ -83,7 +83,7 @@ export const handleERC20TransferLog = async ({
   });
 };
 
-const batchSyncIncomingERC20Transfers = async ({
+const batchSyncERC20Transfers = async ({
   addresses,
   fromBlock,
   toBlock,
@@ -165,7 +165,7 @@ const syncERC20Transfers = async () => {
             blockTag: 'finalized',
           });
 
-          // Sync incoming transfers in 100 address batches
+          // Sync erc20 transfers in 100 address batches
           for (let i = 0; i < addresses.length; i += 100) {
             const batch = addresses
               .slice(i, i + 100)
@@ -205,7 +205,7 @@ const syncERC20Transfers = async () => {
             ) {
               const toBlock = bigIntMin([fromBlock + chunkSize, latestBlock]);
 
-              await batchSyncIncomingERC20Transfers({
+              await batchSyncERC20Transfers({
                 addresses: batch,
                 fromBlock,
                 toBlock,
