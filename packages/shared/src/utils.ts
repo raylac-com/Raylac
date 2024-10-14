@@ -5,47 +5,38 @@ import {
   formatUnits,
   getAddress,
   Hex,
-  keccak256,
   parseUnits,
 } from 'viem';
 import { ChainGasInfo, UserOperation } from './types';
 import RaylacAccountAbi from './abi/RaylacAccountAbi';
 import ERC20Abi from './abi/ERC20Abi';
 import * as chains from 'viem/chains';
-import { Network } from 'alchemy-sdk';
 import supportedTokens, { NATIVE_TOKEN_ADDRESS } from './supportedTokens';
 import { getPublicClient } from './ethRpc';
 import { getERC20TokenBalance, rundlerMaxPriorityFeePerGas } from '.';
 import supportedChains from './supportedChains';
 
-export const encodeERC5564Metadata = ({
-  viewTag,
-  stealthPubKey,
-}: {
-  viewTag: Hex;
-  stealthPubKey: Hex;
-}): Hex => {
+export const encodeERC5564Metadata = (viewTag: Hex): Hex => {
   if (viewTag.length !== 4) {
     throw new Error(
       `viewTag must be exactly 4 bytes, got ${viewTag.length} hex chars`
     );
   }
 
-  const metadata = `${viewTag}${stealthPubKey.replace('0x', '')}` as Hex;
+  const metadata = viewTag;
   return metadata;
 };
 
-export const decodeERC5564Metadata = (metadata: Hex) => {
-  if (metadata.length !== 70) {
+export const decodeERC5564MetadataAsViewTag = (metadata: Hex) => {
+  if (metadata.length !== 4) {
     throw new Error(
-      `metadata must be exactly 66 bytes, got ${metadata.length} hex chars`
+      `metadata must be exactly 1 byte, got ${metadata.length} hex chars`
     );
   }
 
   const viewTag = metadata.slice(0, 4) as Hex;
-  const stealthPubKey = `0x${metadata.slice(4)}` as Hex;
 
-  return { viewTag, stealthPubKey };
+  return { viewTag };
 };
 
 export const hexToProjectivePoint = (hex: Hex) => {
@@ -200,28 +191,6 @@ export const getChainFromId = (chainId: number): Chain => {
   }
 
   return chain[1] as Chain;
-};
-
-/**
- * Convert viem's `Chain` object to Alchemy's `Network` enum
- */
-export const toAlchemyNetwork = (chainId: number) => {
-  switch (chainId) {
-    case chains.base.id:
-      return Network.BASE_MAINNET;
-    case chains.baseSepolia.id:
-      return Network.BASE_SEPOLIA;
-    case chains.optimism.id:
-      return Network.OPT_MAINNET;
-    case chains.optimismSepolia.id:
-      return Network.OPT_SEPOLIA;
-    case chains.arbitrum.id:
-      return Network.ARB_MAINNET;
-    case chains.arbitrumSepolia.id:
-      return Network.ARB_SEPOLIA;
-    default:
-      throw new Error(`Chain ${chainId} not supported`);
-  }
 };
 
 /**
@@ -430,83 +399,6 @@ export const getTokenId = ({
   }
 
   return token.tokenId;
-};
-
-/*
-const getOutgoingTransferId = ({
-  txHash,
-  executionTag,
-  traceAddress,
-}: {
-  txHash: Hex;
-  executionTag: Hex;
-  traceAddress: number[];
-}) => {
-  const input = `${txHash}-${executionTag}-${traceAddress.join('_')}`;
-  const encoded = new TextEncoder().encode(input);
-  return keccak256(encoded);
-};
-
-export const getIncomingNativeTransferId = ({
-  txHash,
-  traceAddress,
-}: {
-  txHash: Hex;
-  traceAddress: number[];
-}) => {
-  const input = `${txHash}-${traceAddress.join('_')}`;
-  const encoded = new TextEncoder().encode(input);
-  return keccak256(encoded);
-};
-
-export const getOutgoingNativeTransferId = ({
-  txHash,
-  executionTag,
-  traceAddress,
-}: {
-  txHash: Hex;
-  traceAddress: number[];
-}) => {
-  return getOutgoingTransferId({ txHash, executionTag, traceAddress });
-};
-
-export const getIncomingERC20TransferId = ({
-  txHash,
-  logIndex,
-}: {
-  txHash: Hex;
-  logIndex: number;
-}) => {
-  const input = `${txHash}-${logIndex}`;
-  const encoded = new TextEncoder().encode(input);
-  return keccak256(encoded);
-};
-
-export const getOutgoingERC20TransferId = ({
-  txHash,
-  executionTag,
-}: {
-  txHash: Hex;
-  executionTag: Hex;
-}) => {
-  return getOutgoingTransferId({ txHash, executionTag });
-};
-*/
-
-export const getTraceId = ({
-  txHash,
-  traceAddress, // TODO: Rename to traceAddressOrLogIndex
-}: {
-  txHash: Hex;
-  traceAddress: number[] | number;
-}) => {
-  const traceAddressString = Array.isArray(traceAddress)
-    ? traceAddress.join('_')
-    : traceAddress;
-
-  const input = `${txHash}-${traceAddressString}`;
-  const encoded = new TextEncoder().encode(input);
-  return keccak256(encoded);
 };
 
 /**

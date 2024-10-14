@@ -10,7 +10,6 @@ import {
   createCallerFactory,
 } from './trpc';
 import { createContext } from './context';
-import { handleNewStealthAccount } from './lib/stealthAccount';
 import signUp from './api/signUp';
 import { webcrypto } from 'node:crypto';
 import getUsers from './api/getUsers';
@@ -20,18 +19,18 @@ import updateAddressLabel from './api/updateAddressLabel';
 import updateDisplayName from './api/updateDisplayName';
 import updateUsername from './api/updateUsername';
 import updateProfileImage from './api/updateProfileImage';
-import { signUserOp } from './lib/paymaster';
+import paymasterSignUserOp from './api/paymasterSignUserOp';
 import { UserOperation } from '@raylac/shared';
 import getStealthAccounts from './api/getStealthAccounts';
 import getTokenBalances from './api/getTokenBalances';
 import getAddressBalancesPerChain from './api/getAddressBalancesPerChain';
-import { getBlockTimestamp } from './utils';
 import getTokenPrices from './api/getTokenPrices';
-import submitUserOperation from './api/submitUserOperation';
+import submitUserOps from './api/submitUserOps';
 import getUser from './api/getUser';
 import deleteAccount from './api/deleteAccount';
 import getTransferDetails from './api/getTransferDetails';
 import toggleDevMode from './api/toggleDevMode';
+import addStealthAccount from './api/addStealthAccount';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -43,7 +42,7 @@ BigInt.prototype.toJSON = function () {
 };
 
 export const appRouter = router({
-  signUserOp: authedProcedure
+  paymasterSignUserOp: authedProcedure
     .input(
       z.object({
         userOp: z.any(),
@@ -53,24 +52,23 @@ export const appRouter = router({
       const { input } = opts;
       const userOp = input.userOp as UserOperation;
 
-      // TODO: Validate that the user has signed this user operation
-
-      const sig = await signUserOp(userOp);
+      const sig = await paymasterSignUserOp(userOp);
 
       return sig;
     }),
 
-  submitUserOperation: authedProcedure
+  submitUserOps: authedProcedure
     .input(
       z.object({
-        userOp: z.any(),
+        userOps: z.array(z.any()),
       })
     )
     .mutation(async opts => {
       const { input } = opts;
 
-      await submitUserOperation({
-        userOp: input.userOp as UserOperation,
+      await submitUserOps({
+        userId: opts.ctx.userId,
+        userOps: input.userOps as UserOperation[],
       });
 
       return 'ok';
@@ -142,14 +140,15 @@ export const appRouter = router({
   getTransferDetails: authedProcedure
     .input(
       z.object({
-        transferId: z.string(),
+        txHash: z.string(),
       })
     )
     .query(async opts => {
       const { input } = opts;
 
       const details = await getTransferDetails({
-        transferId: input.transferId,
+        userId: opts.ctx.userId,
+        txHash: input.txHash,
       });
 
       return details;
@@ -236,7 +235,7 @@ export const appRouter = router({
     .input(
       z.object({
         address: z.string(),
-        stealthPubKey: z.string(),
+        signerAddress: z.string(),
         ephemeralPubKey: z.string(),
         viewTag: z.string(),
         userId: z.number(),
@@ -246,11 +245,11 @@ export const appRouter = router({
     .mutation(async opts => {
       const { input } = opts;
 
-      await handleNewStealthAccount({
+      await addStealthAccount({
         userId: input.userId,
         stealthAccount: {
           address: input.address as Hex,
-          stealthPubKey: input.stealthPubKey as Hex,
+          signerAddress: input.signerAddress as Hex,
           ephemeralPubKey: input.ephemeralPubKey as Hex,
           viewTag: input.viewTag as Hex,
         },
@@ -271,30 +270,15 @@ export const appRouter = router({
       const { input } = opts;
 
       const user = await prisma.user.findFirst({
+        select: {
+          id: true,
+        },
         where: {
           username: input.username,
         },
       });
 
       return user ? false : true;
-    }),
-
-  getBlockTimestamp: publicProcedure
-    .input(
-      z.object({
-        chainId: z.number(),
-        blockNumber: z.number(),
-      })
-    )
-    .query(async opts => {
-      const { input } = opts;
-
-      const timestamp = await getBlockTimestamp(
-        input.blockNumber,
-        input.chainId
-      );
-
-      return timestamp;
     }),
 
   signIn: publicProcedure

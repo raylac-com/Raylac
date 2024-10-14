@@ -40,9 +40,6 @@ model User {
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   UserStealthAddress UserStealthAddress[]
-
-  outgoingTransfers Transfer[] @relation("outgoing")
-  incomingTransfers Transfer[] @relation("incoming")
 }
 
 model UserStealthAddress {
@@ -52,50 +49,46 @@ model UserStealthAddress {
   address         String  @unique
   ephemeralPubKey String
   viewTag         String
-  stealthPubKey   String
+  stealthPubKey   String?
+  signerAddress   String?
   label           String?
 
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   AddressSyncStatus AddressSyncStatus[]
-}
 
-model Transfer {
-  transferId String @id
-
-  fromUserId Int?
-  toUserId   Int?
-
-  fromUser User? @relation("outgoing", fields: [fromUserId], references: [id])
-  toUser   User? @relation("incoming", fields: [toUserId], references: [id])
-
-  fromAddress String?
-  toAddress   String?
-
-  maxBlockNumber BigInt
-
-  traces Trace[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  FromTraces Trace[] @relation("From")
+  ToTraces   Trace[] @relation("To")
 }
 
 model Trace {
-  id String @id
+  id Int @id @default(autoincrement())
 
-  from    String
-  to      String
+  from String
+  to   String
+
+  fromStealthAddress String?
+  toStealthAddress   String?
+
+  UserStealthAddressFrom UserStealthAddress? @relation(fields: [fromStealthAddress], references: [address], name: "From")
+  UserStealthAddressTo   UserStealthAddress? @relation(fields: [toStealthAddress], references: [address], name: "To")
+
   amount  BigInt
   tokenId String
-
-  transferId String
-  Transfer   Transfer @relation(fields: [transferId], references: [transferId])
 
   transactionHash String
 
   logIndex     Int? // For debugging purposes
   traceAddress String? // For debugging purposes
   Transaction  Transaction @relation(fields: [transactionHash], references: [hash])
+
+  chainId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([transactionHash, logIndex])
+  @@unique([transactionHash, traceAddress])
 }
 
 model AddressSyncStatus {
@@ -116,8 +109,10 @@ model AddressSyncStatus {
 model Transaction {
   hash String @id
 
-  blockHash String
-  block     Block  @relation(fields: [blockHash], references: [hash])
+  blockHash   String
+  block       Block   @relation(fields: [blockHash], references: [hash])
+  fromAddress String
+  toAddress   String?
 
   chainId Int
 
@@ -163,8 +158,9 @@ model SyncStatus {
 model Block {
   hash String @id
 
-  number  BigInt
-  chainId Int
+  number    BigInt
+  chainId   Int
+  timestamp BigInt
 
   Transaction Transaction[]
 

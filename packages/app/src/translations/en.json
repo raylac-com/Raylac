@@ -90,13 +90,7 @@
     "TransferHistory": {
       "title": "Transfer History"
     },
-    "RaylacTransferDetails": {
-      "title": "Transfer details"
-    },
-    "NativeTransferDetails": {
-      "title": "Transfer details"
-    },
-    "IncomingERC20TransferDetails": {
+    "TransferDetails": {
       "title": "Transfer details"
     },
     "BackupAccount": {

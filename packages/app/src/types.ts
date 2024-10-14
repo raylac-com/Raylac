@@ -8,3 +8,7 @@ export type User = RouterOutput['getUser'];
 export type TransferItem = RouterOutput['getTxHistory'][0];
 
 export type TraceItem = RouterOutput['getTransferDetails']['traces'][0];
+
+export type AddressOrUser =
+  | string
+  | { spendingPubKey?: string; profileImage?: string; name?: string };

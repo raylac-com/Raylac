@@ -30,7 +30,10 @@ const checkBalance = async ({
     chainId,
   });
 
-  expect(actualBalance).toBe(balance);
+  expect(
+    actualBalance,
+    `Token ${tokenId} balance mismatch for address ${address} on chain ${chainId}`
+  ).toBe(balance);
 };
 
 describe('getAddressBalancesPerChain', () => {

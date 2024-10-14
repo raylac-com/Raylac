@@ -64,8 +64,7 @@ export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
 };
 
 export const getQuickNodeRpcUrl = ({ chain }: { chain: Chain }) => {
-  const apiKey =
-    process.env.QUICKNODE_API_KEY || process.env.EXPO_PUBLIC_QUICKNODE_API_KEY;
+  const apiKey = process.env.QUICKNODE_API_KEY;
 
   if (!apiKey) {
     throw new Error('QUICKNODE_API_KEY is not set');
@@ -129,11 +128,7 @@ export const getPublicClient = ({
   const chain = getChainFromId(chainId);
   const client = createPublicClient({
     chain,
-    transport: http(
-      chainId === chains.anvil.id
-        ? 'http://127.0.0.1:8545'
-        : getAlchemyRpcUrl({ chain })
-    ),
+    transport: http(getAlchemyRpcUrl({ chain })),
   });
 
   return client as PublicClient<HttpTransport, Chain>;
@@ -147,6 +142,6 @@ export const getWalletClient = ({ chainId }: { chainId: number }) => {
   const chain = getChainFromId(chainId);
   return createWalletClient({
     chain,
-    transport: http(getAlchemyRpcUrl({ chain })),
+    transport: http(getQuickNodeRpcUrl({ chain })),
   });
 };

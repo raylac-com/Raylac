@@ -4,7 +4,14 @@ import TransferDetailListItem from '@/components/TransferDetailListItem';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import { theme } from '@/lib/theme';
 import { trpc } from '@/lib/trpc';
-import { shortenAddress } from '@/lib/utils';
+import {
+  getAvatarAddress,
+  getDisplayName,
+  getFinalTransfer,
+  getProfileImage,
+  getTransferType,
+  shortenAddress,
+} from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import { TraceItem } from '@/types';
 import { Entypo } from '@expo/vector-icons';
@@ -17,19 +24,15 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Hex } from 'viem';
-import { publicKeyToAddress } from 'viem/accounts';
 
-type Props = NativeStackScreenProps<
-  RootStackParamsList,
-  'RaylacTransferDetails'
->;
+type Props = NativeStackScreenProps<RootStackParamsList, 'TransferDetails'>;
 
 const TraceListItem = ({ trace }: { trace: TraceItem }) => {
   const from = trace.from as Hex;
   const to = trace.to as Hex;
   const amount = trace.amount as string;
-  const chainId = trace.Transaction?.block?.chainId;
-  const txHash = trace.Transaction.hash as Hex;
+  const chainId = trace.chainId;
+  const txHash = trace.transactionHash as Hex;
 
   const tokenId = trace.tokenId as string;
   const tokenMeta = getTokenMetadata(tokenId);
@@ -79,50 +82,44 @@ const TraceListItem = ({ trace }: { trace: TraceItem }) => {
   );
 };
 
-const tryPublicKeyToAddress = (publicKey: Hex | undefined) => {
-  if (!publicKey) {
-    return undefined;
-  }
-
-  return publicKeyToAddress(publicKey);
-};
-
-const RaylacTransferDetails = ({ route }: Props) => {
-  const { transferId } = route.params;
+const TransferDetails = ({ route }: Props) => {
+  const { txHash } = route.params;
   const { data: signedInUser } = useSignedInUser();
   const [showTraces, setShowTraces] = useState(false);
 
   const { data: transferDetail } = trpc.getTransferDetails.useQuery({
-    transferId,
+    txHash,
   });
 
-  const blockNumber = transferDetail?.maxBlockNumber;
-  const chainId = transferDetail?.traces[0].Transaction.block.chainId;
+  const blockTimestamp = new Date(
+    Number(transferDetail?.block?.timestamp) * 1000
+  );
+
   const tokenId = transferDetail?.traces[0].tokenId;
 
   const tokenMeta = getTokenMetadata(tokenId);
 
-  const { data: timestamp } = trpc.getBlockTimestamp.useQuery(
-    {
-      blockNumber,
-      chainId,
-    },
-    {
-      enabled: !!blockNumber && !!chainId,
-      throwOnError: false,
-    }
-  );
-
-  const type =
-    transferDetail?.fromUser?.id === signedInUser?.id ? 'outgoing' : 'incoming';
-
-  const transferAmount = transferDetail?.traces.reduce((acc, trace) => {
-    return acc + BigInt(trace.amount);
-  }, BigInt(0));
-
   if (!transferDetail) {
     return null;
   }
+
+  const type = getTransferType(transferDetail, signedInUser.id);
+
+  const finalTransfer = getFinalTransfer(transferDetail);
+
+  const transferAmount = finalTransfer.amount as string;
+
+  const from = finalTransfer.UserStealthAddressFrom?.user || finalTransfer.from;
+  const to = finalTransfer.UserStealthAddressTo?.user || finalTransfer.to;
+
+  const avatarAddress =
+    type === 'outgoing' ? getAvatarAddress(to) : getAvatarAddress(from);
+
+  const profileImage =
+    type === 'outgoing' ? getProfileImage(to) : getProfileImage(from);
+
+  const displayName =
+    type === 'outgoing' ? getDisplayName(to) : getDisplayName(from);
 
   return (
     <ScrollView
@@ -138,20 +135,8 @@ const RaylacTransferDetails = ({ route }: Props) => {
       }}
     >
       <FastAvatar
-        address={
-          type === 'outgoing'
-            ? tryPublicKeyToAddress(
-                transferDetail.toUser?.spendingPubKey as Hex
-              ) || transferDetail.toAddress
-            : tryPublicKeyToAddress(
-                transferDetail.fromUser?.spendingPubKey as Hex
-              ) || transferDetail.fromAddress
-        }
-        imageUrl={
-          type === 'outgoing'
-            ? transferDetail.toUser?.profileImage
-            : transferDetail.fromUser?.profileImage
-        }
+        address={avatarAddress}
+        imageUrl={profileImage}
         size={80}
       ></FastAvatar>
       <Text
@@ -161,9 +146,7 @@ const RaylacTransferDetails = ({ route }: Props) => {
         }}
       >
         {type === 'outgoing' ? 'Sent to ' : 'Received from '}
-        {type === 'outgoing'
-          ? `${transferDetail.toUser?.name || shortenAddress(transferDetail.toAddress as Hex)}`
-          : `${transferDetail.fromUser?.name || shortenAddress(transferDetail.fromAddress as Hex)}`}
+        {displayName}
       </Text>
       <Text
         style={{
@@ -181,7 +164,7 @@ const RaylacTransferDetails = ({ route }: Props) => {
           opacity: 0.5,
         }}
       >
-        {timestamp ? new Date(Number(timestamp) * 1000).toLocaleString() : ''}
+        {blockTimestamp.toLocaleString()}
       </Text>
       <Pressable
         style={{
@@ -208,7 +191,6 @@ const RaylacTransferDetails = ({ route }: Props) => {
           color={theme.gray}
         />
       </Pressable>
-
       {showTraces && (
         <View
           style={{
@@ -224,9 +206,7 @@ const RaylacTransferDetails = ({ route }: Props) => {
             }}
           >
             {type === 'outgoing' ? 'Sent to ' : 'Received from '}
-            {type === 'outgoing'
-              ? transferDetail.toUser?.username
-              : transferDetail.fromUser?.username}
+            {displayName}
           </Text>
           {transferDetail.traces.map((trace, i) => (
             <TraceListItem trace={trace} key={i} />
@@ -237,4 +217,4 @@ const RaylacTransferDetails = ({ route }: Props) => {
   );
 };
 
-export default RaylacTransferDetails;
+export default TransferDetails;

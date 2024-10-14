@@ -48,6 +48,7 @@ const saveBlock = async (block: Block, chainId: number) => {
         data: {
           hash: block.hash,
           number: Number(block.number),
+          timestamp: block.timestamp,
           chainId,
         },
       }),
@@ -56,6 +57,7 @@ const saveBlock = async (block: Block, chainId: number) => {
     const data = {
       hash: block.hash,
       number: Number(block.number),
+      timestamp: block.timestamp,
       chainId,
     };
     await prisma.block.upsert({
@@ -117,11 +119,22 @@ const syncBlocksForChain = async (chainId: number) => {
   });
 
   while (true) {
+    const latestSyncedBlock = await prisma.block.findFirst({
+      where: {
+        chainId,
+      },
+      orderBy: {
+        number: 'desc',
+      },
+    });
+
     const finalizedBlock = await publicClient.getBlock({
       blockTag: 'finalized',
     });
 
-    const fromBlock = finalizedBlock.number + BigInt(1);
+    const fromBlock = latestSyncedBlock
+      ? latestSyncedBlock.number + BigInt(1)
+      : finalizedBlock.number + BigInt(1);
 
     const latestBlock = await publicClient.getBlock({
       blockTag: 'latest',
@@ -131,7 +144,7 @@ const syncBlocksForChain = async (chainId: number) => {
       `Fetching ${latestBlock.number - fromBlock} blocks for chain ${chainId} from ${fromBlock.toLocaleString()} to ${latestBlock.number.toLocaleString()}`
     );
 
-    const chunkSize = BigInt(100);
+    const chunkSize = BigInt(10);
     for (
       let blockNumber = fromBlock;
       blockNumber <= latestBlock.number;
@@ -144,7 +157,7 @@ const syncBlocksForChain = async (chainId: number) => {
       });
     }
 
-    await sleep(30 * 1000);
+    await sleep(3 * 1000);
   }
 };
 

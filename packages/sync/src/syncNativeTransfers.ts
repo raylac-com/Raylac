@@ -1,8 +1,8 @@
 import {
   bigIntMin,
   getPublicClient,
-  getTraceId,
   traceFilter,
+  TraceResponseData,
 } from '@raylac/shared';
 import { getAddress, Hex, toHex } from 'viem';
 import prisma from './lib/prisma';
@@ -13,15 +13,89 @@ import {
   getLatestBlockHeight,
   getMinSynchedBlockForAddresses,
   updateAddressesSyncStatus,
-  upsertBlock,
   upsertTransaction,
 } from './utils';
 import logger from './lib/logger';
 
+export const handleNewTrace = async ({
+  trace,
+  chainId,
+}: {
+  trace: TraceResponseData;
+  chainId: number;
+}) => {
+  if (trace.type === 'create') {
+    // `type` can be either 'call' or 'create'.
+    // Skip all 'create' traces.
+    return;
+  }
+
+  if (trace.action.value === '0x0') {
+    // Skip all traces with a zero value
+    return;
+  }
+
+  if (trace.action.callType !== 'call') {
+    // Skip all non-call traces
+    return;
+  }
+
+  await upsertTransaction({
+    txHash: trace.transactionHash,
+    chainId,
+  });
+
+  const traceAddress = trace.traceAddress.join('_');
+
+  const from = getAddress(trace.action.from);
+  const to = getAddress(trace.action.to);
+
+  const data: Prisma.TraceCreateInput = {
+    from,
+    to,
+    amount: BigInt(trace.action.value),
+    tokenId: 'eth',
+    traceAddress,
+    Transaction: {
+      connect: {
+        hash: trace.transactionHash,
+      },
+    },
+    chainId,
+  };
+
+  const toUserExists = await prisma.userStealthAddress.findUnique({
+    where: { address: to },
+  });
+
+  if (toUserExists) {
+    data.UserStealthAddressTo = { connect: { address: to } };
+  }
+
+  const fromUserExists = await prisma.userStealthAddress.findUnique({
+    where: { address: from },
+  });
+
+  if (fromUserExists) {
+    data.UserStealthAddressFrom = { connect: { address: from } };
+  }
+
+  await prisma.trace.upsert({
+    create: data,
+    update: data,
+    where: {
+      transactionHash_traceAddress: {
+        transactionHash: trace.transactionHash,
+        traceAddress,
+      },
+    },
+  });
+};
+
 /**
- * Sync incoming native transfers for a batch of addresses
+ * Sync native transfers for a batch of addresses
  */
-const batchSyncIncomingNativeTransfers = async ({
+const batchSyncNativeTransfers = async ({
   addresses,
   fromBlock,
   toBlock,
@@ -34,123 +108,28 @@ const batchSyncIncomingNativeTransfers = async ({
 }) => {
   console.time(`trace_filter ${chainId}`);
   logger.info(`tracing from ${fromBlock} to ${toBlock} on chain ${chainId}`);
-  const traces = await traceFilter({
+  const incomingTraces = await traceFilter({
     fromBlock: toHex(fromBlock),
     toBlock: toHex(toBlock),
     toAddress: addresses,
     chainId,
   });
+
+  const outgoingTraces = await traceFilter({
+    fromBlock: toHex(fromBlock),
+    toBlock: toHex(toBlock),
+    fromAddress: addresses,
+    chainId,
+  });
+
   console.timeEnd(`trace_filter ${chainId}`);
 
-  for (const trace of traces) {
-    if (trace.type === 'create') {
-      // `type` can be either 'call' or 'create'.
-      // Skip all 'create' traces.
-      continue;
-    }
-
-    if (trace.action.value === '0x0') {
-      // Skip all traces with a zero value
-      continue;
-    }
-
-    await upsertBlock({
-      blockNumber: BigInt(trace.blockNumber),
-      blockHash: trace.blockHash,
-      chainId,
-    });
-
-    await upsertTransaction({
-      txHash: trace.transactionHash,
-      blockHash: trace.blockHash,
-      chainId,
-    });
-
-    const traceId = getTraceId({
-      txHash: trace.transactionHash,
-      traceAddress: trace.traceAddress,
-    });
-
-    const transferId = traceId;
-
-    const data: Prisma.TransferCreateInput = {
-      transferId,
-      maxBlockNumber: trace.blockNumber,
-    };
-
-    const fromUser = await prisma.userStealthAddress.findUnique({
-      select: {
-        userId: true,
-      },
-      where: {
-        address: getAddress(trace.action.from),
-      },
-    });
-
-    if (fromUser) {
-      // The transfer should be indexed by `syncUserOps`
-      // so we can skip it here
-      continue;
-    }
-
-    const toUser = await prisma.userStealthAddress.findUnique({
-      select: {
-        userId: true,
-      },
-      where: {
-        address: getAddress(trace.action.to),
-      },
-    });
-
-    data.fromAddress = getAddress(trace.action.from);
-
-    if (toUser) {
-      data.toUser = {
-        connect: {
-          id: toUser.userId,
-        },
-      };
-    } else {
-      data.toAddress = getAddress(trace.action.to);
-    }
-
-    await prisma.transfer.upsert({
-      create: data,
-      update: data,
-      where: {
-        transferId,
-      },
-    });
-
-    const traceUpsertArgs: Prisma.TraceCreateInput = {
-      id: traceId,
-      from: getAddress(trace.action.from),
-      to: getAddress(trace.action.to),
-      amount: BigInt(trace.action.value),
-      tokenId: 'eth',
-      Transfer: {
-        connect: {
-          transferId,
-        },
-      },
-      Transaction: {
-        connect: {
-          hash: trace.transactionHash,
-        },
-      },
-    };
-
-    await prisma.trace.upsert({
-      create: traceUpsertArgs,
-      update: traceUpsertArgs,
-      where: {
-        id: traceId,
-      },
-    });
+  for (const trace of [...incomingTraces, ...outgoingTraces]) {
+    await handleNewTrace({ trace, chainId });
   }
 };
 
-const syncIncomingNativeTransfers = async () => {
+const syncNativeTransfers = async () => {
   while (true) {
     const addresses = await prisma.userStealthAddress.findMany({
       select: {
@@ -169,7 +148,7 @@ const syncIncomingNativeTransfers = async () => {
           throw new Error('Finalized block number is null');
         }
 
-        // Sync incoming transfers in 100 address batches
+        // Sync native transfers in 100 address batches
         for (let i = 0; i < addresses.length; i += 100) {
           const batch = addresses
             .slice(i, i + 100)
@@ -203,7 +182,7 @@ const syncIncomingNativeTransfers = async () => {
             continue;
           }
 
-          await batchSyncIncomingNativeTransfers({
+          await batchSyncNativeTransfers({
             addresses: batch,
             fromBlock,
             toBlock,
@@ -224,4 +203,4 @@ const syncIncomingNativeTransfers = async () => {
   }
 };
 
-export default syncIncomingNativeTransfers;
+export default syncNativeTransfers;

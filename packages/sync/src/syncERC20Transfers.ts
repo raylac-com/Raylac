@@ -1,17 +1,89 @@
-import { bigIntMin, getPublicClient, getTraceId } from '@raylac/shared';
+import { bigIntMin, ERC20Abi, getPublicClient } from '@raylac/shared';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
-import { getAddress, Hex, parseAbiItem } from 'viem';
+import { decodeEventLog, getAddress, Hex, Log, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
 import { sleep } from './lib/utils';
 import {
   getLatestBlockHeight,
   getMinSynchedBlockForAddresses,
   updateAddressesSyncStatus,
+  upsertTransaction,
 } from './utils';
 import logger from './lib/logger';
 import { Prisma } from '@prisma/client';
 
-const batchSyncIncomingERC20Transfers = async ({
+export const handleERC20TransferLog = async ({
+  log,
+  tokenId,
+  chainId,
+}: {
+  log: Log<bigint, number, false>;
+  tokenId: string;
+  chainId: number;
+}) => {
+  await upsertTransaction({
+    txHash: log.transactionHash,
+    chainId,
+  });
+
+  const decodedLog = decodeEventLog({
+    abi: ERC20Abi,
+    data: log.data,
+    topics: log.topics,
+  });
+
+  if (decodedLog.eventName !== 'Transfer') {
+    throw new Error('Event name is not `Transfer`');
+  }
+
+  const { args } = decodedLog;
+
+  const from = getAddress(args.from);
+  const to = getAddress(args.to);
+
+  const data: Prisma.TraceCreateInput = {
+    from,
+    to,
+    tokenId,
+    amount: args.value,
+    logIndex: log.logIndex,
+    Transaction: {
+      connect: {
+        hash: log.transactionHash,
+      },
+    },
+    chainId,
+  };
+
+  const toUserExists = await prisma.userStealthAddress.findUnique({
+    where: { address: to },
+  });
+
+  if (toUserExists) {
+    data.UserStealthAddressTo = { connect: { address: to } };
+  }
+
+  const fromUserExists = await prisma.userStealthAddress.findUnique({
+    where: { address: from },
+  });
+
+  if (fromUserExists) {
+    data.UserStealthAddressFrom = { connect: { address: from } };
+  }
+
+  await prisma.trace.upsert({
+    create: data,
+    update: data,
+    where: {
+      transactionHash_logIndex: {
+        transactionHash: log.transactionHash,
+        logIndex: log.logIndex,
+      },
+    },
+  });
+};
+
+const batchSyncERC20Transfers = async ({
   addresses,
   fromBlock,
   toBlock,
@@ -46,7 +118,7 @@ const batchSyncIncomingERC20Transfers = async ({
     `Syncing ERC20 transfers for ${addresses.length} addresses. ${fromBlock} -> ${toBlock} on chain ${chainId}`
   );
 
-  const logs = await publicClient.getLogs({
+  const incomingLogs = await publicClient.getLogs({
     address: tokenAddress.address,
     event: parseAbiItem(
       'event Transfer(address indexed from, address indexed to, uint256 value)'
@@ -58,115 +130,20 @@ const batchSyncIncomingERC20Transfers = async ({
     toBlock,
   });
 
-  for (const log of logs) {
-    // TODO: User the `upsertTranasction` function
-    await prisma.transaction.upsert({
-      create: {
-        hash: log.transactionHash,
-        chainId,
-        block: {
-          connectOrCreate: {
-            create: {
-              number: log.blockNumber,
-              hash: log.blockHash,
-              chainId,
-            },
-            where: {
-              hash: log.blockHash,
-            },
-          },
-        },
-      },
-      update: {},
-      where: {
-        hash: log.transactionHash,
-      },
-    });
+  const outgoingLogs = await publicClient.getLogs({
+    address: tokenAddress.address,
+    event: parseAbiItem(
+      'event Transfer(address indexed from, address indexed to, uint256 value)'
+    ),
+    args: {
+      from: addresses,
+    },
+    fromBlock,
+    toBlock,
+  });
 
-    const traceId = getTraceId({
-      txHash: log.transactionHash,
-      traceAddress: log.logIndex,
-    });
-
-    const transferId = traceId;
-
-    const data: Prisma.TransferCreateInput = {
-      transferId,
-      maxBlockNumber: log.blockNumber,
-    };
-
-    const fromAddress = getAddress(log.args.from!);
-    const toAddress = getAddress(log.args.to!);
-
-    const fromUser = await prisma.userStealthAddress.findUnique({
-      select: {
-        userId: true,
-      },
-      where: {
-        address: fromAddress,
-      },
-    });
-
-    if (fromUser) {
-      // The transfer should be indexed by `syncUserOps`
-      // so we can skip it here
-      continue;
-    }
-
-    const toUser = await prisma.userStealthAddress.findUnique({
-      select: {
-        userId: true,
-      },
-      where: {
-        address: toAddress,
-      },
-    });
-
-    data.fromAddress = fromAddress;
-
-    if (toUser) {
-      data.toUser = {
-        connect: {
-          id: toUser.userId,
-        },
-      };
-    } else {
-      data.toAddress = toAddress;
-    }
-
-    await prisma.transfer.upsert({
-      create: data,
-      update: data,
-      where: {
-        transferId,
-      },
-    });
-
-    const traceUpsertArgs: Prisma.TraceCreateInput = {
-      id: traceId,
-      tokenId,
-      from: fromAddress,
-      to: toAddress,
-      amount: BigInt(log.args.value!),
-      Transfer: {
-        connect: {
-          transferId,
-        },
-      },
-      Transaction: {
-        connect: {
-          hash: log.transactionHash,
-        },
-      },
-    };
-
-    await prisma.trace.upsert({
-      create: traceUpsertArgs,
-      update: traceUpsertArgs,
-      where: {
-        id: traceId,
-      },
-    });
+  for (const log of [...incomingLogs, ...outgoingLogs]) {
+    await handleERC20TransferLog({ log, tokenId, chainId });
   }
 };
 
@@ -188,7 +165,7 @@ const syncERC20Transfers = async () => {
             blockTag: 'finalized',
           });
 
-          // Sync incoming transfers in 100 address batches
+          // Sync erc20 transfers in 100 address batches
           for (let i = 0; i < addresses.length; i += 100) {
             const batch = addresses
               .slice(i, i + 100)
@@ -228,7 +205,7 @@ const syncERC20Transfers = async () => {
             ) {
               const toBlock = bigIntMin([fromBlock + chunkSize, latestBlock]);
 
-              await batchSyncIncomingERC20Transfers({
+              await batchSyncERC20Transfers({
                 addresses: batch,
                 fromBlock,
                 toBlock,

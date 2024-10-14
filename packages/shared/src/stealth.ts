@@ -49,17 +49,16 @@ export const recoveryStealthPrivKey = (input: {
 };
 
 /**
- * Check if the given stealth public key matches the given spending and viewing public keys.
+ * Check if the given signer address matches the given spending and viewing public keys.
  */
 export const checkStealthAddress = (input: {
   ephemeralPubKey: Hex;
-  stealthPubKey: Hex;
+  signerAddress: Hex;
   spendingPubKey: Hex;
   viewTag: Hex;
   viewingPrivKey: Hex;
 }): boolean => {
   const ephemeralPubKey = hexToProjectivePoint(input.ephemeralPubKey);
-  const stealthPubKey = hexToProjectivePoint(input.stealthPubKey);
   const spendingPubKey = hexToProjectivePoint(input.spendingPubKey);
   const viewingPrivKey = hexToBigInt(input.viewingPrivKey);
   const viewTag = input.viewTag;
@@ -69,15 +68,18 @@ export const checkStealthAddress = (input: {
   const secretHashHex = keccak256(`0x${secret.toHex()}`);
   const secretHash = BigInt(secretHashHex);
 
-  if (viewTag !== secretHashHex.slice(2, 4)) {
+  if (viewTag !== `0x${secretHashHex.slice(2, 4)}`) {
     return false;
   }
 
   const sH = secp.ProjectivePoint.fromAffine(g).multiply(secretHash);
 
   const recoveredPubKey = spendingPubKey.add(sH);
+  const recoveredSignerAddress = publicKeyToAddress(
+    projectivePointToHex(recoveredPubKey)
+  );
 
-  return recoveredPubKey.equals(stealthPubKey);
+  return recoveredSignerAddress === input.signerAddress;
 };
 
 /**
@@ -139,15 +141,15 @@ export const generateStealthAddress = (input: {
   const stealthPubKey = spendingPubKey.add(sH);
   const stealthPubKeyHex = projectivePointToHex(stealthPubKey);
 
-  const stealthSigner = publicKeyToAddress(stealthPubKeyHex);
+  const signerAddress = publicKeyToAddress(stealthPubKeyHex);
 
   const address = getSenderAddress({
-    stealthSigner,
+    stealthSigner: signerAddress,
   });
 
   return {
     address,
-    stealthPubKey: stealthPubKeyHex,
+    signerAddress,
     ephemeralPubKey: projectivePointToHex(ephemeralPubKey),
     viewTag,
   };

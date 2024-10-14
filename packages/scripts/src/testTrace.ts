@@ -5,40 +5,28 @@ import {
   traceTransaction,
 } from '@raylac/shared';
 import { base } from 'viem/chains';
-import { decodeFunctionData } from 'viem';
+import { decodeFunctionData, getAddress } from 'viem';
 
 const testTrace = async () => {
   const txHash =
-    '0x01c834033fd021c75937bd30f87bd4753348f99b921fdfbfd96b5baaa63be1be';
+    '0x8d478251100e8ee3a2fd094d453a903409ab81c5abc1d2265a96deb1dcf53f04';
 
   const traces = await traceTransaction({
     txHash: txHash,
     chainId: base.id,
   });
 
-  console.log(traces);
-
-  const callsFromEntryPoint = traces // Get the `type: call` traces
-    .filter(trace => trace.type === 'call')
-    // Get the traces that are possibly function calls (i.e., the `input` field is not `0x`)
-    .filter(trace => trace.action.input !== '0x')
-    .filter(trace => trace.action.callType === 'call')
-    .filter(trace => trace.action.from === ENTRY_POINT_ADDRESS.toLowerCase());
-
-  for (const trace of callsFromEntryPoint) {
-    try {
-      const decoded = decodeFunctionData({
-        abi: RaylacAccountAbi,
-        data: trace.action.input,
-      });
-      if (decoded.functionName === 'execute') {
-        console.log(trace);
-        console.log(decoded);
-      }
-    } catch (err) {
-      // Do nothing
-    }
-  }
+  console.log(
+    traces
+      .filter(trace => trace.type === 'call')
+      .filter(trace => trace.action.callType === 'call')
+      .filter(trace => trace.action.input === '0x')
+      .map(trace => ({
+        from: getAddress(trace.action.from),
+        to: getAddress(trace.action.to),
+        value: trace.action.value,
+      }))
+  );
 
   //  console.log(callsFromEntryPoint);
 };

@@ -1,12 +1,15 @@
 import { Prisma, SyncJob } from '@prisma/client';
 import prisma from './lib/prisma';
-import { Hex, ParseEventLogsReturnType } from 'viem';
+import { Hex, parseAbiItem, ParseEventLogsReturnType } from 'viem';
 import {
   ACCOUNT_IMPL_DEPLOYED_BLOCK,
   ERC20Abi,
-  getTokenId,
-  getTraceId,
+  getPublicClient,
 } from '@raylac/shared';
+
+export const announcementAbiItem = parseAbiItem(
+  'event Announcement(uint256 indexed schemeId, address indexed stealthAddress, address indexed caller, bytes viewTag, bytes ephemeralPubKey)'
+);
 
 export const updateJobLatestSyncedBlock = async ({
   chainId,
@@ -34,65 +37,6 @@ export const updateJobLatestSyncedBlock = async ({
     },
   });
 };
-
-/*
-export const getReorgedTxs = async (
-  expectedBlockHashes: {
-    blockNumber: bigint;
-    blockHash: Hex;
-    chainId: number;
-  }[]
-) => {
-  const txs = await prisma.transaction.findMany({
-    select: {
-      hash: true,
-      blockNumber: true,
-      blockHash: true,
-    },
-    where: {
-      blockNumber: {
-        in: expectedBlockHashes.map(tx => tx.blockNumber),
-      },
-    },
-  });
-
-  return txs.filter(tx => {
-    const expectedBlockHash = expectedBlockHashes.find(
-      e => e.blockNumber === tx.blockNumber
-    )?.blockHash;
-
-    if (!expectedBlockHash) {
-      throw new Error(
-        `Expected block hash not found for block number ${tx.blockNumber}`
-      );
-    }
-
-    return tx.blockHash !== expectedBlockHash;
-  });
-};
-
-export const buildReorgedTxsWhereClause = (
-  txs: {
-    blockNumber: bigint;
-    blockHash: Hex;
-    chainId: number;
-  }[]
-) => {
-  const blocks = txs.map(tx => ({
-    AND: {
-      blockNumber: tx.blockNumber,
-      blockHash: tx.blockHash,
-      chainId: tx.chainId,
-    },
-  }));
-
-  return {
-    NOT: {
-      OR: blocks,
-    },
-  };
-};
-*/
 
 export const getLatestBlockHeight = async (chainId: number) => {
   const block = await prisma.block.findFirst({
@@ -211,114 +155,58 @@ export const updateAddressesSyncStatus = async ({
   });
 };
 
-export const upsertBlock = ({
-  blockNumber,
-  blockHash,
-  chainId,
-}: {
-  blockNumber: bigint;
-  blockHash: Hex;
-  chainId: number;
-}) => {
-  const data: Prisma.BlockCreateInput = {
-    number: blockNumber,
-    hash: blockHash,
-    chainId,
-  };
-
-  return prisma.block.upsert({
-    create: data,
-    update: data,
-    where: {
-      hash: blockHash,
-    },
-  });
-};
-
-export const upsertTransaction = ({
+export const upsertTransaction = async ({
   txHash,
-  blockHash,
   chainId,
 }: {
   txHash: Hex;
-  blockHash: Hex;
   chainId: number;
 }) => {
+  const client = getPublicClient({ chainId });
+
+  const txExists = await prisma.transaction.findUnique({
+    where: {
+      hash: txHash,
+    },
+  });
+
+  if (txExists) {
+    return;
+  }
+
+  const tx = await client.getTransaction({
+    hash: txHash,
+  });
+
+  const block = await client.getBlock({
+    blockNumber: tx.blockNumber,
+  });
+
   const data: Prisma.TransactionCreateInput = {
     hash: txHash,
+    fromAddress: tx.from,
+    toAddress: tx.to,
     chainId,
     block: {
-      connect: {
-        hash: blockHash,
+      connectOrCreate: {
+        where: {
+          hash: tx.blockHash,
+        },
+        create: {
+          number: tx.blockNumber,
+          hash: tx.blockHash,
+          timestamp: block.timestamp,
+          chainId,
+        },
       },
     },
   };
 
-  return prisma.transaction.upsert({
+  await prisma.transaction.upsert({
     create: data,
     update: data,
     where: {
       hash: txHash,
     },
   });
-};
-
-/**
- * Save an ERC20 transfer log to the database.
- * Throws an error if the log is not a Transfer event log.
- */
-export const saveERC20TransferLog = ({
-  log,
-  chainId,
-  traceAddress,
-  executionTag,
-}: {
-  log: ERC20TransferLogType;
-  chainId: number;
-  traceAddress: number[];
-  executionTag: Hex;
-}) => {
-  const tokenId = getTokenId({
-    chainId,
-    tokenAddress: log.address,
-  });
-
-  const from = log.args.from;
-  const to = log.args.to;
-  const amount = log.args.value;
-
-  const transferId = executionTag;
-
-  const traceId = getTraceId({
-    txHash: log.transactionHash,
-    traceAddress,
-  });
-
-  const traceData: Prisma.TraceCreateInput = {
-    id: traceId,
-    from: from,
-    to: to,
-    amount,
-    tokenId,
-    Transfer: {
-      connect: {
-        transferId,
-      },
-    },
-    Transaction: {
-      connect: {
-        hash: log.transactionHash,
-      },
-    },
-  };
-
-  const upsertTrace = prisma.trace.upsert({
-    create: traceData,
-    update: traceData,
-    where: {
-      id: traceId,
-    },
-  });
-
-  return upsertTrace;
 };

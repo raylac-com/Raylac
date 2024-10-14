@@ -18,40 +18,36 @@ const getTokenBalances = async ({
   const tokenBalances = await prisma.$queryRaw<TokenBalanceQueryResult[]>`
     WITH incoming_transfers AS (
 	SELECT
-		tc. "tokenId",
-		SUM(tc.amount) AS "amount"
+		sum(amount) AS amount,
+		"tokenId"
 	FROM
-		"Transfer" t
-	LEFT JOIN "Trace" tc ON t. "transferId" = tc. "transferId"
-	LEFT JOIN "Transaction" tx ON tc. "transactionHash" = tx.hash
-	LEFT JOIN "Block" b ON tx. "blockHash" = b.hash
-    WHERE
-        t. "toUserId" = ${userId}
-        AND b. "chainId" in(${Prisma.join(chainIds)})
-    GROUP BY
-        "tokenId"
-    ),
-    outgoing_transfers AS (
+		"Trace" t
+	LEFT JOIN "UserStealthAddress" u ON t. "toStealthAddress" = u.address
+        WHERE
+            u. "userId" = ${userId}
+            AND "chainId" in (${Prisma.join(chainIds)})
+        GROUP BY
+            "tokenId"
+        ),
+        outgoing_transfers AS (
+            SELECT
+                sum(amount) AS amount,
+                "tokenId"
+            FROM
+                "Trace" t
+            LEFT JOIN "UserStealthAddress" u ON t. "fromStealthAddress" = u.address
+        WHERE
+            u. "userId" = ${userId}
+            AND "chainId" in (${Prisma.join(chainIds)})
+        GROUP BY
+            "tokenId"
+        )
         SELECT
-            tc. "tokenId",
-            SUM(tc.amount) AS "amount"
+            COALESCE(i. "tokenId", o. "tokenId") AS "tokenId",
+            COALESCE(i.amount, 0) - COALESCE(o.amount, 0) AS balance
         FROM
-            "Transfer" t
-        LEFT JOIN "Trace" tc ON t. "transferId" = tc. "transferId"
-        LEFT JOIN "Transaction" tx ON tc. "transactionHash" = tx.hash
-        LEFT JOIN "Block" b ON tx. "blockHash" = b.hash
-    WHERE
-        t. "fromUserId" = ${userId}
-        AND b. "chainId" in(${Prisma.join(chainIds)})
-    GROUP BY
-        "tokenId"
-    )
-    SELECT
-        COALESCE(i. "tokenId", o. "tokenId") AS "tokenId",
-        COALESCE(i.amount, 0) - COALESCE(o.amount, 0) AS balance
-    FROM
-        incoming_transfers i
-        LEFT JOIN outgoing_transfers o ON i. "tokenId" = o. "tokenId"
+            incoming_transfers i
+            LEFT JOIN outgoing_transfers o ON i. "tokenId" = o. "tokenId"
   `;
 
   return tokenBalances;

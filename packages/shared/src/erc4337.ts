@@ -26,9 +26,8 @@ import {
 import axios from 'axios';
 import RaylacPaymasterAbi from './abi/RaylacPaymasterAbi';
 import { getSenderAddress, recoveryStealthPrivKey } from './stealth';
-import { increaseByPercent } from './utils';
+import { increaseByPercent, sleep } from './utils';
 import { signMessage } from 'viem/accounts';
-import { handleOps } from './bundler';
 
 /**
  * Get the init code for creating a stealth contract account
@@ -45,11 +44,23 @@ export const getInitCode = ({ stealthSigner }: { stealthSigner: Hex }) => {
   return initCode;
 };
 
+/** preVerificationGas for a transfer operation */
+export const TRANSFER_OP_PRE_VERIFICATION_GAS = toHex(1_500_000);
+
+/** callGasLimit for a transfer operation */
+export const TRANSFER_OP_CALL_GAS_LIMIT = toHex(50_000);
+
+/** verificationGasLimit for a transfer operation */
+export const TRANSFER_OP_VERIFICATION_GAS_LIMIT = toHex(70_000);
+
+/** verificationGasLimit for a transfer operation when the sender needs to be deployed */
+export const TRANSFER_OP_INIT_VERIFICATION_GAS_LIMIT = toHex(210_000);
+
 /**
  * Build an unsigned user operation.
  * The sender of the operation is determined by the given stealthSigner.
  */
-export const buildUserOp = async ({
+export const buildUserOp = ({
   client,
   stealthSigner,
   to,
@@ -67,7 +78,7 @@ export const buildUserOp = async ({
   tag: Hex;
   gasInfo: ChainGasInfo[];
   nonce: number | null;
-}): Promise<UserOperation> => {
+}): UserOperation => {
   const chainId = client.chain.id;
 
   const chainGasInfo = gasInfo.find(gasInfo => gasInfo.chainId === chainId);
@@ -111,36 +122,19 @@ export const buildUserOp = async ({
     nonce: toHex(nextNonce),
     initCode: nonce === null ? initCode : '0x',
     callData,
-    callGasLimit: toHex(BigInt(0)),
-    verificationGasLimit: toHex(BigInt(0)),
-    preVerificationGas: toHex(BigInt(0)),
+    preVerificationGas: TRANSFER_OP_PRE_VERIFICATION_GAS,
+    callGasLimit: TRANSFER_OP_CALL_GAS_LIMIT,
+    // Use a higher gas limit for the verification step if the sender needs to be deployed
+    verificationGasLimit:
+      nonce === null
+        ? TRANSFER_OP_INIT_VERIFICATION_GAS_LIMIT
+        : TRANSFER_OP_VERIFICATION_GAS_LIMIT,
     maxFeePerGas: toHex(maxFeePerGas),
     maxPriorityFeePerGas: toHex(maxPriorityFeePerGasBuffed),
     paymasterAndData: '0x',
-    // Dummy signature as specified by Alchemy https://docs.alchemy.com/reference/eth-estimateuseroperationgas
-    signature:
-      '0xfffffffffffffffffffffffffffffff0000000000000000000000000000000007aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1c',
+    signature: '0x',
     chainId: client.chain.id,
   };
-
-  /*
-  const gasEstimation = await estimateUserOperationGas({
-    client,
-    userOp,
-  });
-  console.log('Gas estimation:', gasEstimation);
-  */
-
-  const gasEstimation = {
-    preVerificationGas: toHex(1_500_000),
-    callGasLimit: toHex(50_000),
-    // Use a higher gas limit for the verification step if the sender needs to be deployed
-    verificationGasLimit: nonce === null ? toHex(210_000) : toHex(70_000),
-  };
-
-  userOp.callGasLimit = gasEstimation.callGasLimit;
-  userOp.verificationGasLimit = gasEstimation.verificationGasLimit;
-  userOp.preVerificationGas = gasEstimation.preVerificationGas;
 
   return userOp;
 };
@@ -420,26 +414,6 @@ export const rundlerMaxPriorityFeePerGas = async ({
 };
 
 /**
- * Send a user operation to the Alchemy bundler.
- * Calls the `eth_sendUserOperation` JSON-RPC method
- * @returns user operation hash
- */
-export const sendUserOperation = async ({
-  client,
-  userOp,
-}: {
-  client: PublicClient<HttpTransport, Chain>;
-  userOp: UserOperation;
-}): Promise<Hex> => {
-  const userOpHashes = await handleOps({
-    userOps: [userOp],
-    chainId: client.chain.id,
-  });
-
-  return userOpHashes[0];
-};
-
-/**
  * Get a user operation by its hash.
  * Calls the `eth_getUserOperationByHash` JSON-RPC method
  */
@@ -593,6 +567,7 @@ export const submitUserOpWithRetry = async ({
 
       errAfterRetries = error;
 
+      await sleep(1500);
       retries++;
     }
   }
