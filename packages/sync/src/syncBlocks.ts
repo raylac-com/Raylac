@@ -119,11 +119,22 @@ const syncBlocksForChain = async (chainId: number) => {
   });
 
   while (true) {
+    const latestSyncedBlock = await prisma.block.findFirst({
+      where: {
+        chainId,
+      },
+      orderBy: {
+        number: 'desc',
+      },
+    });
+
     const finalizedBlock = await publicClient.getBlock({
       blockTag: 'finalized',
     });
 
-    const fromBlock = finalizedBlock.number + BigInt(1);
+    const fromBlock = latestSyncedBlock
+      ? latestSyncedBlock.number + BigInt(1)
+      : finalizedBlock.number + BigInt(1);
 
     const latestBlock = await publicClient.getBlock({
       blockTag: 'latest',
@@ -146,7 +157,7 @@ const syncBlocksForChain = async (chainId: number) => {
       });
     }
 
-    await sleep(60 * 1000);
+    await sleep(2 * 1000);
   }
 };
 
