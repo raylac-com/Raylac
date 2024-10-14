@@ -19,7 +19,10 @@ const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
   transports: useDatadog
-    ? [new winston.transports.Http(httpTransportOptions)]
+    ? [
+        new winston.transports.Http(httpTransportOptions),
+        new winston.transports.Console(),
+      ]
     : [new winston.transports.Console()],
 });
 
