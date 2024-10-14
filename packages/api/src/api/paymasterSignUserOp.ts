@@ -7,7 +7,7 @@ import {
   getPaymasterMessageHash,
 } from '@raylac/shared';
 import { signMessage } from 'viem/accounts';
-import { Hex, parseGwei, toHex } from 'viem';
+import { Hex, parseGwei } from 'viem';
 import logger from '../lib/logger';
 
 const PAYMASTER_PRIVATE_KEY = process.env.PAYMASTER_PRIVATE_KEY;
@@ -17,7 +17,7 @@ if (!PAYMASTER_PRIVATE_KEY) {
 }
 
 /** Max fee (base + priority) that the paymaster will accept */
-const maxFee = parseGwei('0.01');
+const maxFee = parseGwei('0.05');
 
 /**
  * Check that a user operation has values as expected.
@@ -50,10 +50,12 @@ const validateUserOp = (userOp: UserOperation) => {
     throw new Error('Invalid callGasLimit');
   }
 
-  logger.info('userOp.maxFeePerGas : maxFee', userOp.maxFeePerGas, maxFee);
+  logger.info(`userOp.maxFeePerGas: ${BigInt(userOp.maxFeePerGas)} ${maxFee}`);
 
-  if (userOp.maxFeePerGas > toHex(maxFee)) {
-    throw new Error('maxFeePerGas exceeds maxFee');
+  if (BigInt(userOp.maxFeePerGas) > maxFee) {
+    throw new Error(
+      `maxFeePerGas exceeds maxFee ${BigInt(userOp.maxFeePerGas)} > ${maxFee}`
+    );
   }
 };
 
