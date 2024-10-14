@@ -1,7 +1,12 @@
 name: preview
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [opened, synchronize, reopened]
+    paths:
+      - packages/shared/src/**
+      - packages/sync/src/**
+      - packages/api/src/**
+      - packages/app/src/**
   workflow_dispatch:
 
 jobs:
