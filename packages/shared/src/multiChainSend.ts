@@ -322,7 +322,7 @@ export const buildMultiChainSendRequestBody = ({
       throw new Error(`Stealth address not found for ${input.address}`);
     }
 
-    const nonce = addressNonces[input.address];
+    const nonce = addressNonces[input.address] ?? null;
 
     // Build a standard transfer user operation
     const userOp = buildTransferUseOp({
@@ -357,7 +357,7 @@ export const buildMultiChainSendRequestBody = ({
     tokenAddress,
     amount,
     chainId: chainId,
-    nonce: addressNonces[consolidateTo.address],
+    nonce: addressNonces[consolidateTo.address] ?? null,
     tag,
     gasInfo,
   });
