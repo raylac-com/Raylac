@@ -2,6 +2,12 @@ on:
   push:
     branches:
       - main
+    paths:
+      - packages/shared/src/**
+      - packages/sync/src/**
+      - packages/api/src/**
+      - packages/app/src/**
+      - packages/db/**
 jobs:
   update:
     runs-on: ubuntu-latest
