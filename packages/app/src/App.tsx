@@ -11,7 +11,11 @@ import SignIn from './screens/SignIn';
 import { NavigationContainer, ThemeProvider } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc, rpcLinks } from './lib/trpc';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQueryClient,
+} from '@tanstack/react-query';
 import Deposit from './screens/Deposit';
 import ConfirmSend from './screens/Send/ConfirmSend';
 import Account from './screens/Account';
@@ -85,6 +89,12 @@ const Screens = () => {
   const { t } = useTranslation();
 
   const { data: signedInUser, isLoading: isLoadingUser } = useSignedInUser();
+
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    queryClient.invalidateQueries();
+  }, []);
 
   const navigation = useTypedNavigation();
 
