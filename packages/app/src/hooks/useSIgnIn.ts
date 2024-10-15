@@ -1,5 +1,5 @@
 import { saveAuthToken } from '@/lib/auth';
-import { saveMnemonic, setBackupVerificationStatus } from '@/lib/key';
+import { saveMnemonicAndKeys, setBackupVerificationStatus } from '@/lib/key';
 import { trpc } from '@/lib/trpc';
 import { setSignedInUser } from '@/lib/utils';
 import userKeys from '@/queryKeys/userKeys';
@@ -7,6 +7,7 @@ import {
   buildSiweMessage,
   getPublicClient,
   getSpendingPrivKey,
+  sleep,
 } from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -18,15 +19,14 @@ export const useSignIn = () => {
 
   return useMutation({
     mutationFn: async ({ mnemonic }: { mnemonic: string }) => {
-      const spendingAccount = privateKeyToAccount(
-        await getSpendingPrivKey(mnemonic)
-      );
-
+      await sleep(100);
       const issuedAt = new Date();
 
       const publicClient = getPublicClient({
         chainId: mainnet.id,
       });
+
+      const spendingAccount = privateKeyToAccount(getSpendingPrivKey(mnemonic));
 
       const message = buildSiweMessage({
         issuedAt,
@@ -43,7 +43,7 @@ export const useSignIn = () => {
         }),
       });
 
-      await saveMnemonic(mnemonic);
+      await saveMnemonicAndKeys(mnemonic);
       await setSignedInUser(userId);
       await saveAuthToken(token);
 

@@ -31,6 +31,7 @@ import deleteAccount from './api/deleteAccount';
 import getTransferDetails from './api/getTransferDetails';
 import toggleDevMode from './api/toggleDevMode';
 import addStealthAccount from './api/addStealthAccount';
+import getAddressNonces from './api/getAddressNonces';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -123,6 +124,14 @@ export const appRouter = router({
     const addressWithBalances = await getStealthAccounts({ userId });
 
     return addressWithBalances;
+  }),
+
+  getAddressNonces: authedProcedure.query(async opts => {
+    const userId = opts.ctx.userId;
+
+    const addressNonces = await getAddressNonces({ userId });
+
+    return addressNonces;
   }),
 
   /**

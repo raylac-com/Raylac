@@ -1,5 +1,5 @@
 import StyledButton from '@/components/StyledButton';
-import { getMnemonic } from '@/lib/key';
+import { getMnemonicAndKeys } from '@/lib/key';
 import { useCallback, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { AntDesign, Feather } from '@expo/vector-icons';
@@ -19,7 +19,8 @@ const BackupAccount = () => {
       throw new Error('User not signed in');
     }
 
-    setMnemonic(await getMnemonic());
+    const { mnemonic: _mnemonic } = await getMnemonicAndKeys();
+    setMnemonic(_mnemonic);
   }, [setMnemonic, signedInUser]);
 
   const onHidePress = useCallback(() => {

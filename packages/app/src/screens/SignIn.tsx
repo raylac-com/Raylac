@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import * as bip39 from 'bip39';
-import { sleep } from '@raylac/shared';
+import Toast from 'react-native-toast-message';
 
 /**
  * Sign in screen
@@ -15,17 +15,28 @@ const SignIn = () => {
   const { t } = useTranslation('SignIn');
   const [mnemonic, setMnemonic] = useState('');
   const [isMnemonicValid, setIsMnemonicValid] = useState(false);
-  const { mutateAsync: signIn } = useSignIn();
-  const [isSigningIn, setIsSigningIn] = useState(false);
+  const {
+    mutateAsync: signIn,
+    isPending: isSigningIn,
+    error: signInError,
+  } = useSignIn();
   const navigation = useTypedNavigation();
 
   const onSignInPress = useCallback(async () => {
-    setIsSigningIn(true);
-    await sleep(100);
+    // await sleep(100);
     await signIn({ mnemonic });
-    setIsSigningIn(false);
     navigation.navigate('Tabs', { screen: 'Home' });
   }, [signIn, mnemonic]);
+
+  useEffect(() => {
+    if (signInError) {
+      Toast.show({
+        text1: 'Error',
+        text2: signInError.message,
+        type: 'error',
+      });
+    }
+  }, [signInError]);
 
   useEffect(() => {
     try {

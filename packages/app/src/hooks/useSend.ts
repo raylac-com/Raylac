@@ -1,20 +1,20 @@
-import { getMnemonic } from '@/lib/key';
-import { client, trpc } from '@/lib/trpc';
+import { getMnemonicAndKeys } from '@/lib/key';
+import { trpc } from '@/lib/trpc';
 import { User } from '@/types';
 import {
+  AddressTokenBalance,
   ChainGasInfo,
   RAYLAC_PAYMASTER_ADDRESS,
   StealthAddressWithEphemeral,
   buildMultiChainSendRequestBody,
   encodePaymasterAndData,
   generateStealthAddress,
-  getSpendingPrivKey,
-  getTokenAddressOnChain,
-  getViewingPrivKey,
   signUserOpWithStealthAccount,
 } from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
+import { useEffect } from 'react';
+import Toast from 'react-native-toast-message';
 import { Hex } from 'viem';
 
 // This is a workaround for the fact that BigInts are not supported by JSON.stringify
@@ -27,7 +27,8 @@ BigInt.prototype.toJSON = function () {
  * Hook to build and send user operations
  */
 const useSend = () => {
-  const { mutateAsync: submitUserOps } = trpc.submitUserOps.useMutation();
+  const { mutateAsync: submitUserOps, error } =
+    trpc.submitUserOps.useMutation();
 
   const { mutateAsync: addNewStealthAccount } =
     trpc.addStealthAccount.useMutation();
@@ -37,38 +38,37 @@ const useSend = () => {
   const { mutateAsync: paymasterSignUserOp } =
     trpc.paymasterSignUserOp.useMutation();
 
+  useEffect(() => {
+    if (error) {
+      Toast.show({
+        text1: 'Error',
+        text2: error.message,
+        type: 'error',
+      });
+    }
+  }, [error]);
+
   return useMutation({
     mutationFn: async ({
       amount,
       tokenId,
-      outputChainId,
+      chainId,
       recipientUserOrAddress,
+      addressBalancesPerChain,
+      stealthAddresses,
+      addressNonces,
       gasInfo,
     }: {
       amount: bigint;
       tokenId: string;
-      outputChainId: number;
+      chainId: number;
       recipientUserOrAddress: Hex | User;
       gasInfo: ChainGasInfo[];
+      addressBalancesPerChain: AddressTokenBalance[];
+      stealthAddresses: StealthAddressWithEphemeral[];
+      addressNonces: Record<Hex, number | null>;
     }) => {
-      const addressBalancePerChain =
-        await client.getAddressBalancesPerChain.query();
-
-      const stealthAccounts = await client.getStealthAccounts.query();
-
-      const mnemonic = await getMnemonic();
-
-      const viewingPrivKey = await getViewingPrivKey(mnemonic);
-
-      const spendingPrivKey = await getSpendingPrivKey(mnemonic);
-
-      if (!viewingPrivKey) {
-        throw new Error('No view key found');
-      }
-
-      if (!spendingPrivKey) {
-        throw new Error('No spending key found');
-      }
+      const { viewingPrivKey, spendingPrivKey } = await getMnemonicAndKeys();
 
       const to =
         typeof recipientUserOrAddress === 'string'
@@ -95,22 +95,10 @@ const useSend = () => {
         amount,
         tokenId,
         to: toAddress,
-        stealthAccountsWithTokenBalances: addressBalancePerChain.map(
-          account => ({
-            tokenId: account.tokenId!,
-            balance: account.balance!,
-            chainId: account.chainId!,
-            tokenAddress: getTokenAddressOnChain({
-              chainId: account.chainId,
-              tokenId,
-            }),
-            stealthAddress: stealthAccounts.find(
-              stealthAccount => stealthAccount.address === account.address
-            ) as StealthAddressWithEphemeral,
-            nonce: account.nonce,
-          })
-        ),
-        outputChainId,
+        addressTokenBalances: addressBalancesPerChain,
+        stealthAddresses,
+        addressNonces,
+        chainId,
         gasInfo,
       });
 
@@ -122,8 +110,8 @@ const useSend = () => {
         });
         userOp.paymasterAndData = paymasterAndData;
 
-        const stealthAccount = stealthAccounts.find(
-          stealthAccount => stealthAccount.address === userOp.sender
+        const stealthAccount = stealthAddresses.find(
+          stealthAddress => stealthAddress.address === userOp.sender
         ) as StealthAddressWithEphemeral;
 
         if (!stealthAccount) {

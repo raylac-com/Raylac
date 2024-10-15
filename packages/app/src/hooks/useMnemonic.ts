@@ -1,4 +1,4 @@
-import { getMnemonic } from '@/lib/key';
+import { getMnemonicAndKeys } from '@/lib/key';
 import { useEffect, useState } from 'react';
 import useSignedInUser from './useSignedInUser';
 
@@ -9,7 +9,7 @@ const useMnemonic = () => {
   useEffect(() => {
     (async () => {
       if (signedInUser) {
-        const _mnemonic = await getMnemonic();
+        const { mnemonic: _mnemonic } = await getMnemonicAndKeys();
         if (_mnemonic) {
           setMnemonic(_mnemonic);
         } else {

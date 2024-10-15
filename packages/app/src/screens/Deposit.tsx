@@ -132,7 +132,7 @@ const Deposit = () => {
                 color: theme.text,
               }}
             >
-              Deposit ETH on Base
+              Deposit ETH or USDC on Base
             </Text>
           </View>
           <Text
