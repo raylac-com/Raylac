@@ -15,6 +15,8 @@ import {
 } from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
+import { useEffect } from 'react';
+import Toast from 'react-native-toast-message';
 import { Hex } from 'viem';
 
 // This is a workaround for the fact that BigInts are not supported by JSON.stringify
@@ -27,7 +29,8 @@ BigInt.prototype.toJSON = function () {
  * Hook to build and send user operations
  */
 const useSend = () => {
-  const { mutateAsync: submitUserOps } = trpc.submitUserOps.useMutation();
+  const { mutateAsync: submitUserOps, error } =
+    trpc.submitUserOps.useMutation();
 
   const { mutateAsync: addNewStealthAccount } =
     trpc.addStealthAccount.useMutation();
@@ -36,6 +39,16 @@ const useSend = () => {
 
   const { mutateAsync: paymasterSignUserOp } =
     trpc.paymasterSignUserOp.useMutation();
+
+  useEffect(() => {
+    if (error) {
+      Toast.show({
+        text1: 'Error',
+        text2: error.message,
+        type: 'error',
+      });
+    }
+  }, [error]);
 
   return useMutation({
     mutationFn: async ({
