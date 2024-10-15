@@ -8,6 +8,7 @@ import {
   getWalletClient,
 } from '@raylac/shared';
 import { privateKeyToAccount } from 'viem/accounts';
+import logger from './logger';
 
 const ANNOUNCER_PRIVATE_KEY = process.env.ANNOUNCER_PRIVATE_KEY;
 
@@ -41,6 +42,11 @@ export const announce = async ({
       args: [ERC5564_SCHEME_ID, signerAddress, ephemeralPubKey, metadata],
     });
   } catch (_err) {
-    // TODO: Log warning
+    logger.warn('Failed to announce stealth address', {
+      signerAddress,
+      ephemeralPubKey,
+      viewTag,
+      error: _err,
+    });
   }
 };

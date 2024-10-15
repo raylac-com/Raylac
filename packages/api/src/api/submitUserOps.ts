@@ -45,7 +45,7 @@ const submitUserOps = async ({
   if (!canSubmit) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
-      message: 'User has exceeded the maximum number of transfers',
+      message: `User ${userId} has exceeded the maximum number of transfers`,
     });
   }
 
@@ -64,9 +64,12 @@ const submitUserOps = async ({
 
   if (isNativeTransfer) {
     if (!executeArgs.every(args => args.data === '0x')) {
+      const invalidOps = executeArgs.filter(args => args.data !== '0x');
       throw new TRPCError({
         code: 'BAD_REQUEST',
-        message: 'Native transfers must have empty data',
+        message: `Native transfers must have empty data. Found ${JSON.stringify(
+          invalidOps
+        )}`,
       });
     }
   } else {
@@ -75,7 +78,9 @@ const submitUserOps = async ({
     if (!executeArgs.every(args => args.to === tokenAddresses)) {
       throw new TRPCError({
         code: 'BAD_REQUEST',
-        message: 'All user ops must point to the same token',
+        message: `All user ops must point to the same token. Found ${tokenAddresses} and ${executeArgs.map(
+          args => args.to
+        )}`,
       });
     }
   }
@@ -145,7 +150,6 @@ const submitUserOps = async ({
     }
   } catch (err) {
     logger.error(err);
-    // TODO Report to Sentry
   }
 
   const success = userOpEventLogs.every(log => log.args.success);
@@ -154,7 +158,7 @@ const submitUserOps = async ({
   if (!success) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
-      message: 'User operation failed with success=false',
+      message: `User operation failed with success=false (txHash: ${txHash})`,
     });
   }
 };

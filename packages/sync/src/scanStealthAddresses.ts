@@ -156,7 +156,10 @@ const scanStealthAddresses = async () => {
 
         viewTag = decoded.viewTag;
       } catch (_err) {
-        // TODO: Log warning
+        logger.warn('Failed to decode stealth address metadata', {
+          metadata: announcement.metadata,
+          error: _err,
+        });
 
         // Skip this announcement as we can't decode the metadata
         continue;

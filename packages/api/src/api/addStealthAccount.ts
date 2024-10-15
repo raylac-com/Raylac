@@ -6,9 +6,11 @@ import { TRPCError } from '@trpc/server';
 
 const MAX_STEALTH_ACCOUNTS = 500;
 
+/**
+ * Check if the user can add a stealth account.
+ * We implement a limit of 500 stealth accounts per user.
+ */
 const canUserAddStealthAccount = async (userId: number) => {
-  // TODO Implement limit
-
   const numStealthAccounts = await prisma.userStealthAddress.count({
     where: {
       userId,
@@ -32,7 +34,7 @@ const addStealthAccount = async ({
   if (!canAdd) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
-      message: 'User has exceeded the maximum number of stealth accounts',
+      message: `User ${userId} has exceeded the maximum number of stealth accounts`,
     });
   }
 

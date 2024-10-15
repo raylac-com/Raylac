@@ -23,7 +23,7 @@ const updateUsername = async ({
   if (usernameExists) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
-      message: 'Username already taken',
+      message: `Username ${username} is already taken (at username update)`,
     });
   }
 
