@@ -58,7 +58,7 @@ const AmountInput = (props: AmountInputProps) => {
           textAlign: 'right',
           color: theme.text,
         }}
-        keyboardType="numeric"
+        keyboardType="decimal-pad"
       />
     </View>
   );
