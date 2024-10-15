@@ -21,6 +21,11 @@ const getTransferHistory = async ({
           timestamp: true,
         },
       },
+      userOps: {
+        select: {
+          tokenPriceAtOp: true,
+        },
+      },
       traces: {
         select: {
           tokenId: true,

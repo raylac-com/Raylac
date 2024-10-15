@@ -58,6 +58,7 @@ const useSend = () => {
       stealthAddresses,
       addressNonces,
       gasInfo,
+      tokenPrice,
     }: {
       amount: bigint;
       tokenId: string;
@@ -67,6 +68,7 @@ const useSend = () => {
       addressBalancesPerChain: AddressTokenBalance[];
       stealthAddresses: StealthAddressWithEphemeral[];
       addressNonces: Record<Hex, number | null>;
+      tokenPrice: number;
     }) => {
       const { viewingPrivKey, spendingPrivKey } = await getMnemonicAndKeys();
 
@@ -131,6 +133,7 @@ const useSend = () => {
 
       await submitUserOps({
         userOps: signedUserOps,
+        tokenPrice,
       });
     },
     onSuccess: () => {

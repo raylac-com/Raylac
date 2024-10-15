@@ -23,7 +23,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import { Hex } from 'viem';
+import { formatUnits, Hex } from 'viem';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'TransferDetails'>;
 
@@ -109,6 +109,13 @@ const TransferDetails = ({ route }: Props) => {
 
   const transferAmount = finalTransfer.amount as string;
 
+  const userOps = transferDetail?.userOps;
+  const tokenPriceAtOp = userOps?.length > 0 ? userOps[0].tokenPriceAtOp : null;
+  const transferUsdAmount = tokenPriceAtOp
+    ? tokenPriceAtOp *
+      Number(formatUnits(BigInt(transferAmount), tokenMeta.decimals))
+    : null;
+
   const from = finalTransfer.UserStealthAddressFrom?.user || finalTransfer.from;
   const to = finalTransfer.UserStealthAddressTo?.user || finalTransfer.to;
 
@@ -158,6 +165,17 @@ const TransferDetails = ({ route }: Props) => {
         {formatAmount(transferAmount.toString(), tokenMeta.decimals)}{' '}
         {tokenMeta.symbol}
       </Text>
+      {transferUsdAmount && (
+        <Text
+          style={{
+            color: theme.text,
+            opacity: 0.5,
+            fontSize: 16,
+          }}
+        >
+          ~${transferUsdAmount.toFixed(2)}
+        </Text>
+      )}
       <Text
         style={{
           color: theme.text,

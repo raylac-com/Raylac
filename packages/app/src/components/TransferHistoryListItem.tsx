@@ -12,6 +12,7 @@ import { formatAmount, getTokenMetadata } from '@raylac/shared';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { TransferItem } from '@/types';
+import { formatUnits } from 'viem';
 // import useEnsName from '@/hooks/useEnsName';
 
 interface TransferHistoryListItemProps {
@@ -45,6 +46,13 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
 
   const blockTimestamp = new Date(Number(transfer.block.timestamp) * 1000);
 
+  const userOps = transfer.userOps;
+  const tokenPriceAtOp = userOps?.length > 0 ? userOps[0].tokenPriceAtOp : null;
+
+  const transferUsdAmount = tokenPriceAtOp
+    ? tokenPriceAtOp * Number(formatUnits(BigInt(amount), tokenMeta.decimals))
+    : null;
+
   return (
     <Pressable
       style={{
@@ -52,6 +60,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
         flexDirection: 'column',
         borderBottomWidth: 1,
         paddingVertical: 12,
+        rowGap: 4,
       }}
       onPress={() => {
         navigation.navigate('TransferDetails', {
@@ -89,7 +98,13 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
             {getDisplayName(type === 'outgoing' ? to : from)}
           </Text>
         </View>
-        <View>
+        <View
+          style={{
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            rowGap: 4,
+          }}
+        >
           <View
             style={{
               flexDirection: 'row',
@@ -114,18 +129,17 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
               {formattedAmount} {tokenMeta.symbol}
             </Text>
           </View>
-          {/**
-              <Text
-            style={{
-              fontWeight: 'bold',
-              fontSize: 12,
-              color: theme.gray,
-              textAlign: 'right',
-            }}
-          >
-            {formattedUsdAmount} USD
-          </Text>
-             */}
+          {transferUsdAmount && (
+            <Text
+              style={{
+                color: theme.text,
+                textAlign: 'right',
+                opacity: 0.5,
+              }}
+            >
+              ~${transferUsdAmount.toFixed(2)}
+            </Text>
+          )}
         </View>
       </View>
       <Text

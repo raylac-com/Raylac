@@ -5,6 +5,7 @@ import {
   ERC20Abi,
   getPublicClient,
   getTokenId,
+  getUserOpHash,
   traceTransaction,
   UserOperation,
 } from '@raylac/shared';
@@ -14,6 +15,7 @@ import { handleERC20TransferLog, handleNewTrace } from '@raylac/sync';
 import logger from '../lib/logger';
 import prisma from '../lib/prisma';
 import { handleUserOpEvent } from '@raylac/sync/src/syncUserOps';
+import { Prisma } from '@prisma/client';
 
 const MAX_TRANSFERS = 1000;
 
@@ -33,11 +35,32 @@ const canUserSubmitOps = async (userId: number) => {
   return numTransfers < MAX_TRANSFERS;
 };
 
+const upsertUserOpsWithTokenPrice = async ({
+  userOps,
+  tokenPrice,
+}: {
+  userOps: UserOperation[];
+  tokenPrice: number;
+}) => {
+  const data: Prisma.UserOperationCreateInput[] = userOps.map(userOp => ({
+    hash: getUserOpHash({ userOp }),
+    chainId: userOp.chainId,
+    tokenPriceAtOp: tokenPrice,
+  }));
+
+  await prisma.userOperation.createMany({
+    data,
+    skipDuplicates: true,
+  });
+};
+
 const submitUserOps = async ({
   userId,
+  tokenPrice,
   userOps,
 }: {
   userId: number;
+  tokenPrice: number;
   userOps: UserOperation[];
 }) => {
   const canSubmit = await canUserSubmitOps(userId);
@@ -84,6 +107,9 @@ const submitUserOps = async ({
       });
     }
   }
+
+  // Save the token price at the time of the user operation
+  await upsertUserOpsWithTokenPrice({ userOps, tokenPrice });
 
   const chainId = userOps[0].chainId;
 
