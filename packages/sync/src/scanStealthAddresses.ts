@@ -9,6 +9,7 @@ import { Hex } from 'viem';
 import logger from './lib/logger';
 import { getSenderAddress } from '@raylac/shared/src/stealth';
 import { Prisma } from '@prisma/client';
+import crypto from 'crypto';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -85,11 +86,59 @@ const assignStealthAddressToUser = async ({
   });
 };
 
+const algorithm = 'aes-256-cbc';
+
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
+
+if (!ENCRYPTION_KEY) {
+  throw new Error('ENCRYPTION_KEY is not set');
+}
+
+/**
+ * Decrypt data.
+ * This is used to decrypt the viewing private key so it can be securely retrieved from the database.
+ */
+const decryptViewingPrivKey = (encryptedViewingPrivKey: Hex) => {
+  const iv = Buffer.from(
+    encryptedViewingPrivKey.replace('0x', '').slice(0, 32),
+    'hex'
+  );
+  const encryptedData = encryptedViewingPrivKey.replace('0x', '').slice(32);
+
+  const buff = Buffer.from(encryptedData, 'hex');
+  const decipher = crypto.createDecipheriv(
+    algorithm,
+    Buffer.from(ENCRYPTION_KEY, 'hex'),
+    iv
+  );
+  return (
+    decipher.update(buff.toString('utf8'), 'hex', 'utf8') +
+    decipher.final('utf8')
+  );
+};
+
 const scanStealthAddresses = async () => {
   // For all view keys, check if any of the announcements match the view key
 
   while (true) {
-    const users = await prisma.user.findMany();
+    const users = await prisma.user.findMany({
+      select: {
+        id: true,
+        spendingPubKey: true,
+        encryptedViewingPrivKey: true,
+      },
+    });
+
+    const usersWithViewingPrivKey = users.map(user => {
+      const viewingPrivKey = decryptViewingPrivKey(
+        user.encryptedViewingPrivKey as Hex
+      );
+
+      return {
+        ...user,
+        viewingPrivKey,
+      };
+    });
 
     const announcements = await getAnnouncements();
 
@@ -111,7 +160,7 @@ const scanStealthAddresses = async () => {
       const signerAddress = announcement.stealthAddress as Hex;
       const ephemeralPubKey = announcement.ephemeralPubKey as Hex;
 
-      const matchedUser = users.find(user => {
+      const matchedUser = usersWithViewingPrivKey.find(user => {
         return checkStealthAddress({
           viewTag,
           signerAddress,
