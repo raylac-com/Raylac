@@ -1,9 +1,9 @@
 import 'dotenv/config';
 import { beforeAll, expect, test } from 'vitest';
 import {
+  AddressTokenBalance,
   getGasInfo,
   getSpendingPrivKey,
-  getTokenAddressOnChain,
   getViewingPrivKey,
   RAYLAC_PAYMASTER_ADDRESS,
   signUserOpWithStealthAccount,
@@ -73,32 +73,15 @@ const buildRequestBody = async ({
   }
 
   const stealthAccounts = await authedClient.getStealthAccounts.query();
+  const addressNonces = await authedClient.getAddressNonces.query();
 
   const userOps = buildMultiChainSendRequestBody({
-    stealthAccountsWithTokenBalances: addressBalancePerChain.map(account => {
-      const stealthAddress = stealthAccounts.find(
-        stealthAccount => stealthAccount.address === account.address
-      );
-
-      if (!stealthAddress) {
-        throw new Error(`Stealth address not found for ${account.address}`);
-      }
-
-      return {
-        tokenId: account.tokenId!,
-        balance: account.balance!,
-        chainId: account.chainId!,
-        tokenAddress: getTokenAddressOnChain({
-          chainId: account.chainId,
-          tokenId,
-        }),
-        stealthAddress: stealthAddress as StealthAddressWithEphemeral,
-        nonce: account.nonce,
-      };
-    }),
+    addressTokenBalances: addressBalancePerChain as AddressTokenBalance[],
+    stealthAddresses: stealthAccounts as StealthAddressWithEphemeral[],
+    addressNonces,
     gasInfo,
     amount,
-    outputChainId: chainId,
+    chainId,
     to,
     tokenId,
   });
@@ -117,7 +100,9 @@ const buildRequestBody = async ({
       );
 
       if (!stealthAccount) {
-        throw new Error('Stealth account not found');
+        throw new Error(
+          `Stealth account not found for userOp.sender: ${userOp.sender}`
+        );
       }
 
       // Sign the user operation with the stealth account

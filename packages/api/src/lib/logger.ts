@@ -5,8 +5,9 @@ const DATADOG_API_KEY = process.env.DATADOG_API_KEY;
 const SERVICE_NAME = 'raylac-api';
 
 const httpTransportOptions = {
-  host: 'http-intake.logs.datadoghq.com',
+  host: 'http-intake.logs.ap1.datadoghq.com',
   path: `/api/v2/logs?dd-api-key=${DATADOG_API_KEY}&ddsource=nodejs&service=${SERVICE_NAME}`,
+  ssl: true,
 };
 
 const useDatadog = !!DATADOG_API_KEY;

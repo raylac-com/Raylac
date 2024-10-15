@@ -96,15 +96,13 @@ export interface RelayGetQuoteResponseBody {
 }
 
 /**
- * Token balances of an address on a single chain
+ * Token balance of an address on a chain
  */
-export interface TokenBalance {
+export interface AddressTokenBalance {
   tokenId: string;
-  tokenAddress: Hex;
-  stealthAddress: StealthAddressWithEphemeral;
+  address: Hex;
   balance: string;
   chainId: number;
-  nonce: number | null;
 }
 
 export interface SupportedToken {
@@ -162,7 +160,6 @@ export interface AccountBalancePerChainQueryResult {
   balance: string;
   address: Hex;
   tokenId: string;
-  nonce: number | null;
 }
 
 export interface CoingeckoTokenPriceResponse {

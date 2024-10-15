@@ -210,6 +210,9 @@ importers:
       i18next:
         specifier: ^23.11.5
         version: 23.15.1
+      mixpanel-react-native:
+        specifier: ^3.0.7
+        version: 3.0.7(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@6.0.4))
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -5007,6 +5010,9 @@ packages:
     resolution: {integrity: sha512-bAxsR8BVfj60DWXHE3u30oHzfl4G7khkSuPW+qvpd7jFRHm7dLxOjUk1EHACJ/hxLY8phGJ0YhYHZo7jil7Qdg==}
     engines: {node: '>= 8'}
 
+  mixpanel-react-native@3.0.7:
+    resolution: {integrity: sha512-LZKxY1hdGWswAV9xY4Cv460B8QuhhDYVit4tbQcdT71oUreuBFfUqgJrE1VRelr/9N+BK/esqH6eJPxgihnpCA==}
+
   mkdirp@0.5.6:
     resolution: {integrity: sha512-FP+p8RB8OWpF3YZBCrP5gtADmtXApB5AMLn+vdyA+PyxCjrCs00mjyUozssO33cwDeT3wNGdLxJ5M//YqtHAJw==}
     hasBin: true
@@ -6349,6 +6355,11 @@ packages:
 
   uuid@10.0.0:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    hasBin: true
+
+  uuid@3.3.2:
+    resolution: {integrity: sha512-yXJmeNaw3DnnKAOKJE51sL/ZaYfWJRl1pK9dr19YFCu0ObS231AB1/LbqTKRAQ5kw8A90rA6fr4riOUpTZvQZA==}
+    deprecated: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
     hasBin: true
 
   uuid@7.0.3:
@@ -12598,6 +12609,13 @@ snapshots:
       minipass: 3.3.6
       yallist: 4.0.0
 
+  mixpanel-react-native@3.0.7(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@6.0.4)):
+    dependencies:
+      '@react-native-async-storage/async-storage': 1.23.1(react-native@0.74.5(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@types/react@18.2.79)(bufferutil@4.0.8)(react@18.2.0)(utf-8-validate@6.0.4))
+      uuid: 3.3.2
+    transitivePeerDependencies:
+      - react-native
+
   mkdirp@0.5.6:
     dependencies:
       minimist: 1.2.8
@@ -13981,6 +13999,8 @@ snapshots:
   utils-merge@1.0.1: {}
 
   uuid@10.0.0: {}
+
+  uuid@3.3.2: {}
 
   uuid@7.0.3: {}
 

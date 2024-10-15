@@ -122,7 +122,7 @@ const Receive = () => {
             color: theme.text,
           }}
         >
-          Receive ETH on Base
+          Receive ETH or USDC on Base
         </Text>
       </View>
       <View

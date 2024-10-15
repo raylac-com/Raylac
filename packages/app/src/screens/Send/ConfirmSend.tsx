@@ -4,10 +4,16 @@ import useGasInfo from '@/hooks/useGasInfo';
 import useSend from '@/hooks/useSend';
 import useTokenPrice from '@/hooks/useTokenPrice';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
+import mixpanel from '@/lib/mixpanle';
 import { theme } from '@/lib/theme';
+import { trpc } from '@/lib/trpc';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
-import { formatAmount } from '@raylac/shared';
+import {
+  AddressTokenBalance,
+  formatAmount,
+  StealthAddressWithEphemeral,
+} from '@raylac/shared';
 import supportedChains from '@raylac/shared/out/supportedChains';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -26,20 +32,42 @@ const ConfirmSend = ({ route }: Props) => {
   const [usdAmount, setUsdAmount] = useState<string | null>(null);
   const { data: tokenPrice } = useTokenPrice(tokenId);
 
+  const { data: stealthAddresses } = trpc.getStealthAccounts.useQuery();
+  const { data: addressBalancesPerChain } =
+    trpc.getAddressBalancesPerChain.useQuery();
+
+  const { data: addressNonces } = trpc.getAddressNonces.useQuery();
+
   const { data: gasInfo } = useGasInfo();
 
   const onSendPress = useCallback(async () => {
+    const start = Date.now();
+
     await send({
       amount: BigInt(amount),
       tokenId,
-      outputChainId,
+      chainId: outputChainId,
       recipientUserOrAddress,
       gasInfo,
+      stealthAddresses: stealthAddresses as StealthAddressWithEphemeral[],
+      addressBalancesPerChain: addressBalancesPerChain as AddressTokenBalance[],
+      addressNonces: addressNonces as Record<Hex, number | null>,
+    });
+
+    mixpanel.track('Send', {
+      duration: Date.now() - start,
     });
 
     // Navigate to the `SendSuccess` screen
     navigation.navigate('SendSuccess');
-  }, [recipientUserOrAddress, send, amount, gasInfo]);
+  }, [
+    recipientUserOrAddress,
+    send,
+    amount,
+    gasInfo,
+    stealthAddresses,
+    addressBalancesPerChain,
+  ]);
 
   const tokenMeta = supportedTokens.find(token => token.tokenId === tokenId);
 
