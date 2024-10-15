@@ -2,7 +2,7 @@ import StyledButton from '@/components/StyledButton';
 import StyledTextInput from '@/components/StyledTextInput';
 import useSignUp from '@/hooks/useSignUp';
 import { theme } from '@/lib/theme';
-import { isValidUsername } from '@/lib/username';
+import { isValidUsername } from '@raylac/shared';
 import { RootStackParamsList } from '@/navigation/types';
 import { useNavigation } from '@react-navigation/native';
 import {

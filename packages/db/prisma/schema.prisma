@@ -28,10 +28,12 @@ model ERC5564Announcement {
 }
 
 model User {
-  id             Int     @id @default(autoincrement())
-  spendingPubKey String  @unique
-  viewingPubKey  String  @unique
-  viewingPrivKey String  @unique
+  id                      Int     @id @default(autoincrement())
+  spendingPubKey          String  @unique
+  viewingPubKey           String  @unique
+  viewingPrivKey          String  @unique
+  encryptedViewingPrivKey String?
+
   name           String
   username       String  @unique
   profileImage   String?
