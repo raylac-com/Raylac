@@ -125,11 +125,16 @@ const scanStealthAddresses = async () => {
       select: {
         id: true,
         spendingPubKey: true,
+        viewingPrivKey: true,
         encryptedViewingPrivKey: true,
       },
     });
 
     const usersWithViewingPrivKey = users.map(user => {
+      if (!user.encryptedViewingPrivKey) {
+        return user;
+      }
+
       const viewingPrivKey = decryptViewingPrivKey(
         user.encryptedViewingPrivKey as Hex
       );
