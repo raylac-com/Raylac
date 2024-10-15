@@ -1,7 +1,8 @@
 import { getMnemonic } from '@/lib/key';
-import { client, trpc } from '@/lib/trpc';
+import { trpc } from '@/lib/trpc';
 import { User } from '@/types';
 import {
+  AddressTokenBalance,
   ChainGasInfo,
   RAYLAC_PAYMASTER_ADDRESS,
   StealthAddressWithEphemeral,
@@ -9,7 +10,6 @@ import {
   encodePaymasterAndData,
   generateStealthAddress,
   getSpendingPrivKey,
-  getTokenAddressOnChain,
   getViewingPrivKey,
   signUserOpWithStealthAccount,
 } from '@raylac/shared';
@@ -41,21 +41,22 @@ const useSend = () => {
     mutationFn: async ({
       amount,
       tokenId,
-      outputChainId,
+      chainId,
       recipientUserOrAddress,
+      addressBalancesPerChain,
+      stealthAddresses,
+      addressNonces,
       gasInfo,
     }: {
       amount: bigint;
       tokenId: string;
-      outputChainId: number;
+      chainId: number;
       recipientUserOrAddress: Hex | User;
       gasInfo: ChainGasInfo[];
+      addressBalancesPerChain: AddressTokenBalance[];
+      stealthAddresses: StealthAddressWithEphemeral[];
+      addressNonces: Record<Hex, number | null>;
     }) => {
-      const addressBalancePerChain =
-        await client.getAddressBalancesPerChain.query();
-
-      const stealthAccounts = await client.getStealthAccounts.query();
-
       const mnemonic = await getMnemonic();
 
       const viewingPrivKey = await getViewingPrivKey(mnemonic);
@@ -95,22 +96,10 @@ const useSend = () => {
         amount,
         tokenId,
         to: toAddress,
-        stealthAccountsWithTokenBalances: addressBalancePerChain.map(
-          account => ({
-            tokenId: account.tokenId!,
-            balance: account.balance!,
-            chainId: account.chainId!,
-            tokenAddress: getTokenAddressOnChain({
-              chainId: account.chainId,
-              tokenId,
-            }),
-            stealthAddress: stealthAccounts.find(
-              stealthAccount => stealthAccount.address === account.address
-            ) as StealthAddressWithEphemeral,
-            nonce: account.nonce,
-          })
-        ),
-        outputChainId,
+        addressTokenBalances: addressBalancesPerChain,
+        stealthAddresses,
+        addressNonces,
+        chainId,
         gasInfo,
       });
 
@@ -122,8 +111,8 @@ const useSend = () => {
         });
         userOp.paymasterAndData = paymasterAndData;
 
-        const stealthAccount = stealthAccounts.find(
-          stealthAccount => stealthAccount.address === userOp.sender
+        const stealthAccount = stealthAddresses.find(
+          stealthAddress => stealthAddress.address === userOp.sender
         ) as StealthAddressWithEphemeral;
 
         if (!stealthAccount) {

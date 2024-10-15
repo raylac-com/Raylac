@@ -2,7 +2,7 @@ import { encodeFunctionData, Hex, toHex } from 'viem';
 import {
   ChainGasInfo,
   StealthAddressWithEphemeral,
-  TokenBalance,
+  AddressTokenBalance,
   UserOperation,
 } from './types';
 import { buildUserOp } from './erc4337';
@@ -11,11 +11,10 @@ import { getTokenAddressOnChain } from './utils';
 import ERC20Abi from './abi/ERC20Abi';
 import { NATIVE_TOKEN_ADDRESS } from '.';
 
-interface InputStealthAccount {
-  stealthAccount: StealthAddressWithEphemeral;
+interface InputAddress {
+  address: Hex;
   chainId: number;
   amount: bigint;
-  nonce: number | null;
 }
 
 /**
@@ -68,54 +67,52 @@ const buildUserOpsFromRelayQuote = async ({
 /**
  * Pick the stealth accounts to use as inputs for a transfer.
  */
-const chooseInputStealthAccounts = ({
-  outputTokenId,
-  outputChainId,
+const chooseInputAddresses = ({
+  tokenId,
+  chainId,
   amount,
-  stealthAccountsWithTokenBalances,
+  addressTokenBalances,
 }: {
-  outputTokenId: string;
-  outputChainId: number;
+  tokenId: string;
+  chainId: number;
   amount: bigint;
-  stealthAccountsWithTokenBalances: TokenBalance[];
-}): InputStealthAccount[] => {
+  addressTokenBalances: AddressTokenBalance[];
+}): InputAddress[] => {
   // Filter out stealth accounts with non-zero balance of the output token
-  const stealthAccounts = stealthAccountsWithTokenBalances
+  const sortedAddressTokenBalances = addressTokenBalances
     .filter(
-      stealthAccount =>
-        stealthAccount.tokenId === outputTokenId &&
-        stealthAccount.balance !== '0' &&
-        stealthAccount.chainId === outputChainId
+      addressTokenBalance =>
+        addressTokenBalance.tokenId === tokenId &&
+        addressTokenBalance.balance !== '0' &&
+        addressTokenBalance.chainId === chainId
     )
     // Sort by balance in descending order
     .sort((a, b) => (BigInt(b.balance) > BigInt(a.balance) ? 1 : -1));
 
   // Array of stealth accounts that will be used as inputs
-  const sendFromAccounts: InputStealthAccount[] = [];
+  const sendFromAccounts: InputAddress[] = [];
 
   // Set the remaining amount that needs to be sent.
   // This is subtracted as we find stealth accounts with enough funds.
   let remainingAmount = amount;
 
-  for (const stealthAccount of stealthAccounts) {
-    const balance = BigInt(stealthAccount.balance);
+  for (const addressTokenBalance of sortedAddressTokenBalances) {
+    const balance = BigInt(addressTokenBalance.balance);
 
     if (balance >= remainingAmount) {
       // The account has more than enough funds to cover the remaining amount
       sendFromAccounts.push({
-        stealthAccount: stealthAccount.stealthAddress,
-        chainId: stealthAccount.chainId,
+        address: addressTokenBalance.address,
+        chainId: addressTokenBalance.chainId,
         amount: remainingAmount,
-        nonce: stealthAccount.nonce,
       });
       remainingAmount = BigInt(0);
       break;
     } else {
       sendFromAccounts.push({
-        stealthAccount: stealthAccount.stealthAddress,
-        chainId: stealthAccount.chainId,
+        address: addressTokenBalance.address,
+        chainId: addressTokenBalance.chainId,
         amount: balance,
-        nonce: stealthAccount.nonce,
       });
     }
 
@@ -263,38 +260,42 @@ const buildTransferUseOp = ({
 };
 
 /**
- * Builds all the user operations required to send a token from one chain to another.
- * The user operations are unsigned.
+ * Builds all the user operations required to send a token from user's stealth accounts.
+ * The returned user operations are unsigned.
  */
 export const buildMultiChainSendRequestBody = ({
-  outputChainId,
+  chainId,
   tokenId,
   to,
   amount,
-  stealthAccountsWithTokenBalances,
+  addressTokenBalances,
+  stealthAddresses,
+  addressNonces,
   gasInfo,
 }: {
   tokenId: string;
-  outputChainId: number;
+  chainId: number;
   to: Hex;
   amount: bigint;
-  stealthAccountsWithTokenBalances: TokenBalance[];
+  addressTokenBalances: AddressTokenBalance[];
+  stealthAddresses: StealthAddressWithEphemeral[];
+  addressNonces: Record<Hex, number | null>;
   gasInfo: ChainGasInfo[];
 }): UserOperation[] => {
-  const inputs = chooseInputStealthAccounts({
-    outputChainId,
-    outputTokenId: tokenId,
+  const inputs = chooseInputAddresses({
+    chainId,
+    tokenId,
     amount,
-    stealthAccountsWithTokenBalances,
+    addressTokenBalances,
   });
 
   // Sanity check
-  if (!inputs.every(input => input.chainId === outputChainId)) {
+  if (!inputs.every(input => input.chainId === chainId)) {
     throw new Error('Not all input stealth accounts are on the output chain');
   }
 
   const tokenAddress = getTokenAddressOnChain({
-    chainId: outputChainId,
+    chainId: chainId,
     tokenId,
   });
 
@@ -308,20 +309,29 @@ export const buildMultiChainSendRequestBody = ({
   const userOps: UserOperation[] = [];
 
   for (const input of inputs) {
-    if (consolidateTo.stealthAccount.address === input.stealthAccount.address) {
+    if (consolidateTo.address === input.address) {
       continue;
     }
 
-    const stealthSigner = input.stealthAccount.signerAddress;
+    // Get the stealth signer address that corresponds to the input address
+    const stealthSigner = stealthAddresses.find(
+      stealthAddress => stealthAddress.address === input.address
+    )?.signerAddress;
+
+    if (!stealthSigner) {
+      throw new Error(`Stealth address not found for ${input.address}`);
+    }
+
+    const nonce = addressNonces[input.address];
 
     // Build a standard transfer user operation
     const userOp = buildTransferUseOp({
       stealthSigner,
-      to: consolidateTo.stealthAccount.address,
+      to: consolidateTo.address,
       tokenAddress,
       amount: input.amount,
       chainId: input.chainId,
-      nonce: input.nonce,
+      nonce,
       tag,
       gasInfo,
     });
@@ -332,21 +342,29 @@ export const buildMultiChainSendRequestBody = ({
     });
   }
 
+  const consolidateToStealthSigner = stealthAddresses.find(
+    stealthAddress => stealthAddress.address === consolidateTo.address
+  )?.signerAddress;
+
+  if (!consolidateToStealthSigner) {
+    throw new Error(`Stealth address not found for ${consolidateTo.address}`);
+  }
+
   // Send to the recipient from the consolidated account
   const userOp = buildTransferUseOp({
-    stealthSigner: consolidateTo.stealthAccount.signerAddress,
+    stealthSigner: consolidateToStealthSigner,
     to,
     tokenAddress,
     amount,
-    chainId: outputChainId,
-    nonce: consolidateTo.nonce,
+    chainId: chainId,
+    nonce: addressNonces[consolidateTo.address],
     tag,
     gasInfo,
   });
 
   userOps.push({
     ...userOp,
-    chainId: outputChainId,
+    chainId: chainId,
   });
 
   return userOps;

@@ -4,6 +4,7 @@ import {
   AccountBalancePerChainQueryResult,
   getChainsForMode,
 } from '@raylac/shared';
+import logger from '../lib/logger';
 
 /**
  * Get the balances of tokens for all chains and supported tokens
@@ -17,6 +18,8 @@ const getAddressBalancesPerChain = async ({
   isDevMode: boolean;
 }) => {
   const chainIds = getChainsForMode(isDevMode).map(chain => chain.id);
+
+  logger.info(`Getting address balances for user ${userId}`);
 
   const accountBalancePerChain = await prisma.$queryRaw<
     AccountBalancePerChainQueryResult[]
@@ -54,33 +57,17 @@ const getAddressBalancesPerChain = async ({
             "tokenId",
             "chainId",
             "address"
-        ),
-        account_nonces AS (
-            SELECT
-                sender AS "address",
-                "chainId",
-                max(nonce) AS nonce
-            FROM
-                "UserOperation"
-        WHERE
-            success = TRUE
-        GROUP BY
-            sender,
-            "chainId"
         )
         SELECT
             COALESCE(i. "tokenId", o. "tokenId") AS "tokenId",
             COALESCE(i.amount, 0) - COALESCE(o.amount, 0) AS balance,
             i."chainId",
-            i."address",
-            an.nonce
+            i."address"
         FROM
             incoming_transfers i
             LEFT JOIN outgoing_transfers o ON i. "tokenId" = o. "tokenId"
             AND i. "chainId" = o. "chainId"
             AND i. "address" = o. "address"
-            LEFT JOIN account_nonces an ON i. "address" = an. "address"
-            AND i. "chainId" = an. "chainId"
   `;
 
   return accountBalancePerChain;

@@ -89,6 +89,7 @@ const submitUserOps = async ({
 
   const publicClient = getPublicClient({ chainId });
 
+  logger.info(`waiting tx ${txHash} to confirm`);
   const start = Date.now();
   const txReceipt = await publicClient.waitForTransactionReceipt({
     hash: txHash,
@@ -103,23 +104,12 @@ const submitUserOps = async ({
     eventName: 'UserOperationEvent',
   });
 
-  const success = userOpEventLogs.every(log => log.args.success);
-
-  if (!success) {
-    throw new TRPCError({
-      code: 'BAD_REQUEST',
-      message: 'User operation failed with success=false',
-    });
-  }
-
   // Save user ops and traces to the db
 
   try {
     await Promise.all(
       userOpEventLogs.map(log => handleUserOpEvent({ log, chainId }))
     );
-
-    logger.info(`tracing tx ${txHash}`);
 
     if (isNativeTransfer) {
       const start = Date.now();
@@ -156,6 +146,16 @@ const submitUserOps = async ({
   } catch (err) {
     logger.error(err);
     // TODO Report to Sentry
+  }
+
+  const success = userOpEventLogs.every(log => log.args.success);
+
+  // Inform the client that the user operation failed
+  if (!success) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'User operation failed with success=false',
+    });
   }
 };
 
