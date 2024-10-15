@@ -15,7 +15,7 @@
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview",
+      "channel": "production",
       "env": {
         "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
         "EXPO_PUBLIC_ALCHEMY_API_KEY": "UfWNqNlX3Wq4oJtE0iObWWgcenwyICcp",
