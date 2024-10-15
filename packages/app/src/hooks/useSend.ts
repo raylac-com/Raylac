@@ -1,4 +1,4 @@
-import { getMnemonic } from '@/lib/key';
+import { getMnemonicAndKeys } from '@/lib/key';
 import { trpc } from '@/lib/trpc';
 import { User } from '@/types';
 import {
@@ -9,8 +9,6 @@ import {
   buildMultiChainSendRequestBody,
   encodePaymasterAndData,
   generateStealthAddress,
-  getSpendingPrivKey,
-  getViewingPrivKey,
   signUserOpWithStealthAccount,
 } from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -70,19 +68,7 @@ const useSend = () => {
       stealthAddresses: StealthAddressWithEphemeral[];
       addressNonces: Record<Hex, number | null>;
     }) => {
-      const mnemonic = await getMnemonic();
-
-      const viewingPrivKey = await getViewingPrivKey(mnemonic);
-
-      const spendingPrivKey = await getSpendingPrivKey(mnemonic);
-
-      if (!viewingPrivKey) {
-        throw new Error('No view key found');
-      }
-
-      if (!spendingPrivKey) {
-        throw new Error('No spending key found');
-      }
+      const { viewingPrivKey, spendingPrivKey } = await getMnemonicAndKeys();
 
       const to =
         typeof recipientUserOrAddress === 'string'

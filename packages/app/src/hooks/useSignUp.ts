@@ -4,7 +4,7 @@ import { trpc } from '@/lib/trpc';
 import { Buffer } from 'buffer';
 import * as bip39 from 'bip39';
 import userKeys from '@/queryKeys/userKeys';
-import { saveMnemonic } from '@/lib/key';
+import { saveMnemonicAndKeys } from '@/lib/key';
 import { saveAuthToken } from '@/lib/auth';
 import { setSignedInUser } from '@/lib/utils';
 import { getSpendingPrivKey, getViewingPrivKey } from '@raylac/shared';
@@ -37,7 +37,7 @@ const useSignUp = () => {
         viewingPrivKey,
       });
 
-      await saveMnemonic(mnemonic);
+      await saveMnemonicAndKeys(mnemonic);
       await setSignedInUser(userId);
       await saveAuthToken(token);
 

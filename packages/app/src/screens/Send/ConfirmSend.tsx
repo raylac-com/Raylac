@@ -4,6 +4,7 @@ import useGasInfo from '@/hooks/useGasInfo';
 import useSend from '@/hooks/useSend';
 import useTokenPrice from '@/hooks/useTokenPrice';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
+import mixpanel from '@/lib/mixpanle';
 import { theme } from '@/lib/theme';
 import { trpc } from '@/lib/trpc';
 import { shortenAddress } from '@/lib/utils';
@@ -40,6 +41,8 @@ const ConfirmSend = ({ route }: Props) => {
   const { data: gasInfo } = useGasInfo();
 
   const onSendPress = useCallback(async () => {
+    const start = Date.now();
+
     await send({
       amount: BigInt(amount),
       tokenId,
@@ -49,6 +52,10 @@ const ConfirmSend = ({ route }: Props) => {
       stealthAddresses: stealthAddresses as StealthAddressWithEphemeral[],
       addressBalancesPerChain: addressBalancesPerChain as AddressTokenBalance[],
       addressNonces: addressNonces as Record<Hex, number | null>,
+    });
+
+    mixpanel.track('Send', {
+      duration: Date.now() - start,
     });
 
     // Navigate to the `SendSuccess` screen

@@ -1,5 +1,5 @@
 import { saveAuthToken } from '@/lib/auth';
-import { saveMnemonic, setBackupVerificationStatus } from '@/lib/key';
+import { saveMnemonicAndKeys, setBackupVerificationStatus } from '@/lib/key';
 import { trpc } from '@/lib/trpc';
 import { setSignedInUser } from '@/lib/utils';
 import userKeys from '@/queryKeys/userKeys';
@@ -43,7 +43,7 @@ export const useSignIn = () => {
         }),
       });
 
-      await saveMnemonic(mnemonic);
+      await saveMnemonicAndKeys(mnemonic);
       await setSignedInUser(userId);
       await saveAuthToken(token);
 

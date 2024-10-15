@@ -2,7 +2,7 @@ import MnemonicWord from '@/components/MnemonicWord';
 import StyledButton from '@/components/StyledButton';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { getMnemonic } from '@/lib/key';
+import { getMnemonicAndKeys } from '@/lib/key';
 import { theme } from '@/lib/theme';
 import { copyToClipboard } from '@/lib/utils';
 import { Feather } from '@expo/vector-icons';
@@ -21,7 +21,8 @@ const SaveBackupPhrase = () => {
       throw new Error('User not signed in');
     }
 
-    setMnemonic(await getMnemonic());
+    const { mnemonic: _mnemonic } = await getMnemonicAndKeys();
+    setMnemonic(_mnemonic);
   }, [setMnemonic, signedInUser]);
 
   const onHidePress = useCallback(() => {
