@@ -5,7 +5,7 @@ import useCheckUsername from '@/hooks/useCheckUsername';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { trpc } from '@/lib/trpc';
-import { isValidUsername } from '@/lib/username';
+import { isValidUsername } from '@raylac/shared';
 import userKeys from '@/queryKeys/userKeys';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';

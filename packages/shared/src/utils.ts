@@ -407,3 +407,17 @@ export const getTokenId = ({
 export const getTokenMetadata = (tokenId: string) => {
   return supportedTokens.find(token => token.tokenId === tokenId);
 };
+
+export const MIN_USERNAME_LENGTH = 3;
+export const USERNAME_REGEX = /^[a-zA-Z0-9_.-]+$/;
+
+/**
+ * Check if a username is valid.
+ * username must be between 3 and 32 characters long
+ * and can only contain letters, numbers, dots, underscores and dashes
+ */
+export const isValidUsername = (username: string) => {
+  return (
+    username.length >= MIN_USERNAME_LENGTH && USERNAME_REGEX.test(username)
+  );
+};

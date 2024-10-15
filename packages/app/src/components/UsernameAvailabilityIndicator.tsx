@@ -1,5 +1,5 @@
 import { theme } from '@/lib/theme';
-import { MIN_USERNAME_LENGTH, USERNAME_REGEX } from '@/lib/username';
+import { MIN_USERNAME_LENGTH, USERNAME_REGEX } from '@raylac/shared';
 import { useTranslation } from 'react-i18next';
 import { Text } from 'react-native';
 
