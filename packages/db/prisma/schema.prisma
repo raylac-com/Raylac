@@ -28,11 +28,10 @@ model ERC5564Announcement {
 }
 
 model User {
-  id                      Int     @id @default(autoincrement())
-  spendingPubKey          String  @unique
-  viewingPubKey           String  @unique
-  viewingPrivKey          String  @unique
-  encryptedViewingPrivKey String?
+  id                      Int    @id @default(autoincrement())
+  spendingPubKey          String @unique
+  viewingPubKey           String @unique
+  encryptedViewingPrivKey String
 
   name           String
   username       String  @unique
@@ -80,9 +79,11 @@ model Trace {
 
   transactionHash String
 
-  logIndex     Int? // For debugging purposes
-  traceAddress String? // For debugging purposes
+  logIndex     Int?
+  traceAddress String?
   Transaction  Transaction @relation(fields: [transactionHash], references: [hash])
+
+  tokenPriceAtTrace Float?
 
   chainId Int
 
@@ -128,13 +129,14 @@ model Transaction {
 model UserOperation {
   hash String @id
 
-  sender        String?
-  paymaster     String?
-  nonce         Int?
-  success       Boolean?
-  actualGasCost BigInt?
-  actualGasUsed BigInt?
-  chainId       Int
+  sender         String?
+  paymaster      String?
+  nonce          Int?
+  success        Boolean?
+  actualGasCost  BigInt?
+  actualGasUsed  BigInt?
+  chainId        Int
+  tokenPriceAtOp Float?
 
   Transaction     Transaction? @relation(fields: [transactionHash], references: [hash])
   transactionHash String?

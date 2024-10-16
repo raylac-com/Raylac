@@ -62,6 +62,7 @@ export const appRouter = router({
     .input(
       z.object({
         userOps: z.array(z.any()),
+        tokenPrice: z.number(),
       })
     )
     .mutation(async opts => {
@@ -70,6 +71,7 @@ export const appRouter = router({
       await submitUserOps({
         userId: opts.ctx.userId,
         userOps: input.userOps as UserOperation[],
+        tokenPrice: input.tokenPrice,
       });
 
       return 'ok';

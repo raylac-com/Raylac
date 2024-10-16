@@ -3,6 +3,7 @@ import {
   getDisplayName,
   getFinalTransfer,
   getProfileImage,
+  getUsdTransferAmount,
 } from '@/lib/utils';
 import { Pressable, Text, View } from 'react-native';
 import FastAvatar from './FastAvatar';
@@ -45,6 +46,8 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
 
   const blockTimestamp = new Date(Number(transfer.block.timestamp) * 1000);
 
+  const transferUsdAmount = getUsdTransferAmount(transfer);
+
   return (
     <Pressable
       style={{
@@ -52,6 +55,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
         flexDirection: 'column',
         borderBottomWidth: 1,
         paddingVertical: 12,
+        rowGap: 4,
       }}
       onPress={() => {
         navigation.navigate('TransferDetails', {
@@ -89,7 +93,13 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
             {getDisplayName(type === 'outgoing' ? to : from)}
           </Text>
         </View>
-        <View>
+        <View
+          style={{
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            rowGap: 4,
+          }}
+        >
           <View
             style={{
               flexDirection: 'row',
@@ -114,18 +124,17 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
               {formattedAmount} {tokenMeta.symbol}
             </Text>
           </View>
-          {/**
-              <Text
-            style={{
-              fontWeight: 'bold',
-              fontSize: 12,
-              color: theme.gray,
-              textAlign: 'right',
-            }}
-          >
-            {formattedUsdAmount} USD
-          </Text>
-             */}
+          {transferUsdAmount && (
+            <Text
+              style={{
+                color: theme.text,
+                textAlign: 'right',
+                opacity: 0.5,
+              }}
+            >
+              ~${transferUsdAmount}
+            </Text>
+          )}
         </View>
       </View>
       <Text

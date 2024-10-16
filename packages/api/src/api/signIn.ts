@@ -27,7 +27,7 @@ const signIn = async ({
   });
 
   if (!user) {
-    throw new Error('User not found');
+    throw new Error(`User not found`);
   }
 
   const userAddress = publicKeyToAddress(user.spendingPubKey as Hex);

@@ -52,6 +52,7 @@ const ConfirmSend = ({ route }: Props) => {
       stealthAddresses: stealthAddresses as StealthAddressWithEphemeral[],
       addressBalancesPerChain: addressBalancesPerChain as AddressTokenBalance[],
       addressNonces: addressNonces as Record<Hex, number | null>,
+      tokenPrice,
     });
 
     mixpanel.track('Send', {
@@ -67,6 +68,7 @@ const ConfirmSend = ({ route }: Props) => {
     gasInfo,
     stealthAddresses,
     addressBalancesPerChain,
+    tokenPrice,
   ]);
 
   const tokenMeta = supportedTokens.find(token => token.tokenId === tokenId);

@@ -125,16 +125,11 @@ const scanStealthAddresses = async () => {
       select: {
         id: true,
         spendingPubKey: true,
-        viewingPrivKey: true,
         encryptedViewingPrivKey: true,
       },
     });
 
     const usersWithViewingPrivKey = users.map(user => {
-      if (!user.encryptedViewingPrivKey) {
-        return user;
-      }
-
       const viewingPrivKey = decryptViewingPrivKey(
         user.encryptedViewingPrivKey as Hex
       );
@@ -156,7 +151,10 @@ const scanStealthAddresses = async () => {
 
         viewTag = decoded.viewTag;
       } catch (_err) {
-        // TODO: Log warning
+        logger.warn('Failed to decode stealth address metadata', {
+          metadata: announcement.metadata,
+          error: _err,
+        });
 
         // Skip this announcement as we can't decode the metadata
         continue;
@@ -182,10 +180,6 @@ const scanStealthAddresses = async () => {
           viewTag,
           userId: matchedUser.id,
         });
-      } else {
-        console.log(
-          `No user match stealth address ${announcement.stealthAddress}`
-        );
       }
     }
 

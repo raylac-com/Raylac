@@ -18,11 +18,18 @@ const getTransferDetails = async ({
           timestamp: true,
         },
       },
+      userOps: {
+        select: {
+          hash: true,
+          tokenPriceAtOp: true,
+        },
+      },
       traces: {
         select: {
           traceAddress: true,
           tokenId: true,
           chainId: true,
+          tokenPriceAtTrace: true,
           UserStealthAddressFrom: {
             select: {
               userId: true,

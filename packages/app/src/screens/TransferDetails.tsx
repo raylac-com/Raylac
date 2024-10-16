@@ -10,6 +10,7 @@ import {
   getFinalTransfer,
   getProfileImage,
   getTransferType,
+  getUsdTransferAmount,
   shortenAddress,
 } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
@@ -109,6 +110,8 @@ const TransferDetails = ({ route }: Props) => {
 
   const transferAmount = finalTransfer.amount as string;
 
+  const transferUsdAmount = getUsdTransferAmount(transferDetail);
+
   const from = finalTransfer.UserStealthAddressFrom?.user || finalTransfer.from;
   const to = finalTransfer.UserStealthAddressTo?.user || finalTransfer.to;
 
@@ -158,6 +161,17 @@ const TransferDetails = ({ route }: Props) => {
         {formatAmount(transferAmount.toString(), tokenMeta.decimals)}{' '}
         {tokenMeta.symbol}
       </Text>
+      {transferUsdAmount && (
+        <Text
+          style={{
+            color: theme.text,
+            opacity: 0.5,
+            fontSize: 16,
+          }}
+        >
+          ~${transferUsdAmount}
+        </Text>
+      )}
       <Text
         style={{
           color: theme.text,

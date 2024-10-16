@@ -3,6 +3,7 @@ import { Hex } from 'viem';
 import * as Clipboard from 'expo-clipboard';
 import { AddressOrUser, TransferItem } from '@/types';
 import { publicKeyToAddress } from 'viem/accounts';
+import { formatAmount, getTokenMetadata } from '@raylac/shared';
 
 export const ACCOUNT_SPENDING_PUB_KEY_STORAGE_KEY = 'account_spending_pub_key';
 export const ACCOUNT_VIEWING_PUB_KEY_STORAGE_KEY = 'account_viewing_pub_key';
@@ -87,4 +88,36 @@ export const getDisplayName = (addressOrUser: AddressOrUser) => {
   return isAddress(addressOrUser)
     ? shortenAddress(addressOrUser as Hex)
     : addressOrUser.name;
+};
+
+/**
+ * Get the USD amount of a transfer.
+ *
+ * If the transfer has a token price at op, use that.
+ * Otherwise, if the transfer has a token price at trace, use that.
+ * Otherwise, return null.
+ */
+export const getUsdTransferAmount = (transfer: TransferItem): string | null => {
+  const finalTransfer = getFinalTransfer(transfer);
+
+  const amount = finalTransfer.amount as string;
+
+  const tokenMeta = getTokenMetadata(finalTransfer.tokenId);
+  const formattedAmount = Number(formatAmount(amount, tokenMeta.decimals));
+
+  const userOps = transfer.userOps;
+  const tokenPriceAtOp = userOps?.length > 0 ? userOps[0].tokenPriceAtOp : null;
+
+  if (tokenPriceAtOp) {
+    // Prioritize token price at op
+    return (tokenPriceAtOp * formattedAmount).toFixed(2);
+  }
+
+  const tokenPriceAtTrace = finalTransfer.tokenPriceAtTrace;
+
+  if (tokenPriceAtTrace) {
+    return (tokenPriceAtTrace * formattedAmount).toFixed(2);
+  }
+
+  return null;
 };

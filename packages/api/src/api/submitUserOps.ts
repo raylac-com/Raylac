@@ -5,6 +5,7 @@ import {
   ERC20Abi,
   getPublicClient,
   getTokenId,
+  getUserOpHash,
   traceTransaction,
   UserOperation,
 } from '@raylac/shared';
@@ -14,6 +15,7 @@ import { handleERC20TransferLog, handleNewTrace } from '@raylac/sync';
 import logger from '../lib/logger';
 import prisma from '../lib/prisma';
 import { handleUserOpEvent } from '@raylac/sync/src/syncUserOps';
+import { Prisma } from '@prisma/client';
 
 const MAX_TRANSFERS = 1000;
 
@@ -33,11 +35,32 @@ const canUserSubmitOps = async (userId: number) => {
   return numTransfers < MAX_TRANSFERS;
 };
 
+const upsertUserOpsWithTokenPrice = async ({
+  userOps,
+  tokenPrice,
+}: {
+  userOps: UserOperation[];
+  tokenPrice: number;
+}) => {
+  const data: Prisma.UserOperationCreateInput[] = userOps.map(userOp => ({
+    hash: getUserOpHash({ userOp }),
+    chainId: userOp.chainId,
+    tokenPriceAtOp: tokenPrice,
+  }));
+
+  await prisma.userOperation.createMany({
+    data,
+    skipDuplicates: true,
+  });
+};
+
 const submitUserOps = async ({
   userId,
+  tokenPrice,
   userOps,
 }: {
   userId: number;
+  tokenPrice: number;
   userOps: UserOperation[];
 }) => {
   const canSubmit = await canUserSubmitOps(userId);
@@ -45,7 +68,7 @@ const submitUserOps = async ({
   if (!canSubmit) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
-      message: 'User has exceeded the maximum number of transfers',
+      message: `User ${userId} has exceeded the maximum number of transfers`,
     });
   }
 
@@ -64,9 +87,12 @@ const submitUserOps = async ({
 
   if (isNativeTransfer) {
     if (!executeArgs.every(args => args.data === '0x')) {
+      const invalidOps = executeArgs.filter(args => args.data !== '0x');
       throw new TRPCError({
         code: 'BAD_REQUEST',
-        message: 'Native transfers must have empty data',
+        message: `Native transfers must have empty data. Found ${JSON.stringify(
+          invalidOps
+        )}`,
       });
     }
   } else {
@@ -75,10 +101,15 @@ const submitUserOps = async ({
     if (!executeArgs.every(args => args.to === tokenAddresses)) {
       throw new TRPCError({
         code: 'BAD_REQUEST',
-        message: 'All user ops must point to the same token',
+        message: `All user ops must point to the same token. Found ${tokenAddresses} and ${executeArgs.map(
+          args => args.to
+        )}`,
       });
     }
   }
+
+  // Save the token price at the time of the user operation
+  await upsertUserOpsWithTokenPrice({ userOps, tokenPrice });
 
   const chainId = userOps[0].chainId;
 
@@ -145,7 +176,6 @@ const submitUserOps = async ({
     }
   } catch (err) {
     logger.error(err);
-    // TODO Report to Sentry
   }
 
   const success = userOpEventLogs.every(log => log.args.success);
@@ -154,7 +184,7 @@ const submitUserOps = async ({
   if (!success) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
-      message: 'User operation failed with success=false',
+      message: `User operation failed with success=false (txHash: ${txHash})`,
     });
   }
 };

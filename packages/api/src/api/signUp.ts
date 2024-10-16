@@ -52,7 +52,7 @@ const signUp = async ({
   const viewingAccount = privateKeyToAccount(viewingPrivKey as Hex);
 
   if (!isValidUsername(username)) {
-    throw new Error('Invalid username');
+    throw new Error(`Invalid username ${username}`);
   }
 
   const isUsernameTaken = await prisma.user.findUnique({
@@ -64,7 +64,7 @@ const signUp = async ({
   if (isUsernameTaken) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
-      message: 'Username already taken',
+      message: `Username ${username} is already taken`,
     });
   }
 
@@ -76,7 +76,6 @@ const signUp = async ({
       username: username,
       spendingPubKey: spendingPubKey,
       viewingPubKey: viewingAccount.publicKey,
-      viewingPrivKey: viewingPrivKey,
       encryptedViewingPrivKey: encryptedViewingPrivKey,
     },
   });

@@ -8,7 +8,6 @@ import {
 } from '@raylac/shared';
 import { signMessage } from 'viem/accounts';
 import { Hex, parseGwei } from 'viem';
-import logger from '../lib/logger';
 
 const PAYMASTER_PRIVATE_KEY = process.env.PAYMASTER_PRIVATE_KEY;
 
@@ -25,32 +24,40 @@ const maxFee = parseGwei('0.05');
  */
 const validateUserOp = (userOp: UserOperation) => {
   if (userOp.callGasLimit !== TRANSFER_OP_CALL_GAS_LIMIT) {
-    throw new Error('Invalid callGasLimit');
+    throw new Error(
+      `Invalid callGasLimit ${userOp.callGasLimit}. Expected ${TRANSFER_OP_CALL_GAS_LIMIT}`
+    );
   }
 
   if (
     userOp.initCode !== '0x' &&
     userOp.verificationGasLimit !== TRANSFER_OP_INIT_VERIFICATION_GAS_LIMIT
   ) {
-    throw new Error(`Invalid verificationGasLimit for initCode !== 0`);
+    throw new Error(
+      `Invalid verificationGasLimit ${userOp.verificationGasLimit}. Expected ${TRANSFER_OP_INIT_VERIFICATION_GAS_LIMIT} for initCode !== 0`
+    );
   }
 
   if (
     userOp.initCode === '0x' &&
     userOp.verificationGasLimit !== TRANSFER_OP_VERIFICATION_GAS_LIMIT
   ) {
-    throw new Error(`Invalid verificationGasLimit for initCode === 0`);
+    throw new Error(
+      `Invalid verificationGasLimit ${userOp.verificationGasLimit}. Expected ${TRANSFER_OP_VERIFICATION_GAS_LIMIT} for initCode === 0`
+    );
   }
 
   if (userOp.preVerificationGas !== TRANSFER_OP_PRE_VERIFICATION_GAS) {
-    throw new Error('Invalid preVerificationGas');
+    throw new Error(
+      `Invalid preVerificationGas ${userOp.preVerificationGas}. Expected ${TRANSFER_OP_PRE_VERIFICATION_GAS}`
+    );
   }
 
   if (userOp.callGasLimit !== TRANSFER_OP_CALL_GAS_LIMIT) {
-    throw new Error('Invalid callGasLimit');
+    throw new Error(
+      `Invalid callGasLimit ${userOp.callGasLimit}. Expected ${TRANSFER_OP_CALL_GAS_LIMIT}`
+    );
   }
-
-  logger.info(`userOp.maxFeePerGas: ${BigInt(userOp.maxFeePerGas)} ${maxFee}`);
 
   if (BigInt(userOp.maxFeePerGas) > maxFee) {
     throw new Error(

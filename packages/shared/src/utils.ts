@@ -15,6 +15,7 @@ import supportedTokens, { NATIVE_TOKEN_ADDRESS } from './supportedTokens';
 import { getPublicClient } from './ethRpc';
 import { getERC20TokenBalance, rundlerMaxPriorityFeePerGas } from '.';
 import supportedChains from './supportedChains';
+import axios from 'axios';
 
 export const encodeERC5564Metadata = (viewTag: Hex): Hex => {
   if (viewTag.length !== 4) {
@@ -420,4 +421,19 @@ export const isValidUsername = (username: string) => {
   return (
     username.length >= MIN_USERNAME_LENGTH && USERNAME_REGEX.test(username)
   );
+};
+
+export const getCoingeckoClient = () => {
+  const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY;
+
+  if (!COINGECKO_API_KEY) {
+    throw new Error('COINGECKO_API_KEY is not set');
+  }
+
+  return axios.create({
+    baseURL: 'https://pro-api.coingecko.com/api/',
+    headers: {
+      'x-cg-pro-api-key': COINGECKO_API_KEY,
+    },
+  });
 };
