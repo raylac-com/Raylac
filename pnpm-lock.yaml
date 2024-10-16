@@ -373,9 +373,6 @@ importers:
       tsx:
         specifier: ^4.7.1
         version: 4.19.1
-      vitest:
-        specifier: ^2.1.2
-        version: 2.1.2(@types/node@20.16.5)(lightningcss@1.19.0)(terser@5.33.0)
 
   packages/tests:
     dependencies:
