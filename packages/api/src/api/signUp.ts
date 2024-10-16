@@ -76,7 +76,6 @@ const signUp = async ({
       username: username,
       spendingPubKey: spendingPubKey,
       viewingPubKey: viewingAccount.publicKey,
-      viewingPrivKey: viewingPrivKey,
       encryptedViewingPrivKey: encryptedViewingPrivKey,
     },
   });
