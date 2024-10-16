@@ -424,7 +424,16 @@ export const isValidUsername = (username: string) => {
 };
 
 export const getCoingeckoClient = () => {
+  const COINGECKO_API_KEY = process.env.COINGECKO_API_KEY;
+
+  if (!COINGECKO_API_KEY) {
+    throw new Error('COINGECKO_API_KEY is not set');
+  }
+
   return axios.create({
-    baseURL: 'https://api.coingecko.com/api',
+    baseURL: 'https://pro-api.coingecko.com/api/',
+    headers: {
+      'x-cg-pro-api-key': COINGECKO_API_KEY,
+    },
   });
 };

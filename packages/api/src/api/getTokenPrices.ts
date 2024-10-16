@@ -1,5 +1,7 @@
-import { CoingeckoTokenPriceResponse } from '@raylac/shared';
-import axios from 'axios';
+import {
+  CoingeckoTokenPriceResponse,
+  getCoingeckoClient,
+} from '@raylac/shared';
 import NodeCache from 'node-cache';
 
 const cache = new NodeCache();
@@ -13,8 +15,10 @@ const getTokenPrices = async () => {
     return tokenPricesInCache;
   }
 
-  const result = await axios.get<CoingeckoTokenPriceResponse>(
-    `https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd`
+  const client = getCoingeckoClient();
+
+  const result = await client.get<CoingeckoTokenPriceResponse>(
+    `/v3/simple/price?ids=ethereum&vs_currencies=usd`
   );
 
   cache.set(TOKEN_PRICES_CACHE_KEY, result.data, 60);

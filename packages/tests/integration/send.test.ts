@@ -212,6 +212,7 @@ describe('send', () => {
 
         await authedClient.submitUserOps.mutate({
           userOps: signedUserOps,
+          tokenPrice: tokenPrice.usd,
         });
 
         const senderBalanceAfter = await getSenderBalance({
