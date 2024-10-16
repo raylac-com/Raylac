@@ -15,6 +15,7 @@ import supportedTokens, { NATIVE_TOKEN_ADDRESS } from './supportedTokens';
 import { getPublicClient } from './ethRpc';
 import { getERC20TokenBalance, rundlerMaxPriorityFeePerGas } from '.';
 import supportedChains from './supportedChains';
+import axios from 'axios';
 
 export const encodeERC5564Metadata = (viewTag: Hex): Hex => {
   if (viewTag.length !== 4) {
@@ -420,4 +421,10 @@ export const isValidUsername = (username: string) => {
   return (
     username.length >= MIN_USERNAME_LENGTH && USERNAME_REGEX.test(username)
   );
+};
+
+export const getCoingeckoClient = () => {
+  return axios.create({
+    baseURL: 'https://api.coingecko.com/api',
+  });
 };

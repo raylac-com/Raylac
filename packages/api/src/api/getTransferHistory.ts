@@ -31,6 +31,7 @@ const getTransferHistory = async ({
           tokenId: true,
           chainId: true,
           traceAddress: true,
+          tokenPriceAtTrace: true,
           UserStealthAddressFrom: {
             select: {
               userId: true,

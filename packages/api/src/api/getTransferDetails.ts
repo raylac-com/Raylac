@@ -29,6 +29,7 @@ const getTransferDetails = async ({
           traceAddress: true,
           tokenId: true,
           chainId: true,
+          tokenPriceAtTrace: true,
           UserStealthAddressFrom: {
             select: {
               userId: true,

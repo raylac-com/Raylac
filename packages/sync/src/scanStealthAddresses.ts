@@ -185,10 +185,6 @@ const scanStealthAddresses = async () => {
           viewTag,
           userId: matchedUser.id,
         });
-      } else {
-        console.log(
-          `No user match stealth address ${announcement.stealthAddress}`
-        );
       }
     }
 

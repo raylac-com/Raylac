@@ -10,6 +10,7 @@ import {
   getFinalTransfer,
   getProfileImage,
   getTransferType,
+  getUsdTransferAmount,
   shortenAddress,
 } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
@@ -23,7 +24,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
-import { formatUnits, Hex } from 'viem';
+import { Hex } from 'viem';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'TransferDetails'>;
 
@@ -109,12 +110,7 @@ const TransferDetails = ({ route }: Props) => {
 
   const transferAmount = finalTransfer.amount as string;
 
-  const userOps = transferDetail?.userOps;
-  const tokenPriceAtOp = userOps?.length > 0 ? userOps[0].tokenPriceAtOp : null;
-  const transferUsdAmount = tokenPriceAtOp
-    ? tokenPriceAtOp *
-      Number(formatUnits(BigInt(transferAmount), tokenMeta.decimals))
-    : null;
+  const transferUsdAmount = getUsdTransferAmount(transferDetail);
 
   const from = finalTransfer.UserStealthAddressFrom?.user || finalTransfer.from;
   const to = finalTransfer.UserStealthAddressTo?.user || finalTransfer.to;
@@ -173,7 +169,7 @@ const TransferDetails = ({ route }: Props) => {
             fontSize: 16,
           }}
         >
-          ~${transferUsdAmount.toFixed(2)}
+          ~${transferUsdAmount}
         </Text>
       )}
       <Text

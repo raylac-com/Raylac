@@ -84,6 +84,8 @@ model Trace {
   traceAddress String?
   Transaction  Transaction @relation(fields: [transactionHash], references: [hash])
 
+  tokenPriceAtTrace Float?
+
   chainId Int
 
   createdAt DateTime @default(now())

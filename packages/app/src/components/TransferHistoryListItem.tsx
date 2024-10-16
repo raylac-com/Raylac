@@ -3,6 +3,7 @@ import {
   getDisplayName,
   getFinalTransfer,
   getProfileImage,
+  getUsdTransferAmount,
 } from '@/lib/utils';
 import { Pressable, Text, View } from 'react-native';
 import FastAvatar from './FastAvatar';
@@ -12,7 +13,6 @@ import { formatAmount, getTokenMetadata } from '@raylac/shared';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { formatDistanceToNowStrict } from 'date-fns';
 import { TransferItem } from '@/types';
-import { formatUnits } from 'viem';
 // import useEnsName from '@/hooks/useEnsName';
 
 interface TransferHistoryListItemProps {
@@ -46,12 +46,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
 
   const blockTimestamp = new Date(Number(transfer.block.timestamp) * 1000);
 
-  const userOps = transfer.userOps;
-  const tokenPriceAtOp = userOps?.length > 0 ? userOps[0].tokenPriceAtOp : null;
-
-  const transferUsdAmount = tokenPriceAtOp
-    ? tokenPriceAtOp * Number(formatUnits(BigInt(amount), tokenMeta.decimals))
-    : null;
+  const transferUsdAmount = getUsdTransferAmount(transfer);
 
   return (
     <Pressable
@@ -137,7 +132,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
                 opacity: 0.5,
               }}
             >
-              ~${transferUsdAmount.toFixed(2)}
+              ~${transferUsdAmount}
             </Text>
           )}
         </View>

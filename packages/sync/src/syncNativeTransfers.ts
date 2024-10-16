@@ -16,13 +16,16 @@ import {
   upsertTransaction,
 } from './utils';
 import logger from './lib/logger';
+import { getTokenPriceAtTime } from './lib/coingecko';
 
 export const handleNewTrace = async ({
   trace,
   chainId,
+  tokenPrice,
 }: {
   trace: TraceResponseData;
   chainId: number;
+  tokenPrice?: number;
 }) => {
   if (trace.type === 'create') {
     // `type` can be either 'call' or 'create'.
@@ -61,6 +64,7 @@ export const handleNewTrace = async ({
         hash: trace.transactionHash,
       },
     },
+    tokenPriceAtTrace: tokenPrice,
     chainId,
   };
 
@@ -90,6 +94,29 @@ export const handleNewTrace = async ({
       },
     },
   });
+};
+
+const getBlockTimestamp = async ({
+  blockNumber,
+  chainId,
+}: {
+  blockNumber: bigint;
+  chainId: number;
+}) => {
+  const block = await prisma.block.findUnique({
+    where: {
+      number_chainId: {
+        number: blockNumber,
+        chainId,
+      },
+    },
+  });
+
+  if (!block) {
+    return null;
+  }
+
+  return block.timestamp;
 };
 
 /**
@@ -125,7 +152,16 @@ const batchSyncNativeTransfers = async ({
   console.timeEnd(`trace_filter ${chainId}`);
 
   for (const trace of [...incomingTraces, ...outgoingTraces]) {
-    await handleNewTrace({ trace, chainId });
+    const blockTimestamp = await getBlockTimestamp({
+      blockNumber: BigInt(trace.blockNumber),
+      chainId,
+    });
+
+    const tokenPrice = blockTimestamp
+      ? await getTokenPriceAtTime('eth', Number(blockTimestamp))
+      : undefined;
+
+    await handleNewTrace({ trace, chainId, tokenPrice });
   }
 };
 
