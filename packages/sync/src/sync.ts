@@ -6,6 +6,7 @@ import syncERC20Transfers from './syncERC20Transfers';
 import syncAnnouncements from './syncAnnouncements';
 import scanStealthAddresses from './scanStealthAddresses';
 import { announceStealthAccounts } from './announceStealthAccounts';
+import checkAddressBalances from './checkAddressBalances';
 
 const sync = async () => {
   await Promise.all([
@@ -13,6 +14,7 @@ const sync = async () => {
     syncUserOps(),
     syncNativeTransfers(),
     syncERC20Transfers(),
+    checkAddressBalances(),
     announceStealthAccounts(),
     syncAnnouncements(),
     scanStealthAddresses(),
