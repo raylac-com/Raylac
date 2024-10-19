@@ -32,6 +32,9 @@ import getTransferDetails from './api/getTransferDetails';
 import toggleDevMode from './api/toggleDevMode';
 import addStealthAccount from './api/addStealthAccount';
 import getAddressNonces from './api/getAddressNonces';
+import getSwapPrice from './api/getSwapPrice';
+import getSwapQuote from './api/getSwapQuote';
+import submitUserOp from './api/submitUserOp';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -158,7 +161,6 @@ export const appRouter = router({
       const { input } = opts;
 
       const details = await getTransferDetails({
-        userId: opts.ctx.userId,
         txHash: input.txHash,
       });
 
@@ -360,6 +362,64 @@ export const appRouter = router({
         userId: opts.ctx.userId,
         devModeEnabled: input.devModeEnabled,
       });
+    }),
+
+  getSwapPrice: authedProcedure
+    .input(
+      z.object({
+        chainId: z.number(),
+        sellToken: z.string(),
+        sellAmount: z.string(),
+        buyToken: z.string(),
+      })
+    )
+    .query(async opts => {
+      const { input } = opts;
+
+      const price = await getSwapPrice({
+        chainId: input.chainId,
+        sellToken: input.sellToken as Hex,
+        sellAmount: input.sellAmount,
+        buyToken: input.buyToken as Hex,
+      });
+
+      return price;
+    }),
+
+  getSwapQuote: authedProcedure
+    .input(
+      z.object({
+        chainId: z.number(),
+        sellToken: z.string(),
+        sellAmount: z.string(),
+        buyToken: z.string(),
+        taker: z.string(),
+      })
+    )
+    .query(async opts => {
+      const { input } = opts;
+
+      const quote = await getSwapQuote({
+        chainId: input.chainId,
+        sellToken: input.sellToken as Hex,
+        sellAmount: input.sellAmount,
+        buyToken: input.buyToken as Hex,
+        taker: input.taker as Hex,
+      });
+
+      return quote;
+    }),
+
+  submitUserOp: authedProcedure
+    .input(
+      z.object({
+        userOp: z.any(),
+      })
+    )
+    .mutation(async opts => {
+      const { input } = opts;
+
+      await submitUserOp({ userOp: input.userOp as UserOperation });
     }),
 });
 

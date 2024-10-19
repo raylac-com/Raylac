@@ -3,16 +3,20 @@ import {
   bigIntMin,
   ENTRY_POINT_ADDRESS,
   EntryPointAbi,
+  ERC20Abi,
   getPublicClient,
+  getTokenId,
+  isTokenSupported,
   RAYLAC_PAYMASTER_ADDRESS,
 } from '@raylac/shared';
-import { decodeEventLog, Hex, Log, parseAbiItem } from 'viem';
+import { decodeEventLog, Hex, Log, parseAbiItem, parseEventLogs } from 'viem';
 import prisma from './lib/prisma';
 import supportedChains from '@raylac/shared/out/supportedChains';
 import { updateJobLatestSyncedBlock, upsertTransaction } from './utils';
 import { sleep } from './lib/utils';
 import { Prisma } from '@prisma/client';
 import logger from './lib/logger';
+import { handleERC20TransferLog } from './syncERC20Transfers';
 
 const userOpEvent = parseAbiItem(
   'event UserOperationEvent(bytes32 indexed userOpHash, address indexed sender, address indexed paymaster, uint256 nonce, bool success, uint256 actualGasCost, uint256 actualGasUsed)'
@@ -128,6 +132,40 @@ export const handleUserOpEvent = async ({
     chainId,
     txHash,
   });
+
+  const client = getPublicClient({ chainId });
+  const txReceipt = await client.getTransactionReceipt({
+    hash: txHash,
+  });
+
+  const transferLogs = parseEventLogs({
+    abi: ERC20Abi,
+    logs: txReceipt.logs,
+    eventName: 'Transfer',
+  });
+
+  await Promise.all(
+    transferLogs.map(async log => {
+      const tokenAddress = log.address;
+
+      if (
+        !isTokenSupported({
+          chainId,
+          tokenAddress,
+        })
+      ) {
+        return;
+      }
+
+      const tokenId = getTokenId({
+        chainId,
+        tokenAddress: log.address,
+      });
+      console.log({ tokenId, tokenAddress: log.address });
+
+      await handleERC20TransferLog({ log, tokenId, chainId });
+    })
+  );
 };
 
 /**

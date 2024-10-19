@@ -36,12 +36,15 @@ import useTypedNavigation from './hooks/useTypedNavigation';
 import useFetchUpdates from './hooks/useFetchUpdates';
 import Addresses from './screens/Addresses';
 import TransferDetails from './screens/TransferDetails';
+import SwapDetails from './screens/SwapDetails';
 import Advanced from './screens/Advanced';
 import ConfirmBackupPhrase from './screens/ConfirmBackupPhrase';
 import { isBackupVerificationComplete } from './lib/key';
 import SaveBackupPhrase from './screens/SaveBackupPhrase';
 import { SafeAreaView } from 'react-native';
 import Receive from './screens/Receive';
+// import Swap from './screens/Swap';
+// import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -67,6 +70,24 @@ const Tabs = () => {
           ),
         }}
       ></Tab.Screen>
+      {/**
+        
+      <Tab.Screen
+        name="Swap"
+        component={Swap}
+        options={{
+          title: t('title', { ns: 'Swap' }),
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons
+              name="swap-vertical-variant"
+              size={24}
+              color={color}
+            />
+          ),
+        }}
+      ></Tab.Screen>
+        * 
+         */}
       <Tab.Screen
         name="Account"
         component={Account}
@@ -242,6 +263,15 @@ const Screens = () => {
           component={TransferDetails}
           options={{
             title: t('title', { ns: 'TransferDetails' }),
+            headerBackVisible: true,
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="SwapDetails"
+          component={SwapDetails}
+          options={{
+            title: t('title', { ns: 'SwapDetails' }),
             headerBackVisible: true,
             headerBackTitle: t('headerBackTitle', { ns: 'common' }),
           }}

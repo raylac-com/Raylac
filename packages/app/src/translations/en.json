@@ -93,6 +93,12 @@
     "TransferDetails": {
       "title": "Transfer details"
     },
+    "SwapDetails": {
+      "title": "Swap details"
+    },
+    "Swap": {
+      "title": "Swap"
+    },
     "BackupAccount": {
       "title": "Backup Account",
       "backupWarning1": "Anyone who has your backup phrase can access and spend your balance.",

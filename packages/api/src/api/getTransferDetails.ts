@@ -3,13 +3,7 @@ import prisma from '../lib/prisma';
 /**
  * Get the details of a transfer by its transaction hash and trace address
  */
-const getTransferDetails = async ({
-  userId,
-  txHash,
-}: {
-  userId: number;
-  txHash: string;
-}) => {
+const getTransferDetails = async ({ txHash }: { txHash: string }) => {
   const tx = await prisma.transaction.findUnique({
     select: {
       block: {
@@ -30,6 +24,7 @@ const getTransferDetails = async ({
           tokenId: true,
           chainId: true,
           tokenPriceAtTrace: true,
+          logIndex: true,
           UserStealthAddressFrom: {
             select: {
               userId: true,
@@ -73,11 +68,7 @@ const getTransferDetails = async ({
 
   return {
     ...tx,
-    traces: tx?.traces.filter(
-      trace =>
-        trace.UserStealthAddressTo?.userId === userId ||
-        trace.UserStealthAddressFrom?.userId === userId
-    ),
+    traces: tx?.traces,
   };
 };
 

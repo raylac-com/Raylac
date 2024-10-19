@@ -4,6 +4,7 @@ import { Hex } from 'viem';
 export type RootTabsParamsList = {
   Home: undefined;
   Account: undefined;
+  Swap: undefined;
 };
 
 export type RootStackParamsList = {
@@ -34,6 +35,9 @@ export type RootStackParamsList = {
   Deposit: undefined;
   TransferHistory: undefined;
   TransferDetails: {
+    txHash: string;
+  };
+  SwapDetails: {
     txHash: string;
   };
   Receive: undefined;

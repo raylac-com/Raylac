@@ -7,6 +7,17 @@ export const NATIVE_TOKEN_ADDRESS = zeroAddress;
 
 const supportedTokens: SupportedToken[] = [
   {
+    tokenId: 'weth',
+    symbol: 'WETH',
+    name: 'Wrapped Ether',
+    decimals: 18,
+    logoURI: 'https://static.alchemyapi.io/images/assets/2396.png',
+    addresses: supportedChains.map(chain => ({
+      address: '0x4200000000000000000000000000000000000006',
+      chain,
+    })),
+  },
+  {
     tokenId: 'usdc',
     symbol: 'USDC',
     name: 'USD Coin',

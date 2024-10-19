@@ -48,7 +48,7 @@ export const getInitCode = ({ stealthSigner }: { stealthSigner: Hex }) => {
 export const TRANSFER_OP_PRE_VERIFICATION_GAS = toHex(1_500_000);
 
 /** callGasLimit for a transfer operation */
-export const TRANSFER_OP_CALL_GAS_LIMIT = toHex(50_000);
+export const TRANSFER_OP_CALL_GAS_LIMIT = toHex(800_000);
 
 /** verificationGasLimit for a transfer operation */
 export const TRANSFER_OP_VERIFICATION_GAS_LIMIT = toHex(70_000);

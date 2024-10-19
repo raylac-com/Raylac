@@ -1,12 +1,5 @@
 import * as secp from '@noble/secp256k1';
-import {
-  Chain,
-  decodeFunctionData,
-  formatUnits,
-  getAddress,
-  Hex,
-  parseUnits,
-} from 'viem';
+import { Chain, decodeFunctionData, formatUnits, Hex, parseUnits } from 'viem';
 import { ChainGasInfo, UserOperation } from './types';
 import RaylacAccountAbi from './abi/RaylacAccountAbi';
 import ERC20Abi from './abi/ERC20Abi';
@@ -375,6 +368,22 @@ export const bigIntMin = (values: bigint[]) => {
   return minBigInt;
 };
 
+export const isTokenSupported = ({
+  chainId,
+  tokenAddress,
+}: {
+  chainId: number;
+  tokenAddress: Hex;
+}) => {
+  return supportedTokens.find(token =>
+    token.addresses.find(
+      address =>
+        address.chain.id === chainId &&
+        address.address.toLowerCase() === tokenAddress.toLowerCase()
+    )
+  );
+};
+
 /**
  * Get the token ID of a token with a given address on a chain
  */
@@ -389,7 +398,7 @@ export const getTokenId = ({
     token.addresses.find(
       address =>
         address.chain.id === chainId &&
-        address.address === getAddress(tokenAddress)
+        address.address.toLowerCase() === tokenAddress.toLowerCase()
     )
   );
 

@@ -31,6 +31,7 @@ const getTransferHistory = async ({
           tokenId: true,
           chainId: true,
           traceAddress: true,
+          logIndex: true,
           tokenPriceAtTrace: true,
           UserStealthAddressFrom: {
             select: {
@@ -100,11 +101,7 @@ const getTransferHistory = async ({
   const filteredTransactions = transactions.map(tx => {
     return {
       ...tx,
-      traces: tx.traces.filter(
-        trace =>
-          trace.UserStealthAddressTo?.userId === userId ||
-          trace.UserStealthAddressFrom?.userId === userId
-      ),
+      traces: tx.traces,
     };
   });
 

@@ -57,6 +57,41 @@ export const getFinalTransfer = (transfer: TransferItem) => {
   return finalTransfer;
 };
 
+export const isSwap = (transfer: TransferItem) => {
+  const tokenIds = new Set<string>();
+
+  transfer.traces.forEach(trace => {
+    tokenIds.add(trace.tokenId);
+  });
+
+  return tokenIds.size > 1;
+};
+
+export const getSwap = (transfer: TransferItem) => {
+  const senders = new Set<string>();
+
+  transfer.traces.forEach(trace => {
+    senders.add(trace.from);
+  });
+
+  const sortedTraces = transfer.traces.sort((a, b) => a.logIndex - b.logIndex);
+
+  const firstTrace = sortedTraces[0];
+  const lastTrace = sortedTraces[sortedTraces.length - 1];
+
+  const inputTokenId = firstTrace.tokenId;
+  const inputAmount = firstTrace.amount;
+  const outputTokenId = lastTrace.tokenId;
+  const outputAmount = lastTrace.amount;
+
+  return {
+    inputTokenId,
+    inputAmount,
+    outputTokenId,
+    outputAmount,
+  };
+};
+
 export const getTransferType = (
   transfer: TransferItem,
   signedInUserId: number

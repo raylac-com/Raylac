@@ -144,7 +144,7 @@ const syncBlocksForChain = async (chainId: number) => {
       `Fetching ${latestBlock.number - fromBlock} blocks for chain ${chainId} from ${fromBlock.toLocaleString()} to ${latestBlock.number.toLocaleString()}`
     );
 
-    const chunkSize = BigInt(10);
+    const chunkSize = BigInt(100);
     for (
       let blockNumber = fromBlock;
       blockNumber <= latestBlock.number;

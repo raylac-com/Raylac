@@ -182,3 +182,61 @@ export interface RaylacAccountExecuteArgs {
   data: Hex;
   executionTag: Hex;
 }
+
+export interface ZeroExSwapPriceResponse {
+  blockNumber: string;
+  buyAmount: string;
+  buyToken: Hex;
+  fees: { integratorFee: null; zeroExFee: object; gasFee: null };
+  gas: string;
+  gasPrice: string;
+  issues: {
+    allowance: null;
+    balance: object;
+    simulationIncomplete: false;
+    invalidSourcesPassed: [];
+  };
+  liquidityAvailable: true;
+  minBuyAmount: string;
+  sellAmount: string;
+  sellToken: Hex;
+  tokenMetadata: { buyToken: object; sellToken: object };
+  totalNetworkFee: string;
+  zid: string;
+}
+
+export interface ZeroExSwapQuoteResponse {
+  blockNumber: string;
+  buyAmount: string;
+  buyToken: Hex;
+  fees: { integratorFee: null; zeroExFee: object; gasFee: null };
+  issues: {
+    allowance: object;
+    balance: null;
+    simulationIncomplete: boolean;
+    invalidSourcesPassed: [];
+  };
+  liquidityAvailable: boolean;
+  minBuyAmount: string;
+  permit2: {
+    type: string;
+    hash: Hex;
+    eip712: object;
+  };
+  route: {
+    fills: object[];
+    tokens: object[];
+  };
+  sellAmount: string;
+  sellToken: Hex;
+  tokenMetadata: { buyToken: object; sellToken: object };
+  totalNetworkFee: string;
+  transaction: {
+    to: Hex;
+    data: Hex;
+    gas: string;
+    gasPrice: string;
+    value: string;
+  };
+  zid: string;
+}

@@ -11,7 +11,8 @@ import StyledPressable from '@/components/StyledPressable';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTokenBalances from '@/hooks/useTokenBalance';
-import { getTransferType } from '@/lib/utils';
+import { getTransferType, isSwap } from '@/lib/utils';
+import SwapHistoryListItem from '@/components/SwapHistoryListItem';
 
 interface TokenBalanceItemProps {
   formattedBalance: string;
@@ -281,13 +282,25 @@ const HomeScreen = () => {
             flexDirection: 'column',
           }}
         >
-          {txHistory?.map((transfer, i) => (
-            <TransferHistoryListItem
-              key={i}
-              transfer={transfer}
-              type={getTransferType(transfer, signedInUser.id)}
-            />
-          ))}
+          {txHistory?.map((transfer, i) =>
+            isSwap(transfer) ? (
+              <SwapHistoryListItem key={i} transfer={transfer} />
+            ) : (
+              <TransferHistoryListItem
+                key={i}
+                transfer={{
+                  ...transfer,
+                  traces: transfer.traces.filter(trace => {
+                    return (
+                      trace.UserStealthAddressTo?.userId === signedInUser.id ||
+                      trace.UserStealthAddressFrom?.userId === signedInUser.id
+                    );
+                  }),
+                }}
+                type={getTransferType(transfer, signedInUser.id)}
+              />
+            )
+          )}
           {txHistory && txHistory.length > NUM_TRANSFERS_TO_SHOW ? (
             <Text
               style={{
