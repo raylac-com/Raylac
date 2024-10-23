@@ -6,27 +6,27 @@ import '@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol';
 import '@openzeppelin/contracts/utils/Create2.sol';
-import './RaylacAccount.sol';
+import './RaylacAccountV2.sol';
 import './RaylacAccountProxy.sol';
 
-contract AccountFactory {
-  RaylacAccount public immutable accountImplementation;
+contract AccountFactoryV2 {
+  RaylacAccountV2 public immutable accountImplementation;
   IEntryPoint public immutable entryPoint;
 
-  constructor(IEntryPoint _entryPoint, RaylacAccount _accountImplementation) {
+  constructor(IEntryPoint _entryPoint, RaylacAccountV2 _accountImplementation) {
     entryPoint = _entryPoint;
     accountImplementation = _accountImplementation;
   }
 
   function createAccount(
     address stealthSigner
-  ) external returns (RaylacAccount ret) {
+  ) external returns (RaylacAccountV2 ret) {
     // Deploy a new account with CREATE2
-    ret = RaylacAccount(
+    ret = RaylacAccountV2(
       payable(
         new RaylacAccountProxy{ salt: 0 }(
           address(accountImplementation),
-          abi.encodeCall(RaylacAccount.initialize, (stealthSigner))
+          abi.encodeCall(RaylacAccountV2.initialize, (stealthSigner))
         )
       )
     );
@@ -44,7 +44,7 @@ contract AccountFactory {
             type(ERC1967Proxy).creationCode,
             abi.encode(
               address(accountImplementation),
-              abi.encodeCall(RaylacAccount.initialize, (stealthSigner))
+              abi.encodeCall(RaylacAccountV2.initialize, (stealthSigner))
             )
           )
         )

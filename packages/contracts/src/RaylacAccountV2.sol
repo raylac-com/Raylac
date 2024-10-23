@@ -8,8 +8,11 @@ import '@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 import '@openzeppelin/contracts/interfaces/IERC1271.sol';
+import { IERC20 } from '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+import './IRaylacAccountV2.sol';
 
-contract RaylacAccount is
+contract RaylacAccountV2 is
+  IRaylacAccountV2,
   BaseAccount,
   UUPSUpgradeable,
   Initializable,
@@ -25,8 +28,15 @@ contract RaylacAccount is
   uint256 private constant _SIG_VALIDATION_SUCCEED = 0;
   uint256 private constant _SIG_VALIDATION_FAILED = 1;
 
+  address public stelathTransferContract;
+
   modifier onlySelf() {
     require(msg.sender == address(this), 'only self');
+    _;
+  }
+
+  modifier onlyStealthTransfer() {
+    require(msg.sender == stelathTransferContract, 'only stealth transfer');
     _;
   }
 
@@ -38,6 +48,7 @@ contract RaylacAccount is
 
   function initialize(address _stealthSigner) public virtual initializer {
     stealthSigner = _stealthSigner;
+    stelathTransferContract = 0x2347C999165179269283b2511C3D6C2b8F3d4722;
   }
 
   /**
@@ -52,7 +63,7 @@ contract RaylacAccount is
     bytes calldata func,
     bytes calldata /* tag */
   ) external {
-    // _requireFromEntryPoint();
+    _requireFromEntryPoint();
     _call(dest, value, func);
   }
 
@@ -90,8 +101,29 @@ contract RaylacAccount is
     return _SIG_VALIDATION_SUCCEED;
   }
 
-  function setStealthSigner(address newStelathSigner) public {
-    stealthSigner = newStelathSigner;
+  function stealthTransfer(
+    address tokenAddress,
+    uint256 amount
+  ) external onlyStealthTransfer {
+    if (tokenAddress == address(0)) {
+      // Native transfer
+      (bool success, ) = payable(stelathTransferContract).call{ value: amount }(
+        ''
+      );
+
+      if (!success) {
+        revert('Native transfer failed');
+      }
+    } else {
+      // ERC20 transfer
+      IERC20(tokenAddress).transfer(stelathTransferContract, amount);
+    }
+  }
+
+  function setStealthTransferContract(
+    address _stealthTransferContract
+  ) external onlySelf {
+    stelathTransferContract = _stealthTransferContract;
   }
 
   /// UUPSUpsgradeable: only allow self-upgrade.
