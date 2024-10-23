@@ -11,6 +11,7 @@ import {
 } from './utils';
 import logger from './lib/logger';
 import { Prisma } from '@prisma/client';
+import deployAccount from './lib/deployAccount';
 
 export const handleERC20TransferLog = async ({
   log,
@@ -23,11 +24,6 @@ export const handleERC20TransferLog = async ({
   chainId: number;
   tokenPrice?: number;
 }) => {
-  await upsertTransaction({
-    txHash: log.transactionHash,
-    chainId,
-  });
-
   const decodedLog = decodeEventLog({
     abi: ERC20Abi,
     data: log.data,
@@ -42,6 +38,14 @@ export const handleERC20TransferLog = async ({
 
   const from = getAddress(args.from);
   const to = getAddress(args.to);
+
+  // Deploy the account that received the transfer if it's not already deployed
+  await deployAccount({ address: to, chainId });
+
+  await upsertTransaction({
+    txHash: log.transactionHash,
+    chainId,
+  });
 
   const data: Prisma.TraceCreateInput = {
     from,

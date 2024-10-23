@@ -2,6 +2,7 @@ import { Hex } from 'viem';
 import prisma from './prisma';
 import {
   getInitCode,
+  getPublicClient,
   getWalletClient,
   SENDER_CREATOR_ADDRESS,
 } from '@raylac/shared';
@@ -17,6 +18,21 @@ if (!ACCOUNT_DEPLOYER_PRIV_KEY) {
 
 const deployerAccount = privateKeyToAccount(ACCOUNT_DEPLOYER_PRIV_KEY as Hex);
 
+const isAlreadyDeployed = async ({
+  address,
+  chainId,
+}: {
+  address: Hex;
+  chainId: number;
+}): Promise<boolean> => {
+  const client = getPublicClient({ chainId });
+  const code = await client.getCode({ address });
+  return code !== '0x';
+};
+
+/**
+ * Deploys an account if it's not already deployed.
+ */
 const deployAccount = async ({
   address,
   chainId,
@@ -35,7 +51,12 @@ const deployAccount = async ({
   });
 
   if (!stealthAddress) {
-    logger.error(`Stealth address not found for ${address}`);
+    logger.info(`Stealth address not found for ${address}`);
+    return;
+  }
+
+  if (await isAlreadyDeployed({ address, chainId })) {
+    logger.info(`Account already deployed for ${address}`);
     return;
   }
 

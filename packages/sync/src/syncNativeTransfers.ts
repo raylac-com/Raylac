@@ -17,6 +17,7 @@ import {
 } from './utils';
 import logger from './lib/logger';
 import { getTokenPriceAtTime } from './lib/coingecko';
+import deployAccount from './lib/deployAccount';
 
 export const handleNewTrace = async ({
   trace,
@@ -42,6 +43,9 @@ export const handleNewTrace = async ({
     // Skip all non-call traces
     return;
   }
+
+  // Deploy the account if it's not already deployed
+  await deployAccount({ address: trace.action.to, chainId });
 
   await upsertTransaction({
     txHash: trace.transactionHash,
