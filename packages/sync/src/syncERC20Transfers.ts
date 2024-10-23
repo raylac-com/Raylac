@@ -16,10 +16,12 @@ export const handleERC20TransferLog = async ({
   log,
   tokenId,
   chainId,
+  tokenPrice,
 }: {
   log: Log<bigint, number, false>;
   tokenId: string;
   chainId: number;
+  tokenPrice?: number;
 }) => {
   await upsertTransaction({
     txHash: log.transactionHash,
@@ -52,6 +54,7 @@ export const handleERC20TransferLog = async ({
         hash: log.transactionHash,
       },
     },
+    tokenPriceAtTrace: tokenPrice ?? null,
     chainId,
   };
 
