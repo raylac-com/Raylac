@@ -3,6 +3,7 @@ import prisma from './lib/prisma';
 import { Hex, parseAbiItem, ParseEventLogsReturnType } from 'viem';
 import {
   ACCOUNT_IMPL_DEPLOYED_BLOCK,
+  bigIntMin,
   ERC20Abi,
   getPublicClient,
 } from '@raylac/shared';
@@ -11,6 +12,75 @@ export const announcementAbiItem = parseAbiItem(
   'event Announcement(uint256 indexed schemeId, address indexed stealthAddress, address indexed caller, bytes viewTag, bytes ephemeralPubKey)'
 );
 
+export const getFromBlock = async ({
+  chainId,
+  job,
+}: {
+  chainId: number;
+  job: SyncJob;
+}) => {
+  const raylacAccountDeployedBlock = ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId];
+
+  if (!raylacAccountDeployedBlock) {
+    throw new Error(
+      `ACCOUNT_IMPL_DEPLOYED_BLOCK not found for chain ${chainId}`
+    );
+  }
+
+  const jobStatus = await prisma.syncStatus.findFirst({
+    select: {
+      lastSyncedBlockNum: true,
+    },
+    where: {
+      job,
+      chainId,
+    },
+  });
+
+  const latestSynchedBlock =
+    jobStatus?.lastSyncedBlockNum ?? raylacAccountDeployedBlock;
+
+  const client = getPublicClient({ chainId });
+
+  const finalizedBlockNumber = await client.getBlock({
+    blockTag: 'finalized',
+  });
+
+  if (finalizedBlockNumber.number === null) {
+    throw new Error('Finalized block number is null');
+  }
+
+  const fromBlock = bigIntMin([
+    latestSynchedBlock,
+    finalizedBlockNumber.number,
+  ]);
+
+  return fromBlock;
+};
+
+/**
+ * Get the latest synced block number for a sync job
+ */
+export const getLatestSynchedBlockForJob = async (
+  chainId: number,
+  job: SyncJob
+): Promise<bigint | null> => {
+  const syncJobStatus = await prisma.syncStatus.findFirst({
+    select: {
+      lastSyncedBlockNum: true,
+    },
+    where: {
+      job,
+      chainId,
+    },
+  });
+
+  return syncJobStatus?.lastSyncedBlockNum ?? null;
+};
+
+/**
+ * Save the latest synced block number for a sync job to the database.
+ */
 export const updateJobLatestSyncedBlock = async ({
   chainId,
   syncJob,
@@ -174,7 +244,7 @@ export const upsertTransaction = async ({
     return;
   }
 
-  const tx = await client.getTransaction({
+  const tx = await client.getTransactionReceipt({
     hash: txHash,
   });
 

@@ -10,14 +10,6 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { SenderCreatorAbi } from '@raylac/shared';
 import logger from './logger';
 
-const ACCOUNT_DEPLOYER_PRIV_KEY = process.env.ACCOUNT_DEPLOYER_PRIV_KEY;
-
-if (!ACCOUNT_DEPLOYER_PRIV_KEY) {
-  throw new Error('ACCOUNT_DEPLOYERS_PRIV_KEY is not set');
-}
-
-const deployerAccount = privateKeyToAccount(ACCOUNT_DEPLOYER_PRIV_KEY as Hex);
-
 const isAlreadyDeployed = async ({
   address,
   chainId,
@@ -40,6 +32,14 @@ const deployAccount = async ({
   address: Hex;
   chainId: number;
 }) => {
+  const ACCOUNT_DEPLOYER_PRIV_KEY = process.env.ACCOUNT_DEPLOYER_PRIV_KEY;
+
+  if (!ACCOUNT_DEPLOYER_PRIV_KEY) {
+    throw new Error('ACCOUNT_DEPLOYERS_PRIV_KEY is not set');
+  }
+
+  const deployerAccount = privateKeyToAccount(ACCOUNT_DEPLOYER_PRIV_KEY as Hex);
+
   const stealthAddress = await prisma.userStealthAddress.findUnique({
     select: {
       ephemeralPubKey: true,

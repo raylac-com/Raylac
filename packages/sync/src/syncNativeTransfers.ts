@@ -44,9 +44,6 @@ export const handleNewTrace = async ({
     return;
   }
 
-  // Deploy the account if it's not already deployed
-  await deployAccount({ address: trace.action.to, chainId });
-
   await upsertTransaction({
     txHash: trace.transactionHash,
     chainId,
@@ -166,6 +163,11 @@ const batchSyncNativeTransfers = async ({
       : undefined;
 
     await handleNewTrace({ trace, chainId, tokenPrice });
+
+    if (trace.type !== 'create' && trace.action.callType === 'call') {
+      // Deploy the account if it's not already deployed
+      await deployAccount({ address: trace.action.to, chainId });
+    }
   }
 };
 

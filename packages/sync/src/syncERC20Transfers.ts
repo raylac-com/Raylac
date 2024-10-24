@@ -39,9 +39,6 @@ export const handleERC20TransferLog = async ({
   const from = getAddress(args.from);
   const to = getAddress(args.to);
 
-  // Deploy the account that received the transfer if it's not already deployed
-  await deployAccount({ address: to, chainId });
-
   await upsertTransaction({
     txHash: log.transactionHash,
     chainId,
@@ -151,6 +148,10 @@ const batchSyncERC20Transfers = async ({
 
   for (const log of [...incomingLogs, ...outgoingLogs]) {
     await handleERC20TransferLog({ log, tokenId, chainId });
+
+    // Deploy the account that received the transfer if it's not already deployed
+    const to = getAddress(log.args.to!);
+    await deployAccount({ address: to, chainId });
   }
 };
 

@@ -5,8 +5,10 @@ import syncNativeTransfers from './syncNativeTransfers';
 import syncERC20Transfers from './syncERC20Transfers';
 import syncAnnouncements from './syncAnnouncements';
 import scanStealthAddresses from './scanStealthAddresses';
-import { announceStealthAccounts } from './announceStealthAccounts';
+// import { announceStealthAccounts } from './announceStealthAccounts';
 import checkAddressBalances from './checkAddressBalances';
+import syncTxLogs from './syncTxLogs';
+import syncUpgrades from './syncUpgrades';
 
 const sync = async () => {
   await Promise.all([
@@ -15,9 +17,11 @@ const sync = async () => {
     syncNativeTransfers(),
     syncERC20Transfers(),
     checkAddressBalances(),
-    announceStealthAccounts(),
+    // announceStealthAccounts(),
     syncAnnouncements(),
     scanStealthAddresses(),
+    syncUpgrades(),
+    syncTxLogs(),
   ]);
 };
 
