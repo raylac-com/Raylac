@@ -3,12 +3,7 @@ import { saveMnemonicAndKeys, setBackupVerificationStatus } from '@/lib/key';
 import { trpc } from '@/lib/trpc';
 import { setSignedInUser } from '@/lib/utils';
 import userKeys from '@/queryKeys/userKeys';
-import {
-  buildSiweMessage,
-  getPublicClient,
-  getSpendingPrivKey,
-  sleep,
-} from '@raylac/shared';
+import { buildSiweMessage, getSpendingPrivKey, sleep } from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { privateKeyToAccount } from 'viem/accounts';
 import { mainnet } from 'viem/chains';
@@ -22,16 +17,12 @@ export const useSignIn = () => {
       await sleep(100);
       const issuedAt = new Date();
 
-      const publicClient = getPublicClient({
-        chainId: mainnet.id,
-      });
-
       const spendingAccount = privateKeyToAccount(getSpendingPrivKey(mnemonic));
 
       const message = buildSiweMessage({
         issuedAt,
         address: spendingAccount.address,
-        chainId: publicClient.chain.id,
+        chainId: mainnet.id,
       });
 
       // Sign in and get the JWT token
