@@ -8,7 +8,7 @@ import {
 } from '@raylac/shared';
 import { privateKeyToAccount } from 'viem/accounts';
 import { SenderCreatorAbi } from '@raylac/shared';
-import logger from './logger';
+import { logger } from '../utils';
 
 const isAlreadyDeployed = async ({
   address,

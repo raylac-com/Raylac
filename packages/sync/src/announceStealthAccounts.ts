@@ -16,7 +16,7 @@ import prisma from './lib/prisma';
 import { Hex } from 'viem';
 import { getPublicClient } from '@raylac/shared';
 import { announcementAbiItem } from './utils';
-import logger from './lib/logger';
+import { logger } from './utils';
 import { privateKeyToAccount } from 'viem/accounts';
 
 const publicClient = getPublicClient({

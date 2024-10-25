@@ -6,6 +6,7 @@ import {
   bigIntMin,
   ERC20Abi,
   getPublicClient,
+  initLogger,
 } from '@raylac/shared';
 
 export const announcementAbiItem = parseAbiItem(
@@ -280,3 +281,5 @@ export const upsertTransaction = async ({
     },
   });
 };
+
+export const logger = initLogger({ serviceName: 'raylac-sync' });

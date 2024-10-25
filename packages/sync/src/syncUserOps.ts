@@ -2,12 +2,12 @@ import {
   ENTRY_POINT_ADDRESS,
   EntryPointAbi,
   RAYLAC_PAYMASTER_ADDRESS,
+  sleep,
 } from '@raylac/shared';
 import { decodeEventLog, Log, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
 import supportedChains from '@raylac/shared/out/supportedChains';
 import { upsertTransaction } from './utils';
-import { sleep } from './lib/utils';
 import { Prisma } from '@prisma/client';
 import processLogs from './processLogs';
 

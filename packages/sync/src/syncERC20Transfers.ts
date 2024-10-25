@@ -1,15 +1,14 @@
-import { bigIntMin, ERC20Abi, getPublicClient } from '@raylac/shared';
+import { bigIntMin, ERC20Abi, getPublicClient, sleep } from '@raylac/shared';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { decodeEventLog, getAddress, Hex, Log, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
-import { sleep } from './lib/utils';
 import {
   getLatestBlockHeight,
   getMinSynchedBlockForAddresses,
   updateAddressesSyncStatus,
   upsertTransaction,
 } from './utils';
-import logger from './lib/logger';
+import { logger } from './utils';
 import { Prisma } from '@prisma/client';
 import deployAccount from './lib/deployAccount';
 

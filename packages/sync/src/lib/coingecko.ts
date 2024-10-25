@@ -1,6 +1,6 @@
 import { getCoingeckoClient, toCoingeckoTokenId } from '@raylac/shared';
 import NodeCache from 'node-cache';
-import logger from './logger';
+import { logger } from '../utils';
 
 const coingeckoClient = getCoingeckoClient();
 

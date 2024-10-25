@@ -1,7 +1,7 @@
 import { getPublicClient } from '@raylac/shared';
 import prisma from './lib/prisma';
 import { Hex } from 'viem';
-import logger from './lib/logger';
+import { logger } from './utils';
 import { sleep } from '@raylac/shared';
 
 // @ts-ignore

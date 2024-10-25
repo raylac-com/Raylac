@@ -9,7 +9,8 @@
   "scripts": {
     "start": "tsx --watch ./src/index",
     "build": "tsc -d",
-    "build:watch": "tsc -d --watch"
+    "build:watch": "tsc -d --watch",
+    "lint": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",

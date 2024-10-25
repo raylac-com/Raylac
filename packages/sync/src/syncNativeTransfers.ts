@@ -3,19 +3,19 @@ import {
   getPublicClient,
   traceFilter,
   TraceResponseData,
+  sleep,
 } from '@raylac/shared';
 import { getAddress, Hex, toHex } from 'viem';
 import prisma from './lib/prisma';
 import { Prisma } from '@prisma/client';
 import supportedChains from '@raylac/shared/out/supportedChains';
-import { sleep } from './lib/utils';
 import {
   getLatestBlockHeight,
   getMinSynchedBlockForAddresses,
   updateAddressesSyncStatus,
   upsertTransaction,
 } from './utils';
-import logger from './lib/logger';
+import { logger } from './utils';
 import { getTokenPriceAtTime } from './lib/coingecko';
 import deployAccount from './lib/deployAccount';
 

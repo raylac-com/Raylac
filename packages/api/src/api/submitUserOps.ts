@@ -12,7 +12,7 @@ import {
 import { parseEventLogs } from 'viem';
 import { handleOps } from '../lib/bundler';
 import { handleERC20TransferLog, handleNewTrace } from '@raylac/sync';
-import logger from '../lib/logger';
+import { logger } from '../utils';
 import prisma from '../lib/prisma';
 import { handleUserOpEvent } from '@raylac/sync/src/syncUserOps';
 import { Prisma } from '@prisma/client';

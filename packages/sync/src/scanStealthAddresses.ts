@@ -1,12 +1,12 @@
 import {
   checkStealthAddress,
   decodeERC5564MetadataAsViewTag,
+  sleep,
 } from '@raylac/shared';
 import prisma from './lib/prisma';
-import { sleep } from './lib/utils';
 import { webcrypto } from 'node:crypto';
 import { Hex } from 'viem';
-import logger from './lib/logger';
+import { logger } from './utils';
 import { getSenderAddress } from '@raylac/shared/src/stealth';
 import { Prisma } from '@prisma/client';
 import crypto from 'crypto';

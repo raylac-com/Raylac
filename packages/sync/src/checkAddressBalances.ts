@@ -8,7 +8,7 @@ import {
 } from '@raylac/shared';
 import { Hex } from 'viem';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
-import logger from './lib/logger';
+import { logger } from './utils';
 
 const getAddressBalanceFromDb = async ({
   address,
