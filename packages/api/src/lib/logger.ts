@@ -19,7 +19,10 @@ if (useDatadog) {
 
 const logger = winston.createLogger({
   level: 'info',
-  format: winston.format.json(),
+  format: winston.format.combine(
+    winston.format.colorize(),
+    winston.format.simple()
+  ),
   exitOnError: false,
   transports: useDatadog
     ? [

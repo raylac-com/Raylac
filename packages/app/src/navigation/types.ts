@@ -47,4 +47,6 @@ export type RootStackParamsList = {
 
   SaveBackupPhrase: undefined;
   ConfirmBackupPhrase: undefined;
+
+  Upgrade: undefined;
 };

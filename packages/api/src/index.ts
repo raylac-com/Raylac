@@ -32,6 +32,7 @@ import getTransferDetails from './api/getTransferDetails';
 import toggleDevMode from './api/toggleDevMode';
 import addStealthAccount from './api/addStealthAccount';
 import getAddressNonces from './api/getAddressNonces';
+import stealthTransfer from './api/stealthTransfer';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -62,7 +63,7 @@ export const appRouter = router({
     .input(
       z.object({
         userOps: z.array(z.any()),
-        tokenPrice: z.number(),
+        tokenPrice: z.number().optional(),
       })
     )
     .mutation(async opts => {
@@ -359,6 +360,38 @@ export const appRouter = router({
       await toggleDevMode({
         userId: opts.ctx.userId,
         devModeEnabled: input.devModeEnabled,
+      });
+    }),
+
+  stealthTransfer: authedProcedure
+    .input(
+      z.object({
+        inputs: z.array(
+          z.object({
+            address: z.string(),
+            amount: z.string(),
+            signature: z.string(),
+          })
+        ),
+        tokenId: z.string(),
+        chainId: z.number(),
+        to: z.string(),
+        tokenPrice: z.number(),
+      })
+    )
+    .mutation(async opts => {
+      const { input } = opts;
+
+      await stealthTransfer({
+        inputs: input.inputs as {
+          address: Hex;
+          amount: string;
+          signature: Hex;
+        }[],
+        tokenId: input.tokenId,
+        chainId: input.chainId,
+        to: input.to as Hex,
+        tokenPrice: input.tokenPrice,
       });
     }),
 });

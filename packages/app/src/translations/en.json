@@ -123,5 +123,8 @@
     "headerBackTitle": "Back",
       "signUpBonus": "Sign up bonus",
       "copied": "Copied"
+    },
+    "Upgrade": {
+      "title": "Upgrade"
     }
   }

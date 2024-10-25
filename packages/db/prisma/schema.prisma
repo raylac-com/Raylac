@@ -58,8 +58,9 @@ model UserStealthAddress {
   updatedAt         DateTime            @updatedAt
   AddressSyncStatus AddressSyncStatus[]
 
-  FromTraces Trace[] @relation("From")
-  ToTraces   Trace[] @relation("To")
+  FromTraces Trace[]    @relation("From")
+  ToTraces   Trace[]    @relation("To")
+  upgrades   Upgraded[]
 }
 
 model Trace {
@@ -119,8 +120,12 @@ model Transaction {
 
   chainId Int
 
-  userOps UserOperation[]
-  traces  Trace[]
+  logs  Json?
+  input String?
+
+  userOps  UserOperation[]
+  traces   Trace[]
+  upgrades Upgraded[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -145,6 +150,7 @@ model UserOperation {
 enum SyncJob {
   Traces
   UserOps
+  Announcements
 }
 
 model SyncStatus {
@@ -169,4 +175,23 @@ model Block {
   Transaction Transaction[]
 
   @@unique([number, chainId])
+}
+
+model Upgraded {
+  id Int @id @default(autoincrement())
+
+  UserStealthAddress UserStealthAddress @relation(fields: [address], references: [address])
+  address            String
+  newImplementation  String
+
+  txHash   String
+  logIndex Int
+  chainId  Int
+
+  Transaction Transaction @relation(fields: [txHash], references: [hash])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([txHash, logIndex])
 }

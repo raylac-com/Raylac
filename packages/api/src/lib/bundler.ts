@@ -15,7 +15,9 @@ if (!BUNDLER_PRIV_KEY) {
   throw new Error('BUNDLER_PRIV_KEY is not set');
 }
 
-const bundlerAccount = privateKeyToAccount(BUNDLER_PRIV_KEY, { nonceManager });
+export const bundlerAccount = privateKeyToAccount(BUNDLER_PRIV_KEY, {
+  nonceManager,
+});
 
 export const handleOps = async ({
   userOps,

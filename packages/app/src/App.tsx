@@ -42,6 +42,7 @@ import { isBackupVerificationComplete } from './lib/key';
 import SaveBackupPhrase from './screens/SaveBackupPhrase';
 import { SafeAreaView } from 'react-native';
 import Receive from './screens/Receive';
+import Upgrade from './screens/Upgrade';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -306,6 +307,14 @@ const Screens = () => {
             title: t('title', { ns: 'ConfirmBackupPhrase' }),
             headerBackVisible: true,
             headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="Upgrade"
+          component={Upgrade}
+          options={{
+            title: t('title', { ns: 'Upgrade' }),
+            headerBackVisible: false,
           }}
         ></RootStack.Screen>
       </RootStack.Navigator>
