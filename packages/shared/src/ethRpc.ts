@@ -86,7 +86,7 @@ export const getQuickNodeRpcUrl = ({ chain }: { chain: Chain }) => {
       quickNodeSubdomain = 'base-sepolia';
       break;
     case chains.optimism.id:
-      quickNodeSubdomain = 'optimism';
+      quickNodeSubdomain = 'optimism-mainnet';
       break;
     case chains.optimismSepolia.id:
       quickNodeSubdomain = 'optimism-sepolia';
@@ -98,7 +98,7 @@ export const getQuickNodeRpcUrl = ({ chain }: { chain: Chain }) => {
       quickNodeSubdomain = 'blast-sepolia';
       break;
     case chains.arbitrum.id:
-      quickNodeSubdomain = 'arb-mainnet';
+      quickNodeSubdomain = 'arbitrum-mainnet';
       break;
     case chains.arbitrumSepolia.id:
       quickNodeSubdomain = 'arb-sepolia';
@@ -108,6 +108,9 @@ export const getQuickNodeRpcUrl = ({ chain }: { chain: Chain }) => {
       break;
     case chains.polygonAmoy.id:
       quickNodeSubdomain = 'polygon-amoy';
+      break;
+    case chains.scroll.id:
+      quickNodeSubdomain = 'scroll-mainnet';
       break;
     default:
       throw new Error(`Unknown chain id: ${chain.id}`);

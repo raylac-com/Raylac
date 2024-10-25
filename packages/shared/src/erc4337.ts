@@ -1,5 +1,6 @@
 import {
   ACCOUNT_FACTORY_ADDRESS,
+  ACCOUNT_FACTORY_V2_ADDRESS,
   ENTRY_POINT_ADDRESS,
   RAYLAC_PAYMASTER_ADDRESS,
 } from './addresses';
@@ -32,14 +33,23 @@ import { signMessage } from 'viem/accounts';
 /**
  * Get the init code for creating a stealth contract account
  */
-export const getInitCode = ({ stealthSigner }: { stealthSigner: Hex }) => {
+export const getInitCode = ({
+  stealthSigner,
+  accountVersion = 2,
+}: {
+  stealthSigner: Hex;
+  accountVersion?: 1 | 2;
+}) => {
+  const factoryAddress =
+    accountVersion === 1 ? ACCOUNT_FACTORY_ADDRESS : ACCOUNT_FACTORY_V2_ADDRESS;
+
   const factoryData = encodeFunctionData({
     abi: AccountFactoryAbi,
     functionName: 'createAccount',
     args: [stealthSigner],
   });
 
-  const initCode = (ACCOUNT_FACTORY_ADDRESS + factoryData.slice(2)) as Hex;
+  const initCode = (factoryAddress + factoryData.slice(2)) as Hex;
 
   return initCode;
 };
@@ -48,7 +58,7 @@ export const getInitCode = ({ stealthSigner }: { stealthSigner: Hex }) => {
 export const TRANSFER_OP_PRE_VERIFICATION_GAS = toHex(1_500_000);
 
 /** callGasLimit for a transfer operation */
-export const TRANSFER_OP_CALL_GAS_LIMIT = toHex(50_000);
+export const TRANSFER_OP_CALL_GAS_LIMIT = toHex(300_000);
 
 /** verificationGasLimit for a transfer operation */
 export const TRANSFER_OP_VERIFICATION_GAS_LIMIT = toHex(70_000);
@@ -69,6 +79,7 @@ export const buildUserOp = ({
   tag,
   gasInfo,
   nonce,
+  accountVersion = 2,
 }: {
   client: PublicClient<HttpTransport, Chain>;
   stealthSigner: Hex;
@@ -78,6 +89,7 @@ export const buildUserOp = ({
   tag: Hex;
   gasInfo: ChainGasInfo[];
   nonce: number | null;
+  accountVersion?: 1 | 2;
 }): UserOperation => {
   const chainId = client.chain.id;
 
@@ -87,7 +99,7 @@ export const buildUserOp = ({
     throw new Error('Chain gas info not found');
   }
 
-  const initCode = getInitCode({ stealthSigner });
+  const initCode = getInitCode({ stealthSigner, accountVersion });
 
   const senderAddress = getSenderAddress({
     stealthSigner,
@@ -112,7 +124,7 @@ export const buildUserOp = ({
 
   const maxPriorityFeePerGasBuffed = increaseByPercent({
     value: chainGasInfo.maxPriorityFeePerGas,
-    percent: 10,
+    percent: 20,
   });
 
   const maxFeePerGas = baseFeeBuffed + maxPriorityFeePerGasBuffed;

@@ -67,7 +67,7 @@ const buildUserOpsFromRelayQuote = async ({
 /**
  * Pick the stealth accounts to use as inputs for a transfer.
  */
-const chooseInputAddresses = ({
+export const chooseInputAddresses = ({
   tokenId,
   chainId,
   amount,

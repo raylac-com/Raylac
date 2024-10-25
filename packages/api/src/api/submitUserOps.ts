@@ -35,17 +35,17 @@ const canUserSubmitOps = async (userId: number) => {
   return numTransfers < MAX_TRANSFERS;
 };
 
-const upsertUserOpsWithTokenPrice = async ({
+const upsertUserOps = async ({
   userOps,
   tokenPrice,
 }: {
   userOps: UserOperation[];
-  tokenPrice: number;
+  tokenPrice?: number;
 }) => {
   const data: Prisma.UserOperationCreateInput[] = userOps.map(userOp => ({
     hash: getUserOpHash({ userOp }),
     chainId: userOp.chainId,
-    tokenPriceAtOp: tokenPrice,
+    tokenPriceAtOp: tokenPrice ?? null,
   }));
 
   await prisma.userOperation.createMany({
@@ -60,7 +60,7 @@ const submitUserOps = async ({
   userOps,
 }: {
   userId: number;
-  tokenPrice: number;
+  tokenPrice?: number;
   userOps: UserOperation[];
 }) => {
   const canSubmit = await canUserSubmitOps(userId);
@@ -109,7 +109,7 @@ const submitUserOps = async ({
   }
 
   // Save the token price at the time of the user operation
-  await upsertUserOpsWithTokenPrice({ userOps, tokenPrice });
+  await upsertUserOps({ userOps, tokenPrice });
 
   const chainId = userOps[0].chainId;
 

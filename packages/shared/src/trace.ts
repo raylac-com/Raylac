@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Hex } from 'viem';
+import { Hex, toHex } from 'viem';
 import { TraceResponseData } from './types';
 import { getQuickNodeRpcUrl } from './ethRpc';
 import { getChainFromId } from './utils';
@@ -47,6 +47,54 @@ export const traceFilter = async ({
           toBlock,
           fromAddress,
           toAddress,
+        },
+      ],
+    },
+    config
+  );
+
+  if (result.data.error) {
+    throw new Error(result.data.error.message);
+  }
+
+  return result.data.result;
+};
+
+export const traceBlock = async ({
+  blockNumber,
+  chainId,
+}: {
+  blockNumber: bigint;
+  chainId: number;
+}) => {
+  const config = {
+    headers: {
+      accept: 'application/json',
+      'content-type': 'application/json',
+    },
+  };
+
+  const result = await axios.post<{
+    result: TraceResponseData[];
+    error?: {
+      code: number;
+      message: string;
+    };
+  }>(
+    getQuickNodeRpcUrl({
+      chain: getChainFromId(chainId),
+    }),
+    {
+      id: 1,
+      jsonrpc: '2.0',
+      method: 'debug_traceBlockByNumber',
+      params: [
+        toHex(blockNumber),
+        {
+          tracer: 'callTracer',
+          tracerConfig: {
+            onlyTopCall: false,
+          },
         },
       ],
     },
