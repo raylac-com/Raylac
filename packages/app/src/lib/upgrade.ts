@@ -1,7 +1,6 @@
 import {
   buildUserOp,
   ChainGasInfo,
-  getPublicClient,
   RaylacAccountAbi,
   ACCOUNT_IMPL_V2_ADDRESS,
   UserOperation,
@@ -29,13 +28,12 @@ export const buildUpgradeUserOp = async ({
     functionName: 'upgradeTo',
     args: [newImplementation],
   });
-  const publicClient = getPublicClient({ chainId });
 
   const sender = stealthAccount.address;
   const nonce = addressNonces[sender] ?? null;
 
   const userOp = buildUserOp({
-    client: publicClient,
+    chainId,
     stealthSigner: stealthAccount.signerAddress,
     to: sender,
     value: 0n,

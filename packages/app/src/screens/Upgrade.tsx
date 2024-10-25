@@ -1,19 +1,9 @@
 import StyledButton from '@/components/StyledButton';
-import useUpgradeAccounts from '@/hooks/useUpgradeAccounts';
 import { theme } from '@/lib/theme';
-import { EXPECTED_CONTRACT_IMPL } from '@/lib/upgrade';
 import { View, Text } from 'react-native';
 
 const Upgrade = () => {
-  const {
-    mutateAsync: upgradeAccounts,
-    isPending: isUpgrading,
-    isReady,
-  } = useUpgradeAccounts();
-
-  const handleUpgradePress = async () => {
-    await upgradeAccounts(EXPECTED_CONTRACT_IMPL);
-  };
+  const handleUpgradePress = async () => {};
 
   return (
     <View
@@ -35,12 +25,7 @@ const Upgrade = () => {
       >
         Apply latest update to your account
       </Text>
-      <StyledButton
-        isLoading={isUpgrading}
-        title="Update"
-        onPress={handleUpgradePress}
-        disabled={!isReady}
-      />
+      <StyledButton title="Update" onPress={handleUpgradePress} />
     </View>
   );
 };

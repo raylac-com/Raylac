@@ -71,7 +71,7 @@ export const TRANSFER_OP_INIT_VERIFICATION_GAS_LIMIT = toHex(210_000);
  * The sender of the operation is determined by the given stealthSigner.
  */
 export const buildUserOp = ({
-  client,
+  chainId,
   stealthSigner,
   to,
   value,
@@ -81,7 +81,7 @@ export const buildUserOp = ({
   nonce,
   accountVersion = 2,
 }: {
-  client: PublicClient<HttpTransport, Chain>;
+  chainId: number;
   stealthSigner: Hex;
   to: Hex;
   value: bigint;
@@ -91,8 +91,6 @@ export const buildUserOp = ({
   nonce: number | null;
   accountVersion?: 1 | 2;
 }): UserOperation => {
-  const chainId = client.chain.id;
-
   const chainGasInfo = gasInfo.find(gasInfo => gasInfo.chainId === chainId);
 
   if (!chainGasInfo) {
@@ -145,7 +143,7 @@ export const buildUserOp = ({
     maxPriorityFeePerGas: toHex(maxPriorityFeePerGasBuffed),
     paymasterAndData: '0x',
     signature: '0x',
-    chainId: client.chain.id,
+    chainId,
   };
 
   return userOp;
