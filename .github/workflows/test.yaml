@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         run: pnpm i
 
+      - name: Run lint
+        run: pnpm lint
+
       - name: Run tests
         run: pnpm -F tests test
         env:
