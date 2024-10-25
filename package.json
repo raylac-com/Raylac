@@ -32,5 +32,8 @@
       "eslint --cache --fix"
     ],
     "*.{js,ts,tsx,json}": "prettier --write --ignore-unknown"
+  },
+  "dependencies": {
+    "dotenv-cli": "^7.4.2"
   }
 }

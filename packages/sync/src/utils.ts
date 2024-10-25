@@ -20,6 +20,7 @@ export const getFromBlock = async ({
   chainId: number;
   job: SyncJob;
 }) => {
+  // eslint-disable-next-line security/detect-object-injection
   const raylacAccountDeployedBlock = ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId];
 
   if (!raylacAccountDeployedBlock) {

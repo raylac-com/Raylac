@@ -30,6 +30,7 @@ export const buildUpgradeUserOp = async ({
   });
 
   const sender = stealthAccount.address;
+  // eslint-disable-next-line security/detect-object-injection
   const nonce = addressNonces[sender] ?? null;
 
   const userOp = buildUserOp({

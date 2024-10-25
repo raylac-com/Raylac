@@ -7,7 +7,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "tsx --watch ./src/index",
+    "start": "dotenv -e ../../.env -- tsx --watch ./src/index",
     "build": "tsc -d",
     "build:watch": "tsc -d --watch",
     "lint": "tsc --noEmit"
@@ -22,7 +22,6 @@
     "@trpc/server": "^11.0.0-rc.439",
     "@types/node": "^20.11.17",
     "axios": "^1.7.2",
-    "dotenv": "^16.4.5",
     "firebase-admin": "^12.4.0",
     "jsonwebtoken": "^9.0.2",
     "node-cache": "^5.1.2",
