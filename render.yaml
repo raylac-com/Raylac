@@ -1,5 +1,5 @@
 previews:
-  generation: manual
+  generation: automatic
 services:
   - type: web
     name: raylac-api
