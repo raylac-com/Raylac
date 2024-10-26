@@ -1,3 +1,4 @@
+import * as winston from 'winston';
 import { Prisma, SyncJob } from '@prisma/client';
 import prisma from './lib/prisma';
 import { Hex, parseAbiItem, ParseEventLogsReturnType } from 'viem';
@@ -6,7 +7,6 @@ import {
   bigIntMin,
   ERC20Abi,
   getPublicClient,
-  initLogger,
 } from '@raylac/shared';
 
 export const announcementAbiItem = parseAbiItem(
@@ -283,4 +283,34 @@ export const upsertTransaction = async ({
   });
 };
 
-export const logger = initLogger({ serviceName: 'raylac-sync' });
+const DATADOG_API_KEY = process.env.DATADOG_API_KEY;
+
+const SERVICE_NAME = 'raylac-sync';
+
+const httpTransportOptions = {
+  host: 'http-intake.logs.ap1.datadoghq.com',
+  path: `/api/v2/logs?dd-api-key=${DATADOG_API_KEY}&ddsource=nodejs&service=${SERVICE_NAME}`,
+  ssl: true,
+};
+
+const useDatadog = !!DATADOG_API_KEY;
+
+if (useDatadog) {
+   
+  console.log('Sending logs to Datadog');
+}
+
+export const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.combine(
+    winston.format.colorize(),
+    winston.format.simple()
+  ),
+  exitOnError: false,
+  transports: useDatadog
+    ? [
+        new winston.transports.Http(httpTransportOptions),
+        new winston.transports.Console(),
+      ]
+    : [new winston.transports.Console()],
+});

@@ -150,6 +150,24 @@ export type TraceResponseData =
   | TraceResponse<'call', TraceCallAction>
   | TraceResponse<'create', TraceInitAction>;
 
+export type BlockTraceCallResponse = any;
+
+export interface BlockTransactionResponse {
+  from: Hex;
+  gas: Hex;
+  gasUsed: Hex;
+  to: Hex;
+  input: Hex;
+  calls?: BlockTransactionResponse[];
+  value: Hex;
+  type: 'CALL' | 'CREATE';
+}
+
+export type BlockTraceResponse = {
+  txHash: Hex;
+  result: BlockTransactionResponse;
+}[];
+
 export interface TokenBalanceQueryResult {
   tokenId: string;
   balance: string;

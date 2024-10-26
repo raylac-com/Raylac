@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Hex, toHex } from 'viem';
-import { TraceResponseData } from './types';
+import { BlockTraceResponse, TraceResponseData } from './types';
 import { getQuickNodeRpcUrl } from './ethRpc';
 import { getChainFromId } from './utils';
 
@@ -75,7 +75,7 @@ export const traceBlock = async ({
   };
 
   const result = await axios.post<{
-    result: TraceResponseData[];
+    result: BlockTraceResponse;
     error?: {
       code: number;
       message: string;
