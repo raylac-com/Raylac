@@ -371,6 +371,9 @@ importers:
 
   packages/tests:
     dependencies:
+      '@prisma/client':
+        specifier: 5.12.1
+        version: 5.12.1(prisma@5.12.1)
       '@raylac/api':
         specifier: workspace:*
         version: link:../api
