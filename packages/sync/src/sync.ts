@@ -1,5 +1,5 @@
 // import syncUserOps from './syncUserOps';
-import syncBlocks from './syncBlocks';
+// import syncBlocks from './syncBlocks';
 import syncNativeTransfers from './assignNativeTransfers';
 import syncERC20Transfers from './syncERC20Transfers';
 import syncAnnouncements from './syncAnnouncements';
@@ -12,7 +12,7 @@ import checkAddressBalances from './checkAddressBalances';
 
 const sync = async () => {
   await Promise.all([
-    syncBlocks(),
+    // syncBlocks(),
     // syncUserOps(),
     syncNativeTransfers(),
     syncERC20Transfers(),
