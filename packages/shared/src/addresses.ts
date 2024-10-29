@@ -1,5 +1,12 @@
 import { Hex } from 'viem';
-import { anvil, base, baseSepolia } from 'viem/chains';
+import {
+  anvil,
+  arbitrum,
+  base,
+  baseSepolia,
+  optimism,
+  scroll,
+} from 'viem/chains';
 
 export const ACROSS_SPOKE_POOL_ADDRESS: {
   [key: number]: Hex;
@@ -33,6 +40,9 @@ export const ACCOUNT_IMPL_DEPLOYED_BLOCK: {
 } = {
   [baseSepolia.id]: BigInt(15433556),
   [base.id]: BigInt(21053821),
+  [arbitrum.id]: BigInt(267822748),
+  [optimism.id]: BigInt(126295867),
+  [scroll.id]: BigInt(10527993),
   [anvil.id]: BigInt(0),
 };
 

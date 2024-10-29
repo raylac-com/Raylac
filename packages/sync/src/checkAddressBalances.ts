@@ -113,66 +113,70 @@ const checkAddressBalances = async () => {
   while (true) {
     await sleep(60 * 10 * 1000); // 10 minutes
 
-    const addresses = await prisma.userStealthAddress.findMany({
-      select: {
-        address: true,
-      },
-    });
-    logger.info(`Checking balances for ${addresses.length} addresses`);
+    try {
+      const addresses = await prisma.userStealthAddress.findMany({
+        select: {
+          address: true,
+        },
+      });
+      logger.info(`Checking balances for ${addresses.length} addresses`);
 
-    for (const address of addresses) {
-      for (const token of supportedTokens) {
-        for (const chain of supportedChains) {
-          const balanceFromDb = await getAddressBalanceFromDb({
-            address: address.address as Hex,
-            tokenId: token.tokenId,
-            chainId: chain.id,
-          });
-
-          if (token.tokenId === 'eth') {
-            const nativeBalance = await getNativeBalance({
+      for (const address of addresses) {
+        for (const token of supportedTokens) {
+          for (const chain of supportedChains) {
+            const balanceFromDb = await getAddressBalanceFromDb({
               address: address.address as Hex,
+              tokenId: token.tokenId,
               chainId: chain.id,
             });
 
-            if (balanceFromDb !== nativeBalance) {
-              logger.error(
-                `Native balance mismatch for address ${address.address} on chain ${chain.id}: ${balanceFromDb} !== ${nativeBalance}`
-              );
+            if (token.tokenId === 'eth') {
+              const nativeBalance = await getNativeBalance({
+                address: address.address as Hex,
+                chainId: chain.id,
+              });
+
+              if (balanceFromDb !== nativeBalance) {
+                logger.error(
+                  `Native balance mismatch for address ${address.address} on chain ${chain.id}: ${balanceFromDb} !== ${nativeBalance}`
+                );
+              } else {
+                logger.info(
+                  `Balance check: Native balance for address ${address.address} on chain ${chain.id}: ${nativeBalance} = ${balanceFromDb}`
+                );
+              }
             } else {
-              logger.info(
-                `Balance check: Native balance for address ${address.address} on chain ${chain.id}: ${nativeBalance} = ${balanceFromDb}`
-              );
-            }
-          } else {
-            const tokenAddress = token.addresses.find(
-              tokenAddress => tokenAddress.chain.id === chain.id
-            )?.address;
+              const tokenAddress = token.addresses.find(
+                tokenAddress => tokenAddress.chain.id === chain.id
+              )?.address;
 
-            if (!tokenAddress) {
-              throw new Error(
-                `Token ${token.tokenId} not found on chain ${chain.id}`
-              );
-            }
+              if (!tokenAddress) {
+                throw new Error(
+                  `Token ${token.tokenId} not found on chain ${chain.id}`
+                );
+              }
 
-            const erc20Balance = await getERC20Balance({
-              address: address.address as Hex,
-              tokenAddress: tokenAddress,
-              chainId: chain.id,
-            });
+              const erc20Balance = await getERC20Balance({
+                address: address.address as Hex,
+                tokenAddress: tokenAddress,
+                chainId: chain.id,
+              });
 
-            if (balanceFromDb !== erc20Balance) {
-              logger.error(
-                `ERC20 balance mismatch for address ${address.address} on chain ${chain.id}: ${balanceFromDb} !== ${erc20Balance}`
-              );
-            } else {
-              logger.info(
-                `Balance check: ERC20 balance for address ${address.address} on chain ${chain.id}: ${erc20Balance} = ${balanceFromDb} `
-              );
+              if (balanceFromDb !== erc20Balance) {
+                logger.error(
+                  `ERC20 balance mismatch for address ${address.address} on chain ${chain.id}: ${balanceFromDb} !== ${erc20Balance}`
+                );
+              } else {
+                logger.info(
+                  `Balance check: ERC20 balance for address ${address.address} on chain ${chain.id}: ${erc20Balance} = ${balanceFromDb} `
+                );
+              }
             }
           }
         }
       }
+    } catch (err) {
+      logger.error(err);
     }
   }
 };

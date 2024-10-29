@@ -9,6 +9,7 @@ const supportedChains: Chain[] = [
   // chains.scroll,
   // chains.arbitrum,
   // chains.optimism,
+  // chains.polygon,
   // chains.baseSepolia,
 ];
 

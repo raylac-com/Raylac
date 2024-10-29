@@ -172,24 +172,28 @@ export const assignAddressToTraces = async ({ address }: { address: Hex }) => {
 
 const assignNativeTransfers = async () => {
   while (true) {
-    const userStealthAddresses = await prisma.userStealthAddress.findMany({
-      select: {
-        address: true,
-      },
-    });
+    try {
+      const userStealthAddresses = await prisma.userStealthAddress.findMany({
+        select: {
+          address: true,
+        },
+      });
 
-    const batchSize = 10;
+      const batchSize = 10;
 
-    for (let i = 0; i < userStealthAddresses.length; i += batchSize) {
-      const batch = userStealthAddresses.slice(i, i + batchSize);
+      for (let i = 0; i < userStealthAddresses.length; i += batchSize) {
+        const batch = userStealthAddresses.slice(i, i + batchSize);
 
-      await Promise.all(
-        batch.map(address =>
-          assignAddressToTraces({
-            address: address.address as Hex,
-          })
-        )
-      );
+        await Promise.all(
+          batch.map(address =>
+            assignAddressToTraces({
+              address: address.address as Hex,
+            })
+          )
+        );
+      }
+    } catch (err) {
+      logger.error(err);
     }
 
     await sleep(5000); // Sleep for 5 seconds
