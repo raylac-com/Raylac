@@ -296,7 +296,6 @@ const httpTransportOptions = {
 const useDatadog = !!DATADOG_API_KEY;
 
 if (useDatadog) {
-   
   console.log('Sending logs to Datadog');
 }
 
@@ -314,3 +313,47 @@ export const logger = winston.createLogger({
       ]
     : [new winston.transports.Console()],
 });
+
+export const getApproxChainBlockTime = async (
+  chainId: number
+): Promise<number> => {
+  const client = getPublicClient({ chainId });
+  const latestBlock = await client.getBlock({
+    blockTag: 'latest',
+  });
+
+  const compareBlock = await client.getBlock({
+    blockNumber: latestBlock.number - 10n,
+  });
+
+  const timeDiff = latestBlock.timestamp - compareBlock.timestamp;
+
+  return Number(timeDiff) / 10;
+};
+
+export const getLatestSynchedBlock = async (chainId: number) => {
+  const latestSyncedBlock = await prisma.block.findFirst({
+    select: {
+      number: true,
+    },
+    where: {
+      chainId,
+    },
+    orderBy: {
+      number: 'desc',
+    },
+  });
+
+  return latestSyncedBlock?.number ?? null;
+};
+
+export const getAccountImplDeployedBlock = (chainId: number) => {
+  // eslint-disable-next-line security/detect-object-injection
+  const accountImplDeployedBlock = ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId];
+
+  if (!accountImplDeployedBlock) {
+    throw new Error(`No account impl deployed block for chain ${chainId}`);
+  }
+
+  return accountImplDeployedBlock;
+};

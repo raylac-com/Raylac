@@ -1,5 +1,5 @@
 import { Hex } from 'viem';
-import { base, baseSepolia } from 'viem/chains';
+import { anvil, base, baseSepolia } from 'viem/chains';
 
 export const ACROSS_SPOKE_POOL_ADDRESS: {
   [key: number]: Hex;
@@ -32,7 +32,8 @@ export const ACCOUNT_IMPL_DEPLOYED_BLOCK: {
   [key: number]: bigint;
 } = {
   [baseSepolia.id]: BigInt(15433556),
-  [base.id]: BigInt(20053821),
+  [base.id]: BigInt(21053821),
+  [anvil.id]: BigInt(0),
 };
 
 export const RAYLAC_STEALTH_TRANSFER_ADDRESS =

@@ -63,6 +63,22 @@ model UserStealthAddress {
   upgrades   Upgraded[]
 }
 
+model NativeTransferTrace {
+  id Int @id @default(autoincrement())
+
+  from Bytes
+  to   Bytes
+
+  amount          Decimal
+  chainId         Int
+  transactionHash String
+  traceAddress    String
+  blockNumber     BigInt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Trace {
   id Int @id @default(autoincrement())
 
@@ -75,7 +91,7 @@ model Trace {
   UserStealthAddressFrom UserStealthAddress? @relation(fields: [fromStealthAddress], references: [address], name: "From")
   UserStealthAddressTo   UserStealthAddress? @relation(fields: [toStealthAddress], references: [address], name: "To")
 
-  amount  BigInt
+  amount  Decimal
   tokenId String
 
   transactionHash String
@@ -170,7 +186,7 @@ model Block {
 
   number    BigInt
   chainId   Int
-  timestamp BigInt
+  timestamp BigInt?
 
   Transaction Transaction[]
 

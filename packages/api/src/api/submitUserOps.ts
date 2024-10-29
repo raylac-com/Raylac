@@ -6,12 +6,11 @@ import {
   getPublicClient,
   getTokenId,
   getUserOpHash,
-  traceTransaction,
   UserOperation,
 } from '@raylac/shared';
 import { parseEventLogs } from 'viem';
 import { handleOps } from '../lib/bundler';
-import { handleERC20TransferLog, handleNewTrace } from '@raylac/sync';
+import { handleERC20TransferLog } from '@raylac/sync';
 import { logger } from '../utils';
 import prisma from '../lib/prisma';
 import { handleUserOpEvent } from '@raylac/sync/src/syncUserOps';
@@ -143,7 +142,9 @@ const submitUserOps = async ({
     );
 
     if (isNativeTransfer) {
+      /*
       const start = Date.now();
+
       const traces = await traceTransaction({
         txHash,
         chainId,
@@ -154,6 +155,7 @@ const submitUserOps = async ({
       await Promise.all(
         traces.map(trace => handleNewTrace({ trace, chainId }))
       );
+      */
     } else {
       const tokenAddresses = executeArgs[0].to;
 

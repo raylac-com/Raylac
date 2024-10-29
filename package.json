@@ -9,7 +9,7 @@
   "scripts": {
     "prepare": "husky",
     "lint": "eslint . && pnpm -r lint",
-    "build:all:watch": "pnpm -F shared build:watch & pnpm -F api build:watch"
+    "build:all:watch": "pnpm -F shared build:watch & pnpm -F api build:watch & pnpm -F sync build:watch"
   },
   "keywords": [],
   "author": "",

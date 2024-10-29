@@ -47,7 +47,7 @@ export const handleERC20TransferLog = async ({
     from,
     to,
     tokenId,
-    amount: args.value,
+    amount: args.value.toString(),
     logIndex: log.logIndex,
     Transaction: {
       connect: {

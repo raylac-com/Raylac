@@ -1,27 +1,28 @@
-import 'dotenv/config';
-import syncUserOps from './syncUserOps';
+// import syncUserOps from './syncUserOps';
 import syncBlocks from './syncBlocks';
-import syncNativeTransfers from './syncNativeTransfers';
+import syncNativeTransfers from './assignNativeTransfers';
 import syncERC20Transfers from './syncERC20Transfers';
 import syncAnnouncements from './syncAnnouncements';
+import syncAllNativeTransfers from './syncAllNativeTransfers';
 import scanStealthAddresses from './scanStealthAddresses';
-// import { announceStealthAccounts } from './announceStealthAccounts';
+import { announceStealthAccounts } from './announceStealthAccounts';
 import checkAddressBalances from './checkAddressBalances';
-import syncTxLogs from './syncTxLogs';
-import syncUpgrades from './syncUpgrades';
+// import syncTxLogs from './syncTxLogs';
+// import syncUpgrades from './syncUpgrades';
 
 const sync = async () => {
   await Promise.all([
     syncBlocks(),
-    syncUserOps(),
+    // syncUserOps(),
     syncNativeTransfers(),
     syncERC20Transfers(),
     checkAddressBalances(),
-    // announceStealthAccounts(),
+    announceStealthAccounts(),
     syncAnnouncements(),
     scanStealthAddresses(),
-    syncUpgrades(),
-    syncTxLogs(),
+    // syncUpgrades(),
+    // syncTxLogs(),
+    syncAllNativeTransfers(),
   ]);
 };
 

@@ -1,9 +1,11 @@
 import {
   HttpTransport,
   PublicClient,
+  WebSocketTransport,
   createPublicClient,
   createWalletClient,
   http,
+  webSocket,
 } from 'viem';
 import * as chains from 'viem/chains';
 import { Chain } from 'viem/chains';
@@ -55,6 +57,12 @@ export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
     case chains.polygonAmoy.id:
       alchemySubdomain = 'polygon-amoy';
       break;
+    case chains.scroll.id:
+      alchemySubdomain = 'scroll-mainnet';
+      break;
+    case chains.zksync.id:
+      alchemySubdomain = 'zksync-mainnet';
+      break;
     default:
       throw new Error(`Unknown chain id: ${chain.id}`);
   }
@@ -63,6 +71,10 @@ export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
 };
 
 export const getQuickNodeRpcUrl = ({ chain }: { chain: Chain }) => {
+  if (chain.id === chains.anvil.id) {
+    return 'http://127.0.0.1:8545';
+  }
+
   const apiKey = process.env.QUICKNODE_API_KEY;
 
   if (!apiKey) {
@@ -85,7 +97,7 @@ export const getQuickNodeRpcUrl = ({ chain }: { chain: Chain }) => {
       quickNodeSubdomain = 'base-sepolia';
       break;
     case chains.optimism.id:
-      quickNodeSubdomain = 'optimism-mainnet';
+      quickNodeSubdomain = 'optimism';
       break;
     case chains.optimismSepolia.id:
       quickNodeSubdomain = 'optimism-sepolia';
@@ -103,13 +115,16 @@ export const getQuickNodeRpcUrl = ({ chain }: { chain: Chain }) => {
       quickNodeSubdomain = 'arb-sepolia';
       break;
     case chains.polygon.id:
-      quickNodeSubdomain = 'polygon-mainnet';
+      quickNodeSubdomain = 'matic';
       break;
     case chains.polygonAmoy.id:
       quickNodeSubdomain = 'polygon-amoy';
       break;
     case chains.scroll.id:
       quickNodeSubdomain = 'scroll-mainnet';
+      break;
+    case chains.zksync.id:
+      quickNodeSubdomain = 'zksync-mainnet';
       break;
     default:
       throw new Error(`Unknown chain id: ${chain.id}`);
@@ -130,7 +145,11 @@ export const getPublicClient = ({
   const chain = getChainFromId(chainId);
   const client = createPublicClient({
     chain,
-    transport: http(getAlchemyRpcUrl({ chain })),
+    transport: http(
+      chainId === chains.anvil.id
+        ? 'http://127.0.0.1:8545'
+        : getAlchemyRpcUrl({ chain })
+    ),
   });
 
   return client as PublicClient<HttpTransport, Chain>;
@@ -146,4 +165,18 @@ export const getWalletClient = ({ chainId }: { chainId: number }) => {
     chain,
     transport: http(getQuickNodeRpcUrl({ chain })),
   });
+};
+
+export const getWebsocketClient = ({ chainId }: { chainId: number }) => {
+  const chain = getChainFromId(chainId);
+  const client = createPublicClient({
+    chain,
+    transport: webSocket(
+      chainId === chains.anvil.id
+        ? 'ws://127.0.0.1:8545'
+        : getAlchemyRpcUrl({ chain })
+    ),
+  });
+
+  return client as PublicClient<WebSocketTransport, Chain>;
 };

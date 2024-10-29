@@ -1,101 +1,192 @@
-import { bigIntMin, getPublicClient, sleep } from '@raylac/shared';
-import supportedChains from '@raylac/shared/out/supportedChains';
+import { bigIntMin, getPublicClient } from '@raylac/shared';
 import prisma from './lib/prisma';
-import { Block } from 'viem';
+import { Block, Hex } from 'viem';
+import { Prisma } from '@prisma/client';
+import { getWebsocketClient } from '@raylac/shared/src';
+import { logger } from './utils';
+import supportedChains from '@raylac/shared/out/supportedChains';
 
-const saveBlock = async (block: Block, chainId: number) => {
-  if (!block.hash || !block.number) {
-    throw new Error('Cannot save pending block');
+const saveNewBlock = async ({
+  block,
+  chainId,
+}: {
+  block: Block;
+  chainId: number;
+}) => {
+  const newBlockCreateInput: Prisma.BlockCreateInput = {
+    hash: block.hash!,
+    number: Number(block.number),
+    timestamp: block.timestamp,
+    chainId,
+  };
+
+  try {
+    await prisma.block.upsert({
+      update: newBlockCreateInput,
+      create: newBlockCreateInput,
+      where: {
+        hash: block.hash!,
+      },
+    });
+  } catch (error) {
+    logger.error(`Error saving block ${block} on chain ${chainId}`);
+    logger.error(error);
   }
 
-  const conflictingBlock = await prisma.block.findFirst({
+  logger.info(`Saved new block ${block.number} on chain ${chainId}`);
+};
+
+const handleConflictingBlocks = async ({
+  blockHashes,
+  newBlock,
+  chainId,
+  forkDepth = 1,
+}: {
+  blockHashes: Hex[];
+  newBlock: Block;
+  chainId: number;
+  forkDepth?: number;
+}) => {
+  // Check if the head can be extended
+
+  const parentExists = await prisma.block.findFirst({
     where: {
-      number: Number(block.number),
-      hash: {
-        not: block.hash,
-      },
+      hash: newBlock.parentHash,
+      chainId,
     },
   });
 
-  if (conflictingBlock) {
-    console.log(`Reorg detected for chain ${chainId} at block ${block.number}`);
-    await prisma.$transaction([
-      prisma.trace.deleteMany({
-        where: {
-          Transaction: {
-            blockHash: conflictingBlock.hash,
-          },
-        },
-      }),
-      prisma.userOperation.deleteMany({
-        where: {
-          Transaction: {
-            blockHash: conflictingBlock.hash,
-          },
-        },
-      }),
-      prisma.transaction.deleteMany({
-        where: {
-          blockHash: conflictingBlock.hash,
-        },
-      }),
-      prisma.block.delete({
-        where: {
-          hash: conflictingBlock.hash,
-        },
-      }),
-      prisma.block.create({
-        data: {
-          hash: block.hash,
-          number: Number(block.number),
-          timestamp: block.timestamp,
-          chainId,
-        },
-      }),
-    ]);
-  } else {
-    const data = {
-      hash: block.hash,
-      number: Number(block.number),
-      timestamp: block.timestamp,
+  if (!parentExists) {
+    const publicClient = getPublicClient({
       chainId,
-    };
-    await prisma.block.upsert({
-      update: data,
-      create: data,
-      where: {
-        hash: block.hash,
-      },
+    });
+
+    const parentBlock = await publicClient.getBlock({
+      blockHash: newBlock.parentHash,
+    });
+
+    await handleConflictingBlocks({
+      blockHashes: [parentBlock.hash!],
+      newBlock: parentBlock,
+      chainId,
+      forkDepth: forkDepth + 1,
     });
   }
+
+  logger.info(
+    `Revert block at height ${newBlock.number} on chain ${chainId}. ${blockHashes} -> ${newBlock.hash} (depth: ${forkDepth})`
+  );
+
+  const newBlockCreateInput: Prisma.BlockCreateInput = {
+    hash: newBlock.hash!,
+    number: Number(newBlock.number),
+    timestamp: newBlock.timestamp,
+    chainId,
+  };
+
+  await prisma.block.deleteMany({
+    where: {
+      hash: { in: blockHashes },
+    },
+  });
+  await prisma.block.upsert({
+    update: newBlockCreateInput,
+    create: newBlockCreateInput,
+    where: {
+      hash: newBlock.hash!,
+    },
+  });
+
+  /*
+  await prisma.$transaction([
+    prisma.trace.deleteMany({
+      where: {
+        Transaction: {
+          blockHash: { in: blockHashes },
+        },
+      },
+    }),
+    prisma.userOperation.deleteMany({
+      where: {
+        Transaction: {
+          blockHash: { in: blockHashes },
+        },
+      },
+    }),
+    prisma.transaction.deleteMany({
+      where: {
+        blockHash: { in: blockHashes },
+      },
+    }),
+    prisma.block.deleteMany({
+      where: {
+        hash: { in: blockHashes },
+      },
+    }),
+    prisma.block.upsert({
+      update: newBlockCreateInput,
+      create: newBlockCreateInput,
+      where: {
+        hash: newBlock.hash!,
+      },
+    }),
+  ]);
+  */
 };
 
-/**
- * Save the block number and hash to the database.
- */
-const syncBlock = async ({
-  blockNumber,
+const processNewBlocks = async ({
+  blocks,
   chainId,
 }: {
-  blockNumber: bigint;
+  blocks: Block[];
   chainId: number;
 }) => {
-  const publicClient = getPublicClient({
-    chainId,
-  });
+  for (const block of blocks) {
+    if (!block.number) {
+      throw new Error(
+        `Block number is undefined for block ${block.hash} on chain ${chainId}`
+      );
+    }
 
-  const block = await publicClient.getBlock({
-    blockNumber,
-  });
+    const existingBlocks = await prisma.block.findMany({
+      where: {
+        number: block.number,
+        hash: { not: block.hash! },
+        chainId,
+      },
+    });
 
-  await saveBlock(block, chainId);
+    if (existingBlocks.length > 0) {
+      await handleConflictingBlocks({
+        blockHashes: existingBlocks.map(b => b.hash as Hex),
+        newBlock: block,
+        chainId,
+      });
+    } else {
+      await saveNewBlock({ block, chainId });
+    }
+  }
+};
+// Mapping of chainId to a list of new blocks
+// const newBlocks = new Map<number, Block[]>();
+
+const handleNewBlock = async (block: Block, chainId: number) => {
+  /*
+  const blocks = newBlocks.get(chainId) || [];
+
+  blocks.push(block);
+  newBlocks.set(chainId, blocks);
+
+  if (blocks.length >= 1) {
+    await processNewBlocks({ blocks, chainId });
+
+    newBlocks.set(chainId, []);
+  }
+    */
+  await processNewBlocks({ blocks: [block], chainId });
 };
 
-/**
- * Sync blocks in a range.
- * This function is used to sync blocks in a given range concurrently.
- */
-export const syncBlocksInRange = async ({
+const getBlocks = async ({
   fromBlock,
   toBlock,
   chainId,
@@ -104,70 +195,169 @@ export const syncBlocksInRange = async ({
   toBlock: bigint;
   chainId: number;
 }) => {
-  const promises = [];
-
-  for (let blockNumber = fromBlock; blockNumber <= toBlock; blockNumber++) {
-    promises.push(syncBlock({ blockNumber, chainId }));
-  }
-
-  await Promise.all(promises);
-};
-
-const syncBlocksForChain = async (chainId: number) => {
   const publicClient = getPublicClient({
     chainId,
   });
 
-  while (true) {
-    const latestSyncedBlock = await prisma.block.findFirst({
-      where: {
-        chainId,
-      },
-      orderBy: {
-        number: 'desc',
-      },
+  const promises = [];
+
+  for (let blockNumber = fromBlock; blockNumber <= toBlock; blockNumber++) {
+    const block = publicClient.getBlock({
+      blockNumber,
     });
 
-    const finalizedBlock = await publicClient.getBlock({
-      blockTag: 'finalized',
-    });
-
-    const fromBlock = latestSyncedBlock
-      ? latestSyncedBlock.number + BigInt(1)
-      : finalizedBlock.number + BigInt(1);
-
-    const latestBlock = await publicClient.getBlock({
-      blockTag: 'latest',
-    });
-
-    console.log(
-      `Fetching ${latestBlock.number - fromBlock} blocks for chain ${chainId} from ${fromBlock.toLocaleString()} to ${latestBlock.number.toLocaleString()}`
-    );
-
-    const chunkSize = BigInt(10);
-    for (
-      let blockNumber = fromBlock;
-      blockNumber <= latestBlock.number;
-      blockNumber += chunkSize
-    ) {
-      await syncBlocksInRange({
-        fromBlock: blockNumber,
-        toBlock: bigIntMin([blockNumber + chunkSize, latestBlock.number]),
-        chainId,
-      });
-    }
-
-    await sleep(3 * 1000);
+    promises.push(block);
   }
+
+  return Promise.all(promises);
+};
+
+const syncBlocksConcurrently = async ({
+  fromBlock,
+  toBlock,
+  chainId,
+}: {
+  fromBlock: bigint;
+  toBlock: bigint;
+  chainId: number;
+}) => {
+  const blocks = await getBlocks({ fromBlock, toBlock, chainId });
+
+  const conflictingBlocks = await prisma.block.findMany({
+    where: {
+      OR: blocks.map(b => ({
+        chainId,
+        number: b.number,
+        NOT: {
+          hash: b.hash,
+        },
+      })),
+    },
+    orderBy: {
+      number: 'desc',
+    },
+  });
+
+  if (conflictingBlocks.length === 0) {
+    await prisma.block.createMany({
+      data: blocks.map(b => ({
+        hash: b.hash!,
+        number: b.number,
+        chainId,
+      })),
+      skipDuplicates: true,
+    });
+
+    return;
+  }
+
+  logger.info(
+    `Found ${conflictingBlocks.length} conflicting blocks for chain ${chainId}.`
+  );
+
+  const blockHashesToDelete = conflictingBlocks.map(b => b.hash as Hex);
+
+  await prisma.$transaction([
+    prisma.trace.deleteMany({
+      where: {
+        Transaction: {
+          blockHash: { in: blockHashesToDelete },
+        },
+      },
+    }),
+    prisma.userOperation.deleteMany({
+      where: {
+        Transaction: {
+          blockHash: { in: blockHashesToDelete },
+        },
+      },
+    }),
+    prisma.transaction.deleteMany({
+      where: {
+        blockHash: { in: blockHashesToDelete },
+      },
+    }),
+    prisma.block.deleteMany({
+      where: {
+        hash: { in: blockHashesToDelete },
+      },
+    }),
+    prisma.block.createMany({
+      data: blocks.map(b => ({
+        hash: b.hash!,
+        number: b.number,
+        chainId,
+      })),
+      skipDuplicates: true,
+    }),
+  ]);
+};
+
+export const backFillBlocks = async (chainId: number) => {
+  const publicClient = getPublicClient({
+    chainId,
+  });
+
+  const finalizedBlock = await publicClient.getBlock({
+    blockTag: 'finalized',
+  });
+
+  const fromBlock = finalizedBlock.number;
+
+  const latestBlock = await publicClient.getBlock({
+    blockTag: 'latest',
+  });
+
+  logger.info(
+    `Backfilling ${latestBlock.number - fromBlock} blocks for chain ${chainId}`
+  );
+
+  // Sync 10 blocks at a time concurrently
+  const batchSize = 10n;
+  for (
+    let batchStartBlock = fromBlock;
+    batchStartBlock <= latestBlock.number;
+    batchStartBlock += batchSize
+  ) {
+    await syncBlocksConcurrently({
+      fromBlock: batchStartBlock,
+      toBlock: bigIntMin([batchStartBlock + batchSize, latestBlock.number]),
+      chainId,
+    });
+  }
+
+  logger.info(`Backfilling blocks for chain ${chainId} complete`);
+};
+
+export const syncBlocksForChain = async (chainId: number) => {
+  await backFillBlocks(chainId);
+
+  const websocketClient = getWebsocketClient({
+    chainId,
+  });
+
+  const unwatch = await websocketClient.watchBlocks({
+    emitMissed: true,
+    emitOnBegin: true,
+    onBlock: async block => {
+      await handleNewBlock(block, chainId);
+    },
+    onError(error) {
+      logger.error(error);
+    },
+  });
+
+  return unwatch;
 };
 
 const syncBlocks = async () => {
-  // Backfill blocks
-  await Promise.all(
-    supportedChains.map(async chain => {
-      await syncBlocksForChain(chain.id);
-    })
-  );
+  const syncBlocksJob = [];
+
+  for (const chain of supportedChains) {
+    syncBlocksJob.push(syncBlocksForChain(chain.id));
+  }
+
+  await Promise.all(syncBlocksJob);
 };
 
 export default syncBlocks;

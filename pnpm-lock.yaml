@@ -371,6 +371,15 @@ importers:
 
   packages/tests:
     dependencies:
+      '@raylac/api':
+        specifier: workspace:*
+        version: link:../api
+      '@raylac/shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@raylac/sync':
+        specifier: workspace:*
+        version: link:../sync
       bip39:
         specifier: ^3.1.0
         version: 3.1.0
@@ -378,9 +387,6 @@ importers:
         specifier: ^2.17.0
         version: 2.21.10(bufferutil@4.0.8)(typescript@5.6.2)(utf-8-validate@6.0.4)(zod@3.23.8)
     devDependencies:
-      '@raylac/api':
-        specifier: workspace:*
-        version: link:../api
       '@types/node':
         specifier: ^20.11.17
         version: 20.16.5

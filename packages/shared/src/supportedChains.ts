@@ -3,10 +3,13 @@ import * as chains from 'viem/chains';
 
 const supportedChains: Chain[] = [
   // chains.mainnet,
-//  chains.optimism,
-//  chains.optimismSepolia,
+  //  chains.optimism,
+  //  chains.optimismSepolia,
   chains.base,
-  chains.baseSepolia,
+  // chains.scroll,
+  // chains.arbitrum,
+  // chains.optimism,
+  // chains.baseSepolia,
 ];
 
 export default supportedChains;
