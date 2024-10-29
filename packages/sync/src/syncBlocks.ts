@@ -37,46 +37,14 @@ const saveNewBlock = async ({
 };
 
 const handleConflictingBlocks = async ({
-  blockHashes,
+  oldBlockHash,
   newBlock,
   chainId,
-  forkDepth = 1,
 }: {
-  blockHashes: Hex[];
+  oldBlockHash: Hex;
   newBlock: Block;
   chainId: number;
-  forkDepth?: number;
 }) => {
-  // Check if the head can be extended
-
-  const parentExists = await prisma.block.findFirst({
-    where: {
-      hash: newBlock.parentHash,
-      chainId,
-    },
-  });
-
-  if (!parentExists) {
-    const publicClient = getPublicClient({
-      chainId,
-    });
-
-    const parentBlock = await publicClient.getBlock({
-      blockHash: newBlock.parentHash,
-    });
-
-    await handleConflictingBlocks({
-      blockHashes: [parentBlock.hash!],
-      newBlock: parentBlock,
-      chainId,
-      forkDepth: forkDepth + 1,
-    });
-  }
-
-  logger.info(
-    `Revert block at height ${newBlock.number} on chain ${chainId}. ${blockHashes} -> ${newBlock.hash} (depth: ${forkDepth})`
-  );
-
   const newBlockCreateInput: Prisma.BlockCreateInput = {
     hash: newBlock.hash!,
     number: Number(newBlock.number),
@@ -84,107 +52,79 @@ const handleConflictingBlocks = async ({
     chainId,
   };
 
-  await prisma.block.deleteMany({
-    where: {
-      hash: { in: blockHashes },
-    },
-  });
-  await prisma.block.upsert({
-    update: newBlockCreateInput,
-    create: newBlockCreateInput,
-    where: {
-      hash: newBlock.hash!,
-    },
-  });
-
-  /*
   await prisma.$transaction([
     prisma.trace.deleteMany({
       where: {
         Transaction: {
-          blockHash: { in: blockHashes },
+          blockHash: oldBlockHash,
         },
       },
     }),
     prisma.userOperation.deleteMany({
       where: {
         Transaction: {
-          blockHash: { in: blockHashes },
+          blockHash: oldBlockHash,
         },
       },
     }),
     prisma.transaction.deleteMany({
       where: {
-        blockHash: { in: blockHashes },
+        blockHash: oldBlockHash,
       },
     }),
     prisma.block.deleteMany({
       where: {
-        hash: { in: blockHashes },
+        hash: oldBlockHash,
       },
     }),
     prisma.block.upsert({
       update: newBlockCreateInput,
       create: newBlockCreateInput,
       where: {
-        hash: newBlock.hash!,
+        number_chainId: {
+          number: Number(newBlock.number),
+          chainId,
+        },
       },
     }),
   ]);
-  */
 };
 
-const processNewBlocks = async ({
-  blocks,
+const processNewBlock = async ({
+  block,
   chainId,
 }: {
-  blocks: Block[];
+  block: Block;
   chainId: number;
 }) => {
-  for (const block of blocks) {
-    if (!block.number) {
-      throw new Error(
-        `Block number is undefined for block ${block.hash} on chain ${chainId}`
-      );
-    }
+  if (!block.number) {
+    throw new Error(
+      `Block number is undefined for block ${block.hash} on chain ${chainId}`
+    );
+  }
 
-    const existingBlocks = await prisma.block.findMany({
-      where: {
-        number: block.number,
-        hash: { not: block.hash! },
-        chainId,
-      },
+  const existingBlock = await prisma.block.findFirst({
+    select: {
+      hash: true,
+    },
+    where: {
+      number: block.number,
+      chainId,
+    },
+  });
+
+  if (existingBlock && existingBlock.hash !== block.hash) {
+    await handleConflictingBlocks({
+      oldBlockHash: existingBlock.hash as Hex,
+      newBlock: block,
+      chainId,
     });
-
-    if (existingBlocks.length > 0) {
-      await handleConflictingBlocks({
-        blockHashes: existingBlocks.map(b => b.hash as Hex),
-        newBlock: block,
-        chainId,
-      });
-    } else {
-      await saveNewBlock({ block, chainId });
-    }
+  } else {
+    await saveNewBlock({ block, chainId });
   }
 };
 // Mapping of chainId to a list of new blocks
 // const newBlocks = new Map<number, Block[]>();
-
-const handleNewBlock = async (block: Block, chainId: number) => {
-  /*
-  const blocks = newBlocks.get(chainId) || [];
-
-  blocks.push(block);
-  newBlocks.set(chainId, blocks);
-
-  if (blocks.length >= 1) {
-    await processNewBlocks({ blocks, chainId });
-
-    newBlocks.set(chainId, []);
-  }
-    */
-  await processNewBlocks({ blocks: [block], chainId });
-};
 
 const getBlocks = async ({
   fromBlock,
@@ -340,7 +280,11 @@ export const syncBlocksForChain = async (chainId: number) => {
     emitMissed: true,
     emitOnBegin: true,
     onBlock: async block => {
-      await handleNewBlock(block, chainId);
+      try {
+        await processNewBlock({ block, chainId });
+      } catch (error) {
+        logger.error('Error handling new block', { error });
+      }
     },
     onError(error) {
       logger.error(error);
