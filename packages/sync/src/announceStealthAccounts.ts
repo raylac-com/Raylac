@@ -120,32 +120,36 @@ const announceStealthAccount = async (
 
 export const announceStealthAccounts = async () => {
   while (true) {
-    const stealthAccounts = await prisma.userStealthAddress.findMany({
-      select: {
-        address: true,
-        signerAddress: true,
-        ephemeralPubKey: true,
-        viewTag: true,
-      },
-      where: {
-        signerAddress: {
-          not: null,
+    try {
+      const stealthAccounts = await prisma.userStealthAddress.findMany({
+        select: {
+          address: true,
+          signerAddress: true,
+          ephemeralPubKey: true,
+          viewTag: true,
         },
-      },
-    });
+        where: {
+          signerAddress: {
+            not: null,
+          },
+        },
+      });
 
-    for (const stealthAccount of stealthAccounts) {
-      if (await isAnnounced(stealthAccount.signerAddress as Hex)) {
-        logger.debug(
-          `Stealth account ${stealthAccount.address} already announced`
+      for (const stealthAccount of stealthAccounts) {
+        if (await isAnnounced(stealthAccount.signerAddress as Hex)) {
+          logger.debug(
+            `Stealth account ${stealthAccount.address} already announced`
+          );
+          continue;
+        }
+
+        logger.info(`Announcing stealth account ${stealthAccount.address}`);
+        await announceStealthAccount(
+          stealthAccount as StealthAddressWithEphemeral
         );
-        continue;
       }
-
-      logger.info(`Announcing stealth account ${stealthAccount.address}`);
-      await announceStealthAccount(
-        stealthAccount as StealthAddressWithEphemeral
-      );
+    } catch (err) {
+      logger.error(err);
     }
 
     await sleep(60 * 1000);
