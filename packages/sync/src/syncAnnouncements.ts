@@ -5,7 +5,7 @@ import {
 } from '@raylac/shared';
 import prisma from './lib/prisma';
 import { base } from 'viem/chains';
-import { announcementAbiItem } from './utils';
+import { announcementAbiItem, logger } from './utils';
 import processLogs from './processLogs';
 import { Log } from 'viem';
 import { SyncJob } from '@prisma/client';
@@ -38,17 +38,21 @@ export const handleERC5564AnnouncementLog = async ({
 
 const syncAnnouncements = async () => {
   while (true) {
-    await processLogs({
-      chainId: base.id,
-      job: SyncJob.Announcements,
-      address: ERC5564_ANNOUNCER_ADDRESS,
-      event: announcementAbiItem,
-      handleLogs: async logs => {
-        for (const log of logs) {
-          await handleERC5564AnnouncementLog({ log, chainId: base.id });
-        }
-      },
-    });
+    try {
+      await processLogs({
+        chainId: base.id,
+        job: SyncJob.Announcements,
+        address: ERC5564_ANNOUNCER_ADDRESS,
+        event: announcementAbiItem,
+        handleLogs: async logs => {
+          for (const log of logs) {
+            await handleERC5564AnnouncementLog({ log, chainId: base.id });
+          }
+        },
+      });
+    } catch (error) {
+      logger.error('Error syncing announcements', { error });
+    }
 
     await sleep(60 * 1000);
   }
