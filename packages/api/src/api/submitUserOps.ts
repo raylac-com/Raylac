@@ -13,8 +13,8 @@ import { handleOps } from '../lib/bundler';
 import { handleERC20TransferLog } from '@raylac/sync';
 import { logger } from '../utils';
 import prisma from '../lib/prisma';
-import { handleUserOpEvent } from '@raylac/sync/src/syncUserOps';
 import { Prisma } from '@prisma/client';
+import { upsertTransaction } from '@raylac/sync/src/utils';
 
 const MAX_TRANSFERS = 1000;
 
@@ -137,25 +137,35 @@ const submitUserOps = async ({
   // Save user ops and traces to the db
 
   try {
+    /*
     await Promise.all(
       userOpEventLogs.map(log => handleUserOpEvent({ log, chainId }))
     );
+    */
 
     if (isNativeTransfer) {
-      /*
-      const start = Date.now();
+      await upsertTransaction({ txHash, chainId });
 
-      const traces = await traceTransaction({
-        txHash,
-        chainId,
-      });
-      const end = Date.now();
-      logger.info(`traceTransaction ${end - start}ms`);
+      const traceCreateInput: Prisma.TraceCreateManyInput[] = userOps.map(
+        userOp => {
+          const { to, value: amount } = decodeUserOpCalldata(userOp);
 
-      await Promise.all(
-        traces.map(trace => handleNewTrace({ trace, chainId }))
+          return {
+            from: userOp.sender,
+            to,
+            amount: amount.toString(),
+            tokenId: 'eth',
+            chainId,
+            traceAddress: '',
+            transactionHash: txHash,
+          };
+        }
       );
-      */
+
+      await prisma.trace.createMany({
+        data: traceCreateInput,
+        skipDuplicates: true,
+      });
     } else {
       const tokenAddresses = executeArgs[0].to;
 
