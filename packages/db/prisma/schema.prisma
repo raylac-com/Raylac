@@ -10,19 +10,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model AddressSyncStatus {
+  id Int @id @default(autoincrement())
+
+  chainId Int
+  address String
+  tokenId String
+
+  blockHash   String
+  blockNumber BigInt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ERC5564Announcement   ERC5564Announcement @relation(fields: [eRC5564AnnouncementId], references: [id])
+  eRC5564AnnouncementId Int
+
+  @@unique([address, chainId, tokenId])
+}
+
 model ERC5564Announcement {
-  id              Int      @id @default(autoincrement())
+  id              Int    @id @default(autoincrement())
   schemeId        Int
   stealthAddress  String
   caller          String
   ephemeralPubKey String
   metadata        String
   blockNumber     BigInt
-  logIndex        Int
-  txIndex         Int
-  chainId         Int
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  address         String
+
+  addressSyncStatus AddressSyncStatus[]
+  logIndex          Int
+  txIndex           Int
+  chainId           Int
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 
   @@unique([blockNumber, logIndex, txIndex, chainId])
 }
@@ -54,9 +76,8 @@ model UserStealthAddress {
   signerAddress   String?
   label           String?
 
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  AddressSyncStatus AddressSyncStatus[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   FromTraces Trace[]    @relation("From")
   ToTraces   Trace[]    @relation("To")
@@ -109,21 +130,6 @@ model Trace {
 
   @@unique([transactionHash, logIndex])
   @@unique([transactionHash, traceAddress])
-}
-
-model AddressSyncStatus {
-  id Int @id @default(autoincrement())
-
-  address            String
-  UserStealthAddress UserStealthAddress @relation(fields: [address], references: [address])
-  lastSyncedBlockNum BigInt
-  tokenId            String
-  chainId            Int
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([address, chainId, tokenId])
 }
 
 model Transaction {

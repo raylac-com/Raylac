@@ -23,6 +23,7 @@ export interface StealthAddressWithEphemeral {
 }
 
 export interface ERC5564AnnouncementData {
+  address: Hex;
   schemeId: number;
   stealthAddress: string;
   caller: string;

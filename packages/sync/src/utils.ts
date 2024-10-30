@@ -142,7 +142,7 @@ export const getMinSynchedBlockForAddresses = async ({
   const addressSyncStatus = await prisma.addressSyncStatus.findMany({
     select: {
       address: true,
-      lastSyncedBlockNum: true,
+      blockNumber: true,
     },
     where: {
       address: {
@@ -164,7 +164,7 @@ export const getMinSynchedBlockForAddresses = async ({
     .map(
       address =>
         addressSyncStatus.find(status => status.address === address)
-          ?.lastSyncedBlockNum || defaultFromBlock
+          ?.blockNumber || defaultFromBlock
     )
     .sort((a, b) => (a > b ? 1 : -1))[0];
 
@@ -175,52 +175,22 @@ export const updateAddressesSyncStatus = async ({
   addresses,
   chainId,
   tokenId,
-  blockNum,
+  blockNumber,
 }: {
   addresses: Hex[];
   chainId: number;
   tokenId: string;
-  blockNum: bigint;
+  blockNumber: bigint;
 }) => {
-  const currentSyncStatus = await prisma.addressSyncStatus.findMany({
-    where: {
-      address: {
-        in: addresses,
-      },
-      chainId,
-      tokenId,
-    },
-  });
-
-  // Get addresses that don't have a sync status record
-  const addressesWithoutSyncStatus = addresses.filter(
-    address => !currentSyncStatus.find(status => status.address === address)
-  );
-
-  // Get addresses that have a sync status record
-  const addressesWithSyncStatus = addresses.filter(address =>
-    currentSyncStatus.find(status => status.address === address)
-  );
-
-  // Create sync status records for addresses that don't have one
-  await prisma.addressSyncStatus.createMany({
-    data: addressesWithoutSyncStatus.map(address => ({
-      address,
-      chainId,
-      tokenId,
-      lastSyncedBlockNum: blockNum,
-    })),
-    skipDuplicates: true,
-  });
-
   // Update sync status records for addresses that have one
   await prisma.addressSyncStatus.updateMany({
     data: {
-      lastSyncedBlockNum: blockNum,
+      blockHash: '0x',
+      blockNumber,
     },
     where: {
       address: {
-        in: addressesWithSyncStatus,
+        in: addresses,
       },
       chainId,
       tokenId,

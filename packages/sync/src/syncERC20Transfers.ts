@@ -3,14 +3,12 @@ import supportedTokens from '@raylac/shared/out/supportedTokens';
 import { decodeEventLog, getAddress, Hex, Log, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
 import {
-  getLatestBlockHeight,
   getMinSynchedBlockForAddresses,
   updateAddressesSyncStatus,
   upsertTransaction,
 } from './utils';
 import { logger } from './utils';
 import { Prisma } from '@prisma/client';
-import deployAccount from './lib/deployAccount';
 
 export const handleERC20TransferLog = async ({
   log,
@@ -149,8 +147,8 @@ const batchSyncERC20Transfers = async ({
     await handleERC20TransferLog({ log, tokenId, chainId });
 
     // Deploy the account that received the transfer if it's not already deployed
-    const to = getAddress(log.args.to!);
-    await deployAccount({ address: to, chainId });
+    // const to = getAddress(log.args.to!);
+    // await deployAccount({ address: to, chainId });
   }
 };
 
@@ -197,7 +195,7 @@ const syncERC20Transfers = async () => {
                 finalizedBlockNumber.number,
               ]);
 
-              const latestBlock = await getLatestBlockHeight(chainId);
+              const latestBlock = await client.getBlockNumber();
 
               if (!latestBlock) {
                 // No blocks have been synced yet
@@ -224,7 +222,7 @@ const syncERC20Transfers = async () => {
                   addresses: batch,
                   chainId,
                   tokenId: token.tokenId,
-                  blockNum: toBlock,
+                  blockNumber: toBlock,
                 });
               }
             }

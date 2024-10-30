@@ -39,7 +39,7 @@ export const ACCOUNT_IMPL_DEPLOYED_BLOCK: {
   [key: number]: bigint;
 } = {
   [baseSepolia.id]: BigInt(15433556),
-  [base.id]: BigInt(21053821),
+  [base.id]: BigInt(20053821),
   [arbitrum.id]: BigInt(267822748),
   [optimism.id]: BigInt(126295867),
   [scroll.id]: BigInt(10527993),
