@@ -30,14 +30,14 @@ model AddressSyncStatus {
 }
 
 model ERC5564Announcement {
-  id              Int    @id @default(autoincrement())
+  id              Int     @id @default(autoincrement())
   schemeId        Int
   stealthAddress  String
   caller          String
   ephemeralPubKey String
   metadata        String
   blockNumber     BigInt
-  address         String
+  address         String?
 
   addressSyncStatus AddressSyncStatus[]
   logIndex          Int
