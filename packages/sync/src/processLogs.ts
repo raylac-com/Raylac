@@ -22,7 +22,7 @@ const processLogs = async ({
 
   const fromBlock = await getFromBlock({
     chainId,
-    job: 'UserOps',
+    job,
   });
 
   const toBlock = await client.getBlockNumber();
@@ -31,7 +31,7 @@ const processLogs = async ({
   for (
     let startBlock = fromBlock;
     startBlock <= toBlock;
-    startBlock += chunkSize + 1n
+    startBlock += chunkSize
   ) {
     const endBlock =
       startBlock + chunkSize <= toBlock ? startBlock + chunkSize : toBlock;

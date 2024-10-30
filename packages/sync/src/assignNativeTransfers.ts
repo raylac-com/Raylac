@@ -123,7 +123,7 @@ const assignNativeTransfers = async () => {
         },
       });
 
-      const batchSize = 10;
+      const batchSize = 20;
 
       for (let i = 0; i < userStealthAddresses.length; i += batchSize) {
         const batch = userStealthAddresses.slice(i, i + batchSize);
@@ -140,7 +140,7 @@ const assignNativeTransfers = async () => {
       logger.error(err);
     }
 
-    await sleep(5000); // Sleep for 5 seconds
+    await sleep(2000); // Sleep for 2 seconds
   }
 };
 

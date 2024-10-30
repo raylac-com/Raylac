@@ -182,6 +182,7 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
     },
     where: {
       chainId,
+      tokenId: 'eth',
     },
     orderBy: {
       blockNumber: 'asc',
@@ -196,13 +197,12 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
   const blockBatchSize = 100000n;
 
   const client = getPublicClient({ chainId });
-  const latestBlockNumber = await client.getBlockNumber();
 
   for (let i = 0; i < addressWithSyncStatus.length; i += addressBatchSize) {
     const batch = addressWithSyncStatus.slice(i, i + addressBatchSize);
-    const addresses = batch.map(address => address.address as Hex);
-
     const fromBlock = batch[0].blockNumber;
+
+    const latestBlockNumber = await client.getBlockNumber();
 
     for (
       let blockNumber = fromBlock;
@@ -214,19 +214,23 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
         latestBlockNumber,
       ]);
 
-      console.time(`traceFilter for ${addresses.length} addresses`);
+      const addressesToSync = batch
+        .filter(address => address.blockNumber < toBlock)
+        .map(address => address.address as Hex);
+
+      console.time(`traceFilter for ${addressesToSync.length} addresses`);
       const incomingTraces = await traceFilter({
         fromBlock: toHex(fromBlock),
         toBlock: toHex(toBlock),
-        toAddress: addresses,
+        toAddress: addressesToSync,
         chainId,
       });
-      console.timeEnd(`traceFilter for ${addresses.length} addresses`);
+      console.timeEnd(`traceFilter for ${addressesToSync.length} addresses`);
 
       const outgoingTraces = await traceFilter({
         fromBlock: toHex(fromBlock),
         toBlock: toHex(toBlock),
-        fromAddress: addresses,
+        fromAddress: addressesToSync,
         chainId,
       });
 
@@ -276,7 +280,7 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
       }
 
       await updateAddressesSyncStatus({
-        addresses: batch.map(address => address.address as Hex),
+        addresses: addressesToSync,
         chainId,
         tokenId: 'eth',
         blockNumber: toBlock,
@@ -287,19 +291,24 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
 
 const syncNativeTransfers = async () => {
   while (true) {
-    const promises = [];
+    try {
+      const promises = [];
 
-    for (const chain of supportedChains) {
-      if (chain.id === base.id) {
-        promises.push(syncNativeTransfersWithTraceFilter(chain.id));
-      } else {
-        promises.push(syncNativeTransfersForChain(chain.id));
+      for (const chain of supportedChains) {
+        if (chain.id === base.id) {
+          promises.push(syncNativeTransfersWithTraceFilter(chain.id));
+        } else {
+          promises.push(syncNativeTransfersForChain(chain.id));
+        }
       }
+
+      await Promise.all(promises);
+    } catch (err) {
+      logger.error(err);
     }
 
-    await Promise.all(promises);
-
-    await sleep(10 * 1000);
+    logger.info('Sleeping for 3 seconds');
+    await sleep(3 * 1000);
   }
 };
 

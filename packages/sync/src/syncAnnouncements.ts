@@ -101,7 +101,7 @@ const syncAnnouncements = async () => {
       logger.error('Error syncing announcements', { error });
     }
 
-    await sleep(60 * 1000);
+    await sleep(3 * 1000);
   }
 };
 
