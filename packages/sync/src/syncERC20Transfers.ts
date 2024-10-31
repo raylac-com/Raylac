@@ -6,6 +6,7 @@ import {
   getMinSynchedBlockForAddresses,
   updateAddressesSyncStatus,
   upsertTransaction,
+  waitForAnnouncementsBackfill,
 } from './utils';
 import { logger } from './utils';
 import { Prisma } from '@prisma/client';
@@ -149,6 +150,12 @@ const batchSyncERC20Transfers = async ({
 };
 
 const syncERC20Transfers = async () => {
+  logger.info(
+    'syncERC20Transfers: Waiting for announcements backfill to complete'
+  );
+  await waitForAnnouncementsBackfill();
+  logger.info(`syncERC20Transfers: Announcements backfill complete`);
+
   const erc20Tokens = supportedTokens.filter(token => token.tokenId !== 'eth');
 
   while (true) {

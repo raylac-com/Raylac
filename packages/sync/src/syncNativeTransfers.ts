@@ -9,9 +9,14 @@ import {
 import prisma from './lib/prisma';
 import { getAddress, Hex, hexToBigInt, isAddress, toHex } from 'viem';
 import { Prisma } from '@prisma/client';
-import { logger, updateAddressesSyncStatus, upsertTransaction } from './utils';
+import {
+  logger,
+  updateAddressesSyncStatus,
+  upsertTransaction,
+  waitForAnnouncementsBackfill,
+} from './utils';
 import supportedChains from '@raylac/shared/out/supportedChains';
-import { base } from 'viem/chains';
+import { base, optimism } from 'viem/chains';
 import { getTokenPriceAtTime } from './lib/coingecko';
 
 interface TraceWithTraceAddress extends BlockTransactionResponse {
@@ -72,7 +77,7 @@ const syncNativeTransfersForChain = async (chainId: number) => {
     );
 
     logger.info(
-      `Scanning blocks for ${addresses.length} addresses from block ${blockNumber}`
+      `Scanning blocks for ${addresses.length} addresses in block ${blockNumber} on chain ${chainId}`
     );
 
     const traceBlockResult = await traceBlockByNumber({
@@ -127,7 +132,6 @@ const syncNativeTransfersForChain = async (chainId: number) => {
         amount: hexToBigInt(call.value).toString(),
         traceAddress: call.traceAddress.join('_'),
         transactionHash: call.txHash,
-        blockNumber,
         chainId,
         tokenId: 'eth',
       })
@@ -171,7 +175,7 @@ const getBlockTimestamp = async ({
 };
 
 const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
-  if (chainId !== base.id) {
+  if (chainId !== base.id && chainId !== optimism.id) {
     throw new Error(`Cannot use trace_filter for chain ${chainId}`);
   }
 
@@ -290,12 +294,18 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
 };
 
 const syncNativeTransfers = async () => {
+  logger.info(
+    'syncNativeTransfers: Waiting for announcements backfill to complete'
+  );
+  await waitForAnnouncementsBackfill();
+  logger.info(`syncNativeTransfers: Announcements backfill complete`);
+
   while (true) {
     try {
       const promises = [];
 
       for (const chain of supportedChains) {
-        if (chain.id === base.id) {
+        if (chain.id === base.id || chain.id === optimism.id) {
           promises.push(syncNativeTransfersWithTraceFilter(chain.id));
         } else {
           promises.push(syncNativeTransfersForChain(chain.id));

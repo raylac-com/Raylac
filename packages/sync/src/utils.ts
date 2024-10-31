@@ -8,6 +8,7 @@ import {
   bigIntMin,
   ERC20Abi,
   getPublicClient,
+  sleep,
 } from '@raylac/shared';
 
 export const announcementAbiItem = parseAbiItem(
@@ -363,9 +364,7 @@ export const getBlockNumFromTimestamp = async ({
   // eslint-disable-next-line security/detect-object-injection
   const chainBlockTime = CHAIN_BLOCK_TIME[chainId];
 
-  const chainLatestBlock = await client.getBlock({
-    blockTag: 'latest',
-  });
+  const chainLatestBlockNumber = await client.getBlockNumber();
 
   // Estimate the block number from the timestamp
   let estimatedBlockNumber = Math.floor(
@@ -374,8 +373,8 @@ export const getBlockNumFromTimestamp = async ({
 
   let attempts = 0;
   while (true) {
-    if (estimatedBlockNumber > Number(chainLatestBlock.number)) {
-      estimatedBlockNumber = Number(chainLatestBlock.number);
+    if (estimatedBlockNumber > Number(chainLatestBlockNumber)) {
+      estimatedBlockNumber = Number(chainLatestBlockNumber);
     }
 
     const estimatedBlock = await client.getBlock({
@@ -403,4 +402,33 @@ export const getBlockNumFromTimestamp = async ({
   }
 
   return BigInt(estimatedBlockNumber);
+};
+
+export const waitForAnnouncementsBackfill = async () => {
+  const client = getPublicClient({ chainId: base.id });
+
+  const latestBlock = await client.getBlock({
+    blockTag: 'latest',
+  });
+
+  while (true) {
+    const announcementSyncStatus = await prisma.syncStatus.findUnique({
+      where: {
+        chainId_job: {
+          chainId: base.id,
+          job: SyncJob.Announcements,
+        },
+      },
+    });
+
+    if (!announcementSyncStatus) {
+      continue;
+    }
+
+    if (announcementSyncStatus.lastSyncedBlockNum >= latestBlock.number) {
+      break;
+    }
+
+    await sleep(3000);
+  }
 };
