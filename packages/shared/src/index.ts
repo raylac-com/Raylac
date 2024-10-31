@@ -10,7 +10,6 @@ export { default as RaylacStealthTransferAbi } from './abi/RaylacStealthTransfer
 export { default as RaylacAccountProxyBytecode } from './bytecode/RaylacAccountProxyBytecode';
 export { default as SenderCreatorAbi } from './abi/SenderCreator';
 export { default as RaylacAccountV2Abi } from './abi/RaylacAccountV2Abi';
-export { default as UUPSUpgradeableAbi } from './abi/UUPSUpgradeableAbi';
 export * from './stealth';
 export * from './addresses';
 export * from './utils';

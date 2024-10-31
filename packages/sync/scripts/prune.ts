@@ -6,7 +6,6 @@ import prisma from '../src/lib/prisma';
 const prune = async () => {
   await prisma.trace.deleteMany();
   await prisma.userOperation.deleteMany();
-  await prisma.upgraded.deleteMany();
   await prisma.transaction.deleteMany();
   await prisma.block.deleteMany();
   await prisma.syncStatus.deleteMany();

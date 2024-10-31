@@ -79,9 +79,8 @@ model UserStealthAddress {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  FromTraces Trace[]    @relation("From")
-  ToTraces   Trace[]    @relation("To")
-  upgrades   Upgraded[]
+  FromTraces Trace[] @relation("From")
+  ToTraces   Trace[] @relation("To")
 }
 
 model NativeTransferTrace {
@@ -145,9 +144,8 @@ model Transaction {
   logs  Json?
   input String?
 
-  userOps  UserOperation[]
-  traces   Trace[]
-  upgrades Upgraded[]
+  userOps UserOperation[]
+  traces  Trace[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -197,23 +195,4 @@ model Block {
   Transaction Transaction[]
 
   @@unique([number, chainId])
-}
-
-model Upgraded {
-  id Int @id @default(autoincrement())
-
-  UserStealthAddress UserStealthAddress @relation(fields: [address], references: [address])
-  address            String
-  newImplementation  String
-
-  txHash   String
-  logIndex Int
-  chainId  Int
-
-  Transaction Transaction @relation(fields: [txHash], references: [hash])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([txHash, logIndex])
 }
