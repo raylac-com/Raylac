@@ -83,22 +83,6 @@ model UserStealthAddress {
   ToTraces   Trace[] @relation("To")
 }
 
-model NativeTransferTrace {
-  id Int @id @default(autoincrement())
-
-  from Bytes
-  to   Bytes
-
-  amount          Decimal
-  chainId         Int
-  transactionHash String
-  traceAddress    String
-  blockNumber     BigInt
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
 model Trace {
   id Int @id @default(autoincrement())
 
