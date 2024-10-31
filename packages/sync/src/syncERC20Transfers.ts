@@ -115,10 +115,6 @@ const batchSyncERC20Transfers = async ({
     chainId,
   });
 
-  logger.info(
-    `Syncing ERC20 transfers for ${addresses.length} addresses. ${fromBlock} -> ${toBlock} on chain ${chainId}`
-  );
-
   const incomingLogs = await publicClient.getLogs({
     address: tokenAddress.address,
     event: parseAbiItem(
