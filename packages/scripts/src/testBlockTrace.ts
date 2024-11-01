@@ -1,8 +1,14 @@
 import 'dotenv/config';
-import { getPublicClient, traceBlockByNumber } from '@raylac/shared';
+import fs from 'fs';
+import {
+  getNativeTransferTracesInBlock,
+  getPublicClient,
+  traceBlockByNumber,
+  traceFilter,
+} from '@raylac/shared';
 import supportedChains from '@raylac/shared/out/supportedChains';
 import { BlockTransactionResponse } from '@raylac/shared/out/types';
-import { Hex } from 'viem';
+import { Hex, toHex } from 'viem';
 import { base, scroll, arbitrum, optimism, polygon, zksync } from 'viem/chains';
 
 interface TraceWithTraceAddress extends BlockTransactionResponse {
@@ -16,11 +22,12 @@ const getCalls = (
   traceAddress: number[] = []
 ): TraceWithTraceAddress[] => {
   if (tx.calls) {
-    return tx.calls
-      .filter(call => call.type === 'CALL')
-      .flatMap((call, index) =>
+    return [
+      { ...tx, txHash, traceAddress },
+      ...tx.calls.flatMap((call, index) =>
         getCalls(call, txHash, [...traceAddress, index])
-      );
+      ),
+    ];
   }
 
   return [{ ...tx, txHash, traceAddress }];
@@ -42,24 +49,25 @@ const getApproxBlockTime = async (chainId: number): Promise<number> => {
 };
 
 const testBlockTrace = async () => {
-  for (const chain of [base]) {
-    const client = getPublicClient({ chainId: chain.id });
+  const client = getPublicClient({ chainId: base.id });
 
-    const block = await client.getBlock({
-      blockTag: 'finalized',
-      includeTransactions: true,
-    });
+  const block = await client.getBlock({
+    blockTag: 'finalized',
+    includeTransactions: true,
+  });
 
-    console.time(`Tracing ${chain.name} block ${block.number}`);
-    const txs = await traceBlockByNumber({
-      blockNumber: block.number,
-      chainId: chain.id,
-    });
+  const traceBlockResult = await getNativeTransferTracesInBlock({
+    blockNumber: 21827703n,
+    chainId: base.id,
+  });
 
-    console.log(txs);
+  const tx = traceBlockResult.filter(
+    tx =>
+      tx.txHash ===
+      '0x1738433b36de2d1b0f134c180f672820832317fbd619b4b47636093968078ff4'
+  );
 
-    console.timeEnd(`Tracing ${chain.name} block ${block.number}`);
-  }
+  console.log(tx);
 };
 
 testBlockTrace();

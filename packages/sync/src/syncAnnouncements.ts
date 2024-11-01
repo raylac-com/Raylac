@@ -1,23 +1,20 @@
 import {
+  ACCOUNT_IMPL_DEPLOYED_BLOCK,
+  bigIntMax,
   ERC5564_ANNOUNCER_ADDRESS,
   formatERC5564AnnouncementLog,
-  getPublicClient,
   sleep,
 } from '@raylac/shared';
 import prisma from './lib/prisma';
 import { base } from 'viem/chains';
-import {
-  announcementAbiItem,
-  CHAIN_BLOCK_TIME,
-  getBlockNumFromTimestamp,
-} from './utils';
+import { announcementAbiItem, CHAIN_BLOCK_TIME } from './utils';
 import processLogs from './processLogs';
 import { Log } from 'viem';
 import { Prisma, SyncJob } from '@prisma/client';
 import supportedChains from '@raylac/shared/out/supportedChains';
 import supportedTokens from '@raylac/shared/out/supportedTokens';
 
-const SCAN_PAST_BUFFER = 30 * 60 * 1000; // 30 minutes
+const SCAN_PAST_BUFFER = 2 * 60 * 1000; // 2 minutes
 
 export const handleERC5564AnnouncementLog = async ({
   log,
@@ -31,31 +28,23 @@ export const handleERC5564AnnouncementLog = async ({
     chainId,
   });
 
-  const client = getPublicClient({ chainId });
-
-  const announcedBlock = await client.getBlock({
-    blockNumber: log.blockNumber,
-  });
-
-  if (!announcedBlock) {
-    throw new Error(`Failed to get announced block ${log.blockNumber}`);
-  }
-
   // Create address sync statuses records for the announcement address for all chains
   // The worker in `syncNativeTransfers.ts` will scan blocks for the announced address
   // from the specified block height.
   const addressSyncStatuses = (
     await Promise.all(
       supportedChains.map(async chain => {
-        const blockNumber = await getBlockNumFromTimestamp({
-          chainId: chain.id,
-          timestamp: Number(announcedBlock.timestamp),
-        });
+        if (chain.id !== base.id) {
+          throw new Error(`Unsupported chain ${chain.id}`);
+        }
 
         const blockTime = CHAIN_BLOCK_TIME[chain.id];
         const scanPastBufferBlocks = Math.floor(SCAN_PAST_BUFFER / blockTime);
 
-        const fromBlock = blockNumber - BigInt(scanPastBufferBlocks);
+        const fromBlock = bigIntMax([
+          log.blockNumber - BigInt(scanPastBufferBlocks),
+          ACCOUNT_IMPL_DEPLOYED_BLOCK[chain.id],
+        ]);
 
         return supportedTokens.map(token => {
           const item: Omit<

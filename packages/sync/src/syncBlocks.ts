@@ -33,7 +33,9 @@ const saveNewBlock = async ({
     logger.error(error);
   }
 
-  logger.info(`Saved new block ${block.number} on chain ${chainId}`);
+  logger.info(
+    `Saved new block ${block.number?.toLocaleString()} on chain ${chainId}`
+  );
 };
 
 const handleConflictingBlocks = async ({

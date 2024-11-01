@@ -5,72 +5,36 @@ import { Prisma } from '@prisma/client';
 import supportedChains from '@raylac/shared/out/supportedChains';
 import { logger } from './utils';
 
-/**
- * Get the latest trace assigned to an address
- */
-const getLatestAssignedTraceBlockNumber = async ({
-  address,
-  chainId,
-}: {
-  address: Hex;
-  chainId: number;
-}) => {
-  const trace = await prisma.trace.findFirst({
-    select: {
-      Transaction: {
-        select: {
-          block: {
-            select: {
-              number: true,
-            },
-          },
-        },
-      },
-    },
-    where: {
-      chainId,
-      OR: [{ toStealthAddress: address }, { fromStealthAddress: address }],
-    },
-    orderBy: {
-      Transaction: {
-        block: {
-          number: 'desc',
-        },
-      },
-    },
-  });
-
-  return trace?.Transaction.block.number;
-};
-
 export const assignAddressToTraces = async ({ address }: { address: Hex }) => {
   for (const chain of supportedChains) {
     const chainId = chain.id;
 
-    const latestAssignedTraceBlockNumber =
-      await getLatestAssignedTraceBlockNumber({
-        address,
-        chainId,
-      });
-
+    // Get all traces for the address that don't have a stealth address assigned
     const traces = await prisma.trace.findMany({
       select: {
         from: true,
         to: true,
         traceAddress: true,
+        logIndex: true,
         transactionHash: true,
         amount: true,
       },
       where: {
         chainId,
-        OR: [{ from: address }, { to: address }],
-        Transaction: {
-          block: {
-            number: {
-              gt: latestAssignedTraceBlockNumber || 0,
+        OR: [
+          {
+            AND: {
+              from: address,
+              fromStealthAddress: null,
             },
           },
-        },
+          {
+            AND: {
+              to: address,
+              toStealthAddress: null,
+            },
+          },
+        ],
       },
     });
 
@@ -78,10 +42,11 @@ export const assignAddressToTraces = async ({ address }: { address: Hex }) => {
       const to = getAddress(trace.to);
       const from = getAddress(trace.from);
       const traceAddress = trace.traceAddress;
+      const logIndex = trace.logIndex;
 
-      if (traceAddress === null) {
+      if (traceAddress === null && logIndex === null) {
         throw new Error(
-          `Trace of tx ${trace.transactionHash} has no trace address`
+          `Trace of tx ${trace.transactionHash} has no trace address or log index`
         );
       }
 
@@ -98,12 +63,20 @@ export const assignAddressToTraces = async ({ address }: { address: Hex }) => {
       if (data.UserStealthAddressFrom || data.UserStealthAddressTo) {
         await prisma.trace.update({
           data,
-          where: {
-            transactionHash_traceAddress: {
-              transactionHash: trace.transactionHash,
-              traceAddress,
-            },
-          },
+          where:
+            traceAddress !== null
+              ? {
+                  transactionHash_traceAddress: {
+                    transactionHash: trace.transactionHash,
+                    traceAddress,
+                  },
+                }
+              : {
+                  transactionHash_logIndex: {
+                    transactionHash: trace.transactionHash,
+                    logIndex: logIndex!,
+                  },
+                },
         });
 
         logger.info(

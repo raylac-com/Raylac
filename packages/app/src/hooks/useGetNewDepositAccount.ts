@@ -35,7 +35,6 @@ const useGetNewDepositAccount = () => {
       const account = generateStealthAddress({
         spendingPubKey: signedInUser.spendingPubKey as Hex,
         viewingPubKey: signedInUser.viewingPubKey as Hex,
-        accountVersion: 1,
       });
 
       /// Submit the deposit account to the server

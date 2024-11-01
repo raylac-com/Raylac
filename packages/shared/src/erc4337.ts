@@ -1,6 +1,5 @@
 import {
   ACCOUNT_FACTORY_ADDRESS,
-  ACCOUNT_FACTORY_V2_ADDRESS,
   ENTRY_POINT_ADDRESS,
   RAYLAC_PAYMASTER_ADDRESS,
 } from './addresses';
@@ -33,15 +32,8 @@ import { signMessage } from 'viem/accounts';
 /**
  * Get the init code for creating a stealth contract account
  */
-export const getInitCode = ({
-  stealthSigner,
-  accountVersion = 2,
-}: {
-  stealthSigner: Hex;
-  accountVersion?: 1 | 2;
-}) => {
-  const factoryAddress =
-    accountVersion === 1 ? ACCOUNT_FACTORY_ADDRESS : ACCOUNT_FACTORY_V2_ADDRESS;
+export const getInitCode = ({ stealthSigner }: { stealthSigner: Hex }) => {
+  const factoryAddress = ACCOUNT_FACTORY_ADDRESS;
 
   const factoryData = encodeFunctionData({
     abi: AccountFactoryAbi,
@@ -79,7 +71,6 @@ export const buildUserOp = ({
   tag,
   gasInfo,
   nonce,
-  accountVersion = 2,
 }: {
   chainId: number;
   stealthSigner: Hex;
@@ -89,7 +80,6 @@ export const buildUserOp = ({
   tag: Hex;
   gasInfo: ChainGasInfo[];
   nonce: number | null;
-  accountVersion?: 1 | 2;
 }): UserOperation => {
   const chainGasInfo = gasInfo.find(gasInfo => gasInfo.chainId === chainId);
 
@@ -97,7 +87,7 @@ export const buildUserOp = ({
     throw new Error('Chain gas info not found');
   }
 
-  const initCode = getInitCode({ stealthSigner, accountVersion });
+  const initCode = getInitCode({ stealthSigner });
 
   const senderAddress = getSenderAddress({
     stealthSigner,

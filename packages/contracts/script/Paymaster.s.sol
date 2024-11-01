@@ -27,8 +27,11 @@ contract Paymaster is Script, Utils {
   }
 
   function getDeposit() external view {
-    RaylacPaymaster raylacPaymaster = getPaymaster();
+    RaylacPaymaster raylacPaymaster = RaylacPaymaster(
+      0xCa7bEdEcCd6FBD68d0043bb4c4B2405B4948BC8c
+    );
     uint256 currentDeposit = raylacPaymaster.getDeposit();
+    console.log('Verifying Signer:', raylacPaymaster.verifyingSigner());
     console.log('Deposit:', currentDeposit);
   }
 }

@@ -4,10 +4,10 @@ pragma solidity ^0.8.13;
 import 'forge-std-1.9.3/src/Script.sol';
 import '../src/AccountFactoryV2.sol';
 import '../src/RaylacAccountV2.sol';
-import '../src/RaylacStealthTransfer.sol';
 import 'account-abstraction-0.6.0/contracts/interfaces/IEntryPoint.sol';
 import '@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol';
 import './Utils.s.sol';
+import '../src/RaylacPaymaster.sol';
 
 contract DeployV2 is Script, Utils {
   function run() external {
@@ -55,25 +55,23 @@ contract DeployV2 is Script, Utils {
       );
     }
 
-    RaylacStealthTransfer raylacStealthTransfer;
-    address raylacStealthTransferAddress = getAddress(
-      type(RaylacStealthTransfer).creationCode,
-      ''
+    RaylacPaymaster raylacPaymaster;
+    address raylacPaymasterAddress = getAddress(
+      type(RaylacPaymaster).creationCode,
+      abi.encode(entryPoint, paymasterSigner)
     );
 
-    if (!isDeployed(raylacStealthTransferAddress)) {
-      raylacStealthTransfer = new RaylacStealthTransfer{ salt: 0 }();
-      console.log(
-        'RaylacStealthTransfer deployed at:',
-        address(raylacStealthTransfer)
+    if (!isDeployed(raylacPaymasterAddress)) {
+      raylacPaymaster = new RaylacPaymaster{ salt: 0 }(
+        entryPoint,
+        paymasterSigner
       );
+      console.log('RayalcPaymaster deployed at:', address(raylacPaymaster));
     } else {
-      raylacStealthTransfer = RaylacStealthTransfer(
-        payable(raylacStealthTransferAddress)
-      );
+      raylacPaymaster = RaylacPaymaster(payable(raylacPaymasterAddress));
       console.log(
-        'RaylacStealthTransfer already deployed at:',
-        address(raylacStealthTransfer)
+        'RayalcPaymaster already deployed at:',
+        address(raylacPaymaster)
       );
     }
 

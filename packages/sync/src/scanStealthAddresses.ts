@@ -31,17 +31,14 @@ const assignStealthAddressToUser = async ({
   signerAddress,
   viewTag,
   userId,
-  accountVersion,
 }: {
   ephemeralPubKey: Hex;
   signerAddress: Hex;
   viewTag: Hex;
   userId: number;
-  accountVersion: 1 | 2;
 }) => {
   const stealthAddress = getSenderAddress({
     stealthSigner: signerAddress,
-    accountVersion,
   });
 
   const alreadyAssigned = await prisma.userStealthAddress.findFirst({
@@ -148,7 +145,6 @@ const scanStealthAddresses = async () => {
 
       for (const announcement of announcements) {
         let viewTag: Hex;
-        const accountVersion: 1 | 2 = 1;
         try {
           const decoded = decodeERC5564MetadataAsViewTag(
             announcement.metadata as Hex
@@ -185,7 +181,6 @@ const scanStealthAddresses = async () => {
             signerAddress,
             viewTag,
             userId: matchedUser.id,
-            accountVersion,
           });
         }
       }

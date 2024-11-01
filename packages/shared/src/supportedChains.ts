@@ -6,10 +6,10 @@ const supportedChains: Chain[] = [
   //  chains.optimism,
   //  chains.optimismSepolia,
   chains.base,
-  chains.arbitrum,
-  chains.scroll,
-  chains.optimism,
-  chains.polygon,
+  // chains.arbitrum,
+  // chains.scroll,
+  // chains.optimism,
+  //chains.polygon,
   // chains.baseSepolia,
 ];
 

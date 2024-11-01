@@ -15,13 +15,10 @@ import { publicKeyToAddress } from 'viem/accounts';
 import { StealthAddressWithEphemeral } from './types';
 import {
   ACCOUNT_FACTORY_ADDRESS,
-  ACCOUNT_FACTORY_V2_ADDRESS,
   ACCOUNT_IMPL_ADDRESS,
-  ACCOUNT_IMPL_V2_ADDRESS,
   RaylacAccountAbi,
   RaylacAccountProxyAbi,
   RaylacAccountProxyBytecode,
-  RaylacAccountV2Abi,
 } from '.';
 
 const g = {
@@ -88,21 +85,12 @@ export const checkStealthAddress = (input: {
 /**
  * Get the address of the contract account created by the given stealthPubKey.
  */
-export const getSenderAddress = ({
-  stealthSigner,
-  accountVersion = 1,
-}: {
-  stealthSigner: Hex;
-  accountVersion?: 1 | 2;
-}) => {
-  const accountImplAddress =
-    accountVersion === 1 ? ACCOUNT_IMPL_ADDRESS : ACCOUNT_IMPL_V2_ADDRESS;
+export const getSenderAddress = ({ stealthSigner }: { stealthSigner: Hex }) => {
+  const accountImplAddress = ACCOUNT_IMPL_ADDRESS;
 
-  const accountAbi =
-    accountVersion === 1 ? RaylacAccountAbi : RaylacAccountV2Abi;
+  const accountAbi = RaylacAccountAbi;
 
-  const factoryAddress =
-    accountVersion === 1 ? ACCOUNT_FACTORY_ADDRESS : ACCOUNT_FACTORY_V2_ADDRESS;
+  const factoryAddress = ACCOUNT_FACTORY_ADDRESS;
 
   const data = encodeDeployData({
     abi: RaylacAccountProxyAbi,
@@ -134,7 +122,6 @@ export const getSenderAddress = ({
 export const generateStealthAddress = (input: {
   spendingPubKey: Hex;
   viewingPubKey: Hex;
-  accountVersion?: 1 | 2;
 }): StealthAddressWithEphemeral => {
   const spendingPubKey = hexToProjectivePoint(input.spendingPubKey);
   const viewingPubKey = hexToProjectivePoint(input.viewingPubKey);
@@ -164,7 +151,6 @@ export const generateStealthAddress = (input: {
 
   const address = getSenderAddress({
     stealthSigner: signerAddress,
-    accountVersion: input.accountVersion ?? 2,
   });
 
   return {

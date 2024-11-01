@@ -1,13 +1,12 @@
 import {
   bigIntMin,
-  BlockTransactionResponse,
+  getNativeTransferTracesInBlock,
   getPublicClient,
   sleep,
-  traceBlockByNumber,
   traceFilter,
 } from '@raylac/shared';
 import prisma from './lib/prisma';
-import { getAddress, Hex, hexToBigInt, isAddress, toHex } from 'viem';
+import { getAddress, Hex, hexToBigInt, toHex } from 'viem';
 import { Prisma } from '@prisma/client';
 import {
   logger,
@@ -18,32 +17,6 @@ import {
 import supportedChains from '@raylac/shared/out/supportedChains';
 import { base, optimism } from 'viem/chains';
 import { getTokenPriceAtTime } from './lib/coingecko';
-
-interface TraceWithTraceAddress extends BlockTransactionResponse {
-  txHash: Hex;
-  traceAddress: number[];
-}
-
-/**
- * Get traces that all calls recursively.
- * (Filters out static calls, delegate calls, etc.)
- * - Assigns traceAddress to each call.
- */
-const getCalls = (
-  tx: BlockTransactionResponse,
-  txHash: Hex,
-  traceAddress: number[] = []
-): TraceWithTraceAddress[] => {
-  if (tx.calls) {
-    return tx.calls
-      .filter(call => call.type === 'CALL')
-      .flatMap((call, index) =>
-        getCalls(call, txHash, [...traceAddress, index])
-      );
-  }
-
-  return [{ ...tx, txHash, traceAddress }];
-};
 
 const syncNativeTransfersForChain = async (chainId: number) => {
   const addressSyncStatuses = await prisma.addressSyncStatus.findMany({
@@ -80,28 +53,10 @@ const syncNativeTransfersForChain = async (chainId: number) => {
       `Scanning blocks for ${addresses.length} addresses in block ${blockNumber} on chain ${chainId}`
     );
 
-    const traceBlockResult = await traceBlockByNumber({
-      chainId,
+    const callsWithValue = await getNativeTransferTracesInBlock({
       blockNumber,
+      chainId,
     });
-
-    const callsInBlock = traceBlockResult.flatMap(tx =>
-      getCalls(tx.result, tx.txHash)
-    );
-
-    const callsWithValue = callsInBlock
-      // Filter out calls with no value
-      .filter(
-        call =>
-          call.value &&
-          call.value !== '0x0' &&
-          isAddress(call.to, {
-            strict: false,
-          }) &&
-          isAddress(call.from, {
-            strict: false,
-          })
-      );
 
     const callsWithAddresses = callsWithValue.filter(call => {
       const to = getAddress(call.to);
@@ -317,7 +272,6 @@ const syncNativeTransfers = async () => {
       logger.error(err);
     }
 
-    logger.info('Sleeping for 3 seconds');
     await sleep(3 * 1000);
   }
 };

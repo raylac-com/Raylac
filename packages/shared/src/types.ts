@@ -169,6 +169,11 @@ export type BlockTraceResponse = {
   result: BlockTransactionResponse;
 }[];
 
+export interface TraceWithTraceAddress extends BlockTransactionResponse {
+  txHash: Hex;
+  traceAddress: number[];
+}
+
 export interface TokenBalanceQueryResult {
   tokenId: string;
   balance: string;

@@ -222,36 +222,31 @@ export const upsertTransaction = async ({
     hash: txHash,
   });
 
-  const block = await client.getBlock({
-    blockNumber: tx.blockNumber,
+  const blockCreateInput: Prisma.BlockCreateInput = {
+    number: tx.blockNumber,
+    hash: tx.blockHash,
+    chainId,
+  };
+
+  await prisma.block.upsert({
+    create: blockCreateInput,
+    update: blockCreateInput,
+    where: {
+      hash: tx.blockHash,
+    },
   });
 
-  const data: Prisma.TransactionCreateInput = {
+  const data: Prisma.TransactionCreateManyInput = {
     hash: txHash,
     fromAddress: tx.from,
     toAddress: tx.to,
     chainId,
-    block: {
-      connectOrCreate: {
-        where: {
-          hash: tx.blockHash,
-        },
-        create: {
-          number: tx.blockNumber,
-          hash: tx.blockHash,
-          timestamp: block.timestamp,
-          chainId,
-        },
-      },
-    },
+    blockHash: tx.blockHash,
   };
 
-  await prisma.transaction.upsert({
-    create: data,
-    update: data,
-    where: {
-      hash: txHash,
-    },
+  await prisma.transaction.createMany({
+    data: [data],
+    skipDuplicates: true,
   });
 };
 

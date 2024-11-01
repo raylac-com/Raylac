@@ -3,18 +3,18 @@ import {
   decodeUserOpCalldata,
   EntryPointAbi,
   ERC20Abi,
-  getPublicClient,
+  getNativeTransferTracesInBlock,
   getTokenId,
   getUserOpHash,
+  getWebsocketClient,
   UserOperation,
 } from '@raylac/shared';
-import { parseEventLogs } from 'viem';
+import { getAddress, parseEventLogs, toHex } from 'viem';
 import { handleOps } from '../lib/bundler';
-import { handleERC20TransferLog } from '@raylac/sync';
+import { handleERC20TransferLog, handleUserOpEvent } from '@raylac/sync';
 import { logger } from '../utils';
 import prisma from '../lib/prisma';
 import { Prisma } from '@prisma/client';
-import { upsertTransaction } from '@raylac/sync/src/utils';
 
 const MAX_TRANSFERS = 1000;
 
@@ -117,11 +117,12 @@ const submitUserOps = async ({
     chainId,
   });
 
-  const publicClient = getPublicClient({ chainId });
+  //  const publicClient = getPublicClient({ chainId });
+  const websocketClient = getWebsocketClient({ chainId });
 
   logger.info(`waiting tx ${txHash} to confirm`);
   const start = Date.now();
-  const txReceipt = await publicClient.waitForTransactionReceipt({
+  const txReceipt = await websocketClient.waitForTransactionReceipt({
     hash: txHash,
   });
 
@@ -137,29 +138,61 @@ const submitUserOps = async ({
   // Save user ops and traces to the db
 
   try {
-    /*
     await Promise.all(
       userOpEventLogs.map(log => handleUserOpEvent({ log, chainId }))
     );
-    */
 
     if (isNativeTransfer) {
-      await upsertTransaction({ txHash, chainId });
+      const callsWithValue = await getNativeTransferTracesInBlock({
+        blockNumber: txReceipt.blockNumber,
+        chainId,
+      });
 
-      const traceCreateInput: Prisma.TraceCreateManyInput[] = userOps.map(
-        userOp => {
+      const txTraces = callsWithValue.filter(call => call.txHash === txHash);
+
+      if (txTraces.length === 0) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: `No native transfer traces found for tx ${txHash}`,
+        });
+      }
+
+      const traceCreateInput: Prisma.TraceCreateManyInput[] = await Promise.all(
+        userOps.map(async userOp => {
           const { to, value: amount } = decodeUserOpCalldata(userOp);
+
+          const toUser = await prisma.userStealthAddress.findUnique({
+            select: { address: true },
+            where: { address: to },
+          });
+
+          const trace = txTraces.find(
+            call =>
+              getAddress(call.from) === userOp.sender &&
+              getAddress(call.to) === to &&
+              call.value === toHex(amount)
+          );
+
+          if (!trace) {
+            const userOpHash = getUserOpHash({ userOp });
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: `No native transfer trace found for user op ${userOpHash} in ${txHash}`,
+            });
+          }
 
           return {
             from: userOp.sender,
             to,
+            fromStealthAddress: userOp.sender,
+            toStealthAddress: toUser?.address || null,
             amount: amount.toString(),
             tokenId: 'eth',
             chainId,
-            traceAddress: '',
+            traceAddress: trace.traceAddress.join('_'),
             transactionHash: txHash,
           };
-        }
+        })
       );
 
       await prisma.trace.createMany({

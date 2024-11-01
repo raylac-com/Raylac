@@ -29,7 +29,6 @@ export const formatERC5564AnnouncementLog = ({
   const stealthAddress = decodedLog.args.stealthAddress;
   const address = getSenderAddress({
     stealthSigner: stealthAddress,
-    accountVersion: 1,
   });
   const caller = decodedLog.args.caller;
   const ephemeralPubKey = decodedLog.args.ephemeralPubKey;
