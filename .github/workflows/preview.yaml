@@ -55,3 +55,4 @@ jobs:
           working-directory: packages/app
         env:
           EXPO_PUBLIC_RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
+          EXPO_PUBLIC_ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}

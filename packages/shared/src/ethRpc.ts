@@ -12,7 +12,8 @@ import { Chain } from 'viem/chains';
 import { getChainFromId } from './utils';
 
 export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
-  const apiKey = process.env.ALCHEMY_API_KEY;
+  const apiKey =
+    process.env.ALCHEMY_API_KEY || process.env.EXPO_PUBLIC_ALCHEMY_API_KEY;
 
   if (!apiKey) {
     throw new Error('ALCHEMY_API_KEY is not set');
