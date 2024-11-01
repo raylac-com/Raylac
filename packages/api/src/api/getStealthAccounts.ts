@@ -6,21 +6,6 @@ import prisma from '../lib/prisma';
 const getStealthAccounts = async ({ userId }: { userId: number }) => {
   const addresses = await prisma.userStealthAddress.findMany({
     select: {
-      upgrades: {
-        select: {
-          newImplementation: true,
-          chainId: true,
-          Transaction: {
-            select: {
-              block: {
-                select: {
-                  number: true,
-                },
-              },
-            },
-          },
-        },
-      },
       address: true,
       signerAddress: true,
       viewTag: true,
