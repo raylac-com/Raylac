@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 import '@openzeppelin/contracts/utils/Create2.sol';
-import 'account-abstraction/contracts/interfaces/IEntryPoint.sol';
+import 'account-abstraction-0.6.0/contracts/interfaces/IEntryPoint.sol';
 
 contract Utils {
   IEntryPoint entryPoint =
@@ -14,20 +14,19 @@ contract Utils {
    * Compute the address of a contract deployed using CREATE2,
    * and return the address if the contract is deployed, otherwise return address(0).
    */
-  function getDeployedAddress(
+  function getAddress(
     bytes memory bytecode,
     bytes memory constructorArgs
-  ) public view returns (address) {
-    address addr = Create2.computeAddress(
-      0,
-      keccak256(abi.encodePacked(bytecode, constructorArgs)),
-      deployerAddress
-    );
+  ) public pure returns (address) {
+    return
+      Create2.computeAddress(
+        0,
+        keccak256(abi.encodePacked(bytecode, constructorArgs)),
+        deployerAddress
+      );
+  }
 
-    if (addr.code.length == 0) {
-      return address(0);
-    }
-
-    return addr;
+  function isDeployed(address addr) public view returns (bool) {
+    return addr.code.length > 0;
   }
 }

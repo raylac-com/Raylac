@@ -1,13 +1,12 @@
 import { getMnemonicAndKeys } from '@/lib/key';
 import { trpc } from '@/lib/trpc';
+import { getPaymasterAndData } from '@/lib/utils';
 import { User } from '@/types';
 import {
   AddressTokenBalance,
   ChainGasInfo,
-  RAYLAC_PAYMASTER_ADDRESS,
   StealthAddressWithEphemeral,
   buildMultiChainSendRequestBody,
-  encodePaymasterAndData,
   generateStealthAddress,
   signUserOpWithStealthAccount,
 } from '@raylac/shared';
@@ -34,9 +33,6 @@ const useSend = () => {
     trpc.addStealthAccount.useMutation();
 
   const queryClient = useQueryClient();
-
-  const { mutateAsync: paymasterSignUserOp } =
-    trpc.paymasterSignUserOp.useMutation();
 
   useEffect(() => {
     if (error) {
@@ -106,11 +102,7 @@ const useSend = () => {
 
       const signedUserOps = [];
       for (const userOp of userOps) {
-        const paymasterAndData = encodePaymasterAndData({
-          paymaster: RAYLAC_PAYMASTER_ADDRESS,
-          data: await paymasterSignUserOp({ userOp }),
-        });
-        userOp.paymasterAndData = paymasterAndData;
+        userOp.paymasterAndData = await getPaymasterAndData(userOp);
 
         const stealthAccount = stealthAddresses.find(
           stealthAddress => stealthAddress.address === userOp.sender

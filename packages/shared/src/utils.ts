@@ -7,13 +7,22 @@ import {
   Hex,
   parseUnits,
 } from 'viem';
-import { ChainGasInfo, UserOperation } from './types';
+import {
+  BlockTransactionResponse,
+  ChainGasInfo,
+  TraceWithTraceAddress,
+  UserOperation,
+} from './types';
 import RaylacAccountAbi from './abi/RaylacAccountAbi';
 import ERC20Abi from './abi/ERC20Abi';
 import * as chains from 'viem/chains';
 import supportedTokens, { NATIVE_TOKEN_ADDRESS } from './supportedTokens';
 import { getPublicClient } from './ethRpc';
-import { getERC20TokenBalance, rundlerMaxPriorityFeePerGas } from '.';
+import {
+  getERC20TokenBalance,
+  rundlerMaxPriorityFeePerGas,
+  traceBlockByNumber,
+} from '.';
 import supportedChains from './supportedChains';
 import axios from 'axios';
 
@@ -173,7 +182,7 @@ export const decodeUserOpCalldata = (userOp: UserOperation) => {
   const [to, value, data] = args;
 
   return {
-    to,
+    to: getAddress(to),
     value,
     data,
   };
@@ -376,6 +385,17 @@ export const bigIntMin = (values: bigint[]) => {
 };
 
 /**
+ * Return the maximum BigInt from an array of BigInts
+ */
+export const bigIntMax = (values: bigint[]) => {
+  const maxBigInt = values.reduce((max, current) =>
+    current > max ? current : max
+  );
+
+  return maxBigInt;
+};
+
+/**
  * Get the token ID of a token with a given address on a chain
  */
 export const getTokenId = ({
@@ -436,4 +456,45 @@ export const getCoingeckoClient = () => {
       'x-cg-pro-api-key': COINGECKO_API_KEY,
     },
   });
+};
+
+/**
+ * Get traces that all calls recursively.
+ * (Filters out static calls, delegate calls, etc.)
+ * - Assigns traceAddress to each call.
+ */
+const getCalls = (
+  tx: BlockTransactionResponse,
+  txHash: Hex,
+  traceAddress: number[] = []
+): TraceWithTraceAddress[] => {
+  if (tx.calls) {
+    return [
+      { ...tx, txHash, traceAddress },
+      ...tx.calls.flatMap((call, index) =>
+        getCalls(call, txHash, [...traceAddress, index])
+      ),
+    ];
+  }
+
+  return [{ ...tx, txHash, traceAddress }];
+};
+
+export const getNativeTransferTracesInBlock = async ({
+  blockNumber,
+  chainId,
+}: {
+  blockNumber: bigint;
+  chainId: number;
+}) => {
+  const traceBlockResult = await traceBlockByNumber({
+    chainId,
+    blockNumber,
+  });
+
+  const callsWithValuesInBlock = traceBlockResult
+    .flatMap(tx => getCalls(tx.result, tx.txHash))
+    .filter(call => call.type === 'CALL' && call.value && call.value !== '0x0');
+
+  return callsWithValuesInBlock;
 };

@@ -1,91 +1,109 @@
 import {
   ACCOUNT_IMPL_DEPLOYED_BLOCK,
+  bigIntMax,
   ERC5564_ANNOUNCER_ADDRESS,
   formatERC5564AnnouncementLog,
-  getPublicClient,
   sleep,
 } from '@raylac/shared';
 import prisma from './lib/prisma';
 import { base } from 'viem/chains';
-import { announcementAbiItem } from './utils';
+import { announcementAbiItem, CHAIN_BLOCK_TIME } from './utils';
+import processLogs from './processLogs';
+import { Log } from 'viem';
+import { Prisma, SyncJob } from '@prisma/client';
+import supportedChains from '@raylac/shared/out/supportedChains';
+import supportedTokens from '@raylac/shared/out/supportedTokens';
 
-const chain = base;
+const SCAN_PAST_BUFFER = 2 * 60 * 1000; // 2 minutes
 
-const getLatestAnnouncementBlock = async () => {
-  const latestAnnouncement = await prisma.eRC5564Announcement.findFirst({
-    select: {
-      blockNumber: true,
-    },
-    orderBy: {
-      blockNumber: 'desc',
-    },
+export const handleERC5564AnnouncementLog = async ({
+  log,
+  chainId,
+}: {
+  log: Log<bigint, number, false>;
+  chainId: number;
+}) => {
+  const data = formatERC5564AnnouncementLog({
+    log,
+    chainId,
   });
 
-  return latestAnnouncement?.blockNumber;
+  // Create address sync statuses records for the announcement address for all chains
+  // The worker in `syncNativeTransfers.ts` will scan blocks for the announced address
+  // from the specified block height.
+  const addressSyncStatuses = (
+    await Promise.all(
+      supportedChains.map(async chain => {
+        if (chain.id !== base.id) {
+          throw new Error(`Unsupported chain ${chain.id}`);
+        }
+
+        const blockTime = CHAIN_BLOCK_TIME[chain.id];
+        const scanPastBufferBlocks = Math.floor(SCAN_PAST_BUFFER / blockTime);
+
+        const fromBlock = bigIntMax([
+          log.blockNumber - BigInt(scanPastBufferBlocks),
+          ACCOUNT_IMPL_DEPLOYED_BLOCK[chain.id],
+        ]);
+
+        return supportedTokens.map(token => {
+          const item: Omit<
+            Prisma.AddressSyncStatusCreateManyInput,
+            // We omit eRC5564AnnouncementId because it's set after the eRC5564Announcement is inserted to the db
+            'eRC5564AnnouncementId'
+          > = {
+            address: data.address,
+            chainId: chain.id,
+            blockNumber: fromBlock,
+            tokenId: token.tokenId,
+            blockHash: log.blockHash,
+          };
+
+          return item;
+        });
+      })
+    )
+  ).flat();
+
+  await prisma.$transaction(async prisma => {
+    const announcement = await prisma.eRC5564Announcement.upsert({
+      create: data,
+      update: data,
+      where: {
+        blockNumber_logIndex_txIndex_chainId: {
+          blockNumber: log.blockNumber,
+          logIndex: log.logIndex,
+          txIndex: log.transactionIndex,
+          chainId,
+        },
+      },
+    });
+
+    await prisma.addressSyncStatus.createMany({
+      data: addressSyncStatuses.map(addressSyncStatus => ({
+        ...addressSyncStatus,
+        eRC5564AnnouncementId: announcement.id,
+      })),
+      skipDuplicates: true,
+    });
+  });
 };
 
 const syncAnnouncements = async () => {
   while (true) {
-    const client = getPublicClient({
-      chainId: chain.id,
+    await processLogs({
+      chainId: base.id,
+      job: SyncJob.Announcements,
+      address: ERC5564_ANNOUNCER_ADDRESS,
+      event: announcementAbiItem,
+      handleLogs: async logs => {
+        for (const log of logs) {
+          await handleERC5564AnnouncementLog({ log, chainId: base.id });
+        }
+      },
     });
 
-    const accountImplDeployedBlock = ACCOUNT_IMPL_DEPLOYED_BLOCK[chain.id];
-
-    if (!accountImplDeployedBlock) {
-      throw new Error('ACCOUNT_IMPL_DEPLOYED_BLOCK is not set');
-    }
-
-    const latestAnnouncementBlock = await getLatestAnnouncementBlock();
-
-    const fromBlock = latestAnnouncementBlock
-      ? latestAnnouncementBlock + 1n
-      : accountImplDeployedBlock;
-
-    const latestBlock = await client.getBlock({
-      blockTag: 'latest',
-    });
-
-    const toBlock = latestBlock.number;
-
-    const chunkSize = BigInt(10_000);
-    for (
-      let blockNumber = fromBlock;
-      blockNumber <= toBlock;
-      blockNumber += chunkSize
-    ) {
-      const _fromBlock = blockNumber;
-      const _toBlock = blockNumber + chunkSize;
-
-      const logs = await client.getLogs({
-        address: ERC5564_ANNOUNCER_ADDRESS,
-        event: announcementAbiItem,
-        fromBlock: _fromBlock,
-        toBlock: _toBlock,
-      });
-
-      for (const log of logs) {
-        const data = formatERC5564AnnouncementLog({
-          log,
-          chainId: client.chain.id,
-        });
-
-        await prisma.eRC5564Announcement.upsert({
-          create: data,
-          update: data,
-          where: {
-            blockNumber_logIndex_txIndex_chainId: {
-              blockNumber: log.blockNumber,
-              logIndex: log.logIndex,
-              txIndex: log.transactionIndex,
-              chainId: client.chain.id,
-            },
-          },
-        });
-      }
-    }
-
-    await sleep(60 * 1000);
+    await sleep(3 * 1000);
   }
 };
 

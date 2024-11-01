@@ -7,7 +7,7 @@ import {
 } from '@raylac/shared';
 import { Hex } from 'viem';
 import { privateKeyToAccount, nonceManager } from 'viem/accounts';
-import logger from './logger';
+import { logger } from '../utils';
 
 const BUNDLER_PRIV_KEY = process.env.BUNDLER_PRIV_KEY as Hex;
 
@@ -15,7 +15,9 @@ if (!BUNDLER_PRIV_KEY) {
   throw new Error('BUNDLER_PRIV_KEY is not set');
 }
 
-const bundlerAccount = privateKeyToAccount(BUNDLER_PRIV_KEY, { nonceManager });
+export const bundlerAccount = privateKeyToAccount(BUNDLER_PRIV_KEY, {
+  nonceManager,
+});
 
 export const handleOps = async ({
   userOps,

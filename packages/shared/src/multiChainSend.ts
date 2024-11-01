@@ -6,7 +6,6 @@ import {
   UserOperation,
 } from './types';
 import { buildUserOp } from './erc4337';
-import { getPublicClient } from './ethRpc';
 import { getTokenAddressOnChain } from './utils';
 import ERC20Abi from './abi/ERC20Abi';
 import { NATIVE_TOKEN_ADDRESS } from '.';
@@ -67,7 +66,7 @@ const buildUserOpsFromRelayQuote = async ({
 /**
  * Pick the stealth accounts to use as inputs for a transfer.
  */
-const chooseInputAddresses = ({
+export const chooseInputAddresses = ({
   tokenId,
   chainId,
   amount,
@@ -154,10 +153,6 @@ export const buildERC20TransferUserOp = ({
   gasInfo: ChainGasInfo[];
   tag: Hex;
 }) => {
-  const client = getPublicClient({
-    chainId,
-  });
-
   const transferCall = encodeFunctionData({
     abi: ERC20Abi,
     functionName: 'transfer',
@@ -165,7 +160,7 @@ export const buildERC20TransferUserOp = ({
   });
 
   const userOp = buildUserOp({
-    client,
+    chainId,
     stealthSigner,
     value: BigInt(0),
     to: tokenAddress,
@@ -198,12 +193,8 @@ export const buildETHTransferUserOp = ({
   nonce: number | null;
   tag: Hex;
 }) => {
-  const client = getPublicClient({
-    chainId,
-  });
-
   const userOp = buildUserOp({
-    client,
+    chainId,
     stealthSigner,
     value: amount,
     to,

@@ -4,7 +4,7 @@ pragma solidity ^0.8.12;
 /* solhint-disable reason-string */
 /* solhint-disable no-inline-assembly */
 
-import 'account-abstraction/contracts/core/BasePaymaster.sol';
+import 'account-abstraction-0.6.0/contracts/core/BasePaymaster.sol';
 import '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 
 contract RaylacPaymaster is BasePaymaster {

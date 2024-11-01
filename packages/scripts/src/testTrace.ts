@@ -9,7 +9,7 @@ import { decodeFunctionData, getAddress } from 'viem';
 
 const testTrace = async () => {
   const txHash =
-    '0x8d478251100e8ee3a2fd094d453a903409ab81c5abc1d2265a96deb1dcf53f04';
+    '0x469dc44ce9699badeebe0214cd78af253bcb8ca622980860390236590aa9a8e6';
 
   const traces = await traceTransaction({
     txHash: txHash,

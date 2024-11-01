@@ -1,6 +1,5 @@
-import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
-import logger from './logger';
+import { logger } from '../utils';
 
 const prisma = new PrismaClient().$extends({
   query: {

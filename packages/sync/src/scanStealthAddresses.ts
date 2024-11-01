@@ -1,12 +1,12 @@
 import {
   checkStealthAddress,
   decodeERC5564MetadataAsViewTag,
+  sleep,
 } from '@raylac/shared';
 import prisma from './lib/prisma';
-import { sleep } from './lib/utils';
 import { webcrypto } from 'node:crypto';
 import { Hex } from 'viem';
-import logger from './lib/logger';
+import { logger } from './utils';
 import { getSenderAddress } from '@raylac/shared/src/stealth';
 import { Prisma } from '@prisma/client';
 import crypto from 'crypto';
@@ -121,66 +121,71 @@ const scanStealthAddresses = async () => {
   // For all view keys, check if any of the announcements match the view key
 
   while (true) {
-    const users = await prisma.user.findMany({
-      select: {
-        id: true,
-        spendingPubKey: true,
-        encryptedViewingPrivKey: true,
-      },
-    });
-
-    const usersWithViewingPrivKey = users.map(user => {
-      const viewingPrivKey = decryptViewingPrivKey(
-        user.encryptedViewingPrivKey as Hex
-      );
-
-      return {
-        ...user,
-        viewingPrivKey,
-      };
-    });
-
-    const announcements = await getAnnouncements();
-
-    for (const announcement of announcements) {
-      let viewTag: Hex;
-      try {
-        const decoded = decodeERC5564MetadataAsViewTag(
-          announcement.metadata as Hex
-        );
-
-        viewTag = decoded.viewTag;
-      } catch (_err) {
-        logger.warn('Failed to decode stealth address metadata', {
-          metadata: announcement.metadata,
-          error: _err,
-        });
-
-        // Skip this announcement as we can't decode the metadata
-        continue;
-      }
-
-      const signerAddress = announcement.stealthAddress as Hex;
-      const ephemeralPubKey = announcement.ephemeralPubKey as Hex;
-
-      const matchedUser = usersWithViewingPrivKey.find(user => {
-        return checkStealthAddress({
-          viewTag,
-          signerAddress,
-          ephemeralPubKey,
-          spendingPubKey: user.spendingPubKey as Hex,
-          viewingPrivKey: user.viewingPrivKey as Hex,
-        });
+    try {
+      const users = await prisma.user.findMany({
+        select: {
+          id: true,
+          spendingPubKey: true,
+          encryptedViewingPrivKey: true,
+        },
       });
 
-      if (matchedUser) {
-        await assignStealthAddressToUser({
-          ephemeralPubKey,
-          signerAddress,
-          viewTag,
-          userId: matchedUser.id,
+      const usersWithViewingPrivKey = users.map(user => {
+        const viewingPrivKey = decryptViewingPrivKey(
+          user.encryptedViewingPrivKey as Hex
+        );
+
+        return {
+          ...user,
+          viewingPrivKey,
+        };
+      });
+
+      const announcements = await getAnnouncements();
+
+      for (const announcement of announcements) {
+        let viewTag: Hex;
+        try {
+          const decoded = decodeERC5564MetadataAsViewTag(
+            announcement.metadata as Hex
+          );
+
+          viewTag = decoded.viewTag;
+          // TODO: Assign account version
+        } catch (_err) {
+          logger.warn('Failed to decode stealth address metadata', {
+            metadata: announcement.metadata,
+            error: _err,
+          });
+
+          // Skip this announcement as we can't decode the metadata
+          continue;
+        }
+
+        const signerAddress = announcement.stealthAddress as Hex;
+        const ephemeralPubKey = announcement.ephemeralPubKey as Hex;
+
+        const matchedUser = usersWithViewingPrivKey.find(user => {
+          return checkStealthAddress({
+            viewTag,
+            signerAddress,
+            ephemeralPubKey,
+            spendingPubKey: user.spendingPubKey as Hex,
+            viewingPrivKey: user.viewingPrivKey as Hex,
+          });
         });
+
+        if (matchedUser) {
+          await assignStealthAddressToUser({
+            ephemeralPubKey,
+            signerAddress,
+            viewTag,
+            userId: matchedUser.id,
+          });
+        }
       }
+    } catch (error) {
+      logger.error('Error scanning stealth addresses', { error });
     }
 
     await sleep(15 * 1000);

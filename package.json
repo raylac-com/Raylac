@@ -8,7 +8,8 @@
   ],
   "scripts": {
     "prepare": "husky",
-    "lint": "eslint ."
+    "lint": "eslint . && pnpm -r lint",
+    "build:all:watch": "pnpm -F shared build:watch & pnpm -F api build:watch & pnpm -F sync build:watch"
   },
   "keywords": [],
   "author": "",
@@ -31,5 +32,8 @@
       "eslint --cache --fix"
     ],
     "*.{js,ts,tsx,json}": "prettier --write --ignore-unknown"
+  },
+  "dependencies": {
+    "dotenv-cli": "^7.4.2"
   }
 }

@@ -1,6 +1,7 @@
 import { Log, decodeEventLog, parseAbi } from 'viem';
 import { ERC5564AnnouncementData } from './types';
 import { base } from 'viem/chains';
+import { getSenderAddress } from './stealth';
 
 export const ERC5564_ANNOUNCEMENT_CHAIN = base;
 
@@ -26,11 +27,15 @@ export const formatERC5564AnnouncementLog = ({
 
   const schemeId = Number(decodedLog.args.schemeId);
   const stealthAddress = decodedLog.args.stealthAddress;
+  const address = getSenderAddress({
+    stealthSigner: stealthAddress,
+  });
   const caller = decodedLog.args.caller;
   const ephemeralPubKey = decodedLog.args.ephemeralPubKey;
   const metadata = decodedLog.args.metadata;
 
   return {
+    address,
     schemeId,
     stealthAddress,
     caller,

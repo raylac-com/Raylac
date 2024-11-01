@@ -66,11 +66,13 @@ describe('new stealth account', () => {
       throw new Error('User not found');
     }
 
+    // Generate a new stealth address for the test user
     const newStealthAccount = generateStealthAddress({
       spendingPubKey: user.spendingPubKey as Hex,
       viewingPubKey: user.viewingPubKey as Hex,
     });
 
+    // Submit the stealth address to the server
     await client.addStealthAccount.mutate({
       address: newStealthAccount.address,
       signerAddress: newStealthAccount.signerAddress,
@@ -80,10 +82,12 @@ describe('new stealth account', () => {
       label: '',
     });
 
+    // Poll for the announcement log
     const announcementLog = await pollAnnouncementLog(
       newStealthAccount.signerAddress
     );
 
+    // Check that the announcement log is correct
     expect(announcementLog).toBeDefined();
     expect(announcementLog.args.ephemeralPubKey).toEqual(
       newStealthAccount.ephemeralPubKey

@@ -23,6 +23,7 @@ export interface StealthAddressWithEphemeral {
 }
 
 export interface ERC5564AnnouncementData {
+  address: Hex;
   schemeId: number;
   stealthAddress: string;
   caller: string;
@@ -149,6 +150,29 @@ type TraceResponse<T extends string, A> = {
 export type TraceResponseData =
   | TraceResponse<'call', TraceCallAction>
   | TraceResponse<'create', TraceInitAction>;
+
+export type BlockTraceCallResponse = any;
+
+export interface BlockTransactionResponse {
+  from: Hex;
+  gas: Hex;
+  gasUsed: Hex;
+  to: Hex;
+  input: Hex;
+  calls?: BlockTransactionResponse[];
+  value: Hex;
+  type: 'CALL' | 'CREATE';
+}
+
+export type BlockTraceResponse = {
+  txHash: Hex;
+  result: BlockTransactionResponse;
+}[];
+
+export interface TraceWithTraceAddress extends BlockTransactionResponse {
+  txHash: Hex;
+  traceAddress: number[];
+}
 
 export interface TokenBalanceQueryResult {
   tokenId: string;

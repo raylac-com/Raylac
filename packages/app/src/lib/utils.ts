@@ -3,7 +3,14 @@ import { Hex } from 'viem';
 import * as Clipboard from 'expo-clipboard';
 import { AddressOrUser, TransferItem } from '@/types';
 import { publicKeyToAddress } from 'viem/accounts';
-import { formatAmount, getTokenMetadata } from '@raylac/shared';
+import {
+  formatAmount,
+  encodePaymasterAndData,
+  getTokenMetadata,
+  UserOperation,
+  RAYLAC_PAYMASTER_ADDRESS,
+} from '@raylac/shared';
+import { client } from './trpc';
 
 export const ACCOUNT_SPENDING_PUB_KEY_STORAGE_KEY = 'account_spending_pub_key';
 export const ACCOUNT_VIEWING_PUB_KEY_STORAGE_KEY = 'account_viewing_pub_key';
@@ -120,4 +127,17 @@ export const getUsdTransferAmount = (transfer: TransferItem): string | null => {
   }
 
   return null;
+};
+
+export const getPaymasterAndData = async (userOp: UserOperation) => {
+  const paymasterSig = await client.paymasterSignUserOp.mutate({
+    userOp,
+  });
+
+  const paymasterAndData = encodePaymasterAndData({
+    paymaster: RAYLAC_PAYMASTER_ADDRESS,
+    data: paymasterSig,
+  });
+
+  return paymasterAndData;
 };

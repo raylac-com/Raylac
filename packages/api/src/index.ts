@@ -62,7 +62,7 @@ export const appRouter = router({
     .input(
       z.object({
         userOps: z.array(z.any()),
-        tokenPrice: z.number(),
+        tokenPrice: z.number().optional(),
       })
     )
     .mutation(async opts => {

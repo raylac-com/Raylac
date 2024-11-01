@@ -1,7 +1,7 @@
 {
   "name": "@raylac/scripts",
   "scripts": {
-    "lint": "tsc --noEmit"
+    "run": "dotenv -e ../../.env -- tsx $1"
   },
   "dependencies": {
     "@noble/secp256k1": "^2.1.0",

@@ -8,7 +8,7 @@ import {
   getWalletClient,
 } from '@raylac/shared';
 import { privateKeyToAccount } from 'viem/accounts';
-import logger from './logger';
+import { logger } from '../utils';
 
 const ANNOUNCER_PRIVATE_KEY = process.env.ANNOUNCER_PRIVATE_KEY;
 

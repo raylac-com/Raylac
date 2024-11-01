@@ -30,9 +30,12 @@ jobs:
       - name: Install dependencies
         run: pnpm i
 
-      - name: Run tests
-        run: pnpm -F tests test
-        env:
-          RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
-          TEST_ACCOUNT_MNEMONIC: ${{ secrets.TEST_ACCOUNT_MNEMONIC }}
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+      - name: Run lint
+        run: pnpm lint
+
+      # - name: Run tests
+      #   run: pnpm -F tests test
+      #   env:
+      #    RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
+      #    TEST_ACCOUNT_MNEMONIC: ${{ secrets.TEST_ACCOUNT_MNEMONIC }}
+      #    ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}

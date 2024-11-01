@@ -4,7 +4,7 @@ import {
   AccountBalancePerChainQueryResult,
   getChainsForMode,
 } from '@raylac/shared';
-import logger from '../lib/logger';
+import { logger } from '../utils';
 
 /**
  * Get the balances of tokens for all chains and supported tokens

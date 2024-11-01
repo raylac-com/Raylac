@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      dotenv-cli:
+        specifier: ^7.4.2
+        version: 7.4.2
     devDependencies:
       '@eslint/js':
         specifier: ^9.11.1
@@ -62,9 +66,6 @@ importers:
       axios:
         specifier: ^1.7.2
         version: 1.7.7
-      dotenv:
-        specifier: ^16.4.5
-        version: 16.4.5
       firebase-admin:
         specifier: ^12.4.0
         version: 12.5.0
@@ -354,12 +355,6 @@ importers:
       '@raylac/shared':
         specifier: workspace:*
         version: link:../shared
-      alchemy-sdk:
-        specifier: ^3.3.1
-        version: 3.4.1(bufferutil@4.0.8)(utf-8-validate@6.0.4)
-      dotenv:
-        specifier: ^16.4.5
-        version: 16.4.5
       viem:
         specifier: ^2.17.0
         version: 2.21.10(bufferutil@4.0.8)(typescript@5.6.2)(utf-8-validate@6.0.4)(zod@3.23.8)
@@ -376,6 +371,18 @@ importers:
 
   packages/tests:
     dependencies:
+      '@prisma/client':
+        specifier: 5.12.1
+        version: 5.12.1(prisma@5.12.1)
+      '@raylac/api':
+        specifier: workspace:*
+        version: link:../api
+      '@raylac/shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@raylac/sync':
+        specifier: workspace:*
+        version: link:../sync
       bip39:
         specifier: ^3.1.0
         version: 3.1.0
@@ -383,9 +390,6 @@ importers:
         specifier: ^2.17.0
         version: 2.21.10(bufferutil@4.0.8)(typescript@5.6.2)(utf-8-validate@6.0.4)(zod@3.23.8)
     devDependencies:
-      '@raylac/api':
-        specifier: workspace:*
-        version: link:../api
       '@types/node':
         specifier: ^20.11.17
         version: 20.16.5
@@ -3459,6 +3463,14 @@ packages:
   dir-glob@3.0.1:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
+
+  dotenv-cli@7.4.2:
+    resolution: {integrity: sha512-SbUj8l61zIbzyhIbg0FwPJq6+wjbzdn9oEtozQpZ6kW2ihCcapKVZj49oCT3oPM+mgQm+itgvUQcG5szxVrZTA==}
+    hasBin: true
+
+  dotenv-expand@10.0.0:
+    resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
+    engines: {node: '>=12'}
 
   dotenv-expand@11.0.6:
     resolution: {integrity: sha512-8NHi73otpWsZGBSZwwknTXS5pqMOrk9+Ssrna8xCaxkzEpU9OTf9R5ArQGVw03//Zmk9MOwLPng9WwndvpAJ5g==}
@@ -10661,6 +10673,15 @@ snapshots:
   dir-glob@3.0.1:
     dependencies:
       path-type: 4.0.0
+
+  dotenv-cli@7.4.2:
+    dependencies:
+      cross-spawn: 7.0.3
+      dotenv: 16.4.5
+      dotenv-expand: 10.0.0
+      minimist: 1.2.8
+
+  dotenv-expand@10.0.0: {}
 
   dotenv-expand@11.0.6:
     dependencies:

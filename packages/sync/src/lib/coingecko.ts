@@ -1,6 +1,6 @@
 import { getCoingeckoClient, toCoingeckoTokenId } from '@raylac/shared';
 import NodeCache from 'node-cache';
-import logger from './logger';
+import { logger } from '../utils';
 
 const coingeckoClient = getCoingeckoClient();
 
@@ -30,11 +30,7 @@ const tryGettingFromCache = (
     price => Math.abs(price.timestamp - timestamp * 1000) <= 3600 * 1000
   );
 
-  if (result) {
-    logger.info(
-      `Found cached price for ${coingeckoId} at ${timestamp}: ${result?.price} (price timestamp: ${result?.timestamp})`
-    );
-  } else {
+  if (!result) {
     logger.info(
       `No cached price for ${coingeckoId} at ${timestamp}, fetching from Coingecko`
     );

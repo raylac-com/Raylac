@@ -5,18 +5,21 @@
   "main": "./out/index.js",
   "types": "out/index.d.ts",
   "scripts": {
-    "test": "vitest"
+    "test": "dotenv -e ../../.env -- vitest"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@raylac/api": "workspace:*",
     "@types/node": "^20.11.17",
     "vitest": "^2.1.2"
   },
   "dependencies": {
     "bip39": "^3.1.0",
-    "viem": "^2.17.0"
+    "viem": "^2.17.0",
+    "@raylac/api": "workspace:*",
+    "@raylac/sync": "workspace:*",
+    "@raylac/shared": "workspace:*",
+    "@prisma/client": "5.12.1"
   }
 }

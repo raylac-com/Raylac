@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
-import 'account-abstraction/contracts/interfaces/IAccount.sol';
-import 'account-abstraction/contracts/interfaces/IEntryPoint.sol';
+import 'account-abstraction-0.6.0/contracts/interfaces/IAccount.sol';
+import 'account-abstraction-0.6.0/contracts/interfaces/IEntryPoint.sol';
 import '@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol';
 import '@openzeppelin/contracts/proxy/utils/Initializable.sol';
 import '@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol';

@@ -86,13 +86,19 @@ export const checkStealthAddress = (input: {
  * Get the address of the contract account created by the given stealthPubKey.
  */
 export const getSenderAddress = ({ stealthSigner }: { stealthSigner: Hex }) => {
+  const accountImplAddress = ACCOUNT_IMPL_ADDRESS;
+
+  const accountAbi = RaylacAccountAbi;
+
+  const factoryAddress = ACCOUNT_FACTORY_ADDRESS;
+
   const data = encodeDeployData({
     abi: RaylacAccountProxyAbi,
     bytecode: RaylacAccountProxyBytecode,
     args: [
-      ACCOUNT_IMPL_ADDRESS,
+      accountImplAddress,
       encodeFunctionData({
-        abi: RaylacAccountAbi,
+        abi: accountAbi,
         functionName: 'initialize',
         args: [stealthSigner],
       }),
@@ -101,7 +107,7 @@ export const getSenderAddress = ({ stealthSigner }: { stealthSigner: Hex }) => {
 
   const address = getContractAddress({
     bytecode: data,
-    from: ACCOUNT_FACTORY_ADDRESS,
+    from: factoryAddress,
     opcode: 'CREATE2',
     salt: '0x0',
   });

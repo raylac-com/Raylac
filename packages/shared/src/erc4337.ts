@@ -33,13 +33,15 @@ import { signMessage } from 'viem/accounts';
  * Get the init code for creating a stealth contract account
  */
 export const getInitCode = ({ stealthSigner }: { stealthSigner: Hex }) => {
+  const factoryAddress = ACCOUNT_FACTORY_ADDRESS;
+
   const factoryData = encodeFunctionData({
     abi: AccountFactoryAbi,
     functionName: 'createAccount',
     args: [stealthSigner],
   });
 
-  const initCode = (ACCOUNT_FACTORY_ADDRESS + factoryData.slice(2)) as Hex;
+  const initCode = (factoryAddress + factoryData.slice(2)) as Hex;
 
   return initCode;
 };
@@ -48,7 +50,7 @@ export const getInitCode = ({ stealthSigner }: { stealthSigner: Hex }) => {
 export const TRANSFER_OP_PRE_VERIFICATION_GAS = toHex(1_500_000);
 
 /** callGasLimit for a transfer operation */
-export const TRANSFER_OP_CALL_GAS_LIMIT = toHex(50_000);
+export const TRANSFER_OP_CALL_GAS_LIMIT = toHex(300_000);
 
 /** verificationGasLimit for a transfer operation */
 export const TRANSFER_OP_VERIFICATION_GAS_LIMIT = toHex(70_000);
@@ -61,7 +63,7 @@ export const TRANSFER_OP_INIT_VERIFICATION_GAS_LIMIT = toHex(210_000);
  * The sender of the operation is determined by the given stealthSigner.
  */
 export const buildUserOp = ({
-  client,
+  chainId,
   stealthSigner,
   to,
   value,
@@ -70,7 +72,7 @@ export const buildUserOp = ({
   gasInfo,
   nonce,
 }: {
-  client: PublicClient<HttpTransport, Chain>;
+  chainId: number;
   stealthSigner: Hex;
   to: Hex;
   value: bigint;
@@ -79,8 +81,6 @@ export const buildUserOp = ({
   gasInfo: ChainGasInfo[];
   nonce: number | null;
 }): UserOperation => {
-  const chainId = client.chain.id;
-
   const chainGasInfo = gasInfo.find(gasInfo => gasInfo.chainId === chainId);
 
   if (!chainGasInfo) {
@@ -112,7 +112,7 @@ export const buildUserOp = ({
 
   const maxPriorityFeePerGasBuffed = increaseByPercent({
     value: chainGasInfo.maxPriorityFeePerGas,
-    percent: 10,
+    percent: 20,
   });
 
   const maxFeePerGas = baseFeeBuffed + maxPriorityFeePerGasBuffed;
@@ -133,7 +133,7 @@ export const buildUserOp = ({
     maxPriorityFeePerGas: toHex(maxPriorityFeePerGasBuffed),
     paymasterAndData: '0x',
     signature: '0x',
-    chainId: client.chain.id,
+    chainId,
   };
 
   return userOp;

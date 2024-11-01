@@ -3,18 +3,17 @@ import {
   decodeUserOpCalldata,
   EntryPointAbi,
   ERC20Abi,
-  getPublicClient,
+  getNativeTransferTracesInBlock,
   getTokenId,
   getUserOpHash,
-  traceTransaction,
+  getWebsocketClient,
   UserOperation,
 } from '@raylac/shared';
-import { parseEventLogs } from 'viem';
+import { getAddress, parseEventLogs, toHex } from 'viem';
 import { handleOps } from '../lib/bundler';
-import { handleERC20TransferLog, handleNewTrace } from '@raylac/sync';
-import logger from '../lib/logger';
+import { handleERC20TransferLog, handleUserOpEvent } from '@raylac/sync';
+import { logger } from '../utils';
 import prisma from '../lib/prisma';
-import { handleUserOpEvent } from '@raylac/sync/src/syncUserOps';
 import { Prisma } from '@prisma/client';
 
 const MAX_TRANSFERS = 1000;
@@ -35,17 +34,17 @@ const canUserSubmitOps = async (userId: number) => {
   return numTransfers < MAX_TRANSFERS;
 };
 
-const upsertUserOpsWithTokenPrice = async ({
+const upsertUserOps = async ({
   userOps,
   tokenPrice,
 }: {
   userOps: UserOperation[];
-  tokenPrice: number;
+  tokenPrice?: number;
 }) => {
   const data: Prisma.UserOperationCreateInput[] = userOps.map(userOp => ({
     hash: getUserOpHash({ userOp }),
     chainId: userOp.chainId,
-    tokenPriceAtOp: tokenPrice,
+    tokenPriceAtOp: tokenPrice ?? null,
   }));
 
   await prisma.userOperation.createMany({
@@ -60,7 +59,7 @@ const submitUserOps = async ({
   userOps,
 }: {
   userId: number;
-  tokenPrice: number;
+  tokenPrice?: number;
   userOps: UserOperation[];
 }) => {
   const canSubmit = await canUserSubmitOps(userId);
@@ -109,7 +108,7 @@ const submitUserOps = async ({
   }
 
   // Save the token price at the time of the user operation
-  await upsertUserOpsWithTokenPrice({ userOps, tokenPrice });
+  await upsertUserOps({ userOps, tokenPrice });
 
   const chainId = userOps[0].chainId;
 
@@ -118,11 +117,12 @@ const submitUserOps = async ({
     chainId,
   });
 
-  const publicClient = getPublicClient({ chainId });
+  //  const publicClient = getPublicClient({ chainId });
+  const websocketClient = getWebsocketClient({ chainId });
 
   logger.info(`waiting tx ${txHash} to confirm`);
   const start = Date.now();
-  const txReceipt = await publicClient.waitForTransactionReceipt({
+  const txReceipt = await websocketClient.waitForTransactionReceipt({
     hash: txHash,
   });
 
@@ -143,17 +143,62 @@ const submitUserOps = async ({
     );
 
     if (isNativeTransfer) {
-      const start = Date.now();
-      const traces = await traceTransaction({
-        txHash,
+      const callsWithValue = await getNativeTransferTracesInBlock({
+        blockNumber: txReceipt.blockNumber,
         chainId,
       });
-      const end = Date.now();
-      logger.info(`traceTransaction ${end - start}ms`);
 
-      await Promise.all(
-        traces.map(trace => handleNewTrace({ trace, chainId }))
+      const txTraces = callsWithValue.filter(call => call.txHash === txHash);
+
+      if (txTraces.length === 0) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: `No native transfer traces found for tx ${txHash}`,
+        });
+      }
+
+      const traceCreateInput: Prisma.TraceCreateManyInput[] = await Promise.all(
+        userOps.map(async userOp => {
+          const { to, value: amount } = decodeUserOpCalldata(userOp);
+
+          const toUser = await prisma.userStealthAddress.findUnique({
+            select: { address: true },
+            where: { address: to },
+          });
+
+          const trace = txTraces.find(
+            call =>
+              getAddress(call.from) === userOp.sender &&
+              getAddress(call.to) === to &&
+              call.value === toHex(amount)
+          );
+
+          if (!trace) {
+            const userOpHash = getUserOpHash({ userOp });
+            throw new TRPCError({
+              code: 'BAD_REQUEST',
+              message: `No native transfer trace found for user op ${userOpHash} in ${txHash}`,
+            });
+          }
+
+          return {
+            from: userOp.sender,
+            to,
+            fromStealthAddress: userOp.sender,
+            toStealthAddress: toUser?.address || null,
+            amount: amount.toString(),
+            tokenId: 'eth',
+            chainId,
+            traceAddress: trace.traceAddress.join('_'),
+            transactionHash: txHash,
+          };
+        })
       );
+
+      await prisma.trace.createMany({
+        data: traceCreateInput,
+        skipDuplicates: true,
+      });
     } else {
       const tokenAddresses = executeArgs[0].to;
 

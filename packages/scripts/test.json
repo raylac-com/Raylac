@@ -1,0 +1,4 @@
+
+> @raylac/scripts@ run /Users/danieltehrani/dev/raylac/packages/scripts
+> dotenv -e ../../.env -- tsx $1 "./src/testBlockTrace.ts"
+

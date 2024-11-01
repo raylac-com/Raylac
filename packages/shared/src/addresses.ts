@@ -1,5 +1,12 @@
 import { Hex } from 'viem';
-import { base, baseSepolia } from 'viem/chains';
+import {
+  anvil,
+  arbitrum,
+  base,
+  baseSepolia,
+  optimism,
+  scroll,
+} from 'viem/chains';
 
 export const ACROSS_SPOKE_POOL_ADDRESS: {
   [key: number]: Hex;
@@ -27,4 +34,14 @@ export const ACCOUNT_IMPL_DEPLOYED_BLOCK: {
 } = {
   [baseSepolia.id]: BigInt(15433556),
   [base.id]: BigInt(20053821),
+  [arbitrum.id]: BigInt(267822748),
+  [optimism.id]: BigInt(126295867),
+  [scroll.id]: BigInt(10527993),
+  [anvil.id]: BigInt(0),
 };
+
+export const RAYLAC_STEALTH_TRANSFER_ADDRESS =
+  '0x9e3f9137168d7f37A56aFd2a2d82440a6e961611';
+
+export const SENDER_CREATOR_ADDRESS =
+  '0x7fc98430eaedbb6070b35b39d798725049088348';
