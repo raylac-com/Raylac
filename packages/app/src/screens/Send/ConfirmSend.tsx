@@ -4,7 +4,7 @@ import useGasInfo from '@/hooks/useGasInfo';
 import useSend from '@/hooks/useSend';
 import useTokenPrice from '@/hooks/useTokenPrice';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import mixpanel from '@/lib/mixpanle';
+import mixpanel from '@/lib/mixpanel';
 import { theme } from '@/lib/theme';
 import { trpc } from '@/lib/trpc';
 import { shortenAddress } from '@/lib/utils';
