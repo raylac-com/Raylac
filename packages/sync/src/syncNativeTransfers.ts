@@ -177,6 +177,10 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
         .filter(address => address.blockNumber < toBlock)
         .map(address => address.address as Hex);
 
+      if (addressesToSync.length === 0) {
+        continue;
+      }
+
       console.time(`traceFilter for ${addressesToSync.length} addresses`);
       const incomingTraces = await traceFilter({
         fromBlock: toHex(fromBlock),

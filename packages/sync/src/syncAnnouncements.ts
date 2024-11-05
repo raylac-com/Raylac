@@ -7,7 +7,12 @@ import {
 } from '@raylac/shared';
 import prisma from './lib/prisma';
 import { base } from 'viem/chains';
-import { announcementAbiItem, CHAIN_BLOCK_TIME } from './utils';
+import {
+  announcementAbiItem,
+  CHAIN_BLOCK_TIME,
+  endTimer,
+  startTimer,
+} from './utils';
 import processLogs from './processLogs';
 import { Log } from 'viem';
 import { Prisma, SyncJob } from '@prisma/client';
@@ -91,6 +96,7 @@ export const handleERC5564AnnouncementLog = async ({
 
 const syncAnnouncements = async () => {
   while (true) {
+    const announcementBackfillTimer = startTimer('announcementBackfill');
     await processLogs({
       chainId: base.id,
       job: SyncJob.Announcements,
@@ -103,6 +109,7 @@ const syncAnnouncements = async () => {
       },
     });
 
+    endTimer(announcementBackfillTimer);
     await sleep(3 * 1000);
   }
 };

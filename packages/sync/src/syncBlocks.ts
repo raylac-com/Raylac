@@ -33,7 +33,7 @@ const saveNewBlock = async ({
     logger.error(error);
   }
 
-  logger.info(
+  logger.debug(
     `Saved new block ${block.number?.toLocaleString()} on chain ${chainId}`
   );
 };
