@@ -1,10 +1,41 @@
 {
   "cli": {
-    "version": ">= 12.4.1",
+    "version": ">= 12.6.2",
     "appVersionSource": "remote" 
   },
   "build": {
+    "simulator": {
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      }
+    },
+    "maestro": {
+      "config": "maestro.yaml",
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      },
+      "ios": {
+        "simulator": true
+      },
+      "env": {
+        "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
+        "EXPO_PUBLIC_ALCHEMY_API_KEY": "UfWNqNlX3Wq4oJtE0iObWWgcenwyICcp",
+        "APP_VARIANT": "development"
+      }
+    },
     "development": {
+      "ios": {
+        "simulator": true
+      },  
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      },
       "developmentClient": true,
       "distribution": "internal",
       "env": {
@@ -14,6 +45,13 @@
       }
     },
     "preview": {
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      },
       "distribution": "internal",
       "channel": "production",
       "env": {
@@ -33,5 +71,12 @@
     }
   },
   "submit": {
+    "production": {
+      "ios": {
+        "appleId": "dan00300@icloud.com",
+        "ascAppId": "6702008447",
+        "appleTeamId": "D7H78Z8FX2"
+      }
+    }
   }
 }
