@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "db:build": "pnpm exec prisma generate",
+    "build": "pnpm exec prisma generate",
     "migrate:dev": "pnpm exec pnpm exec prisma migrate dev",
     "migrate:prod": "pnpm exec prisma migrate deploy"
   },

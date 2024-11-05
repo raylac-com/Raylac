@@ -12,9 +12,6 @@
       "dev": {
         "persistent": true,
         "cache": false
-      },
-      "db:build": {
-        "cache": false
       }
     }
   }
