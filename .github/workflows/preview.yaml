@@ -98,5 +98,5 @@ jobs:
           app-file: packages/app/build/raylac.apk
           workspace: packages/app/.maestro
           env: |
-            API_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
-            GIT_COMMIT: ${{ github.sha }}
+            API_URL=https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
+            GIT_COMMIT=${{ github.sha }}
