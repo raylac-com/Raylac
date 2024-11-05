@@ -82,4 +82,4 @@ jobs:
         with:
           api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
           app-file: packages/app/build/raylac.apk
-          workspace: packages/app
+          workspace: packages/app/.maestro
