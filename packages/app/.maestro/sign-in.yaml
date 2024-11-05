@@ -2,9 +2,13 @@ appId: com.raylac
 ---
 - launchApp
 - assertVisible: 'Sign in'
-- tap: 'Sign in'
-- runScript:
-    file: ./scripts/wait-for-server.js
-    env:
-      API_URL: ${API_URL}
-      GIT_COMMIT: ${GIT_COMMIT}
+- tapOn: 'Sign in'
+#- runScript:
+#    file: ./scripts/wait-for-server.js
+#    env:
+#      API_URL: ${API_URL}
+#      GIT_COMMIT: ${GIT_COMMIT}
+- tapOn: 'Enter your mnemonic'
+- inputText: ${TEST_ACCOUNT_MNEMONIC}
+- tapOn: 'Sign in'
+- assertVisible: 'Home'

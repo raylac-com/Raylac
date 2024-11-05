@@ -1,0 +1,12 @@
+appId: com.raylac
+---
+- launchApp
+- runFlow: sign-in.yaml
+- tapOn: 'Send'
+- tapOn: 'Search user or Ethereum address'
+- inputText: "0x06D35f6B8Fb9Ad47A866052b6a6C3c2DcD1C36F1"
+- tapOn: '0x06D3...36F1'
+- inputNumber: 0.01
+- tapOn: 'Next'
+- tapOn: 'Send'
+- tapOn: 'Back to home'
