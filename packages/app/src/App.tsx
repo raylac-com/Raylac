@@ -11,7 +11,9 @@ import SignIn from './screens/SignIn';
 import { NavigationContainer, ThemeProvider } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc, rpcLinks } from './lib/trpc';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import Deposit from './screens/Deposit';
 import ConfirmSend from './screens/Send/ConfirmSend';
 import Account from './screens/Account';
@@ -43,6 +45,7 @@ import SaveBackupPhrase from './screens/SaveBackupPhrase';
 import { SafeAreaView } from 'react-native';
 import Receive from './screens/Receive';
 import Upgrade from './screens/Upgrade';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -343,6 +346,10 @@ const queryClient = new QueryClient({
   },
 });
 
+const asyncStoragePersister = createAsyncStoragePersister({
+  storage: AsyncStorage,
+});
+
 const App = () => {
   const trpcClient = trpc.createClient({
     links: rpcLinks,
@@ -351,12 +358,15 @@ const App = () => {
   return (
     <NavigationContainer>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={{ persister: asyncStoragePersister }}
+        >
           <ThemeProvider value={NavigationTheme}>
             <Screens></Screens>
             <StatusBar style="light" />
           </ThemeProvider>
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
       </trpc.Provider>
     </NavigationContainer>
   );
