@@ -32,7 +32,7 @@ import getTransferDetails from './api/getTransferDetails';
 import toggleDevMode from './api/toggleDevMode';
 import addStealthAccount from './api/addStealthAccount';
 import getAddressNonces from './api/getAddressNonces';
-
+import version from './api/version';
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 
@@ -361,6 +361,10 @@ export const appRouter = router({
         devModeEnabled: input.devModeEnabled,
       });
     }),
+
+  version: publicProcedure.query(async () => {
+    return await version();
+  }),
 });
 
 export const createCaller = createCallerFactory(appRouter);
