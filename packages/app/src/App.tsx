@@ -94,7 +94,7 @@ const Screens = () => {
 
   const { i18n } = useTranslation();
 
-  useFetchUpdates();
+  const { isFetching: isFetchingUpdates } = useFetchUpdates();
 
   useEffect(() => {
     (async () => {
@@ -105,13 +105,19 @@ const Screens = () => {
 
   useEffect(() => {
     (async () => {
-      if (signedInUser === null && !isLoadingUser) {
-        navigation.navigate('Start');
-      } else if (signedInUser && !(await isBackupVerificationComplete())) {
-        navigation.navigate('SaveBackupPhrase');
+      if (!isFetchingUpdates) {
+        if (signedInUser === null && !isLoadingUser) {
+          navigation.navigate('Start');
+        } else if (signedInUser && !(await isBackupVerificationComplete())) {
+          navigation.navigate('SaveBackupPhrase');
+        }
       }
     })();
-  }, [signedInUser, isLoadingUser]);
+  }, [signedInUser, isLoadingUser, isFetchingUpdates]);
+
+  if (isFetchingUpdates) {
+    return null;
+  }
 
   return (
     <SafeAreaView

@@ -1,5 +1,5 @@
 import { bigIntMin, ERC20Abi, getPublicClient, sleep } from '@raylac/shared';
-import supportedTokens from '@raylac/shared/out/supportedTokens';
+import { supportedTokens } from '@raylac/shared';
 import { decodeEventLog, getAddress, Hex, Log, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
 import {

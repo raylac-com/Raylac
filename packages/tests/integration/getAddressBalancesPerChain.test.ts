@@ -4,7 +4,7 @@ import { getAuthedClient } from '../lib/rpc';
 import { signInAsTestUser } from '../lib/auth';
 import { Hex } from 'viem';
 import { getAddressBalance } from '../lib/utils';
-import supportedTokens from '@raylac/shared/out/supportedTokens';
+import { supportedTokens } from '@raylac/shared';
 import { getChainsForMode } from '@raylac/shared';
 
 const IS_DEV_MODE = false;

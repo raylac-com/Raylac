@@ -8,7 +8,7 @@ import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import { useTranslation } from 'react-i18next';
 import StyledPressable from '@/components/StyledPressable';
-import supportedTokens from '@raylac/shared/out/supportedTokens';
+import { supportedTokens } from '@raylac/shared';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTokenBalances from '@/hooks/useTokenBalance';
 import { getTransferType } from '@/lib/utils';

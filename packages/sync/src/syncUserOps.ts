@@ -6,7 +6,7 @@ import {
 } from '@raylac/shared';
 import { decodeEventLog, Log, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
-import supportedChains from '@raylac/shared/out/supportedChains';
+import { supportedChains } from '@raylac/shared';
 import { upsertTransaction } from './utils';
 import { Prisma } from '@prisma/client';
 import processLogs from './processLogs';

@@ -16,8 +16,8 @@ import {
 import processLogs from './processLogs';
 import { Log } from 'viem';
 import { Prisma, SyncJob } from '@prisma/client';
-import supportedChains from '@raylac/shared/out/supportedChains';
-import supportedTokens from '@raylac/shared/out/supportedTokens';
+import { supportedChains } from '@raylac/shared';
+import { supportedTokens } from '@raylac/shared';
 
 const SCAN_PAST_BUFFER = 2 * 60 * 1000; // 2 minutes
 

@@ -14,7 +14,7 @@ import {
   upsertTransaction,
   waitForAnnouncementsBackfill,
 } from './utils';
-import supportedChains from '@raylac/shared/out/supportedChains';
+import { supportedChains } from '@raylac/shared';
 import { base, optimism } from 'viem/chains';
 import { getTokenPriceAtTime } from './lib/coingecko';
 

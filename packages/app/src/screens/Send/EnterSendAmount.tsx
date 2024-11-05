@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, Text, TextInput, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import supportedTokens from '@raylac/shared/out/supportedTokens';
+import { supportedTokens } from '@raylac/shared';
 import { Hex, parseUnits } from 'viem';
 import { trpc } from '@/lib/trpc';
 import { formatAmount, getChainsForMode } from '@raylac/shared';

@@ -14,8 +14,8 @@ import {
   formatAmount,
   StealthAddressWithEphemeral,
 } from '@raylac/shared';
-import supportedChains from '@raylac/shared/out/supportedChains';
-import supportedTokens from '@raylac/shared/out/supportedTokens';
+import { supportedChains } from '@raylac/shared';
+import { supportedTokens } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
 import { Text, View } from 'react-native';

@@ -6,7 +6,7 @@ import {
   traceBlockByNumber,
   traceFilter,
 } from '@raylac/shared';
-import supportedChains from '@raylac/shared/out/supportedChains';
+import { supportedChains } from '@raylac/shared';
 import { BlockTransactionResponse } from '@raylac/shared/out/types';
 import { Hex, toHex } from 'viem';
 import { base, scroll, arbitrum, optimism, polygon, zksync } from 'viem/chains';
