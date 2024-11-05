@@ -3,7 +3,8 @@
     "tasks": {
       "build": {
         "dependsOn": ["^build"],
-        "outputs": ["packages/shared/out/**/*", "packages/sync/out/**/*", "packages/api/out/**/*"]
+        "outputs": ["packages/shared/out/**", "packages/sync/out/**", "packages/api/out/**"],
+        "cache": false
       },
       "lint": {
         "dependsOn": ["^lint"]
