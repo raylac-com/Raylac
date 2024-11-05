@@ -22,6 +22,7 @@
     "@typescript-eslint/eslint-plugin": "^8.8.0",
     "@typescript-eslint/parser": "^8.8.0",
     "eslint": "^9.11.1",
+    "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-security": "^3.0.1",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",

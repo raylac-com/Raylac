@@ -2,11 +2,13 @@ import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 import { getSpendingPrivKey, getViewingPrivKey } from '@raylac/shared';
 import { MnemonicAndKeys } from '@/types';
+import * as Device from 'expo-device';
 
 const MNEMONIC_STORAGE_KEY = 'mnemonic';
 const BACKUP_VERIFICATION_COMPLETE_STORAGE_KEY = 'backupVerificationComplete';
 
-const REQUIRE_AUTHENTICATION = Constants.appOwnership !== 'expo';
+const REQUIRE_AUTHENTICATION =
+  Constants.appOwnership !== 'expo' && Device.isDevice;
 
 export const isBackupVerificationComplete = async (): Promise<boolean> => {
   return (
