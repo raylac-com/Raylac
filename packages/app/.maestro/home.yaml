@@ -1,4 +1,0 @@
-appId: com.raylac
----
-- launchApp
-- assertVisible: 'Sign in'
