@@ -1,4 +1,4 @@
 appId: com.raylac
 ---
 - launchApp
-- assertVisible: 'USD'
+- assertVisible: 'Sign in'

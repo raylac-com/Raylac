@@ -67,7 +67,7 @@ jobs:
           EXPO_PUBLIC_ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
 
       - name: Run Maestro tests on the test channel
-        uses: mobile-dev-inc/action-maestro-cloud@v1.9.3
+        uses: mobile-dev-inc/action-maestro-cloud@v1
         with:
           api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
           app-file: packages/app/build/raylac.app
