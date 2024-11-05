@@ -141,11 +141,9 @@ const Account = () => {
     return null;
   }
 
-  /*
   const onChangeLanguagePress = useCallback(() => {
     navigation.navigate('SelectLanguage');
   }, []);
-  */
 
   return (
     <View
@@ -204,6 +202,7 @@ const Account = () => {
             opacity: 0.5,
             color: theme.text,
           }}
+          // eslint-disable-next-line react/jsx-no-literals
         >
           @{user.username}
         </Text>
@@ -242,16 +241,12 @@ const Account = () => {
           onPress={() => navigation.navigate('Advanced')}
           color={theme.text}
         />
-        {/**
-           * 
-          
         <SettingListItem
           icon={<Entypo name="language" size={24} color={theme.gray} />}
           title={t('language')}
           onPress={onChangeLanguagePress}
           color={theme.text}
         />
-         */}
         <SettingListItem
           icon={<MaterialIcons name="logout" size={24} color={theme.waning} />}
           title={t('signOut')}

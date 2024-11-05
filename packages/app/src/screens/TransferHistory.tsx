@@ -1,11 +1,13 @@
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import { trpc } from '@/lib/trpc';
+import { useTranslation } from 'react-i18next';
 import { FlatList, Text, View } from 'react-native';
 
 const TransferHistory = () => {
   const { data: transferHistory } = trpc.getTransferHistory.useQuery({});
   const { data: signedInUser } = useSignedInUser();
+  const { t } = useTranslation('TransferHistory');
 
   return (
     <View
@@ -39,7 +41,7 @@ const TransferHistory = () => {
             opacity: 0.5,
           }}
         >
-          No transfers
+          {t('noTransfers', { ns: 'TransferHistory' })}
         </Text>
       ) : null}
     </View>

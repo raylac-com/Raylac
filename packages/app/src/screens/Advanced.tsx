@@ -91,6 +91,7 @@ const Advanced = () => {
             color: theme.text,
             fontSize: 14,
           }}
+          // eslint-disable-next-line react/jsx-no-literals
         >
           user id: {signedInUser.id}
         </Text>
@@ -99,6 +100,7 @@ const Advanced = () => {
             color: theme.text,
             fontSize: 14,
           }}
+          // eslint-disable-next-line react/jsx-no-literals
         >
           runtime: {currentlyRunning.runtimeVersion}
         </Text>
@@ -107,6 +109,7 @@ const Advanced = () => {
             color: theme.text,
             fontSize: 14,
           }}
+          // eslint-disable-next-line react/jsx-no-literals
         >
           uuid: {currentlyRunning.updateId}
         </Text>
@@ -115,6 +118,7 @@ const Advanced = () => {
             color: theme.text,
             fontSize: 14,
           }}
+          // eslint-disable-next-line react/jsx-no-literals
         >
           channel: {currentlyRunning.channel}
         </Text>
@@ -123,6 +127,7 @@ const Advanced = () => {
             color: theme.text,
             fontSize: 14,
           }}
+          // eslint-disable-next-line react/jsx-no-literals
         >
           update available: {isUpdateAvailable ? 'yes' : 'no'}
         </Text>
@@ -131,6 +136,7 @@ const Advanced = () => {
             color: theme.text,
             fontSize: 14,
           }}
+          // eslint-disable-next-line react/jsx-no-literals
         >
           update pending: {isUpdatePending ? 'yes' : 'no'}
         </Text>

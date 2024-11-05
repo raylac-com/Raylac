@@ -66,6 +66,7 @@ const AddressListItem = (props: AddressListItemProps) => {
 };
 
 const Addresses = () => {
+  const { t } = useTranslation('Addresses');
   const { data: addressesWithBalances } = trpc.getStealthAccounts.useQuery();
 
   if (!addressesWithBalances) {
@@ -89,7 +90,7 @@ const Addresses = () => {
               padding: 16,
             }}
           >
-            No addresses
+            {t('noAddresses')}
           </Text>
         }
         data={addressesWithBalances}

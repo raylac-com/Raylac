@@ -54,6 +54,7 @@ const AccountInfoListItem = (props: AccountInfoListItemProps) => {
 };
 
 const AccountInfo = () => {
+  const { t } = useTranslation('AccountInfo');
   const { data: signedInUser } = useSignedInUser();
 
   const navigation = useTypedNavigation();
@@ -67,14 +68,14 @@ const AccountInfo = () => {
       }}
     >
       <AccountInfoListItem
-        label="Name"
+        label={t('displayName')}
         value={signedInUser.name}
         onPress={() => {
           navigation.navigate('UpdateDisplayName');
         }}
       ></AccountInfoListItem>
       <AccountInfoListItem
-        label="Username"
+        label={t('username')}
         value={signedInUser.username}
         onPress={() => {
           navigation.navigate('UpdateUsername');

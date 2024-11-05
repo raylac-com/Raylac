@@ -91,7 +91,7 @@ const TransferDetails = ({ route }: Props) => {
   const { data: signedInUser } = useSignedInUser();
   const [showTraces, setShowTraces] = useState(false);
 
-  const { t } = useTranslation();
+  const { t } = useTranslation('TransferDetails');
 
   const { data: transferDetail } = trpc.getTransferDetails.useQuery({
     txHash,
@@ -133,7 +133,7 @@ const TransferDetails = ({ route }: Props) => {
     copyToClipboard(avatarAddress);
     Toast.show({
       type: 'success',
-      text1: t('copied', { ns: 'common' }),
+      text1: t('copiedAddress', { ns: 'common' }),
       position: 'bottom',
     });
   };
@@ -166,8 +166,9 @@ const TransferDetails = ({ route }: Props) => {
             fontSize: 14,
           }}
         >
-          {type === 'outgoing' ? 'Sent to ' : 'Received from '}
-          {displayName}
+          {type === 'outgoing'
+            ? t('sentTo', { name: displayName })
+            : t('receivedFrom', { name: displayName })}
         </Text>
         <Feather name="copy" size={14} color={theme.text} />
       </Pressable>
@@ -188,6 +189,7 @@ const TransferDetails = ({ route }: Props) => {
             opacity: 0.5,
             fontSize: 16,
           }}
+          // eslint-disable-next-line react/jsx-no-literals
         >
           ~${transferUsdAmount}
         </Text>
@@ -217,7 +219,7 @@ const TransferDetails = ({ route }: Props) => {
             fontWeight: 'bold',
           }}
         >
-          Traces
+          {t('traces', { ns: 'TransferDetails' })}
         </Text>
         <Entypo
           name={showTraces ? 'chevron-up' : 'chevron-down'}
@@ -239,8 +241,9 @@ const TransferDetails = ({ route }: Props) => {
               textAlign: 'center',
             }}
           >
-            {type === 'outgoing' ? 'Sent to ' : 'Received from '}
-            {displayName}
+            {type === 'outgoing'
+              ? t('sentTo', { name: displayName })
+              : t('receivedFrom', { name: displayName })}
           </Text>
           {transferDetail.traces.map((trace, i) => (
             <TraceListItem trace={trace} key={i} />

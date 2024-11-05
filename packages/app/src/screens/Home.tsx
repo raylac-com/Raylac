@@ -21,6 +21,7 @@ interface TokenBalanceItemProps {
 
 const TokenBalanceItem = (props: TokenBalanceItemProps) => {
   const { tokenId, formattedBalance, formattedUsdBalance } = props;
+  const { t } = useTranslation('Home');
 
   const tokenMetadata = supportedTokens.find(
     token => token.tokenId === tokenId
@@ -60,7 +61,9 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
             fontSize: 20,
           }}
         >
-          {`${formattedUsdBalance} USD`}
+          {t('fiatDenominatedBalance', {
+            balance: formattedUsdBalance,
+          })}
         </Text>
         <Text
           style={{
@@ -173,7 +176,7 @@ const HomeScreen = () => {
       }, 0)
     : null;
 
-  if (!isSignedIn || !signedInUser) {
+  if (!isSignedIn || !signedInUser || totalUsdBalance === null) {
     return null;
   }
 
@@ -212,7 +215,7 @@ const HomeScreen = () => {
               fontWeight: 500,
             }}
           >
-            {totalUsdBalance} USD
+            {t('fiatDenominatedBalance', { balance: totalUsdBalance })}
           </Text>
         </View>
         {/* Action menus (Deposit, Send, Receive) */}

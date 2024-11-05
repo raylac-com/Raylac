@@ -46,6 +46,7 @@ import { SafeAreaView } from 'react-native';
 import Receive from './screens/Receive';
 import Upgrade from './screens/Upgrade';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Localization from 'expo-localization';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -99,7 +100,15 @@ const Screens = () => {
   useEffect(() => {
     (async () => {
       const lang = await getSelectedLanguage();
-      i18n.changeLanguage(lang);
+
+      if (lang) {
+        i18n.changeLanguage(lang);
+      } else {
+        const locales = Localization.getLocales();
+        if (locales.length > 0) {
+          i18n.changeLanguage(locales[0].languageCode ?? 'en');
+        }
+      }
     })();
   }, []);
 

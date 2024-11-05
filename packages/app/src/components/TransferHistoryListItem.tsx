@@ -11,8 +11,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/lib/theme';
 import { formatAmount, getTokenMetadata } from '@raylac/shared';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { formatDistanceToNowStrict } from 'date-fns';
+import { formatDistanceToNowStrict, Locale } from 'date-fns';
+import { ja, enUS } from 'date-fns/locale';
 import { TransferItem } from '@/types';
+import { useTranslation } from 'react-i18next';
 // import useEnsName from '@/hooks/useEnsName';
 
 interface TransferHistoryListItemProps {
@@ -20,8 +22,14 @@ interface TransferHistoryListItemProps {
   type: 'incoming' | 'outgoing';
 }
 
-const formatDate = (date: Date) => {
-  return formatDistanceToNowStrict(date, { addSuffix: true });
+const formatDate = ({
+  timestamp,
+  locale,
+}: {
+  timestamp: Date;
+  locale: Locale;
+}) => {
+  return formatDistanceToNowStrict(timestamp, { addSuffix: true, locale });
 };
 
 const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
@@ -30,6 +38,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
   const tokenId = transfer.traces[0].tokenId;
 
   const finalTransfer = getFinalTransfer(transfer);
+  const { i18n } = useTranslation();
 
   const amount = finalTransfer.amount as string;
 
@@ -131,6 +140,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
                 textAlign: 'right',
                 opacity: 0.5,
               }}
+              // eslint-disable-next-line react/jsx-no-literals
             >
               ~${transferUsdAmount}
             </Text>
@@ -144,7 +154,12 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           opacity: 0.5,
         }}
       >
-        {blockTimestamp ? formatDate(blockTimestamp) : ''}
+        {blockTimestamp
+          ? formatDate({
+              timestamp: blockTimestamp,
+              locale: i18n.language === 'ja' ? ja : enUS,
+            })
+          : ''}
       </Text>
     </Pressable>
   );

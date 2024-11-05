@@ -217,6 +217,9 @@ importers:
       expo-linking:
         specifier: ~6.3.1
         version: 6.3.1(expo@51.0.38(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(bufferutil@4.0.8)(utf-8-validate@6.0.4))
+      expo-localization:
+        specifier: ~15.0.3
+        version: 15.0.3(expo@51.0.38(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(bufferutil@4.0.8)(utf-8-validate@6.0.4))
       expo-secure-store:
         specifier: ~13.0.2
         version: 13.0.2(expo@51.0.38(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(bufferutil@4.0.8)(utf-8-validate@6.0.4))
@@ -3911,6 +3914,11 @@ packages:
   expo-linking@6.3.1:
     resolution: {integrity: sha512-xuZCntSBGWCD/95iZ+mTUGTwHdy8Sx+immCqbUBxdvZ2TN61P02kKg7SaLS8A4a/hLrSCwrg5tMMwu5wfKr35g==}
 
+  expo-localization@15.0.3:
+    resolution: {integrity: sha512-IfcmlKuKRlowR9qIzL0e+nGHBeNoF7l2GQaOJstc7HZiPjNJ4J1R4D53ZNf483dt7JSkTRJBihdTadOtOEjRdg==}
+    peerDependencies:
+      expo: '*'
+
   expo-manifests@0.14.3:
     resolution: {integrity: sha512-L3b5/qocBPiQjbW0cpOHfnqdKZbTJS7sA3mgeDJT+mWga/xYsdpma1EfNmsuvrOzjLGjStr1k1fceM9Bl49aqQ==}
     peerDependencies:
@@ -5956,6 +5964,9 @@ packages:
     resolution: {integrity: sha512-DOmrlGSXNk1DM0ljiQA+i+o0rSLhtii1je5wgk60j49d1jHT5YYttBv1iWOnYSTG+fZZESUOSNiAl89SIet+Cg==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
+
+  rtl-detect@1.1.2:
+    resolution: {integrity: sha512-PGMBq03+TTG/p/cRB7HCLKJ1MgDIi07+QU1faSjiYRfmY5UsAttV9Hs08jDAHVwcOwmVLcSJkpwyfXszVjWfIQ==}
 
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
@@ -11650,6 +11661,11 @@ snapshots:
       - expo
       - supports-color
 
+  expo-localization@15.0.3(expo@51.0.38(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(bufferutil@4.0.8)(utf-8-validate@6.0.4)):
+    dependencies:
+      expo: 51.0.38(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(bufferutil@4.0.8)(utf-8-validate@6.0.4)
+      rtl-detect: 1.1.2
+
   expo-manifests@0.14.3(expo@51.0.38(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(bufferutil@4.0.8)(utf-8-validate@6.0.4)):
     dependencies:
       '@expo/config': 9.0.4
@@ -14031,6 +14047,8 @@ snapshots:
       '@rollup/rollup-win32-ia32-msvc': 4.24.0
       '@rollup/rollup-win32-x64-msvc': 4.24.0
       fsevents: 2.3.3
+
+  rtl-detect@1.1.2: {}
 
   run-parallel@1.2.0:
     dependencies:

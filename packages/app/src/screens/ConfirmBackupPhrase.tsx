@@ -8,6 +8,7 @@ import useTypedNavigation from '@/hooks/useTypedNavigation';
 import Toast from 'react-native-toast-message';
 import { setBackupVerificationStatus } from '@/lib/key';
 import MnemonicWord from '@/components/MnemonicWord';
+import { useTranslation } from 'react-i18next';
 
 const generateRandomNumbers = ({
   max,
@@ -57,6 +58,7 @@ const pickRandom = ({ array, count }: { array: any[]; count: number }) => {
 };
 
 const ConfirmBackupPhrase = () => {
+  const { t } = useTranslation('ConfirmBackupPhrase');
   const mnemonic = useMnemonic();
   const [userInputs, setUserInputs] = useState<string[]>([]);
   const [hideIndices, _setHideIndices] = useState<number[]>(
@@ -179,7 +181,7 @@ const ConfirmBackupPhrase = () => {
           fontSize: 16,
         }}
       >
-        Choose 3 words from the list below that complete the phrase
+        {t('choose3Words')}
       </Text>
       <View style={{}}>
         <FlatList

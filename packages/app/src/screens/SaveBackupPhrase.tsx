@@ -7,11 +7,13 @@ import { theme } from '@/lib/theme';
 import { copyToClipboard } from '@/lib/utils';
 import { Feather } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 const SaveBackupPhrase = () => {
   const navigation = useTypedNavigation();
+  const { t } = useTranslation('SaveBackupPhrase');
 
   const [mnemonic, setMnemonic] = useState<string | null>(null);
 
@@ -34,7 +36,7 @@ const SaveBackupPhrase = () => {
 
     Toast.show({
       type: 'success',
-      text1: 'Copied backup phrase',
+      text1: t('copied'),
       position: 'top',
     });
   }, [mnemonic]);
@@ -62,7 +64,7 @@ const SaveBackupPhrase = () => {
             fontWeight: 'bold',
           }}
         >
-          Save your backup phrase
+          {t('saveBackupPhrase')}
         </Text>
         <Text
           style={{
@@ -71,7 +73,7 @@ const SaveBackupPhrase = () => {
             color: theme.gray,
           }}
         >
-          Write down your backup phrase, or save it in a secure place.
+          {t('writeDownOrSave')}
         </Text>
       </View>
       <View
@@ -130,7 +132,7 @@ const SaveBackupPhrase = () => {
                 color: theme.text,
               }}
             >
-              Copy
+              {t('copyBackupPhrase')}
             </Text>
           </Pressable>
         )}

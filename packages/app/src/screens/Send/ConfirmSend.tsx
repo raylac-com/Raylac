@@ -18,6 +18,7 @@ import { supportedChains } from '@raylac/shared';
 import { supportedTokens } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import { formatUnits, Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
@@ -25,6 +26,7 @@ import { publicKeyToAddress } from 'viem/accounts';
 type Props = NativeStackScreenProps<RootStackParamsList, 'ConfirmSend'>;
 
 const ConfirmSend = ({ route }: Props) => {
+  const { t } = useTranslation('ConfirmSend');
   const { amount, recipientUserOrAddress, tokenId, outputChainId } =
     route.params;
   const { mutateAsync: send, isPending: isSending } = useSend();
@@ -135,7 +137,9 @@ const ConfirmSend = ({ route }: Props) => {
             color: theme.text,
           }}
         >
-          Send to {recipientName}
+          {t('sendToUser', {
+            name: recipientName,
+          })}
         </Text>
         <Text
           style={{
@@ -154,7 +158,9 @@ const ConfirmSend = ({ route }: Props) => {
             opacity: 0.6,
           }}
         >
-          ~${usdAmount}
+          {t('amountInUsd', {
+            amount: usdAmount,
+          })}
         </Text>
         <Text
           style={{
@@ -162,12 +168,16 @@ const ConfirmSend = ({ route }: Props) => {
             fontSize: 16,
           }}
         >
-          {recipientName} receives {formattedAmount.toLocaleString()}{' '}
-          {tokenMeta.symbol} on {destinationChainMetadata.name}
+          {t('receivesAmountOnChain', {
+            name: recipientName,
+            amount: formattedAmount,
+            symbol: tokenMeta.symbol,
+            chain: destinationChainMetadata.name,
+          })}
         </Text>
       </View>
       <StyledButton
-        title={'Send'}
+        title={t('send')}
         isLoading={isSending}
         onPress={() => {
           onSendPress();

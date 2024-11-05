@@ -60,6 +60,7 @@ const UserListItem = (props: UserListItemProps) => {
             opacity: 0.6,
             color: theme.text,
           }}
+          // eslint-disable-next-line react/jsx-no-literals
         >
           @{props.user.username}
         </Text>

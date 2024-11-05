@@ -1,101 +1,158 @@
 {
-  "Start": {
-    "title": "",
-    "signIn": "ログイン",
-    "createAccount": "アカウント作成",
-    "deleteAccount": "アカウント削除"
-  },
-  "SignIn": {
-    "title": "ログイン",
-    "enterYourMnemonic": "復元コードを入力",
-    "signIn": "ログイン"
-  },
-  "Home": {
-    "title": "ホーム",
-    "deposit": "チャージ",
-    "receive": "受取",
-    "send": "送金",
-    "noTransfers": "",
-    "seeAll": "全て表示"
-  },
   "Account": {
-    "title": "アカウント",
-    "signOut": "ログアウト",
-    "confirmSignOutTitle": "ログアウトしますか？",
-    "confirmSignOut": "ログアウト",
-    "backupAccount": "アカウントのバックアップ",
     "accountInfo": "アカウント情報",
+    "addresses": "アドレス",
+    "advanced": "詳細設定",
+    "backupAccount": "アカウントのバックアップ",
     "cancel": "キャンセル",
-    "language": "言語"
+    "confirmSignOut": "ログアウト",
+    "confirmSignOutTitle": "ログアウトしますか？",
+    "language": "言語",
+    "signOut": "ログアウト",
+    "title": "アカウント"
   },
   "AccountInfo": {
-    "title": "アカウント情報",
     "displayName": "名前",
-    "username": "ユーザー名",
-    "edit": "編集"
-  },
-  "UpdateDisplayName": {
-    "title": "名前を変更",
-    "save": "保存",
-    "displayName": "名前"
-  },
-  "UpdateUsername": {
-    "title": "ユーザー名を変更",
-    "save": "保存",
+    "edit": "編集",
+    "title": "アカウント情報",
     "username": "ユーザー名"
   },
-  "SignUp": {
-    "title": "アカウント作成",
-    "name": "名前",
-    "username": "ユーザー名",
-    "usernameLengthWarning": "ユーザー名は{{minChars}}文字以上である必要があります",
-    "usernameInvalid": "ユーザー名は英数字のみ使用できます",
-    "usernameTaken": "このユーザー名は既に使用されています",
-    "signUp": "次へ"
+  "Addresses": {
+    "noAddresses": "アドレスがありません",
+    "title": "アドレス"
   },
-  "Deposit": {
-    "title": "確認",
-    "sendAmountToAddress": "下記のアドレスに \n USDCをBase で送金してください",
-    "confirm": "送金しました"
-  },
-  "SendSuccess": {
-    "title": "",
-    "transferSuccessful": "送金完了",
-    "backToHome": "ホームに戻る"
-  },
-  "EnterSendAmount": {
-    "title": "金額を入力",
-    "availableBalance": "残高: {{ amount}} USDC",
-    "insufficientBalance": "残高が足りません",
-    "sendToUser": "{{ name }} へ送金"
-  },
-  "SelectRecipient": {
-    "title": "送金先を選択",
-    "searchUser": "ユーザー名で検索"
-  },
-  "ConfirmSend": {
-    "title": "確認",
-    "sendToUser": "{{ name }} へ送金",
-    "send": "送金"
-  },
-  "TransferHistory": {
-    "title": "取引履歴"
+  "Advanced": {
+    "title": "詳細設定"
   },
   "BackupAccount": {
-    "title": "アカウントのバックアップ",
     "backupWarning1": "次に表示される復元フレーズを使用することで、誰でもあなたの残高を使用することができます。",
     "backupWarning2": "次の画面が誰にも見えないことを確認してください",
-    "revealBackupPhrase": "復元フレーズを表示",
+    "copyBackupPhrase": "コピー",
     "hideBackupPhrase": "閉じる",
-    "copyBackupPhrase": "コピー"
+    "revealBackupPhrase": "復元フレーズを表示",
+    "title": "アカウントのバックアップ"
+  },
+  "ConfirmBackupPhrase": {
+    "choose3Words": "リストから3つの単語を選択して復元フレーズを完成させてください",
+    "title": "復元フレーズを確認"
+  },
+  "ConfirmSend": {
+    "amountInUsd": "~${{ amount }}",
+    "receivesAmountOnChain": "{{ name }}さん に {{ amount }} {{ symbol }} を \n {{ chain }} で送金",
+    "send": "送金",
+    "sendToUser": "{{ name }}さん に送金",
+    "title": "送金"
+  },
+  "Deposit": {
+    "copyAddress": "アドレスをコピー",
+    "depositOn": "BaseでETHまたはUSDCを入金",
+    "depositToFreshAddress": "新しいアドレスに入金することで、\n 取引の匿名性が高められます",
+    "getDepositAddress": "入金アドレスを取得",
+    "pastDepositAddresses": "過去の入金アドレス",
+    "title": "入金",
+    "pastReceivingAddresses": "過去の受取アドレス",
+    "getReceivingAddress": "受取アドレスを取得"
+  },
+  "EnterSendAmount": {
+    "availableBalance": "残高: {{ amount}} USDC",
+    "insufficientBalance": "残高が足りません",
+    "privacyNotice1": "{{ name }} さんの新しいアドレスに送金します。",
+    "privacyNotice2": "誰も {{ name }} さんに送金していることを知ることができません。",
+    "receivesOn": "さん \n が受け取るチェーン",
+    "sendToUser": "{{ name }} に送金",
+    "title": "金額を入力",
+    "usd": "ドル"
+  },
+  "Home": {
+    "deposit": "入金",
+    "fiatDenominatedBalance": "{{ balance }} ドル",
+    "noTransfers": "取引がありません",
+    "receive": "受取",
+    "seeAll": "全て表示",
+    "send": "送金",
+    "title": "ホーム"
+  },
+  "Receive": {
+    "backToHome": "ホームに戻る",
+    "orReceiveFromAnyone": "誰からでも受取",
+    "receiveFromRaylacUser": "Raylacユーザーから受取",
+    "receiveOn": "BaseでETHまたはUSDCを受取",
+    "receiveTo": "受取アドレス",
+    "receiveToFreshAddress": "新しいアドレスに受け取ることで、\n 取引の匿名性が高められます",
+    "title": "受取",
+    "yourRaylacUsername": "あなたのユーザー名",
+    "pastReceivingAddresses": "過去の受取アドレス",
+    "getReceivingAddress": "受取アドレスを取得",
+    "copyAddress": "アドレスをコピー"
+  },
+  "SaveBackupPhrase": {
+    "backupPhrase": "Backup phrase",
+    "copyBackupPhrase": "コピー",
+    "save": "保存",
+    "saveBackupPhrase": "バックアップフレーズを保存",
+    "title": "バックアップフレーズを保存",
+    "writeDownOrSave": "バックアップフレーズをメモしてください。または安全な場所に保存してください。"
   },
   "SelectLanguage": {
     "title": "言語"
   },
+  "SelectRecipient": {
+    "searchUser": "ユーザー名、またはETHアドレスで検索",
+    "title": "送金先を選択"
+  },
+  "SendSuccess": {
+    "backToHome": "ホームに戻る",
+    "title": "",
+    "transferSuccessful": "送金しました"
+  },
+  "SignIn": {
+    "enterYourMnemonic": "復元コードを入力",
+    "signIn": "ログイン",
+    "title": "ログイン"
+  },
+  "SignUp": {
+    "name": "名前",
+    "signUp": "次へ",
+    "title": "アカウント作成",
+    "username": "ユーザー名",
+    "usernameInvalid": "ユーザー名は英数字のみ使用できます",
+    "usernameLengthWarning": "ユーザー名は{{minChars}}文字以上である必要があります",
+    "usernameTaken": "このユーザー名は既に使用されています"
+  },
+  "Start": {
+    "createAccount": "アカウント作成",
+    "signIn": "ログイン",
+    "title": "アカウント作成"
+  },
+  "TransferDetails": {
+    "title": "詳細",
+    "traces": "詳細",
+    "sentTo": "{{ name }} さんに送金",
+    "receivedFrom": "{{ name }} さんから受取"
+  },
+  "TransferHistory": {
+    "noTransfers": "取引がありません",
+    "title": "取引履歴"
+  },
+  "UpdateDisplayName": {
+    "displayName": "名前",
+    "save": "保存",
+    "title": "名前を変更"
+  },
+  "UpdateUsername": {
+    "save": "保存",
+    "title": "ユーザー名を変更",
+    "username": "ユーザー名"
+  },
+  "Upgrade": {
+    "title": "アップグレード",
+    "upgradeAccount": "更新"
+  },
   "common": {
-    "next": "次へ",
+    "copied": "コピーしました",
+    "copiedAddress": "アドレスをコピーしました",
     "headerBackTitle": "戻る",
-    "signUpBonus": "新規登録ボーナス",
-    "copied": "コピーしました"
+    "next": "次へ",
+    "signUpBonus": "新規登録ボーナス"
   }
 }
