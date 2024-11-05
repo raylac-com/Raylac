@@ -8,7 +8,7 @@
   "SignIn": {
     "title": "ログイン",
     "enterYourMnemonic": "復元コードを入力",
-    "signIn":"ログイン"
+    "signIn": "ログイン"
   },
   "Home": {
     "title": "ホーム",
@@ -59,10 +59,10 @@
     "confirm": "送金しました"
   },
   "SendSuccess": {
-      "title": "",
-      "transferSuccessful": "送金完了",
-      "backToHome": "ホームに戻る"
-    },
+    "title": "",
+    "transferSuccessful": "送金完了",
+    "backToHome": "ホームに戻る"
+  },
   "EnterSendAmount": {
     "title": "金額を入力",
     "availableBalance": "残高: {{ amount}} USDC",
@@ -82,16 +82,16 @@
     "title": "取引履歴"
   },
   "BackupAccount": {
-      "title": "アカウントのバックアップ",
-      "backupWarning1": "次に表示される復元フレーズを使用することで、誰でもあなたの残高を使用することができます。",
-      "backupWarning2": "次の画面が誰にも見えないことを確認してください",
-      "revealBackupPhrase": "復元フレーズを表示",
-      "hideBackupPhrase": "閉じる",
-      "copyBackupPhrase": "コピー"
-    },
-    "SelectLanguage": {
-      "title": "言語"
-    },
+    "title": "アカウントのバックアップ",
+    "backupWarning1": "次に表示される復元フレーズを使用することで、誰でもあなたの残高を使用することができます。",
+    "backupWarning2": "次の画面が誰にも見えないことを確認してください",
+    "revealBackupPhrase": "復元フレーズを表示",
+    "hideBackupPhrase": "閉じる",
+    "copyBackupPhrase": "コピー"
+  },
+  "SelectLanguage": {
+    "title": "言語"
+  },
   "common": {
     "next": "次へ",
     "headerBackTitle": "戻る",

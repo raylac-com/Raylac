@@ -4,25 +4,25 @@
     "signIn": "Sign in",
     "createAccount": "Create new account"
   },
-    "SignIn": {
-      "title": "Sign in",
-      "enterYourMnemonic": "Enter your mnemonic",
-      "signIn":"Sign in"
-    },
-    "Home": {
-      "title": "Home",
-      "deposit": "Deposit",
-      "receive": "Receive",
+  "SignIn": {
+    "title": "Sign in",
+    "enterYourMnemonic": "Enter your mnemonic",
+    "signIn": "Sign in"
+  },
+  "Home": {
+    "title": "Home",
+    "deposit": "Deposit",
+    "receive": "Receive",
     "send": "Send",
     "noTransfers": "No transfers yet.",
     "seeAll": "See all"
-    },
-    "Receive": {
-      "title": "Receive",
-      "backToHome": "Back to home",
-      "sendAmountToAddress": "Send ETH to the following address on Base"
-    },
-    "Account": {
+  },
+  "Receive": {
+    "title": "Receive",
+    "backToHome": "Back to home",
+    "sendAmountToAddress": "Send ETH to the following address on Base"
+  },
+  "Account": {
     "title": "Account",
     "signOut": "Sign out",
     "confirmSignOutTitle": "Sign out?",
@@ -38,7 +38,7 @@
     "title": "Account info",
     "displayName": "Name",
     "username": "Username",
-    "edit": "Edit"  
+    "edit": "Edit"
   },
   "UpdateDisplayName": {
     "title": "Update Name",
@@ -47,84 +47,84 @@
   },
   "UpdateUsername": {
     "title": "Update Username",
-    "save": "Save",  
+    "save": "Save",
     "username": "Username"
   },
-    "SignUp": {
-      "title": "Sign Up",
-      "name": "Name",
+  "SignUp": {
+    "title": "Sign Up",
+    "name": "Name",
     "username": "Username",
     "usernameLengthWarning": "Username must be at least {{minChars}} characters",
     "usernameInvalid": "Username contains invalid characters",
     "usernameTaken": "Username is not available",
     "signUp": "Sign up"
-    },
-    "EnterDepositAmount": {
-      "title": "Enter Amount"
-    },
-    "Deposit": {
-      "title": "Deposit",
-      "sendAmountToAddress": "Send ETH to the following address on Base",
-      "confirm": "I made the transfer"
-    },
-    "SendSuccess": {
-      "title": "",
-      "transferSuccessful": "Transfer successful",
-      "backToHome": "Back to home"
   },
-    "EnterSendAmount": {
-      "title": "Enter Amount",
-       "availableBalance": "Balance: {{ amount}} USDC",
-       "insufficientBalance": "Insufficient balance",
-      "sendToUser": "Send to {{ name }}"
-    },
-    "SelectRecipient": {
-      "title": "Select recipient",
-      "searchUser": "Search user or Ethereum address"
-    },
-    "ConfirmSend": {
-      "title": "Confirm",
-      "sendToUser":  "Send {{ amount }} {{ symbol }} to {{ name }}",  
-      "send": "Send"
-    },
-    "TransferHistory": {
-      "title": "Transfer History"
-    },
-    "TransferDetails": {
-      "title": "Transfer details"
-    },
-    "BackupAccount": {
-      "title": "Backup Account",
-      "backupWarning1": "Anyone who has your backup phrase can access and spend your balance.",
-      "backupWarning2": "Make sure no one can see your screen when you reveal your backup phrase.",
-      "revealBackupPhrase": "Reveal backup phrase",
-      "hideBackupPhrase": "Hide backup phrase",
-      "copyBackupPhrase": "Copy"
-    },
-    "SelectLanguage": {
-      "title": "Select Language"
-    },
-    "Addresses": {
-      "title": "Addresses"
-    },
-    "Advanced": {
-      "title": "Advanced"
-    },
-    "SaveBackupPhrase": {
-      "title": "Save Backup Phrase",
-      "backupPhrase": "Backup phrase",
-      "save": "Save"
-    },
-    "ConfirmBackupPhrase": {
-      "title": "Confirm Backup"
-    },
-    "common": {
-      "next": "Next",
+  "EnterDepositAmount": {
+    "title": "Enter Amount"
+  },
+  "Deposit": {
+    "title": "Deposit",
+    "sendAmountToAddress": "Send ETH to the following address on Base",
+    "confirm": "I made the transfer"
+  },
+  "SendSuccess": {
+    "title": "",
+    "transferSuccessful": "Transfer successful",
+    "backToHome": "Back to home"
+  },
+  "EnterSendAmount": {
+    "title": "Enter Amount",
+    "availableBalance": "Balance: {{ amount}} USDC",
+    "insufficientBalance": "Insufficient balance",
+    "sendToUser": "Send to {{ name }}"
+  },
+  "SelectRecipient": {
+    "title": "Select recipient",
+    "searchUser": "Search user or Ethereum address"
+  },
+  "ConfirmSend": {
+    "title": "Confirm",
+    "sendToUser": "Send {{ amount }} {{ symbol }} to {{ name }}",
+    "send": "Send"
+  },
+  "TransferHistory": {
+    "title": "Transfer History"
+  },
+  "TransferDetails": {
+    "title": "Transfer details"
+  },
+  "BackupAccount": {
+    "title": "Backup Account",
+    "backupWarning1": "Anyone who has your backup phrase can access and spend your balance.",
+    "backupWarning2": "Make sure no one can see your screen when you reveal your backup phrase.",
+    "revealBackupPhrase": "Reveal backup phrase",
+    "hideBackupPhrase": "Hide backup phrase",
+    "copyBackupPhrase": "Copy"
+  },
+  "SelectLanguage": {
+    "title": "Select Language"
+  },
+  "Addresses": {
+    "title": "Addresses"
+  },
+  "Advanced": {
+    "title": "Advanced"
+  },
+  "SaveBackupPhrase": {
+    "title": "Save Backup Phrase",
+    "backupPhrase": "Backup phrase",
+    "save": "Save"
+  },
+  "ConfirmBackupPhrase": {
+    "title": "Confirm Backup"
+  },
+  "common": {
+    "next": "Next",
     "headerBackTitle": "Back",
-      "signUpBonus": "Sign up bonus",
-      "copied": "Copied"
-    },
-    "Upgrade": {
-      "title": "Upgrade"
-    }
+    "signUpBonus": "Sign up bonus",
+    "copied": "Copied"
+  },
+  "Upgrade": {
+    "title": "Upgrade"
   }
+}
