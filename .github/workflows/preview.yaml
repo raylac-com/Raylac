@@ -37,7 +37,10 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Install dependencies
-        run: pnpm i
+        run: pnpm i --filter .
+
+      - name: Build
+        run: pnpm turbo build
 
       - name: Create new preview channel
         run: eas channel:create ${{ github.event.pull_request.head.ref }}
