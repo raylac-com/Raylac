@@ -20,6 +20,7 @@
     "@raylac/shared": "workspace:*",
     "@raylac/sync": "workspace:*",
     "@trpc/server": "^11.0.0-rc.439",
+    "@types/express": "^5.0.0",
     "@types/node": "^20.11.17",
     "axios": "^1.7.2",
     "express": "^4.21.1",

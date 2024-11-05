@@ -4,11 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "pnpm exec prisma generate",
-    "down": "docker-compose down",
+    "db:build": "pnpm exec prisma generate",
     "migrate:dev": "pnpm exec pnpm exec prisma migrate dev",
-    "migrate:prod": "pnpm exec prisma migrate deploy",
-    "start": "pnpm down && docker-compose up -d && pnpm migrate:dev"
+    "migrate:prod": "pnpm exec prisma migrate deploy"
   },
   "keywords": [],
   "author": "",

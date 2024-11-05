@@ -7,7 +7,7 @@ services:
     previewPlan: starter
     runtime: node
     region: oregon
-    buildCommand: pnpm i --filter . --ignore-scripts && pnpm turbo build
+    buildCommand: pnpm i --filter . --ignore-scripts && pnpm turbo db:build && pnpm turbo build
     startCommand: NODE_ENV=production pnpm -F api start
     preDeployCommand: pnpm -F db migrate:prod
     autoDeploy: true
@@ -29,7 +29,7 @@ services:
     previewPlan: starter
     runtime: node
     region: oregon
-    buildCommand: pnpm i --filter . --ignore-scripts && pnpm turbo build
+    buildCommand: pnpm i --filter . --ignore-scripts && pnpm turbo db:build && pnpm turbo build
     startCommand: pnpm -F sync start
     preDeployCommand: pnpm -F db migrate:prod
     rootDir: ./
