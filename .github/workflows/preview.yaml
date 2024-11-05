@@ -81,5 +81,5 @@ jobs:
         uses: mobile-dev-inc/action-maestro-cloud@v1
         with:
           api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
-          app-file: build/raylac.apk
+          app-file: packages/app/build/raylac.apk
           workspace: packages/app
