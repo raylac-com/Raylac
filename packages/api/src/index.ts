@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { z } from 'zod';
 import prisma from './lib/prisma';
 import { Hex } from 'viem';
@@ -32,7 +31,10 @@ import getTransferDetails from './api/getTransferDetails';
 import toggleDevMode from './api/toggleDevMode';
 import addStealthAccount from './api/addStealthAccount';
 import getAddressNonces from './api/getAddressNonces';
-import version from './api/version';
+import express from 'express';
+import { createHTTPServer } from '@trpc/server/adapters/standalone';
+import { logger } from './utils';
+
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 
@@ -361,10 +363,6 @@ export const appRouter = router({
         devModeEnabled: input.devModeEnabled,
       });
     }),
-
-  version: publicProcedure.query(async () => {
-    return await version();
-  }),
 });
 
 export const createCaller = createCallerFactory(appRouter);
@@ -377,4 +375,19 @@ const server = createHTTPServer({
   createContext,
 });
 
+const app = express();
+
+app.get('/version', (_req, res) => {
+  const RENDER_GIT_COMMIT = process.env.RENDER_GIT_COMMIT;
+
+  if (!RENDER_GIT_COMMIT) {
+    throw new Error('RENDER_GIT_COMMIT is not set');
+  }
+
+  logger.info(`RENDER_GIT_COMMIT: ${RENDER_GIT_COMMIT}`);
+
+  res.send(RENDER_GIT_COMMIT);
+});
+
 server.listen(3000);
+app.listen(4000);
