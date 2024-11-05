@@ -9,7 +9,8 @@
     "test": "vitest",
     "build": "pnpm i && tsc -d",
     "build:watch": "tsc -d --watch",
-    "prune": "tsx scripts/prune.ts"
+    "prune": "tsx scripts/prune.ts",
+    "postinstall": "tsc -d"
   },
   "dependencies": {
     "@prisma/client": "5.12.1",

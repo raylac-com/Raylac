@@ -11,7 +11,8 @@
   ],
   "scripts": {
     "build": "pnpm i && tsc -d",
-    "build:watch": "tsc -d --watch"
+    "build:watch": "tsc -d --watch",
+    "postinstall": "tsc -d"
   },
   "keywords": [],
   "author": "",

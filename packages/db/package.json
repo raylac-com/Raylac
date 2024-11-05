@@ -6,7 +6,8 @@
   "scripts": {
     "build": "pnpm i && pnpm exec prisma generate",
     "migrate:dev": "pnpm exec pnpm exec prisma migrate dev",
-    "migrate:prod": "pnpm exec prisma migrate deploy"
+    "migrate:prod": "pnpm exec prisma migrate deploy",
+    "prepare": "pnpm exec prisma generate && cp -n .env.example .env || true"
   },
   "keywords": [],
   "author": "",
