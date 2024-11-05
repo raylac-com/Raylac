@@ -2,7 +2,7 @@ import { trpc } from '@/lib/trpc';
 import useIsSignedIn from './useIsSignedIn';
 import { useCallback } from 'react';
 import { formatAmount, toCoingeckoTokenId } from '@raylac/shared';
-import supportedTokens from '@raylac/shared/out/supportedTokens';
+import { supportedTokens } from '@raylac/shared';
 import { formatUnits } from 'viem';
 
 const useTokenBalances = () => {

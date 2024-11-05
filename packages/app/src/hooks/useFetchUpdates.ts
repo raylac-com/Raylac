@@ -1,6 +1,6 @@
 import * as Updates from 'expo-updates';
-import { useEffect } from 'react';
 import Constants from 'expo-constants';
+import { useQuery } from '@tanstack/react-query';
 
 const fetchUpdateAsync = async () => {
   const isExpoGo = Constants.appOwnership === 'expo';
@@ -15,12 +15,15 @@ const fetchUpdateAsync = async () => {
     // eslint-disable-next-line no-console
     console.log('Skipping update check in Expo Go');
   }
+
+  return null;
 };
 
 const useFetchUpdates = () => {
-  useEffect(() => {
-    fetchUpdateAsync();
-  }, []);
+  return useQuery({
+    queryKey: ['fetchUpdates'],
+    queryFn: fetchUpdateAsync,
+  });
 };
 
 export default useFetchUpdates;
