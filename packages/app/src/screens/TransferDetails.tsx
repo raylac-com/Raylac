@@ -5,6 +5,7 @@ import useSignedInUser from '@/hooks/useSignedInUser';
 import { theme } from '@/lib/theme';
 import { trpc } from '@/lib/trpc';
 import {
+  copyToClipboard,
   getAvatarAddress,
   getDisplayName,
   getFinalTransfer,
@@ -15,7 +16,7 @@ import {
 } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import { TraceItem } from '@/types';
-import { Entypo } from '@expo/vector-icons';
+import { Entypo, Feather } from '@expo/vector-icons';
 import {
   formatAmount,
   getBlockExplorerUrl,
@@ -23,7 +24,9 @@ import {
 } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { Hex } from 'viem';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'TransferDetails'>;
@@ -88,6 +91,8 @@ const TransferDetails = ({ route }: Props) => {
   const { data: signedInUser } = useSignedInUser();
   const [showTraces, setShowTraces] = useState(false);
 
+  const { t } = useTranslation();
+
   const { data: transferDetail } = trpc.getTransferDetails.useQuery({
     txHash,
   });
@@ -124,6 +129,15 @@ const TransferDetails = ({ route }: Props) => {
   const displayName =
     type === 'outgoing' ? getDisplayName(to) : getDisplayName(from);
 
+  const onCopyPress = () => {
+    copyToClipboard(avatarAddress);
+    Toast.show({
+      type: 'success',
+      text1: t('copied', { ns: 'common' }),
+      position: 'bottom',
+    });
+  };
+
   return (
     <ScrollView
       contentContainerStyle={{
@@ -142,15 +156,21 @@ const TransferDetails = ({ route }: Props) => {
         imageUrl={profileImage}
         size={80}
       ></FastAvatar>
-      <Text
-        style={{
-          color: theme.text,
-          fontSize: 14,
-        }}
+      <Pressable
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+        onPress={onCopyPress}
       >
-        {type === 'outgoing' ? 'Sent to ' : 'Received from '}
-        {displayName}
-      </Text>
+        <Text
+          style={{
+            color: theme.text,
+            fontSize: 14,
+          }}
+        >
+          {type === 'outgoing' ? 'Sent to ' : 'Received from '}
+          {displayName}
+        </Text>
+        <Feather name="copy" size={14} color={theme.text} />
+      </Pressable>
       <Text
         style={{
           color: theme.text,
