@@ -48,23 +48,14 @@ jobs:
         run: eas channel:edit ${{ github.event.pull_request.head.ref }} --branch ${{ github.event.pull_request.head.ref }}
         working-directory: packages/app
 
-      - name: Create preview
-        uses: expo/expo-github-action/preview@v8
-        with:
-          command: eas update --auto --channel ${{ github.event.pull_request.head.ref }}
-          working-directory: packages/app
-        env:
-          EXPO_PUBLIC_RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
-          EXPO_PUBLIC_ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
-
       - name: Link branch to test channel
         run: eas channel:edit test --branch ${{ github.event.pull_request.head.ref }}
         working-directory: packages/app
 
-      - name: Push updates to test
+      - name: Run eas update for the preview branch and test branch
         uses: expo/expo-github-action/preview@v8
         with:
-          command: eas update --auto --channel test
+          command: eas update --auto --channel ${{ github.event.pull_request.head.ref }} & eas update --auto --channel test
           working-directory: packages/app
         env:
           EXPO_PUBLIC_RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
@@ -75,3 +66,4 @@ jobs:
         with:
           api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
           app-file: packages/app/build/raylac.apk
+          working-directory: packages/app
