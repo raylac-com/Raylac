@@ -8,7 +8,6 @@
     "down": "docker-compose down",
     "migrate:dev": "pnpm exec pnpm exec prisma migrate dev",
     "migrate:prod": "pnpm exec prisma migrate deploy",
-    "prepare": "pnpm exec prisma generate && cp -n .env.example .env || true",
     "start": "pnpm down && docker-compose up -d && pnpm migrate:dev"
   },
   "keywords": [],
