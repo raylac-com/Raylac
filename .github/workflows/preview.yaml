@@ -10,8 +10,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  update:
-    name: EAS Update
+  setup-preview:
+    name: Setup EAS preview
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -57,6 +57,10 @@ jobs:
           EXPO_PUBLIC_RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
           EXPO_PUBLIC_ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
 
+      - name: Link branch to test channel
+        run: eas channel:edit test --branch ${{ github.event.pull_request.head.ref }}
+        working-directory: packages/app
+
       - name: Push updates to test
         uses: expo/expo-github-action/preview@v8
         with:
@@ -70,4 +74,4 @@ jobs:
         uses: mobile-dev-inc/action-maestro-cloud@v1
         with:
           api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
-          app-file: packages/app/build/raylac.app
+          app-file: packages/app/build/raylac.apk
