@@ -10,9 +10,8 @@
     "out"
   ],
   "scripts": {
-    "build": "tsc -d",
-    "build:watch": "tsc -d --watch",
-    "postinstall": "pnpm build"
+    "build": "pnpm i && tsc -d",
+    "build:watch": "tsc -d --watch"
   },
   "keywords": [],
   "author": "",
