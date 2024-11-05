@@ -141,14 +141,22 @@ export const appRouter = router({
   /**
    * Get the transaction history of the user
    */
-  getTxHistory: authedProcedure.query(async opts => {
-    const userId = opts.ctx.userId;
-    const isDevMode = opts.ctx.isDevMode;
+  getTransferHistory: authedProcedure
+    .input(
+      z.object({
+        take: z.number().optional(),
+        skip: z.number().optional(),
+      })
+    )
+    .query(async opts => {
+      const userId = opts.ctx.userId;
+      const take = opts.input?.take;
+      const skip = opts.input?.skip;
 
-    const transfers = await getTransferHistory({ userId, isDevMode });
+      const transfers = await getTransferHistory({ userId, take, skip });
 
-    return transfers;
-  }),
+      return transfers;
+    }),
 
   getTransferDetails: authedProcedure
     .input(

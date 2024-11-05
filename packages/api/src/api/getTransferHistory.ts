@@ -1,17 +1,19 @@
 import prisma from '../lib/prisma';
-import { getChainsForMode } from '@raylac/shared';
+import { supportedChains } from '@raylac/shared';
 
 /**
  * Get the transaction history of all stealth addresses for a user
  */
 const getTransferHistory = async ({
   userId,
-  isDevMode,
+  take,
+  skip,
 }: {
   userId: number;
-  isDevMode: boolean;
+  take?: number;
+  skip?: number;
 }) => {
-  const chainIds = getChainsForMode(isDevMode).map(chain => chain.id);
+  const chainIds = supportedChains.map(chain => chain.id);
 
   const transactions = await prisma.transaction.findMany({
     select: {
@@ -94,6 +96,8 @@ const getTransferHistory = async ({
         number: 'desc',
       },
     },
+    take,
+    skip,
   });
 
   // Filter out the traces that are not to the user's stealth address

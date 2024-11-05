@@ -4,7 +4,7 @@ import { trpc } from '@/lib/trpc';
 import { FlatList, Text, View } from 'react-native';
 
 const TransferHistory = () => {
-  const { data: txHistory } = trpc.getTxHistory.useQuery();
+  const { data: transferHistory } = trpc.getTransferHistory.useQuery({});
   const { data: signedInUser } = useSignedInUser();
 
   return (
@@ -19,7 +19,7 @@ const TransferHistory = () => {
         contentContainerStyle={{
           paddingHorizontal: 16,
         }}
-        data={txHistory}
+        data={transferHistory}
         renderItem={({ item }) => (
           <TransferHistoryListItem
             transfer={item}
@@ -31,7 +31,7 @@ const TransferHistory = () => {
           />
         )}
       />
-      {txHistory?.length === 0 ? (
+      {transferHistory?.length === 0 ? (
         <Text
           style={{
             textAlign: 'center',
