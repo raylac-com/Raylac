@@ -53,14 +53,14 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Create new preview channel
-        run: eas channel:create ${{ github.event.pull_request.head.ref }}
-        working-directory: packages/app
-        continue-on-error: true
+      #- name: Create new preview channel
+      #  run: eas channel:create ${{ github.event.pull_request.head.ref }}
+      #  working-directory: packages/app
+      #  continue-on-error: true
 
-      - name: Link branch to channel
-        run: eas channel:edit ${{ github.event.pull_request.head.ref }} --branch ${{ github.event.pull_request.head.ref }}
-        working-directory: packages/app
+      #- name: Link branch to channel
+      #  run: eas channel:edit ${{ github.event.pull_request.head.ref }} --branch ${{ github.event.pull_request.head.ref }}
+      #  working-directory: packages/app
 
       - name: Link branch to test channel
         run: eas channel:edit test --branch ${{ github.event.pull_request.head.ref }}
