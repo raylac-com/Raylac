@@ -55,7 +55,10 @@ jobs:
       - name: Run eas update for the preview branch and test branch
         uses: expo/expo-github-action/preview@v8
         with:
-          command: eas update --auto --channel ${{ github.event.pull_request.head.ref }} & eas update --auto --channel test
+          command: |
+            eas update --auto --channel ${{ github.event.pull_request.head.ref }} 
+            & eas update --auto --channel test 
+            & wait
           working-directory: packages/app
         env:
           EXPO_PUBLIC_RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
