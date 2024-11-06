@@ -8,6 +8,7 @@ import {
   RAYLAC_PAYMASTER_ADDRESS,
   signUserOpWithStealthAccount,
   StealthAddressWithEphemeral,
+  supportedTokens,
   toCoingeckoTokenId,
 } from '@raylac/shared';
 import { buildMultiChainSendRequestBody } from '@raylac/shared/src/multiChainSend';
@@ -18,7 +19,6 @@ import { client, getAuthedClient } from '../lib/rpc';
 import { describe } from 'node:test';
 import { MNEMONIC, signInAsTestUser } from '../lib/auth';
 import { getAddressBalance } from '../lib/utils';
-import supportedTokens from '@raylac/shared/src/supportedTokens';
 import { CoingeckoTokenPriceResponse } from '@raylac/shared/src/types';
 
 const IS_DEV_MODE = false;

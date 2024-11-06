@@ -95,7 +95,8 @@
   },
   "SelectRecipient": {
     "searchUser": "Search user or Ethereum address",
-    "title": "Select recipient"
+    "title": "Select recipient",
+    "paste": "Paste"
   },
   "SendSuccess": {
     "backToHome": "Back to home",

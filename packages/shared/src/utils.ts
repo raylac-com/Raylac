@@ -480,6 +480,11 @@ const getCalls = (
   return [{ ...tx, txHash, traceAddress }];
 };
 
+/**
+ * Get native transfer traces in the given block
+ * - Calls the `trace_block` RPC method under the hood, and only returns calls
+ *   that are `CALL` type and have a value
+ */
 export const getNativeTransferTracesInBlock = async ({
   blockNumber,
   chainId,
