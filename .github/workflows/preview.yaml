@@ -24,11 +24,15 @@ jobs:
       contents: read
       pull-requests: write
     steps:
-      - name: Debug commit
-        run: ${{ COMMIT_MESSAGE=$(git log -1 --pretty=%B) && echo $COMMIT_MESSAGE  }}
+      - name: Get Commit Message
+        id: get_commit_message
+        run: echo "COMMIT_MESSAGE=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
+
+      - name: Print Commit Message
+        run: echo ${{ env.COMMIT_MESSAGE }}
 
       - name: Check if we should skip the build step
-        run: if ${{ COMMIT_MESSAGE=$(git log -1 --pretty=%B) && ! contains(COMMIT_MESSAGE, '[skip build]') }}; then exit 0; else exit 1; fi
+        run: if ${{ ! contains(env.COMMIT_MESSAGE, '[skip build]') }}; then exit 0; else exit 1; fi
 
       - name: Checkout repository
         uses: actions/checkout@v4
