@@ -80,7 +80,8 @@
     "title": "Receive",
     "yourRaylacUsername": "Your Raylac username",
     "pastReceivingAddresses": "Past receiving addresses",
-    "getReceivingAddress": "Get receiving address"
+    "getReceivingAddress": "Get receiving address",
+    "copyAddress": "Copy address"
   },
   "SaveBackupPhrase": {
     "backupPhrase": "Backup phrase",
