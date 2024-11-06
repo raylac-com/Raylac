@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   setup-preview:
-    if: ${{ COMMIT_MESSAGE=$(git log -1 --pretty=%B) && ! contains(COMMIT_MESSAGE, '[skip build]') }}
+  # if: ${{ COMMIT_MESSAGE=$(git log -1 --pretty=%B) && ! contains(COMMIT_MESSAGE, '[skip build]') }}
     name: Setup EAS preview
     runs-on: ubuntu-latest
     env:
@@ -25,7 +25,10 @@ jobs:
       pull-requests: write
     steps:
       - name: Debug commit
-        run: ${{ COMMIT_MESSAGE=$(git log -1 --pretty=%B) && echo $COMMIT_MESSAGE }}
+        run: ${{ COMMIT_MESSAGE=$(git log -1 --pretty=%B) && echo $COMMIT_MESSAGE  }}
+
+      - name: Check if we should skip the build step
+        run: if ${{ COMMIT_MESSAGE=$(git log -1 --pretty=%B) && ! contains(COMMIT_MESSAGE, '[skip build]') }}; then exit 0; else exit 1; fi
 
       - name: Checkout repository
         uses: actions/checkout@v4
