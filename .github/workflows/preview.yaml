@@ -24,6 +24,9 @@ jobs:
       contents: read
       pull-requests: write
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Get Commit Message
         id: get_commit_message
         run: echo "COMMIT_MESSAGE=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
@@ -33,9 +36,6 @@ jobs:
 
       - name: Check if we should skip the build step
         run: if ${{ ! contains(env.COMMIT_MESSAGE, '[skip build]') }}; then exit 0; else exit 1; fi
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
       - name: Cache turbo build setup
         uses: actions/cache@v4
