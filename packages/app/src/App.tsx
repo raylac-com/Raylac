@@ -95,8 +95,6 @@ const Screens = () => {
 
   const { i18n } = useTranslation();
 
-  const { isFetching: isFetchingUpdates } = useFetchUpdates();
-
   useEffect(() => {
     (async () => {
       const lang = await getSelectedLanguage();
@@ -114,19 +112,13 @@ const Screens = () => {
 
   useEffect(() => {
     (async () => {
-      if (!isFetchingUpdates) {
-        if (signedInUser === null && !isLoadingUser) {
-          navigation.navigate('Start');
-        } else if (signedInUser && !(await isBackupVerificationComplete())) {
-          navigation.navigate('SaveBackupPhrase');
-        }
+      if (signedInUser === null && !isLoadingUser) {
+        navigation.navigate('Start');
+      } else if (signedInUser && !(await isBackupVerificationComplete())) {
+        navigation.navigate('SaveBackupPhrase');
       }
     })();
-  }, [signedInUser, isLoadingUser, isFetchingUpdates]);
-
-  if (isFetchingUpdates) {
-    return null;
-  }
+  }, [signedInUser, isLoadingUser]);
 
   return (
     <SafeAreaView
@@ -366,6 +358,12 @@ const asyncStoragePersister = createAsyncStoragePersister({
 });
 
 const App = () => {
+  const { isFetchingUpdates } = useFetchUpdates();
+
+  if (isFetchingUpdates) {
+    return null;
+  }
+
   const trpcClient = trpc.createClient({
     links: rpcLinks,
   });
