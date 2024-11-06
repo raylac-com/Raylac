@@ -66,23 +66,24 @@ jobs:
         run: eas channel:edit test --branch ${{ github.event.pull_request.head.ref }}
         working-directory: packages/app
 
-      - name: Run eas update for the preview branch
-        uses: expo/expo-github-action/preview@v8
-        with:
-          command: eas update --auto --channel ${{ github.event.pull_request.head.ref }}
-          working-directory: packages/app
-        env:
-          EXPO_PUBLIC_RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
-          EXPO_PUBLIC_ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+      - name: Create a .env file
+        run: printf "EXPO_PUBLIC_RPC_URL=https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com\nEXPO_PUBLIC_ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}\n" > .env
+        working-directory: packages/app
+
+      #- name: Run eas update for the preview branch
+      #  uses: expo/expo-github-action/preview@v8
+      #  with:
+      #    command: eas update --auto --channel ${{ github.event.pull_request.head.ref }}
+      #    working-directory: packages/app
+      #    env:
+      #      EXPO_PUBLIC_RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
+      #      EXPO_PUBLIC_ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
 
       - name: Run eas update for the test branch
         uses: expo/expo-github-action/preview@v8
         with:
           command: eas update --auto --channel test
           working-directory: packages/app
-        env:
-          EXPO_PUBLIC_RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
-          EXPO_PUBLIC_ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
 
   test-ios:
     name: Run Maestro tests on ios
