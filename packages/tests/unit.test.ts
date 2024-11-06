@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { getBlockNumFromTimestamp } from '@raylac/sync';
-import supportedChains from '@raylac/shared/out/supportedChains';
+import { supportedChains } from '@raylac/shared';
 import { getPublicClient } from '@raylac/shared';
 
 describe('unit tests', () => {

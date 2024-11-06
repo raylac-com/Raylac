@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "main": "./index.js",
   "scripts": {
+    "build": "pnpm i",
     "start": "expo start -c",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "check-i18n": "sync-i18n --files 'src/translations/*.json' --primary en --languages ja --space 1 --check"
   },
   "dependencies": {
     "@expo/config": "~9.0.0",
@@ -22,8 +24,10 @@
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.9.26",
     "@sentry/cli": "^2.32.1",
-    "@sentry/react-native": "^5.22.3",
+    "@sentry/react-native": "^5.24.3",
+    "@tanstack/query-async-storage-persister": "^5.59.17",
     "@tanstack/react-query": "^5.48.0",
+    "@tanstack/react-query-persist-client": "^5.59.19",
     "@trpc/client": "11.0.0-rc.439",
     "@trpc/react-query": "11.0.0-rc.439",
     "@trpc/server": "11.0.0-rc.439",
@@ -33,19 +37,21 @@
     "buffer": "^6.0.3",
     "date-fns": "^4.1.0",
     "ethereum-blockies-base64": "^1.0.2",
-    "expo": "~51.0.34",
+    "expo": "~51.0.38",
     "expo-asset": "~10.0.10",
     "expo-camera": "~15.0.16",
     "expo-clipboard": "~6.0.3",
     "expo-constants": "~16.0.2",
-    "expo-dev-client": "~4.0.26",
+    "expo-dev-client": "~4.0.28",
+    "expo-device": "~6.0.2",
     "expo-image-manipulator": "~12.0.5",
     "expo-image-picker": "~15.0.7",
     "expo-linking": "~6.3.1",
+    "expo-localization": "~15.0.3",
     "expo-secure-store": "~13.0.2",
     "expo-status-bar": "~1.12.1",
     "expo-system-ui": "~3.0.7",
-    "expo-updates": "^0.25.25",
+    "expo-updates": "^0.25.27",
     "i18next": "^23.11.5",
     "mixpanel-react-native": "^3.0.7",
     "react": "18.2.0",
@@ -64,7 +70,8 @@
   "devDependencies": {
     "@babel/core": "^7.24.4",
     "@babel/runtime": "^7.24.7",
-    "babel-preset-expo": "^11.0.11"
+    "babel-preset-expo": "^11.0.11",
+    "i18next-json-sync": "^3.1.2"
   },
   "private": true
 }

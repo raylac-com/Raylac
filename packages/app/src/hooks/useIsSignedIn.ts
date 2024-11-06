@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import userKeys from '@/queryKeys/userKeys';
 import { getSignedInUserId } from '@/lib/utils';
 import { getAuthToken } from '@/lib/auth';
-import { client } from '@/lib/trpc';
+import { getRpcClient } from '@/lib/trpc';
 
 const useIsSignedIn = () => {
   return useQuery({
@@ -19,6 +19,7 @@ const useIsSignedIn = () => {
         return false;
       }
 
+      const client = getRpcClient();
       const user = await client.getUser.query({ userId: signedInUserId });
 
       if (!user) {

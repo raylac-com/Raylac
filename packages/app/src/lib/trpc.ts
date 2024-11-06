@@ -10,27 +10,31 @@ export const trpc = createTRPCReact<AppRouter>();
 
 const EXPO_PUBLIC_RPC_URL = process.env.EXPO_PUBLIC_RPC_URL;
 
-if (!EXPO_PUBLIC_RPC_URL) {
-  throw new Error('Missing EXPO_PUBLIC_RPC_URL');
-}
+export const getRpcLinks = () => {
+  return [
+    httpBatchLink({
+      url: EXPO_PUBLIC_RPC_URL,
+      async headers() {
+        if (!EXPO_PUBLIC_RPC_URL) {
+          throw new Error('Missing EXPO_PUBLIC_RPC_URL');
+        }
 
-export const rpcLinks = [
-  httpBatchLink({
-    url: EXPO_PUBLIC_RPC_URL,
-    async headers() {
-      const authToken = await getAuthToken();
+        const authToken = await getAuthToken();
 
-      if (authToken) {
-        return {
-          authorization: `Bearer ${authToken}`,
-        };
-      }
+        if (authToken) {
+          return {
+            authorization: `Bearer ${authToken}`,
+          };
+        }
 
-      return {};
-    },
-  }),
-];
+        return {};
+      },
+    }),
+  ];
+};
 
-export const client = createTRPCClient<AppRouter>({
-  links: rpcLinks,
-});
+export const getRpcClient = () => {
+  return createTRPCClient<AppRouter>({
+    links: getRpcLinks(),
+  });
+};

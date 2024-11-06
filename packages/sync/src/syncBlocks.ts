@@ -4,7 +4,7 @@ import { Block, Hex } from 'viem';
 import { Prisma } from '@prisma/client';
 import { getWebsocketClient } from '@raylac/shared/src';
 import { logger } from './utils';
-import supportedChains from '@raylac/shared/out/supportedChains';
+import { supportedChains } from '@raylac/shared';
 
 const saveNewBlock = async ({
   block,
@@ -33,7 +33,7 @@ const saveNewBlock = async ({
     logger.error(error);
   }
 
-  logger.info(
+  logger.debug(
     `Saved new block ${block.number?.toLocaleString()} on chain ${chainId}`
   );
 };

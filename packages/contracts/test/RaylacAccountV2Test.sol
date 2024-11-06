@@ -27,13 +27,13 @@ contract RaylacAccountV2Test is Test {
     account = accountFactory.createAccount(stealthSigner);
   }
 
-  function test_initialize() public {
+  function test_CannotInitializeTwice() public {
     // Shouldn't be able to call twice
     vm.expectRevert('Initializable: contract is already initialized');
     account.initialize(stealthSigner);
   }
 
-  function test_execute() public {
+  function test_CannotExecuteWithoutEntryPoint() public {
     vm.expectRevert('account: not from EntryPoint');
     account.execute(address(0), 0, '', '');
   }

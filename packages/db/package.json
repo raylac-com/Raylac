@@ -4,12 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "pnpm exec prisma generate",
-    "down": "docker-compose down",
+    "build": "pnpm i && pnpm exec prisma generate",
     "migrate:dev": "pnpm exec pnpm exec prisma migrate dev",
     "migrate:prod": "pnpm exec prisma migrate deploy",
-    "prepare": "pnpm exec prisma generate && cp -n .env.example .env || true",
-    "start": "pnpm down && docker-compose up -d && pnpm migrate:dev"
+    "prepare": "pnpm exec prisma generate && cp -n .env.example .env || true"
   },
   "keywords": [],
   "author": "",

@@ -2,7 +2,7 @@ import { sleep } from '@raylac/shared';
 import { getAddress, Hex } from 'viem';
 import prisma from './lib/prisma';
 import { Prisma } from '@prisma/client';
-import supportedChains from '@raylac/shared/out/supportedChains';
+import { supportedChains } from '@raylac/shared';
 import { logger } from './utils';
 
 export const assignAddressToTraces = async ({ address }: { address: Hex }) => {

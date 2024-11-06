@@ -1,5 +1,5 @@
 import { getPublicClient } from '@raylac/shared';
-import supportedChains from '@raylac/shared/out/supportedChains';
+import { supportedChains } from '@raylac/shared';
 import { anvil, base } from 'viem/chains';
 
 const getBlockTime = async () => {

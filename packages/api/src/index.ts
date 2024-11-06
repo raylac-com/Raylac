@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { z } from 'zod';
 import prisma from './lib/prisma';
 import { Hex } from 'viem';
@@ -32,6 +31,9 @@ import getTransferDetails from './api/getTransferDetails';
 import toggleDevMode from './api/toggleDevMode';
 import addStealthAccount from './api/addStealthAccount';
 import getAddressNonces from './api/getAddressNonces';
+import express from 'express';
+import { createHTTPServer } from '@trpc/server/adapters/standalone';
+import { logger } from './utils';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -139,14 +141,22 @@ export const appRouter = router({
   /**
    * Get the transaction history of the user
    */
-  getTxHistory: authedProcedure.query(async opts => {
-    const userId = opts.ctx.userId;
-    const isDevMode = opts.ctx.isDevMode;
+  getTransferHistory: authedProcedure
+    .input(
+      z.object({
+        take: z.number().optional(),
+        skip: z.number().optional(),
+      })
+    )
+    .query(async opts => {
+      const userId = opts.ctx.userId;
+      const take = opts.input?.take;
+      const skip = opts.input?.skip;
 
-    const transfers = await getTransferHistory({ userId, isDevMode });
+      const transfers = await getTransferHistory({ userId, take, skip });
 
-    return transfers;
-  }),
+      return transfers;
+    }),
 
   getTransferDetails: authedProcedure
     .input(
@@ -373,4 +383,19 @@ const server = createHTTPServer({
   createContext,
 });
 
+const app = express();
+
+app.get('/version', (_req, res) => {
+  const RENDER_GIT_COMMIT = process.env.RENDER_GIT_COMMIT;
+
+  if (!RENDER_GIT_COMMIT) {
+    throw new Error('RENDER_GIT_COMMIT is not set');
+  }
+
+  logger.info(`RENDER_GIT_COMMIT: ${RENDER_GIT_COMMIT}`);
+
+  res.send(RENDER_GIT_COMMIT);
+});
+
 server.listen(3000);
+app.listen(4000);

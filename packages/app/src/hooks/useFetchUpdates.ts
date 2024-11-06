@@ -1,26 +1,32 @@
 import * as Updates from 'expo-updates';
-import { useEffect } from 'react';
 import Constants from 'expo-constants';
-
-const fetchUpdateAsync = async () => {
-  const isExpoGo = Constants.appOwnership === 'expo';
-
-  if (!isExpoGo) {
-    const { isAvailable } = await Updates.checkForUpdateAsync();
-    if (isAvailable) {
-      await Updates.fetchUpdateAsync();
-      await Updates.reloadAsync();
-    }
-  } else {
-    // eslint-disable-next-line no-console
-    console.log('Skipping update check in Expo Go');
-  }
-};
+import { useEffect, useState } from 'react';
 
 const useFetchUpdates = () => {
+  const [isFetchingUpdates, setIsFetchingUpdates] = useState(true);
+
+  const isExpoGo = Constants.appOwnership === 'expo';
+
   useEffect(() => {
-    fetchUpdateAsync();
+    (async () => {
+      if (!isExpoGo) {
+        const { isAvailable } = await Updates.checkForUpdateAsync();
+        if (isAvailable) {
+          await Updates.fetchUpdateAsync();
+          await Updates.reloadAsync();
+        }
+      } else {
+        // eslint-disable-next-line no-console
+        console.log('Skipping update check in Expo Go');
+      }
+
+      setIsFetchingUpdates(false);
+    })();
   }, []);
+
+  return {
+    isFetchingUpdates,
+  };
 };
 
 export default useFetchUpdates;

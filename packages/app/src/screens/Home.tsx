@@ -8,7 +8,7 @@ import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import { useTranslation } from 'react-i18next';
 import StyledPressable from '@/components/StyledPressable';
-import supportedTokens from '@raylac/shared/out/supportedTokens';
+import { supportedTokens } from '@raylac/shared';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTokenBalances from '@/hooks/useTokenBalance';
 import { getTransferType } from '@/lib/utils';
@@ -21,6 +21,7 @@ interface TokenBalanceItemProps {
 
 const TokenBalanceItem = (props: TokenBalanceItemProps) => {
   const { tokenId, formattedBalance, formattedUsdBalance } = props;
+  const { t } = useTranslation('Home');
 
   const tokenMetadata = supportedTokens.find(
     token => token.tokenId === tokenId
@@ -60,7 +61,9 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
             fontSize: 20,
           }}
         >
-          {`${formattedUsdBalance} USD`}
+          {t('fiatDenominatedBalance', {
+            balance: formattedUsdBalance,
+          })}
         </Text>
         <Text
           style={{
@@ -79,11 +82,12 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
 interface MenuItemProps {
   icon: React.ReactNode;
   title: string;
+  testID: string;
   onPress: () => void;
 }
 
 const MenuItem = (props: MenuItemProps) => {
-  const { icon, title, onPress } = props;
+  const { icon, title, onPress, testID } = props;
 
   return (
     <StyledPressable
@@ -92,6 +96,7 @@ const MenuItem = (props: MenuItemProps) => {
         flexDirection: 'column',
         alignItems: 'center',
       }}
+      testID={testID}
     >
       <View
         style={{
@@ -121,7 +126,7 @@ const MenuItem = (props: MenuItemProps) => {
   );
 };
 
-const NUM_TRANSFERS_TO_SHOW = 5;
+const NUM_TRANSFERS_TO_FETCH = 7;
 
 const HomeScreen = () => {
   const { t } = useTranslation('Home');
@@ -135,22 +140,28 @@ const HomeScreen = () => {
   } = useTokenBalances();
 
   const {
-    data: txHistory,
-    refetch: refetchTxHistory,
-    isRefetching: isRefetchingTxHistory,
-  } = trpc.getTxHistory.useQuery(null, {
-    enabled: isSignedIn,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-    throwOnError: false,
-  });
+    data: transferHistory,
+    refetch: refetchTransferHistory,
+    isRefetching: isRefetchingTransferHistory,
+  } = trpc.getTransferHistory.useQuery(
+    {
+      take: NUM_TRANSFERS_TO_FETCH,
+      skip: 0,
+    },
+    {
+      enabled: isSignedIn,
+      refetchOnWindowFocus: true,
+      refetchOnMount: true,
+      throwOnError: false,
+    }
+  );
 
   const navigation = useTypedNavigation();
 
   const onRefresh = useCallback(() => {
     refetchBalances();
-    refetchTxHistory();
-  }, [refetchBalances, refetchTxHistory]);
+    refetchTransferHistory();
+  }, [refetchBalances, refetchTransferHistory]);
 
   useEffect(() => {
     if (isSignedIn === false) {
@@ -167,7 +178,7 @@ const HomeScreen = () => {
       }, 0)
     : null;
 
-  if (!isSignedIn || !signedInUser) {
+  if (!isSignedIn || !signedInUser || totalUsdBalance === null) {
     return null;
   }
 
@@ -186,7 +197,7 @@ const HomeScreen = () => {
         refreshControl={
           <RefreshControl
             tintColor={theme.primary}
-            refreshing={isRefetchingBalance || isRefetchingTxHistory}
+            refreshing={isRefetchingBalance || isRefetchingTransferHistory}
             onRefresh={onRefresh}
           />
         }
@@ -206,7 +217,7 @@ const HomeScreen = () => {
               fontWeight: 500,
             }}
           >
-            {totalUsdBalance} USD
+            {t('fiatDenominatedBalance', { balance: totalUsdBalance })}
           </Text>
         </View>
         {/* Action menus (Deposit, Send, Receive) */}
@@ -223,6 +234,7 @@ const HomeScreen = () => {
             onPress={() => {
               navigation.navigate('Deposit');
             }}
+            testID="deposit"
           />
           <MenuItem
             icon={
@@ -232,6 +244,7 @@ const HomeScreen = () => {
             onPress={() => {
               navigation.navigate('Receive');
             }}
+            testID="receive"
           />
           <MenuItem
             icon={
@@ -241,6 +254,7 @@ const HomeScreen = () => {
             onPress={() => {
               navigation.navigate('SelectRecipient');
             }}
+            testID="send"
           />
         </View>
         {/* Token list */}
@@ -281,14 +295,15 @@ const HomeScreen = () => {
             flexDirection: 'column',
           }}
         >
-          {txHistory?.map((transfer, i) => (
+          {transferHistory?.map((transfer, i) => (
             <TransferHistoryListItem
               key={i}
               transfer={transfer}
               type={getTransferType(transfer, signedInUser.id)}
             />
           ))}
-          {txHistory && txHistory.length > NUM_TRANSFERS_TO_SHOW ? (
+          {transferHistory &&
+          transferHistory.length >= NUM_TRANSFERS_TO_FETCH ? (
             <Text
               style={{
                 textAlign: 'right',
@@ -305,7 +320,7 @@ const HomeScreen = () => {
               {t('seeAll')}
             </Text>
           ) : null}
-          {txHistory?.length === 0 ? (
+          {transferHistory?.length === 0 ? (
             <Text
               style={{
                 textAlign: 'center',

@@ -267,7 +267,7 @@ if (useDatadog) {
 }
 
 export const logger = winston.createLogger({
-  level: 'info',
+  level: process.env.LOG_LEVEL ?? 'info',
   format: winston.format.combine(
     winston.format.colorize(),
     winston.format.simple()
@@ -426,4 +426,22 @@ export const waitForAnnouncementsBackfill = async () => {
 
     await sleep(3000);
   }
+};
+
+export interface Timer {
+  startTime: number;
+  label: string;
+}
+
+export const startTimer = (label: string): Timer => {
+  return {
+    startTime: Date.now(),
+    label,
+  };
+};
+
+export const endTimer = (timer: Timer) => {
+  const endTime = Date.now();
+  const duration = endTime - timer.startTime;
+  logger.info(`${timer.label} took ${duration}ms`);
 };

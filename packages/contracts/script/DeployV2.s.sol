@@ -11,8 +11,12 @@ import '../src/RaylacPaymaster.sol';
 
 contract DeployV2 is Script, Utils {
   function run() external {
-    // uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
-    vm.startBroadcast();
+    uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
+    if (deployerPrivateKey == 0) {
+      vm.startBroadcast();
+    } else {
+      vm.startBroadcast(deployerPrivateKey);
+    }
 
     // Deploy RaylacAccountV2
 

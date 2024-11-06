@@ -1,9 +1,10 @@
 import { bigIntMin, ERC20Abi, getPublicClient, sleep } from '@raylac/shared';
-import supportedTokens from '@raylac/shared/out/supportedTokens';
+import { supportedTokens } from '@raylac/shared';
 import { decodeEventLog, getAddress, Hex, Log, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
 import {
-  getMinSynchedBlockForAddresses,
+  endTimer,
+  startTimer,
   updateAddressesSyncStatus,
   upsertTransaction,
   waitForAnnouncementsBackfill,
@@ -83,69 +84,111 @@ export const handleERC20TransferLog = async ({
       },
     },
   });
+
+  logger.info(
+    `Inserted ${tokenId} transfer ${log.transactionHash} on ${chainId}`
+  );
 };
 
-const batchSyncERC20Transfers = async ({
-  addresses,
-  fromBlock,
-  toBlock,
+export const syncERC20TransfersForChain = async ({
   chainId,
   tokenId,
+  tokenAddress,
 }: {
-  addresses: Hex[];
-  fromBlock: bigint;
-  toBlock: bigint;
   chainId: number;
   tokenId: string;
+  tokenAddress: Hex;
 }) => {
-  const token = supportedTokens.find(token => token.tokenId === tokenId);
+  const addressSyncStatuses = await prisma.addressSyncStatus.findMany({
+    select: {
+      blockNumber: true,
+      chainId: true,
+      address: true,
+    },
+    where: {
+      tokenId,
+      chainId,
+    },
+    orderBy: {
+      blockNumber: 'asc',
+    },
+  });
 
-  if (!token) {
-    throw new Error(`Token not found for token id ${tokenId}`);
+  if (addressSyncStatuses.length === 0) {
+    return;
   }
 
-  const tokenAddress = token.addresses.find(
-    address => address.chain.id === chainId
-  );
+  const client = getPublicClient({ chainId });
 
-  if (!tokenAddress) {
-    throw new Error(`Token not found for chain ${chainId}`);
-  }
+  const addressBatchSize = 100;
+  const blockBatchSize = 100000n;
 
-  const publicClient = getPublicClient({
-    chainId,
-  });
+  for (let i = 0; i < addressSyncStatuses.length; i += addressBatchSize) {
+    // TODO: Try not to call this here every time
+    const latestBlockNumber = await client.getBlockNumber();
 
-  const incomingLogs = await publicClient.getLogs({
-    address: tokenAddress.address,
-    event: parseAbiItem(
-      'event Transfer(address indexed from, address indexed to, uint256 value)'
-    ),
-    args: {
-      to: addresses,
-    },
-    fromBlock,
-    toBlock,
-  });
+    const batch = addressSyncStatuses.slice(i, i + addressBatchSize);
 
-  const outgoingLogs = await publicClient.getLogs({
-    address: tokenAddress.address,
-    event: parseAbiItem(
-      'event Transfer(address indexed from, address indexed to, uint256 value)'
-    ),
-    args: {
-      from: addresses,
-    },
-    fromBlock,
-    toBlock,
-  });
+    const fromBlock = batch[0].blockNumber;
 
-  for (const log of [...incomingLogs, ...outgoingLogs]) {
-    await handleERC20TransferLog({ log, tokenId, chainId });
+    for (
+      let blockNumber = fromBlock;
+      blockNumber <= latestBlockNumber;
+      blockNumber += blockBatchSize
+    ) {
+      const toBlock = bigIntMin([
+        blockNumber + blockBatchSize,
+        latestBlockNumber,
+      ]);
 
-    // Deploy the account that received the transfer if it's not already deployed
-    // const to = getAddress(log.args.to!);
-    // await deployAccount({ address: to, chainId });
+      const addressesToSync = batch
+        .filter(address => address.blockNumber < toBlock)
+        .map(address => address.address as Hex);
+
+      if (addressesToSync.length === 0) {
+        continue;
+      }
+
+      const incomingLogs = await client.getLogs({
+        address: tokenAddress,
+        event: parseAbiItem(
+          'event Transfer(address indexed from, address indexed to, uint256 value)'
+        ),
+        args: {
+          to: addressesToSync,
+        },
+        fromBlock,
+        toBlock,
+      });
+
+      const outgoingLogs = await client.getLogs({
+        address: tokenAddress,
+        event: parseAbiItem(
+          'event Transfer(address indexed from, address indexed to, uint256 value)'
+        ),
+        args: {
+          from: addressesToSync,
+        },
+        fromBlock,
+        toBlock,
+      });
+
+      // Handle logs concurrently
+      const handleLogsPromises = [];
+      for (const log of [...incomingLogs, ...outgoingLogs]) {
+        handleLogsPromises.push(
+          handleERC20TransferLog({ log, tokenId, chainId })
+        );
+      }
+      await Promise.all(handleLogsPromises);
+
+      await updateAddressesSyncStatus({
+        addresses: addressesToSync,
+        chainId,
+        tokenId,
+        blockNumber: toBlock,
+      });
+    }
   }
 };
 
@@ -160,78 +203,34 @@ const syncERC20Transfers = async () => {
 
   while (true) {
     try {
-      const addresses = await prisma.userStealthAddress.findMany({
-        select: { address: true },
-      });
-
+      const syncTimer = startTimer('syncERC20Transfers');
+      const allTokensSyncPromises = [];
       for (const token of erc20Tokens) {
-        await Promise.all(
-          token.addresses.map(async ({ chain }) => {
-            const chainId = chain.id;
-            const client = getPublicClient({ chainId });
+        // Sync ERC20 transfers for each chain concurrently
+        const syncOnChainsPromises = [];
+        for (const tokenOnChain of token.addresses) {
+          const chainId = tokenOnChain.chain.id;
 
-            const finalizedBlockNumber = await client.getBlock({
-              blockTag: 'finalized',
-            });
+          syncOnChainsPromises.push(
+            syncERC20TransfersForChain({
+              chainId,
+              tokenId: token.tokenId,
+              tokenAddress: tokenOnChain.address,
+            })
+          );
+        }
 
-            // Sync erc20 transfers in 100 address batches
-            for (let i = 0; i < addresses.length; i += 100) {
-              const batch = addresses
-                .slice(i, i + 100)
-                .map(({ address }) => address as Hex);
-
-              const minSynchedBlockInBatch =
-                await getMinSynchedBlockForAddresses({
-                  tokenId: token.tokenId,
-                  addresses: batch,
-                  chainId,
-                });
-
-              if (!minSynchedBlockInBatch) {
-                throw new Error(
-                  `No min synched block found for token ${token.tokenId}`
-                );
-              }
-
-              const _fromBlock = bigIntMin([
-                minSynchedBlockInBatch,
-                finalizedBlockNumber.number,
-              ]);
-
-              const latestBlock = await client.getBlockNumber();
-
-              const chunkSize = BigInt(10000);
-              for (
-                let fromBlock = _fromBlock;
-                fromBlock < latestBlock;
-                fromBlock += chunkSize
-              ) {
-                const toBlock = bigIntMin([fromBlock + chunkSize, latestBlock]);
-
-                await batchSyncERC20Transfers({
-                  addresses: batch,
-                  fromBlock,
-                  toBlock,
-                  chainId,
-                  tokenId: token.tokenId,
-                });
-
-                await updateAddressesSyncStatus({
-                  addresses: batch,
-                  chainId,
-                  tokenId: token.tokenId,
-                  blockNumber: toBlock,
-                });
-              }
-            }
-          })
-        );
+        allTokensSyncPromises.push(...syncOnChainsPromises);
       }
+
+      await Promise.all(allTokensSyncPromises);
+
+      endTimer(syncTimer);
     } catch (err) {
       logger.error(err);
     }
 
-    await sleep(5 * 1000); // Sleep for 10 seconds
+    await sleep(5 * 1000);
   }
 };
 

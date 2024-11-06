@@ -1,4 +1,4 @@
-import supportedChains from '@raylac/shared/out/supportedChains';
+import { supportedChains } from '@raylac/shared';
 import prisma from './lib/prisma';
 import {
   AccountBalancePerChainQueryResult,
@@ -7,7 +7,7 @@ import {
   sleep,
 } from '@raylac/shared';
 import { Hex } from 'viem';
-import supportedTokens from '@raylac/shared/out/supportedTokens';
+import { supportedTokens } from '@raylac/shared';
 import { logger } from './utils';
 
 const getAddressBalanceFromDb = async ({

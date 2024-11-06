@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "start": "dotenv -e ../../.env -- tsx --watch ./src/index",
-    "build": "tsc -d",
+    "build": "pnpm i && tsc -d",
     "build:watch": "tsc -d --watch",
     "lint": "tsc --noEmit"
   },
@@ -20,8 +20,10 @@
     "@raylac/shared": "workspace:*",
     "@raylac/sync": "workspace:*",
     "@trpc/server": "^11.0.0-rc.439",
+    "@types/express": "^5.0.0",
     "@types/node": "^20.11.17",
     "axios": "^1.7.2",
+    "express": "^4.21.1",
     "firebase-admin": "^12.4.0",
     "jsonwebtoken": "^9.0.2",
     "node-cache": "^5.1.2",

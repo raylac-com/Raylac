@@ -1,8 +1,11 @@
 import StyledButton from '@/components/StyledButton';
 import { theme } from '@/lib/theme';
+import { useTranslation } from 'react-i18next';
 import { View, Text } from 'react-native';
 
 const Upgrade = () => {
+  const { t } = useTranslation('Upgrade');
+
   const handleUpgradePress = async () => {};
 
   return (
@@ -23,7 +26,7 @@ const Upgrade = () => {
           textAlign: 'center',
         }}
       >
-        Apply latest update to your account
+        {t('upgradeAccount', { ns: 'Upgrade' })}
       </Text>
       <StyledButton title="Update" onPress={handleUpgradePress} />
     </View>

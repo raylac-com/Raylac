@@ -133,7 +133,7 @@ const useSend = () => {
         queryKey: getQueryKey(trpc.getTokenBalances),
       });
       queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.getTxHistory),
+        queryKey: getQueryKey(trpc.getTransferHistory),
       });
       queryClient.invalidateQueries({
         queryKey: ['tokenBalances'],

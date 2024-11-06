@@ -73,7 +73,7 @@ const Receive = () => {
   const { data: signedInUser } = useSignedInUser();
 
   const navigation = useTypedNavigation();
-  const { t } = useTranslation('Deposit');
+  const { t } = useTranslation('Receive');
 
   const onCopyClick = useCallback(() => {
     if (depositAddress) {
@@ -122,7 +122,7 @@ const Receive = () => {
             color: theme.text,
           }}
         >
-          Receive ETH or USDC on Base
+          {t('receiveOn')}
         </Text>
       </View>
       <View
@@ -141,7 +141,7 @@ const Receive = () => {
             fontWeight: 'bold',
           }}
         >
-          Receive from a Raylac user
+          {t('receiveFromRaylacUser')}
         </Text>
 
         <Text
@@ -151,7 +151,7 @@ const Receive = () => {
             color: theme.text,
           }}
         >
-          Your Raylac username
+          {t('yourRaylacUsername')}
         </Text>
         <Pressable
           style={{
@@ -168,8 +168,9 @@ const Receive = () => {
               textAlign: 'center',
               color: theme.gray,
             }}
+            // eslint-disable-next-line react/jsx-no-literals
           >
-            @{signedInUser.username}
+            @{signedInUser?.username}
           </Text>
         </Pressable>
       </View>
@@ -205,7 +206,7 @@ const Receive = () => {
                   color: theme.text,
                 }}
               >
-                Receive to
+                {t('receiveTo')}
               </Text>
               <AddressWithChainIcon
                 address={depositAddress}
@@ -223,7 +224,7 @@ const Receive = () => {
             fontWeight: 'bold',
           }}
         >
-          Or receive from anyone
+          {t('orReceiveFromAnyone')}
         </Text>
         <Text
           style={{
@@ -232,11 +233,11 @@ const Receive = () => {
             textAlign: 'center',
           }}
         >
-          Receive to a fresh address to keep your transfers private
+          {t('receiveToFreshAddress')}
         </Text>
         {!depositAddress || isGeneratingAddress ? (
           <StyledButton
-            title="Get receiving address"
+            title={t('getReceivingAddress')}
             onPress={async () => {
               const account = await getNewDepositAccount('');
               setDepositAddress(account.address);
@@ -244,20 +245,22 @@ const Receive = () => {
             style={{
               width: '100%',
             }}
+            testID="get-receiving-address"
           ></StyledButton>
         ) : (
           <StyledButton
-            title={'Copy address'}
+            title={t('copyAddress')}
             onPress={() => {
               onCopyClick();
             }}
             style={{
               width: '100%',
             }}
+            testID="copy-address"
           ></StyledButton>
         )}
         <StyledButton
-          title={'Past receiving addresses'}
+          title={t('pastReceivingAddresses')}
           onPress={() => {
             navigation.navigate('Addresses');
           }}
@@ -265,6 +268,7 @@ const Receive = () => {
             width: '100%',
           }}
           variant="underline"
+          testID="past-receiving-addresses"
         ></StyledButton>
       </View>
     </View>

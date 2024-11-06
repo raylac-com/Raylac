@@ -2,7 +2,7 @@ name: Integration test
 
 on:
   pull_request:
-    types: [opened, reopened]
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
       apiUrl:
@@ -31,7 +31,7 @@ jobs:
         run: pnpm i
 
       - name: Run lint
-        run: pnpm lint
+        run: pnpm turbo lint
 
       # - name: Run tests
       #   run: pnpm -F tests test

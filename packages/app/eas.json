@@ -1,37 +1,54 @@
 {
   "cli": {
-    "version": ">= 12.4.1",
+    "version": ">= 12.6.2",
     "appVersionSource": "remote" 
   },
   "build": {
     "development": {
+      "ios": {
+        "simulator": true
+      },  
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      },
       "developmentClient": true,
+      "distribution": "internal"
+    },
+    "test": {
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      },
       "distribution": "internal",
-      "env": {
-        "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
-        "EXPO_PUBLIC_ALCHEMY_API_KEY": "UfWNqNlX3Wq4oJtE0iObWWgcenwyICcp",
-        "APP_VARIANT": "development"
-      }
+      "channel": "test"
     },
     "preview": {
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      },
       "distribution": "internal",
-      "channel": "production",
-      "env": {
-        "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
-        "EXPO_PUBLIC_ALCHEMY_API_KEY": "UfWNqNlX3Wq4oJtE0iObWWgcenwyICcp",
-        "APP_VARIANT": "preview"
-      }
+      "channel": "production"
     },
     "production": {
       "channel": "production",
-      "env": {
-        "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
-        "EXPO_PUBLIC_ALCHEMY_API_KEY": "UfWNqNlX3Wq4oJtE0iObWWgcenwyICcp",
-        "APP_VARIANT": "production"
-      },
       "autoIncrement": true
     }
   },
   "submit": {
+    "production": {
+      "ios": {
+        "appleId": "dan00300@icloud.com",
+        "ascAppId": "6702008447",
+        "appleTeamId": "D7H78Z8FX2"
+      }
+    }
   }
 }

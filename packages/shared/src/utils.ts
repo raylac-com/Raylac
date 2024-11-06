@@ -16,14 +16,14 @@ import {
 import RaylacAccountAbi from './abi/RaylacAccountAbi';
 import ERC20Abi from './abi/ERC20Abi';
 import * as chains from 'viem/chains';
-import supportedTokens, { NATIVE_TOKEN_ADDRESS } from './supportedTokens';
+import { supportedTokens, NATIVE_TOKEN_ADDRESS } from './supportedTokens';
 import { getPublicClient } from './ethRpc';
 import {
   getERC20TokenBalance,
   rundlerMaxPriorityFeePerGas,
   traceBlockByNumber,
 } from '.';
-import supportedChains from './supportedChains';
+import { supportedChains } from './supportedChains';
 import axios from 'axios';
 
 export const encodeERC5564Metadata = (viewTag: Hex): Hex => {
@@ -480,6 +480,11 @@ const getCalls = (
   return [{ ...tx, txHash, traceAddress }];
 };
 
+/**
+ * Get native transfer traces in the given block
+ * - Calls the `trace_block` RPC method under the hood, and only returns calls
+ *   that are `CALL` type and have a value
+ */
 export const getNativeTransferTracesInBlock = async ({
   blockNumber,
   chainId,

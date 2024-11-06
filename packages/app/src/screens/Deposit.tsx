@@ -132,7 +132,7 @@ const Deposit = () => {
                 color: theme.text,
               }}
             >
-              Deposit ETH or USDC on Base
+              {t('depositOn')}
             </Text>
           </View>
           <Text
@@ -142,7 +142,7 @@ const Deposit = () => {
               color: theme.text,
             }}
           >
-            Deposit to a fresh address to keep your balance private
+            {t('depositToFreshAddress')}
           </Text>
         </View>
 
@@ -173,7 +173,7 @@ const Deposit = () => {
       >
         {!depositAddress || isGeneratingAddress ? (
           <StyledButton
-            title="Get deposit address"
+            title={t('getDepositAddress')}
             onPress={async () => {
               const account = await getNewDepositAccount('');
               setDepositAddress(account.address);
@@ -181,20 +181,22 @@ const Deposit = () => {
             style={{
               width: '100%',
             }}
+            testID="get-deposit-address"
           ></StyledButton>
         ) : (
           <StyledButton
-            title={'Copy address'}
+            title={t('copyAddress')}
             onPress={() => {
               onCopyClick();
             }}
             style={{
               width: '100%',
             }}
+            testID="copy-address"
           ></StyledButton>
         )}
         <StyledButton
-          title={'Past deposit addresses'}
+          title={t('pastDepositAddresses')}
           onPress={() => {
             navigation.navigate('Addresses');
           }}
@@ -202,6 +204,7 @@ const Deposit = () => {
             width: '100%',
           }}
           variant="underline"
+          testID="past-deposit-addresses"
         ></StyledButton>
       </View>
     </View>

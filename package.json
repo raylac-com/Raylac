@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "description": "",
+  "packageManager": "pnpm@9.0.4",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
     "prepare": "husky",
     "lint": "eslint . && pnpm -r lint",
+    "build": "pnpm -F db build && pnpm -F shared build && pnpm -F sync build && pnpm -F api build",
     "build:all:watch": "pnpm -F shared build:watch & pnpm -F api build:watch & pnpm -F sync build:watch"
   },
   "keywords": [],
@@ -20,10 +22,12 @@
     "@typescript-eslint/eslint-plugin": "^8.8.0",
     "@typescript-eslint/parser": "^8.8.0",
     "eslint": "^9.11.1",
+    "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-security": "^3.0.1",
     "husky": "^9.0.11",
     "lint-staged": "^15.2.2",
     "prettier": "^3.3.2",
+    "turbo": "^2.2.3",
     "typescript": "^5.4.5",
     "typescript-eslint": "^8.8.0"
   },

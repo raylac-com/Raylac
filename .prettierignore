@@ -2,4 +2,3 @@ node_modules/
 .next/
 wasm_bytes.ts
 *.csv
-*.json

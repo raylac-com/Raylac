@@ -1,130 +1,157 @@
 {
-  "Start": {
-    "title": "",
-    "signIn": "Sign in",
-    "createAccount": "Create new account"
-  },
-    "SignIn": {
-      "title": "Sign in",
-      "enterYourMnemonic": "Enter your mnemonic",
-      "signIn":"Sign in"
-    },
-    "Home": {
-      "title": "Home",
-      "deposit": "Deposit",
-      "receive": "Receive",
-    "send": "Send",
-    "noTransfers": "No transfers yet.",
-    "seeAll": "See all"
-    },
-    "Receive": {
-      "title": "Receive",
-      "backToHome": "Back to home",
-      "sendAmountToAddress": "Send ETH to the following address on Base"
-    },
-    "Account": {
-    "title": "Account",
-    "signOut": "Sign out",
-    "confirmSignOutTitle": "Sign out?",
-    "confirmSignOut": "Confirm",
-    "backupAccount": "Backup account",
-    "addresses": "Addresses",
+  "Account": {
     "accountInfo": "Account info",
+    "addresses": "Addresses",
+    "advanced": "Advanced",
+    "backupAccount": "Backup account",
     "cancel": "Cancel",
+    "confirmSignOut": "Confirm",
+    "confirmSignOutTitle": "Sign out?",
     "language": "Language",
-    "advanced": "Advanced"
+    "signOut": "Sign out",
+    "title": "Account"
   },
   "AccountInfo": {
-    "title": "Account info",
     "displayName": "Name",
-    "username": "Username",
-    "edit": "Edit"  
-  },
-  "UpdateDisplayName": {
-    "title": "Update Name",
-    "save": "Save",
-    "displayName": "Name"
-  },
-  "UpdateUsername": {
-    "title": "Update Username",
-    "save": "Save",  
+    "edit": "Edit",
+    "title": "Account info",
     "username": "Username"
   },
-    "SignUp": {
-      "title": "Sign Up",
-      "name": "Name",
-    "username": "Username",
-    "usernameLengthWarning": "Username must be at least {{minChars}} characters",
-    "usernameInvalid": "Username contains invalid characters",
-    "usernameTaken": "Username is not available",
-    "signUp": "Sign up"
-    },
-    "EnterDepositAmount": {
-      "title": "Enter Amount"
-    },
-    "Deposit": {
-      "title": "Deposit",
-      "sendAmountToAddress": "Send ETH to the following address on Base",
-      "confirm": "I made the transfer"
-    },
-    "SendSuccess": {
-      "title": "",
-      "transferSuccessful": "Transfer successful",
-      "backToHome": "Back to home"
+  "Addresses": {
+    "noAddresses": "No addresses",
+    "title": "Addresses"
   },
-    "EnterSendAmount": {
-      "title": "Enter Amount",
-       "availableBalance": "Balance: {{ amount}} USDC",
-       "insufficientBalance": "Insufficient balance",
-      "sendToUser": "Send to {{ name }}"
-    },
-    "SelectRecipient": {
-      "title": "Select recipient",
-      "searchUser": "Search user or Ethereum address"
-    },
-    "ConfirmSend": {
-      "title": "Confirm",
-      "sendToUser":  "Send {{ amount }} {{ symbol }} to {{ name }}",  
-      "send": "Send"
-    },
-    "TransferHistory": {
-      "title": "Transfer History"
-    },
-    "TransferDetails": {
-      "title": "Transfer details"
-    },
-    "BackupAccount": {
-      "title": "Backup Account",
-      "backupWarning1": "Anyone who has your backup phrase can access and spend your balance.",
-      "backupWarning2": "Make sure no one can see your screen when you reveal your backup phrase.",
-      "revealBackupPhrase": "Reveal backup phrase",
-      "hideBackupPhrase": "Hide backup phrase",
-      "copyBackupPhrase": "Copy"
-    },
-    "SelectLanguage": {
-      "title": "Select Language"
-    },
-    "Addresses": {
-      "title": "Addresses"
-    },
-    "Advanced": {
-      "title": "Advanced"
-    },
-    "SaveBackupPhrase": {
-      "title": "Save Backup Phrase",
-      "backupPhrase": "Backup phrase",
-      "save": "Save"
-    },
-    "ConfirmBackupPhrase": {
-      "title": "Confirm Backup"
-    },
-    "common": {
-      "next": "Next",
+  "Advanced": {
+    "title": "Advanced"
+  },
+  "BackupAccount": {
+    "backupWarning1": "Anyone who has your backup phrase can access and spend your balance.",
+    "backupWarning2": "Make sure no one can see your screen when you reveal your backup phrase.",
+    "copyBackupPhrase": "Copy",
+    "hideBackupPhrase": "Hide backup phrase",
+    "revealBackupPhrase": "Reveal backup phrase",
+    "title": "Backup Account"
+  },
+  "ConfirmBackupPhrase": {
+    "choose3Words": "Choose 3 words from the list below to complete the phrase",
+    "title": "Confirm Backup"
+  },
+  "ConfirmSend": {
+    "amountInUsd": "~${{ amount }}",
+    "receivesAmountOnChain": "{{ name }} receives {{ amount }} {{ symbol }} on {{ chain }}",
+    "send": "Send",
+    "sendToUser": "Send to {{ name }}",
+    "title": "Confirm"
+  },
+  "Deposit": {
+    "copyAddress": "Copy address",
+    "depositOn": "Deposit ETH or USDC on Base",
+    "depositToFreshAddress": "Deposit to a fresh address to keep your balance private",
+    "getDepositAddress": "Get deposit address",
+    "pastDepositAddresses": "Past deposit addresses",
+    "title": "Deposit"
+  },
+  "EnterSendAmount": {
+    "availableBalance": "${{ amount }} available",
+    "insufficientBalance": "Insufficient balance",
+    "privacyNotice1": "{{ name }} receives to a fresh stealth address.",
+    "privacyNotice2": "No one can determine that the recipient is {{ name }}.",
+    "receivesOn": "receives on",
+    "sendToUser": "Send to {{ name }}",
+    "title": "Enter Amount",
+    "usd": "USD"
+  },
+  "Home": {
+    "deposit": "Deposit",
+    "fiatDenominatedBalance": "{{ balance }} USD",
+    "noTransfers": "No transfers yet.",
+    "receive": "Receive",
+    "seeAll": "See all",
+    "send": "Send",
+    "title": "Home"
+  },
+  "Receive": {
+    "backToHome": "Back to home",
+    "orReceiveFromAnyone": "Or receive from anyone",
+    "receiveFromRaylacUser": "Receive from a Raylac user",
+    "receiveOn": "Receive ETH or USDC on Base",
+    "receiveTo": "Receive to",
+    "receiveToFreshAddress": "Receive to a fresh address to keep your transfers private",
+    "title": "Receive",
+    "yourRaylacUsername": "Your Raylac username",
+    "pastReceivingAddresses": "Past receiving addresses",
+    "getReceivingAddress": "Get receiving address",
+    "copyAddress": "Copy address"
+  },
+  "SaveBackupPhrase": {
+    "backupPhrase": "Backup phrase",
+    "copyBackupPhrase": "Copy",
+    "save": "Save",
+    "saveBackupPhrase": "Save your backup phrase",
+    "title": "Save Backup Phrase",
+    "writeDownOrSave": "Write down your backup phrase, or save it in a secure place."
+  },
+  "SelectLanguage": {
+    "title": "Select Language"
+  },
+  "SelectRecipient": {
+    "searchUser": "Search user or Ethereum address",
+    "title": "Select recipient",
+    "paste": "Paste"
+  },
+  "SendSuccess": {
+    "backToHome": "Back to home",
+    "title": "",
+    "transferSuccessful": "Transfer successful"
+  },
+  "SignIn": {
+    "enterYourMnemonic": "Enter your mnemonic",
+    "signIn": "Sign in",
+    "title": "Sign in"
+  },
+  "SignUp": {
+    "name": "Name",
+    "signUp": "Sign up",
+    "title": "Sign Up",
+    "username": "Username",
+    "usernameInvalid": "Username contains invalid characters",
+    "usernameLengthWarning": "Username must be at least {{minChars}} characters",
+    "usernameTaken": "Username is not available"
+  },
+  "Start": {
+    "createAccount": "Create new account",
+    "signIn": "Sign in",
+    "title": ""
+  },
+  "TransferDetails": {
+    "title": "Transfer details",
+    "traces": "Traces",
+    "sentTo": "Sent to {{ name }}",
+    "receivedFrom": "Received from {{ name }}"
+  },
+  "TransferHistory": {
+    "noTransfers": "No transfers yet",
+    "title": "Transfer History"
+  },
+  "UpdateDisplayName": {
+    "displayName": "Name",
+    "save": "Save",
+    "title": "Update Name"
+  },
+  "UpdateUsername": {
+    "save": "Save",
+    "title": "Update Username",
+    "username": "Username"
+  },
+  "Upgrade": {
+    "title": "Upgrade",
+    "upgradeAccount": "Apply latest update to your account"
+  },
+  "common": {
+    "copied": "Copied",
+    "copiedAddress": "Copied address",
     "headerBackTitle": "Back",
-      "signUpBonus": "Sign up bonus",
-      "copied": "Copied"
-    },
-    "Upgrade": {
-      "title": "Upgrade"
-    }
+    "next": "Next",
+    "signUpBonus": "Sign up bonus"
   }
+}

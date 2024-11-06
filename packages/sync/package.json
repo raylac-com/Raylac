@@ -7,10 +7,10 @@
     "start": "dotenv -e ../../.env -- tsx src/sync.ts",
     "lint": "tsc --noEmit",
     "test": "vitest",
-    "build": "tsc -d",
+    "build": "pnpm i && tsc -d",
     "build:watch": "tsc -d --watch",
-    "postinstall": "pnpm build",
-    "prune": "tsx scripts/prune.ts"
+    "prune": "tsx scripts/prune.ts",
+    "postinstall": "tsc -d"
   },
   "dependencies": {
     "@prisma/client": "5.12.1",

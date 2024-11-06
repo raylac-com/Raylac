@@ -1,11 +1,11 @@
-import supportedChains from './supportedChains';
+import { supportedChains } from './supportedChains';
 import { SupportedToken } from './types';
 import * as chains from 'viem/chains';
 import { zeroAddress } from 'viem';
 
 export const NATIVE_TOKEN_ADDRESS = zeroAddress;
 
-const supportedTokens: SupportedToken[] = [
+export const supportedTokens: SupportedToken[] = [
   {
     tokenId: 'usdc',
     symbol: 'USDC',
@@ -93,5 +93,3 @@ const supportedTokens: SupportedToken[] = [
     })),
   },
 ];
-
-export default supportedTokens;

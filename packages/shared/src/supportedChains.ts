@@ -1,7 +1,7 @@
 import { Chain } from 'viem';
 import * as chains from 'viem/chains';
 
-const supportedChains: Chain[] = [
+export const supportedChains: Chain[] = [
   // chains.mainnet,
   //  chains.optimism,
   //  chains.optimismSepolia,
@@ -12,5 +12,3 @@ const supportedChains: Chain[] = [
   //chains.polygon,
   // chains.baseSepolia,
 ];
-
-export default supportedChains;

@@ -10,8 +10,10 @@ import SignUp from './screens/SignUp';
 import SignIn from './screens/SignIn';
 import { NavigationContainer, ThemeProvider } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { trpc, rpcLinks } from './lib/trpc';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { trpc, getRpcLinks } from './lib/trpc';
+import { QueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 import Deposit from './screens/Deposit';
 import ConfirmSend from './screens/Send/ConfirmSend';
 import Account from './screens/Account';
@@ -43,6 +45,8 @@ import SaveBackupPhrase from './screens/SaveBackupPhrase';
 import { SafeAreaView } from 'react-native';
 import Receive from './screens/Receive';
 import Upgrade from './screens/Upgrade';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Localization from 'expo-localization';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -91,12 +95,18 @@ const Screens = () => {
 
   const { i18n } = useTranslation();
 
-  useFetchUpdates();
-
   useEffect(() => {
     (async () => {
       const lang = await getSelectedLanguage();
-      i18n.changeLanguage(lang);
+
+      if (lang) {
+        i18n.changeLanguage(lang);
+      } else {
+        const locales = Localization.getLocales();
+        if (locales.length > 0) {
+          i18n.changeLanguage(locales[0].languageCode ?? 'en');
+        }
+      }
     })();
   }, []);
 
@@ -343,20 +353,33 @@ const queryClient = new QueryClient({
   },
 });
 
+const asyncStoragePersister = createAsyncStoragePersister({
+  storage: AsyncStorage,
+});
+
 const App = () => {
+  const { isFetchingUpdates } = useFetchUpdates();
+
+  if (isFetchingUpdates) {
+    return null;
+  }
+
   const trpcClient = trpc.createClient({
-    links: rpcLinks,
+    links: getRpcLinks(),
   });
 
   return (
     <NavigationContainer>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={{ persister: asyncStoragePersister }}
+        >
           <ThemeProvider value={NavigationTheme}>
             <Screens></Screens>
             <StatusBar style="light" />
           </ThemeProvider>
-        </QueryClientProvider>
+        </PersistQueryClientProvider>
       </trpc.Provider>
     </NavigationContainer>
   );

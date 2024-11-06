@@ -1,0 +1,13 @@
+appId: com.raylac
+---
+- launchApp
+- runFlow: sign-in.yaml
+- tapOn:
+    id: receive
+- tapOn:
+    id: get-receiving-address
+- tapOn:
+    id: copy-address
+- tapOn:
+    id: past-receiving-addresses
+- assertVisible: 'Addresses'

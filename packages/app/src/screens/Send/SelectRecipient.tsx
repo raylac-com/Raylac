@@ -60,6 +60,7 @@ const UserListItem = (props: UserListItemProps) => {
             opacity: 0.6,
             color: theme.text,
           }}
+          // eslint-disable-next-line react/jsx-no-literals
         >
           @{props.user.username}
         </Text>
@@ -187,6 +188,7 @@ const SelectRecipient = ({ navigation }: Props) => {
           height: 24,
         }}
         onChangeText={setSearchInput}
+        testID="search-user-or-ethereum-address"
       ></StyledTextInput>
       {inputAddress && (
         <View

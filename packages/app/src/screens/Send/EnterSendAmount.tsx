@@ -7,7 +7,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, Text, TextInput, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import supportedTokens from '@raylac/shared/out/supportedTokens';
+import { supportedTokens } from '@raylac/shared';
 import { Hex, parseUnits } from 'viem';
 import { trpc } from '@/lib/trpc';
 import { formatAmount, getChainsForMode } from '@raylac/shared';
@@ -260,7 +260,9 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
               opacity: 0.8,
             }}
           >
-            ${inputTokenUsdBalance} available
+            {t('availableBalance', {
+              amount: inputTokenUsdBalance,
+            })}
           </Text>
         </View>
       </View>
@@ -287,7 +289,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
             zIndex: 1000,
           }}
         >
-          USD
+          {t('usd')}
         </Text>
       </View>
       <View
@@ -330,7 +332,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
               color: theme.text,
             }}
           >
-            {recipientDisplayName} receives on
+            {recipientDisplayName} {t('receivesOn', {})}
           </Text>
         </View>
         <DropDownPicker
@@ -381,9 +383,13 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
               marginTop: 32,
             }}
           >
-            {recipientDisplayName} receives to a fresh stealth address.
+            {t('privacyNotice1', {
+              name: recipientDisplayName,
+            })}
             {`\n`}
-            No one can determine that the recipient is {recipientDisplayName}.
+            {t('privacyNotice2', {
+              name: recipientDisplayName,
+            })}
           </Text>
         </View>
       )}
@@ -400,6 +406,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           title={t('next', { ns: 'common' })}
           onPress={onNextClick}
           disabled={!canGoNext}
+          testID="next"
         ></StyledButton>
       </View>
     </View>

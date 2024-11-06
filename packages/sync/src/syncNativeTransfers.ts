@@ -14,7 +14,7 @@ import {
   upsertTransaction,
   waitForAnnouncementsBackfill,
 } from './utils';
-import supportedChains from '@raylac/shared/out/supportedChains';
+import { supportedChains } from '@raylac/shared';
 import { base, optimism } from 'viem/chains';
 import { getTokenPriceAtTime } from './lib/coingecko';
 
@@ -176,6 +176,10 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
       const addressesToSync = batch
         .filter(address => address.blockNumber < toBlock)
         .map(address => address.address as Hex);
+
+      if (addressesToSync.length === 0) {
+        continue;
+      }
 
       console.time(`traceFilter for ${addressesToSync.length} addresses`);
       const incomingTraces = await traceFilter({
