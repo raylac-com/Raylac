@@ -9,6 +9,9 @@ on:
       - packages/app/src/**
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   setup-preview:
     if: ${{ ! contains(github.event.head_commit.message, '[skip build]') }}
@@ -21,6 +24,9 @@ jobs:
       contents: read
       pull-requests: write
     steps:
+      - name: Debug commit
+        run: echo ${{ github.event.head_commit.message }}
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
