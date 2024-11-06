@@ -40,6 +40,7 @@ const SendSuccess = () => {
             screen: 'Home',
           });
         }}
+        testID="back-to-home"
       ></StyledButton>
     </View>
   );

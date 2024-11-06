@@ -2,5 +2,13 @@ appId: com.raylac
 ---
 - launchApp
 - runFlow: sign-in.yaml
-- tapOn: 'Deposit'
-- tapOn: 'Get deposit address'
+- tapOn:
+    id: deposit
+- tapOn:
+    id: get-deposit-address
+- tapOn:
+    id: copy-address
+- tapOn:
+    id: past-deposit-addresses
+- assertVisible: 'Addresses'
+

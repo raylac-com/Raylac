@@ -245,6 +245,7 @@ const Receive = () => {
             style={{
               width: '100%',
             }}
+            testID="get-receiving-address"
           ></StyledButton>
         ) : (
           <StyledButton
@@ -255,6 +256,7 @@ const Receive = () => {
             style={{
               width: '100%',
             }}
+            testID="copy-address"
           ></StyledButton>
         )}
         <StyledButton
@@ -266,6 +268,7 @@ const Receive = () => {
             width: '100%',
           }}
           variant="underline"
+          testID="past-receiving-addresses"
         ></StyledButton>
       </View>
     </View>

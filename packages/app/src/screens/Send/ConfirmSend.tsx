@@ -186,6 +186,7 @@ const ConfirmSend = ({ route }: Props) => {
           width: '100%',
         }}
         disabled={gasInfo ? false : true}
+        testID="send"
       ></StyledButton>
     </View>
   );

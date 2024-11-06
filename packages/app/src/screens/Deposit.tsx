@@ -181,6 +181,7 @@ const Deposit = () => {
             style={{
               width: '100%',
             }}
+            testID="get-deposit-address"
           ></StyledButton>
         ) : (
           <StyledButton
@@ -191,6 +192,7 @@ const Deposit = () => {
             style={{
               width: '100%',
             }}
+            testID="copy-address"
           ></StyledButton>
         )}
         <StyledButton
@@ -202,6 +204,7 @@ const Deposit = () => {
             width: '100%',
           }}
           variant="underline"
+          testID="past-deposit-addresses"
         ></StyledButton>
       </View>
     </View>

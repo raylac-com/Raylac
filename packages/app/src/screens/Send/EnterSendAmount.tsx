@@ -406,6 +406,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           title={t('next', { ns: 'common' })}
           onPress={onNextClick}
           disabled={!canGoNext}
+          testID="next"
         ></StyledButton>
       </View>
     </View>

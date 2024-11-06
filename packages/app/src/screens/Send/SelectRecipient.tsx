@@ -188,6 +188,7 @@ const SelectRecipient = ({ navigation }: Props) => {
           height: 24,
         }}
         onChangeText={setSearchInput}
+        testID="search-user-or-ethereum-address"
       ></StyledTextInput>
       {inputAddress && (
         <View

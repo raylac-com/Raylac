@@ -82,11 +82,12 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
 interface MenuItemProps {
   icon: React.ReactNode;
   title: string;
+  testID: string;
   onPress: () => void;
 }
 
 const MenuItem = (props: MenuItemProps) => {
-  const { icon, title, onPress } = props;
+  const { icon, title, onPress, testID } = props;
 
   return (
     <StyledPressable
@@ -95,6 +96,7 @@ const MenuItem = (props: MenuItemProps) => {
         flexDirection: 'column',
         alignItems: 'center',
       }}
+      testID={testID}
     >
       <View
         style={{
@@ -232,6 +234,7 @@ const HomeScreen = () => {
             onPress={() => {
               navigation.navigate('Deposit');
             }}
+            testID="deposit"
           />
           <MenuItem
             icon={
@@ -241,6 +244,7 @@ const HomeScreen = () => {
             onPress={() => {
               navigation.navigate('Receive');
             }}
+            testID="receive"
           />
           <MenuItem
             icon={
@@ -250,6 +254,7 @@ const HomeScreen = () => {
             onPress={() => {
               navigation.navigate('SelectRecipient');
             }}
+            testID="send"
           />
         </View>
         {/* Token list */}
