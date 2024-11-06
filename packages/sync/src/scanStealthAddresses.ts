@@ -1,32 +1,43 @@
 import {
   checkStealthAddress,
   decodeERC5564MetadataAsViewTag,
+  getSenderAddressV2,
   sleep,
 } from '@raylac/shared';
 import prisma from './lib/prisma';
 import { webcrypto } from 'node:crypto';
 import { Hex } from 'viem';
 import { logger } from './utils';
-import { getSenderAddress } from '@raylac/shared/src/stealth';
 import { Prisma } from '@prisma/client';
 import crypto from 'crypto';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 
-const getAnnouncements = async () => {
+/**
+ * Get all address announcements with schemeId 2 (v2 stealth addresses)
+ * from the database
+ */
+const getV2Announcements = async () => {
   const result = await prisma.eRC5564Announcement.findMany({
     select: {
       stealthAddress: true,
       ephemeralPubKey: true,
       metadata: true,
     },
+    where: {
+      schemeId: 2,
+    },
   });
 
   return result;
 };
 
-const assignStealthAddressToUser = async ({
+/**
+ * Create a `UserStealthAddress` record for the given stealth address
+ * This is called when a stealth address is detected to match a user's view and spending keys
+ */
+const saveUserStealthAddress = async ({
   ephemeralPubKey,
   signerAddress,
   viewTag,
@@ -37,7 +48,7 @@ const assignStealthAddressToUser = async ({
   viewTag: Hex;
   userId: number;
 }) => {
-  const stealthAddress = getSenderAddress({
+  const stealthAddress = getSenderAddressV2({
     stealthSigner: signerAddress,
   });
 
@@ -141,7 +152,7 @@ const scanStealthAddresses = async () => {
         };
       });
 
-      const announcements = await getAnnouncements();
+      const announcements = await getV2Announcements();
 
       for (const announcement of announcements) {
         let viewTag: Hex;
@@ -176,7 +187,7 @@ const scanStealthAddresses = async () => {
         });
 
         if (matchedUser) {
-          await assignStealthAddressToUser({
+          await saveUserStealthAddress({
             ephemeralPubKey,
             signerAddress,
             viewTag,

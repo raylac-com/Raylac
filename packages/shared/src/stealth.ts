@@ -14,11 +14,11 @@ import { hexToProjectivePoint, projectivePointToHex } from './utils';
 import { publicKeyToAddress } from 'viem/accounts';
 import { StealthAddressWithEphemeral } from './types';
 import {
-  ACCOUNT_FACTORY_ADDRESS,
-  ACCOUNT_IMPL_ADDRESS,
-  RaylacAccountAbi,
-  RaylacAccountProxyAbi,
+  ACCOUNT_IMPL_V2_ADDRESS,
+  RaylacAccountV2Abi,
+  ACCOUNT_FACTORY_V2_ADDRESS,
   RaylacAccountProxyBytecode,
+  RaylacAccountProxyAbi,
 } from '.';
 
 const g = {
@@ -82,15 +82,16 @@ export const checkStealthAddress = (input: {
   return recoveredSignerAddress === input.signerAddress;
 };
 
-/**
- * Get the address of the contract account created by the given stealthPubKey.
- */
-export const getSenderAddress = ({ stealthSigner }: { stealthSigner: Hex }) => {
-  const accountImplAddress = ACCOUNT_IMPL_ADDRESS;
+export const getSenderAddressV2 = ({
+  stealthSigner,
+}: {
+  stealthSigner: Hex;
+}) => {
+  const accountImplAddress = ACCOUNT_IMPL_V2_ADDRESS;
 
-  const accountAbi = RaylacAccountAbi;
+  const accountAbi = RaylacAccountV2Abi;
 
-  const factoryAddress = ACCOUNT_FACTORY_ADDRESS;
+  const factoryAddress = ACCOUNT_FACTORY_V2_ADDRESS;
 
   const data = encodeDeployData({
     abi: RaylacAccountProxyAbi,
@@ -119,7 +120,7 @@ export const getSenderAddress = ({ stealthSigner }: { stealthSigner: Hex }) => {
  * Generate a stealth address for the given spending and viewing public keys.
  * Returns the stealth public key, ephemeral public key, and view tag.
  */
-export const generateStealthAddress = (input: {
+export const generateStealthAddressV2 = (input: {
   spendingPubKey: Hex;
   viewingPubKey: Hex;
 }): StealthAddressWithEphemeral => {
@@ -149,7 +150,7 @@ export const generateStealthAddress = (input: {
 
   const signerAddress = publicKeyToAddress(stealthPubKeyHex);
 
-  const address = getSenderAddress({
+  const address = getSenderAddressV2({
     stealthSigner: signerAddress,
   });
 

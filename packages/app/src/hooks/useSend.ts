@@ -7,7 +7,7 @@ import {
   ChainGasInfo,
   StealthAddressWithEphemeral,
   buildMultiChainSendRequestBody,
-  generateStealthAddress,
+  generateStealthAddressV2,
   signUserOpWithStealthAccount,
 } from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -71,7 +71,7 @@ const useSend = () => {
       const to =
         typeof recipientUserOrAddress === 'string'
           ? recipientUserOrAddress
-          : generateStealthAddress({
+          : generateStealthAddressV2({
               spendingPubKey: recipientUserOrAddress.spendingPubKey as Hex,
               viewingPubKey: recipientUserOrAddress.viewingPubKey as Hex,
             });
@@ -109,7 +109,9 @@ const useSend = () => {
         ) as StealthAddressWithEphemeral;
 
         if (!stealthAccount) {
-          throw new Error('Stealth account not found');
+          throw new Error(
+            `Stealth account not found for sender ${userOp.sender}`
+          );
         }
 
         // Sign the user operation with the stealth account
