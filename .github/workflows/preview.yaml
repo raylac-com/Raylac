@@ -11,6 +11,7 @@ on:
 
 jobs:
   setup-preview:
+    if: ${{ ! contains(github.event.head_commit.message, '[skip build]') }}
     name: Setup EAS preview
     runs-on: ubuntu-latest
     env:
