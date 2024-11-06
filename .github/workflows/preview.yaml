@@ -14,7 +14,6 @@ permissions:
 
 jobs:
   setup-preview:
-  # if: ${{ COMMIT_MESSAGE=$(git log -1 --pretty=%B) && ! contains(COMMIT_MESSAGE, '[skip build]') }}
     name: Setup EAS preview
     runs-on: ubuntu-latest
     env:
@@ -26,21 +25,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Get Commit Message
-        id: get_commit_message
-        run: echo "COMMIT_MESSAGE=$(git log ${{ github.event.pull_request.head.ref }} -1 --pretty=%B)" >> $GITHUB_ENV
-
-      - name: Debug commit
-        run: echo "COMMIT_MESSAGE=$(git log -1 --pretty=%B)"
-
-      - name: Print Commit Message
-        run: echo ${{ env.COMMIT_MESSAGE }}
-
-      - name: Check if we should skip the build step
-        run: if ${{ ! contains(env.COMMIT_MESSAGE, '[skip build]') }}; then exit 0; else exit 1; fi
 
       - name: Cache turbo build setup
         uses: actions/cache@v4
@@ -80,6 +64,11 @@ jobs:
       #- name: Link branch to channel
       #  run: eas channel:edit ${{ github.event.pull_request.head.ref }} --branch ${{ github.event.pull_request.head.ref }}
       #  working-directory: packages/app
+
+      - name: Create a PR branch
+        run: eas branch:create ${{ github.event.pull_request.head.ref }}
+        working-directory: packages/app
+        continue-on-error: true
 
       - name: Link branch to test channel
         run: eas channel:edit test --branch ${{ github.event.pull_request.head.ref }}
