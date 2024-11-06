@@ -1,7 +1,6 @@
 import 'dotenv/config';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { getAuthedClient } from '../lib/rpc';
-import { signInAsTestUser } from '../lib/auth';
 import { Hex } from 'viem';
 import { getAddressBalance } from '../lib/utils';
 import { supportedTokens } from '@raylac/shared';
@@ -37,16 +36,8 @@ const checkBalance = async ({
 };
 
 describe('getAddressBalancesPerChain', () => {
-  let token;
-
-  beforeAll(async () => {
-    const { token: _token } = await signInAsTestUser();
-
-    token = _token;
-  });
-
   it('should return the correct balances of the address for each chain', async () => {
-    const authedClient = getAuthedClient(token);
+    const authedClient = await getAuthedClient();
     const stealthAccounts = await authedClient.getStealthAccounts.query();
     const balances = await authedClient.getAddressBalancesPerChain.query();
 

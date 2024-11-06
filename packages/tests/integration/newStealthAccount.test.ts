@@ -1,9 +1,7 @@
 import { webcrypto } from 'node:crypto';
 import 'dotenv/config';
-import { describe } from 'node:test';
-import { expect, test } from 'vitest';
-import { MNEMONIC, signInAsTestUser } from '../lib/auth';
-import { getAuthedClient } from '../lib/rpc';
+import { describe, expect, test } from 'vitest';
+import { getAuthedClient, getTestUserId } from '../lib/rpc';
 import {
   ERC5564_ANNOUNCEMENT_CHAIN,
   ERC5564_ANNOUNCER_ADDRESS,
@@ -17,6 +15,7 @@ import {
 } from '@raylac/shared';
 import { Hex, parseAbiItem } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
+import { TEST_ACCOUNT_MNEMONIC } from '../lib/auth';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -54,13 +53,10 @@ const pollAnnouncementLog = async (signerAddress: Hex) => {
 
 describe('new stealth account', () => {
   test('create and recover stealth account', async () => {
-    const { token, userId } = await signInAsTestUser();
+    const testUserId = await getTestUserId();
+    const client = await getAuthedClient();
 
-    const client = await getAuthedClient(token);
-
-    const user = await client.getUser.query({
-      userId,
-    });
+    const user = await client.getUser.query({ userId: testUserId });
 
     if (!user) {
       throw new Error('User not found');
@@ -98,8 +94,8 @@ describe('new stealth account', () => {
     expect(announcementLog.args.metadata).toEqual(newStealthAccount.viewTag);
     expect(announcementLog.args.schemeId).toEqual(ERC5564_SCHEME_ID);
 
-    const spendingPrivKey = getSpendingPrivKey(MNEMONIC);
-    const viewingPrivKey = getViewingPrivKey(MNEMONIC);
+    const spendingPrivKey = getSpendingPrivKey(TEST_ACCOUNT_MNEMONIC);
+    const viewingPrivKey = getViewingPrivKey(TEST_ACCOUNT_MNEMONIC);
 
     // Check that we can recover the stealth address private key from the announcement log
     const stealthAddressPrivateKey = recoveryStealthPrivKey({

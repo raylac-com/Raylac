@@ -2,16 +2,16 @@ import 'dotenv/config';
 import { getSpendingPrivKey, getViewingPrivKey, sleep } from '@raylac/shared';
 import { privateKeyToAccount } from 'viem/accounts';
 import { client } from './lib/rpc';
-import { MNEMONIC } from './lib/auth';
+import { TEST_ACCOUNT_MNEMONIC } from './lib/auth';
 
 const TEST_USER_NAME = 'Test User';
 const TEST_USER_USERNAME = 'testuser';
 
 const signUpTestUser = async () => {
   const spendingPubKey = privateKeyToAccount(
-    getSpendingPrivKey(MNEMONIC)
+    getSpendingPrivKey(TEST_ACCOUNT_MNEMONIC)
   ).publicKey;
-  const viewingPrivKey = getViewingPrivKey(MNEMONIC);
+  const viewingPrivKey = getViewingPrivKey(TEST_ACCOUNT_MNEMONIC);
 
   try {
     const { token: _token } = await client.signUp.mutate({
@@ -24,14 +24,6 @@ const signUpTestUser = async () => {
     // eslint-disable-next-line no-console
     console.log(e.message);
   }
-
-  /*
-  const authedClient = getAuthedClient(token);
-  
-  await authedClient.toggleDevMode.mutate({
-    devModeEnabled: true,
-  });
-  */
 };
 
 const waitForServer = async () => {
