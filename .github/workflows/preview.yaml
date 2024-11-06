@@ -26,10 +26,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Get Commit Message
         id: get_commit_message
         run: echo "COMMIT_MESSAGE=$(git log ${{ github.event.pull_request.head.ref }} -1 --pretty=%B)" >> $GITHUB_ENV
+
+      - name: Debug commit
+        run: echo "COMMIT_MESSAGE=$(git log -1 --pretty=%B)"
 
       - name: Print Commit Message
         run: echo ${{ env.COMMIT_MESSAGE }}
