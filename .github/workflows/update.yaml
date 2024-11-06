@@ -8,6 +8,7 @@ on:
       - packages/api/src/**
       - packages/app/src/**
       - packages/db/**
+      - .github/workflows/**
 jobs:
   update:
     runs-on: ubuntu-latest
