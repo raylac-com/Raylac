@@ -10,7 +10,7 @@ import SignUp from './screens/SignUp';
 import SignIn from './screens/SignIn';
 import { NavigationContainer, ThemeProvider } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { trpc, rpcLinks } from './lib/trpc';
+import { trpc, getRpcLinks } from './lib/trpc';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
@@ -365,7 +365,7 @@ const App = () => {
   }
 
   const trpcClient = trpc.createClient({
-    links: rpcLinks,
+    links: getRpcLinks(),
   });
 
   return (
