@@ -101,6 +101,7 @@ jobs:
           env: |
             API_URL=https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
             GIT_COMMIT=${{ github.sha }}
+            TEST_ACCOUNT_MNEMONIC=${{ secrets.TEST_ACCOUNT_MNEMONIC }}
 
   test-android:
     name: Run Maestro tests on android
@@ -118,3 +119,4 @@ jobs:
           env: |
             API_URL=https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
             GIT_COMMIT=${{ github.sha }}
+            TEST_ACCOUNT_MNEMONIC=${{ secrets.TEST_ACCOUNT_MNEMONIC }}
