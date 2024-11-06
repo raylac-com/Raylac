@@ -1,13 +1,13 @@
 {
   "cli": {
     "version": ">= 12.6.2",
-    "appVersionSource": "remote" 
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
       "ios": {
         "simulator": true
-      },  
+      },
       "android": {
         "buildType": "apk",
         "image": "latest"
@@ -27,9 +27,6 @@
       "channel": "test"
     },
     "preview": {
-      "ios": {
-        "simulator": true
-      },
       "android": {
         "buildType": "apk",
         "image": "latest"
