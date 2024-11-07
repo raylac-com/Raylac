@@ -7,4 +7,4 @@ WORKDIR /app
 
 EXPOSE 8545
 
-CMD ["anvil", "--base-fee", "10000"]
+CMD ["anvil", "--host=0.0.0.0",  "--base-fee", "10000"]
