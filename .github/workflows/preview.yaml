@@ -118,6 +118,9 @@ jobs:
 
       - name: Setup test environment
         run: pnpm -F ci run setup
+        env:
+          RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
+          TEST_ACCOUNT_MNEMONIC: ${{ secrets.TEST_ACCOUNT_MNEMONIC }}
 
   test-ios:
     name: Run Maestro tests on ios
