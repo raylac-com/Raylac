@@ -2,7 +2,7 @@ import prisma from '../lib/prisma';
 import { beforeAll, describe, expect, test } from 'vitest';
 import { anvil } from 'viem/chains';
 import { Hex, parseEther, zeroAddress } from 'viem';
-import { backFillBlocks, syncBlocksForChain } from '@raylac/sync';
+import { backFillFromFinalizedBlock, manageReorgsForChain } from '@raylac/sync';
 import { getPublicClient, getWalletClient, sleep } from '@raylac/shared';
 import { fundAddress, testClient } from '../lib/utils';
 
@@ -65,7 +65,7 @@ describe('syncBlocks', () => {
   describe('backfill', () => {
     test('should backfill from the finalized block', async () => {
       await deleteBlocks();
-      await backFillBlocks(chain.id);
+      await backFillFromFinalizedBlock(chain.id);
 
       const oldestSyncedBlock = await prisma.block.findFirst({
         where: { chainId: chain.id },
@@ -88,7 +88,7 @@ describe('syncBlocks', () => {
       await testClient.mine({ blocks: 16 });
 
       // Should backfill the blocks mined in the above line
-      await backFillBlocks(chain.id);
+      await backFillFromFinalizedBlock(chain.id);
 
       // Revert to the state before the blocks were backfilled
       await testClient.revert({ id: snapshot });
@@ -97,7 +97,7 @@ describe('syncBlocks', () => {
       await testClient.mine({ blocks: 16 });
 
       // Backfill the forked blocks
-      await backFillBlocks(chain.id);
+      await backFillFromFinalizedBlock(chain.id);
 
       const oldestSyncedBlock = await prisma.block.findFirst({
         where: { chainId: chain.id },
@@ -114,11 +114,11 @@ describe('syncBlocks', () => {
     });
   });
 
-  describe('syncBlocksForChain', async () => {
+  describe('manageReorgsForChain', async () => {
     for (const depth of [5, 10]) {
       test(`should handle ${depth} block${depth > 1 ? 's' : ''} reorg correctly`, async () => {
         await deleteBlocks();
-        const unwatch = await syncBlocksForChain(chain.id);
+        const unwatch = await manageReorgsForChain(chain.id);
 
         // Get the block number to start mining from
         const fromBlock = await publicClient.getBlockNumber();

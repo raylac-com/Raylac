@@ -1,4 +1,4 @@
-import syncBlocks from './syncBlocks';
+import syncBlocks from './manageReorgs';
 import syncNativeTransfers from './syncNativeTransfers';
 import syncERC20Transfers from './syncERC20Transfers';
 import syncAnnouncements from './syncAnnouncements';

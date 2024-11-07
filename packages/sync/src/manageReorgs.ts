@@ -235,7 +235,10 @@ const syncBlocksConcurrently = async ({
   ]);
 };
 
-export const backFillBlocks = async (chainId: number) => {
+/**
+ * Backfills blocks for a given chain from the latest finalized block to the latest block
+ */
+export const backFillFromFinalizedBlock = async (chainId: number) => {
   const publicClient = getPublicClient({
     chainId,
   });
@@ -271,8 +274,8 @@ export const backFillBlocks = async (chainId: number) => {
   logger.info(`Backfilling blocks for chain ${chainId} complete`);
 };
 
-export const syncBlocksForChain = async (chainId: number) => {
-  await backFillBlocks(chainId);
+export const manageReorgsForChain = async (chainId: number) => {
+  await backFillFromFinalizedBlock(chainId);
 
   const websocketClient = getWebsocketClient({
     chainId,
@@ -296,14 +299,14 @@ export const syncBlocksForChain = async (chainId: number) => {
   return unwatch;
 };
 
-const syncBlocks = async () => {
-  const syncBlocksJob = [];
+const manageReorgs = async () => {
+  const manageReorgsJob = [];
 
   for (const chain of supportedChains) {
-    syncBlocksJob.push(syncBlocksForChain(chain.id));
+    manageReorgsJob.push(manageReorgsForChain(chain.id));
   }
 
-  await Promise.all(syncBlocksJob);
+  await Promise.all(manageReorgsJob);
 };
 
-export default syncBlocks;
+export default manageReorgs;

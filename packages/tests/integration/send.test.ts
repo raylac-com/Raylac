@@ -21,7 +21,10 @@ import { client, getAuthedClient, getTestUserId } from '../lib/rpc';
 import { describe } from 'node:test';
 import { getAddressBalance, testClient } from '../lib/utils';
 import { TEST_ACCOUNT_MNEMONIC } from '../lib/auth';
-import { syncBlocksForChain, waitForAnnouncementsBackfill } from '@raylac/sync';
+import {
+  manageReorgsForChain,
+  waitForAnnouncementsBackfill,
+} from '@raylac/sync';
 
 const IS_DEV_MODE = false;
 
@@ -235,7 +238,7 @@ describe('send', () => {
     const chainId = anvil.id;
 
     // Start the indexer for the chain
-    const unwatch = await syncBlocksForChain(chainId);
+    const unwatch = await manageReorgsForChain(chainId);
 
     // 1. Send
     // 2. Revert the tx
