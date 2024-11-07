@@ -1,5 +1,3 @@
-import { base } from 'viem/chains';
-
 export const ACCOUNT_IMPL_V2_ADDRESS =
   '0x0dE41E4cb54a3084433f2Ed6Dd75F65C07F35eDb';
 
@@ -13,9 +11,3 @@ export const ENTRY_POINT_ADDRESS = '0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789';
 
 export const ERC5564_ANNOUNCER_ADDRESS =
   '0x55649E01B5Df198D18D95b5cc5051630cfD45564';
-
-export const ACCOUNT_IMPL_V2_DEPLOYED_BLOCK: {
-  [key: number]: bigint;
-} = {
-  [base.id]: BigInt(22047405),
-};

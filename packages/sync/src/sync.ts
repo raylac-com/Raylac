@@ -14,18 +14,18 @@ import { base } from 'viem/chains';
  */
 const ERC5564_DEFAULT_ANNOUNCEMENT_CHAIN_ID = base.id;
 
-const sync = async () => {
+const sync = async ({ chainIds }: { chainIds: number[] }) => {
   await Promise.all([
-    syncBlocks(),
-    syncUserOps(),
-    syncNativeTransfers(),
+    syncBlocks({ chainIds }),
+    syncUserOps({ chainIds }),
+    syncNativeTransfers({ chainIds }),
     syncAnnouncements({ chainId: ERC5564_DEFAULT_ANNOUNCEMENT_CHAIN_ID }),
     assignNativeTransfers(),
-    syncERC20Transfers(),
-    checkAddressBalances(),
+    syncERC20Transfers({ chainIds }),
+    checkAddressBalances({ chainIds }),
     // announceStealthAccounts(),
     scanStealthAddresses(),
   ]);
 };
 
-sync();
+export default sync;

@@ -192,7 +192,7 @@ export const syncERC20TransfersForChain = async ({
   }
 };
 
-const syncERC20Transfers = async () => {
+const syncERC20Transfers = async ({ chainIds }: { chainIds: number[] }) => {
   logger.info(
     'syncERC20Transfers: Waiting for announcements backfill to complete'
   );
@@ -212,6 +212,10 @@ const syncERC20Transfers = async () => {
         const syncOnChainsPromises = [];
         for (const tokenOnChain of token.addresses) {
           const chainId = tokenOnChain.chain.id;
+
+          if (!chainIds.includes(chainId)) {
+            continue;
+          }
 
           syncOnChainsPromises.push(
             syncERC20TransfersForChain({

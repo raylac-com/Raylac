@@ -6,7 +6,6 @@ import {
 } from '@raylac/shared';
 import { decodeEventLog, Log, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
-import { supportedChains } from '@raylac/shared';
 import { upsertTransaction } from './utils';
 import { Prisma } from '@prisma/client';
 import processLogs from './processLogs';
@@ -105,11 +104,11 @@ export const syncUserOpsForChain = async ({ chainId }: { chainId: number }) => {
  * Therefore we only need this indexing job to make sure we index UserOperations
  * that failed to be indexed for any reason.
  */
-const syncUserOps = async () => {
+const syncUserOps = async ({ chainIds }: { chainIds: number[] }) => {
   while (true) {
     const promises = [];
 
-    for (const chainId of supportedChains.map(chain => chain.id)) {
+    for (const chainId of chainIds) {
       promises.push(syncUserOpsForChain({ chainId }));
     }
 

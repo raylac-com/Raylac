@@ -4,7 +4,7 @@
   "types": "out/index.d.ts",
   "type": "module",
   "scripts": {
-    "start": "dotenv -e ../../.env -- tsx src/sync.ts",
+    "start": "dotenv -e ../../.env -- tsx src/start.ts",
     "lint": "tsc --noEmit",
     "test": "vitest",
     "build": "pnpm i && tsc -d",

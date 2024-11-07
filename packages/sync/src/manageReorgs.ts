@@ -4,7 +4,6 @@ import { Block, Hex } from 'viem';
 import { Prisma } from '@prisma/client';
 import { getWebsocketClient } from '@raylac/shared/src';
 import { logger } from './utils';
-import { supportedChains } from '@raylac/shared';
 
 const saveNewBlock = async ({
   block,
@@ -299,11 +298,11 @@ export const manageReorgsForChain = async (chainId: number) => {
   return unwatch;
 };
 
-const manageReorgs = async () => {
+const manageReorgs = async ({ chainIds }: { chainIds: number[] }) => {
   const manageReorgsJob = [];
 
-  for (const chain of supportedChains) {
-    manageReorgsJob.push(manageReorgsForChain(chain.id));
+  for (const chainId of chainIds) {
+    manageReorgsJob.push(manageReorgsForChain(chainId));
   }
 
   await Promise.all(manageReorgsJob);

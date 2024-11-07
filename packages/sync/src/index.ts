@@ -3,3 +3,4 @@ export * from './manageReorgs';
 export * from './assignNativeTransfers';
 export * from './syncERC20Transfers';
 export * from './utils';
+export { default as sync } from './sync';

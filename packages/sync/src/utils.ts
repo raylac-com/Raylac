@@ -1,19 +1,40 @@
 import * as winston from 'winston';
 import { Prisma, SyncJob } from '@prisma/client';
-import { arbitrum, base, optimism, polygon, scroll } from 'viem/chains';
+import { anvil, arbitrum, base, optimism, polygon, scroll } from 'viem/chains';
 import prisma from './lib/prisma';
 import { Hex, parseAbiItem, ParseEventLogsReturnType } from 'viem';
-import {
-  ACCOUNT_IMPL_V2_DEPLOYED_BLOCK,
-  bigIntMin,
-  ERC20Abi,
-  getPublicClient,
-  sleep,
-} from '@raylac/shared';
+import { bigIntMin, ERC20Abi, getPublicClient, sleep } from '@raylac/shared';
 
 export const announcementAbiItem = parseAbiItem(
   'event Announcement(uint256 indexed schemeId, address indexed stealthAddress, address indexed caller, bytes viewTag, bytes ephemeralPubKey)'
 );
+
+export const RAYLAC_DEPLOYED_BLOCK: {
+  [key: number]: bigint;
+} = {
+  [base.id]: BigInt(22047405),
+  [anvil.id]: BigInt(0), // It's 0 on anvil before we deploy the contracts right after starting the chain
+};
+
+/**
+ * Get the block height at which the Raylac contracts were deployed for a chain.
+ */
+export const getRaylacDeployedBlock = ({
+  chainId,
+}: {
+  chainId: number;
+}): bigint => {
+  // We allow specifying a custom deployed block value.
+  // This is useful for testing when we only want to index from a certain block and not the entire history.
+  if (process.env.RAYLAC_DEPLOYED_BLOCK) {
+    return BigInt(process.env.RAYLAC_DEPLOYED_BLOCK);
+  }
+
+  // eslint-disable-next-line security/detect-object-injection
+  const raylacAccountDeployedBlock = RAYLAC_DEPLOYED_BLOCK[chainId];
+
+  return raylacAccountDeployedBlock;
+};
 
 export const getFromBlock = async ({
   chainId,
@@ -22,14 +43,7 @@ export const getFromBlock = async ({
   chainId: number;
   job: SyncJob;
 }) => {
-  // eslint-disable-next-line security/detect-object-injection
-  const raylacAccountDeployedBlock = ACCOUNT_IMPL_V2_DEPLOYED_BLOCK[chainId];
-
-  if (!raylacAccountDeployedBlock) {
-    throw new Error(
-      `ACCOUNT_IMPL_V2_DEPLOYED_BLOCK not found for chain ${chainId}`
-    );
-  }
+  const raylacAccountDeployedBlock = getRaylacDeployedBlock({ chainId });
 
   const jobStatus = await prisma.syncStatus.findFirst({
     select: {
@@ -60,26 +74,6 @@ export const getFromBlock = async ({
   ]);
 
   return fromBlock;
-};
-
-/**
- * Get the latest synced block number for a sync job
- */
-export const getLatestSynchedBlockForJob = async (
-  chainId: number,
-  job: SyncJob
-): Promise<bigint | null> => {
-  const syncJobStatus = await prisma.syncStatus.findFirst({
-    select: {
-      lastSyncedBlockNum: true,
-    },
-    where: {
-      job,
-      chainId,
-    },
-  });
-
-  return syncJobStatus?.lastSyncedBlockNum ?? null;
 };
 
 /**
@@ -257,22 +251,6 @@ export const getApproxChainBlockTime = async (
   const timeDiff = latestBlock.timestamp - compareBlock.timestamp;
 
   return Number(timeDiff) / 10;
-};
-
-export const getLatestSynchedBlock = async (chainId: number) => {
-  const latestSyncedBlock = await prisma.block.findFirst({
-    select: {
-      number: true,
-    },
-    where: {
-      chainId,
-    },
-    orderBy: {
-      number: 'desc',
-    },
-  });
-
-  return latestSyncedBlock?.number ?? null;
 };
 
 export const CHAIN_BLOCK_TIME: Record<number, number> = {

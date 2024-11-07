@@ -1,5 +1,4 @@
 import {
-  ACCOUNT_IMPL_V2_DEPLOYED_BLOCK,
   bigIntMax,
   ERC5564_ANNOUNCER_ADDRESS,
   ERC5564_SCHEME_ID,
@@ -12,6 +11,7 @@ import {
   announcementAbiItem,
   CHAIN_BLOCK_TIME,
   endTimer,
+  getRaylacDeployedBlock,
   logger,
   startTimer,
 } from './utils';
@@ -54,7 +54,7 @@ export const handleERC5564AnnouncementLog = async ({
 
         const fromBlock = bigIntMax([
           log.blockNumber - BigInt(scanPastBufferBlocks),
-          ACCOUNT_IMPL_V2_DEPLOYED_BLOCK[chain.id],
+          getRaylacDeployedBlock({ chainId: chain.id }),
         ]);
 
         return supportedTokens.map(token => {

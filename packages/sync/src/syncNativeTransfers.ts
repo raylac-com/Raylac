@@ -14,7 +14,6 @@ import {
   upsertTransaction,
   waitForAnnouncementsBackfill,
 } from './utils';
-import { supportedChains } from '@raylac/shared';
 import { base, optimism } from 'viem/chains';
 import { getTokenPriceAtTime } from './lib/coingecko';
 
@@ -260,7 +259,7 @@ const syncNativeTransfersForChain = async (chainId: number) => {
   }
 };
 
-const syncNativeTransfers = async () => {
+const syncNativeTransfers = async ({ chainIds }: { chainIds: number[] }) => {
   logger.info(
     'syncNativeTransfers: Waiting for announcements backfill to complete'
   );
@@ -271,8 +270,8 @@ const syncNativeTransfers = async () => {
     try {
       const promises = [];
 
-      for (const chain of supportedChains) {
-        promises.push(syncNativeTransfersForChain(chain.id));
+      for (const chainId of chainIds) {
+        promises.push(syncNativeTransfersForChain(chainId));
       }
 
       await Promise.all(promises);
