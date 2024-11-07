@@ -8,6 +8,7 @@ on:
       - packages/api/src/**
       - packages/app/src/**
       - packages/db/**
+      - .github/workflows/**
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -34,9 +35,10 @@ jobs:
       - name: 📦 Install dependencies
         run: pnpm i
 
+      - name: Create a .env file
+        run: printf "EXPO_PUBLIC_RPC_URL=https://raylac-api.onrender.com\nEXPO_PUBLIC_ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}\n" > .env
+        working-directory: packages/app
+
       - name: 🚀 Create update
         run: eas update --auto --non-interactive
         working-directory: packages/app
-        env:
-          EXPO_PUBLIC_RPC_URL: https://raylac-api.onrender.com
-          EXPO_PUBLIC_ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
