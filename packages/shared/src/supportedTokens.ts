@@ -87,7 +87,7 @@ export const supportedTokens: SupportedToken[] = [
     decimals: 18,
     logoURI:
       'https://assets.coingecko.com/coins/images/279/standard/ethereum.png?1696501628',
-    addresses: supportedChains.map(chain => ({
+    addresses: [...supportedChains, chains.anvil].map(chain => ({
       address: NATIVE_TOKEN_ADDRESS,
       chain,
     })),

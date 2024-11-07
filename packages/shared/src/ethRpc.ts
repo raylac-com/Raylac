@@ -73,7 +73,13 @@ export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
 
 export const getQuickNodeRpcUrl = ({ chain }: { chain: Chain }) => {
   if (chain.id === chains.anvil.id) {
-    return 'http://127.0.0.1:8545';
+    const ANVIL_RPC_URL = process.env.ANVIL_RPC_URL;
+
+    if (!ANVIL_RPC_URL) {
+      throw new Error('ANVIL_RPC_URL is not set');
+    }
+
+    return ANVIL_RPC_URL;
   }
 
   const apiKey = process.env.QUICKNODE_API_KEY;
@@ -144,12 +150,17 @@ export const getPublicClient = ({
   chainId: number;
 }): PublicClient<HttpTransport, Chain> => {
   const chain = getChainFromId(chainId);
+
+  const ANVIL_RPC_URL = process.env.ANVIL_RPC_URL as string;
+
+  if (chainId === chains.anvil.id && !ANVIL_RPC_URL) {
+    throw new Error('ANVIL_RPC_URL is not set');
+  }
+
   const client = createPublicClient({
     chain,
     transport: http(
-      chainId === chains.anvil.id
-        ? 'http://127.0.0.1:8545'
-        : getAlchemyRpcUrl({ chain })
+      chainId === chains.anvil.id ? ANVIL_RPC_URL : getAlchemyRpcUrl({ chain })
     ),
   });
 
@@ -170,11 +181,18 @@ export const getWalletClient = ({ chainId }: { chainId: number }) => {
 
 export const getWebsocketClient = ({ chainId }: { chainId: number }) => {
   const chain = getChainFromId(chainId);
+
+  const ANVIL_RPC_URL = process.env.ANVIL_RPC_URL as string;
+
+  if (chainId === chains.anvil.id && !ANVIL_RPC_URL) {
+    throw new Error('ANVIL_RPC_URL is not set');
+  }
+
   const client = createPublicClient({
     chain,
     transport: webSocket(
       chainId === chains.anvil.id
-        ? 'ws://127.0.0.1:8545'
+        ? ANVIL_RPC_URL?.replace('http', 'ws')
         : getAlchemyRpcUrl({ chain })
     ),
   });

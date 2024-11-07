@@ -1,3 +1,4 @@
+import { anvil } from 'viem/chains';
 import prisma from '../lib/prisma';
 import { supportedChains } from '@raylac/shared';
 
@@ -8,12 +9,18 @@ const getTransferHistory = async ({
   userId,
   take,
   skip,
+  includeAnvil = false,
 }: {
   userId: number;
   take?: number;
   skip?: number;
+  includeAnvil?: boolean;
 }) => {
   const chainIds = supportedChains.map(chain => chain.id);
+
+  if (includeAnvil) {
+    chainIds.push(anvil.id);
+  }
 
   const transactions = await prisma.transaction.findMany({
     select: {

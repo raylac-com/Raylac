@@ -27,6 +27,7 @@ import axios from 'axios';
 import { getSenderAddressV2, recoveryStealthPrivKey } from './stealth';
 import { increaseByPercent, sleep } from './utils';
 import { signMessage } from 'viem/accounts';
+import { anvil } from 'viem/chains';
 
 /**
  * Get the init code for creating a stealth contract account
@@ -376,6 +377,10 @@ export const rundlerMaxPriorityFeePerGas = async ({
 
   if (result.data.error) {
     throw new Error(JSON.stringify(result.data.error));
+  }
+
+  if (client.chain.id === anvil.id) {
+    return 100000n;
   }
 
   return BigInt(result.data.result!);

@@ -48,10 +48,6 @@ const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
       addressSyncStatus => addressSyncStatus.blockNumber < blockNumber
     );
 
-    logger.info(
-      `Scanning blocks for ${addresses.length} addresses in block ${blockNumber} on chain ${chainId}`
-    );
-
     const callsWithValue = await getNativeTransferTracesInBlock({
       blockNumber,
       chainId,
@@ -66,12 +62,6 @@ const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
         addresses.some(address => address.address === from)
       );
     });
-
-    if (callsWithAddresses.length > 0) {
-      logger.info(
-        `Found ${callsWithAddresses.length} calls with announced address in block ${blockNumber}`
-      );
-    }
 
     const txHashes = new Set(callsWithAddresses.map(call => call.txHash));
 

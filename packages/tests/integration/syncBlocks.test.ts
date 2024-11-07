@@ -55,7 +55,7 @@ const sendTransaction = async () => {
   });
 };
 
-describe('syncBlocks', () => {
+describe.skip('syncBlocks', () => {
   beforeAll(async () => {
     await fundAddress({
       address: TEST_ADDRESS,

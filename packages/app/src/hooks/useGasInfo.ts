@@ -1,4 +1,4 @@
-import { getGasInfo } from '@raylac/shared';
+import { getGasInfo, supportedChains } from '@raylac/shared';
 import { useQuery } from '@tanstack/react-query';
 import useSignedInUser from './useSignedInUser';
 
@@ -9,7 +9,7 @@ const useGasInfo = () => {
     queryKey: ['gasInfo'],
     queryFn: async () => {
       const gasInfo = await getGasInfo({
-        isDevMode: signedInUser.devModeEnabled,
+        chainIds: supportedChains.map(chain => chain.id),
       });
       return gasInfo;
     },

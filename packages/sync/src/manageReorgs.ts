@@ -115,6 +115,10 @@ const processNewBlock = async ({
   });
 
   if (existingBlock && existingBlock.hash !== block.hash) {
+    logger.info(
+      `Found conflicting blocks for chain ${chainId}. Replacing ${existingBlock.hash} with ${block.hash}`
+    );
+
     await handleConflictingBlocks({
       oldBlockHash: existingBlock.hash as Hex,
       newBlock: block,

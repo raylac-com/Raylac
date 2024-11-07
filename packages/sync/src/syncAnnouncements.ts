@@ -1,12 +1,12 @@
 import {
   bigIntMax,
+  ERC5564_ANNOUNCEMENT_CHAIN,
   ERC5564_ANNOUNCER_ADDRESS,
   ERC5564_SCHEME_ID,
-  formatERC5564AnnouncementLog,
+  getSenderAddressV2,
   sleep,
 } from '@raylac/shared';
 import prisma from './lib/prisma';
-import { base } from 'viem/chains';
 import {
   announcementAbiItem,
   CHAIN_BLOCK_TIME,
@@ -16,88 +16,126 @@ import {
   startTimer,
 } from './utils';
 import processLogs from './processLogs';
-import { Log } from 'viem';
-import { Prisma, SyncJob } from '@prisma/client';
-import { supportedChains } from '@raylac/shared';
+import { decodeEventLog, Hex, Log, parseAbi } from 'viem';
+import { ERC5564Announcement, Prisma, SyncJob } from '@prisma/client';
 import { supportedTokens } from '@raylac/shared';
+import { anvil } from 'viem/chains';
 
 const SCAN_PAST_BUFFER = 2 * 60 * 1000; // 2 minutes
 
-export const handleERC5564AnnouncementLog = async ({
-  log,
+/**
+ * Create sync tasks for an announcement on a given chain
+ *
+ * @param announcement - The announcement to create sync tasks for
+ * @param chainId - The chain to create sync tasks for
+ */
+const createSyncTaskForChain = async ({
+  announcement,
   chainId,
 }: {
-  log: Log<bigint, number, false>;
+  announcement: ERC5564Announcement;
   chainId: number;
 }) => {
-  const data = formatERC5564AnnouncementLog({
-    log,
-    chainId,
-  });
+  // eslint-disable-next-line security/detect-object-injection
+  const blockTime = CHAIN_BLOCK_TIME[chainId];
+  const scanPastBufferBlocks = Math.floor(SCAN_PAST_BUFFER / blockTime);
 
-  if (data.address === '0x5a27067D67C9B016E49feA767D35E7121D794D57') {
-    return;
-  }
-
-  // Create address sync statuses records for the announcement address for all chains
-  // The worker in `syncNativeTransfers.ts` will scan blocks for the announced address
-  // from the specified block height.
-  const addressSyncStatuses = (
-    await Promise.all(
-      supportedChains.map(async chain => {
-        if (chain.id !== base.id) {
-          throw new Error(`Unsupported chain ${chain.id}`);
-        }
-
-        const blockTime = CHAIN_BLOCK_TIME[chain.id];
-        const scanPastBufferBlocks = Math.floor(SCAN_PAST_BUFFER / blockTime);
-
-        const fromBlock = bigIntMax([
-          log.blockNumber - BigInt(scanPastBufferBlocks),
-          getRaylacDeployedBlock({ chainId: chain.id }),
+  const fromBlock =
+    chainId === anvil.id
+      ? 0n
+      : bigIntMax([
+          bigIntMax([
+            announcement.blockNumber - BigInt(scanPastBufferBlocks),
+            0n,
+          ]),
+          getRaylacDeployedBlock({ chainId }),
         ]);
 
-        return supportedTokens.map(token => {
-          const item: Omit<
-            Prisma.AddressSyncStatusCreateManyInput,
-            // We omit eRC5564AnnouncementId because it's set after the eRC5564Announcement is inserted to the db
-            'eRC5564AnnouncementId'
-          > = {
-            address: data.address,
-            chainId: chain.id,
-            blockNumber: fromBlock,
-            tokenId: token.tokenId,
-            blockHash: log.blockHash,
-          };
+  const tokenIds = supportedTokens.map(token => token.tokenId);
 
-          return item;
-        });
-      })
-    )
-  ).flat();
-
-  await prisma.$transaction(async prisma => {
-    const announcement = await prisma.eRC5564Announcement.upsert({
-      create: data,
-      update: data,
-      where: {
-        blockNumber_logIndex_txIndex_chainId: {
-          blockNumber: log.blockNumber,
-          logIndex: log.logIndex,
-          txIndex: log.transactionIndex,
-          chainId,
-        },
-      },
+  const syncTasks: Prisma.AddressSyncStatusCreateManyInput[] = [];
+  for (const tokenId of tokenIds) {
+    syncTasks.push({
+      address: announcement.address as Hex,
+      chainId,
+      blockNumber: fromBlock,
+      tokenId,
+      eRC5564AnnouncementId: announcement.id,
+      blockHash: '0x',
     });
+  }
 
-    await prisma.addressSyncStatus.createMany({
-      data: addressSyncStatuses.map(addressSyncStatus => ({
-        ...addressSyncStatus,
-        eRC5564AnnouncementId: announcement.id,
-      })),
-      skipDuplicates: true,
-    });
+  await prisma.addressSyncStatus.createMany({
+    data: syncTasks,
+    skipDuplicates: true,
   });
+
+  logger.info(
+    `Created sync tasks for announcement of address ${announcement.address} on chain ${chainId}`
+  );
+};
+
+const createSyncTasks = async ({
+  announcement,
+  chainIds,
+}: {
+  announcement: ERC5564Announcement;
+  chainIds: number[];
+}) => {
+  const promises = [];
+
+  for (const chainId of chainIds) {
+    promises.push(createSyncTaskForChain({ announcement, chainId }));
+  }
+};
+
+export const handleERC5564AnnouncementLog = async ({
+  log,
+  chainIds,
+}: {
+  log: Log<bigint, number, false>;
+  chainIds: number[];
+}) => {
+  const decodedLog = decodeEventLog({
+    abi: parseAbi([
+      'event Announcement(uint256 indexed schemeId, address indexed stealthAddress, address indexed caller, bytes ephemeralPubKey, bytes metadata)',
+    ]),
+    data: log.data,
+    topics: log.topics,
+  });
+
+  const schemeId = Number(decodedLog.args.schemeId);
+  const address = getSenderAddressV2({
+    stealthSigner: decodedLog.args.stealthAddress,
+  });
+
+  const data: Prisma.ERC5564AnnouncementCreateInput = {
+    address,
+    schemeId,
+    stealthAddress: decodedLog.args.stealthAddress,
+    caller: decodedLog.args.caller,
+    ephemeralPubKey: decodedLog.args.ephemeralPubKey,
+    metadata: decodedLog.args.metadata,
+    chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
+    blockNumber: log.blockNumber,
+    logIndex: log.logIndex,
+    txIndex: log.transactionIndex,
+  };
+
+  const announcement = await prisma.eRC5564Announcement.upsert({
+    create: data,
+    update: data,
+    where: {
+      blockNumber_logIndex_txIndex_chainId: {
+        blockNumber: log.blockNumber,
+        logIndex: log.logIndex,
+        txIndex: log.transactionIndex,
+        chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
+      },
+    },
+  });
+
+  await createSyncTasks({ announcement, chainIds });
 };
 
 /**
@@ -141,21 +179,21 @@ const deleteV1Accounts = async () => {
 /**
  * Sync ERC5564 announcements made on a given chain
  *
- * @param chainId - The chain to sync announcements for
+ * @param chainIds - The chains to sync announcements for
  */
-const syncAnnouncements = async ({ chainId }: { chainId: number }) => {
+const syncAnnouncements = async ({ chainIds }: { chainIds: number[] }) => {
   await deleteV1Accounts();
 
   while (true) {
     const announcementBackfillTimer = startTimer('announcementBackfill');
     await processLogs({
-      chainId,
+      chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
       job: SyncJob.Announcements,
       address: ERC5564_ANNOUNCER_ADDRESS,
       event: announcementAbiItem,
       handleLogs: async logs => {
         for (const log of logs) {
-          await handleERC5564AnnouncementLog({ log, chainId });
+          await handleERC5564AnnouncementLog({ log, chainIds });
         }
       },
       args: {

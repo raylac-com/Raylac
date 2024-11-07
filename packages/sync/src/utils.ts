@@ -3,7 +3,13 @@ import { Prisma, SyncJob } from '@prisma/client';
 import { anvil, arbitrum, base, optimism, polygon, scroll } from 'viem/chains';
 import prisma from './lib/prisma';
 import { Hex, parseAbiItem, ParseEventLogsReturnType } from 'viem';
-import { bigIntMin, ERC20Abi, getPublicClient, sleep } from '@raylac/shared';
+import {
+  bigIntMin,
+  ERC20Abi,
+  ERC5564_ANNOUNCEMENT_CHAIN,
+  getPublicClient,
+  sleep,
+} from '@raylac/shared';
 
 export const announcementAbiItem = parseAbiItem(
   'event Announcement(uint256 indexed schemeId, address indexed stealthAddress, address indexed caller, bytes viewTag, bytes ephemeralPubKey)'
@@ -259,6 +265,7 @@ export const CHAIN_BLOCK_TIME: Record<number, number> = {
   [optimism.id]: 2000,
   [scroll.id]: 3000,
   [polygon.id]: 2000,
+  [anvil.id]: 250,
 };
 
 export const CHAIN_GENESIS_BLOCK_TIME: Record<number, number> = {
@@ -331,7 +338,7 @@ export const getBlockNumFromTimestamp = async ({
  * Resolves when the ERC5554 announcements backfills to the latest block
  */
 export const waitForAnnouncementsBackfill = async () => {
-  const client = getPublicClient({ chainId: base.id }); // TODO: Use the constant to specify the chain
+  const client = getPublicClient({ chainId: ERC5564_ANNOUNCEMENT_CHAIN.id });
 
   const latestBlock = await client.getBlock({
     blockTag: 'latest',
@@ -341,7 +348,7 @@ export const waitForAnnouncementsBackfill = async () => {
     const announcementSyncStatus = await prisma.syncStatus.findUnique({
       where: {
         chainId_job: {
-          chainId: base.id,
+          chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
           job: SyncJob.Announcements,
         },
       },

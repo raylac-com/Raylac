@@ -8,6 +8,8 @@ import {
   parseUnits,
 } from 'viem';
 import {
+  AnvilBlockTraceResponse,
+  BlockTraceResponse,
   BlockTransactionResponse,
   ChainGasInfo,
   TraceWithTraceAddress,
@@ -25,6 +27,7 @@ import {
 } from '.';
 import { supportedChains } from './supportedChains';
 import axios from 'axios';
+import { anvil } from 'viem/chains';
 
 export const encodeERC5564Metadata = (viewTag: Hex): Hex => {
   if (viewTag.length !== 4) {
@@ -346,15 +349,13 @@ export const USER_OP_EVENT_SIG =
  * Get the gas info for all supported chains
  */
 export const getGasInfo = async ({
-  isDevMode,
+  chainIds,
 }: {
-  isDevMode: boolean;
+  chainIds: number[];
 }): Promise<ChainGasInfo[]> => {
-  const chains = getChainsForMode(isDevMode);
-
   const gasInfo: ChainGasInfo[] = [];
-  for (const chain of chains) {
-    const client = getPublicClient({ chainId: chain.id });
+  for (const chainId of chainIds) {
+    const client = getPublicClient({ chainId });
     const block = await client.getBlock({ blockTag: 'latest' });
     const maxPriorityFeePerGas = await rundlerMaxPriorityFeePerGas({ client });
 
@@ -363,7 +364,7 @@ export const getGasInfo = async ({
     }
 
     gasInfo.push({
-      chainId: chain.id,
+      chainId,
       baseFeePerGas: block.baseFeePerGas,
       maxPriorityFeePerGas,
     });
@@ -491,13 +492,32 @@ export const getNativeTransferTracesInBlock = async ({
 }: {
   blockNumber: bigint;
   chainId: number;
-}) => {
+}): Promise<TraceWithTraceAddress[]> => {
   const traceBlockResult = await traceBlockByNumber({
     chainId,
     blockNumber,
   });
 
-  const callsWithValuesInBlock = traceBlockResult
+  if (chainId === anvil.id) {
+    const callsWithValues = (
+      traceBlockResult as AnvilBlockTraceResponse
+    ).filter(tx => tx.action.callType === 'call' && tx.action.value !== '0x0');
+
+    return callsWithValues.map(tx => ({
+      from: tx.action.from,
+      gas: tx.action.gas,
+      gasUsed: tx.result.gasUsed,
+      to: tx.action.to,
+      input: tx.action.input,
+      calls: [],
+      value: tx.action.value,
+      type: 'CALL',
+      txHash: tx.transactionHash,
+      traceAddress: tx.traceAddress,
+    }));
+  }
+
+  const callsWithValuesInBlock = (traceBlockResult as BlockTraceResponse)
     .flatMap(tx => getCalls(tx.result, tx.txHash))
     .filter(call => call.type === 'CALL' && call.value && call.value !== '0x0');
 
