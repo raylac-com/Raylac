@@ -349,8 +349,11 @@ export const getBlockNumFromTimestamp = async ({
   return BigInt(estimatedBlockNumber);
 };
 
+/**
+ * Resolves when the ERC5554 announcements backfills to the latest block
+ */
 export const waitForAnnouncementsBackfill = async () => {
-  const client = getPublicClient({ chainId: base.id });
+  const client = getPublicClient({ chainId: base.id }); // TODO: Use the constant to specify the chain
 
   const latestBlock = await client.getBlock({
     blockTag: 'latest',

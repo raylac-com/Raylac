@@ -196,6 +196,8 @@ const syncERC20Transfers = async () => {
   logger.info(
     'syncERC20Transfers: Waiting for announcements backfill to complete'
   );
+  // We need to wait for ERC5554 announcements to be backfilled before syncing ERC20 transfers,
+  // because we use the ERC5554 events to find the stealth addresses to sync ERC20 transfers for
   await waitForAnnouncementsBackfill();
   logger.info(`syncERC20Transfers: Announcements backfill complete`);
 

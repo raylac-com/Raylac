@@ -138,19 +138,24 @@ const deleteV1Accounts = async () => {
   logger.info(`Deleted ${v1Addresses.length} v1 accounts`);
 };
 
-const syncAnnouncements = async () => {
+/**
+ * Sync ERC5564 announcements made on a given chain
+ *
+ * @param chainId - The chain to sync announcements for
+ */
+const syncAnnouncements = async ({ chainId }: { chainId: number }) => {
   await deleteV1Accounts();
 
   while (true) {
     const announcementBackfillTimer = startTimer('announcementBackfill');
     await processLogs({
-      chainId: base.id,
+      chainId,
       job: SyncJob.Announcements,
       address: ERC5564_ANNOUNCER_ADDRESS,
       event: announcementAbiItem,
       handleLogs: async logs => {
         for (const log of logs) {
-          await handleERC5564AnnouncementLog({ log, chainId: base.id });
+          await handleERC5564AnnouncementLog({ log, chainId });
         }
       },
       args: {

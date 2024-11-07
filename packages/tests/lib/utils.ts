@@ -11,11 +11,19 @@ import { anvil } from 'viem/chains';
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 
-export const testClient = createTestClient({
-  mode: 'anvil',
-  chain: anvil,
-  transport: http('http://127.0.0.1:8545'),
-});
+export const getTestClient = () => {
+  const ANVIL_RPC_URL = process.env.ANVIL_RPC_URL;
+
+  if (!ANVIL_RPC_URL) {
+    throw new Error('ANVIL_RPC_URL is not set');
+  }
+
+  return createTestClient({
+    mode: 'anvil',
+    chain: anvil,
+    transport: http(ANVIL_RPC_URL),
+  });
+};
 
 const getNativeBalance = async ({
   address,
@@ -77,6 +85,7 @@ export const fundAddress = async ({
   address: Hex;
   amount: bigint;
 }) => {
+  const testClient = getTestClient();
   await testClient.setBalance({ address, value: amount });
 };
 
@@ -92,6 +101,7 @@ export const impersonateAndSend = async ({
   to: Hex;
   amount: bigint;
 }) => {
+  const testClient = getTestClient();
   await testClient.impersonateAccount({ address: from });
   const walletClient = getWalletClient({ chainId: anvil.id });
 

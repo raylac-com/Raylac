@@ -4,7 +4,7 @@ import { anvil } from 'viem/chains';
 import { Hex, parseEther, zeroAddress } from 'viem';
 import { backFillFromFinalizedBlock, manageReorgsForChain } from '@raylac/sync';
 import { getPublicClient, getWalletClient, sleep } from '@raylac/shared';
-import { fundAddress, testClient } from '../lib/utils';
+import { fundAddress, getTestClient } from '../lib/utils';
 
 const chain = anvil;
 
@@ -27,6 +27,7 @@ const waitForBlockSync = async (blockHash: Hex) => {
   }
 };
 
+const testClient = getTestClient();
 const publicClient = getPublicClient({ chainId: chain.id });
 
 const deleteBlocks = async () => {

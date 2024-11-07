@@ -18,7 +18,7 @@ import { supportedChains } from '@raylac/shared';
 import { base, optimism } from 'viem/chains';
 import { getTokenPriceAtTime } from './lib/coingecko';
 
-const syncNativeTransfersForChain = async (chainId: number) => {
+const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
   const addressSyncStatuses = await prisma.addressSyncStatus.findMany({
     select: {
       blockNumber: true,
@@ -252,6 +252,14 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
   }
 };
 
+const syncNativeTransfersForChain = async (chainId: number) => {
+  if (chainId === base.id || chainId === optimism.id) {
+    await syncNativeTransfersWithTraceFilter(chainId);
+  } else {
+    await syncNativeTransfersWithTraceBlock(chainId);
+  }
+};
+
 const syncNativeTransfers = async () => {
   logger.info(
     'syncNativeTransfers: Waiting for announcements backfill to complete'
@@ -264,11 +272,7 @@ const syncNativeTransfers = async () => {
       const promises = [];
 
       for (const chain of supportedChains) {
-        if (chain.id === base.id || chain.id === optimism.id) {
-          promises.push(syncNativeTransfersWithTraceFilter(chain.id));
-        } else {
-          promises.push(syncNativeTransfersForChain(chain.id));
-        }
+        promises.push(syncNativeTransfersForChain(chain.id));
       }
 
       await Promise.all(promises);
