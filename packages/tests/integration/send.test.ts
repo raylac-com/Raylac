@@ -2,12 +2,12 @@ import 'dotenv/config';
 import { expect, test } from 'vitest';
 import {
   AddressTokenBalance,
-  generateStealthAddress,
+  generateStealthAddressV2,
   getGasInfo,
   getSpendingPrivKey,
   getViewingPrivKey,
   getWalletClient,
-  RAYLAC_PAYMASTER_ADDRESS,
+  RAYLAC_PAYMASTER_V2_ADDRESS,
   signUserOpWithStealthAccount,
   StealthAddressWithEphemeral,
   supportedTokens,
@@ -124,7 +124,7 @@ const send = async ({
     userOps.map(async userOp => {
       // Get the paymaster signature
       const paymasterAndData = encodePaymasterAndData({
-        paymaster: RAYLAC_PAYMASTER_ADDRESS,
+        paymaster: RAYLAC_PAYMASTER_V2_ADDRESS,
         data: await authedClient.paymasterSignUserOp.mutate({ userOp }),
       });
       userOp.paymasterAndData = paymasterAndData;
@@ -257,7 +257,7 @@ describe('send', () => {
     }
 
     // Generate a new stealth address for the test user
-    const newStealthAccount = generateStealthAddress({
+    const newStealthAccount = generateStealthAddressV2({
       spendingPubKey: testUser.spendingPubKey as Hex,
       viewingPubKey: testUser.viewingPubKey as Hex,
     });

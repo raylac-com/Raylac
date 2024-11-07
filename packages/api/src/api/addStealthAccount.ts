@@ -1,7 +1,6 @@
 import { StealthAddressWithEphemeral } from '@raylac/shared';
 import prisma from '../lib/prisma';
 import * as erc5564 from '../lib/erc5564';
-import { Hex } from 'viem';
 import { TRPCError } from '@trpc/server';
 
 const MAX_STEALTH_ACCOUNTS = 500;
@@ -52,11 +51,7 @@ const addStealthAccount = async ({
 
   // Submit an announcement to the ERC5564 announcer contract.
   // We don't await this because it's slow and we don't want to block the response.
-  erc5564.announce({
-    signerAddress: stealthAccount.signerAddress as Hex,
-    ephemeralPubKey: stealthAccount.ephemeralPubKey as Hex,
-    viewTag: stealthAccount.viewTag as Hex,
-  });
+  erc5564.announce(stealthAccount);
 };
 
 export default addStealthAccount;

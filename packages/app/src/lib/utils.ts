@@ -8,7 +8,7 @@ import {
   encodePaymasterAndData,
   getTokenMetadata,
   UserOperation,
-  RAYLAC_PAYMASTER_ADDRESS,
+  RAYLAC_PAYMASTER_V2_ADDRESS,
 } from '@raylac/shared';
 import { getRpcClient } from './trpc';
 
@@ -136,7 +136,7 @@ export const getPaymasterAndData = async (userOp: UserOperation) => {
   });
 
   const paymasterAndData = encodePaymasterAndData({
-    paymaster: RAYLAC_PAYMASTER_ADDRESS,
+    paymaster: RAYLAC_PAYMASTER_V2_ADDRESS,
     data: paymasterSig,
   });
 

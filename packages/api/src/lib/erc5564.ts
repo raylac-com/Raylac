@@ -5,7 +5,9 @@ import {
   ERC5564_ANNOUNCER_ADDRESS,
   ERC5564_SCHEME_ID,
   ERC5564AnnouncerAbi,
+  getSenderAddressV2,
   getWalletClient,
+  StealthAddressWithEphemeral,
 } from '@raylac/shared';
 import { privateKeyToAccount } from 'viem/accounts';
 import { logger } from '../utils';
@@ -18,16 +20,20 @@ if (!ANNOUNCER_PRIVATE_KEY) {
 
 const announcerAccount = privateKeyToAccount(ANNOUNCER_PRIVATE_KEY as Hex);
 
-export const announce = async ({
-  signerAddress,
-  ephemeralPubKey,
-  viewTag,
-}: {
-  signerAddress: Hex;
-  ephemeralPubKey: Hex;
-  viewTag: Hex;
-}) => {
-  const metadata = encodeERC5564Metadata(viewTag);
+export const announce = async (stealthAccount: StealthAddressWithEphemeral) => {
+  const metadata = encodeERC5564Metadata(stealthAccount.viewTag);
+
+  // Sanity check that the stealth account matches the ERC5564_SCHEME_ID version
+  if (
+    stealthAccount.address !==
+    getSenderAddressV2({
+      stealthSigner: stealthAccount.signerAddress,
+    })
+  ) {
+    throw new Error(
+      `Stealth account ${stealthAccount.address} does not match ERC5564_SCHEME_ID version ${ERC5564_SCHEME_ID}`
+    );
+  }
 
   const walletClient = getWalletClient({
     chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
@@ -39,13 +45,16 @@ export const announce = async ({
       abi: ERC5564AnnouncerAbi,
       address: ERC5564_ANNOUNCER_ADDRESS,
       functionName: 'announce',
-      args: [ERC5564_SCHEME_ID, signerAddress, ephemeralPubKey, metadata],
+      args: [
+        ERC5564_SCHEME_ID,
+        stealthAccount.signerAddress,
+        stealthAccount.ephemeralPubKey,
+        metadata,
+      ],
     });
   } catch (_err) {
     logger.warn('Failed to announce stealth address', {
-      signerAddress,
-      ephemeralPubKey,
-      viewTag,
+      stealthAccount,
       error: _err,
     });
   }

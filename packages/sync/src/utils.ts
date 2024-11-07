@@ -4,7 +4,7 @@ import { arbitrum, base, optimism, polygon, scroll } from 'viem/chains';
 import prisma from './lib/prisma';
 import { Hex, parseAbiItem, ParseEventLogsReturnType } from 'viem';
 import {
-  ACCOUNT_IMPL_DEPLOYED_BLOCK,
+  ACCOUNT_IMPL_V2_DEPLOYED_BLOCK,
   bigIntMin,
   ERC20Abi,
   getPublicClient,
@@ -23,11 +23,11 @@ export const getFromBlock = async ({
   job: SyncJob;
 }) => {
   // eslint-disable-next-line security/detect-object-injection
-  const raylacAccountDeployedBlock = ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId];
+  const raylacAccountDeployedBlock = ACCOUNT_IMPL_V2_DEPLOYED_BLOCK[chainId];
 
   if (!raylacAccountDeployedBlock) {
     throw new Error(
-      `ACCOUNT_IMPL_DEPLOYED_BLOCK not found for chain ${chainId}`
+      `ACCOUNT_IMPL_V2_DEPLOYED_BLOCK not found for chain ${chainId}`
     );
   }
 
@@ -130,47 +130,6 @@ export type ERC20TransferLogType = ParseEventLogsReturnType<
   'Transfer',
   true
 >[number];
-
-export const getMinSynchedBlockForAddresses = async ({
-  addresses,
-  tokenId,
-  chainId,
-}: {
-  addresses: Hex[];
-  tokenId: string;
-  chainId: number;
-}) => {
-  const addressSyncStatus = await prisma.addressSyncStatus.findMany({
-    select: {
-      address: true,
-      blockNumber: true,
-    },
-    where: {
-      address: {
-        in: addresses,
-      },
-      chainId,
-      tokenId,
-    },
-  });
-
-  // eslint-disable-next-line security/detect-object-injection
-  const defaultFromBlock = ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId];
-
-  if (!defaultFromBlock) {
-    throw new Error(`No default from block for chain ${chainId}`);
-  }
-
-  const minSynchedBlock = addresses
-    .map(
-      address =>
-        addressSyncStatus.find(status => status.address === address)
-          ?.blockNumber || defaultFromBlock
-    )
-    .sort((a, b) => (a > b ? 1 : -1))[0];
-
-  return minSynchedBlock;
-};
 
 export const updateAddressesSyncStatus = async ({
   addresses,
@@ -314,17 +273,6 @@ export const getLatestSynchedBlock = async (chainId: number) => {
   });
 
   return latestSyncedBlock?.number ?? null;
-};
-
-export const getAccountImplDeployedBlock = (chainId: number) => {
-  // eslint-disable-next-line security/detect-object-injection
-  const accountImplDeployedBlock = ACCOUNT_IMPL_DEPLOYED_BLOCK[chainId];
-
-  if (!accountImplDeployedBlock) {
-    throw new Error(`No account impl deployed block for chain ${chainId}`);
-  }
-
-  return accountImplDeployedBlock;
 };
 
 export const CHAIN_BLOCK_TIME: Record<number, number> = {

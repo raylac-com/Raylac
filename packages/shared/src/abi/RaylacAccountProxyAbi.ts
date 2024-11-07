@@ -1,4 +1,4 @@
-const RaylacAccountAbi = [
+const RaylacAccountProxyAbi = [
   {
     type: 'constructor',
     inputs: [
@@ -11,4 +11,4 @@ const RaylacAccountAbi = [
   { type: 'receive', stateMutability: 'payable' },
 ];
 
-export default RaylacAccountAbi;
+export default RaylacAccountProxyAbi;

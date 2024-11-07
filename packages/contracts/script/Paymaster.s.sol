@@ -21,15 +21,13 @@ contract Paymaster is Script, Utils {
     vm.startBroadcast();
 
     RaylacPaymaster raylacPaymaster = getPaymaster();
-    raylacPaymaster.deposit{ value: 0.02 ether }();
+    raylacPaymaster.deposit{ value: 0.001 ether }();
 
     vm.stopBroadcast();
   }
 
   function getDeposit() external view {
-    RaylacPaymaster raylacPaymaster = RaylacPaymaster(
-      0xCa7bEdEcCd6FBD68d0043bb4c4B2405B4948BC8c
-    );
+    RaylacPaymaster raylacPaymaster = getPaymaster();
     uint256 currentDeposit = raylacPaymaster.getDeposit();
     console.log('Verifying Signer:', raylacPaymaster.verifyingSigner());
     console.log('Deposit:', currentDeposit);

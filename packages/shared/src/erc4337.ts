@@ -1,15 +1,15 @@
 import {
-  ACCOUNT_FACTORY_ADDRESS,
+  ACCOUNT_FACTORY_V2_ADDRESS,
   ENTRY_POINT_ADDRESS,
-  RAYLAC_PAYMASTER_ADDRESS,
+  RAYLAC_PAYMASTER_V2_ADDRESS,
 } from './addresses';
 import {
   ChainGasInfo,
   StealthAddressWithEphemeral,
   UserOperation,
 } from './types';
-import RaylacAccountAbi from './abi/RaylacAccountAbi';
-import AccountFactoryAbi from './abi/AccountFactory';
+import RaylacAccountV2Abi from './abi/RaylacAccountV2Abi';
+import AccountFactoryV2Abi from './abi/AccountFactoryV2';
 import EntryPointAbi from './abi/EntryPointAbi';
 import {
   Chain,
@@ -24,8 +24,7 @@ import {
   toHex,
 } from 'viem';
 import axios from 'axios';
-import RaylacPaymasterAbi from './abi/RaylacPaymasterAbi';
-import { getSenderAddress, recoveryStealthPrivKey } from './stealth';
+import { getSenderAddressV2, recoveryStealthPrivKey } from './stealth';
 import { increaseByPercent, sleep } from './utils';
 import { signMessage } from 'viem/accounts';
 
@@ -33,10 +32,10 @@ import { signMessage } from 'viem/accounts';
  * Get the init code for creating a stealth contract account
  */
 export const getInitCode = ({ stealthSigner }: { stealthSigner: Hex }) => {
-  const factoryAddress = ACCOUNT_FACTORY_ADDRESS;
+  const factoryAddress = ACCOUNT_FACTORY_V2_ADDRESS;
 
   const factoryData = encodeFunctionData({
-    abi: AccountFactoryAbi,
+    abi: AccountFactoryV2Abi,
     functionName: 'createAccount',
     args: [stealthSigner],
   });
@@ -60,7 +59,7 @@ export const TRANSFER_OP_INIT_VERIFICATION_GAS_LIMIT = toHex(210_000);
 
 /**
  * Build an unsigned user operation.
- * The sender of the operation is determined by the given stealthSigner.
+ * The `sender` address of the user operation is derived from the given `stealthSigner`.
  */
 export const buildUserOp = ({
   chainId,
@@ -89,7 +88,7 @@ export const buildUserOp = ({
 
   const initCode = getInitCode({ stealthSigner });
 
-  const senderAddress = getSenderAddress({
+  const senderAddress = getSenderAddressV2({
     stealthSigner,
   });
 
@@ -100,7 +99,7 @@ export const buildUserOp = ({
   const nextNonce = nonce === null ? 0 : Number(nonce) + 1;
 
   const callData = encodeFunctionData({
-    abi: RaylacAccountAbi,
+    abi: RaylacAccountV2Abi,
     functionName: 'execute',
     args: [to, value, data, tag],
   });
@@ -245,40 +244,9 @@ export const getPaymasterMessageHash = ({
     encodeAbiParameters(parseAbiParameters('bytes, uint256, address'), [
       packedPaymasterSigMessage,
       BigInt(userOp.chainId),
-      RAYLAC_PAYMASTER_ADDRESS,
+      RAYLAC_PAYMASTER_V2_ADDRESS,
     ])
   );
-};
-
-export const getPaymasterMessageHashAsync = async ({
-  userOp,
-  client,
-}: {
-  userOp: UserOperation;
-  client: PublicClient<HttpTransport, Chain>;
-}) => {
-  const paymasterMessageHash = await client.readContract({
-    abi: RaylacPaymasterAbi,
-    address: RAYLAC_PAYMASTER_ADDRESS,
-    functionName: 'getHash',
-    args: [
-      {
-        sender: userOp.sender,
-        nonce: hexToBigInt(userOp.nonce),
-        initCode: userOp.initCode,
-        callData: userOp.callData,
-        callGasLimit: hexToBigInt(userOp.callGasLimit),
-        verificationGasLimit: hexToBigInt(userOp.verificationGasLimit),
-        preVerificationGas: hexToBigInt(userOp.preVerificationGas),
-        maxFeePerGas: hexToBigInt(userOp.maxFeePerGas),
-        maxPriorityFeePerGas: hexToBigInt(userOp.maxPriorityFeePerGas),
-        paymasterAndData: userOp.paymasterAndData,
-        signature: userOp.signature,
-      },
-    ],
-  });
-
-  return paymasterMessageHash as Hex;
 };
 
 /*

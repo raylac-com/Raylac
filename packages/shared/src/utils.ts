@@ -13,7 +13,7 @@ import {
   TraceWithTraceAddress,
   UserOperation,
 } from './types';
-import RaylacAccountAbi from './abi/RaylacAccountAbi';
+import RaylacAccountV2Abi from './abi/RaylacAccountV2Abi';
 import ERC20Abi from './abi/ERC20Abi';
 import * as chains from 'viem/chains';
 import { supportedTokens, NATIVE_TOKEN_ADDRESS } from './supportedTokens';
@@ -146,7 +146,7 @@ export const mimeTypeToExtension = (mimeType: string) => {
  */
 export const getERC20TransferDataFromUserOp = (userOp: UserOperation) => {
   const { functionName, args } = decodeFunctionData({
-    abi: RaylacAccountAbi,
+    abi: RaylacAccountV2Abi,
     data: userOp.callData,
   });
 
@@ -171,7 +171,7 @@ export const getERC20TransferDataFromUserOp = (userOp: UserOperation) => {
  */
 export const decodeUserOpCalldata = (userOp: UserOperation) => {
   const { functionName, args } = decodeFunctionData({
-    abi: RaylacAccountAbi,
+    abi: RaylacAccountV2Abi,
     data: userOp.callData,
   });
 

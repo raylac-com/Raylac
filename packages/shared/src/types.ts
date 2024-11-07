@@ -17,7 +17,7 @@ export interface UserOperation {
 
 export interface StealthAddressWithEphemeral {
   address: Hex;
-  viewTag: string;
+  viewTag: Hex;
   signerAddress: Hex;
   ephemeralPubKey: Hex;
 }
