@@ -53,7 +53,7 @@ services:
     runtime: docker
     dockerfilePath: ./packages/ci/Dockerfile.foundary
     region: oregon
-    autoDeploy: true
+    autoDeploy: false
     rootDir: ./
     buildFilter:
       paths:
