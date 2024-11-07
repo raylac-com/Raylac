@@ -52,6 +52,7 @@ services:
     previewPlan: starter
     runtime: docker
     dockerfilePath: ./packages/ci/Dockerfile.foundary
+    dockerCommand: anvil --host 0.0.0.0 --base-fee 10000
     region: oregon
     autoDeploy: false
     rootDir: ./
