@@ -158,6 +158,40 @@ export const updateAddressesSyncStatus = async ({
   });
 };
 
+/**
+ * Get the timestamp of a block.
+ * This function first checks the database for the block, and if it's not found, it fetches it from the node.
+ */
+export const getBlockTimestamp = async ({
+  chainId,
+  blockHash,
+}: {
+  chainId: number;
+  blockHash: Hex;
+}) => {
+  const blockInDb = await prisma.block.findUnique({
+    select: {
+      timestamp: true,
+    },
+    where: {
+      hash: blockHash,
+    },
+  });
+
+  if (blockInDb?.timestamp) {
+    return blockInDb.timestamp;
+  }
+
+  const client = getPublicClient({ chainId });
+  const block = await client.getBlock({ blockHash });
+
+  if (!block) {
+    throw new Error(`Block ${blockHash} not found for chain ${chainId}`);
+  }
+
+  return block.timestamp;
+};
+
 export const upsertTransaction = async ({
   txHash,
   chainId,
@@ -181,9 +215,15 @@ export const upsertTransaction = async ({
     hash: txHash,
   });
 
+  const blockTimestamp = await getBlockTimestamp({
+    chainId,
+    blockHash: tx.blockHash,
+  });
+
   const blockCreateInput: Prisma.BlockCreateInput = {
     number: tx.blockNumber,
     hash: tx.blockHash,
+    timestamp: blockTimestamp,
     chainId,
   };
 

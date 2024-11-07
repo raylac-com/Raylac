@@ -9,6 +9,7 @@ import prisma from './lib/prisma';
 import { getAddress, Hex, hexToBigInt, toHex } from 'viem';
 import { Prisma } from '@prisma/client';
 import {
+  getBlockTimestamp,
   logger,
   updateAddressesSyncStatus,
   upsertTransaction,
@@ -101,23 +102,6 @@ const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
   }
 };
 
-const getBlockTimestamp = async ({
-  chainId,
-  blockNumber,
-}: {
-  chainId: number;
-  blockNumber: bigint;
-}) => {
-  const client = getPublicClient({ chainId });
-  const block = await client.getBlock({ blockNumber });
-
-  if (!block) {
-    throw new Error(`Block ${blockNumber} not found for chain ${chainId}`);
-  }
-
-  return block.timestamp;
-};
-
 const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
   if (chainId !== base.id && chainId !== optimism.id) {
     throw new Error(`Cannot use trace_filter for chain ${chainId}`);
@@ -205,7 +189,7 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
       for (const trace of tracesToSave) {
         const blockTimestamp = await getBlockTimestamp({
           chainId,
-          blockNumber: BigInt(trace.blockNumber),
+          blockHash: trace.blockHash,
         });
 
         const tokenPrice = blockTimestamp
