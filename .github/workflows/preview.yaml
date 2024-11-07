@@ -100,9 +100,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: pnpm i
-
       - uses: pnpm/action-setup@v4
         with:
           version: 9.0.4
@@ -112,6 +109,9 @@ jobs:
         with:
           node-version: 18.17.0
           cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm i
 
       - name: Build
         run: pnpm build
