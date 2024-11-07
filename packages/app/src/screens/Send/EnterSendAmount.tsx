@@ -7,13 +7,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image, Text, TextInput, View } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { supportedTokens } from '@raylac/shared';
+import { supportedChains, supportedTokens } from '@raylac/shared';
 import { Hex, parseUnits } from 'viem';
 import { trpc } from '@/lib/trpc';
-import { formatAmount, getChainsForMode } from '@raylac/shared';
+import { formatAmount } from '@raylac/shared';
 import FastAvatar from '@/components/FastAvatar';
 import { publicKeyToAddress } from 'viem/accounts';
-import useSignedInUser from '@/hooks/useSignedInUser';
 import useTokenPrice from '@/hooks/useTokenPrice';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'EnterSendAmount'>;
@@ -65,9 +64,7 @@ const AmountInput = (props: AmountInputProps) => {
 };
 
 const EnterSendAmount = ({ navigation, route }: Props) => {
-  const { data: signedInUser } = useSignedInUser();
-
-  const chains = getChainsForMode(signedInUser?.devModeEnabled || false);
+  const chains = supportedChains;
 
   const [outputChain, setOutputChain] = useState(chains[0].id);
   const [amount, setAmount] = useState<string>('');

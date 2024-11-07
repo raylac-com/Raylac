@@ -28,7 +28,6 @@ import submitUserOps from './api/submitUserOps';
 import getUser from './api/getUser';
 import deleteAccount from './api/deleteAccount';
 import getTransferDetails from './api/getTransferDetails';
-import toggleDevMode from './api/toggleDevMode';
 import addStealthAccount from './api/addStealthAccount';
 import getAddressNonces from './api/getAddressNonces';
 import express from 'express';
@@ -125,9 +124,8 @@ export const appRouter = router({
    */
   getTokenBalances: authedProcedure.query(async opts => {
     const userId = opts.ctx.userId;
-    const isDevMode = opts.ctx.isDevMode;
 
-    const balances = await getTokenBalances({ userId, isDevMode });
+    const balances = await getTokenBalances({ userId });
     return balances;
   }),
 
@@ -377,21 +375,6 @@ export const appRouter = router({
     const userId = opts.ctx.userId;
     await deleteAccount({ userId });
   }),
-
-  toggleDevMode: authedProcedure
-    .input(
-      z.object({
-        devModeEnabled: z.boolean(),
-      })
-    )
-    .mutation(async opts => {
-      const { input } = opts;
-
-      await toggleDevMode({
-        userId: opts.ctx.userId,
-        devModeEnabled: input.devModeEnabled,
-      });
-    }),
 
   pruneAnvil: authedProcedure.mutation(async _opts => {
     if (process.env.RENDER && !process.env.IS_PULL_REQUEST) {

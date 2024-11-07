@@ -3,10 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { getAuthedClient } from '../lib/rpc';
 import { Hex } from 'viem';
 import { getAddressBalance } from '../lib/utils';
-import { supportedTokens } from '@raylac/shared';
-import { getChainsForMode } from '@raylac/shared';
-
-const IS_DEV_MODE = false;
+import { supportedChains, supportedTokens } from '@raylac/shared';
 
 /**
  * Check if the given balance of the address
@@ -47,8 +44,7 @@ describe('getAddressBalancesPerChain', () => {
         // Iterate over all supported tokens
         supportedTokens.map(async token => {
           return Promise.all(
-            // Iterate over all supported chains
-            getChainsForMode(IS_DEV_MODE).map(async chain => {
+            supportedChains.map(async chain => {
               const tokenBalance =
                 balances.find(
                   balance =>

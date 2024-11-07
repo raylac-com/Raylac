@@ -25,7 +25,6 @@ import {
   rundlerMaxPriorityFeePerGas,
   traceBlockByNumber,
 } from '.';
-import { supportedChains } from './supportedChains';
 import axios from 'axios';
 import { anvil } from 'viem/chains';
 
@@ -300,15 +299,6 @@ export const toCoingeckoTokenId = (tokenId: string) => {
     default:
       throw new Error(`Unsupported Coingecko token ID: ${tokenId}`);
   }
-};
-
-/**
- * Get the chains to use based on the mode (dev or prod)
- */
-export const getChainsForMode = (isDevMode: boolean) => {
-  return isDevMode
-    ? supportedChains.filter(chain => chain.testnet)
-    : supportedChains.filter(chain => !chain.testnet);
 };
 
 export const sleep = (ms: number) =>
