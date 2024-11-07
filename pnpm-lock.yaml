@@ -288,6 +288,25 @@ importers:
         specifier: ^3.1.2
         version: 3.1.2
 
+  packages/ci:
+    dependencies:
+      '@raylac/api':
+        specifier: workspace:*
+        version: link:../api
+      '@raylac/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.17
+        version: 20.16.5
+      tsx:
+        specifier: ^4.7.1
+        version: 4.19.1
+      typescript:
+        specifier: ^5.5.2
+        version: 5.6.2
+
   packages/db:
     dependencies:
       '@prisma/client':

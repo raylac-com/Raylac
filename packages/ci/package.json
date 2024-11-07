@@ -1,0 +1,15 @@
+{
+  "name": "@raylac/ci",
+  "scripts": {
+    "setup": "tsx src/setup.ts"
+  },
+  "dependencies": {
+    "@raylac/api": "workspace:*",
+    "@raylac/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "tsx": "^4.7.1",
+    "typescript": "^5.5.2"
+  }
+}
