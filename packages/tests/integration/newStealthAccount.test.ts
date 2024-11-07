@@ -5,13 +5,13 @@ import { getAuthedClient, getTestUserId } from '../lib/rpc';
 import {
   ERC5564_ANNOUNCEMENT_CHAIN,
   ERC5564_ANNOUNCER_ADDRESS,
-  generateStealthAddress,
   getPublicClient,
   getViewingPrivKey,
   getSpendingPrivKey,
   recoveryStealthPrivKey,
   sleep,
   ERC5564_SCHEME_ID,
+  generateStealthAddressV2,
 } from '@raylac/shared';
 import { Hex, parseAbiItem } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -63,7 +63,7 @@ describe('new stealth account', () => {
     }
 
     // Generate a new stealth address for the test user
-    const newStealthAccount = generateStealthAddress({
+    const newStealthAccount = generateStealthAddressV2({
       spendingPubKey: user.spendingPubKey as Hex,
       viewingPubKey: user.viewingPubKey as Hex,
     });

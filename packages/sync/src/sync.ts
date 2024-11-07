@@ -3,7 +3,7 @@ import syncNativeTransfers from './syncNativeTransfers';
 import syncERC20Transfers from './syncERC20Transfers';
 import syncAnnouncements from './syncAnnouncements';
 import scanStealthAddresses from './scanStealthAddresses';
-import { announceStealthAccounts } from './announceStealthAccounts';
+// import { announceStealthAccounts } from './announceStealthAccounts';
 import checkAddressBalances from './checkAddressBalances';
 import assignNativeTransfers from './assignNativeTransfers';
 import syncUserOps from './syncUserOps';
@@ -18,7 +18,7 @@ const sync = async () => {
     assignNativeTransfers(),
     syncERC20Transfers(),
     checkAddressBalances(),
-    announceStealthAccounts(),
+    // announceStealthAccounts(),
     scanStealthAddresses(),
     // syncTxLogs(),
   ]);

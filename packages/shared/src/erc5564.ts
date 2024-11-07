@@ -1,14 +1,11 @@
 import { Log, decodeEventLog, parseAbi } from 'viem';
 import { ERC5564AnnouncementData } from './types';
 import { base } from 'viem/chains';
-import { getSenderAddress } from './stealth';
+import { getSenderAddressV2 } from './stealth';
 
 export const ERC5564_ANNOUNCEMENT_CHAIN = base;
 
-export const ERC5564_SCHEME_ID = BigInt(1);
-
-/** Block number of the deployment of the ERC5564 announcer contract on Base */
-export const ERC5564_ANNOUNCER_DEPLOYED_BLOCK = BigInt(15502414);
+export const ERC5564_SCHEME_ID = BigInt(2);
 
 export const formatERC5564AnnouncementLog = ({
   log,
@@ -27,7 +24,7 @@ export const formatERC5564AnnouncementLog = ({
 
   const schemeId = Number(decodedLog.args.schemeId);
   const stealthAddress = decodedLog.args.stealthAddress;
-  const address = getSenderAddress({
+  const address = getSenderAddressV2({
     stealthSigner: stealthAddress,
   });
   const caller = decodedLog.args.caller;

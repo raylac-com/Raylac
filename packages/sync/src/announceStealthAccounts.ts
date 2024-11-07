@@ -5,7 +5,6 @@
 import {
   ERC5564_ANNOUNCEMENT_CHAIN,
   ERC5564_ANNOUNCER_ADDRESS,
-  ERC5564_ANNOUNCER_DEPLOYED_BLOCK,
   ERC5564_SCHEME_ID,
   ERC5564AnnouncerAbi,
   getWalletClient,
@@ -18,6 +17,7 @@ import { getPublicClient } from '@raylac/shared';
 import { announcementAbiItem } from './utils';
 import { logger } from './utils';
 import { privateKeyToAccount } from 'viem/accounts';
+import { ACCOUNT_IMPL_V2_DEPLOYED_BLOCK } from '@raylac/shared/src/addresses';
 
 const publicClient = getPublicClient({
   chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
@@ -61,7 +61,7 @@ const isAnnounced = async (signerAddress: Hex): Promise<boolean> => {
       schemeId: ERC5564_SCHEME_ID,
       stealthAddress: signerAddress,
     },
-    fromBlock: ERC5564_ANNOUNCER_DEPLOYED_BLOCK,
+    fromBlock: ACCOUNT_IMPL_V2_DEPLOYED_BLOCK[ERC5564_ANNOUNCEMENT_CHAIN.id],
     toBlock: 'latest',
   });
 

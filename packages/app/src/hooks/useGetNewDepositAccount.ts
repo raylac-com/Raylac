@@ -4,7 +4,7 @@ import { Hex } from 'viem';
 import { trpc } from '@/lib/trpc';
 import Toast from 'react-native-toast-message';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { generateStealthAddress } from '@raylac/shared';
+import { generateStealthAddressV2 } from '@raylac/shared';
 import { getQueryKey } from '@trpc/react-query';
 
 /**
@@ -32,7 +32,7 @@ const useGetNewDepositAccount = () => {
         throw new Error('User not signed in');
       }
 
-      const account = generateStealthAddress({
+      const account = generateStealthAddressV2({
         spendingPubKey: signedInUser.spendingPubKey as Hex,
         viewingPubKey: signedInUser.viewingPubKey as Hex,
       });

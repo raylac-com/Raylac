@@ -1,7 +1,7 @@
 import {
   ENTRY_POINT_ADDRESS,
   EntryPointAbi,
-  RAYLAC_PAYMASTER_ADDRESS,
+  RAYLAC_PAYMASTER_V2_ADDRESS,
   sleep,
 } from '@raylac/shared';
 import { decodeEventLog, Log, parseAbiItem } from 'viem';
@@ -86,7 +86,7 @@ export const syncUserOpsForChain = async (chainId: number) => {
     address: ENTRY_POINT_ADDRESS,
     event: userOpEvent,
     args: {
-      paymaster: RAYLAC_PAYMASTER_ADDRESS,
+      paymaster: RAYLAC_PAYMASTER_V2_ADDRESS,
     },
     handleLogs: async logs => {
       for (const log of logs) {

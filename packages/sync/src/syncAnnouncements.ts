@@ -1,7 +1,8 @@
 import {
-  ACCOUNT_IMPL_DEPLOYED_BLOCK,
+  ACCOUNT_IMPL_V2_DEPLOYED_BLOCK,
   bigIntMax,
   ERC5564_ANNOUNCER_ADDRESS,
+  ERC5564_SCHEME_ID,
   formatERC5564AnnouncementLog,
   sleep,
 } from '@raylac/shared';
@@ -11,6 +12,7 @@ import {
   announcementAbiItem,
   CHAIN_BLOCK_TIME,
   endTimer,
+  logger,
   startTimer,
 } from './utils';
 import processLogs from './processLogs';
@@ -33,6 +35,10 @@ export const handleERC5564AnnouncementLog = async ({
     chainId,
   });
 
+  if (data.address === '0x5a27067D67C9B016E49feA767D35E7121D794D57') {
+    return;
+  }
+
   // Create address sync statuses records for the announcement address for all chains
   // The worker in `syncNativeTransfers.ts` will scan blocks for the announced address
   // from the specified block height.
@@ -48,7 +54,7 @@ export const handleERC5564AnnouncementLog = async ({
 
         const fromBlock = bigIntMax([
           log.blockNumber - BigInt(scanPastBufferBlocks),
-          ACCOUNT_IMPL_DEPLOYED_BLOCK[chain.id],
+          ACCOUNT_IMPL_V2_DEPLOYED_BLOCK[chain.id],
         ]);
 
         return supportedTokens.map(token => {
@@ -94,7 +100,47 @@ export const handleERC5564AnnouncementLog = async ({
   });
 };
 
+/**
+ * Delete all v1 accounts and related records from the database
+ */
+const deleteV1Accounts = async () => {
+  const v1Announcements = await prisma.eRC5564Announcement.findMany({
+    select: {
+      address: true,
+    },
+    where: {
+      schemeId: 1,
+    },
+  });
+
+  const v1Addresses = v1Announcements
+    .map(a => a.address)
+    .filter(a => a !== null);
+
+  await prisma.addressSyncStatus.deleteMany({
+    where: {
+      address: { in: v1Addresses },
+    },
+  });
+
+  await prisma.userStealthAddress.deleteMany({
+    where: {
+      address: { in: v1Addresses },
+    },
+  });
+
+  await prisma.userOperation.deleteMany({
+    where: {
+      sender: { in: v1Addresses },
+    },
+  });
+
+  logger.info(`Deleted ${v1Addresses.length} v1 accounts`);
+};
+
 const syncAnnouncements = async () => {
+  await deleteV1Accounts();
+
   while (true) {
     const announcementBackfillTimer = startTimer('announcementBackfill');
     await processLogs({
@@ -106,6 +152,9 @@ const syncAnnouncements = async () => {
         for (const log of logs) {
           await handleERC5564AnnouncementLog({ log, chainId: base.id });
         }
+      },
+      args: {
+        schemeId: ERC5564_SCHEME_ID,
       },
     });
 

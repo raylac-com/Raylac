@@ -1,4 +1,4 @@
-const AccountFactoryAbi = [
+const AccountFactoryV2Abi = [
   {
     type: 'constructor',
     inputs: [
@@ -10,7 +10,7 @@ const AccountFactoryAbi = [
       {
         name: '_accountImplementation',
         type: 'address',
-        internalType: 'contract RaylacAccount',
+        internalType: 'contract RaylacAccountV2',
       },
     ],
     stateMutability: 'nonpayable',
@@ -20,7 +20,7 @@ const AccountFactoryAbi = [
     name: 'accountImplementation',
     inputs: [],
     outputs: [
-      { name: '', type: 'address', internalType: 'contract RaylacAccount' },
+      { name: '', type: 'address', internalType: 'contract RaylacAccountV2' },
     ],
     stateMutability: 'view',
   },
@@ -31,7 +31,11 @@ const AccountFactoryAbi = [
       { name: 'stealthSigner', type: 'address', internalType: 'address' },
     ],
     outputs: [
-      { name: 'ret', type: 'address', internalType: 'contract RaylacAccount' },
+      {
+        name: 'ret',
+        type: 'address',
+        internalType: 'contract RaylacAccountV2',
+      },
     ],
     stateMutability: 'nonpayable',
   },
@@ -55,4 +59,4 @@ const AccountFactoryAbi = [
   },
 ] as const;
 
-export default AccountFactoryAbi;
+export default AccountFactoryV2Abi;
