@@ -4,6 +4,7 @@ import {
   ERC20Abi,
   getPublicClient,
   sleep,
+  getChainName,
 } from '@raylac/shared';
 import { Hex } from 'viem';
 import { supportedTokens } from '@raylac/shared';
@@ -137,11 +138,11 @@ const checkAddressBalances = async ({ chainIds }: { chainIds: number[] }) => {
 
               if (balanceFromDb !== nativeBalance) {
                 logger.error(
-                  `Native balance mismatch for address ${address.address} on chain ${chainId}: ${balanceFromDb} !== ${nativeBalance}`
+                  `Native balance mismatch for address ${address.address} on ${getChainName(chainId)}: ${balanceFromDb} !== ${nativeBalance}`
                 );
               } else {
                 logger.info(
-                  `Balance check: Native balance for address ${address.address} on chain ${chainId}: ${nativeBalance} = ${balanceFromDb}`
+                  `Balance check: Native balance for address ${address.address} on ${getChainName(chainId)}: ${nativeBalance} = ${balanceFromDb}`
                 );
               }
             } else {
@@ -151,7 +152,7 @@ const checkAddressBalances = async ({ chainIds }: { chainIds: number[] }) => {
 
               if (!tokenAddress) {
                 throw new Error(
-                  `Token ${token.tokenId} not found on chain ${chainId}`
+                  `Token ${token.tokenId} not found on ${getChainName(chainId)}`
                 );
               }
 
@@ -163,11 +164,11 @@ const checkAddressBalances = async ({ chainIds }: { chainIds: number[] }) => {
 
               if (balanceFromDb !== erc20Balance) {
                 logger.error(
-                  `ERC20 balance mismatch for address ${address.address} on chain ${chainId}: ${balanceFromDb} !== ${erc20Balance}`
+                  `ERC20 balance mismatch for address ${address.address} on ${getChainName(chainId)}: ${balanceFromDb} !== ${erc20Balance}`
                 );
               } else {
                 logger.info(
-                  `Balance check: ERC20 balance for address ${address.address} on chain ${chainId}: ${erc20Balance} = ${balanceFromDb} `
+                  `Balance check: ERC20 balance for address ${address.address} on ${getChainName(chainId)}: ${erc20Balance} = ${balanceFromDb} `
                 );
               }
             }

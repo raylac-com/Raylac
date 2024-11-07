@@ -10,11 +10,11 @@ import {
   StealthAddressWithEphemeral,
   supportedTokens,
   toCoingeckoTokenId,
+  encodePaymasterAndData,
+  buildMultiChainSendRequestBody,
 } from '@raylac/shared';
-import { buildMultiChainSendRequestBody } from '@raylac/shared/src/multiChainSend';
 import { parseUnits, Hex } from 'viem';
 import { base } from 'viem/chains';
-import { encodePaymasterAndData } from '@raylac/shared/src/utils';
 import { client, getAuthedClient } from '../lib/rpc';
 import { describe } from 'node:test';
 import { getAddressBalance } from '../lib/utils';

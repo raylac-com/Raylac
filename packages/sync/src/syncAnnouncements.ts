@@ -20,6 +20,7 @@ import { decodeEventLog, Hex, Log, parseAbi } from 'viem';
 import { ERC5564Announcement, Prisma, SyncJob } from '@prisma/client';
 import { supportedTokens } from '@raylac/shared';
 import { anvil } from 'viem/chains';
+import { getChainName } from '@raylac/shared';
 
 const SCAN_PAST_BUFFER = 2 * 60 * 1000; // 2 minutes
 
@@ -71,7 +72,7 @@ const createSyncTaskForChain = async ({
   });
 
   logger.info(
-    `Created sync tasks for announcement of address ${announcement.address} on chain ${chainId}`
+    `Created sync tasks for announcement of address ${announcement.address} on ${getChainName(chainId)}`
   );
 };
 

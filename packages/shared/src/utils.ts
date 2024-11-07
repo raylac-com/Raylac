@@ -228,7 +228,9 @@ export const getTokenAddressOnChain = ({
   );
 
   if (!tokenOnChain) {
-    throw new Error(`Token ${tokenId} not supported on chain ${chainId}`);
+    throw new Error(
+      `Token ${tokenId} not supported on ${getChainName(chainId)}`
+    );
   }
 
   return tokenOnChain.address;
@@ -406,7 +408,7 @@ export const getTokenId = ({
 
   if (!token) {
     throw new Error(
-      `Token with address ${tokenAddress} on chain ${chainId} not found`
+      `Token with address ${tokenAddress} on ${getChainName(chainId)} not found`
     );
   }
 
@@ -512,4 +514,8 @@ export const getNativeTransferTracesInBlock = async ({
     .filter(call => call.type === 'CALL' && call.value && call.value !== '0x0');
 
   return callsWithValuesInBlock;
+};
+
+export const getChainName = (chainId: number) => {
+  return `${getChainFromId(chainId).name} (${chainId})`;
 };

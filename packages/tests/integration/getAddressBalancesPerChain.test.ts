@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { getAuthedClient } from '../lib/rpc';
 import { Hex } from 'viem';
 import { getAddressBalance } from '../lib/utils';
-import { supportedChains, supportedTokens } from '@raylac/shared';
+import { supportedChains, supportedTokens, getChainName } from '@raylac/shared';
 
 /**
  * Check if the given balance of the address
@@ -28,7 +28,7 @@ const checkBalance = async ({
 
   expect(
     actualBalance,
-    `Token ${tokenId} balance mismatch for address ${address} on chain ${chainId}`
+    `Token ${tokenId} balance mismatch for address ${address} on ${getChainName(chainId)}`
   ).toBe(balance);
 };
 

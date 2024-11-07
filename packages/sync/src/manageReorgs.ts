@@ -1,4 +1,4 @@
-import { bigIntMin, getPublicClient } from '@raylac/shared';
+import { bigIntMin, getChainName, getPublicClient } from '@raylac/shared';
 import prisma from './lib/prisma';
 import { Block, Hex } from 'viem';
 import { Prisma } from '@prisma/client';
@@ -28,12 +28,14 @@ const saveNewBlock = async ({
       },
     });
   } catch (error) {
-    logger.error(`Error saving block ${block} on chain ${chainId}`);
+    logger.error(`Error saving block ${block} on ${getChainName(chainId)}`);
     logger.error(error);
   }
 
   logger.debug(
-    `Saved new block ${block.number?.toLocaleString()} on chain ${chainId}`
+    `Saved new block ${block.number?.toLocaleString()} on ${getChainName(
+      chainId
+    )}`
   );
 };
 
@@ -100,7 +102,9 @@ const processNewBlock = async ({
 }) => {
   if (!block.number) {
     throw new Error(
-      `Block number is undefined for block ${block.hash} on chain ${chainId}`
+      `Block number is undefined for block ${block.hash} on ${getChainName(
+        chainId
+      )}`
     );
   }
 
@@ -257,7 +261,9 @@ export const backFillFromFinalizedBlock = async (chainId: number) => {
   });
 
   logger.info(
-    `Backfilling ${latestBlock.number - fromBlock} blocks for chain ${chainId}`
+    `Backfilling ${latestBlock.number - fromBlock} blocks for ${getChainName(
+      chainId
+    )}`
   );
 
   // Sync 10 blocks at a time concurrently
@@ -274,7 +280,7 @@ export const backFillFromFinalizedBlock = async (chainId: number) => {
     });
   }
 
-  logger.info(`Backfilling blocks for chain ${chainId} complete`);
+  logger.info(`Backfilling blocks for ${getChainName(chainId)} complete`);
 };
 
 export const manageReorgsForChain = async (chainId: number) => {

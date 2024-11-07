@@ -7,6 +7,7 @@ import {
   bigIntMin,
   ERC20Abi,
   ERC5564_ANNOUNCEMENT_CHAIN,
+  getChainName,
   getPublicClient,
   sleep,
 } from '@raylac/shared';
@@ -186,7 +187,9 @@ export const getBlockTimestamp = async ({
   const block = await client.getBlock({ blockHash });
 
   if (!block) {
-    throw new Error(`Block ${blockHash} not found for chain ${chainId}`);
+    throw new Error(
+      `Block ${blockHash} not found for ${getChainName(chainId)}`
+    );
   }
 
   return block.timestamp;

@@ -1,5 +1,6 @@
 import {
   bigIntMin,
+  getChainName,
   getNativeTransferTracesInBlock,
   getPublicClient,
   sleep,
@@ -104,7 +105,7 @@ const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
 
 const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
   if (chainId !== base.id && chainId !== optimism.id) {
-    throw new Error(`Cannot use trace_filter for chain ${chainId}`);
+    throw new Error(`Cannot use trace_filter for ${getChainName(chainId)}`);
   }
 
   const addressWithSyncStatus = await prisma.addressSyncStatus.findMany({
@@ -154,14 +155,12 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
         continue;
       }
 
-      console.time(`traceFilter for ${addressesToSync.length} addresses`);
       const incomingTraces = await traceFilter({
         fromBlock: toHex(fromBlock),
         toBlock: toHex(toBlock),
         toAddress: addressesToSync,
         chainId,
       });
-      console.timeEnd(`traceFilter for ${addressesToSync.length} addresses`);
 
       const outgoingTraces = await traceFilter({
         fromBlock: toHex(fromBlock),
