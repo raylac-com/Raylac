@@ -64,11 +64,12 @@ const AmountInput = (props: AmountInputProps) => {
 };
 
 const EnterSendAmount = ({ navigation, route }: Props) => {
-  const chains = supportedChains;
+  const recipientUserOrAddress = route.params.recipientUserOrAddress;
 
-  const [outputChain, setOutputChain] = useState(chains[0].id);
+  const [outputChain, setOutputChain] = useState(supportedChains[0].id);
   const [amount, setAmount] = useState<string>('');
   const [usdAmount, setUsdAmount] = useState<string>('');
+  const [outputChainPickerOpen, setOutputChainPickerOpen] = useState(false);
 
   const { data: tokenBalances } = trpc.getTokenBalances.useQuery();
 
@@ -108,9 +109,6 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
   const { t } = useTranslation('EnterSendAmount');
 
   const [inputTokenPickerOpen, setInputTokenPickerOpen] = useState(false);
-  const [outputChainPickerOpen, setOutputChainPickerOpen] = useState(false);
-
-  const recipientUserOrAddress = route.params.recipientUserOrAddress;
 
   const inputTokenData = supportedTokens.find(
     token => token.tokenId === tokenId
@@ -127,7 +125,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
       tokenId,
       outputChainId: outputChain,
     });
-  }, [parsedInputAmount, recipientUserOrAddress, tokenId, outputChain]);
+  }, [parsedInputAmount, recipientUserOrAddress, tokenId]);
 
   const onUsdAmountChange = useCallback(
     (amount: string) => {
@@ -289,77 +287,64 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           {t('usd')}
         </Text>
       </View>
-      <View
-        style={{
-          alignItems: 'center',
-          flexDirection: 'row',
-          justifyContent: 'flex-end',
-          paddingHorizontal: 16,
-          zIndex: 1000,
-          marginTop: 24,
-        }}
-      >
+      {!isRaylacRecipient && (
         <View
           style={{
-            flex: 1,
-            flexDirection: 'row',
             alignItems: 'center',
+            flexDirection: 'row',
             justifyContent: 'flex-end',
-            columnGap: 8,
-            marginRight: 12,
+            paddingHorizontal: 16,
+            zIndex: 1000,
+            marginTop: 24,
           }}
         >
-          <FastAvatar
-            imageUrl={
-              typeof recipientUserOrAddress === 'string'
-                ? null
-                : recipientUserOrAddress.profileImage
-            }
-            address={
-              typeof recipientUserOrAddress === 'string'
-                ? recipientUserOrAddress
-                : publicKeyToAddress(
-                    recipientUserOrAddress.spendingPubKey as Hex
-                  )
-            }
-            size={24}
-          ></FastAvatar>
-          <Text
+          <View
             style={{
-              color: theme.text,
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              columnGap: 8,
+              marginRight: 12,
             }}
           >
-            {recipientDisplayName} {t('receivesOn', {})}
-          </Text>
-        </View>
-        <DropDownPicker
-          open={outputChainPickerOpen}
-          value={outputChain}
-          style={{
-            width: 120,
-            borderWidth: 0,
-          }}
-          textStyle={{
-            color: theme.text,
-          }}
-          theme="DARK"
-          containerStyle={{
-            width: 120,
-          }}
-          items={chains.map(chain => ({
-            label: chain.name,
-            value: chain.id,
-          }))}
-          setOpen={_open => {
-            if (inputTokenPickerOpen) {
-              setInputTokenPickerOpen(false);
-            }
+            <Text
+              style={{
+                color: theme.text,
+              }}
+            >
+              {recipientDisplayName} {t('receivesOn', {})}
+            </Text>
+          </View>
+          <DropDownPicker
+            open={outputChainPickerOpen}
+            value={outputChain}
+            style={{
+              width: 120,
+              borderWidth: 0,
+            }}
+            textStyle={{
+              color: theme.text,
+            }}
+            theme="DARK"
+            containerStyle={{
+              width: 120,
+            }}
+            items={supportedChains.map(chain => ({
+              label: chain.name,
+              value: chain.id,
+            }))}
+            setOpen={_open => {
+              if (inputTokenPickerOpen) {
+                setInputTokenPickerOpen(false);
+              }
 
-            setOutputChainPickerOpen(_open);
-          }}
-          setValue={setOutputChain}
-        />
-      </View>
+              setOutputChainPickerOpen(_open);
+            }}
+            setValue={setOutputChain}
+          />
+        </View>
+      )}
       {isBalanceSufficient === false ? (
         <Text
           style={{
@@ -371,22 +356,31 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
         </Text>
       ) : null}
       {isRaylacRecipient && (
-        <View>
-          <Text
-            style={{
-              color: theme.text,
-              textAlign: 'center',
-              opacity: 0.8,
-              marginTop: 32,
-            }}
+        <View style={{ marginTop: 24, flexDirection: 'column', rowGap: 4 }}>
+          <View
+            style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
           >
-            {t('privacyNotice1', {
-              name: recipientDisplayName,
-            })}
-            {`\n`}
-            {t('privacyNotice2', {
-              name: recipientDisplayName,
-            })}
+            <FastAvatar
+              imageUrl={recipientUserOrAddress.profileImage}
+              address={publicKeyToAddress(
+                recipientUserOrAddress.spendingPubKey as Hex
+              )}
+              size={20}
+            ></FastAvatar>
+            <Text
+              style={{
+                color: theme.text,
+                textAlign: 'center',
+                opacity: 0.8,
+              }}
+            >
+              {t('privacyNotice1', {
+                name: recipientDisplayName,
+              })}
+            </Text>
+          </View>
+          <Text style={{ color: theme.text, opacity: 0.8 }}>
+            {t('privacyNotice2', { name: recipientDisplayName })}
           </Text>
         </View>
       )}

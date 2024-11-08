@@ -31,8 +31,8 @@ export type RootStackParamsList = {
   ConfirmSend: {
     recipientUserOrAddress: User | Hex;
     tokenId: string;
-    outputChainId: number;
     amount: string;
+    outputChainId?: number;
   };
 
   // Deposit stack
