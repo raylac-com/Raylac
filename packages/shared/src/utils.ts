@@ -22,7 +22,7 @@ import { supportedTokens, NATIVE_TOKEN_ADDRESS } from './supportedTokens';
 import { getPublicClient } from './ethRpc';
 import {
   getERC20TokenBalance,
-  rundlerMaxPriorityFeePerGas,
+  getMaxPriorityFeePerGas,
   traceBlockByNumber,
 } from '.';
 import axios from 'axios';
@@ -349,7 +349,7 @@ export const getGasInfo = async ({
   for (const chainId of chainIds) {
     const client = getPublicClient({ chainId });
     const block = await client.getBlock({ blockTag: 'latest' });
-    const maxPriorityFeePerGas = await rundlerMaxPriorityFeePerGas({ client });
+    const maxPriorityFeePerGas = await getMaxPriorityFeePerGas({ chainId });
 
     if (block.baseFeePerGas === null) {
       throw new Error('baseFeePerGas is null');

@@ -28,6 +28,7 @@ import { getSenderAddressV2, recoveryStealthPrivKey } from './stealth';
 import { increaseByPercent, sleep } from './utils';
 import { signMessage } from 'viem/accounts';
 import { anvil } from 'viem/chains';
+import { getPublicClient } from './ethRpc';
 
 /**
  * Get the init code for creating a stealth contract account
@@ -343,14 +344,15 @@ export const estimateUserOperationGas = async ({
 };
 
 /**
- * Calls Alchemy's `eth_sendUserOperation` JSON-RPC method
- * https://docs.alchemy.com/reference/rundler-maxpriorityfeepergas
+ * Calls the `eth_maxPriorityFeePerGas` JSON-RPC method
  */
-export const rundlerMaxPriorityFeePerGas = async ({
-  client,
+export const getMaxPriorityFeePerGas = async ({
+  chainId,
 }: {
-  client: PublicClient<HttpTransport, Chain>;
+  chainId: number;
 }): Promise<bigint> => {
+  const url = getPublicClient({ chainId }).transport.url as string;
+
   const config = {
     headers: {
       accept: 'application/json',
@@ -365,7 +367,7 @@ export const rundlerMaxPriorityFeePerGas = async ({
       message: string;
     };
   }>(
-    client.transport.url as string,
+    url,
     {
       id: 1,
       jsonrpc: '2.0',
@@ -379,7 +381,7 @@ export const rundlerMaxPriorityFeePerGas = async ({
     throw new Error(JSON.stringify(result.data.error));
   }
 
-  if (client.chain.id === anvil.id) {
+  if (chainId === anvil.id) {
     return 100000n;
   }
 
