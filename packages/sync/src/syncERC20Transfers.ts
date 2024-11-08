@@ -193,13 +193,19 @@ export const syncERC20TransfersForChain = async ({
   }
 };
 
-const syncERC20Transfers = async ({ chainIds }: { chainIds: number[] }) => {
+const syncERC20Transfers = async ({
+  announcementChainId,
+  chainIds,
+}: {
+  announcementChainId: number;
+  chainIds: number[];
+}) => {
   logger.info(
     'syncERC20Transfers: Waiting for announcements backfill to complete'
   );
   // We need to wait for ERC5554 announcements to be backfilled before syncing ERC20 transfers,
   // because we use the ERC5554 events to find the stealth addresses to sync ERC20 transfers for
-  await waitForAnnouncementsBackfill();
+  await waitForAnnouncementsBackfill({ announcementChainId });
   logger.info(`syncERC20Transfers: Announcements backfill complete`);
 
   const erc20Tokens = supportedTokens.filter(token => token.tokenId !== 'eth');

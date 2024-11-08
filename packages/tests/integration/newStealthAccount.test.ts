@@ -1,7 +1,7 @@
 import { webcrypto } from 'node:crypto';
 import 'dotenv/config';
 import { describe, expect, test } from 'vitest';
-import { getAuthedClient, getTestUserId } from '../lib/rpc';
+import { client } from '../lib/rpc';
 import {
   ERC5564_ANNOUNCEMENT_CHAIN,
   ERC5564_ANNOUNCER_ADDRESS,
@@ -16,6 +16,7 @@ import {
 import { Hex, parseAbiItem } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { TEST_ACCOUNT_MNEMONIC } from '../lib/auth';
+import { getTestUser } from '../lib/utils';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -53,14 +54,7 @@ const pollAnnouncementLog = async (signerAddress: Hex) => {
 
 describe('new stealth account', () => {
   test('create and recover stealth account', async () => {
-    const testUserId = await getTestUserId();
-    const client = await getAuthedClient();
-
-    const user = await client.getUser.query({ userId: testUserId });
-
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const user = await getTestUser();
 
     // Generate a new stealth address for the test user
     const newStealthAccount = generateStealthAddressV2({

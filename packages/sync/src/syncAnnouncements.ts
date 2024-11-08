@@ -1,6 +1,5 @@
 import {
   bigIntMax,
-  ERC5564_ANNOUNCEMENT_CHAIN,
   ERC5564_ANNOUNCER_ADDRESS,
   ERC5564_SCHEME_ID,
   getSenderAddressV2,
@@ -11,7 +10,6 @@ import {
   announcementAbiItem,
   CHAIN_BLOCK_TIME,
   endTimer,
-  getRaylacDeployedBlock,
   startTimer,
 } from './utils';
 import processLogs from './processLogs';
@@ -40,16 +38,17 @@ const createSyncTaskForChain = async ({
   const blockTime = CHAIN_BLOCK_TIME[chainId];
   const scanPastBufferBlocks = Math.floor(SCAN_PAST_BUFFER / blockTime);
 
-  const fromBlock =
-    chainId === anvil.id
-      ? 0n
-      : bigIntMax([
-          bigIntMax([
-            announcement.blockNumber - BigInt(scanPastBufferBlocks),
-            0n,
-          ]),
-          getRaylacDeployedBlock({ chainId }),
-        ]);
+  let fromBlock;
+
+  if (announcement.chainId === anvil.id) {
+    fromBlock =
+      announcement.blockNumber !== 0n ? announcement.blockNumber - 1n : 0n;
+  } else {
+    fromBlock = bigIntMax([
+      announcement.blockNumber - BigInt(scanPastBufferBlocks),
+      0n,
+    ]);
+  }
 
   const tokenIds = supportedTokens.map(token => token.tokenId);
 
@@ -91,9 +90,11 @@ const createSyncTasks = async ({
 
 export const handleERC5564AnnouncementLog = async ({
   log,
+  announcementChainId,
   chainIds,
 }: {
   log: Log<bigint, number, false>;
+  announcementChainId: number;
   chainIds: number[];
 }) => {
   const decodedLog = decodeEventLog({
@@ -116,7 +117,7 @@ export const handleERC5564AnnouncementLog = async ({
     caller: decodedLog.args.caller,
     ephemeralPubKey: decodedLog.args.ephemeralPubKey,
     metadata: decodedLog.args.metadata,
-    chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
+    chainId: announcementChainId,
     blockNumber: log.blockNumber,
     logIndex: log.logIndex,
     txIndex: log.transactionIndex,
@@ -130,7 +131,7 @@ export const handleERC5564AnnouncementLog = async ({
         blockNumber: log.blockNumber,
         logIndex: log.logIndex,
         txIndex: log.transactionIndex,
-        chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
+        chainId: announcementChainId,
       },
     },
   });
@@ -181,19 +182,29 @@ const deleteV1Accounts = async () => {
  *
  * @param chainIds - The chains to sync announcements for
  */
-const syncAnnouncements = async ({ chainIds }: { chainIds: number[] }) => {
+const syncAnnouncements = async ({
+  announcementChainId,
+  chainIds,
+}: {
+  announcementChainId: number;
+  chainIds: number[];
+}) => {
   await deleteV1Accounts();
 
   while (true) {
     const announcementBackfillTimer = startTimer('announcementBackfill');
     await processLogs({
-      chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
+      chainId: announcementChainId,
       job: SyncJob.Announcements,
       address: ERC5564_ANNOUNCER_ADDRESS,
       event: announcementAbiItem,
       handleLogs: async logs => {
         for (const log of logs) {
-          await handleERC5564AnnouncementLog({ log, chainIds });
+          await handleERC5564AnnouncementLog({
+            log,
+            announcementChainId,
+            chainIds,
+          });
         }
       },
       args: {

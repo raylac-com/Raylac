@@ -5,6 +5,7 @@ import {
   getPublicClient,
   getTokenAddressOnChain,
   getWalletClient,
+  sleep,
   StealthAddressWithEphemeral,
   supportedTokens,
   toCoingeckoTokenId,
@@ -135,34 +136,52 @@ export const impersonateAndSend = async ({
   });
 };
 
-export const createStealthAccountForTestUser =
-  async (): Promise<StealthAddressWithEphemeral> => {
-    const user = await client.getUser.query({ userId: await getTestUserId() });
+/**
+ * Get the `User` object for the test user
+ */
+export const getTestUser = async () => {
+  const testUserId = await getTestUserId();
+  const user = await client.getUser.query({ userId: testUserId });
 
-    if (!user) {
-      throw new Error('User not found');
-    }
+  if (!user) {
+    throw new Error(`Test user ${testUserId} not found`);
+  }
 
-    // Generate a new stealth address for the test user
-    const newStealthAccount = generateStealthAddressV2({
-      spendingPubKey: user.spendingPubKey as Hex,
-      viewingPubKey: user.viewingPubKey as Hex,
-    });
+  return user;
+};
 
-    const authedClient = await getAuthedClient();
+/**
+ * Create a stealth address for the test user
+ * - Submits the stealth address to the server which will announce it to the ERC5564 contract on anvil
+ */
+export const createStealthAccountForTestUser = async ({
+  useAnvil,
+}: {
+  useAnvil: boolean;
+}): Promise<StealthAddressWithEphemeral> => {
+  const user = await getTestUser();
 
-    // Submit the stealth address to the server
-    await authedClient.addStealthAccount.mutate({
-      address: newStealthAccount.address,
-      signerAddress: newStealthAccount.signerAddress,
-      ephemeralPubKey: newStealthAccount.ephemeralPubKey,
-      viewTag: newStealthAccount.viewTag,
-      userId: user.id,
-      label: '',
-    });
+  // Generate a new stealth address for the test user
+  const newStealthAccount = generateStealthAddressV2({
+    spendingPubKey: user.spendingPubKey as Hex,
+    viewingPubKey: user.viewingPubKey as Hex,
+  });
 
-    return newStealthAccount;
-  };
+  const authedClient = await getAuthedClient();
+
+  // Submit the stealth address to the server
+  await authedClient.addStealthAccount.mutate({
+    address: newStealthAccount.address,
+    signerAddress: newStealthAccount.signerAddress,
+    ephemeralPubKey: newStealthAccount.ephemeralPubKey,
+    viewTag: newStealthAccount.viewTag,
+    userId: user.id,
+    label: '',
+    useAnvil,
+  });
+
+  return newStealthAccount;
+};
 
 /**
  * Get the amount of tokens from the USD amount
@@ -209,4 +228,24 @@ export const getTestUserTokenBalance = async ({
   }
 
   return BigInt(senderBalance);
+};
+
+export const waitFor = async ({
+  fn,
+  timeout,
+  interval = 1000,
+  label,
+}: {
+  fn: () => Promise<boolean>;
+  timeout: number;
+  interval?: number;
+  label: string;
+}) => {
+  const timeoutMs = Date.now() + timeout;
+
+  while (true) {
+    if (await fn()) return;
+    if (Date.now() > timeoutMs) throw new Error(`Timeout waiting for ${label}`);
+    await sleep(interval);
+  }
 };

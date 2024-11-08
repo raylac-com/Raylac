@@ -5,7 +5,6 @@ import { Hex, parseAbiItem, ParseEventLogsReturnType } from 'viem';
 import {
   bigIntMin,
   ERC20Abi,
-  ERC5564_ANNOUNCEMENT_CHAIN,
   getChainName,
   getPublicClient,
   sleep,
@@ -347,8 +346,12 @@ export const getBlockNumFromTimestamp = async ({
 /**
  * Resolves when the ERC5554 announcements backfills to the latest block
  */
-export const waitForAnnouncementsBackfill = async () => {
-  const client = getPublicClient({ chainId: ERC5564_ANNOUNCEMENT_CHAIN.id });
+export const waitForAnnouncementsBackfill = async ({
+  announcementChainId,
+}: {
+  announcementChainId: number;
+}) => {
+  const client = getPublicClient({ chainId: announcementChainId });
 
   const latestBlock = await client.getBlock({
     blockTag: 'latest',
@@ -358,7 +361,7 @@ export const waitForAnnouncementsBackfill = async () => {
     const announcementSyncStatus = await prisma.syncStatus.findUnique({
       where: {
         chainId_job: {
-          chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
+          chainId: announcementChainId,
           job: SyncJob.Announcements,
         },
       },

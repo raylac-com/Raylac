@@ -2,11 +2,13 @@
   "name": "@raylac/ci",
   "scripts": {
     "setup": "tsx src/setup.ts",
-    "lint": "eslint . & tsc --noEmit"
+    "lint": "eslint . & tsc --noEmit",
+    "print-pr-postgres-connection-string": "dotenv -e ../../.env -- tsx src/printPRPostgres.ts"
   },
   "dependencies": {
     "@raylac/api": "workspace:*",
-    "@raylac/shared": "workspace:*"
+    "@raylac/shared": "workspace:*",
+    "axios": "^1.7.2"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
