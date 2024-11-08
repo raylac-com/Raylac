@@ -51,7 +51,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Install dependencies
-        run: pnpm i --ignore-scripts --filter .
+        run: pnpm i --ignore-scripts
 
       - name: Build
         run: pnpm build

@@ -54,9 +54,9 @@ importers:
 
   packages/api:
     dependencies:
-      '@prisma/client':
-        specifier: 5.12.1
-        version: 5.12.1(prisma@5.12.1)
+      '@raylac/db':
+        specifier: workspace:*
+        version: link:../db
       '@raylac/shared':
         specifier: workspace:*
         version: link:../shared
@@ -321,12 +321,12 @@ importers:
       '@noble/secp256k1':
         specifier: ^2.1.0
         version: 2.1.0
-      '@prisma/client':
-        specifier: 5.12.1
-        version: 5.12.1(prisma@5.12.1)
       '@raylac/api':
         specifier: workspace:*
         version: link:../api
+      '@raylac/db':
+        specifier: workspace:*
+        version: link:../db
       '@raylac/shared':
         specifier: workspace:*
         version: link:../shared
@@ -395,9 +395,9 @@ importers:
 
   packages/sync:
     dependencies:
-      '@prisma/client':
-        specifier: 5.12.1
-        version: 5.12.1(prisma@5.12.1)
+      '@raylac/db':
+        specifier: workspace:*
+        version: link:../db
       '@raylac/shared':
         specifier: workspace:*
         version: link:../shared
@@ -417,12 +417,12 @@ importers:
 
   packages/tests:
     dependencies:
-      '@prisma/client':
-        specifier: 5.12.1
-        version: 5.12.1(prisma@5.12.1)
       '@raylac/api':
         specifier: workspace:*
         version: link:../api
+      '@raylac/db':
+        specifier: workspace:*
+        version: link:../db
       '@raylac/shared':
         specifier: workspace:*
         version: link:../shared

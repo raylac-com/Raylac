@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@raylac/db';
 
 const prisma = new PrismaClient();
 

@@ -10,9 +10,8 @@
     "out"
   ],
   "scripts": {
-    "build": "pnpm i && tsc -d",
+    "build": "tsc -d",
     "build:watch": "tsc -d --watch",
-    "postinstall": "tsc -d",
     "lint": "eslint . & tsc --noEmit"
   },
   "keywords": [],
