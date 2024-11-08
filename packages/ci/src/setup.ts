@@ -35,6 +35,7 @@ const signUpTestUser = async () => {
 const waitForServer = async () => {
   while (true) {
     try {
+      // We call this function to check if the server and the database are ready
       await client.getUsers.query();
       break;
     } catch (_e: any) {

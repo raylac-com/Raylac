@@ -8,14 +8,20 @@ import checkAddressBalances from './checkAddressBalances';
 import assignNativeTransfers from './assignNativeTransfers';
 import syncUserOps from './syncUserOps';
 
-const sync = async ({ chainIds }: { chainIds: number[] }) => {
+const sync = async ({
+  announcementChainId,
+  chainIds,
+}: {
+  announcementChainId: number;
+  chainIds: number[];
+}) => {
   await Promise.all([
     syncBlocks({ chainIds }),
     syncUserOps({ chainIds }),
-    syncNativeTransfers({ chainIds }),
-    syncAnnouncements({ chainIds }),
+    syncNativeTransfers({ announcementChainId, chainIds }),
+    syncAnnouncements({ announcementChainId, chainIds }),
     assignNativeTransfers({ chainIds }),
-    syncERC20Transfers({ chainIds }),
+    syncERC20Transfers({ announcementChainId, chainIds }),
     checkAddressBalances({ chainIds }),
     // announceStealthAccounts(),
     scanStealthAddresses(),
