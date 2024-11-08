@@ -155,6 +155,9 @@ jobs:
 
       - name: Run integration tests
         run: pnpm -F tests test syncNativeTransfers.test.ts syncAnnouncements.test.ts
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          ANVIL_RPC_URL: https://anvil-pr-${{ github.event.pull_request.number }}.onrender.com
 
   test-ios:
     name: Run Maestro tests on ios
