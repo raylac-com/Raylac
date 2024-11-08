@@ -47,6 +47,8 @@ import Receive from './screens/Receive';
 import Upgrade from './screens/Upgrade';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
+import SupportedChains from './screens/SupportedChains';
+import SupportedTokens from './screens/SupportedTokens';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -325,6 +327,22 @@ const Screens = () => {
           options={{
             title: t('title', { ns: 'Upgrade' }),
             headerBackVisible: false,
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="SupportedChains"
+          component={SupportedChains}
+          options={{
+            title: t('title', { ns: 'SupportedChains' }),
+            headerBackVisible: true,
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="SupportedTokens"
+          component={SupportedTokens}
+          options={{
+            title: t('title', { ns: 'SupportedTokens' }),
           }}
         ></RootStack.Screen>
       </RootStack.Navigator>

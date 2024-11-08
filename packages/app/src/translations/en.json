@@ -45,10 +45,11 @@
   },
   "Deposit": {
     "copyAddress": "Copy address",
-    "depositOn": "Deposit ETH or USDC on Base",
+    "depositOn": "Deposit",
     "depositToFreshAddress": "Deposit to a fresh address to keep your balance private",
     "getDepositAddress": "Get deposit address",
     "pastDepositAddresses": "Past deposit addresses",
+    "supportedChainsAndTokens": "Supported tokens",
     "title": "Deposit"
   },
   "EnterSendAmount": {
@@ -74,14 +75,15 @@
     "backToHome": "Back to home",
     "orReceiveFromAnyone": "Or receive from anyone",
     "receiveFromRaylacUser": "Receive from a Raylac user",
-    "receiveOn": "Receive ETH or USDC on Base",
+    "receiveOn": "Receive",
     "receiveTo": "Receive to",
     "receiveToFreshAddress": "Receive to a fresh address to keep your transfers private",
     "title": "Receive",
     "yourRaylacUsername": "Your Raylac username",
     "pastReceivingAddresses": "Past receiving addresses",
     "getReceivingAddress": "Get receiving address",
-    "copyAddress": "Copy address"
+    "copyAddress": "Copy address",
+    "supportedChainsAndTokens": "Supported tokens"
   },
   "SaveBackupPhrase": {
     "backupPhrase": "Backup phrase",

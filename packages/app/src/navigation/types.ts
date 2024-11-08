@@ -12,6 +12,11 @@ export type RootStackParamsList = {
   SignIn: undefined;
   SignUp: undefined;
 
+  SupportedChains: undefined;
+  SupportedTokens: {
+    chainId: number;
+  };
+
   SignInWithMnemonic: undefined;
 
   AccountInfo: undefined;
