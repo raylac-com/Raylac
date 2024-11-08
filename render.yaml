@@ -7,7 +7,7 @@ services:
     previewPlan: starter
     runtime: node
     region: oregon
-    buildCommand: pnpm i --ignore-scripts && pnpm build
+    buildCommand: rm -rf ./packages/app ./packages/tests && pnpm i --ignore-scripts && pnpm build
     startCommand: NODE_ENV=production pnpm -F api start
     preDeployCommand: pnpm -F db migrate:prod
     autoDeploy: true
