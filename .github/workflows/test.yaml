@@ -28,10 +28,10 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm i
+        run: pnpm i --ignore-scripts
 
       - name: Run lint
-        run: pnpm turbo lint
+        run: pnpm lint
 
       # - name: Run tests
       #   run: pnpm -F tests test
