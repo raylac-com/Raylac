@@ -71,15 +71,6 @@ const submitUserOps = async ({
     });
   }
 
-  // Sanity check that all user ops have the same chainId
-  const chainIds = userOps.map(userOp => userOp.chainId);
-  if (new Set(chainIds).size !== 1) {
-    throw new TRPCError({
-      code: 'BAD_REQUEST',
-      message: 'All user ops must have the same chainId',
-    });
-  }
-
   // Sanity check that all user ops are pointing to the same token
   const executeArgs = userOps.map(decodeUserOpCalldata);
   const isNativeTransfer = executeArgs[0].data === '0x';
@@ -106,6 +97,8 @@ const submitUserOps = async ({
       });
     }
   }
+
+  // TODO: Sanity check that all user ops have the same tag
 
   // Save the token price at the time of the user operation
   await upsertUserOps({ userOps, tokenPrice });
