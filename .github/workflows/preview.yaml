@@ -126,7 +126,7 @@ jobs:
 
       - name: Get the PR Postgres connection string
         run: |
-          PR_DB_CONNECTION_STRING=$(pnpm -F ci run print-pr-postgres-connection-string)
+          PR_DB_CONNECTION_STRING=$(pnpm --silent exec -- pnpm -F ci run print-pr-postgres-connection-string --silent)
           echo "DATABASE_URL=$PR_DB_CONNECTION_STRING" >> $GITHUB_ENV
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
