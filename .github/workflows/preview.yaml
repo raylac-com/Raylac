@@ -81,8 +81,8 @@ jobs:
           working-directory: packages/app
 
 
-  setup-test-env:
-    name: Setup test environment
+  integration-test:
+    name: Run integration tests
     runs-on: ubuntu-latest
     env:
       TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
