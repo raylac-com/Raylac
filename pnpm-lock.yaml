@@ -373,9 +373,6 @@ importers:
       '@noble/secp256k1':
         specifier: ^2.1.0
         version: 2.1.0
-      '@prisma/client':
-        specifier: 5.12.1
-        version: 5.12.1(prisma@5.12.1)
       axios:
         specifier: ^1.7.2
         version: 1.7.7
