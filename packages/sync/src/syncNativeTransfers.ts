@@ -8,7 +8,7 @@ import {
 } from '@raylac/shared';
 import prisma from './lib/prisma';
 import { getAddress, Hex, hexToBigInt, toHex } from 'viem';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@raylac/db';
 import {
   getBlockTimestamp,
   logger,

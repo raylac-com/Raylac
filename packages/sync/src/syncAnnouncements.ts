@@ -17,7 +17,7 @@ import {
 } from './utils';
 import processLogs from './processLogs';
 import { decodeEventLog, Hex, Log, parseAbi } from 'viem';
-import { ERC5564Announcement, Prisma, SyncJob } from '@prisma/client';
+import { ERC5564Announcement, Prisma, SyncJob } from '@raylac/db';
 import { supportedTokens } from '@raylac/shared';
 import { anvil } from 'viem/chains';
 import { getChainName } from '@raylac/shared';

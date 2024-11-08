@@ -1,5 +1,5 @@
 import * as winston from 'winston';
-import { Prisma, SyncJob } from '@prisma/client';
+import { Prisma, SyncJob } from '@raylac/db';
 import { anvil, arbitrum, base, optimism, polygon, scroll } from 'viem/chains';
 import prisma from './lib/prisma';
 import { Hex, parseAbiItem, ParseEventLogsReturnType } from 'viem';

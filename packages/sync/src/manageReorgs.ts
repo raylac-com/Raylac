@@ -1,7 +1,7 @@
 import { bigIntMin, getChainName, getPublicClient } from '@raylac/shared';
 import prisma from './lib/prisma';
 import { Block, Hex } from 'viem';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@raylac/db';
 import { getWebsocketClient } from '@raylac/shared/src';
 import { logger } from './utils';
 

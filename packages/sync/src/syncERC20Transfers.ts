@@ -10,7 +10,7 @@ import {
   waitForAnnouncementsBackfill,
 } from './utils';
 import { logger } from './utils';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@raylac/db';
 
 export const handleERC20TransferLog = async ({
   log,
