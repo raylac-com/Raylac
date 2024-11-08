@@ -52,6 +52,9 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Remove unnecessary packages
+        run: rm -rf ./packages/{tests,ci,scripts}
+
       - name: Install dependencies
         run: pnpm i --ignore-scripts
 
@@ -106,8 +109,11 @@ jobs:
           node-version: 18.17.0
           cache: pnpm
 
+      - name: Remove unnecessary packages
+        run: rm -rf ./packages/{app,tests,ci,scripts}
+
       - name: Install dependencies
-        run: pnpm i
+        run: pnpm i --ignore-scripts
 
       - name: Build
         run: pnpm build
@@ -147,16 +153,18 @@ jobs:
           node-version: 18.17.0
           cache: pnpm
 
+      - name: Remove unnecessary packages
+        run: rm -rf ./packages/{app,ci,scripts}
+
       - name: Install dependencies
-        run: pnpm i
+        run: pnpm i --ignore-scripts
 
       - name: Build
         run: pnpm build
 
       - name: Get the PR Postgres connection string
         run: |
-          PR_DB_CONNECTION_STRING=$(pnpm -F ci run print-pr-postgres-connection-string) && \
-          echo "DATABASE_URL=$PR_DB_CONNECTION_STRING" >> $GITHUB_ENV
+          PR_DB_CONNECTION_STRING=$(pnpm -F ci run print-pr-postgres-connection-string) && echo "DATABASE_URL=$PR_DB_CONNECTION_STRING" >> $GITHUB_ENV
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
