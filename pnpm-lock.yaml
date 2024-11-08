@@ -296,6 +296,9 @@ importers:
       '@raylac/shared':
         specifier: workspace:*
         version: link:../shared
+      axios:
+        specifier: ^1.7.2
+        version: 1.7.7
     devDependencies:
       '@types/node':
         specifier: ^20.11.17
