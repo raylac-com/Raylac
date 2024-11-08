@@ -110,7 +110,7 @@ jobs:
           cache: pnpm
 
       - name: Remove unnecessary packages
-        run: rm -rf ./packages/{app,tests,ci,scripts}
+        run: rm -rf ./packages/{app,scripts}
 
       - name: Install dependencies
         run: pnpm i --ignore-scripts
@@ -123,44 +123,6 @@ jobs:
         env:
           RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
           TEST_ACCOUNT_MNEMONIC: ${{ secrets.TEST_ACCOUNT_MNEMONIC }}
-
-  integration-test:
-    name: Run integration tests
-    runs-on: ubuntu-latest
-    env:
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
-    needs: [setup-test-env]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Cache turbo build setup
-        uses: actions/cache@v4
-        with: 
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.0.4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18.17.0
-          cache: pnpm
-
-      - name: Remove unnecessary packages
-        run: rm -rf ./packages/{app,ci,scripts}
-
-      - name: Install dependencies
-        run: pnpm i --ignore-scripts
-
-      - name: Build
-        run: pnpm build
 
       - name: Get the PR Postgres connection string
         run: |
