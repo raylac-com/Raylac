@@ -135,6 +135,7 @@ jobs:
           echo "DATABASE_URL=$PR_DB_CONNECTION_STRING" >> $GITHUB_ENV
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
 
       - name: Run integration tests
         run: pnpm -F tests test syncNativeTransfers.test.ts syncAnnouncements.test.ts
