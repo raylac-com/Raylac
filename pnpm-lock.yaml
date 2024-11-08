@@ -298,7 +298,10 @@ importers:
         version: link:../shared
       '@trpc/client':
         specifier: 11.0.0-rc.439
-        version: 11.0.0-rc.439(@trpc/server@10.45.2)
+        version: 11.0.0-rc.439(@trpc/server@11.0.0-rc.439)
+      '@trpc/server':
+        specifier: ^11.0.0-rc.439
+        version: 11.0.0-rc.439
       axios:
         specifier: ^1.7.2
         version: 1.7.7
@@ -2644,9 +2647,6 @@ packages:
       '@trpc/server': 11.0.0-rc.439+775af00cc
       react: '>=18.2.0'
       react-dom: '>=18.2.0'
-
-  '@trpc/server@10.45.2':
-    resolution: {integrity: sha512-wOrSThNNE4HUnuhJG6PfDRp4L2009KDVxsd+2VYH8ro6o/7/jwYZ8Uu5j+VaW+mOmc8EHerHzGcdbGNQSAUPgg==}
 
   '@trpc/server@11.0.0-rc.439':
     resolution: {integrity: sha512-Xs6TKmaVXox4CnVFBSAlbM/rUBlrg8hwgwmy/sKChMEDmmk1Ot9PDyG7IkGb5oNfLeAim/GLKOCoQWIze6zQpA==}
@@ -10060,10 +10060,6 @@ snapshots:
   '@tootallnate/once@2.0.0':
     optional: true
 
-  '@trpc/client@11.0.0-rc.439(@trpc/server@10.45.2)':
-    dependencies:
-      '@trpc/server': 10.45.2
-
   '@trpc/client@11.0.0-rc.439(@trpc/server@11.0.0-rc.439)':
     dependencies:
       '@trpc/server': 11.0.0-rc.439
@@ -10075,8 +10071,6 @@ snapshots:
       '@trpc/server': 11.0.0-rc.439
       react: 18.2.0
       react-dom: 18.3.1(react@18.2.0)
-
-  '@trpc/server@10.45.2': {}
 
   '@trpc/server@11.0.0-rc.439': {}
 

@@ -9,6 +9,7 @@
     "@raylac/api": "workspace:*",
     "@raylac/shared": "workspace:*",
     "@trpc/client": "11.0.0-rc.439",
+    "@trpc/server": "^11.0.0-rc.439",
     "axios": "^1.7.2"
   },
   "devDependencies": {
