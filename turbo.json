@@ -5,14 +5,11 @@
       "cache": false
     },
     "build": {
-      "dependsOn": ["^db:generate", "^build"]
+      "dependsOn": ["^db:generate", "^build"],
+      "outputs": ["out/**"]
     },
     "lint": {
       "dependsOn": ["^build"]
-    },
-    "dev": {
-      "persistent": true,
-      "cache": false
     }
   }
 }
