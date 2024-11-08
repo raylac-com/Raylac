@@ -133,7 +133,7 @@ jobs:
         uses: mobile-dev-inc/action-maestro-cloud@v1
         with:
           api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
-          app-file: packages/app/build/raylac.zip
+          app-binary-id: 019d6dd75a4e12679a04cebfb2c981c7bea211fe
           workspace: packages/app/.maestro
           env: |
             API_URL=https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
@@ -151,7 +151,7 @@ jobs:
         uses: mobile-dev-inc/action-maestro-cloud@v1
         with:
           api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
-          app-file: packages/app/build/raylac.apk
+          app-binary-id: 93c0d33d4b71a7bd733236bb1e000557f7bc9efd
           workspace: packages/app/.maestro
           env: |
             API_URL=https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
