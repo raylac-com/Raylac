@@ -9,7 +9,8 @@ import {
   upsertTransaction,
   waitForAnnouncementsBackfill,
 } from './utils';
-import { logger } from './utils';
+import { logger } from '@raylac/shared-backend';
+
 import { Prisma } from '@raylac/db';
 
 export const handleERC20TransferLog = async ({

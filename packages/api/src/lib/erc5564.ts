@@ -10,7 +10,7 @@ import {
   StealthAddressWithEphemeral,
 } from '@raylac/shared';
 import { privateKeyToAccount } from 'viem/accounts';
-import { logger } from '../utils';
+import { logger } from '@raylac/shared-backend';
 
 const ANNOUNCER_PRIVATE_KEY = process.env.ANNOUNCER_PRIVATE_KEY;
 

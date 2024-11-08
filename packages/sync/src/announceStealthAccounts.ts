@@ -15,7 +15,8 @@ import prisma from './lib/prisma';
 import { Hex } from 'viem';
 import { getPublicClient } from '@raylac/shared';
 import { announcementAbiItem, getRaylacDeployedBlock } from './utils';
-import { logger } from './utils';
+import { logger } from '@raylac/shared-backend';
+
 import { privateKeyToAccount } from 'viem/accounts';
 
 const publicClient = getPublicClient({
@@ -128,11 +129,6 @@ export const announceStealthAccounts = async () => {
           signerAddress: true,
           ephemeralPubKey: true,
           viewTag: true,
-        },
-        where: {
-          signerAddress: {
-            not: null,
-          },
         },
       });
 

@@ -3,7 +3,7 @@ import prisma from './lib/prisma';
 import { Block, Hex } from 'viem';
 import { Prisma } from '@raylac/db';
 import { getWebsocketClient } from '@raylac/shared/src';
-import { logger } from './utils';
+import { logger } from '@raylac/shared-backend';
 
 const saveNewBlock = async ({
   block,

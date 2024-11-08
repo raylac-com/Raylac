@@ -1,6 +1,6 @@
 import { anvil } from 'viem/chains';
 import prisma from '../lib/prisma';
-import { logger } from '@raylac/sync';
+import { logger } from '@raylac/shared-backend';
 
 const pruneAnvil = async () => {
   await prisma.addressSyncStatus.deleteMany({

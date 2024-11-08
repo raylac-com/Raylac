@@ -12,7 +12,6 @@ import {
   CHAIN_BLOCK_TIME,
   endTimer,
   getRaylacDeployedBlock,
-  logger,
   startTimer,
 } from './utils';
 import processLogs from './processLogs';
@@ -21,7 +20,7 @@ import { ERC5564Announcement, Prisma, SyncJob } from '@raylac/db';
 import { supportedTokens } from '@raylac/shared';
 import { anvil } from 'viem/chains';
 import { getChainName } from '@raylac/shared';
-
+import { logger } from '@raylac/shared-backend';
 const SCAN_PAST_BUFFER = 2 * 60 * 1000; // 2 minutes
 
 /**

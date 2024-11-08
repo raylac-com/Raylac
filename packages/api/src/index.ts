@@ -32,7 +32,7 @@ import addStealthAccount from './api/addStealthAccount';
 import getAddressNonces from './api/getAddressNonces';
 import express from 'express';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
-import { logger } from './utils';
+import { logger } from '@raylac/shared-backend';
 import pruneAnvil from './api/pruneAnvil';
 
 // @ts-ignore

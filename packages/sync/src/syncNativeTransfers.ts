@@ -11,14 +11,13 @@ import { getAddress, Hex, hexToBigInt, toHex } from 'viem';
 import { Prisma } from '@raylac/db';
 import {
   getBlockTimestamp,
-  logger,
   updateAddressesSyncStatus,
   upsertTransaction,
   waitForAnnouncementsBackfill,
 } from './utils';
 import { base, optimism } from 'viem/chains';
 import { getTokenPriceAtTime } from './lib/coingecko';
-
+import { logger } from '@raylac/shared-backend';
 const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
   const addressSyncStatuses = await prisma.addressSyncStatus.findMany({
     select: {

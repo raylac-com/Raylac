@@ -7,7 +7,8 @@ import {
 import prisma from './lib/prisma';
 import { webcrypto } from 'node:crypto';
 import { Hex } from 'viem';
-import { logger } from './utils';
+import { logger } from '@raylac/shared-backend';
+
 import { Prisma } from '@raylac/db';
 import crypto from 'crypto';
 
