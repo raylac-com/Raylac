@@ -2,9 +2,10 @@ import prisma from '../lib/prisma';
 import { Prisma } from '@prisma/client';
 import {
   AccountBalancePerChainQueryResult,
-  getChainsForMode,
+  supportedChains,
 } from '@raylac/shared';
 import { logger } from '../utils';
+import { anvil } from 'viem/chains';
 
 /**
  * Get the balances of tokens for all chains and supported tokens
@@ -12,12 +13,16 @@ import { logger } from '../utils';
  */
 const getAddressBalancesPerChain = async ({
   userId,
-  isDevMode,
+  includeAnvil,
 }: {
   userId: number;
-  isDevMode: boolean;
+  includeAnvil?: boolean;
 }) => {
-  const chainIds = getChainsForMode(isDevMode).map(chain => chain.id);
+  const chainIds = supportedChains.map(chain => chain.id);
+
+  if (includeAnvil) {
+    chainIds.push(anvil.id);
+  }
 
   logger.info(`Getting address balances for user ${userId}`);
 

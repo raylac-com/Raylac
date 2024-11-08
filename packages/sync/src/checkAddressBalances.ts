@@ -1,10 +1,10 @@
-import { supportedChains } from '@raylac/shared';
 import prisma from './lib/prisma';
 import {
   AccountBalancePerChainQueryResult,
   ERC20Abi,
   getPublicClient,
   sleep,
+  getChainName,
 } from '@raylac/shared';
 import { Hex } from 'viem';
 import { supportedTokens } from '@raylac/shared';
@@ -109,7 +109,7 @@ const getERC20Balance = async ({
   return balance;
 };
 
-const checkAddressBalances = async () => {
+const checkAddressBalances = async ({ chainIds }: { chainIds: number[] }) => {
   while (true) {
     await sleep(60 * 10 * 1000); // 10 minutes
 
@@ -123,52 +123,52 @@ const checkAddressBalances = async () => {
 
       for (const address of addresses) {
         for (const token of supportedTokens) {
-          for (const chain of supportedChains) {
+          for (const chainId of chainIds) {
             const balanceFromDb = await getAddressBalanceFromDb({
               address: address.address as Hex,
               tokenId: token.tokenId,
-              chainId: chain.id,
+              chainId,
             });
 
             if (token.tokenId === 'eth') {
               const nativeBalance = await getNativeBalance({
                 address: address.address as Hex,
-                chainId: chain.id,
+                chainId,
               });
 
               if (balanceFromDb !== nativeBalance) {
                 logger.error(
-                  `Native balance mismatch for address ${address.address} on chain ${chain.id}: ${balanceFromDb} !== ${nativeBalance}`
+                  `Native balance mismatch for address ${address.address} on ${getChainName(chainId)}: ${balanceFromDb} !== ${nativeBalance}`
                 );
               } else {
                 logger.info(
-                  `Balance check: Native balance for address ${address.address} on chain ${chain.id}: ${nativeBalance} = ${balanceFromDb}`
+                  `Balance check: Native balance for address ${address.address} on ${getChainName(chainId)}: ${nativeBalance} = ${balanceFromDb}`
                 );
               }
             } else {
               const tokenAddress = token.addresses.find(
-                tokenAddress => tokenAddress.chain.id === chain.id
+                tokenAddress => tokenAddress.chain.id === chainId
               )?.address;
 
               if (!tokenAddress) {
                 throw new Error(
-                  `Token ${token.tokenId} not found on chain ${chain.id}`
+                  `Token ${token.tokenId} not found on ${getChainName(chainId)}`
                 );
               }
 
               const erc20Balance = await getERC20Balance({
                 address: address.address as Hex,
                 tokenAddress: tokenAddress,
-                chainId: chain.id,
+                chainId,
               });
 
               if (balanceFromDb !== erc20Balance) {
                 logger.error(
-                  `ERC20 balance mismatch for address ${address.address} on chain ${chain.id}: ${balanceFromDb} !== ${erc20Balance}`
+                  `ERC20 balance mismatch for address ${address.address} on ${getChainName(chainId)}: ${balanceFromDb} !== ${erc20Balance}`
                 );
               } else {
                 logger.info(
-                  `Balance check: ERC20 balance for address ${address.address} on chain ${chain.id}: ${erc20Balance} = ${balanceFromDb} `
+                  `Balance check: ERC20 balance for address ${address.address} on ${getChainName(chainId)}: ${erc20Balance} = ${balanceFromDb} `
                 );
               }
             }

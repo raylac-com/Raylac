@@ -232,6 +232,8 @@ const submitUserOps = async ({
       message: `User operation failed with success=false (txHash: ${txHash})`,
     });
   }
+
+  return txHash;
 };
 
 export default submitUserOps;

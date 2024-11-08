@@ -1,4 +1,4 @@
-import { encodeFunctionData, Hex, toHex } from 'viem';
+import { encodeFunctionData, Hex } from 'viem';
 import {
   ChainGasInfo,
   StealthAddressWithEphemeral,
@@ -290,10 +290,7 @@ export const buildMultiChainSendRequestBody = ({
     tokenId,
   });
 
-  // Create a Uint8Array with 20 bytes
-  const randomBytes = new Uint8Array(20);
-  crypto.getRandomValues(randomBytes);
-  const tag = toHex(randomBytes);
+  const tag = '0x';
 
   const consolidateTo = inputs[0];
 

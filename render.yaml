@@ -46,7 +46,19 @@ services:
         fromDatabase:
           name: raylac
           property: connectionString
-
+  - type: web
+    name: anvil
+    plan: standard
+    previewPlan: starter
+    runtime: docker
+    dockerfilePath: ./packages/ci/Dockerfile.foundary
+    dockerCommand: anvil --host 0.0.0.0 --base-fee 10000
+    region: oregon
+    autoDeploy: false
+    rootDir: ./
+    buildFilter:
+      paths:
+        - ./packages/ci/Dockerfile.foundary
 databases:
   - name: raylac
     databaseName: raylac

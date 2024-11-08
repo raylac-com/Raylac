@@ -22,19 +22,6 @@ export interface StealthAddressWithEphemeral {
   ephemeralPubKey: Hex;
 }
 
-export interface ERC5564AnnouncementData {
-  address: Hex;
-  schemeId: number;
-  stealthAddress: string;
-  caller: string;
-  ephemeralPubKey: string;
-  metadata: string;
-  blockNumber: bigint;
-  logIndex: number;
-  txIndex: number;
-  chainId: number;
-}
-
 export interface User {
   id: number;
   name: string;
@@ -167,6 +154,25 @@ export interface BlockTransactionResponse {
 export type BlockTraceResponse = {
   txHash: Hex;
   result: BlockTransactionResponse;
+}[];
+
+export type AnvilBlockTraceResponse = {
+  action: {
+    from: Hex;
+    callType: 'call' | 'create';
+    gas: Hex;
+    input: Hex;
+    to: Hex;
+    value: Hex;
+  };
+  blockHash: Hex;
+  blockNumber: number;
+  result: { gasUsed: Hex; output: Hex };
+  subtraces: number;
+  traceAddress: number[];
+  transactionHash: Hex;
+  transactionPosition: number;
+  type: 'call' | 'create';
 }[];
 
 export interface TraceWithTraceAddress extends BlockTransactionResponse {

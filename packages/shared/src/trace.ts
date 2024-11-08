@@ -1,8 +1,13 @@
 import axios from 'axios';
 import { Hex, toHex } from 'viem';
-import { BlockTraceResponse, TraceResponseData } from './types';
+import {
+  AnvilBlockTraceResponse,
+  BlockTraceResponse,
+  TraceResponseData,
+} from './types';
 import { getQuickNodeRpcUrl } from './ethRpc';
 import { getChainFromId } from './utils';
+import { anvil } from 'viem/chains';
 
 /**
  * Calls the `trace_filter` RPC method
@@ -66,7 +71,7 @@ export const traceBlockByNumber = async ({
 }: {
   blockNumber: bigint;
   chainId: number;
-}) => {
+}): Promise<AnvilBlockTraceResponse | BlockTraceResponse> => {
   const config = {
     headers: {
       accept: 'application/json',
@@ -74,8 +79,16 @@ export const traceBlockByNumber = async ({
     },
   };
 
+  const method =
+    chainId === anvil.id ? 'trace_block' : 'debug_traceBlockByNumber';
+
+  const params =
+    chainId === anvil.id
+      ? [toHex(blockNumber)]
+      : [toHex(blockNumber), { tracer: 'callTracer', tracerConfig: {} }];
+
   const result = await axios.post<{
-    result: BlockTraceResponse;
+    result: BlockTraceResponse | AnvilBlockTraceResponse;
     error?: {
       code: number;
       message: string;
@@ -87,16 +100,8 @@ export const traceBlockByNumber = async ({
     {
       id: 1,
       jsonrpc: '2.0',
-      method: 'debug_traceBlockByNumber',
-      params: [
-        toHex(blockNumber),
-        {
-          tracer: 'callTracer',
-          tracerConfig: {
-            onlyTopCall: false,
-          },
-        },
-      ],
+      method,
+      params,
     },
     config
   );
@@ -105,7 +110,11 @@ export const traceBlockByNumber = async ({
     throw new Error(result.data.error.message);
   }
 
-  return result.data.result;
+  if (chainId === anvil.id) {
+    return result.data.result as AnvilBlockTraceResponse;
+  } else {
+    return result.data.result as BlockTraceResponse;
+  }
 };
 
 export const traceBlockByHash = async ({

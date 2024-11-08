@@ -18,7 +18,12 @@ contract Paymaster is Script, Utils {
   }
 
   function deposit() external {
-    vm.startBroadcast();
+    uint256 deployerPrivateKey = vm.envUint('PRIVATE_KEY');
+    if (deployerPrivateKey == 0) {
+      vm.startBroadcast();
+    } else {
+      vm.startBroadcast(deployerPrivateKey);
+    }
 
     RaylacPaymaster raylacPaymaster = getPaymaster();
     raylacPaymaster.deposit{ value: 0.001 ether }();

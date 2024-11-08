@@ -1,4 +1,4 @@
-import syncBlocks from './syncBlocks';
+import syncBlocks from './manageReorgs';
 import syncNativeTransfers from './syncNativeTransfers';
 import syncERC20Transfers from './syncERC20Transfers';
 import syncAnnouncements from './syncAnnouncements';
@@ -7,21 +7,19 @@ import scanStealthAddresses from './scanStealthAddresses';
 import checkAddressBalances from './checkAddressBalances';
 import assignNativeTransfers from './assignNativeTransfers';
 import syncUserOps from './syncUserOps';
-// import syncTxLogs from './syncTxLogs';
 
-const sync = async () => {
+const sync = async ({ chainIds }: { chainIds: number[] }) => {
   await Promise.all([
-    syncBlocks(),
-    syncUserOps(),
-    syncNativeTransfers(),
-    syncAnnouncements(),
-    assignNativeTransfers(),
-    syncERC20Transfers(),
-    checkAddressBalances(),
+    syncBlocks({ chainIds }),
+    syncUserOps({ chainIds }),
+    syncNativeTransfers({ chainIds }),
+    syncAnnouncements({ chainIds }),
+    assignNativeTransfers({ chainIds }),
+    syncERC20Transfers({ chainIds }),
+    checkAddressBalances({ chainIds }),
     // announceStealthAccounts(),
     scanStealthAddresses(),
-    // syncTxLogs(),
   ]);
 };
 
-sync();
+export default sync;

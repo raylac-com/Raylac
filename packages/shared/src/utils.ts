@@ -8,6 +8,8 @@ import {
   parseUnits,
 } from 'viem';
 import {
+  AnvilBlockTraceResponse,
+  BlockTraceResponse,
   BlockTransactionResponse,
   ChainGasInfo,
   TraceWithTraceAddress,
@@ -20,11 +22,11 @@ import { supportedTokens, NATIVE_TOKEN_ADDRESS } from './supportedTokens';
 import { getPublicClient } from './ethRpc';
 import {
   getERC20TokenBalance,
-  rundlerMaxPriorityFeePerGas,
+  getMaxPriorityFeePerGas,
   traceBlockByNumber,
 } from '.';
-import { supportedChains } from './supportedChains';
 import axios from 'axios';
+import { anvil } from 'viem/chains';
 
 export const encodeERC5564Metadata = (viewTag: Hex): Hex => {
   if (viewTag.length !== 4) {
@@ -226,7 +228,9 @@ export const getTokenAddressOnChain = ({
   );
 
   if (!tokenOnChain) {
-    throw new Error(`Token ${tokenId} not supported on chain ${chainId}`);
+    throw new Error(
+      `Token ${tokenId} not supported on ${getChainName(chainId)}`
+    );
   }
 
   return tokenOnChain.address;
@@ -299,15 +303,6 @@ export const toCoingeckoTokenId = (tokenId: string) => {
   }
 };
 
-/**
- * Get the chains to use based on the mode (dev or prod)
- */
-export const getChainsForMode = (isDevMode: boolean) => {
-  return isDevMode
-    ? supportedChains.filter(chain => chain.testnet)
-    : supportedChains.filter(chain => !chain.testnet);
-};
-
 export const sleep = (ms: number) =>
   new Promise(resolve => setTimeout(resolve, ms));
 
@@ -346,24 +341,22 @@ export const USER_OP_EVENT_SIG =
  * Get the gas info for all supported chains
  */
 export const getGasInfo = async ({
-  isDevMode,
+  chainIds,
 }: {
-  isDevMode: boolean;
+  chainIds: number[];
 }): Promise<ChainGasInfo[]> => {
-  const chains = getChainsForMode(isDevMode);
-
   const gasInfo: ChainGasInfo[] = [];
-  for (const chain of chains) {
-    const client = getPublicClient({ chainId: chain.id });
+  for (const chainId of chainIds) {
+    const client = getPublicClient({ chainId });
     const block = await client.getBlock({ blockTag: 'latest' });
-    const maxPriorityFeePerGas = await rundlerMaxPriorityFeePerGas({ client });
+    const maxPriorityFeePerGas = await getMaxPriorityFeePerGas({ chainId });
 
     if (block.baseFeePerGas === null) {
       throw new Error('baseFeePerGas is null');
     }
 
     gasInfo.push({
-      chainId: chain.id,
+      chainId,
       baseFeePerGas: block.baseFeePerGas,
       maxPriorityFeePerGas,
     });
@@ -415,7 +408,7 @@ export const getTokenId = ({
 
   if (!token) {
     throw new Error(
-      `Token with address ${tokenAddress} on chain ${chainId} not found`
+      `Token with address ${tokenAddress} on ${getChainName(chainId)} not found`
     );
   }
 
@@ -491,15 +484,38 @@ export const getNativeTransferTracesInBlock = async ({
 }: {
   blockNumber: bigint;
   chainId: number;
-}) => {
+}): Promise<TraceWithTraceAddress[]> => {
   const traceBlockResult = await traceBlockByNumber({
     chainId,
     blockNumber,
   });
 
-  const callsWithValuesInBlock = traceBlockResult
+  if (chainId === anvil.id) {
+    const callsWithValues = (
+      traceBlockResult as AnvilBlockTraceResponse
+    ).filter(tx => tx.action.callType === 'call' && tx.action.value !== '0x0');
+
+    return callsWithValues.map(tx => ({
+      from: tx.action.from,
+      gas: tx.action.gas,
+      gasUsed: tx.result.gasUsed,
+      to: tx.action.to,
+      input: tx.action.input,
+      calls: [],
+      value: tx.action.value,
+      type: 'CALL',
+      txHash: tx.transactionHash,
+      traceAddress: tx.traceAddress,
+    }));
+  }
+
+  const callsWithValuesInBlock = (traceBlockResult as BlockTraceResponse)
     .flatMap(tx => getCalls(tx.result, tx.txHash))
     .filter(call => call.type === 'CALL' && call.value && call.value !== '0x0');
 
   return callsWithValuesInBlock;
+};
+
+export const getChainName = (chainId: number) => {
+  return `${getChainFromId(chainId).name} (${chainId})`;
 };

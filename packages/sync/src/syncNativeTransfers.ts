@@ -1,5 +1,6 @@
 import {
   bigIntMin,
+  getChainName,
   getNativeTransferTracesInBlock,
   getPublicClient,
   sleep,
@@ -9,16 +10,16 @@ import prisma from './lib/prisma';
 import { getAddress, Hex, hexToBigInt, toHex } from 'viem';
 import { Prisma } from '@prisma/client';
 import {
+  getBlockTimestamp,
   logger,
   updateAddressesSyncStatus,
   upsertTransaction,
   waitForAnnouncementsBackfill,
 } from './utils';
-import { supportedChains } from '@raylac/shared';
 import { base, optimism } from 'viem/chains';
 import { getTokenPriceAtTime } from './lib/coingecko';
 
-const syncNativeTransfersForChain = async (chainId: number) => {
+const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
   const addressSyncStatuses = await prisma.addressSyncStatus.findMany({
     select: {
       blockNumber: true,
@@ -49,10 +50,6 @@ const syncNativeTransfersForChain = async (chainId: number) => {
       addressSyncStatus => addressSyncStatus.blockNumber < blockNumber
     );
 
-    logger.info(
-      `Scanning blocks for ${addresses.length} addresses in block ${blockNumber} on chain ${chainId}`
-    );
-
     const callsWithValue = await getNativeTransferTracesInBlock({
       blockNumber,
       chainId,
@@ -67,12 +64,6 @@ const syncNativeTransfersForChain = async (chainId: number) => {
         addresses.some(address => address.address === from)
       );
     });
-
-    if (callsWithAddresses.length > 0) {
-      logger.info(
-        `Found ${callsWithAddresses.length} calls with announced address in block ${blockNumber}`
-      );
-    }
 
     const txHashes = new Set(callsWithAddresses.map(call => call.txHash));
 
@@ -112,26 +103,9 @@ const syncNativeTransfersForChain = async (chainId: number) => {
   }
 };
 
-const getBlockTimestamp = async ({
-  chainId,
-  blockNumber,
-}: {
-  chainId: number;
-  blockNumber: bigint;
-}) => {
-  const client = getPublicClient({ chainId });
-  const block = await client.getBlock({ blockNumber });
-
-  if (!block) {
-    throw new Error(`Block ${blockNumber} not found for chain ${chainId}`);
-  }
-
-  return block.timestamp;
-};
-
 const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
   if (chainId !== base.id && chainId !== optimism.id) {
-    throw new Error(`Cannot use trace_filter for chain ${chainId}`);
+    throw new Error(`Cannot use trace_filter for ${getChainName(chainId)}`);
   }
 
   const addressWithSyncStatus = await prisma.addressSyncStatus.findMany({
@@ -181,14 +155,12 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
         continue;
       }
 
-      console.time(`traceFilter for ${addressesToSync.length} addresses`);
       const incomingTraces = await traceFilter({
         fromBlock: toHex(fromBlock),
         toBlock: toHex(toBlock),
         toAddress: addressesToSync,
         chainId,
       });
-      console.timeEnd(`traceFilter for ${addressesToSync.length} addresses`);
 
       const outgoingTraces = await traceFilter({
         fromBlock: toHex(fromBlock),
@@ -216,7 +188,7 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
       for (const trace of tracesToSave) {
         const blockTimestamp = await getBlockTimestamp({
           chainId,
-          blockNumber: BigInt(trace.blockNumber),
+          blockHash: trace.blockHash,
         });
 
         const tokenPrice = blockTimestamp
@@ -252,7 +224,15 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
   }
 };
 
-const syncNativeTransfers = async () => {
+const syncNativeTransfersForChain = async (chainId: number) => {
+  if (chainId === base.id || chainId === optimism.id) {
+    await syncNativeTransfersWithTraceFilter(chainId);
+  } else {
+    await syncNativeTransfersWithTraceBlock(chainId);
+  }
+};
+
+const syncNativeTransfers = async ({ chainIds }: { chainIds: number[] }) => {
   logger.info(
     'syncNativeTransfers: Waiting for announcements backfill to complete'
   );
@@ -263,12 +243,8 @@ const syncNativeTransfers = async () => {
     try {
       const promises = [];
 
-      for (const chain of supportedChains) {
-        if (chain.id === base.id || chain.id === optimism.id) {
-          promises.push(syncNativeTransfersWithTraceFilter(chain.id));
-        } else {
-          promises.push(syncNativeTransfersForChain(chain.id));
-        }
+      for (const chainId of chainIds) {
+        promises.push(syncNativeTransfersForChain(chainId));
       }
 
       await Promise.all(promises);

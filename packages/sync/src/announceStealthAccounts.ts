@@ -14,10 +14,9 @@ import {
 import prisma from './lib/prisma';
 import { Hex } from 'viem';
 import { getPublicClient } from '@raylac/shared';
-import { announcementAbiItem } from './utils';
+import { announcementAbiItem, getRaylacDeployedBlock } from './utils';
 import { logger } from './utils';
 import { privateKeyToAccount } from 'viem/accounts';
-import { ACCOUNT_IMPL_V2_DEPLOYED_BLOCK } from '@raylac/shared/src/addresses';
 
 const publicClient = getPublicClient({
   chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
@@ -61,7 +60,9 @@ const isAnnounced = async (signerAddress: Hex): Promise<boolean> => {
       schemeId: ERC5564_SCHEME_ID,
       stealthAddress: signerAddress,
     },
-    fromBlock: ACCOUNT_IMPL_V2_DEPLOYED_BLOCK[ERC5564_ANNOUNCEMENT_CHAIN.id],
+    fromBlock: getRaylacDeployedBlock({
+      chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
+    }),
     toBlock: 'latest',
   });
 

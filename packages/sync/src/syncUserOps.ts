@@ -6,7 +6,6 @@ import {
 } from '@raylac/shared';
 import { decodeEventLog, Log, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
-import { supportedChains } from '@raylac/shared';
 import { upsertTransaction } from './utils';
 import { Prisma } from '@prisma/client';
 import processLogs from './processLogs';
@@ -75,11 +74,12 @@ export const handleUserOpEvent = async ({
 };
 
 /**
- * Sync user operations for the given chain,
- * from either the latest synched block or the finalized block (from the earlier block)
- * to the latest block
+ * Index `UserOperationEvent` logs for a given chain.
+ * Only `UserOperationEvent` logs with the paymaster set to `RAYLAC_PAYMASTER_ADDRESS` are indexed.
+ * @param chainId - The chain to sync user operations for
+ * @param fromBlock - (Optional) The block to start syncing from. This is useful for indexing on test environments where we only want to backfill a few blocks
  */
-export const syncUserOpsForChain = async (chainId: number) => {
+export const syncUserOpsForChain = async ({ chainId }: { chainId: number }) => {
   await processLogs({
     chainId,
     job: 'UserOps',
@@ -96,18 +96,27 @@ export const syncUserOpsForChain = async (chainId: number) => {
   });
 };
 
-const syncUserOpsByPaymaster = async () => {
+/**
+ * Continuously index `UserOperationEvent` logs across all supported chains.
+ *
+ * NOTE: UserOperations are saved to the database synchronously when a user
+ * submits a user operation from the Raylac app.
+ * Therefore we only need this indexing job to make sure we index UserOperations
+ * that failed to be indexed for any reason.
+ */
+const syncUserOps = async ({ chainIds }: { chainIds: number[] }) => {
   while (true) {
-    for (const chainId of supportedChains.map(chain => chain.id)) {
-      await syncUserOpsForChain(chainId);
+    const promises = [];
+
+    for (const chainId of chainIds) {
+      promises.push(syncUserOpsForChain({ chainId }));
     }
 
-    await sleep(15 * 1000); // Sleep for 15 seconds
-  }
-};
+    await Promise.all(promises);
 
-const syncUserOps = async () => {
-  await syncUserOpsByPaymaster();
+    // TODO: Figure out the right interval
+    await sleep(15 * 1000);
+  }
 };
 
 export default syncUserOps;

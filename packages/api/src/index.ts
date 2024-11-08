@@ -28,12 +28,12 @@ import submitUserOps from './api/submitUserOps';
 import getUser from './api/getUser';
 import deleteAccount from './api/deleteAccount';
 import getTransferDetails from './api/getTransferDetails';
-import toggleDevMode from './api/toggleDevMode';
 import addStealthAccount from './api/addStealthAccount';
 import getAddressNonces from './api/getAddressNonces';
 import express from 'express';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { logger } from './utils';
+import pruneAnvil from './api/pruneAnvil';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -70,13 +70,13 @@ export const appRouter = router({
     .mutation(async opts => {
       const { input } = opts;
 
-      await submitUserOps({
+      const txHash = await submitUserOps({
         userId: opts.ctx.userId,
         userOps: input.userOps as UserOperation[],
         tokenPrice: input.tokenPrice,
       });
 
-      return 'ok';
+      return txHash;
     }),
 
   /**
@@ -100,22 +100,32 @@ export const appRouter = router({
       return user;
     }),
 
-  getAddressBalancesPerChain: authedProcedure.query(async opts => {
-    const userId = opts.ctx.userId;
-    const isDevMode = opts.ctx.isDevMode;
+  getAddressBalancesPerChain: authedProcedure
+    .input(
+      z
+        .object({
+          includeAnvil: z.boolean().optional(),
+        })
+        .optional()
+    )
+    .query(async opts => {
+      const userId = opts.ctx.userId;
+      const includeAnvil = opts.input?.includeAnvil;
 
-    const balances = await getAddressBalancesPerChain({ userId, isDevMode });
-    return balances;
-  }),
+      const balances = await getAddressBalancesPerChain({
+        userId,
+        includeAnvil,
+      });
+      return balances;
+    }),
 
   /**
    * Get the balances of tokens for all chains and supported tokens
    */
   getTokenBalances: authedProcedure.query(async opts => {
     const userId = opts.ctx.userId;
-    const isDevMode = opts.ctx.isDevMode;
 
-    const balances = await getTokenBalances({ userId, isDevMode });
+    const balances = await getTokenBalances({ userId });
     return balances;
   }),
 
@@ -143,17 +153,26 @@ export const appRouter = router({
    */
   getTransferHistory: authedProcedure
     .input(
-      z.object({
-        take: z.number().optional(),
-        skip: z.number().optional(),
-      })
+      z
+        .object({
+          take: z.number().optional(),
+          skip: z.number().optional(),
+          includeAnvil: z.boolean().optional(),
+        })
+        .optional()
     )
     .query(async opts => {
       const userId = opts.ctx.userId;
       const take = opts.input?.take;
       const skip = opts.input?.skip;
+      const includeAnvil = opts.input?.includeAnvil;
 
-      const transfers = await getTransferHistory({ userId, take, skip });
+      const transfers = await getTransferHistory({
+        userId,
+        take,
+        skip,
+        includeAnvil,
+      });
 
       return transfers;
     }),
@@ -357,20 +376,13 @@ export const appRouter = router({
     await deleteAccount({ userId });
   }),
 
-  toggleDevMode: authedProcedure
-    .input(
-      z.object({
-        devModeEnabled: z.boolean(),
-      })
-    )
-    .mutation(async opts => {
-      const { input } = opts;
+  pruneAnvil: authedProcedure.mutation(async _opts => {
+    if (process.env.RENDER && !process.env.IS_PULL_REQUEST) {
+      throw new Error('Cannot prune anvil in a non-pull request');
+    }
 
-      await toggleDevMode({
-        userId: opts.ctx.userId,
-        devModeEnabled: input.devModeEnabled,
-      });
-    }),
+    await pruneAnvil();
+  }),
 });
 
 export const createCaller = createCallerFactory(appRouter);

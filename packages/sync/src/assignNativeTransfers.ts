@@ -2,13 +2,16 @@ import { sleep } from '@raylac/shared';
 import { getAddress, Hex } from 'viem';
 import prisma from './lib/prisma';
 import { Prisma } from '@prisma/client';
-import { supportedChains } from '@raylac/shared';
 import { logger } from './utils';
 
-export const assignAddressToTraces = async ({ address }: { address: Hex }) => {
-  for (const chain of supportedChains) {
-    const chainId = chain.id;
-
+export const assignAddressToTraces = async ({
+  chainIds,
+  address,
+}: {
+  chainIds: number[];
+  address: Hex;
+}) => {
+  for (const chainId of chainIds) {
     // Get all traces for the address that don't have a stealth address assigned
     const traces = await prisma.trace.findMany({
       select: {
@@ -87,7 +90,7 @@ export const assignAddressToTraces = async ({ address }: { address: Hex }) => {
   }
 };
 
-const assignNativeTransfers = async () => {
+const assignNativeTransfers = async ({ chainIds }: { chainIds: number[] }) => {
   while (true) {
     try {
       const userStealthAddresses = await prisma.userStealthAddress.findMany({
@@ -105,6 +108,7 @@ const assignNativeTransfers = async () => {
           batch.map(address =>
             assignAddressToTraces({
               address: address.address as Hex,
+              chainIds,
             })
           )
         );
@@ -113,7 +117,7 @@ const assignNativeTransfers = async () => {
       logger.error(err);
     }
 
-    await sleep(2000); // Sleep for 2 seconds
+    await sleep(1000); // Sleep for 2 seconds
   }
 };
 

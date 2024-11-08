@@ -2,28 +2,23 @@ import 'dotenv/config';
 import { expect, test } from 'vitest';
 import {
   AddressTokenBalance,
-  generateStealthAddressV2,
   getGasInfo,
   getSpendingPrivKey,
   getViewingPrivKey,
-  getWalletClient,
   RAYLAC_PAYMASTER_V2_ADDRESS,
   signUserOpWithStealthAccount,
   StealthAddressWithEphemeral,
   supportedTokens,
   toCoingeckoTokenId,
+  encodePaymasterAndData,
+  buildMultiChainSendRequestBody,
 } from '@raylac/shared';
-import { buildMultiChainSendRequestBody } from '@raylac/shared/src/multiChainSend';
-import { parseUnits, Hex, zeroAddress } from 'viem';
-import { anvil, base } from 'viem/chains';
-import { encodePaymasterAndData } from '@raylac/shared/src/utils';
-import { client, getAuthedClient, getTestUserId } from '../lib/rpc';
+import { parseUnits, Hex } from 'viem';
+import { base } from 'viem/chains';
+import { client, getAuthedClient } from '../lib/rpc';
 import { describe } from 'node:test';
-import { getAddressBalance, testClient } from '../lib/utils';
+import { getAddressBalance } from '../lib/utils';
 import { TEST_ACCOUNT_MNEMONIC } from '../lib/auth';
-import { syncBlocksForChain, waitForAnnouncementsBackfill } from '@raylac/sync';
-
-const IS_DEV_MODE = false;
 
 /**
  * Get the current USD price of a token
@@ -103,7 +98,7 @@ const send = async ({
   });
 
   const gasInfo = await getGasInfo({
-    isDevMode: IS_DEV_MODE,
+    chainIds: [chainId],
   });
 
   const stealthAccounts = await authedClient.getStealthAccounts.query();
@@ -229,99 +224,5 @@ describe('send', () => {
         });
       }
     }
-  });
-
-  test.skip('should handle reorgs', async () => {
-    const chainId = anvil.id;
-
-    // Start the indexer for the chain
-    const unwatch = await syncBlocksForChain(chainId);
-
-    // 1. Send
-    // 2. Revert the tx
-    // 3. Check the balance and transfer history
-
-    const snapshot = await testClient.snapshot();
-
-    const amount = await fromUsdAmount({
-      tokenId: 'usdc',
-      tokenPriceUsd: USD_AMOUNT,
-    });
-
-    const testUserId = await getTestUserId();
-
-    const testUser = await client.getUser.query({ userId: testUserId });
-
-    if (!testUser) {
-      throw new Error('Test user not found');
-    }
-
-    // Generate a new stealth address for the test user
-    const newStealthAccount = generateStealthAddressV2({
-      spendingPubKey: testUser.spendingPubKey as Hex,
-      viewingPubKey: testUser.viewingPubKey as Hex,
-    });
-
-    // Submit the stealth address to the server
-    await client.addStealthAccount.mutate({
-      address: newStealthAccount.address,
-      signerAddress: newStealthAccount.signerAddress,
-      ephemeralPubKey: newStealthAccount.ephemeralPubKey,
-      viewTag: newStealthAccount.viewTag,
-      userId: testUser.id,
-      label: '',
-    });
-
-    const funderAddress = zeroAddress;
-
-    // Fund the new account
-    await testClient.setBalance({
-      address: funderAddress,
-      value: parseUnits('1', 18),
-    });
-
-    const walletClient = await getWalletClient({
-      chainId,
-    });
-
-    await testClient.impersonateAccount({
-      address: funderAddress,
-    });
-    // Send the funds to the stealth account
-    await walletClient.sendTransaction({
-      to: newStealthAccount.address,
-      value: parseUnits('0.1', 18),
-      account: funderAddress,
-    });
-
-    await testClient.stopImpersonatingAccount({
-      address: funderAddress,
-    });
-
-    // Index the above transfer
-    await waitForAnnouncementsBackfill();
-
-    const senderBalanceBefore = await getTestUserBalance({
-      tokenId: 'eth',
-    });
-
-    await send({
-      amount,
-      tokenId: 'eth',
-      to: '0x06D35f6B8Fb9Ad47A866052b6a6C3c2DcD1C36F1',
-      numInputs: 1,
-      chainId,
-    });
-
-    // Revert the blocks
-    await testClient.revert({ id: snapshot });
-
-    const senderBalanceAfter = await getTestUserBalance({
-      tokenId: 'eth',
-    });
-
-    expect(senderBalanceAfter).toEqual(senderBalanceBefore);
-
-    unwatch();
   });
 });
