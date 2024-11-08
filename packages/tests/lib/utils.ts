@@ -135,13 +135,27 @@ export const impersonateAndSend = async ({
   });
 };
 
+/**
+ * Get the `User` object for the test user
+ */
+export const getTestUser = async () => {
+  const testUserId = await getTestUserId();
+  const user = await client.getUser.query({ userId: testUserId });
+
+  if (!user) {
+    throw new Error(`Test user ${testUserId} not found`);
+  }
+
+  return user;
+};
+
+/**
+ * Create a stealth address for the test user
+ * - Submits the stealth address to the server which will announce it to the ERC5564 contract
+ */
 export const createStealthAccountForTestUser =
   async (): Promise<StealthAddressWithEphemeral> => {
-    const user = await client.getUser.query({ userId: await getTestUserId() });
-
-    if (!user) {
-      throw new Error('User not found');
-    }
+    const user = await getTestUser();
 
     // Generate a new stealth address for the test user
     const newStealthAccount = generateStealthAddressV2({

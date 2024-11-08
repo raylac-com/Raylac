@@ -236,6 +236,9 @@ const syncNativeTransfers = async ({ chainIds }: { chainIds: number[] }) => {
   logger.info(
     'syncNativeTransfers: Waiting for announcements backfill to complete'
   );
+
+  // We want to wait for announcements backfill to complete before start indexing native transfers,
+  // because synching in batches of addresses is a lot faster than indexing address transfers one by one.
   await waitForAnnouncementsBackfill();
   logger.info(`syncNativeTransfers: Announcements backfill complete`);
 
