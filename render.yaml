@@ -12,9 +12,13 @@ services:
     preDeployCommand: pnpm -F db migrate:prod
     autoDeploy: true
     buildFilter:
-      paths:
-        - packages/api/**/*
-        - packages/shared/**/*
+      ignoredPaths:
+        - ./packages/app/**/*
+        - ./packages/tests/**/*
+        - ./packages/contracts/**/*
+        - ./README.md
+        - ./LICENSE
+        - ./.gitignore
     envVars:
       - fromGroup: raylac
       - key: NODE_VERSION
@@ -35,9 +39,14 @@ services:
     rootDir: ./
     autoDeploy: true
     buildFilter:
-      paths:
-        - packages/sync/**/*
-        - packages/shared/**/*  
+      ignoredPaths:
+        - ./packages/app/**/*
+        - ./packages/tests/**/*
+        - ./packages/api/**/*
+        - ./packages/contracts/**/*
+        - ./README.md
+        - ./LICENSE
+        - ./.gitignore
     envVars:
       - fromGroup: raylac
       - key: NODE_VERSION
