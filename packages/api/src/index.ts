@@ -34,6 +34,7 @@ import express from 'express';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { logger } from './utils';
 import pruneAnvil from './api/pruneAnvil';
+import getSyncStatus from './api/getSyncStatus';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -280,6 +281,7 @@ export const appRouter = router({
         viewTag: z.string(),
         userId: z.number(),
         label: z.string(),
+        useAnvil: z.boolean().optional(),
       })
     )
     .mutation(async opts => {
@@ -294,6 +296,7 @@ export const appRouter = router({
           viewTag: input.viewTag as Hex,
         },
         label: input.label,
+        useAnvil: input.useAnvil,
       });
     }),
 
@@ -383,6 +386,21 @@ export const appRouter = router({
 
     await pruneAnvil();
   }),
+
+  getSyncStatus: publicProcedure
+    .input(
+      z.object({
+        addresses: z.array(z.string()),
+        chainIds: z.array(z.number()),
+      })
+    )
+    .query(async opts => {
+      const { input } = opts;
+      return await getSyncStatus({
+        addresses: input.addresses as Hex[],
+        chainIds: input.chainIds,
+      });
+    }),
 });
 
 export const createCaller = createCallerFactory(appRouter);

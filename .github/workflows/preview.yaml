@@ -122,6 +122,40 @@ jobs:
           RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
           TEST_ACCOUNT_MNEMONIC: ${{ secrets.TEST_ACCOUNT_MNEMONIC }}
 
+  integration-test:
+    name: Run integration tests
+    runs-on: ubuntu-latest
+    needs: [setup-test-env]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.17.0
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm i
+
+      - name: Build
+        run: pnpm build
+
+      - name: Get the PR Postgres connection string
+        run: |
+          PR_DB_CONNECTION_STRING=$(pnpm -F ci run print-pr-postgres-connection-string) && \
+          echo "DATABASE_URL=$PR_DB_CONNECTION_STRING" >> $GITHUB_ENV
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      - name: Run integration tests
+        run: pnpm -F tests test syncNativeTransfers.test.ts syncAnnouncements.test.ts
+
   test-ios:
     name: Run Maestro tests on ios
     runs-on: ubuntu-latest

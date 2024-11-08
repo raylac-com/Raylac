@@ -3,6 +3,7 @@ import {
   ACCOUNT_FACTORY_V2_ADDRESS,
   ACCOUNT_IMPL_V2_ADDRESS,
   ENTRY_POINT_ADDRESS,
+  ERC5564_ANNOUNCER_ADDRESS,
   getPublicClient,
   getSpendingPrivKey,
   getViewingPrivKey,
@@ -19,6 +20,7 @@ import {
   ACCOUNT_FACTORY_V2_BYTECODE,
   ACCOUNT_IMPL_V2_BYTECODE,
   ENTRYPOINT_BYTECODE,
+  ERC5564_ANNOUNCER_BYTECODE,
   RAYLAC_PAYMASTER_BYTECODE,
   SENDER_CREATOR_BYTECODE,
 } from './lib/bytecode';
@@ -104,6 +106,12 @@ const initAnvilState = async () => {
     bytecode: ACCOUNT_IMPL_V2_BYTECODE,
   });
 
+  // Deploy the ERC5564Announcer contract
+  await testClient.setCode({
+    address: ERC5564_ANNOUNCER_ADDRESS,
+    bytecode: ERC5564_ANNOUNCER_BYTECODE,
+  });
+
   // Deposit funds to the EntryPoint
 
   const walletClient = getWalletClient({ chainId: anvil.id });
@@ -130,6 +138,9 @@ const initAnvilState = async () => {
     abi: RaylacPaymasterAbi,
     functionName: 'deposit',
     value: parseEther('0.1'),
+  });
+  await testClient.stopImpersonatingAccount({
+    address: ANNOUNCER_ADDRESS,
   });
 
   // Sanity check the deposit

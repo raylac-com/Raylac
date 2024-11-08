@@ -11,6 +11,7 @@ import {
 } from '@raylac/shared';
 import { privateKeyToAccount } from 'viem/accounts';
 import { logger } from '../utils';
+import { anvil } from 'viem/chains';
 
 const ANNOUNCER_PRIVATE_KEY = process.env.ANNOUNCER_PRIVATE_KEY;
 
@@ -20,7 +21,13 @@ if (!ANNOUNCER_PRIVATE_KEY) {
 
 const announcerAccount = privateKeyToAccount(ANNOUNCER_PRIVATE_KEY as Hex);
 
-export const announce = async (stealthAccount: StealthAddressWithEphemeral) => {
+export const announce = async ({
+  stealthAccount,
+  useAnvil = false,
+}: {
+  stealthAccount: StealthAddressWithEphemeral;
+  useAnvil?: boolean;
+}) => {
   const metadata = encodeERC5564Metadata(stealthAccount.viewTag);
 
   // Sanity check that the stealth account matches the ERC5564_SCHEME_ID version
@@ -36,7 +43,7 @@ export const announce = async (stealthAccount: StealthAddressWithEphemeral) => {
   }
 
   const walletClient = getWalletClient({
-    chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
+    chainId: useAnvil ? anvil.id : ERC5564_ANNOUNCEMENT_CHAIN.id,
   });
 
   try {

@@ -89,10 +89,6 @@ export const getSynchedAddressNonce = async ({
 describe('reorg', () => {
   const sender = zeroAddress;
   beforeAll(async () => {
-    const authedClient = await getAuthedClient();
-
-    await authedClient.pruneAnvil.mutate();
-
     // Fund the sender address
     await fundAddress({ address: sender, amount: parseEther('1') });
   });
@@ -101,12 +97,17 @@ describe('reorg', () => {
     const authedClient = await getAuthedClient();
 
     // Start the sync job for Anvil
-    sync({ chainIds: [anvil.id] });
+    await sync({
+      announcementChainId: anvil.id,
+      chainIds: [anvil.id],
+    });
 
     const snapshot = await testClient.snapshot();
 
     // Create a stealth address for the test user
-    const stealthAccount = await createStealthAccountForTestUser();
+    const stealthAccount = await createStealthAccountForTestUser({
+      useAnvil: true,
+    });
 
     // Fund the stealth account
     await testClient.setBalance({

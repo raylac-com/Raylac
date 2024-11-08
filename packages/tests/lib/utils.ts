@@ -5,6 +5,7 @@ import {
   getPublicClient,
   getTokenAddressOnChain,
   getWalletClient,
+  sleep,
   StealthAddressWithEphemeral,
   supportedTokens,
   toCoingeckoTokenId,
@@ -151,32 +152,36 @@ export const getTestUser = async () => {
 
 /**
  * Create a stealth address for the test user
- * - Submits the stealth address to the server which will announce it to the ERC5564 contract
+ * - Submits the stealth address to the server which will announce it to the ERC5564 contract on anvil
  */
-export const createStealthAccountForTestUser =
-  async (): Promise<StealthAddressWithEphemeral> => {
-    const user = await getTestUser();
+export const createStealthAccountForTestUser = async ({
+  useAnvil,
+}: {
+  useAnvil: boolean;
+}): Promise<StealthAddressWithEphemeral> => {
+  const user = await getTestUser();
 
-    // Generate a new stealth address for the test user
-    const newStealthAccount = generateStealthAddressV2({
-      spendingPubKey: user.spendingPubKey as Hex,
-      viewingPubKey: user.viewingPubKey as Hex,
-    });
+  // Generate a new stealth address for the test user
+  const newStealthAccount = generateStealthAddressV2({
+    spendingPubKey: user.spendingPubKey as Hex,
+    viewingPubKey: user.viewingPubKey as Hex,
+  });
 
-    const authedClient = await getAuthedClient();
+  const authedClient = await getAuthedClient();
 
-    // Submit the stealth address to the server
-    await authedClient.addStealthAccount.mutate({
-      address: newStealthAccount.address,
-      signerAddress: newStealthAccount.signerAddress,
-      ephemeralPubKey: newStealthAccount.ephemeralPubKey,
-      viewTag: newStealthAccount.viewTag,
-      userId: user.id,
-      label: '',
-    });
+  // Submit the stealth address to the server
+  await authedClient.addStealthAccount.mutate({
+    address: newStealthAccount.address,
+    signerAddress: newStealthAccount.signerAddress,
+    ephemeralPubKey: newStealthAccount.ephemeralPubKey,
+    viewTag: newStealthAccount.viewTag,
+    userId: user.id,
+    label: '',
+    useAnvil,
+  });
 
-    return newStealthAccount;
-  };
+  return newStealthAccount;
+};
 
 /**
  * Get the amount of tokens from the USD amount
@@ -223,4 +228,24 @@ export const getTestUserTokenBalance = async ({
   }
 
   return BigInt(senderBalance);
+};
+
+export const waitFor = async ({
+  fn,
+  timeout,
+  interval = 1000,
+  label,
+}: {
+  fn: () => Promise<boolean>;
+  timeout: number;
+  interval?: number;
+  label: string;
+}) => {
+  const timeoutMs = Date.now() + timeout;
+
+  while (true) {
+    if (await fn()) return;
+    if (Date.now() > timeoutMs) throw new Error(`Timeout waiting for ${label}`);
+    await sleep(interval);
+  }
 };
