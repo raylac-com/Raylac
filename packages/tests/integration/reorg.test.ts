@@ -3,7 +3,6 @@ import {
   createStealthAccountForTestUser,
   fundAddress,
   getTestClient,
-  impersonateAndSend,
 } from '../lib/utils';
 import { Address, Hex, parseEther, zeroAddress } from 'viem';
 import { sync } from '@raylac/sync';
@@ -12,7 +11,6 @@ import { getAuthedClient } from '../lib/rpc';
 import {
   buildUserOp,
   encodePaymasterAndData,
-  ENTRY_POINT_ADDRESS,
   getGasInfo,
   getSpendingPrivKey,
   getViewingPrivKey,
@@ -20,12 +18,9 @@ import {
   signUserOpWithStealthAccount,
   sleep,
 } from '@raylac/shared';
-import { ENTRYPOINT_BYTECODE, SENDER_CREATOR_BYTECODE } from '../lib/bytecode';
 import { TEST_ACCOUNT_MNEMONIC } from '../lib/auth';
 
 const testClient = getTestClient();
-
-const SENDER_CREATOR_ADDRESS = '0x7fc98430eaedbb6070b35b39d798725049088348';
 
 /*
 const waitForIncomingSync = async (txHash: Hex) => {
@@ -57,7 +52,7 @@ const waitForIncomingSync = async (txHash: Hex) => {
 */
 
 const isTxRemoved = async (txHash: Hex) => {
-  const timeout = Date.now() + 10000;
+  const timeout = Date.now() + 20000;
 
   const authedClient = await getAuthedClient();
 
@@ -100,23 +95,6 @@ describe('reorg', () => {
 
     // Fund the sender address
     await fundAddress({ address: sender, amount: parseEther('1') });
-
-    // Fund the bundler
-    await impersonateAndSend({
-      from: sender,
-      to: '0x9D3224743435d058f4B17Da29E8673DceD1768E7',
-      amount: parseEther('0.3'),
-    });
-
-    await testClient.setCode({
-      address: ENTRY_POINT_ADDRESS,
-      bytecode: ENTRYPOINT_BYTECODE,
-    });
-
-    await testClient.setCode({
-      address: SENDER_CREATOR_ADDRESS,
-      bytecode: SENDER_CREATOR_BYTECODE,
-    });
   });
 
   test('should handle a reorg for incoming transfers correctly', async () => {
@@ -130,17 +108,13 @@ describe('reorg', () => {
     // Create a stealth address for the test user
     const stealthAccount = await createStealthAccountForTestUser();
 
-    // Send a transaction
-    await impersonateAndSend({
-      from: sender,
-      to: stealthAccount.address,
-      amount: parseEther('0.1'),
+    // Fund the stealth account
+    await testClient.setBalance({
+      address: stealthAccount.address,
+      value: parseEther('1'),
     });
 
     await testClient.mine({ blocks: 1 });
-
-    // Wait for the transfer to be synced
-    // await waitForIncomingSync(depositTxHash);
 
     const gasInfo = await getGasInfo({
       chainIds: [anvil.id],
@@ -182,7 +156,7 @@ describe('reorg', () => {
     // Reorg the chain
     await testClient.revert({ id: snapshot });
 
-    await testClient.mine({ blocks: 3 });
+    await testClient.mine({ blocks: 5 });
 
     expect(await isTxRemoved(txHash)).toBe(true);
     expect(

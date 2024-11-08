@@ -220,6 +220,6 @@ const RaylacPaymasterAbi = [
     ],
     anonymous: false,
   },
-];
+] as const;
 
 export default RaylacPaymasterAbi;
