@@ -1,7 +1,8 @@
 {
   "name": "@raylac/ci",
   "scripts": {
-    "setup": "tsx src/setup.ts"
+    "setup": "tsx src/setup.ts",
+    "lint": "eslint . & tsc --noEmit"
   },
   "dependencies": {
     "@raylac/api": "workspace:*",

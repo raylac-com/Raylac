@@ -191,6 +191,10 @@ describe('reorg', () => {
 
     const balances = await authedClient.getAddressBalancesPerChain.query();
 
-    expect(balances[stealthAccount.address]).toBe(undefined);
+    const addressBalance = balances.find(
+      balance => balance.address === stealthAccount.address
+    );
+
+    expect(addressBalance).toBe(undefined);
   });
 });

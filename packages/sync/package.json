@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "dotenv -e ../../.env -- tsx src/start.ts",
-    "lint": "tsc --noEmit",
+    "lint": "eslint . & tsc --noEmit",
     "test": "vitest",
     "build": "pnpm i && tsc -d",
     "build:watch": "tsc -d --watch",

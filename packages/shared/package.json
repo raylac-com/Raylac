@@ -12,7 +12,8 @@
   "scripts": {
     "build": "pnpm i && tsc -d",
     "build:watch": "tsc -d --watch",
-    "postinstall": "tsc -d"
+    "postinstall": "tsc -d",
+    "lint": "eslint . & tsc --noEmit"
   },
   "keywords": [],
   "author": "",

@@ -9,7 +9,9 @@ const cache = new NodeCache();
 const TOKEN_PRICES_CACHE_KEY = 'tokenPrices';
 
 const getTokenPrices = async () => {
-  const tokenPricesInCache = cache.get(TOKEN_PRICES_CACHE_KEY);
+  const tokenPricesInCache = cache.get<CoingeckoTokenPriceResponse | null>(
+    TOKEN_PRICES_CACHE_KEY
+  );
 
   if (tokenPricesInCache) {
     return tokenPricesInCache;
