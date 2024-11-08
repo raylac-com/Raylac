@@ -38,33 +38,34 @@ describe('getAddressBalancesPerChain', () => {
     const stealthAccounts = await authedClient.getStealthAccounts.query();
     const balances = await authedClient.getAddressBalancesPerChain.query();
 
-    // Iterate over all stealth accounts
-    const promises = stealthAccounts.map(stealthAccount => {
-      return Promise.all(
-        // Iterate over all supported tokens
-        supportedTokens.map(async token => {
-          return Promise.all(
-            supportedChains.map(async chain => {
-              const tokenBalance =
-                balances.find(
-                  balance =>
-                    balance.address === stealthAccount.address &&
-                    balance.tokenId === token.tokenId &&
-                    balance.chainId === chain.id
-                )?.balance || '0';
+    for (const token of supportedTokens) {
+      for (const chain of supportedChains) {
+        const promises: Promise<void>[] = [];
 
-              await checkBalance({
-                tokenId: token.tokenId,
-                address: stealthAccount.address as Hex,
-                balance: BigInt(tokenBalance),
-                chainId: chain.id,
-              });
+        // We run `checkBalance` for each account concurrently to make test run faster.
+        // But we only do concurrent executions among stealth accounts (and not all the token - chain - account combinations)
+        // to avoid hitting the RPC rate limit.
+        for (const stealthAccount of stealthAccounts) {
+          const tokenBalance =
+            balances.find(
+              balance =>
+                balance.address === stealthAccount.address &&
+                balance.tokenId === token.tokenId &&
+                balance.chainId === chain.id
+            )?.balance || '0';
+
+          promises.push(
+            checkBalance({
+              tokenId: token.tokenId,
+              address: stealthAccount.address as Hex,
+              balance: BigInt(tokenBalance),
+              chainId: chain.id,
             })
           );
-        })
-      );
-    });
+        }
 
-    await Promise.all(promises);
+        await Promise.all(promises);
+      }
+    }
   });
 });
