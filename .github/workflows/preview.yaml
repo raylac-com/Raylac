@@ -16,6 +16,7 @@ permissions:
 env:
   TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
 
 jobs:
   setup-preview:
@@ -71,7 +72,7 @@ jobs:
         working-directory: packages/app
 
       - name: Create a .env file
-        run: printf "EXPO_PUBLIC_RPC_URL=https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com\nEXPO_PUBLIC_ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}\n" > .env
+        run: printf "EXPO_PUBLIC_RPC_URL=${{ env.RPC_URL }}\nEXPO_PUBLIC_ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}\n" > .env
         working-directory: packages/app
 
       - name: Run eas update for the preview branch
@@ -85,8 +86,7 @@ jobs:
     name: Run integration tests
     runs-on: ubuntu-latest
     env:
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+      TEST_ACCOUNT_MNEMONIC: ${{ secrets.TEST_ACCOUNT_MNEMONIC }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -120,9 +120,6 @@ jobs:
 
       - name: Setup test environment
         run: pnpm -F ci run setup
-        env:
-          RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
-          TEST_ACCOUNT_MNEMONIC: ${{ secrets.TEST_ACCOUNT_MNEMONIC }}
 
       - name: Get the PR Postgres connection string
         run: |
@@ -137,4 +134,4 @@ jobs:
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           ANVIL_RPC_URL: https://anvil-pr-${{ github.event.pull_request.number }}.onrender.com
-          TEST_ACCOUNT_MNEMONIC: ${{ secrets.TEST_ACCOUNT_MNEMONIC }}
+
