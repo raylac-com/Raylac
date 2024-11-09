@@ -7,7 +7,7 @@ import {
 import { decodeEventLog, Log, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
 import { upsertTransaction } from './utils';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@raylac/db';
 import processLogs from './processLogs';
 
 const userOpEvent = parseAbiItem(

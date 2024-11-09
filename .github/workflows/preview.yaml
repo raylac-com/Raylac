@@ -7,18 +7,22 @@ on:
       - packages/sync/src/**
       - packages/api/src/**
       - packages/app/src/**
+      - .github/workflows/preview.yaml
   workflow_dispatch:
 
 permissions:
   contents: read
 
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
+
+
 jobs:
   setup-preview:
     name: Setup EAS preview
     runs-on: ubuntu-latest
-    env:
-      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-      TURBO_TEAM: ${{ vars.TURBO_TEAM }}
     permissions:
       contents: read
       pull-requests: write
@@ -50,55 +54,51 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Remove unnecessary packages
+        run: rm -rf ./packages/{tests,ci,scripts}
+
       - name: Install dependencies
-        run: pnpm i --ignore-scripts --filter .
+        run: pnpm i --ignore-scripts
 
       - name: Build
         run: pnpm build
 
-      #- name: Create new preview channel
-      #  run: eas channel:create ${{ github.event.pull_request.head.ref }}
-      #  working-directory: packages/app
-      #  continue-on-error: true
-
-      #- name: Link branch to channel
-      #  run: eas channel:edit ${{ github.event.pull_request.head.ref }} --branch ${{ github.event.pull_request.head.ref }}
-      #  working-directory: packages/app
-
-      - name: Create a PR branch
-        run: eas branch:create ${{ github.event.pull_request.head.ref }}
+      - name: Create new preview channel
+        run: eas channel:create ${{ github.event.pull_request.head.ref }}
         working-directory: packages/app
         continue-on-error: true
 
-      - name: Link branch to test channel
-        run: eas channel:edit test --branch ${{ github.event.pull_request.head.ref }}
+      - name: Link branch to channel
+        run: eas channel:edit ${{ github.event.pull_request.head.ref }} --branch ${{ github.event.pull_request.head.ref }}
         working-directory: packages/app
 
       - name: Create a .env file
-        run: printf "EXPO_PUBLIC_RPC_URL=https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com\nEXPO_PUBLIC_ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}\n" > .env
+        run: printf "EXPO_PUBLIC_RPC_URL=${{ env.RPC_URL }}\nEXPO_PUBLIC_ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}\n" > .env
         working-directory: packages/app
 
-      #- name: Run eas update for the preview branch
-      #  uses: expo/expo-github-action/preview@v8
-      #  with:
-      #    command: eas update --auto --channel ${{ github.event.pull_request.head.ref }}
-      #    working-directory: packages/app
-      #    env:
-      #      EXPO_PUBLIC_RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
-      #      EXPO_PUBLIC_ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
-
-      - name: Run eas update for the test branch
+      - name: Run eas update for the preview branch
         uses: expo/expo-github-action/preview@v8
         with:
-          command: eas update --auto --channel test
+          command: eas update --auto --channel ${{ github.event.pull_request.head.ref }}
           working-directory: packages/app
 
-  setup-test-env:
-    name: Setup test environment
+
+  integration-test:
+    name: Run integration tests
     runs-on: ubuntu-latest
+    env:
+      TEST_ACCOUNT_MNEMONIC: ${{ secrets.TEST_ACCOUNT_MNEMONIC }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with: 
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
 
       - uses: pnpm/action-setup@v4
         with:
@@ -110,50 +110,31 @@ jobs:
           node-version: 18.17.0
           cache: pnpm
 
+      - name: Remove unnecessary packages
+        run: rm -rf ./packages/{app,scripts}
+
       - name: Install dependencies
-        run: pnpm i
+        run: pnpm i --ignore-scripts
 
       - name: Build
         run: pnpm build
 
       - name: Setup test environment
         run: pnpm -F ci run setup
+
+      - name: Get the PR Postgres connection string
+        run: |
+          PR_DB_CONNECTION_STRING=$(pnpm --silent exec -- pnpm -F ci run print-pr-postgres-connection-string --silent | awk -F'=' '{print $2}' | xargs)
+          echo "DATABASE_URL=$PR_DB_CONNECTION_STRING" >> $GITHUB_ENV
         env:
-          RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
-          TEST_ACCOUNT_MNEMONIC: ${{ secrets.TEST_ACCOUNT_MNEMONIC }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
 
-  test-ios:
-    name: Run Maestro tests on ios
-    runs-on: ubuntu-latest
-    needs: [setup-preview, setup-test-env]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run Maestro tests on the test channel
-        uses: mobile-dev-inc/action-maestro-cloud@v1
-        with:
-          api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
-          app-file: packages/app/build/raylac.zip
-          workspace: packages/app/.maestro
-          env: |
-            API_URL=https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
-            GIT_COMMIT=${{ github.sha }}
-            TEST_ACCOUNT_MNEMONIC=${{ secrets.TEST_ACCOUNT_MNEMONIC }}
-
-  test-android:
-    name: Run Maestro tests on android
-    runs-on: ubuntu-latest
-    needs: [setup-preview, setup-test-env]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Run Maestro tests on the test channel
-        uses: mobile-dev-inc/action-maestro-cloud@v1
-        with:
-          api-key: ${{ secrets.MAESTRO_CLOUD_API_KEY }}
-          app-file: packages/app/build/raylac.apk
-          workspace: packages/app/.maestro
-          env: |
-            API_URL=https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
-            GIT_COMMIT=${{ github.sha }}
-            TEST_ACCOUNT_MNEMONIC=${{ secrets.TEST_ACCOUNT_MNEMONIC }}
+      - name: Run integration tests
+        run: pnpm -F tests test syncNativeTransfers.test.ts syncAnnouncements.test.ts
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          ANVIL_RPC_URL: https://anvil-pr-${{ github.event.pull_request.number }}.onrender.com
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}

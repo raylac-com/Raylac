@@ -8,17 +8,16 @@ import {
 } from '@raylac/shared';
 import prisma from './lib/prisma';
 import { getAddress, Hex, hexToBigInt, toHex } from 'viem';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@raylac/db';
 import {
   getBlockTimestamp,
-  logger,
   updateAddressesSyncStatus,
   upsertTransaction,
   waitForAnnouncementsBackfill,
 } from './utils';
-import { base, optimism } from 'viem/chains';
+import { anvil, base, optimism } from 'viem/chains';
 import { getTokenPriceAtTime } from './lib/coingecko';
-
+import { logger } from '@raylac/shared-backend';
 const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
   const addressSyncStatuses = await prisma.addressSyncStatus.findMany({
     select: {
@@ -28,11 +27,14 @@ const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
     },
     where: {
       chainId,
+      tokenId: 'eth',
     },
     orderBy: {
       blockNumber: 'asc',
     },
   });
+
+  console.log({ addressSyncStatuses });
 
   if (addressSyncStatuses.length === 0) {
     return;
@@ -47,7 +49,7 @@ const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
   for (let blockNumber = fromBlock; blockNumber <= toBlock; blockNumber++) {
     // Get addresses that needs to be scanned from this block
     const addresses = addressSyncStatuses.filter(
-      addressSyncStatus => addressSyncStatus.blockNumber < blockNumber
+      addressSyncStatus => BigInt(addressSyncStatus.blockNumber) <= blockNumber
     );
 
     const callsWithValue = await getNativeTransferTracesInBlock({
@@ -91,8 +93,9 @@ const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
       });
     }
 
-    // Only update every 10 blocks
-    if (Number(blockNumber) % 10 === 0) {
+    // On Anvil, update on every block
+    // On other chains, update every 10 blocks
+    if (chainId === anvil.id || Number(blockNumber) % 10 === 0) {
       await updateAddressesSyncStatus({
         addresses: addresses.map(address => address.address as Hex),
         chainId,
@@ -232,11 +235,20 @@ const syncNativeTransfersForChain = async (chainId: number) => {
   }
 };
 
-const syncNativeTransfers = async ({ chainIds }: { chainIds: number[] }) => {
+const syncNativeTransfers = async ({
+  announcementChainId,
+  chainIds,
+}: {
+  announcementChainId: number;
+  chainIds: number[];
+}) => {
   logger.info(
     'syncNativeTransfers: Waiting for announcements backfill to complete'
   );
-  await waitForAnnouncementsBackfill();
+
+  // We want to wait for announcements backfill to complete before start indexing native transfers,
+  // because synching in batches of addresses is a lot faster than indexing address transfers one by one.
+  await waitForAnnouncementsBackfill({ announcementChainId });
   logger.info(`syncNativeTransfers: Announcements backfill complete`);
 
   while (true) {

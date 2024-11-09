@@ -12,9 +12,9 @@ import {
 import { getAddress, parseEventLogs, toHex } from 'viem';
 import { handleOps } from '../lib/bundler';
 import { handleERC20TransferLog, handleUserOpEvent } from '@raylac/sync';
-import { logger } from '../utils';
+import { logger } from '@raylac/shared-backend';
 import prisma from '../lib/prisma';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@raylac/db';
 
 const MAX_TRANSFERS = 1000;
 

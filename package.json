@@ -9,8 +9,8 @@
   ],
   "scripts": {
     "prepare": "husky",
-    "lint": "eslint . && pnpm -r lint",
-    "build": "pnpm -F db build && pnpm -F shared build && pnpm -F sync build && pnpm -F api build",
+    "build": "turbo build",
+    "lint": "turbo lint",
     "build:all:watch": "pnpm -F shared build:watch & pnpm -F api build:watch & pnpm -F sync build:watch"
   },
   "keywords": [],

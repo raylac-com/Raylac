@@ -7,14 +7,18 @@ services:
     previewPlan: starter
     runtime: node
     region: oregon
-    buildCommand: pnpm i --filter . --ignore-scripts && pnpm build
+    buildCommand: rm -rf ./packages/{app,tests,ci,contracts,scripts} && pnpm i --ignore-scripts && pnpm build
     startCommand: NODE_ENV=production pnpm -F api start
     preDeployCommand: pnpm -F db migrate:prod
     autoDeploy: true
     buildFilter:
-      paths:
-        - packages/api/**/*
-        - packages/shared/**/*
+      ignoredPaths:
+        - ./packages/app/**/*
+        - ./packages/tests/**/*
+        - ./packages/contracts/**/*
+        - ./README.md
+        - ./LICENSE
+        - ./.gitignore
     envVars:
       - fromGroup: raylac
       - key: NODE_VERSION
@@ -23,21 +27,31 @@ services:
         fromDatabase:
           name: raylac
           property: connectionString
+      - key: ANVIL_RPC_URL
+        fromService:
+          name: anvil
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
   - type: worker
     name: raylac-sync
     plan: standard
     previewPlan: starter
     runtime: node
     region: oregon
-    buildCommand: pnpm i --filter . --ignore-scripts && pnpm build
+    buildCommand: rm -rf ./packages/{app,tests,api,ci,contracts,scripts} && pnpm i --ignore-scripts && pnpm build
     startCommand: pnpm -F sync start
     preDeployCommand: pnpm -F db migrate:prod
     rootDir: ./
     autoDeploy: true
     buildFilter:
-      paths:
-        - packages/sync/**/*
-        - packages/shared/**/*  
+      ignoredPaths:
+        - ./packages/app/**/*
+        - ./packages/tests/**/*
+        - ./packages/api/**/*
+        - ./packages/contracts/**/*
+        - ./README.md
+        - ./LICENSE
+        - ./.gitignore
     envVars:
       - fromGroup: raylac
       - key: NODE_VERSION

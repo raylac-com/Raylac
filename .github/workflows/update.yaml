@@ -9,12 +9,25 @@ on:
       - packages/app/src/**
       - packages/db/**
       - .github/workflows/**
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
       - name: 🏗 Setup repo
         uses: actions/checkout@v4
+
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with: 
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
 
       - uses: pnpm/action-setup@v4
         with:
@@ -32,8 +45,11 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: 📦 Install dependencies
-        run: pnpm i
+      - name: Install dependencies
+        run: pnpm i --ignore-scripts
+
+      - name: Build
+        run: pnpm build
 
       - name: Create a .env file
         run: printf "EXPO_PUBLIC_RPC_URL=https://raylac-api.onrender.com\nEXPO_PUBLIC_ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}\n" > .env

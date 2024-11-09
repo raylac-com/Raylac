@@ -4,8 +4,11 @@
   "description": "",
   "main": "./out/index.js",
   "types": "out/index.d.ts",
+  "private": true,
+  "type": "module",
   "scripts": {
-    "test": "dotenv -e ../../.env -- vitest"
+    "test": "dotenv -e ../../.env -- vitest",
+    "lint": "eslint . & tsc --noEmit"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +23,6 @@
     "@raylac/api": "workspace:*",
     "@raylac/sync": "workspace:*",
     "@raylac/shared": "workspace:*",
-    "@prisma/client": "5.12.1"
+    "@raylac/db": "workspace:*"
   }
 }

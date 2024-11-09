@@ -7,7 +7,7 @@ import {
 } from '@raylac/shared';
 import { Hex } from 'viem';
 import { privateKeyToAccount, nonceManager } from 'viem/accounts';
-import { logger } from '../utils';
+import { logger } from '@raylac/shared-backend';
 
 const BUNDLER_PRIV_KEY = process.env.BUNDLER_PRIV_KEY as Hex;
 
