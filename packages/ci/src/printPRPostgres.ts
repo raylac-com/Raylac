@@ -111,7 +111,7 @@ const printPRPostgresConnectionString = async () => {
   const connectionString = await getPRPostgresConnectionString();
 
   // eslint-disable-next-line no-console
-  console.log(connectionString);
+  console.log(`DATABASE_URL=${connectionString}`);
 };
 
 printPRPostgresConnectionString();
