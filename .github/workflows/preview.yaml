@@ -137,4 +137,4 @@ jobs:
           ANVIL_RPC_URL: https://anvil-pr-${{ github.event.pull_request.number }}.onrender.com
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
-
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
