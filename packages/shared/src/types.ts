@@ -210,5 +210,11 @@ export interface RaylacAccountExecuteArgs {
   to: Hex;
   value: bigint;
   data: Hex;
-  executionTag: Hex;
+  tag: Hex;
+}
+
+export enum UserActionType {
+  Transfer = '0x01',
+  Swap = '0x02',
+  Bridge = '0x03',
 }

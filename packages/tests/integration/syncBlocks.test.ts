@@ -3,10 +3,15 @@ import { beforeAll, describe, expect, test } from 'vitest';
 import { anvil } from 'viem/chains';
 import { Hex, parseEther, zeroAddress } from 'viem';
 import { backFillFromFinalizedBlock, manageReorgsForChain } from '@raylac/sync';
-import { getPublicClient, getWalletClient, sleep } from '@raylac/shared';
-import { fundAddress, getTestClient } from '../lib/utils';
+import {
+  anvil1,
+  getPublicClient,
+  getWalletClient,
+  sleep,
+} from '@raylac/shared';
+import { getTestClient } from '../lib/utils';
 
-const chain = anvil;
+const chain = anvil1;
 
 const waitForBlockSync = async (blockHash: Hex) => {
   const timeoutAt = Date.now() + 20 * 1000;
@@ -27,7 +32,7 @@ const waitForBlockSync = async (blockHash: Hex) => {
   }
 };
 
-const testClient = getTestClient();
+const testClient = getTestClient({ chainId: chain.id });
 const publicClient = getPublicClient({ chainId: chain.id });
 
 const deleteBlocks = async () => {
@@ -57,9 +62,9 @@ const sendTransaction = async () => {
 
 describe.skip('syncBlocks', () => {
   beforeAll(async () => {
-    await fundAddress({
+    await testClient.setBalance({
       address: TEST_ADDRESS,
-      amount: parseEther('1000'),
+      value: parseEther('1000'),
     });
   });
 

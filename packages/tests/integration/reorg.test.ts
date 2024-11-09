@@ -1,9 +1,5 @@
 import { beforeAll, describe, expect, test } from 'vitest';
-import {
-  createStealthAccountForTestUser,
-  fundAddress,
-  getTestClient,
-} from '../lib/utils';
+import { createStealthAccountForTestUser, getTestClient } from '../lib/utils';
 import { Address, Hex, parseEther, zeroAddress } from 'viem';
 import { sync } from '@raylac/sync';
 import { anvil } from 'viem/chains';
@@ -19,37 +15,9 @@ import {
   sleep,
 } from '@raylac/shared';
 import { TEST_ACCOUNT_MNEMONIC } from '../lib/auth';
+import { anvil1 } from '@raylac/shared/src/devChains';
 
-const testClient = getTestClient();
-
-/*
-const waitForIncomingSync = async (txHash: Hex) => {
-  const timeout = setTimeout(() => {
-    throw new Error('Timeout waiting for incoming sync');
-  }, 10000);
-
-  while (true) {
-    const authedClient = await getAuthedClient();
-
-    const transferHistory = await authedClient.getTransferHistory.query({
-      take: 1,
-      includeAnvil: true,
-    });
-
-    if (transferHistory.length === 0) {
-      await sleep(3000);
-      continue;
-    }
-
-    if (transferHistory[0].hash === txHash) {
-      clearTimeout(timeout);
-      return;
-    }
-
-    await sleep(3000);
-  }
-};
-*/
+const testClient = getTestClient({ chainId: anvil1.id });
 
 const isTxRemoved = async (txHash: Hex) => {
   const timeout = Date.now() + 20000;
@@ -90,7 +58,10 @@ describe('reorg', () => {
   const sender = zeroAddress;
   beforeAll(async () => {
     // Fund the sender address
-    await fundAddress({ address: sender, amount: parseEther('1') });
+    await testClient.setBalance({
+      address: sender,
+      value: parseEther('1'),
+    });
   });
 
   test('should handle a reorg for incoming transfers correctly', async () => {
@@ -117,8 +88,8 @@ describe('reorg', () => {
 
     await testClient.mine({ blocks: 1 });
 
-    const gasInfo = await getGasInfo({
-      chainIds: [anvil.id],
+    const [gasInfo] = await getGasInfo({
+      chainIds: [anvil1.id],
     });
 
     const userOp = buildUserOp({
@@ -150,7 +121,7 @@ describe('reorg', () => {
       viewingPrivKey,
     });
 
-    const txHash = await authedClient.submitUserOps.mutate({
+    const [txHash] = await authedClient.submitUserOps.mutate({
       userOps: [signedUserOp],
     });
 

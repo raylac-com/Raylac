@@ -1,6 +1,5 @@
-import { anvil } from 'viem/chains';
 import prisma from '../lib/prisma';
-import { supportedChains } from '@raylac/shared';
+import { devChains, supportedChains } from '@raylac/shared';
 
 /**
  * Get the transaction history of all stealth addresses for a user
@@ -19,105 +18,112 @@ const getTransferHistory = async ({
   const chainIds = supportedChains.map(chain => chain.id);
 
   if (includeAnvil) {
-    chainIds.push(anvil.id);
+    chainIds.push(...devChains.map(c => c.id));
   }
 
-  const transactions = await prisma.transaction.findMany({
+  const transfers = await prisma.userAction.findMany({
     select: {
-      block: {
+      transactions: {
         select: {
-          number: true,
-          timestamp: true,
-        },
-      },
-      userOps: {
-        select: {
-          tokenPriceAtOp: true,
-        },
-      },
-      traces: {
-        select: {
-          tokenId: true,
           chainId: true,
-          traceAddress: true,
-          tokenPriceAtTrace: true,
-          UserStealthAddressFrom: {
+          block: {
             select: {
-              userId: true,
-              address: true,
-              user: {
-                select: {
-                  spendingPubKey: true,
-                  name: true,
-                  profileImage: true,
-                },
-              },
+              number: true,
+              timestamp: true,
             },
           },
-          UserStealthAddressTo: {
+          userOps: {
             select: {
-              userId: true,
-              address: true,
-              user: {
-                select: {
-                  spendingPubKey: true,
-                  name: true,
-                  profileImage: true,
-                },
-              },
+              tokenPriceAtOp: true,
             },
           },
-          from: true,
-          to: true,
-          amount: true,
-          transactionHash: true,
-        },
-      },
-      hash: true,
-    },
-    where: {
-      OR: [
-        {
           traces: {
-            some: {
+            select: {
+              tokenId: true,
+              chainId: true,
+              traceAddress: true,
+              tokenPriceAtTrace: true,
               UserStealthAddressFrom: {
-                userId,
+                select: {
+                  userId: true,
+                  address: true,
+                  user: {
+                    select: {
+                      spendingPubKey: true,
+                      name: true,
+                      profileImage: true,
+                    },
+                  },
+                },
               },
-            },
-          },
-        },
-        {
-          traces: {
-            some: {
               UserStealthAddressTo: {
-                userId,
+                select: {
+                  userId: true,
+                  address: true,
+                  user: {
+                    select: {
+                      spendingPubKey: true,
+                      name: true,
+                      profileImage: true,
+                    },
+                  },
+                },
               },
+              from: true,
+              to: true,
+              amount: true,
+              transactionHash: true,
             },
           },
+          hash: true,
         },
-      ],
-      chainId: { in: chainIds },
-    },
-    orderBy: {
-      block: {
-        number: 'desc',
+        where: {
+          OR: [
+            {
+              traces: {
+                some: {
+                  UserStealthAddressFrom: {
+                    userId,
+                  },
+                },
+              },
+            },
+            {
+              traces: {
+                some: {
+                  UserStealthAddressTo: {
+                    userId,
+                  },
+                },
+              },
+            },
+          ],
+          chainId: { in: chainIds },
+        },
       },
+      timestamp: true,
     },
     take,
     skip,
+    orderBy: {
+      timestamp: 'desc',
+    },
   });
 
   // Filter out the traces that are not to the user's stealth address
-  const filteredTransactions = transactions.map(tx => {
-    return {
-      ...tx,
-      traces: tx.traces.filter(
-        trace =>
-          trace.UserStealthAddressTo?.userId === userId ||
-          trace.UserStealthAddressFrom?.userId === userId
-      ),
-    };
-  });
+  const filteredTransactions = transfers.map(transfer => ({
+    ...transfer,
+    transactions: transfer.transactions.map(tx => {
+      return {
+        ...tx,
+        traces: tx.traces.filter(
+          trace =>
+            trace.UserStealthAddressTo?.userId === userId ||
+            trace.UserStealthAddressFrom?.userId === userId
+        ),
+      };
+    }),
+  }));
 
   return filteredTransactions;
 };

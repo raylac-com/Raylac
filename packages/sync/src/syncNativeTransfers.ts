@@ -1,5 +1,6 @@
 import {
   bigIntMin,
+  devChains,
   getChainName,
   getNativeTransferTracesInBlock,
   getPublicClient,
@@ -15,7 +16,7 @@ import {
   upsertTransaction,
   waitForAnnouncementsBackfill,
 } from './utils';
-import { anvil, base, optimism } from 'viem/chains';
+import { base, optimism } from 'viem/chains';
 import { getTokenPriceAtTime } from './lib/coingecko';
 import { logger } from '@raylac/shared-backend';
 const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
@@ -93,9 +94,12 @@ const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
       });
     }
 
-    // On Anvil, update on every block
+    const devChainIds = devChains.map(c => c.id);
+    const isDevChain = devChainIds.includes(chainId);
+
+    // Update on every block on dev chains
     // On other chains, update every 10 blocks
-    if (chainId === anvil.id || Number(blockNumber) % 10 === 0) {
+    if (isDevChain || Number(blockNumber) % 10 === 0) {
       await updateAddressesSyncStatus({
         addresses: addresses.map(address => address.address as Hex),
         chainId,

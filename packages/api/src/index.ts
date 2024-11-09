@@ -71,13 +71,13 @@ export const appRouter = router({
     .mutation(async opts => {
       const { input } = opts;
 
-      const txHash = await submitUserOps({
+      const txHashes = await submitUserOps({
         userId: opts.ctx.userId,
         userOps: input.userOps as UserOperation[],
         tokenPrice: input.tokenPrice,
       });
 
-      return txHash;
+      return txHashes;
     }),
 
   /**

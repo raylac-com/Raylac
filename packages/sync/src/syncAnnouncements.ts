@@ -1,5 +1,6 @@
 import {
   bigIntMax,
+  devChains,
   ERC5564_ANNOUNCER_ADDRESS,
   ERC5564_SCHEME_ID,
   getSenderAddressV2,
@@ -16,7 +17,6 @@ import processLogs from './processLogs';
 import { decodeEventLog, Hex, Log, parseAbi } from 'viem';
 import { ERC5564Announcement, Prisma, SyncJob } from '@raylac/db';
 import { supportedTokens } from '@raylac/shared';
-import { anvil } from 'viem/chains';
 import { getChainName } from '@raylac/shared';
 import { logger } from '@raylac/shared-backend';
 const SCAN_PAST_BUFFER = 2 * 60 * 1000; // 2 minutes
@@ -40,7 +40,10 @@ const createSyncTaskForChain = async ({
 
   let fromBlock;
 
-  if (announcement.chainId === anvil.id) {
+  const devChainIds = devChains.map(c => c.id);
+  const isDevChain = devChainIds.includes(chainId);
+
+  if (isDevChain) {
     fromBlock =
       announcement.blockNumber !== 0n ? announcement.blockNumber - 1n : 0n;
   } else {

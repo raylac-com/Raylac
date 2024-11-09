@@ -1,12 +1,24 @@
 import { Prisma, SyncJob } from '@raylac/db';
-import { anvil, arbitrum, base, optimism, polygon, scroll } from 'viem/chains';
+import { arbitrum, base, optimism, polygon, scroll } from 'viem/chains';
 import prisma from './lib/prisma';
-import { Hex, parseAbiItem, ParseEventLogsReturnType } from 'viem';
 import {
+  decodeEventLog,
+  decodeFunctionData,
+  Hex,
+  Log,
+  parseAbiItem,
+  ParseEventLogsReturnType,
+} from 'viem';
+import {
+  anvil1,
+  anvil2,
   bigIntMin,
+  EntryPointAbi,
   ERC20Abi,
   getChainName,
   getPublicClient,
+  RaylacAccountExecuteArgs,
+  RaylacAccountV2Abi,
   sleep,
 } from '@raylac/shared';
 import { logger } from '@raylac/shared-backend';
@@ -19,7 +31,10 @@ export const RAYLAC_DEPLOYED_BLOCK: {
   [key: number]: bigint;
 } = {
   [base.id]: BigInt(22047405),
-  [anvil.id]: BigInt(0), // It's 0 on anvil before we deploy the contracts right after starting the chain
+
+  // It's 0s on dev chains because we deploy the contracts right after starting the chain
+  [anvil1.id]: BigInt(0),
+  [anvil2.id]: BigInt(0),
 };
 
 /**
@@ -213,9 +228,43 @@ export const upsertTransaction = async ({
     return;
   }
 
-  const tx = await client.getTransactionReceipt({
+  const tx = await client.getTransaction({
     hash: txHash,
   });
+
+  const handleOpsInput = decodeFunctionData({
+    abi: EntryPointAbi,
+    data: tx.input,
+  });
+
+  let tag: Hex = '0x';
+  if (handleOpsInput.functionName === 'handleOps') {
+    const userOps = handleOpsInput.args[0];
+
+    const executeArgs: RaylacAccountExecuteArgs[] = [];
+
+    for (const userOp of userOps) {
+      const data = decodeFunctionData({
+        abi: RaylacAccountV2Abi,
+        data: userOp.callData,
+      });
+
+      if (data.functionName === 'execute') {
+        executeArgs.push({
+          to: data.args[0],
+          value: data.args[1],
+          data: data.args[2],
+          tag: data.args[3],
+        });
+      }
+    }
+
+    // Check that all execute calls has the same tag
+    if (!executeArgs.some(arg => arg.tag !== executeArgs[0].tag)) {
+      // All execute calls have the same tag
+      tag = executeArgs[0].tag;
+    }
+  }
 
   const blockTimestamp = await getBlockTimestamp({
     chainId,
@@ -243,11 +292,76 @@ export const upsertTransaction = async ({
     toAddress: tx.to,
     chainId,
     blockHash: tx.blockHash,
+    tag,
   };
 
+  // We use `createMany` instead of `upsert` because,
+  // because `upsert` occasionally fails with a unique constraint error. (This is likely due to upserts being run in parallel)
   await prisma.transaction.createMany({
     data: [data],
     skipDuplicates: true,
+  });
+};
+
+/**
+ * Upsert a `UserOperationEvent` log to the database.
+ * This function expects that the corresponding `Transaction` has already been created in the database.
+ */
+export const upsertUserOpEventLog = async ({
+  log,
+  chainId,
+}: {
+  log: Log<bigint, number, false>;
+  chainId: number;
+}) => {
+  const decodedLog = decodeEventLog({
+    abi: EntryPointAbi,
+    data: log.data,
+    topics: log.topics,
+  });
+
+  if (decodedLog.eventName !== 'UserOperationEvent') {
+    throw new Error('Event name is not `UserOperationEvent`');
+  }
+
+  const { args } = decodedLog;
+
+  const txHash = log.transactionHash;
+
+  const userOpHash = args.userOpHash;
+  const sender = args.sender;
+  const paymaster = args.paymaster;
+  const nonce = args.nonce;
+  const success = args.success;
+  const actualGasCost = args.actualGasCost;
+  const actualGasUsed = args.actualGasUsed;
+
+  const data: Prisma.UserOperationCreateInput = {
+    chainId,
+    hash: userOpHash,
+    UserStealthAddress: {
+      connect: {
+        address: sender,
+      },
+    },
+    paymaster,
+    nonce: Number(nonce),
+    success,
+    actualGasCost,
+    actualGasUsed,
+    Transaction: {
+      connect: {
+        hash: txHash,
+      },
+    },
+  };
+
+  await prisma.userOperation.upsert({
+    create: data,
+    update: data,
+    where: {
+      hash: userOpHash,
+    },
   });
 };
 
@@ -274,7 +388,8 @@ export const CHAIN_BLOCK_TIME: Record<number, number> = {
   [optimism.id]: 2000,
   [scroll.id]: 3000,
   [polygon.id]: 2000,
-  [anvil.id]: 250,
+  [anvil1.id]: 250,
+  [anvil2.id]: 250,
 };
 
 export const CHAIN_GENESIS_BLOCK_TIME: Record<number, number> = {

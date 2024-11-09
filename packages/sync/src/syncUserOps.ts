@@ -1,76 +1,29 @@
 import {
   ENTRY_POINT_ADDRESS,
-  EntryPointAbi,
   RAYLAC_PAYMASTER_V2_ADDRESS,
   sleep,
 } from '@raylac/shared';
-import { decodeEventLog, Log, parseAbiItem } from 'viem';
-import prisma from './lib/prisma';
-import { upsertTransaction } from './utils';
-import { Prisma } from '@raylac/db';
+import { Log, parseAbiItem } from 'viem';
+import { upsertTransaction, upsertUserOpEventLog } from './utils';
 import processLogs from './processLogs';
 
 const userOpEvent = parseAbiItem(
   'event UserOperationEvent(bytes32 indexed userOpHash, address indexed sender, address indexed paymaster, uint256 nonce, bool success, uint256 actualGasCost, uint256 actualGasUsed)'
 );
 
-export const handleUserOpEvent = async ({
+const handleUserOpEvent = async ({
   log,
   chainId,
 }: {
   log: Log<bigint, number, false>;
   chainId: number;
 }) => {
-  const decodedLog = decodeEventLog({
-    abi: EntryPointAbi,
-    data: log.data,
-    topics: log.topics,
-  });
-
-  if (decodedLog.eventName !== 'UserOperationEvent') {
-    throw new Error('Event name is not `UserOperationEvent`');
-  }
-
-  const { args } = decodedLog;
-
-  const txHash = log.transactionHash;
-
-  const userOpHash = args.userOpHash;
-  const sender = args.sender;
-  const paymaster = args.paymaster;
-  const nonce = args.nonce;
-  const success = args.success;
-  const actualGasCost = args.actualGasCost;
-  const actualGasUsed = args.actualGasUsed;
-
   await upsertTransaction({
-    txHash,
+    txHash: log.transactionHash,
     chainId,
   });
 
-  const data: Prisma.UserOperationCreateInput = {
-    chainId,
-    hash: userOpHash,
-    sender,
-    paymaster,
-    nonce: Number(nonce),
-    success,
-    actualGasCost,
-    actualGasUsed,
-    Transaction: {
-      connect: {
-        hash: txHash,
-      },
-    },
-  };
-
-  await prisma.userOperation.upsert({
-    create: data,
-    update: data,
-    where: {
-      hash: userOpHash,
-    },
-  });
+  await upsertUserOpEventLog({ log, chainId });
 };
 
 /**

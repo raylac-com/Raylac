@@ -1,5 +1,6 @@
 import { Hex } from 'viem';
 import {
+  anvil1,
   encodeERC5564Metadata,
   ERC5564_ANNOUNCEMENT_CHAIN,
   ERC5564_ANNOUNCER_ADDRESS,
@@ -11,7 +12,6 @@ import {
 } from '@raylac/shared';
 import { privateKeyToAccount } from 'viem/accounts';
 import { logger } from '@raylac/shared-backend';
-import { anvil } from 'viem/chains';
 
 const ANNOUNCER_PRIVATE_KEY = process.env.ANNOUNCER_PRIVATE_KEY;
 
@@ -43,7 +43,7 @@ export const announce = async ({
   }
 
   const walletClient = getWalletClient({
-    chainId: useAnvil ? anvil.id : ERC5564_ANNOUNCEMENT_CHAIN.id,
+    chainId: useAnvil ? anvil1.id : ERC5564_ANNOUNCEMENT_CHAIN.id,
   });
 
   try {

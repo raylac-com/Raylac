@@ -3,6 +3,7 @@ import {
   Chain,
   decodeFunctionData,
   formatUnits,
+  fromHex,
   getAddress,
   Hex,
   parseUnits,
@@ -21,12 +22,12 @@ import * as chains from 'viem/chains';
 import { supportedTokens, NATIVE_TOKEN_ADDRESS } from './supportedTokens';
 import { getPublicClient } from './ethRpc';
 import {
+  devChains,
   getERC20TokenBalance,
   getMaxPriorityFeePerGas,
   traceBlockByNumber,
 } from '.';
 import axios from 'axios';
-import { anvil } from 'viem/chains';
 
 export const encodeERC5564Metadata = (viewTag: Hex): Hex => {
   if (viewTag.length !== 4) {
@@ -181,20 +182,44 @@ export const decodeUserOpCalldata = (userOp: UserOperation) => {
     throw new Error("Function name must be 'execute'");
   }
 
-  const [to, value, data] = args;
+  const [to, value, data, tag] = args;
 
   return {
     to: getAddress(to),
     value,
     data,
+    tag,
   };
+};
+
+/**
+ * Decode the `tag` argument in the `execute` function of RaylacAccount.sol
+ */
+export const decodeUserOperationTag = (
+  tag: Hex
+): {
+  groupTag: Hex;
+  groupSize: number;
+} => {
+  if (tag === '0x') {
+    return { groupTag: '0x', groupSize: 1 };
+  }
+
+  const tagRaw = tag.replace('0x', '');
+  // The first 32 bytes are the grouping tag
+  const groupTag = `0x${tagRaw.slice(0, 64)}` as Hex;
+
+  // The last 2 bytes are the group size
+  const groupSize = fromHex(`0x${tagRaw.slice(64, 68)}`, 'number');
+
+  return { groupTag, groupSize };
 };
 
 /**
  * Returns viem's `Chain` object from a chain ID
  */
 export const getChainFromId = (chainId: number): Chain => {
-  const chain = Object.entries(chains).find(
+  const chain = Object.entries([...Object.values(chains), ...devChains]).find(
     ([_, chain]) => chain.id === chainId
   );
 
@@ -490,7 +515,9 @@ export const getNativeTransferTracesInBlock = async ({
     blockNumber,
   });
 
-  if (chainId === anvil.id) {
+  const devChainIds = devChains.map(c => c.id);
+
+  if (devChainIds.includes(chainId)) {
     const callsWithValues = (
       traceBlockResult as AnvilBlockTraceResponse
     ).filter(tx => tx.action.callType === 'call' && tx.action.value !== '0x0');

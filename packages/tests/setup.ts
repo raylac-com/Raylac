@@ -2,8 +2,10 @@ import 'dotenv/config';
 import {
   ACCOUNT_FACTORY_V2_ADDRESS,
   ACCOUNT_IMPL_V2_ADDRESS,
+  devChains,
   ENTRY_POINT_ADDRESS,
   ERC5564_ANNOUNCER_ADDRESS,
+  getChainName,
   getPublicClient,
   getSpendingPrivKey,
   getViewingPrivKey,
@@ -25,7 +27,7 @@ import {
   SENDER_CREATOR_BYTECODE,
 } from './lib/bytecode';
 import { parseEther } from 'viem';
-import { anvil } from 'viem/chains';
+import { logger } from '../shared-backend/out';
 
 const TEST_USER_NAME = 'Test User';
 const TEST_USER_USERNAME = 'testuser';
@@ -69,8 +71,9 @@ const BUNDLER_ADDRESS = '0x9D3224743435d058f4B17Da29E8673DceD1768E7';
 
 const ANNOUNCER_ADDRESS = '0x44B31836e77E74b2dA2E5B81967BB17e5b69ED5A';
 
-const initAnvilState = async () => {
-  const testClient = getTestClient();
+const initDevChainState = async ({ chainId }: { chainId: number }) => {
+  logger.info(`Initializing state for ${getChainName(chainId)}`);
+  const testClient = getTestClient({ chainId });
 
   const authedClient = await getAuthedClient();
 
@@ -114,7 +117,7 @@ const initAnvilState = async () => {
 
   // Deposit funds to the EntryPoint
 
-  const walletClient = getWalletClient({ chainId: anvil.id });
+  const walletClient = getWalletClient({ chainId });
 
   // Fund the bundler
   await testClient.setBalance({
@@ -128,7 +131,7 @@ const initAnvilState = async () => {
     value: parseEther('1'),
   });
 
-  const publicClient = getPublicClient({ chainId: anvil.id });
+  const publicClient = getPublicClient({ chainId });
 
   // Deposit funds to the paymaster
   await testClient.impersonateAccount({ address: ANNOUNCER_ADDRESS });
@@ -159,7 +162,9 @@ const setup = async () => {
   // eslint-disable-next-line no-console
   console.log(`RPC_URL ${process.env.RPC_URL}`);
   // eslint-disable-next-line no-console
-  console.log(`ANVIL_RPC_URL ${process.env.ANVIL_RPC_URL}`);
+  console.log(`ANVIL_1_RPC_URL ${process.env.ANVIL_1_RPC_URL}`);
+  // eslint-disable-next-line no-console
+  console.log(`ANVIL_2_RPC_URL ${process.env.ANVIL_2_RPC_URL}`);
 
   // Wait for the server to get ready
   await waitForServer();
@@ -174,7 +179,10 @@ const setup = async () => {
     await signUpTestUser();
   }
 
-  await initAnvilState();
+  // Initialize the state for all dev chains
+  await Promise.all(
+    devChains.map(chain => initDevChainState({ chainId: chain.id }))
+  );
 };
 
 await setup();

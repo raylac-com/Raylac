@@ -2,32 +2,36 @@ import { webcrypto } from 'node:crypto';
 import {
   ERC20Abi,
   generateStealthAddressV2,
+  getDevChainRpcUrl,
   getPublicClient,
+  getSpendingPrivKey,
   getTokenAddressOnChain,
-  getWalletClient,
+  getViewingPrivKey,
+  RAYLAC_PAYMASTER_V2_ADDRESS,
+  signUserOpWithStealthAccount,
   sleep,
   StealthAddressWithEphemeral,
   supportedTokens,
   toCoingeckoTokenId,
+  UserActionType,
+  UserOperation,
 } from '@raylac/shared';
-import { createTestClient, Hex, http, parseUnits } from 'viem';
+import { createTestClient, Hex, http, parseUnits, toHex } from 'viem';
 import { anvil } from 'viem/chains';
 import { client, getAuthedClient, getTestUserId } from './rpc';
+import { TEST_ACCOUNT_MNEMONIC } from './auth';
+import { encodePaymasterAndData } from '@raylac/shared/src/utils';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 
-export const getTestClient = () => {
-  const ANVIL_RPC_URL = process.env.ANVIL_RPC_URL;
-
-  if (!ANVIL_RPC_URL) {
-    throw new Error('ANVIL_RPC_URL is not set');
-  }
+export const getTestClient = ({ chainId }: { chainId: number }) => {
+  const rpcUrl = getDevChainRpcUrl({ chainId });
 
   return createTestClient({
     mode: 'anvil',
     chain: anvil,
-    transport: http(ANVIL_RPC_URL),
+    transport: http(rpcUrl),
   });
 };
 
@@ -99,44 +103,6 @@ export const getAddressBalance = async ({
 };
 
 /**
- * Fund an address with a given amount of ETH.
- * This only works on anvil (obviously)
- */
-export const fundAddress = async ({
-  address,
-  amount,
-}: {
-  address: Hex;
-  amount: bigint;
-}) => {
-  const testClient = getTestClient();
-  await testClient.setBalance({ address, value: amount });
-};
-
-/**
- * Impersonate an address and send the given amount of ETH to the given address
- */
-export const impersonateAndSend = async ({
-  from,
-  to,
-  amount,
-}: {
-  from: Hex;
-  to: Hex;
-  amount: bigint;
-}): Promise<Hex> => {
-  const testClient = getTestClient();
-  await testClient.impersonateAccount({ address: from });
-  const walletClient = getWalletClient({ chainId: anvil.id });
-
-  return await walletClient.sendTransaction({
-    account: from,
-    to,
-    value: amount,
-  });
-};
-
-/**
  * Get the `User` object for the test user
  */
 export const getTestUser = async () => {
@@ -181,6 +147,54 @@ export const createStealthAccountForTestUser = async ({
   });
 
   return newStealthAccount;
+};
+
+/**
+ * Sign a user operation with the paymaster account
+ * This function calls the paymaster signUserOp endpoint to get the paymaster signature,
+ * and sets the `paymasterAndData` field on the user operation
+ */
+export const signUserOpWithPaymasterAccount = async ({
+  userOp,
+}: {
+  userOp: UserOperation;
+}) => {
+  const authedClient = await getAuthedClient();
+  const paymasterSignedUserOp = await authedClient.paymasterSignUserOp.mutate({
+    userOp,
+  });
+
+  const paymasterAndData = encodePaymasterAndData({
+    paymaster: RAYLAC_PAYMASTER_V2_ADDRESS,
+    data: paymasterSignedUserOp,
+  });
+  userOp.paymasterAndData = paymasterAndData;
+
+  return userOp;
+};
+
+/**
+ * Sign a user operation with the test user's stealth account
+ */
+export const signUserOpWithTestUserAccount = async ({
+  userOp,
+  stealthAccount,
+}: {
+  userOp: UserOperation;
+  stealthAccount: StealthAddressWithEphemeral;
+}) => {
+  const spendingPrivKey = getSpendingPrivKey(TEST_ACCOUNT_MNEMONIC);
+  const viewingPrivKey = getViewingPrivKey(TEST_ACCOUNT_MNEMONIC);
+
+  // Sign the user operation with the stealth account
+  const signedUserOp = await signUserOpWithStealthAccount({
+    userOp,
+    stealthAccount,
+    spendingPrivKey,
+    viewingPrivKey,
+  });
+
+  return signedUserOp;
 };
 
 /**
@@ -248,4 +262,29 @@ export const waitFor = async ({
     if (Date.now() > timeoutMs) throw new Error(`Timeout waiting for ${label}`);
     await sleep(interval);
   }
+};
+
+export const getUserActionTag = ({
+  groupTag,
+  groupSize,
+  userActionType,
+}: {
+  groupTag: Hex;
+  groupSize: number;
+  userActionType: UserActionType;
+}) => {
+  if (groupSize < 1 || groupSize > 255) {
+    throw new Error('Group size must be between 1 and 255');
+  }
+
+  if (groupTag.replace('0x', '').length !== 64) {
+    throw new Error('Group tag must be 32 bytes');
+  }
+
+  const groupSizeHex = toHex(groupSize, { size: 2 }).replace('0x', '');
+  const userActionTypeHex = userActionType.replace('0x', '');
+
+  const tag = `${groupTag}${groupSizeHex}${userActionTypeHex}` as Hex;
+
+  return tag;
 };

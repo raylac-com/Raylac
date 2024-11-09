@@ -74,6 +74,8 @@ model UserStealthAddress {
   signerAddress   String
   label           String?
 
+  userOps UserOperation[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -128,6 +130,10 @@ model Transaction {
 
   userOps UserOperation[]
   traces  Trace[]
+  tag     String?
+
+  UserAction   UserAction? @relation(fields: [userActionId], references: [id])
+  userActionId Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -147,6 +153,8 @@ model UserOperation {
 
   Transaction     Transaction? @relation(fields: [transactionHash], references: [hash])
   transactionHash String?
+
+  UserStealthAddress UserStealthAddress? @relation(fields: [sender], references: [address])
 }
 
 enum SyncJob {
@@ -177,4 +185,19 @@ model Block {
   Transaction Transaction[]
 
   @@unique([number, chainId])
+}
+
+model UserAction {
+  id Int @id @default(autoincrement())
+
+  groupTag     String?
+  groupSize    Int
+  transactions Transaction[]
+
+  txHashes String[] @unique
+
+  timestamp BigInt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
