@@ -18,6 +18,7 @@ env:
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
   RPC_URL: https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com
 
+
 jobs:
   setup-preview:
     name: Setup EAS preview
@@ -134,4 +135,6 @@ jobs:
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           ANVIL_RPC_URL: https://anvil-pr-${{ github.event.pull_request.number }}.onrender.com
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
 
