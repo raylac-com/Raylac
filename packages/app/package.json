@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "main": "./index.js",
   "scripts": {
-    "build": "pnpm i",
     "start": "expo start -c",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "tsc --noEmit",
+    "lint": "eslint . & tsc --noEmit",
     "check-i18n": "sync-i18n --files 'src/translations/*.json' --primary en --languages ja --space 1 --check"
   },
   "dependencies": {

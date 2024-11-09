@@ -1,5 +1,4 @@
-import * as winston from 'winston';
-import { Prisma, SyncJob } from '@prisma/client';
+import { Prisma, SyncJob } from '@raylac/db';
 import { anvil, arbitrum, base, optimism, polygon, scroll } from 'viem/chains';
 import prisma from './lib/prisma';
 import { Hex, parseAbiItem, ParseEventLogsReturnType } from 'viem';
@@ -10,6 +9,7 @@ import {
   getPublicClient,
   sleep,
 } from '@raylac/shared';
+import { logger } from '@raylac/shared-backend';
 
 export const announcementAbiItem = parseAbiItem(
   'event Announcement(uint256 indexed schemeId, address indexed stealthAddress, address indexed caller, bytes viewTag, bytes ephemeralPubKey)'
@@ -250,39 +250,6 @@ export const upsertTransaction = async ({
     skipDuplicates: true,
   });
 };
-
-const DATADOG_API_KEY = process.env.DATADOG_API_KEY;
-
-const SERVICE_NAME = 'raylac-sync';
-
-const httpTransportOptions = {
-  host: 'http-intake.logs.ap1.datadoghq.com',
-  path: `/api/v2/logs?dd-api-key=${DATADOG_API_KEY}&ddsource=nodejs&service=${SERVICE_NAME}`,
-  ssl: true,
-};
-
-const useDatadog = !!DATADOG_API_KEY;
-
-if (useDatadog) {
-  console.log('Sending logs to Datadog');
-}
-
-export const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL ?? 'info',
-  format: useDatadog
-    ? winston.format.json()
-    : winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      ),
-  exitOnError: false,
-  transports: useDatadog
-    ? [
-        new winston.transports.Http(httpTransportOptions),
-        new winston.transports.Console(),
-      ]
-    : [new winston.transports.Console()],
-});
 
 export const getApproxChainBlockTime = async (
   chainId: number

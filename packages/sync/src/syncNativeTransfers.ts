@@ -8,17 +8,16 @@ import {
 } from '@raylac/shared';
 import prisma from './lib/prisma';
 import { getAddress, Hex, hexToBigInt, toHex } from 'viem';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@raylac/db';
 import {
   getBlockTimestamp,
-  logger,
   updateAddressesSyncStatus,
   upsertTransaction,
   waitForAnnouncementsBackfill,
 } from './utils';
 import { anvil, base, optimism } from 'viem/chains';
 import { getTokenPriceAtTime } from './lib/coingecko';
-
+import { logger } from '@raylac/shared-backend';
 const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
   const addressSyncStatuses = await prisma.addressSyncStatus.findMany({
     select: {

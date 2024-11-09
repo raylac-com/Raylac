@@ -29,6 +29,7 @@ const getTokenPrice = async (tokenId: string) => {
   }
 
   const tokenPrices = await client.getTokenPrices.query();
+
   const price = tokenPrices[toCoingeckoTokenId(tokenId)];
 
   if (price === undefined) {

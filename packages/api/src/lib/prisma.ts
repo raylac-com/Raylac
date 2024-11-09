@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-import { logger } from '../utils';
+import { PrismaClient } from '@raylac/db';
+import { logger } from '@raylac/shared-backend';
 
 const prisma = new PrismaClient().$extends({
   query: {

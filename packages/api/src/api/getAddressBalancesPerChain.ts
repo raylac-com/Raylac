@@ -1,10 +1,10 @@
 import prisma from '../lib/prisma';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@raylac/db';
 import {
   AccountBalancePerChainQueryResult,
   supportedChains,
 } from '@raylac/shared';
-import { logger } from '../utils';
+import { logger } from '@raylac/shared-backend';
 import { anvil } from 'viem/chains';
 
 /**

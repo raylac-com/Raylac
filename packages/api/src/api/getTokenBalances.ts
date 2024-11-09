@@ -1,5 +1,5 @@
 import prisma from '../lib/prisma';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '@raylac/db';
 import { supportedChains, TokenBalanceQueryResult } from '@raylac/shared';
 
 /**

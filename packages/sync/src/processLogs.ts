@@ -1,7 +1,7 @@
 import { getPublicClient } from '@raylac/shared';
 import { AbiEvent, GetLogsReturnType, Hex } from 'viem';
 import { getFromBlock, updateJobLatestSyncedBlock } from './utils';
-import { SyncJob } from '@prisma/client';
+import { SyncJob } from '@raylac/db';
 
 const processLogs = async ({
   chainId,
