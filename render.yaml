@@ -31,7 +31,7 @@ services:
         fromService:
           name: anvil
           type: web
-          property: host
+          envVarKey: RENDER_EXTERNAL_URL
   - type: worker
     name: raylac-sync
     plan: standard
