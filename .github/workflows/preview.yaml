@@ -137,3 +137,4 @@ jobs:
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           ANVIL_RPC_URL: https://anvil-pr-${{ github.event.pull_request.number }}.onrender.com
+          TEST_ACCOUNT_MNEMONIC: ${{ secrets.TEST_ACCOUNT_MNEMONIC }}
