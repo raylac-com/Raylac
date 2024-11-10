@@ -54,8 +54,8 @@ const signUpTestUser = async () => {
  */
 const waitForRpcServer = async () => {
   await waitFor({
-    interval: 500,
-    timeout: 10000,
+    interval: 1000,
+    timeout: 10 * 60 * 1000, // 10 minutes
     label: 'waiting for RPC server',
     fn: async () => {
       // Git commit to test against
@@ -86,8 +86,8 @@ const waitForIndexer = async () => {
   }
 
   await waitFor({
-    interval: 500,
-    timeout: 10000,
+    interval: 1000,
+    timeout: 10 * 60 * 1000, // 10 minutes
     label: 'waiting for indexer',
     fn: async () => {
       // Git commit to test against
