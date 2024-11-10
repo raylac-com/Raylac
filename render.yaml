@@ -32,7 +32,7 @@ services:
           name: anvil
           type: web
           envVarKey: RENDER_EXTERNAL_URL
-  - type: worker
+  - type: web
     name: raylac-sync
     plan: standard
     previewPlan: starter
@@ -60,6 +60,11 @@ services:
         fromDatabase:
           name: raylac
           property: connectionString
+      - key: ANVIL_RPC_URL
+        fromService:
+          name: anvil
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
   - type: web
     name: anvil
     plan: standard

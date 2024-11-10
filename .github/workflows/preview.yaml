@@ -136,3 +136,4 @@ jobs:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           ANVIL_RPC_URL: https://anvil-pr-${{ github.event.pull_request.number }}.onrender.com
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          INDEXER_URL: https://raylac-sync-pr-${{ github.event.pull_request.number }}.onrender.com
