@@ -78,6 +78,8 @@ describe('syncNativeTransfers', () => {
     // 1. Create {NUM_STEALTH_ADDRESSES} stealth addresses for testing
 
     const stealthAccountPromises: Promise<StealthAddressWithEphemeral>[] = [];
+    // 1. Create multiple stealth addresses for testing
+
     for (let i = 0; i < NUM_STEALTH_ADDRESSES; i++) {
       const account = createStealthAccountForTestUser({
         useAnvil: true,

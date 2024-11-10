@@ -399,6 +399,10 @@ export const appRouter = router({
         chainIds: input.chainIds,
       });
     }),
+
+  getGitCommit: publicProcedure.query(async () => {
+    return process.env.RENDER_GIT_COMMIT ?? '';
+  }),
 });
 
 export const createCaller = createCallerFactory(appRouter);

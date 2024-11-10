@@ -58,9 +58,15 @@ const waitForRpcServer = async () => {
     timeout: 10000,
     label: 'waiting for RPC server',
     fn: async () => {
+      // Git commit to test against
+      const GIT_COMMIT = process.env.GIT_COMMIT || '';
+
       try {
-        await client.getUsers.query();
-        return true;
+        const gitCommit = await client.getGitCommit.query();
+        // eslint-disable-next-line no-console
+        console.log(`waiting for RPC server: ${gitCommit} === ${GIT_COMMIT}`);
+
+        return gitCommit === GIT_COMMIT;
       } catch (_e: any) {
         logger.info('RPC server not ready yet, waiting...');
         return false;
@@ -84,10 +90,17 @@ const waitForIndexer = async () => {
     timeout: 10000,
     label: 'waiting for indexer',
     fn: async () => {
-      try {
-        await fetch(`${INDEXER_URL}/ping`);
+      // Git commit to test against
+      const GIT_COMMIT = process.env.GIT_COMMIT || '';
 
-        return true;
+      try {
+        const result = await fetch(`${INDEXER_URL}/git-commit`);
+        const gitCommit = await result.text();
+
+        // eslint-disable-next-line no-console
+        console.log(`waiting for indexer: ${gitCommit} === ${GIT_COMMIT}`);
+
+        return gitCommit === GIT_COMMIT;
       } catch (_e: any) {
         logger.info('Indexer not ready yet, waiting...');
         return false;

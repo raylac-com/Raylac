@@ -137,3 +137,4 @@ jobs:
           ANVIL_RPC_URL: https://anvil-pr-${{ github.event.pull_request.number }}.onrender.com
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
           INDEXER_URL: https://raylac-indexer-pr-${{ github.event.pull_request.number }}.onrender.com
+          GIT_COMMIT: ${{ github.event.pull_request.head.sha }}
