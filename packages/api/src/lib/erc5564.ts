@@ -9,7 +9,7 @@ import {
   getWalletClient,
   StealthAddressWithEphemeral,
 } from '@raylac/shared';
-import { privateKeyToAccount } from 'viem/accounts';
+import { privateKeyToAccount, nonceManager } from 'viem/accounts';
 import { logger } from '@raylac/shared-backend';
 import { anvil } from 'viem/chains';
 
@@ -19,7 +19,9 @@ if (!ANNOUNCER_PRIVATE_KEY) {
   throw new Error('ANNOUNCER_PRIVATE_KEY is required');
 }
 
-const announcerAccount = privateKeyToAccount(ANNOUNCER_PRIVATE_KEY as Hex);
+const announcerAccount = privateKeyToAccount(ANNOUNCER_PRIVATE_KEY as Hex, {
+  nonceManager,
+});
 
 export const announce = async ({
   stealthAccount,

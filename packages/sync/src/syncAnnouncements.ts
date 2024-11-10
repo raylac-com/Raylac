@@ -40,9 +40,8 @@ const createSyncTaskForChain = async ({
 
   let fromBlock;
 
-  if (announcement.chainId === anvil.id) {
-    fromBlock =
-      announcement.blockNumber !== 0n ? announcement.blockNumber - 1n : 0n;
+  if (chainId === anvil.id) {
+    fromBlock = 0n;
   } else {
     fromBlock = bigIntMax([
       announcement.blockNumber - BigInt(scanPastBufferBlocks),
@@ -84,6 +83,12 @@ const createSyncTasks = async ({
   const promises = [];
 
   for (const chainId of chainIds) {
+    if (announcement.chainId === anvil.id && chainId !== anvil.id) {
+      // We don't create sync tasks for production chains when the announcement
+      // is on the anvil chain
+      continue;
+    }
+
     promises.push(createSyncTaskForChain({ announcement, chainId }));
   }
 };
