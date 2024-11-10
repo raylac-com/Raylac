@@ -8,7 +8,7 @@ import {
   copyToClipboard,
   getAvatarAddress,
   getDisplayName,
-  getFinalTransfer,
+  getFinalTransfers,
   getProfileImage,
   getTransferType,
   getUsdTransferAmount,
@@ -87,38 +87,40 @@ const TraceListItem = ({ trace }: { trace: TraceItem }) => {
 };
 
 const TransferDetails = ({ route }: Props) => {
-  const { txHash } = route.params;
+  const { transferId } = route.params;
   const { data: signedInUser } = useSignedInUser();
   const [showTraces, setShowTraces] = useState(false);
 
   const { t } = useTranslation('TransferDetails');
 
   const { data: transferDetail } = trpc.getTransferDetails.useQuery({
-    txHash,
+    transferId,
   });
 
-  const blockTimestamp = new Date(
-    Number(transferDetail?.block?.timestamp) * 1000
-  );
+  const blockTimestamp = new Date(Number(transferDetail?.timestamp) * 1000);
 
-  const tokenId = transferDetail?.traces[0].tokenId;
+  const tokenId = transferDetail?.transactions[0].traces[0].tokenId;
 
   const tokenMeta = getTokenMetadata(tokenId);
 
-  if (!transferDetail) {
+  if (!transferDetail || transferDetail.transactions.length === 0) {
     return null;
   }
 
   const type = getTransferType(transferDetail, signedInUser.id);
 
-  const finalTransfer = getFinalTransfer(transferDetail);
+  const finalTransfers = getFinalTransfers(transferDetail);
 
-  const transferAmount = finalTransfer.amount as string;
+  const transferAmount = finalTransfers
+    .reduce((acc, curr) => acc + BigInt(curr.amount!), 0n)
+    .toString();
 
   const transferUsdAmount = getUsdTransferAmount(transferDetail);
 
-  const from = finalTransfer.UserStealthAddressFrom?.user || finalTransfer.from;
-  const to = finalTransfer.UserStealthAddressTo?.user || finalTransfer.to;
+  const from =
+    finalTransfers[0].UserStealthAddressFrom?.user || finalTransfers[0].from;
+  const to =
+    finalTransfers[0].UserStealthAddressTo?.user || finalTransfers[0].to;
 
   const avatarAddress =
     type === 'outgoing' ? getAvatarAddress(to) : getAvatarAddress(from);
@@ -245,9 +247,11 @@ const TransferDetails = ({ route }: Props) => {
               ? t('sentTo', { name: displayName })
               : t('receivedFrom', { name: displayName })}
           </Text>
-          {transferDetail.traces.map((trace, i) => (
-            <TraceListItem trace={trace} key={i} />
-          ))}
+          {transferDetail.transactions.map(tx => {
+            return tx.traces.map((trace, i) => (
+              <TraceListItem trace={trace} key={i} />
+            ));
+          })}
         </View>
       )}
     </ScrollView>

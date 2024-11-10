@@ -79,21 +79,24 @@ const upsertUserAction = async ({
     blockNumber: txReceipts[0].blockNumber,
   });
 
-  const txHashes = txReceipts.map(tx => tx.transactionHash);
+  const txHashes = txReceipts.map(tx => tx.transactionHash).sort();
 
   const data: Prisma.UserActionCreateInput = {
     timestamp: blockTimestamp,
     transactions: {
       connect: txHashes.map(hash => ({ hash })),
     },
-    txHashes: txHashes.sort(),
+    txHashes,
     groupTag,
     groupSize,
   };
 
-  await prisma.userAction.createMany({
-    data: [data],
-    skipDuplicates: true,
+  return await prisma.userAction.upsert({
+    where: {
+      txHashes,
+    },
+    update: data,
+    create: data,
   });
 };
 
@@ -363,7 +366,7 @@ const submitUserOps = async ({
   );
 
   // Create the `UserAction` record
-  await upsertUserAction({
+  const transfer = await upsertUserAction({
     userOps,
     txReceipts,
   });
@@ -376,7 +379,10 @@ const submitUserOps = async ({
     });
   }
 
-  return txReceipts.map(txReceipt => txReceipt.transactionHash);
+  return {
+    transferId: transfer.id,
+    txHashes: txReceipts.map(txReceipt => txReceipt.transactionHash),
+  };
 };
 
 export default submitUserOps;

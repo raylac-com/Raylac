@@ -22,7 +22,7 @@ BigInt.prototype.toJSON = function () {
 /**
  * Hook to build and send user operations
  */
-const useSend = () => {
+const useMultiChainSend = () => {
   const { mutateAsync: submitUserOps, error } =
     trpc.submitUserOps.useMutation();
 
@@ -80,6 +80,7 @@ const useSend = () => {
 
       const toAddress = typeof to === 'string' ? to : to.address;
 
+      // Choose the stealth accounts to use as inputs for the transfer
       const result = await buildMultiChainSendUserOps({
         amount: amount.toString(),
         tokenId,
@@ -118,4 +119,4 @@ const useSend = () => {
   });
 };
 
-export default useSend;
+export default useMultiChainSend;

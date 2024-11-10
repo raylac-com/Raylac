@@ -23,6 +23,7 @@ const getTransferHistory = async ({
 
   const transfers = await prisma.userAction.findMany({
     select: {
+      id: true,
       transactions: {
         select: {
           chainId: true,

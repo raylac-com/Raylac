@@ -26,7 +26,8 @@ const TransferHistory = () => {
           <TransferHistoryListItem
             transfer={item}
             type={
-              item.traces[0].UserStealthAddressFrom?.userId === signedInUser?.id
+              item.transactions[0].traces[0].UserStealthAddressFrom?.userId ===
+              signedInUser?.id
                 ? 'outgoing'
                 : 'incoming'
             }

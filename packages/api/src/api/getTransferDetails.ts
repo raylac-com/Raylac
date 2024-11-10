@@ -5,79 +5,86 @@ import prisma from '../lib/prisma';
  */
 const getTransferDetails = async ({
   userId,
-  txHash,
+  transferId,
 }: {
   userId: number;
-  txHash: string;
+  transferId: number;
 }) => {
-  const tx = await prisma.transaction.findUnique({
+  const tx = await prisma.userAction.findUnique({
     select: {
-      block: {
+      timestamp: true,
+      transactions: {
         select: {
-          number: true,
-          timestamp: true,
-        },
-      },
-      userOps: {
-        select: {
-          hash: true,
-          tokenPriceAtOp: true,
-        },
-      },
-      traces: {
-        select: {
-          traceAddress: true,
-          tokenId: true,
-          chainId: true,
-          tokenPriceAtTrace: true,
-          UserStealthAddressFrom: {
+          block: {
             select: {
-              userId: true,
-              address: true,
-              user: {
-                select: {
-                  spendingPubKey: true,
-                  name: true,
-                  username: true,
-                  profileImage: true,
-                },
-              },
+              number: true,
+              timestamp: true,
             },
           },
-          UserStealthAddressTo: {
+          userOps: {
             select: {
-              userId: true,
-              address: true,
-              user: {
-                select: {
-                  spendingPubKey: true,
-                  name: true,
-                  username: true,
-                  profileImage: true,
-                },
-              },
+              hash: true,
+              tokenPriceAtOp: true,
             },
           },
-          from: true,
-          to: true,
-          amount: true,
-          transactionHash: true,
+          traces: {
+            select: {
+              traceAddress: true,
+              tokenId: true,
+              chainId: true,
+              tokenPriceAtTrace: true,
+              UserStealthAddressFrom: {
+                select: {
+                  userId: true,
+                  address: true,
+                  user: {
+                    select: {
+                      spendingPubKey: true,
+                      name: true,
+                      username: true,
+                      profileImage: true,
+                    },
+                  },
+                },
+              },
+              UserStealthAddressTo: {
+                select: {
+                  userId: true,
+                  address: true,
+                  user: {
+                    select: {
+                      spendingPubKey: true,
+                      name: true,
+                      username: true,
+                      profileImage: true,
+                    },
+                  },
+                },
+              },
+              from: true,
+              to: true,
+              amount: true,
+              transactionHash: true,
+            },
+          },
         },
       },
-      hash: true,
     },
     where: {
-      hash: txHash,
+      id: transferId,
     },
   });
 
   return {
     ...tx,
-    traces: tx?.traces.filter(
-      trace =>
-        trace.UserStealthAddressTo?.userId === userId ||
-        trace.UserStealthAddressFrom?.userId === userId
-    ),
+    transactions: tx?.transactions.map(tx => ({
+      ...tx,
+      traces: tx.traces.filter(
+        trace =>
+          trace.UserStealthAddressTo?.userId === userId ||
+          trace.UserStealthAddressFrom?.userId === userId
+      ),
+    })),
   };
 };
 

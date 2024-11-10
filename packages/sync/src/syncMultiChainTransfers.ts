@@ -28,8 +28,6 @@ const syncMultiChainTransfers = async ({
       },
     });
 
-    console.log({ unassignedTxs });
-
     // Group the multi-chain transfers
     const multiChainTransfers: Record<
       string,
@@ -62,8 +60,6 @@ const syncMultiChainTransfers = async ({
       };
     }
 
-    console.log({ multiChainTransfers });
-
     // Create a new UserActions for the multi-chain transfers
     for (const [groupTag, group] of Object.entries(multiChainTransfers)) {
       // TODO: Handle conflicting groupTags
@@ -84,8 +80,7 @@ const syncMultiChainTransfers = async ({
         ),
       };
 
-      console.log({ data });
-
+      await sleep(200);
       await prisma.userAction.upsert({
         update: data,
         create: data,

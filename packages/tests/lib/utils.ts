@@ -13,10 +13,9 @@ import {
   StealthAddressWithEphemeral,
   supportedTokens,
   toCoingeckoTokenId,
-  UserActionType,
   UserOperation,
 } from '@raylac/shared';
-import { createTestClient, Hex, http, parseUnits, toHex } from 'viem';
+import { createTestClient, Hex, http, parseUnits } from 'viem';
 import { anvil } from 'viem/chains';
 import { client, getAuthedClient, getTestUserId } from './rpc';
 import { TEST_ACCOUNT_MNEMONIC } from './auth';
@@ -262,29 +261,4 @@ export const waitFor = async ({
     if (Date.now() > timeoutMs) throw new Error(`Timeout waiting for ${label}`);
     await sleep(interval);
   }
-};
-
-export const getUserActionTag = ({
-  groupTag,
-  groupSize,
-  userActionType,
-}: {
-  groupTag: Hex;
-  groupSize: number;
-  userActionType: UserActionType;
-}) => {
-  if (groupSize < 1 || groupSize > 255) {
-    throw new Error('Group size must be between 1 and 255');
-  }
-
-  if (groupTag.replace('0x', '').length !== 64) {
-    throw new Error('Group tag must be 32 bytes');
-  }
-
-  const groupSizeHex = toHex(groupSize, { size: 2 }).replace('0x', '');
-  const userActionTypeHex = userActionType.replace('0x', '');
-
-  const tag = `${groupTag}${groupSizeHex}${userActionTypeHex}` as Hex;
-
-  return tag;
 };

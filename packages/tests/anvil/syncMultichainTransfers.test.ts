@@ -2,7 +2,6 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import {
   createStealthAccountForTestUser,
   getTestClient,
-  getUserActionTag,
   signUserOpWithPaymasterAccount,
   signUserOpWithTestUserAccount,
   waitFor,
@@ -15,7 +14,7 @@ import {
 } from '@raylac/shared';
 import { Hex, pad, parseEther } from 'viem';
 import { zeroAddress } from 'viem';
-import { getGasInfo } from '@raylac/shared/src/utils';
+import { encodeUserActionTag, getGasInfo } from '@raylac/shared/src/utils';
 import { devChains } from '@raylac/shared/src/devChains';
 import { buildUserOp } from '@raylac/shared/src/erc4337';
 import { getAuthedClient } from '../lib/rpc';
@@ -37,6 +36,17 @@ const waitForUserActionSync = async ({ txHashes }: { txHashes: Hex[] }) => {
   });
 };
 
+/**
+ * Test that multi-chain transfers are correctly backfilled  (i.e. `UserAction` is correctly created)
+ *
+ * Steps:
+ * 1. Create a new stealth account for the test user
+ * 2. Fund the stealth account on all dev chains
+ * 3. Send multi-chain transfers using the stealth account
+ * 4. Delete the `UserAction` from the database
+ * 5. Wait for the `UserAction` to be synced again
+ * 6. Check that the `UserAction` is correctly indexed
+ */
 describe('syncMultichainTransfers', () => {
   let stealthAccount: StealthAddressWithEphemeral;
   beforeAll(async () => {
@@ -75,7 +85,7 @@ describe('syncMultichainTransfers', () => {
         throw new Error(`Gas info not found for chain ${chain.id}`);
       }
 
-      const tag = getUserActionTag({
+      const tag = encodeUserActionTag({
         groupTag,
         groupSize,
         userActionType: UserActionType.Transfer,
@@ -107,13 +117,13 @@ describe('syncMultichainTransfers', () => {
     }
 
     // Submit the user operations to the RPC endpoint
-    const txHashes = await authedClient.submitUserOps.mutate({
+    const { txHashes } = await authedClient.submitUserOps.mutate({
       userOps: signedUserOps,
     });
 
     const sortedTxHashes = txHashes.sort();
 
-    // 2. Modify the UserAction in the database to a wrong value
+    // Set the `userActionId` to `null` of the transactions so we can delete the `UserAction`
     await prisma.transaction.updateMany({
       data: {
         userActionId: null,
@@ -125,6 +135,7 @@ describe('syncMultichainTransfers', () => {
       },
     });
 
+    // Delete the `UserAction`
     await prisma.userAction.delete({
       where: {
         txHashes: sortedTxHashes,

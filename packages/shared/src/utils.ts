@@ -7,6 +7,7 @@ import {
   getAddress,
   Hex,
   parseUnits,
+  toHex,
 } from 'viem';
 import {
   AnvilBlockTraceResponse,
@@ -14,6 +15,7 @@ import {
   BlockTransactionResponse,
   ChainGasInfo,
   TraceWithTraceAddress,
+  UserActionType,
   UserOperation,
 } from './types';
 import RaylacAccountV2Abi from './abi/RaylacAccountV2Abi';
@@ -545,4 +547,29 @@ export const getNativeTransferTracesInBlock = async ({
 
 export const getChainName = (chainId: number) => {
   return `${getChainFromId(chainId).name} (${chainId})`;
+};
+
+export const encodeUserActionTag = ({
+  groupTag,
+  groupSize,
+  userActionType,
+}: {
+  groupTag: Hex;
+  groupSize: number;
+  userActionType: UserActionType;
+}) => {
+  if (groupSize < 1 || groupSize > 255) {
+    throw new Error('Group size must be between 1 and 255');
+  }
+
+  if (groupTag.replace('0x', '').length !== 64) {
+    throw new Error('Group tag must be 32 bytes');
+  }
+
+  const groupSizeHex = toHex(groupSize, { size: 2 }).replace('0x', '');
+  const userActionTypeHex = userActionType.replace('0x', '');
+
+  const tag = `${groupTag}${groupSizeHex}${userActionTypeHex}` as Hex;
+
+  return tag;
 };

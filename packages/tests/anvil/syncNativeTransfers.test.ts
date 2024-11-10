@@ -15,7 +15,7 @@ import {
 import { getAddress, Hex, parseEther } from 'viem';
 import { zeroAddress } from 'viem';
 
-const testClient = getTestClient();
+const testClient = getTestClient({ chainId: anvil.id });
 const walletClient = getWalletClient({ chainId: anvil.id });
 const publicClient = getPublicClient({ chainId: anvil.id });
 

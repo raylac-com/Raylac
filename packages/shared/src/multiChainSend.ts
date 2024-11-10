@@ -207,7 +207,7 @@ export const buildETHTransferUserOp = ({
   return userOp;
 };
 
-const buildTransferUseOp = ({
+export const buildTransferUseOp = ({
   stealthSigner,
   to,
   tokenAddress,

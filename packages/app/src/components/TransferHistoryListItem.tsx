@@ -1,7 +1,7 @@
 import {
   getAvatarAddress,
   getDisplayName,
-  getFinalTransfer,
+  getFinalTransfers,
   getProfileImage,
   getUsdTransferAmount,
 } from '@/lib/utils';
@@ -35,25 +35,33 @@ const formatDate = ({
 const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
   const { transfer, type } = props;
 
-  const tokenId = transfer.traces[0].tokenId;
+  if (transfer.transactions.length === 0) {
+    return null;
+  }
 
-  const finalTransfer = getFinalTransfer(transfer);
+  const tokenId = transfer.transactions[0].traces[0].tokenId;
+
+  const finalTransfers = getFinalTransfers(transfer);
   const { i18n } = useTranslation();
 
-  const amount = finalTransfer.amount as string;
+  const amount = finalTransfers
+    .reduce((acc, curr) => acc + BigInt(curr.amount!), 0n)
+    .toString();
 
   const tokenMeta = getTokenMetadata(tokenId);
   const formattedAmount = formatAmount(amount, tokenMeta.decimals);
 
   const navigation = useTypedNavigation();
 
-  const from = finalTransfer.UserStealthAddressFrom?.user || finalTransfer.from;
-  const to = finalTransfer.UserStealthAddressTo?.user || finalTransfer.to;
+  const from =
+    finalTransfers[0].UserStealthAddressFrom?.user || finalTransfers[0].from;
+  const to =
+    finalTransfers[0].UserStealthAddressTo?.user || finalTransfers[0].to;
 
   const avatarAddress =
     type === 'outgoing' ? getAvatarAddress(to) : getAvatarAddress(from);
 
-  const blockTimestamp = new Date(Number(transfer.block.timestamp) * 1000);
+  const blockTimestamp = new Date(Number(transfer.timestamp) * 1000);
 
   const transferUsdAmount = getUsdTransferAmount(transfer);
 
@@ -68,7 +76,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
       }}
       onPress={() => {
         navigation.navigate('TransferDetails', {
-          txHash: transfer.hash,
+          transferId: transfer.id,
         });
       }}
     >

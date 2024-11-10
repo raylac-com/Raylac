@@ -1,6 +1,10 @@
 import { beforeAll, describe, expect, test } from 'vitest';
-import { createStealthAccountForTestUser, getTestClient } from '../lib/utils';
-import { Address, Hex, parseEther, zeroAddress } from 'viem';
+import {
+  createStealthAccountForTestUser,
+  getTestClient,
+  waitFor,
+} from '../lib/utils';
+import { parseEther, zeroAddress } from 'viem';
 import { sync } from '@raylac/sync';
 import { anvil } from 'viem/chains';
 import { getAuthedClient } from '../lib/rpc';
@@ -12,46 +16,46 @@ import {
   getViewingPrivKey,
   RAYLAC_PAYMASTER_V2_ADDRESS,
   signUserOpWithStealthAccount,
-  sleep,
 } from '@raylac/shared';
 import { TEST_ACCOUNT_MNEMONIC } from '../lib/auth';
 import { anvil1 } from '@raylac/shared/src/devChains';
+import prisma from '../lib/prisma';
 
 const testClient = getTestClient({ chainId: anvil1.id });
 
-const isTxRemoved = async (txHash: Hex) => {
-  const timeout = Date.now() + 20000;
+const isTransferRemoved = async ({ transferId }: { transferId: number }) => {
+  await waitFor({
+    fn: async () => {
+      const transfer = await prisma.userAction.findUnique({
+        where: { id: transferId },
+      });
 
-  const authedClient = await getAuthedClient();
+      const txs = await prisma.transaction.findMany({
+        where: { userActionId: transferId },
+      });
 
-  while (true) {
-    const transferDetails = await authedClient.getTransferDetails.query({
-      txHash,
-    });
+      // `Transaction` and `UserAction` must be both deleted.
+      if (transfer && txs.length === 0) {
+        // eslint-disable-next-line no-console
+        console.error(`Transactions removed but UserAction ${transferId} not`);
+        return true;
+      }
 
-    if (!transferDetails.hash) {
-      return true;
-    }
+      if (!transfer && txs.length > 0) {
+        // eslint-disable-next-line no-console
+        console.error(`UserAction ${transferId} removed but transactions not`);
+        return true;
+      }
 
-    if (Date.now() > timeout) {
+      if (!transfer && txs.length === 0) {
+        return true;
+      }
+
       return false;
-    }
-
-    await sleep(3000);
-  }
-};
-
-export const getSynchedAddressNonce = async ({
-  address,
-}: {
-  address: Address;
-}) => {
-  const authedClient = await getAuthedClient();
-
-  const addressNonces = await authedClient.getAddressNonces.query();
-
-  // eslint-disable-next-line security/detect-object-injection
-  return addressNonces[address];
+    },
+    timeout: 20000,
+    label: 'isTransferRemoved',
+  });
 };
 
 describe('reorg', () => {
@@ -121,7 +125,7 @@ describe('reorg', () => {
       viewingPrivKey,
     });
 
-    const [txHash] = await authedClient.submitUserOps.mutate({
+    const { transferId } = await authedClient.submitUserOps.mutate({
       userOps: [signedUserOp],
     });
 
@@ -130,10 +134,7 @@ describe('reorg', () => {
 
     await testClient.mine({ blocks: 5 });
 
-    expect(await isTxRemoved(txHash)).toBe(true);
-    expect(
-      await getSynchedAddressNonce({ address: stealthAccount.address })
-    ).toBe(undefined);
+    expect(await isTransferRemoved({ transferId })).toBe(true);
 
     const balances = await authedClient.getAddressBalancesPerChain.query();
 

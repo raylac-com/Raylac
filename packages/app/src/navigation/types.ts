@@ -39,7 +39,7 @@ export type RootStackParamsList = {
   Deposit: undefined;
   TransferHistory: undefined;
   TransferDetails: {
-    txHash: string;
+    transferId: number;
   };
   Receive: undefined;
   BackupAccount: undefined;

@@ -1,4 +1,6 @@
+// @ts-ignore
 import baseLogo from '../../assets/chains/8453.png';
+// @ts-ignore
 import arbitrumLogo from '../../assets/chains/42161.png';
 
 export const getChainLogo = (chainId: number) => {
