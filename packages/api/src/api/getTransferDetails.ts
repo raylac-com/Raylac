@@ -27,6 +27,7 @@ const getTransferDetails = async ({
       traces: {
         select: {
           traceAddress: true,
+          logIndex: true,
           tokenId: true,
           chainId: true,
           tokenPriceAtTrace: true,

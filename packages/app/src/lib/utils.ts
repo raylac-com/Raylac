@@ -49,17 +49,23 @@ export const getClipboardText = async () => {
 };
 
 export const getFinalTransfer = (transfer: TransferItem) => {
-  const senders = new Set<string>();
+  if (transfer.traces[0].logIndex !== null) {
+    const finalTransfer = transfer.traces.sort(
+      (a, b) => b.logIndex - a.logIndex
+    )[0];
 
-  transfer.traces.forEach(trace => {
-    senders.add(trace.from);
-  });
-
-  const finalTransfer = transfer.traces.find(trace => !senders.has(trace.to));
-
-  if (!finalTransfer) {
-    throw new Error('No final transfer found');
+    return finalTransfer;
   }
+
+  const finalTransfer = transfer.traces.sort((a, b) => {
+    const aTraceAddress = a.traceAddress.split('_');
+    const bTraceAddress = b.traceAddress.split('_');
+
+    return (
+      parseInt(bTraceAddress[bTraceAddress.length - 1]) -
+      parseInt(aTraceAddress[aTraceAddress.length - 1])
+    );
+  })[0];
 
   return finalTransfer;
 };
