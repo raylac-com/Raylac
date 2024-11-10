@@ -20,7 +20,8 @@
     "winston": "^3.15.0",
     "vitest": "^2.1.2",
     "express": "^4.21.1",
-    "@types/express": "^5.0.0"
+    "@types/express": "^5.0.0",
+    "node-cache": "^5.1.2"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
