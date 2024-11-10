@@ -11,14 +11,6 @@ services:
     startCommand: NODE_ENV=production pnpm -F api start
     preDeployCommand: pnpm -F db migrate:prod
     autoDeploy: true
-    buildFilter:
-      ignoredPaths:
-        - ./packages/app/**/*
-        - ./packages/tests/**/*
-        - ./packages/contracts/**/*
-        - ./README.md
-        - ./LICENSE
-        - ./.gitignore
     envVars:
       - fromGroup: raylac
       - key: NODE_VERSION
@@ -43,15 +35,6 @@ services:
     preDeployCommand: pnpm -F db migrate:prod
     rootDir: ./
     autoDeploy: true
-    buildFilter:
-      ignoredPaths:
-        - ./packages/app/**/*
-        - ./packages/tests/**/*
-        - ./packages/api/**/*
-        - ./packages/contracts/**/*
-        - ./README.md
-        - ./LICENSE
-        - ./.gitignore
     envVars:
       - fromGroup: raylac
       - key: NODE_VERSION
@@ -75,9 +58,7 @@ services:
     region: oregon
     autoDeploy: false
     rootDir: ./
-    buildFilter:
-      paths:
-        - ./packages/ci/Dockerfile.foundary
+
 databases:
   - name: raylac
     databaseName: raylac
