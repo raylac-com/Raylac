@@ -26,11 +26,69 @@ jobs:
             echo "should-run=false" >> $GITHUB_OUTPUT
           fi
 
+  setup-test-channel-app:
+    name: Setup EAS test channel app
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    needs: [check-pr-title]
+    if: needs.check-pr-title.outputs.should-run == 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache turbo build setup
+        uses: actions/cache@v4
+        with: 
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.17.0
+          cache: pnpm
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Remove unnecessary packages
+        run: rm -rf ./packages/{tests,ci,scripts}
+
+      - name: Install dependencies
+        run: pnpm i --ignore-scripts
+
+      - name: Build
+        run: pnpm build
+
+      - name: Link branch to test channel
+        run: eas channel:edit test --branch ${{ github.event.pull_request.head.ref }}
+        working-directory: packages/app
+
+      - name: Create a .env file
+        run: printf "EXPO_PUBLIC_RPC_URL=https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com\nEXPO_PUBLIC_ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}\n" > .env
+        working-directory: packages/app
+
+      - name: Run eas update for the test channel
+        uses: expo/expo-github-action/preview@v8
+        with:
+          command: eas update --auto --channel test
+          working-directory: packages/app
+
   test-ios:
     name: Run Maestro tests on ios
     runs-on: ubuntu-latest
-    needs: [check-pr-title]
-    if: needs.check-pr-title.outputs.should-run == 'true'
+    needs: [setup-test-channel-app]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -47,8 +105,7 @@ jobs:
   test-android:
     name: Run Maestro tests on android
     runs-on: ubuntu-latest
-    needs: [check-pr-title]
-    if: needs.check-pr-title.outputs.should-run == 'true'
+    needs: [setup-test-channel-app]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
