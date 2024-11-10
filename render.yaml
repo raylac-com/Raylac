@@ -33,7 +33,7 @@ services:
           type: web
           envVarKey: RENDER_EXTERNAL_URL
   - type: web
-    name: raylac-sync
+    name: raylac-indexer
     plan: standard
     previewPlan: starter
     runtime: node
