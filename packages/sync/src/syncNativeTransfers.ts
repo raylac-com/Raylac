@@ -3,7 +3,6 @@ import {
   getChainName,
   getNativeTransferTracesInBlock,
   getPublicClient,
-  sleep,
   traceFilter,
 } from '@raylac/shared';
 import prisma from './lib/prisma';
@@ -11,6 +10,7 @@ import { getAddress, Hex, hexToBigInt, toHex } from 'viem';
 import { Prisma } from '@raylac/db';
 import {
   getBlockTimestamp,
+  loop,
   updateAddressesSyncStatus,
   upsertTransaction,
   waitForAnnouncementsBackfill,
@@ -18,6 +18,7 @@ import {
 import { anvil, base, optimism } from 'viem/chains';
 import { getTokenPriceAtTime } from './lib/coingecko';
 import { logger } from '@raylac/shared-backend';
+
 const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
   const addressSyncStatuses = await prisma.addressSyncStatus.findMany({
     select: {
@@ -33,8 +34,6 @@ const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
       blockNumber: 'asc',
     },
   });
-
-  console.log({ addressSyncStatuses });
 
   if (addressSyncStatuses.length === 0) {
     return;
@@ -228,11 +227,16 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
 };
 
 const syncNativeTransfersForChain = async (chainId: number) => {
-  if (chainId === base.id || chainId === optimism.id) {
-    await syncNativeTransfersWithTraceFilter(chainId);
-  } else {
-    await syncNativeTransfersWithTraceBlock(chainId);
-  }
+  await loop({
+    fn: async () => {
+      if (chainId === base.id || chainId === optimism.id) {
+        await syncNativeTransfersWithTraceFilter(chainId);
+      } else {
+        await syncNativeTransfersWithTraceBlock(chainId);
+      }
+    },
+    interval: 3 * 1000,
+  });
 };
 
 const syncNativeTransfers = async ({
@@ -251,21 +255,15 @@ const syncNativeTransfers = async ({
   await waitForAnnouncementsBackfill({ announcementChainId });
   logger.info(`syncNativeTransfers: Announcements backfill complete`);
 
-  while (true) {
-    try {
-      const promises = [];
+  const jobs = [];
 
-      for (const chainId of chainIds) {
-        promises.push(syncNativeTransfersForChain(chainId));
-      }
-
-      await Promise.all(promises);
-    } catch (err) {
-      logger.error(err);
-    }
-
-    await sleep(3 * 1000);
+  // Start native transfer sync jobs for all each chain
+  for (const chainId of chainIds) {
+    const chainSyncJob = syncNativeTransfersForChain(chainId);
+    jobs.push(chainSyncJob);
   }
+
+  await Promise.all(jobs);
 };
 
 export default syncNativeTransfers;

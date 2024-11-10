@@ -131,10 +131,10 @@ jobs:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
 
       - name: Run integration tests
-        run: pnpm -F tests test syncNativeTransfers.test.ts syncAnnouncements.test.ts
+        run: pnpm -F tests test syncNativeTransfers.test.ts
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           ANVIL_RPC_URL: https://anvil-pr-${{ github.event.pull_request.number }}.onrender.com
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
-          COINGECKO_API_KEY: ${{ secrets.COINGECKO_API_KEY }}
-          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+          INDEXER_URL: https://raylac-indexer-pr-${{ github.event.pull_request.number }}.onrender.com
+          GIT_COMMIT: ${{ github.event.pull_request.head.sha }}

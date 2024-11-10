@@ -1,25 +1,5 @@
 import { PrismaClient } from '@raylac/db';
-import { logger } from '@raylac/shared-backend';
 
-const prisma = new PrismaClient().$extends({
-  query: {
-    async $allOperations({ model, operation, args, query }) {
-      const start = Date.now();
-      /* your custom logic for modifying all Prisma Client operations here */
-
-      const result = await query(args);
-
-      const duration = Date.now() - start;
-
-      logger.info(`Query on ${model} took ${duration}ms`, {
-        model,
-        operation,
-        duration,
-      });
-
-      return result;
-    },
-  },
-});
+const prisma: PrismaClient = new PrismaClient();
 
 export default prisma;

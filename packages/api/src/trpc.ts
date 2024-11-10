@@ -1,7 +1,20 @@
 import { initTRPC } from '@trpc/server';
 import type { Context } from './context';
+import { logger } from '@raylac/shared-backend';
 
-const t = initTRPC.context<Context>().create();
+const t = initTRPC.context<Context>().create({
+  errorFormatter({ shape, error }) {
+    logger.error('TRPC error', { shape, error });
+
+    return {
+      ...shape,
+      data: {
+        ...shape.data,
+        error: error.message,
+      },
+    };
+  },
+});
 
 export const router = t.router;
 export const publicProcedure = t.procedure;

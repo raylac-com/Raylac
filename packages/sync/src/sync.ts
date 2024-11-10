@@ -7,25 +7,61 @@ import scanStealthAddresses from './scanStealthAddresses';
 import checkAddressBalances from './checkAddressBalances';
 import assignNativeTransfers from './assignNativeTransfers';
 import syncUserOps from './syncUserOps';
+import { anvil } from 'viem/chains';
+import { ERC5564_ANNOUNCEMENT_CHAIN, supportedChains } from '@raylac/shared';
 
-const sync = async ({
-  announcementChainId,
-  chainIds,
-}: {
-  announcementChainId: number;
-  chainIds: number[];
-}) => {
-  await Promise.all([
+const sync = async () => {
+  const chainIds = supportedChains.map(chain => chain.id);
+
+  const jobs = [
     syncBlocks({ chainIds }),
     syncUserOps({ chainIds }),
-    syncNativeTransfers({ announcementChainId, chainIds }),
-    syncAnnouncements({ announcementChainId, chainIds }),
+    syncNativeTransfers({
+      announcementChainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
+      chainIds,
+    }),
+    syncAnnouncements({
+      announcementChainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
+      chainIds,
+    }),
     assignNativeTransfers({ chainIds }),
-    syncERC20Transfers({ announcementChainId, chainIds }),
+    syncERC20Transfers({
+      announcementChainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
+      chainIds,
+    }),
     checkAddressBalances({ chainIds }),
-    // announceStealthAccounts(),
     scanStealthAddresses(),
-  ]);
+  ];
+
+  if (process.env.ANVIL_RPC_URL) {
+    console.log('ANVIL_RPC_URL is set, indexing dev chains');
+    const devChainIds = [anvil.id];
+    const DEV_CHAIN_ANNOUNCEMENT_CHAIN_ID = anvil.id;
+
+    const devChainJobs = [
+      syncBlocks({ chainIds: devChainIds }),
+      syncUserOps({ chainIds: devChainIds }),
+      syncNativeTransfers({
+        announcementChainId: DEV_CHAIN_ANNOUNCEMENT_CHAIN_ID,
+        chainIds: devChainIds,
+      }),
+      syncAnnouncements({
+        announcementChainId: DEV_CHAIN_ANNOUNCEMENT_CHAIN_ID,
+        chainIds: devChainIds,
+      }),
+      assignNativeTransfers({ chainIds: devChainIds }),
+      syncERC20Transfers({
+        announcementChainId: DEV_CHAIN_ANNOUNCEMENT_CHAIN_ID,
+        chainIds: devChainIds,
+      }),
+      checkAddressBalances({ chainIds: devChainIds }),
+      scanStealthAddresses(),
+    ];
+
+    jobs.push(...devChainJobs);
+  }
+
+  await Promise.all(jobs);
 };
 
 export default sync;
