@@ -9,6 +9,7 @@ import colors from '@/lib/styles/colors';
 import { useTranslation } from 'react-i18next';
 import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
 import { Feather, Ionicons } from '@expo/vector-icons';
+import fontSizes from '@/lib/styles/fontSizes';
 
 interface AddressWithChainIconProps {
   address: Hex;
@@ -40,7 +41,7 @@ const AddressWithChainIcon = (props: AddressWithChainIconProps) => {
         ></Image>
         <Text
           style={{
-            fontSize: 18,
+            fontSize: fontSizes.base,
             fontWeight: 'bold',
             textAlign: 'center',
             color: colors.text,
@@ -126,7 +127,7 @@ const Deposit = () => {
             />
             <Text
               style={{
-                fontSize: 24,
+                fontSize: fontSizes.large,
                 textAlign: 'center',
                 fontWeight: 'bold',
                 color: colors.text,
@@ -137,7 +138,7 @@ const Deposit = () => {
           </View>
           <Text
             style={{
-              fontSize: 16,
+              fontSize: fontSizes.base,
               textAlign: 'center',
               color: colors.text,
             }}
@@ -173,6 +174,7 @@ const Deposit = () => {
       >
         {!depositAddress || isGeneratingAddress ? (
           <StyledButton
+            variant="primary"
             title={t('getDepositAddress')}
             onPress={async () => {
               const account = await getNewDepositAccount('');
@@ -185,6 +187,7 @@ const Deposit = () => {
           ></StyledButton>
         ) : (
           <StyledButton
+            variant="outline"
             title={t('copyAddress')}
             onPress={() => {
               onCopyClick();

@@ -1,4 +1,5 @@
 import colors from '@/lib/styles/colors';
+import spacing from '@/lib/styles/spacing';
 import { trpc } from '@/lib/trpc';
 import { copyToClipboard, shortenAddress } from '@/lib/utils';
 import { Feather } from '@expo/vector-icons';
@@ -30,9 +31,9 @@ const AddressListItem = (props: AddressListItemProps) => {
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
-        padding: 16,
+        padding: spacing.small,
         borderBottomWidth: 1,
-        borderBottomColor: colors.gray,
+        borderBottomColor: colors.border,
       }}
     >
       <View
@@ -78,7 +79,6 @@ const Addresses = () => {
       style={{
         flex: 1,
         justifyContent: 'center',
-        marginTop: 16,
       }}
     >
       <FlatList

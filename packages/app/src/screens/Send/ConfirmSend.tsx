@@ -6,6 +6,7 @@ import useTokenPrice from '@/hooks/useTokenPrice';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import mixpanel from '@/lib/mixpanel';
 import colors from '@/lib/styles/colors';
+import fontSizes from '@/lib/styles/fontSizes';
 import { trpc } from '@/lib/trpc';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
@@ -165,7 +166,7 @@ const ConfirmSend = ({ route }: Props) => {
         <Text
           style={{
             color: colors.text,
-            fontSize: 16,
+            fontSize: fontSizes.base,
           }}
         >
           {t('receivesAmountOnChain', {
@@ -187,6 +188,7 @@ const ConfirmSend = ({ route }: Props) => {
         }}
         disabled={gasInfo ? false : true}
         testID="send"
+        variant="primary"
       ></StyledButton>
     </View>
   );

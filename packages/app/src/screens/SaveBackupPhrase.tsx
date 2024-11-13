@@ -4,6 +4,8 @@ import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { getMnemonicAndKeys } from '@/lib/key';
 import colors from '@/lib/styles/colors';
+import fontSizes from '@/lib/styles/fontSizes';
+import spacing from '@/lib/styles/spacing';
 import { copyToClipboard } from '@/lib/utils';
 import { Feather } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
@@ -68,7 +70,7 @@ const SaveBackupPhrase = () => {
         </Text>
         <Text
           style={{
-            fontSize: 16,
+            fontSize: fontSizes.base,
             textAlign: 'center',
             color: colors.gray,
           }}
@@ -136,17 +138,21 @@ const SaveBackupPhrase = () => {
             </Text>
           </Pressable>
         )}
-        {mnemonic ? (
-          <StyledButton
-            title={'Hide backup phrase'}
-            onPress={onHidePress}
-          ></StyledButton>
-        ) : (
-          <StyledButton
-            title={'Reveal backup phrase'}
-            onPress={onRevealPress}
-          ></StyledButton>
-        )}
+        <View style={{ width: '62%', marginTop: spacing.base }}>
+          {mnemonic ? (
+            <StyledButton
+              variant="underline"
+              title={'Hide backup phrase'}
+              onPress={onHidePress}
+            ></StyledButton>
+          ) : (
+            <StyledButton
+              variant="underline"
+              title={'Reveal backup phrase'}
+              onPress={onRevealPress}
+            ></StyledButton>
+          )}
+        </View>
       </View>
       <View
         style={{
@@ -155,6 +161,7 @@ const SaveBackupPhrase = () => {
         }}
       >
         <StyledButton
+          variant="primary"
           title="I saved my backup phrase"
           onPress={() => {
             navigation.navigate('ConfirmBackupPhrase');

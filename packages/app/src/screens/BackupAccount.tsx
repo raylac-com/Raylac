@@ -8,6 +8,8 @@ import { copyToClipboard } from '@/lib/utils';
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
 import useSignedInUser from '@/hooks/useSignedInUser';
+import fontSizes from '@/lib/styles/fontSizes';
+import spacing from '@/lib/styles/spacing';
 
 const BackupAccount = () => {
   const { t } = useTranslation('BackupAccount');
@@ -111,7 +113,7 @@ const BackupAccount = () => {
               color: colors.text,
               width: '80%',
               marginTop: 24,
-              fontSize: 18,
+              fontSize: fontSizes.base,
             }}
           >
             {mnemonic}
@@ -136,23 +138,27 @@ const BackupAccount = () => {
           </View>
         </Pressable>
       ) : null}
-      {mnemonic ? (
-        <StyledButton
-          title={t('hideBackupPhrase')}
-          onPress={onHidePress}
-          style={{
-            marginTop: 36,
-          }}
-        ></StyledButton>
-      ) : (
-        <StyledButton
-          title={t('revealBackupPhrase')}
-          onPress={onRevealPress}
-          style={{
-            marginTop: 36,
-          }}
-        ></StyledButton>
-      )}
+      <View style={{ width: '62%', marginTop: spacing.base }}>
+        {mnemonic ? (
+          <StyledButton
+            variant="primary"
+            title={t('hideBackupPhrase')}
+            onPress={onHidePress}
+            style={{
+              marginTop: 36,
+            }}
+          ></StyledButton>
+        ) : (
+          <StyledButton
+            variant="primary"
+            title={t('revealBackupPhrase')}
+            onPress={onRevealPress}
+            style={{
+              marginTop: 36,
+            }}
+          ></StyledButton>
+        )}
+      </View>
     </View>
   );
 };

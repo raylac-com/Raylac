@@ -9,6 +9,7 @@ import { useCallback } from 'react';
 import { Alert, Text, View } from 'react-native';
 import * as Updates from 'expo-updates';
 import useSignOut from '@/hooks/useSignOut';
+import fontSizes from '@/lib/styles/fontSizes';
 
 const Advanced = () => {
   const { data: signedInUser } = useSignedInUser();
@@ -72,6 +73,7 @@ const Advanced = () => {
       }}
     >
       <StyledButton
+        variant="primary"
         title="Delete account"
         onPress={onDeleteAccountPress}
         style={{
@@ -89,7 +91,7 @@ const Advanced = () => {
         <Text
           style={{
             color: colors.text,
-            fontSize: 14,
+            fontSize: fontSizes.small,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >
@@ -98,7 +100,7 @@ const Advanced = () => {
         <Text
           style={{
             color: colors.text,
-            fontSize: 14,
+            fontSize: fontSizes.small,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >
@@ -107,7 +109,7 @@ const Advanced = () => {
         <Text
           style={{
             color: colors.text,
-            fontSize: 14,
+            fontSize: fontSizes.small,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >
@@ -116,7 +118,7 @@ const Advanced = () => {
         <Text
           style={{
             color: colors.text,
-            fontSize: 14,
+            fontSize: fontSizes.small,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >
@@ -125,7 +127,7 @@ const Advanced = () => {
         <Text
           style={{
             color: colors.text,
-            fontSize: 14,
+            fontSize: fontSizes.small,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >
@@ -134,7 +136,7 @@ const Advanced = () => {
         <Text
           style={{
             color: colors.text,
-            fontSize: 14,
+            fontSize: fontSizes.small,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >

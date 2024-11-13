@@ -44,11 +44,13 @@ const AccountInfoListItem = (props: AccountInfoListItemProps) => {
           {props.value}
         </Text>
       </View>
-      <StyledButton
-        title={t('edit')}
-        onPress={props.onPress}
-        variant="underline"
-      ></StyledButton>
+      <View style={{ width: '20%', justifyContent: 'center' }}>
+        <StyledButton
+          title={t('edit')}
+          onPress={props.onPress}
+          variant="underline"
+        ></StyledButton>
+      </View>
     </View>
   );
 };

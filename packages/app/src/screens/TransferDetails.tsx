@@ -3,6 +3,8 @@ import LinkText from '@/components/LinkText';
 import TransferDetailListItem from '@/components/TransferDetailListItem';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import colors from '@/lib/styles/colors';
+import fontSizes from '@/lib/styles/fontSizes';
+import opacity from '@/lib/styles/opacity';
 import { trpc } from '@/lib/trpc';
 import {
   copyToClipboard,
@@ -186,8 +188,8 @@ const TransferDetails = ({ route }: Props) => {
         <Text
           style={{
             color: colors.text,
-            opacity: 0.5,
-            fontSize: 16,
+            opacity: opacity.dimmed,
+            fontSize: fontSizes.base,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >

@@ -13,6 +13,9 @@ import { Entypo } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import useSetProfileImage from '@/hooks/useSetProfileImage';
 import Toast from 'react-native-toast-message';
+import fontSizes from '@/lib/styles/fontSizes';
+import spacing from '@/lib/styles/spacing';
+import opacity from '@/lib/styles/opacity';
 
 interface SettingListItemProps {
   icon: React.ReactNode;
@@ -59,8 +62,8 @@ const SettingListItem = (props: SettingListItemProps) => {
           </View>
           <Text
             style={{
-              marginLeft: 10,
-              fontSize: 16,
+              marginLeft: spacing.small,
+              fontSize: fontSizes.base,
               textAlign: 'center',
               fontWeight: '500',
               color: color ? color : colors.text,
@@ -71,8 +74,9 @@ const SettingListItem = (props: SettingListItemProps) => {
         </View>
         <Entypo
           name="chevron-right"
-          size={18}
+          size={fontSizes.base}
           color={colors.text}
+          a
           style={{
             opacity: 0.7,
           }}
@@ -150,8 +154,7 @@ const Account = () => {
         flex: 1,
         flexDirection: 'column',
         alignItems: 'center',
-        marginTop: 40,
-        paddingHorizontal: 16,
+        padding: spacing.base,
       }}
     >
       <View
@@ -190,7 +193,7 @@ const Account = () => {
         </View>
         <Text
           style={{
-            fontSize: 24,
+            fontSize: fontSizes.large,
             color: colors.text,
           }}
         >
@@ -198,7 +201,7 @@ const Account = () => {
         </Text>
         <Text
           style={{
-            opacity: 0.5,
+            opacity: opacity.dimmed,
             color: colors.text,
           }}
           // eslint-disable-next-line react/jsx-no-literals
@@ -211,7 +214,7 @@ const Account = () => {
           flex: 1,
           flexDirection: 'column',
           alignItems: 'center',
-          marginTop: 40,
+          marginTop: spacing.base,
         }}
       >
         <SettingListItem

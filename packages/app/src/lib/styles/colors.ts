@@ -6,7 +6,7 @@ const colors = {
 
   // Required colors by react-navigation https://reactnavigation.org/docs/themes/
   primary: '#4169E1',
-  border: '#171717',
+  border: '#262626',
   background: '#121212',
   text: '#E5E5E5',
   card: '#121212',

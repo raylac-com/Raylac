@@ -28,7 +28,11 @@ const Upgrade = () => {
       >
         {t('upgradeAccount', { ns: 'Upgrade' })}
       </Text>
-      <StyledButton title="Update" onPress={handleUpgradePress} />
+      <StyledButton
+        variant="primary"
+        title="Update"
+        onPress={handleUpgradePress}
+      ></StyledButton>
     </View>
   );
 };

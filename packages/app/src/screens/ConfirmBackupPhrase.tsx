@@ -9,6 +9,7 @@ import Toast from 'react-native-toast-message';
 import { setBackupVerificationStatus } from '@/lib/key';
 import MnemonicWord from '@/components/MnemonicWord';
 import { useTranslation } from 'react-i18next';
+import fontSizes from '@/lib/styles/fontSizes';
 
 const generateRandomNumbers = ({
   max,
@@ -178,7 +179,7 @@ const ConfirmBackupPhrase = () => {
         style={{
           color: colors.text,
           textAlign: 'center',
-          fontSize: 16,
+          fontSize: fontSizes.base,
         }}
       >
         {t('choose3Words')}

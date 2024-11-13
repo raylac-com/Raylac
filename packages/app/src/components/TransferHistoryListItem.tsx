@@ -15,6 +15,10 @@ import { formatDistanceToNowStrict, Locale } from 'date-fns';
 import { ja, enUS } from 'date-fns/locale';
 import { TransferItem } from '@/types';
 import { useTranslation } from 'react-i18next';
+import spacing from '@/lib/styles/spacing';
+import fontSizes from '@/lib/styles/fontSizes';
+import opacity from '@/lib/styles/opacity';
+import avatarSizes from '@/lib/styles/avatarSizes';
 // import useEnsName from '@/hooks/useEnsName';
 
 interface TransferHistoryListItemProps {
@@ -63,8 +67,9 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
         flex: 1,
         flexDirection: 'column',
         borderBottomWidth: 1,
-        paddingVertical: 12,
-        rowGap: 4,
+        borderColor: colors.border,
+        paddingVertical: spacing.small,
+        rowGap: spacing.xxSmall,
       }}
       onPress={() => {
         navigation.navigate('TransferDetails', {
@@ -84,7 +89,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            columnGap: 8,
+            columnGap: spacing.xSmall,
           }}
         >
           <FastAvatar
@@ -92,7 +97,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
             imageUrl={
               type === 'outgoing' ? getProfileImage(to) : getProfileImage(from)
             }
-            size={36}
+            size={avatarSizes.small}
           ></FastAvatar>
           <Text
             style={{
@@ -106,14 +111,14 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           style={{
             flexDirection: 'column',
             alignItems: 'flex-end',
-            rowGap: 4,
+            rowGap: spacing.xxSmall,
           }}
         >
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              columnGap: 4,
+              columnGap: spacing.xxSmall,
             }}
           >
             <Ionicons
@@ -126,7 +131,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
             <Text
               style={{
                 fontWeight: 'bold',
-                fontSize: 16,
+                fontSize: fontSizes.base,
                 color: type === 'incoming' ? colors.green : colors.warning,
               }}
             >
@@ -138,7 +143,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
               style={{
                 color: colors.text,
                 textAlign: 'right',
-                opacity: 0.5,
+                opacity: opacity.dimmed,
               }}
               // eslint-disable-next-line react/jsx-no-literals
             >
@@ -151,7 +156,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
         style={{
           color: colors.text,
           textAlign: 'right',
-          opacity: 0.5,
+          opacity: opacity.dimmed,
         }}
       >
         {blockTimestamp

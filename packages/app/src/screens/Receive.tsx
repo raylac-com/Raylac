@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
 import { Feather } from '@expo/vector-icons';
 import useSignedInUser from '@/hooks/useSignedInUser';
+import fontSizes from '@/lib/styles/fontSizes';
 
 interface AddressWithChainIconProps {
   address: Hex;
@@ -135,7 +136,7 @@ const Receive = () => {
       >
         <Text
           style={{
-            fontSize: 16,
+            fontSize: fontSizes.base,
             textAlign: 'center',
             color: colors.text,
             fontWeight: 'bold',
@@ -146,7 +147,7 @@ const Receive = () => {
 
         <Text
           style={{
-            fontSize: 16,
+            fontSize: fontSizes.base,
             textAlign: 'center',
             color: colors.text,
           }}
@@ -164,7 +165,7 @@ const Receive = () => {
         >
           <Text
             style={{
-              fontSize: 16,
+              fontSize: fontSizes.base,
               textAlign: 'center',
               color: colors.gray,
             }}
@@ -201,7 +202,7 @@ const Receive = () => {
             >
               <Text
                 style={{
-                  fontSize: 16,
+                  fontSize: fontSizes.base,
                   textAlign: 'center',
                   color: colors.text,
                 }}
@@ -218,7 +219,7 @@ const Receive = () => {
         </View>
         <Text
           style={{
-            fontSize: 16,
+            fontSize: fontSizes.base,
             textAlign: 'center',
             color: colors.text,
             fontWeight: 'bold',
@@ -237,6 +238,7 @@ const Receive = () => {
         </Text>
         {!depositAddress || isGeneratingAddress ? (
           <StyledButton
+            variant="primary"
             title={t('getReceivingAddress')}
             onPress={async () => {
               const account = await getNewDepositAccount('');
@@ -249,6 +251,7 @@ const Receive = () => {
           ></StyledButton>
         ) : (
           <StyledButton
+            variant="outline"
             title={t('copyAddress')}
             onPress={() => {
               onCopyClick();

@@ -12,6 +12,10 @@ import { supportedTokens } from '@raylac/shared';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTokenBalances from '@/hooks/useTokenBalance';
 import { getTransferType } from '@/lib/utils';
+import spacing from '@/lib/styles/spacing';
+import fontSizes from '@/lib/styles/fontSizes';
+import borderRadius from '@/lib/styles/borderRadius';
+import opacity from '@/lib/styles/opacity';
 
 interface TokenBalanceItemProps {
   formattedBalance: string;
@@ -33,10 +37,10 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        columnGap: 8,
-        borderRadius: 8,
+        columnGap: spacing.small,
+        borderRadius: borderRadius.base,
         borderWidth: 1,
-        padding: 12,
+        padding: spacing.small,
         borderColor: colors.gray,
       }}
     >
@@ -52,13 +56,13 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          rowGap: 4,
+          rowGap: spacing.xxSmall,
         }}
       >
         <Text
           style={{
             color: colors.text,
-            fontSize: 20,
+            fontSize: fontSizes.base,
           }}
         >
           {t('fiatDenominatedBalance', {
@@ -68,8 +72,8 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
         <Text
           style={{
             color: colors.text,
-            fontSize: 16,
-            opacity: 0.5,
+            fontSize: fontSizes.base,
+            opacity: opacity.dimmed,
           }}
         >
           {`${formattedBalance} ${tokenMetadata.symbol}`}
@@ -95,6 +99,7 @@ const MenuItem = (props: MenuItemProps) => {
       style={{
         flexDirection: 'column',
         alignItems: 'center',
+        rowGap: spacing.xSmall,
       }}
       testID={testID}
     >
@@ -106,16 +111,14 @@ const MenuItem = (props: MenuItemProps) => {
           justifyContent: 'center',
           alignItems: 'center',
           backgroundColor: colors.text,
-          padding: 12,
-          borderRadius: 100,
+          borderRadius: borderRadius.rounded,
         }}
       >
         {icon}
       </View>
       <Text
         style={{
-          fontSize: 16,
-          marginTop: 8,
+          fontSize: fontSizes.base,
           color: colors.text,
           textAlign: 'center',
         }}
@@ -183,158 +186,148 @@ const HomeScreen = () => {
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'column',
+    <ScrollView
+      contentContainerStyle={{
+        rowGap: spacing.base,
+        paddingHorizontal: spacing.small,
+        paddingTop: spacing.small,
       }}
+      refreshControl={
+        <RefreshControl
+          tintColor={colors.primary}
+          refreshing={isRefetchingBalance || isRefetchingTransferHistory}
+          onRefresh={onRefresh}
+        />
+      }
     >
-      <ScrollView
-        contentContainerStyle={{
-          rowGap: 24,
-          paddingHorizontal: 16,
+      <View
+        style={{
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
-        refreshControl={
-          <RefreshControl
-            tintColor={colors.primary}
-            refreshing={isRefetchingBalance || isRefetchingTransferHistory}
-            onRefresh={onRefresh}
-          />
-        }
       >
-        <View
+        <Text
           style={{
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: 24,
+            fontSize: fontSizes.large,
+            color: colors.text,
+            fontWeight: 500,
           }}
         >
+          {t('fiatDenominatedBalance', { balance: totalUsdBalance })}
+        </Text>
+      </View>
+      {/* Action menus (Deposit, Send, Receive) */}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          columnGap: spacing.large,
+        }}
+      >
+        <MenuItem
+          icon={<AntDesign name="plus" size={24} color={colors.background} />}
+          title={t('deposit')}
+          onPress={() => {
+            navigation.navigate('Deposit');
+          }}
+          testID="deposit"
+        />
+        <MenuItem
+          icon={
+            <AntDesign name="arrowdown" size={24} color={colors.background} />
+          }
+          title={t('receive')}
+          onPress={() => {
+            navigation.navigate('Receive');
+          }}
+          testID="receive"
+        />
+        <MenuItem
+          icon={
+            <AntDesign name="arrowup" size={24} color={colors.background} />
+          }
+          title={t('send')}
+          onPress={() => {
+            navigation.navigate('SelectRecipient');
+          }}
+          testID="send"
+        />
+      </View>
+      {/* Token list */}
+      <ScrollView
+        horizontal
+        style={{
+          flexDirection: 'row',
+          height: 80,
+          paddingHorizontal: spacing.base,
+        }}
+        contentContainerStyle={{
+          columnGap: 16,
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+        }}
+      >
+        {tokenBalances?.map(
+          ({ tokenId, formattedBalance, formattedUsdBalance }, i) => {
+            return (
+              <TokenBalanceItem
+                key={i}
+                formattedBalance={formattedBalance}
+                formattedUsdBalance={formattedUsdBalance}
+                tokenId={tokenId}
+              />
+            );
+          }
+        )}
+        {tokenBalances?.length > 3 && (
+          <AntDesign name="arrowright" size={24} color={colors.gray} />
+        )}
+      </ScrollView>
+      {/* Transfer history */}
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'column',
+        }}
+      >
+        {transferHistory?.map((transfer, i) => (
+          <TransferHistoryListItem
+            key={i}
+            transfer={transfer}
+            type={getTransferType(transfer, signedInUser.id)}
+          />
+        ))}
+        {transferHistory && transferHistory.length >= NUM_TRANSFERS_TO_FETCH ? (
           <Text
             style={{
-              fontSize: 24,
+              textAlign: 'right',
+              marginVertical: spacing.base,
+              marginRight: spacing.base,
+              textDecorationLine: 'underline',
               color: colors.text,
-              fontWeight: 500,
+            }}
+            onPress={() => {
+              navigation.navigate('TransferHistory');
             }}
           >
-            {t('fiatDenominatedBalance', { balance: totalUsdBalance })}
+            {t('seeAll')}
           </Text>
-        </View>
-        {/* Action menus (Deposit, Send, Receive) */}
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            columnGap: 40,
-          }}
-        >
-          <MenuItem
-            icon={<AntDesign name="plus" size={24} color={colors.background} />}
-            title={t('deposit')}
-            onPress={() => {
-              navigation.navigate('Deposit');
+        ) : null}
+        {transferHistory?.length === 0 ? (
+          <Text
+            style={{
+              textAlign: 'center',
+              opacity: opacity.dimmed,
+              color: colors.text,
             }}
-            testID="deposit"
-          />
-          <MenuItem
-            icon={
-              <AntDesign name="arrowdown" size={24} color={colors.background} />
-            }
-            title={t('receive')}
-            onPress={() => {
-              navigation.navigate('Receive');
-            }}
-            testID="receive"
-          />
-          <MenuItem
-            icon={
-              <AntDesign name="arrowup" size={24} color={colors.background} />
-            }
-            title={t('send')}
-            onPress={() => {
-              navigation.navigate('SelectRecipient');
-            }}
-            testID="send"
-          />
-        </View>
-        {/* Token list */}
-        <ScrollView
-          horizontal
-          style={{
-            flexDirection: 'row',
-            height: 80,
-            paddingHorizontal: 20,
-          }}
-          contentContainerStyle={{
-            columnGap: 16,
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%',
-          }}
-        >
-          {tokenBalances?.map(
-            ({ tokenId, formattedBalance, formattedUsdBalance }, i) => {
-              return (
-                <TokenBalanceItem
-                  key={i}
-                  formattedBalance={formattedBalance}
-                  formattedUsdBalance={formattedUsdBalance}
-                  tokenId={tokenId}
-                />
-              );
-            }
-          )}
-          {tokenBalances?.length > 3 && (
-            <AntDesign name="arrowright" size={24} color={colors.gray} />
-          )}
-        </ScrollView>
-        {/* Transfer history */}
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'column',
-          }}
-        >
-          {transferHistory?.map((transfer, i) => (
-            <TransferHistoryListItem
-              key={i}
-              transfer={transfer}
-              type={getTransferType(transfer, signedInUser.id)}
-            />
-          ))}
-          {transferHistory &&
-          transferHistory.length >= NUM_TRANSFERS_TO_FETCH ? (
-            <Text
-              style={{
-                textAlign: 'right',
-                marginTop: 20,
-                marginRight: 20,
-                marginBottom: 20,
-                textDecorationLine: 'underline',
-                color: colors.text,
-              }}
-              onPress={() => {
-                navigation.navigate('TransferHistory');
-              }}
-            >
-              {t('seeAll')}
-            </Text>
-          ) : null}
-          {transferHistory?.length === 0 ? (
-            <Text
-              style={{
-                textAlign: 'center',
-                marginTop: 20,
-                opacity: 0.5,
-                color: colors.text,
-              }}
-            >
-              {t('noTransfers')}
-            </Text>
-          ) : null}
-        </View>
-      </ScrollView>
-    </View>
+          >
+            {t('noTransfers')}
+          </Text>
+        ) : null}
+      </View>
+    </ScrollView>
   );
 };
 

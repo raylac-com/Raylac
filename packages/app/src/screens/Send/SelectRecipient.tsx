@@ -12,6 +12,7 @@ import { publicKeyToAddress } from 'viem/accounts';
 import { Hex, isAddress } from 'viem';
 import { useTranslation } from 'react-i18next';
 import { shortenAddress } from '@/lib/utils';
+import fontSizes from '@/lib/styles/fontSizes';
 // import useEnsName from '@/hooks/useEnsName';
 
 interface UserListItemProps {
@@ -47,7 +48,7 @@ const UserListItem = (props: UserListItemProps) => {
       >
         <Text
           style={{
-            fontSize: 16,
+            fontSize: fontSizes.base,
             fontWeight: 'bold',
             color: colors.text,
           }}
@@ -102,7 +103,7 @@ const AddressListItem = (props: AddressListItemProps) => {
       >
         <Text
           style={{
-            fontSize: 16,
+            fontSize: fontSizes.base,
             fontWeight: 'bold',
             color: colors.text,
           }}

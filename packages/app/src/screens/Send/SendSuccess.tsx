@@ -31,6 +31,7 @@ const SendSuccess = () => {
         {t('transferSuccessful')}
       </Text>
       <StyledButton
+        variant="primary"
         title={t('backToHome')}
         style={{
           marginTop: 24,
