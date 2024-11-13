@@ -6,12 +6,15 @@ import {
   ERC5564_ANNOUNCER_ADDRESS,
   ERC5564_SCHEME_ID,
   ERC5564AnnouncerAbi,
+  getPublicClient,
   getSenderAddressV2,
   getWalletClient,
   StealthAddressWithEphemeral,
+  supportedChains,
 } from '@raylac/shared';
 import { privateKeyToAccount, nonceManager } from 'viem/accounts';
 import { logger } from '@raylac/shared-backend';
+import { CHAIN_BLOCK_TIME } from '@raylac/sync';
 
 const ANNOUNCER_PRIVATE_KEY = process.env.ANNOUNCER_PRIVATE_KEY;
 
@@ -23,6 +26,13 @@ const announcerAccount = privateKeyToAccount(ANNOUNCER_PRIVATE_KEY as Hex, {
   nonceManager,
 });
 
+const getChainBlockNumber = async ({ chainId }: { chainId: number }) => {
+  const publicClient = getPublicClient({ chainId });
+  return await publicClient.getBlockNumber();
+};
+
+const SCAN_PAST_BUFFER = 2 * 60 * 1000; // 2 minutes
+
 export const announce = async ({
   stealthAccount,
   useAnvil = false,
@@ -30,7 +40,26 @@ export const announce = async ({
   stealthAccount: StealthAddressWithEphemeral;
   useAnvil?: boolean;
 }) => {
-  const metadata = encodeERC5564Metadata(stealthAccount.viewTag);
+  // Get the block number for all supported chains
+  const chainInfos = await Promise.all(
+    supportedChains.map(async chain => {
+      const blockNumber = await getChainBlockNumber({ chainId: chain.id });
+
+       
+      const blockTime = CHAIN_BLOCK_TIME[chain.id];
+      const scanPastBufferBlocks = Math.floor(SCAN_PAST_BUFFER / blockTime);
+
+      return {
+        chainId: chain.id,
+        scanFromBlock: blockNumber - BigInt(scanPastBufferBlocks),
+      };
+    })
+  );
+
+  const metadata = encodeERC5564Metadata({
+    viewTag: stealthAccount.viewTag,
+    chainInfo: chainInfos,
+  });
 
   // Sanity check that the stealth account matches the ERC5564_SCHEME_ID version
   if (

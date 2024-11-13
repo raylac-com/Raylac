@@ -5,7 +5,6 @@ import {
   waitFor,
 } from '../lib/utils';
 import { parseEther, zeroAddress } from 'viem';
-import { sync } from '@raylac/sync';
 import { anvil } from 'viem/chains';
 import { getAuthedClient } from '../lib/rpc';
 import {
@@ -70,12 +69,6 @@ describe('reorg', () => {
 
   test('should handle a reorg for incoming transfers correctly', async () => {
     const authedClient = await getAuthedClient();
-
-    // Start the sync job for Anvil
-    await sync({
-      announcementChainId: anvil.id,
-      chainIds: [anvil.id],
-    });
 
     const snapshot = await testClient.snapshot();
 

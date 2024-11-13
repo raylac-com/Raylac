@@ -1,7 +1,7 @@
 import FastAvatar from '@/components/FastAvatar';
 import StyledButton from '@/components/StyledButton';
 import useGasInfo from '@/hooks/useGasInfo';
-import useSend from '@/hooks/useSend';
+import useMultiChainSend from '@/hooks/useMultiChainSend';
 import useTokenPrice from '@/hooks/useTokenPrice';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import mixpanel from '@/lib/mixpanel';
@@ -25,7 +25,7 @@ const ConfirmSend = ({ route }: Props) => {
   const { t } = useTranslation('ConfirmSend');
   const { amount, recipientUserOrAddress, tokenId, outputChainId } =
     route.params;
-  const { mutateAsync: send, isPending: isSending } = useSend();
+  const { mutateAsync: send, isPending: isSending } = useMultiChainSend();
   const navigation = useTypedNavigation();
   const [usdAmount, setUsdAmount] = useState<string | null>(null);
   const { data: tokenPrice } = useTokenPrice(tokenId);

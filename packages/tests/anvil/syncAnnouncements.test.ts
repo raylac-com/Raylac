@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import sync from '../../sync/src/sync';
 import { anvil } from 'viem/chains';
 import { createStealthAccountForTestUser, waitFor } from '../lib/utils';
 import prisma from '../lib/prisma';
@@ -53,12 +52,6 @@ describe('syncAnnouncements', () => {
     }
 
     const blockNumber = await publicClient.getBlockNumber();
-
-    // 2: Sync the announcements
-    sync({
-      announcementChainId: anvil.id,
-      chainIds: [anvil.id],
-    });
 
     await waitForAnnouncementsSync({
       blockNumber: BigInt(blockNumber),

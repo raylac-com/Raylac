@@ -1,6 +1,5 @@
 import {
   bigIntMin,
-  devChains,
   getChainName,
   getNativeTransferTracesInBlock,
   getPublicClient,
@@ -19,6 +18,26 @@ import {
 import { base, optimism } from 'viem/chains';
 import { getTokenPriceAtTime } from './lib/coingecko';
 import { logger } from '@raylac/shared-backend';
+
+const getNativeTransferTracesInBlocks = async ({
+  blocks,
+  chainId,
+}: {
+  blocks: bigint[];
+  chainId: number;
+}) => {
+  const promises = [];
+
+  for (const block of blocks) {
+    promises.push(
+      getNativeTransferTracesInBlock({ blockNumber: block, chainId })
+    );
+  }
+
+  const traces = await Promise.all(promises);
+
+  return traces.flat();
+};
 
 const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
   const addressSyncStatuses = await prisma.addressSyncStatus.findMany({
@@ -46,16 +65,31 @@ const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
 
   const toBlock = await client.getBlockNumber();
 
-  for (let blockNumber = fromBlock; blockNumber <= toBlock; blockNumber++) {
-    // Get addresses that needs to be scanned from this block
-    const addresses = addressSyncStatuses.filter(
-      addressSyncStatus => BigInt(addressSyncStatus.blockNumber) <= blockNumber
-    );
+  const batchSize = 20;
 
-    const callsWithValue = await getNativeTransferTracesInBlock({
-      blockNumber,
+  for (
+    let blockNumber = fromBlock;
+    blockNumber <= toBlock;
+    blockNumber += BigInt(batchSize)
+  ) {
+    const blocks: bigint[] = [];
+
+    for (let i = 0; i < batchSize; i++) {
+      if (blockNumber + BigInt(i) <= toBlock) {
+        blocks.push(blockNumber + BigInt(i));
+      }
+    }
+
+    const callsWithValue = await getNativeTransferTracesInBlocks({
+      blocks,
       chainId,
     });
+
+    // Get addresses that needs to be scanned for this batch
+    const addresses = addressSyncStatuses.filter(
+      addressSyncStatus =>
+        BigInt(addressSyncStatus.blockNumber) <= blocks[blocks.length - 1]
+    );
 
     const callsWithAddresses = callsWithValue.filter(call => {
       const to = getAddress(call.to);
@@ -93,19 +127,12 @@ const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
       });
     }
 
-    const devChainIds = devChains.map(c => c.id);
-    const isDevChain = devChainIds.includes(chainId);
-
-    // Update on every block on dev chains
-    // On other chains, update every 10 blocks
-    if (isDevChain || Number(blockNumber) % 10 === 0) {
-      await updateAddressesSyncStatus({
-        addresses: addresses.map(address => address.address as Hex),
-        chainId,
-        tokenId: 'eth',
-        blockNumber,
-      });
-    }
+    await updateAddressesSyncStatus({
+      addresses: addresses.map(address => address.address as Hex),
+      chainId,
+      tokenId: 'eth',
+      blockNumber: blocks[blocks.length - 1],
+    });
   }
 };
 

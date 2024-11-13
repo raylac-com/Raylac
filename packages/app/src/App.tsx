@@ -391,7 +391,7 @@ const App = () => {
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <PersistQueryClientProvider
           client={queryClient}
-          persistOptions={{ persister: asyncStoragePersister, buster: '41' }}
+          persistOptions={{ persister: asyncStoragePersister, buster: '42' }}
         >
           <ThemeProvider value={NavigationTheme}>
             <Screens></Screens>

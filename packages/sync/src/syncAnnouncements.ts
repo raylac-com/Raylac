@@ -1,18 +1,12 @@
 import {
-  bigIntMax,
   ERC5564_ANNOUNCER_ADDRESS,
   ERC5564_SCHEME_ID,
   getSenderAddressV2,
   sleep,
-  devChains,
+  decodeERC5564MetadataAsViewTag,
 } from '@raylac/shared';
 import prisma from './lib/prisma';
-import {
-  announcementAbiItem,
-  CHAIN_BLOCK_TIME,
-  endTimer,
-  startTimer,
-} from './utils';
+import { announcementAbiItem, endTimer, startTimer } from './utils';
 import processLogs from './processLogs';
 import { decodeEventLog, Hex, Log, parseAbi } from 'viem';
 import { anvil } from 'viem/chains';
@@ -20,7 +14,6 @@ import { ERC5564Announcement, Prisma, SyncJob } from '@raylac/db';
 import { supportedTokens } from '@raylac/shared';
 import { getChainName } from '@raylac/shared';
 import { logger } from '@raylac/shared-backend';
-const SCAN_PAST_BUFFER = 2 * 60 * 1000; // 2 minutes
 
 /**
  * Create sync tasks for an announcement on a given chain
@@ -31,29 +24,12 @@ const SCAN_PAST_BUFFER = 2 * 60 * 1000; // 2 minutes
 const createSyncTaskForChain = async ({
   announcement,
   chainId,
+  scanFromBlock,
 }: {
   announcement: ERC5564Announcement;
   chainId: number;
+  scanFromBlock: bigint;
 }) => {
-  // eslint-disable-next-line security/detect-object-injection
-  const blockTime = CHAIN_BLOCK_TIME[chainId];
-  const scanPastBufferBlocks = Math.floor(SCAN_PAST_BUFFER / blockTime);
-
-  let fromBlock;
-
-  const devChainIds = devChains.map(c => c.id);
-  const isDevChain = devChainIds.includes(chainId);
-
-  if (isDevChain) {
-    fromBlock =
-      announcement.blockNumber !== 0n ? announcement.blockNumber - 1n : 0n;
-  } else {
-    fromBlock = bigIntMax([
-      announcement.blockNumber - BigInt(scanPastBufferBlocks),
-      0n,
-    ]);
-  }
-
   const tokenIds = supportedTokens.map(token => token.tokenId);
 
   const syncTasks: Prisma.AddressSyncStatusCreateManyInput[] = [];
@@ -61,7 +37,7 @@ const createSyncTaskForChain = async ({
     syncTasks.push({
       address: announcement.address as Hex,
       chainId,
-      blockNumber: fromBlock,
+      blockNumber: scanFromBlock,
       tokenId,
       eRC5564AnnouncementId: announcement.id,
       blockHash: '0x',
@@ -80,32 +56,39 @@ const createSyncTaskForChain = async ({
 
 const createSyncTasks = async ({
   announcement,
-  chainIds,
 }: {
   announcement: ERC5564Announcement;
-  chainIds: number[];
 }) => {
   const promises = [];
 
-  for (const chainId of chainIds) {
-    if (announcement.chainId === anvil.id && chainId !== anvil.id) {
+  const decodedAnnouncementMetadata = decodeERC5564MetadataAsViewTag(
+    announcement.metadata as Hex
+  );
+  const chainInfos = decodedAnnouncementMetadata.chainInfos;
+
+  for (const chainInfo of chainInfos) {
+    if (announcement.chainId === anvil.id && chainInfo.chainId !== anvil.id) {
       // We don't create sync tasks for production chains when the announcement
       // is on the anvil chain
       continue;
     }
 
-    promises.push(createSyncTaskForChain({ announcement, chainId }));
+    promises.push(
+      createSyncTaskForChain({
+        announcement,
+        chainId: chainInfo.chainId,
+        scanFromBlock: chainInfo.scanFromBlock,
+      })
+    );
   }
 };
 
 export const handleERC5564AnnouncementLog = async ({
   log,
   announcementChainId,
-  chainIds,
 }: {
   log: Log<bigint, number, false>;
   announcementChainId: number;
-  chainIds: number[];
 }) => {
   const decodedLog = decodeEventLog({
     abi: parseAbi([
@@ -146,7 +129,7 @@ export const handleERC5564AnnouncementLog = async ({
     },
   });
 
-  await createSyncTasks({ announcement, chainIds });
+  await createSyncTasks({ announcement });
 };
 
 /**
@@ -194,10 +177,8 @@ const deleteV1Accounts = async () => {
  */
 const syncAnnouncements = async ({
   announcementChainId,
-  chainIds,
 }: {
   announcementChainId: number;
-  chainIds: number[];
 }) => {
   await deleteV1Accounts();
 
@@ -213,7 +194,6 @@ const syncAnnouncements = async ({
           await handleERC5564AnnouncementLog({
             log,
             announcementChainId,
-            chainIds,
           });
         }
       },

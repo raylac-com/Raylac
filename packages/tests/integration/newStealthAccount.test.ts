@@ -10,6 +10,8 @@ import {
   recoveryStealthPrivKey,
   sleep,
   ERC5564_SCHEME_ID,
+  decodeERC5564MetadataAsViewTag,
+  supportedChains,
 } from '@raylac/shared';
 import { Hex, parseAbiItem } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -70,7 +72,16 @@ describe('new stealth account', () => {
     expect(announcementLog.args.stealthAddress).toEqual(
       newStealthAccount.signerAddress
     );
-    expect(announcementLog.args.metadata).toEqual(newStealthAccount.viewTag);
+
+    const decodedMetadata = decodeERC5564MetadataAsViewTag(
+      announcementLog.args.metadata as Hex
+    );
+
+    expect(decodedMetadata.viewTag).toEqual(newStealthAccount.viewTag);
+    expect(
+      decodedMetadata.chainInfos.map(chainInfo => chainInfo.chainId)
+    ).toEqual(supportedChains.map(chain => chain.id));
+
     expect(announcementLog.args.schemeId).toEqual(ERC5564_SCHEME_ID);
 
     const spendingPrivKey = getSpendingPrivKey(TEST_ACCOUNT_MNEMONIC);

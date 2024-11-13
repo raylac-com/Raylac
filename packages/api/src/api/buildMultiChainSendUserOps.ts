@@ -14,6 +14,7 @@ import { toHex } from 'viem/utils';
 import getStealthAccounts from './getStealthAccounts';
 import { Hex } from 'viem';
 import paymasterSignUserOp from './paymasterSignUserOp';
+import { StealthAccountQueryResult } from '../queries/selectStealthAccounts';
 
 interface InputAddress {
   address: Hex;
@@ -32,7 +33,7 @@ const chooseInputs = async ({
 }): Promise<InputAddress[]> => {
   const addressBalances = await getAddressBalancesPerChain({ userId });
 
-  // Filter out stealth accounts with non-zero balance of the output token
+  // Get stealth accounts with non-zero balance of the token we are sending
   const sortedAddressTokenBalances = addressBalances
     .filter(
       addressTokenBalance =>
@@ -83,6 +84,22 @@ const chooseInputs = async ({
   }
 
   return sendFromAccounts;
+};
+
+const getAccountNonceOnChain = ({
+  stealthAccount,
+  chainId,
+}: {
+  stealthAccount: StealthAccountQueryResult;
+  chainId: number;
+}): number | null => {
+  const pastUserOpsOnChain = stealthAccount.userOps.filter(
+    userOp => userOp.chainId === chainId
+  );
+
+  return pastUserOpsOnChain.length > 0
+    ? Math.max(...pastUserOpsOnChain.map(userOp => userOp.nonce ?? 0))
+    : null;
 };
 
 const buildMultiChainSendUserOps = async ({
@@ -185,7 +202,10 @@ const buildMultiChainSendUserOps = async ({
         tokenAddress,
         amount: input.amount,
         chainId: input.chainId,
-        nonce: stealthAccount.nonce,
+        nonce: getAccountNonceOnChain({
+          stealthAccount,
+          chainId: input.chainId,
+        }),
         tag,
         gasInfo: chainGasInfo,
       });
@@ -216,7 +236,10 @@ const buildMultiChainSendUserOps = async ({
       tokenAddress,
       amount: BigInt(amount),
       chainId,
-      nonce: consolidateToStealthAccount.nonce,
+      nonce: getAccountNonceOnChain({
+        stealthAccount: consolidateToStealthAccount,
+        chainId,
+      }),
       tag,
       gasInfo: chainGasInfo,
     });

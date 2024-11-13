@@ -20,7 +20,10 @@ const sync = async () => {
 
   const jobs = [
     syncBlocks({ chainIds }),
-    syncUserOps({ chainIds }),
+    syncUserOps({
+      announcementChainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
+      chainIds,
+    }),
     syncUserActions({ chainIds }),
     syncNativeTransfers({
       announcementChainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
@@ -28,7 +31,6 @@ const sync = async () => {
     }),
     syncAnnouncements({
       announcementChainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
-      chainIds,
     }),
     assignNativeTransfers({ chainIds }),
     syncERC20Transfers({
@@ -46,7 +48,10 @@ const sync = async () => {
 
     const devChainJobs = [
       syncBlocks({ chainIds: devChainIds }),
-      syncUserOps({ chainIds: devChainIds }),
+      syncUserOps({
+        announcementChainId: DEV_CHAIN_ANNOUNCEMENT_CHAIN_ID,
+        chainIds: devChainIds,
+      }),
       syncUserActions({ chainIds: devChainIds }),
       syncNativeTransfers({
         announcementChainId: DEV_CHAIN_ANNOUNCEMENT_CHAIN_ID,
@@ -54,7 +59,6 @@ const sync = async () => {
       }),
       syncAnnouncements({
         announcementChainId: DEV_CHAIN_ANNOUNCEMENT_CHAIN_ID,
-        chainIds: devChainIds,
       }),
       assignNativeTransfers({ chainIds: devChainIds }),
       syncERC20Transfers({

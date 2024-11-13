@@ -1,12 +1,7 @@
 import { Prisma } from '@raylac/db';
 import prisma from './lib/prisma';
 import { Hex } from 'viem';
-import {
-  bigIntMax,
-  decodeUserOperationContext,
-  devChains,
-  sleep,
-} from '@raylac/shared';
+import { bigIntMax, decodeUserOperationContext, sleep } from '@raylac/shared';
 import { logger } from '@raylac/shared-backend';
 
 /**
@@ -49,10 +44,6 @@ const syncMultiChainTransfers = async ({
         txHash: tx.hash as Hex,
         context: tx.tag as Hex,
       });
-
-      if (devChains.map(chain => chain.id).includes(tx.chainId)) {
-        console.log({ multiChainTag, numChains, tag: tx.tag, hash: tx.hash });
-      }
 
       return { ...tx, multiChainTag, numChains };
     });

@@ -4,6 +4,7 @@ import StyledButton from '@/components/StyledButton';
 import { useTranslation } from 'react-i18next';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import colors from '@/lib/styles/colors';
+import spacing from '@/lib/styles/spacing';
 
 /**
  * Screen shown after a transfer succeeds
@@ -30,19 +31,21 @@ const SendSuccess = () => {
       >
         {t('transferSuccessful')}
       </Text>
-      <StyledButton
-        variant="primary"
-        title={t('backToHome')}
-        style={{
-          marginTop: 24,
-        }}
-        onPress={() => {
-          navigate('Tabs', {
-            screen: 'Home',
-          });
-        }}
-        testID="back-to-home"
-      ></StyledButton>
+      <View style={{ width: '40%' }}>
+        <StyledButton
+          variant="primary"
+          title={t('backToHome')}
+          style={{
+            marginTop: spacing.large,
+          }}
+          onPress={() => {
+            navigate('Tabs', {
+              screen: 'Home',
+            });
+          }}
+          testID="back-to-home"
+        ></StyledButton>
+      </View>
     </View>
   );
 };

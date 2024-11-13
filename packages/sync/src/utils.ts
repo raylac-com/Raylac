@@ -13,6 +13,7 @@ import {
   anvil1,
   anvil2,
   bigIntMin,
+  ENTRY_POINT_ADDRESS,
   EntryPointAbi,
   ERC20Abi,
   getChainName,
@@ -232,37 +233,39 @@ export const upsertTransaction = async ({
     hash: txHash,
   });
 
-  const handleOpsInput = decodeFunctionData({
-    abi: EntryPointAbi,
-    data: tx.input,
-  });
-
   let tag: Hex = '0x';
-  if (handleOpsInput.functionName === 'handleOps') {
-    const userOps = handleOpsInput.args[0];
 
-    const executeArgs: RaylacAccountExecuteArgs[] = [];
+  if (tx.to === ENTRY_POINT_ADDRESS) {
+    const handleOpsInput = decodeFunctionData({
+      abi: EntryPointAbi,
+      data: tx.input,
+    });
+    if (handleOpsInput.functionName === 'handleOps') {
+      const userOps = handleOpsInput.args[0];
 
-    for (const userOp of userOps) {
-      const data = decodeFunctionData({
-        abi: RaylacAccountV2Abi,
-        data: userOp.callData,
-      });
+      const executeArgs: RaylacAccountExecuteArgs[] = [];
 
-      if (data.functionName === 'execute') {
-        executeArgs.push({
-          to: data.args[0],
-          value: data.args[1],
-          data: data.args[2],
-          tag: data.args[3],
+      for (const userOp of userOps) {
+        const data = decodeFunctionData({
+          abi: RaylacAccountV2Abi,
+          data: userOp.callData,
         });
-      }
-    }
 
-    // Check that all execute calls has the same tag
-    if (!executeArgs.some(arg => arg.tag !== executeArgs[0].tag)) {
-      // All execute calls have the same tag
-      tag = executeArgs[0].tag;
+        if (data.functionName === 'execute') {
+          executeArgs.push({
+            to: data.args[0],
+            value: data.args[1],
+            data: data.args[2],
+            tag: data.args[3],
+          });
+        }
+      }
+
+      // Check that all execute calls has the same tag
+      if (!executeArgs.some(arg => arg.tag !== executeArgs[0].tag)) {
+        // All execute calls have the same tag
+        tag = executeArgs[0].tag;
+      }
     }
   }
 

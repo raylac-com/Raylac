@@ -31,31 +31,86 @@ import {
   devChains,
   getERC20TokenBalance,
   getMaxPriorityFeePerGas,
+  supportedChains,
   traceBlockByNumber,
 } from '.';
 import axios from 'axios';
 
-export const encodeERC5564Metadata = (viewTag: Hex): Hex => {
-  if (viewTag.length !== 4) {
+const VIEW_TAG_BYTES = 1;
+const CHAIN_ID_BYTES = 4;
+const SCAN_FROM_BLOCK_BYTES = 4;
+
+export const encodeERC5564Metadata = ({
+  viewTag,
+  chainInfo,
+}: {
+  viewTag: Hex;
+  chainInfo: {
+    chainId: number;
+    scanFromBlock: bigint;
+  }[];
+}): Hex => {
+  if (toBytes(viewTag).byteLength !== VIEW_TAG_BYTES) {
     throw new Error(
-      `viewTag must be exactly 4 bytes, got ${viewTag.length} hex chars`
+      `viewTag must be exactly 1 byte, got ${viewTag.length} hex chars`
     );
   }
 
-  const metadata = viewTag;
+  let metadata = viewTag;
+
+  for (const chain of chainInfo) {
+    metadata += toHex(chain.chainId, { size: CHAIN_ID_BYTES }).replace(
+      '0x',
+      ''
+    );
+    metadata += toHex(chain.scanFromBlock, {
+      size: SCAN_FROM_BLOCK_BYTES,
+    }).replace('0x', '');
+  }
+
   return metadata;
 };
 
 export const decodeERC5564MetadataAsViewTag = (metadata: Hex) => {
-  if (metadata.length !== 4) {
-    throw new Error(
-      `metadata must be exactly 1 byte, got ${metadata.length} hex chars`
+  const metadataBytes = toBytes(metadata);
+  const viewTag = toHex(metadataBytes.slice(0, VIEW_TAG_BYTES));
+
+  const chainInfos: {
+    chainId: number;
+    scanFromBlock: bigint;
+  }[] = [];
+
+  const supportedChainIds = supportedChains.map(chain => chain.id);
+
+  for (
+    let i = VIEW_TAG_BYTES;
+    i < metadataBytes.byteLength;
+    i += CHAIN_ID_BYTES + SCAN_FROM_BLOCK_BYTES
+  ) {
+    const chainId = fromHex(
+      toHex(metadataBytes.slice(i, i + CHAIN_ID_BYTES)),
+      'number'
     );
+
+    // Ignore scan requests for unsupported chains
+    if (!supportedChainIds.includes(chainId)) {
+      continue;
+    }
+
+    const scanFromBlock = fromHex(
+      toHex(
+        metadataBytes.slice(
+          i + CHAIN_ID_BYTES,
+          i + CHAIN_ID_BYTES + SCAN_FROM_BLOCK_BYTES
+        )
+      ),
+      'bigint'
+    );
+
+    chainInfos.push({ chainId, scanFromBlock });
   }
 
-  const viewTag = metadata.slice(0, 4) as Hex;
-
-  return { viewTag };
+  return { viewTag, chainInfos };
 };
 
 export const hexToProjectivePoint = (hex: Hex) => {
@@ -358,6 +413,8 @@ export const getBlockExplorerUrl = (chainId: number) => {
       return `https://sepolia.basescan.org`;
     case chains.base.id:
       return `https://basescan.org`;
+    case chains.arbitrum.id:
+      return `https://arbiscan.io`;
     default:
       throw new Error(`Chain ${chainId} not supported`);
   }

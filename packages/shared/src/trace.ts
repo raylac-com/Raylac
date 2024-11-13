@@ -100,7 +100,15 @@ export const traceBlockByNumber = async ({
 
   const params = isDevChain
     ? [toHex(blockNumber)]
-    : [toHex(blockNumber), { tracer: 'callTracer', tracerConfig: {} }];
+    : [
+        toHex(blockNumber),
+        {
+          tracer: 'callTracer',
+          tracerConfig: {
+            onlyTopCall: false,
+          },
+        },
+      ];
 
   const result = await axios.post<{
     result: BlockTraceResponse | AnvilBlockTraceResponse;

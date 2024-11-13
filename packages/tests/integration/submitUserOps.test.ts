@@ -9,6 +9,7 @@ import {
   buildUserOp,
   UserOperation,
   UserActionType,
+  encodeUserActionTag,
 } from '@raylac/shared';
 import { parseUnits, parseEther, zeroAddress, pad } from 'viem';
 import { client, getAuthedClient } from '../lib/rpc';
@@ -18,7 +19,6 @@ import {
   getTestClient,
   signUserOpWithTestUserAccount,
   signUserOpWithPaymasterAccount,
-  getUserActionTag,
 } from '../lib/utils';
 import prisma from '../lib/prisma';
 
@@ -104,7 +104,7 @@ describe('multiChainSend', () => {
     const groupTag = pad('0x3333', { size: 32 });
     const groupSize = 2;
 
-    const tag = getUserActionTag({
+    const tag = encodeUserActionTag({
       groupTag,
       groupSize,
       userActionType: UserActionType.Transfer,
@@ -143,7 +143,7 @@ describe('multiChainSend', () => {
     }
 
     // Submit the user operations to the RPC endpoint
-    const txHashes = await authedClient.submitUserOps.mutate({
+    const { txHashes } = await authedClient.submitUserOps.mutate({
       userOps: signedUserOps,
       tokenPrice: tokenPrice.usd,
     });
