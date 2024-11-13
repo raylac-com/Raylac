@@ -6,7 +6,10 @@ import {
   fromHex,
   getAddress,
   Hex,
+  keccak256,
+  pad,
   parseUnits,
+  toBytes,
   toHex,
 } from 'viem';
 import {
@@ -14,6 +17,7 @@ import {
   BlockTraceResponse,
   BlockTransactionResponse,
   ChainGasInfo,
+  DecodedUserOperationContext,
   TraceWithTraceAddress,
   UserActionType,
   UserOperation,
@@ -197,24 +201,28 @@ export const decodeUserOpCalldata = (userOp: UserOperation) => {
 /**
  * Decode the `tag` argument in the `execute` function of RaylacAccount.sol
  */
-export const decodeUserOperationTag = (
-  tag: Hex
-): {
-  groupTag: Hex;
-  groupSize: number;
-} => {
-  if (tag === '0x') {
-    return { groupTag: '0x', groupSize: 1 };
+export const decodeUserOperationContext = ({
+  txHash,
+  context,
+}: {
+  txHash: Hex;
+  context: Hex;
+}): DecodedUserOperationContext => {
+  try {
+    const contextRaw = context.replace('0x', '');
+    // The first 32 bytes are the grouping tag
+    const multiChainTag = `0x${contextRaw.slice(0, 64)}` as Hex;
+
+    // The last 2 bytes are the group size
+    const numChains = fromHex(`0x${contextRaw.slice(64, 68)}`, 'number');
+
+    return { multiChainTag, numChains };
+  } catch (_err: any) {
+    // If we fail to decode the context,
+    // just use the tx hash as the multi chain tag
+    // and assume this UserAction only spans one chain
+    return { multiChainTag: txHash, numChains: 1 };
   }
-
-  const tagRaw = tag.replace('0x', '');
-  // The first 32 bytes are the grouping tag
-  const groupTag = `0x${tagRaw.slice(0, 64)}` as Hex;
-
-  // The last 2 bytes are the group size
-  const groupSize = fromHex(`0x${tagRaw.slice(64, 68)}`, 'number');
-
-  return { groupTag, groupSize };
 };
 
 /**
@@ -572,4 +580,26 @@ export const encodeUserActionTag = ({
   const tag = `${groupTag}${groupSizeHex}${userActionTypeHex}` as Hex;
 
   return tag;
+};
+
+/**
+ * Get the hash of a UserAction from the tx hashes that constitute it
+ */
+export const getUserActionHash = (txHashes: Hex[]) => {
+  const sortedTxHashes = txHashes.sort();
+
+  let txHashesBytes = Buffer.alloc(0);
+
+  for (const txHash of sortedTxHashes) {
+    txHashesBytes = Buffer.concat([txHashesBytes, toBytes(txHash)]);
+  }
+
+  return keccak256(txHashesBytes);
+};
+
+export const generateRandomMultiChainTag = (): Hex => {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+
+  return pad(toHex(array), { size: 32 });
 };

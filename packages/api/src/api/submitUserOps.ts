@@ -1,7 +1,7 @@
 import { TRPCError } from '@trpc/server';
 import {
   decodeUserOpCalldata,
-  decodeUserOperationTag,
+  decodeUserOperationContext,
   EntryPointAbi,
   ERC20Abi,
   getChainName,
@@ -69,9 +69,17 @@ const upsertUserAction = async ({
 }) => {
   const executeArgs = userOps.map(decodeUserOpCalldata);
 
-  const groupTags = executeArgs.map(args => args.tag);
+  const contexts = executeArgs.map(args => args.tag);
 
-  const { groupTag, groupSize } = decodeUserOperationTag(groupTags[0]);
+  const decodedContexts = contexts.map(context =>
+    decodeUserOperationContext({
+      txHash: txReceipts[0].transactionHash,
+      context,
+    })
+  );
+
+  const multiChainTag = decodedContexts[0].multiChainTag;
+  const numChains = decodedContexts[0].numChains;
 
   // TODO: Get the timestamp from the chain that has the fastest RPC endpoint
   const blockTimestamp = await getBlockTimestamp({
@@ -87,8 +95,8 @@ const upsertUserAction = async ({
       connect: txHashes.map(hash => ({ hash })),
     },
     txHashes,
-    groupTag,
-    groupSize,
+    groupTag: multiChainTag,
+    groupSize: numChains,
   };
 
   return await prisma.userAction.upsert({
@@ -254,13 +262,25 @@ const validateUserOps = ({
     }
   }
 
-  const userOpTags = executeArgs.map(args => args.tag);
-  const tags = userOpTags.map(tag => decodeUserOperationTag(tag));
+  const userOpContexts = executeArgs.map(args => args.tag);
+  const decodedContexts = userOpContexts.map(tag =>
+    decodeUserOperationContext({
+      // We don't need to provide the tx hash to validate the context because
+      // the tx hash is used only as a fallback for the multiChain tag when the
+      // decoding fails
+      txHash: '0x',
+      context: tag,
+    })
+  );
 
-  if (!tags.every(tag => tag.groupTag === tags[0].groupTag)) {
+  if (
+    !decodedContexts.every(
+      context => context.multiChainTag === decodedContexts[0].multiChainTag
+    )
+  ) {
     throw new TRPCError({
       code: 'BAD_REQUEST',
-      message: `All user ops must have the same tag`,
+      message: `All user ops must have the same multi-chain tag`,
     });
   }
 };

@@ -278,13 +278,20 @@ export const upsertTransaction = async ({
     chainId,
   };
 
-  await prisma.block.upsert({
-    create: blockCreateInput,
-    update: blockCreateInput,
-    where: {
-      hash: tx.blockHash,
-    },
-  });
+  try {
+    // Sometimes this fails because the chain is going through a reorg
+    await prisma.block.upsert({
+      create: blockCreateInput,
+      update: blockCreateInput,
+      where: {
+        hash: tx.blockHash,
+      },
+    });
+  } catch (_err) {
+    logger.error(
+      `Error upserting block ${tx.blockHash} on ${getChainName(chainId)}`
+    );
+  }
 
   const data: Prisma.TransactionCreateManyInput = {
     hash: txHash,

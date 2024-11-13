@@ -1,7 +1,6 @@
 import FastAvatar from '@/components/FastAvatar';
 import LinkText from '@/components/LinkText';
 import TransferDetailListItem from '@/components/TransferDetailListItem';
-import useSignedInUser from '@/hooks/useSignedInUser';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
 import opacity from '@/lib/styles/opacity';
@@ -10,10 +9,7 @@ import {
   copyToClipboard,
   getAvatarAddress,
   getDisplayName,
-  getFinalTransfers,
   getProfileImage,
-  getTransferType,
-  getUsdTransferAmount,
   shortenAddress,
 } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
@@ -90,7 +86,6 @@ const TraceListItem = ({ trace }: { trace: TraceItem }) => {
 
 const TransferDetails = ({ route }: Props) => {
   const { transferId } = route.params;
-  const { data: signedInUser } = useSignedInUser();
   const [showTraces, setShowTraces] = useState(false);
 
   const { t } = useTranslation('TransferDetails');
@@ -99,30 +94,21 @@ const TransferDetails = ({ route }: Props) => {
     transferId,
   });
 
+  if (!transferDetail) {
+    return null;
+  }
+
   const blockTimestamp = new Date(Number(transferDetail?.timestamp) * 1000);
 
   const tokenId = transferDetail?.transactions[0].traces[0].tokenId;
 
   const tokenMeta = getTokenMetadata(tokenId);
 
-  if (!transferDetail || transferDetail.transactions.length === 0) {
-    return null;
-  }
+  const from = transferDetail?.fromUser || transferDetail?.fromAddress;
 
-  const type = getTransferType(transferDetail, signedInUser.id);
+  const to = transferDetail?.toUser || transferDetail?.toAddress;
 
-  const finalTransfers = getFinalTransfers(transferDetail);
-
-  const transferAmount = finalTransfers
-    .reduce((acc, curr) => acc + BigInt(curr.amount!), 0n)
-    .toString();
-
-  const transferUsdAmount = getUsdTransferAmount(transferDetail);
-
-  const from =
-    finalTransfers[0].UserStealthAddressFrom?.user || finalTransfers[0].from;
-  const to =
-    finalTransfers[0].UserStealthAddressTo?.user || finalTransfers[0].to;
+  const type = transferDetail.transferType;
 
   const avatarAddress =
     type === 'outgoing' ? getAvatarAddress(to) : getAvatarAddress(from);
@@ -183,10 +169,10 @@ const TransferDetails = ({ route }: Props) => {
           fontWeight: 'bold',
         }}
       >
-        {formatAmount(transferAmount.toString(), tokenMeta.decimals)}{' '}
+        {formatAmount(transferDetail.amount, tokenMeta.decimals)}{' '}
         {tokenMeta.symbol}
       </Text>
-      {transferUsdAmount && (
+      {transferDetail.usdAmount && (
         <Text
           style={{
             color: colors.text,
@@ -195,7 +181,7 @@ const TransferDetails = ({ route }: Props) => {
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >
-          ~${transferUsdAmount}
+          ~${transferDetail.usdAmount}
         </Text>
       )}
       <Text

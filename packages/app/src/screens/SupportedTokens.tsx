@@ -1,5 +1,5 @@
 import { getChainLogo } from '@/lib/logo';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { RootStackParamsList } from '@/navigation/types';
 import {
   getChainFromId,
@@ -21,8 +21,8 @@ const SupportedTokenListItem = (props: { token: SupportedToken }) => {
         alignItems: 'center',
         justifyContent: 'center',
         columnGap: 8,
-        borderBottomColor: theme.gray,
-        backgroundColor: theme.background,
+        borderBottomColor: colors.gray,
+        backgroundColor: colors.background,
         borderBottomWidth: 1,
         paddingVertical: 16,
       }}
@@ -31,7 +31,7 @@ const SupportedTokenListItem = (props: { token: SupportedToken }) => {
         source={{ uri: token.logoURI }}
         style={{ width: 20, height: 20 }}
       />
-      <Text style={{ color: theme.text, fontSize: 16 }}>{token.name}</Text>
+      <Text style={{ color: colors.text, fontSize: 16 }}>{token.name}</Text>
     </View>
   );
 };
@@ -59,7 +59,7 @@ const SupportedTokens = ({ route }: Props) => {
           columnGap: 8,
         }}
       >
-        <Text style={{ color: theme.text, fontSize: 18 }}>
+        <Text style={{ color: colors.text, fontSize: 18 }}>
           {t('tokensOnChain', { chain: chain.name })}
         </Text>
         <Image

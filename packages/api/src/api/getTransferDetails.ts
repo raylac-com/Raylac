@@ -1,91 +1,29 @@
 import prisma from '../lib/prisma';
+import selectTransfer from '../queries/selectTransfer';
+import { parseTransferData } from '../utils';
 
 /**
  * Get the details of a transfer by its transaction hash and trace address
  */
 const getTransferDetails = async ({
-  userId,
   transferId,
+  userId,
 }: {
-  userId: number;
   transferId: number;
+  userId: number;
 }) => {
-  const tx = await prisma.userAction.findUnique({
-    select: {
-      timestamp: true,
-      transactions: {
-        select: {
-          block: {
-            select: {
-              number: true,
-              timestamp: true,
-            },
-          },
-          userOps: {
-            select: {
-              hash: true,
-              tokenPriceAtOp: true,
-            },
-          },
-          traces: {
-            select: {
-              traceAddress: true,
-              tokenId: true,
-              chainId: true,
-              tokenPriceAtTrace: true,
-              UserStealthAddressFrom: {
-                select: {
-                  userId: true,
-                  address: true,
-                  user: {
-                    select: {
-                      spendingPubKey: true,
-                      name: true,
-                      username: true,
-                      profileImage: true,
-                    },
-                  },
-                },
-              },
-              UserStealthAddressTo: {
-                select: {
-                  userId: true,
-                  address: true,
-                  user: {
-                    select: {
-                      spendingPubKey: true,
-                      name: true,
-                      username: true,
-                      profileImage: true,
-                    },
-                  },
-                },
-              },
-              from: true,
-              to: true,
-              amount: true,
-              transactionHash: true,
-            },
-          },
-        },
-      },
-    },
+  const transfer = await prisma.userAction.findUnique({
+    select: selectTransfer,
     where: {
       id: transferId,
     },
   });
 
-  return {
-    ...tx,
-    transactions: tx?.transactions.map(tx => ({
-      ...tx,
-      traces: tx.traces.filter(
-        trace =>
-          trace.UserStealthAddressTo?.userId === userId ||
-          trace.UserStealthAddressFrom?.userId === userId
-      ),
-    })),
-  };
+  if (!transfer) {
+    throw new Error(`Transfer with id ${transferId} not found`);
+  }
+
+  return parseTransferData({ transfer, userId });
 };
 
 export default getTransferDetails;

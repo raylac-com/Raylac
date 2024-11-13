@@ -1,6 +1,6 @@
 import { Text, View, Image, FlatList, Pressable } from 'react-native';
 import { Chain } from 'viem';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import {
   supportedChains,
   SupportedToken,
@@ -43,8 +43,8 @@ const SupportedChainListItem = (props: SupportedChainListItemProps) => {
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
-        borderBottomColor: theme.gray,
-        backgroundColor: theme.background,
+        borderBottomColor: colors.gray,
+        backgroundColor: colors.background,
         borderBottomWidth: 1,
         paddingVertical: 16,
         rowGap: 8,
@@ -64,7 +64,7 @@ const SupportedChainListItem = (props: SupportedChainListItemProps) => {
           source={getChainLogo(chain.id)}
           style={{ width: 20, height: 20 }}
         ></Image>
-        <Text style={{ color: theme.text, fontSize: 16 }}>{chain.name}</Text>
+        <Text style={{ color: colors.text, fontSize: 16 }}>{chain.name}</Text>
       </View>
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <View style={{ flexDirection: 'row' }}>
@@ -72,8 +72,8 @@ const SupportedChainListItem = (props: SupportedChainListItemProps) => {
             <SupportedTokenItem key={token.tokenId} token={token} />
           ))}
         </View>
-        <Text style={{ color: theme.gray, fontSize: 16 }}>{t('viewAll')}</Text>
-        <AntDesign name="arrowright" size={16} color={theme.gray} />
+        <Text style={{ color: colors.gray, fontSize: 16 }}>{t('viewAll')}</Text>
+        <AntDesign name="arrowright" size={16} color={colors.gray} />
       </View>
     </Pressable>
   );

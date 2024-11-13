@@ -11,7 +11,6 @@ import StyledPressable from '@/components/StyledPressable';
 import { supportedTokens } from '@raylac/shared';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTokenBalances from '@/hooks/useTokenBalance';
-import { getTransferType } from '@/lib/utils';
 import spacing from '@/lib/styles/spacing';
 import fontSizes from '@/lib/styles/fontSizes';
 import borderRadius from '@/lib/styles/borderRadius';
@@ -296,7 +295,7 @@ const HomeScreen = () => {
           <TransferHistoryListItem
             key={i}
             transfer={transfer}
-            type={getTransferType(transfer, signedInUser.id)}
+            type={transfer.transferType as 'incoming' | 'outgoing'}
           />
         ))}
         {transferHistory && transferHistory.length >= NUM_TRANSFERS_TO_FETCH ? (

@@ -15,11 +15,11 @@ import {
 } from './utils';
 import processLogs from './processLogs';
 import { decodeEventLog, Hex, Log, parseAbi } from 'viem';
+import { anvil } from 'viem/chains';
 import { ERC5564Announcement, Prisma, SyncJob } from '@raylac/db';
 import { supportedTokens } from '@raylac/shared';
 import { getChainName } from '@raylac/shared';
 import { logger } from '@raylac/shared-backend';
-import { anvil } from 'viem/_types/chains/definitions/anvil';
 const SCAN_PAST_BUFFER = 2 * 60 * 1000; // 2 minutes
 
 /**

@@ -110,20 +110,18 @@ export const getDisplayName = (addressOrUser: AddressOrUser) => {
  *
  * Use the token price logged to the trace record to determine the USD amount.
  */
-export const getUsdTransferAmount = (transfer: TransferItem): string | null => {
-  const finalTransfers = getFinalTransfers(transfer);
+export const getUsdTransferAmount = (
+  transfer: TransferItem,
+  tokenId: Hex
+): string | null => {
+  const tokenMeta = getTokenMetadata(tokenId);
 
-  const tokenMeta = getTokenMetadata(finalTransfers[0].tokenId);
-
-  const amount = finalTransfers
-    .reduce((acc, curr) => {
-      return acc + BigInt(curr.amount!);
-    }, 0n)
-    .toString();
+  const amount = transfer.amount;
 
   const formattedAmount = Number(formatAmount(amount, tokenMeta.decimals));
 
-  const tokenPriceAtTrace = finalTransfers[0].tokenPriceAtTrace;
+  const tokenPriceAtTrace =
+    transfer.transactions[0].traces[0].tokenPriceAtTrace;
 
   if (tokenPriceAtTrace) {
     return (tokenPriceAtTrace * formattedAmount).toFixed(2);

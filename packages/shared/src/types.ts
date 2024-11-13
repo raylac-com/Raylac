@@ -15,6 +15,18 @@ export interface UserOperation {
   chainId: number;
 }
 
+export interface DecodedUserOperationContext {
+  /**
+   * Tag to map transactions across multiple chains.
+   * Transactions with the same multi chain tag are part of the same UserAction.
+   */
+  multiChainTag: Hex;
+  /**
+   * Number of chains that the UserAction that corresponds to this UserOperation spans.
+   */
+  numChains: number;
+}
+
 export interface StealthAddressWithEphemeral {
   address: Hex;
   viewTag: Hex;

@@ -7,10 +7,13 @@ import scanStealthAddresses from './scanStealthAddresses';
 import checkAddressBalances from './checkAddressBalances';
 import assignNativeTransfers from './assignNativeTransfers';
 import syncUserOps from './syncUserOps';
-import syncMultiChainTransfers from './syncMultiChainTransfers';
-import syncSingleChainTransfers from './syncSingleChainTransfers';
+import syncUserActions from './syncUserActions';
 import { anvil } from 'viem/chains';
-import { ERC5564_ANNOUNCEMENT_CHAIN, supportedChains } from '@raylac/shared';
+import {
+  devChains,
+  ERC5564_ANNOUNCEMENT_CHAIN,
+  supportedChains,
+} from '@raylac/shared';
 
 const sync = async () => {
   const chainIds = supportedChains.map(chain => chain.id);
@@ -18,8 +21,7 @@ const sync = async () => {
   const jobs = [
     syncBlocks({ chainIds }),
     syncUserOps({ chainIds }),
-    syncMultiChainTransfers({ chainIds }),
-    syncSingleChainTransfers({ chainIds }),
+    syncUserActions({ chainIds }),
     syncNativeTransfers({
       announcementChainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
       chainIds,
@@ -39,12 +41,13 @@ const sync = async () => {
 
   if (process.env.ANVIL_RPC_URL) {
     console.log('ANVIL_RPC_URL is set, indexing dev chains');
-    const devChainIds = [anvil.id];
+    const devChainIds = devChains.map(chain => chain.id);
     const DEV_CHAIN_ANNOUNCEMENT_CHAIN_ID = anvil.id;
 
     const devChainJobs = [
       syncBlocks({ chainIds: devChainIds }),
       syncUserOps({ chainIds: devChainIds }),
+      syncUserActions({ chainIds: devChainIds }),
       syncNativeTransfers({
         announcementChainId: DEV_CHAIN_ANNOUNCEMENT_CHAIN_ID,
         chainIds: devChainIds,

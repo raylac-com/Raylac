@@ -1,6 +1,7 @@
 import prisma from '../lib/prisma';
 import { devChains, supportedChains } from '@raylac/shared';
-
+import selectTransfer from '../queries/selectTransfer';
+import { parseTransferData } from '../utils';
 /**
  * Get the transaction history of all stealth addresses for a user
  */
@@ -22,63 +23,10 @@ const getTransferHistory = async ({
   }
 
   const transfers = await prisma.userAction.findMany({
-    select: {
-      id: true,
+    select: selectTransfer,
+    where: {
       transactions: {
-        select: {
-          chainId: true,
-          block: {
-            select: {
-              number: true,
-              timestamp: true,
-            },
-          },
-          userOps: {
-            select: {
-              tokenPriceAtOp: true,
-            },
-          },
-          traces: {
-            select: {
-              tokenId: true,
-              chainId: true,
-              traceAddress: true,
-              tokenPriceAtTrace: true,
-              UserStealthAddressFrom: {
-                select: {
-                  userId: true,
-                  address: true,
-                  user: {
-                    select: {
-                      spendingPubKey: true,
-                      name: true,
-                      profileImage: true,
-                    },
-                  },
-                },
-              },
-              UserStealthAddressTo: {
-                select: {
-                  userId: true,
-                  address: true,
-                  user: {
-                    select: {
-                      spendingPubKey: true,
-                      name: true,
-                      profileImage: true,
-                    },
-                  },
-                },
-              },
-              from: true,
-              to: true,
-              amount: true,
-              transactionHash: true,
-            },
-          },
-          hash: true,
-        },
-        where: {
+        some: {
           OR: [
             {
               traces: {
@@ -102,7 +50,6 @@ const getTransferHistory = async ({
           chainId: { in: chainIds },
         },
       },
-      timestamp: true,
     },
     take,
     skip,
@@ -111,20 +58,9 @@ const getTransferHistory = async ({
     },
   });
 
-  // Filter out the traces that are not to the user's stealth address
-  const filteredTransactions = transfers.map(transfer => ({
-    ...transfer,
-    transactions: transfer.transactions.map(tx => {
-      return {
-        ...tx,
-        traces: tx.traces.filter(
-          trace =>
-            trace.UserStealthAddressTo?.userId === userId ||
-            trace.UserStealthAddressFrom?.userId === userId
-        ),
-      };
-    }),
-  }));
+  const filteredTransactions = transfers.map(transfer =>
+    parseTransferData({ transfer, userId })
+  );
 
   return filteredTransactions;
 };

@@ -1,10 +1,4 @@
-import {
-  getAvatarAddress,
-  getDisplayName,
-  getFinalTransfers,
-  getProfileImage,
-  getUsdTransferAmount,
-} from '@/lib/utils';
+import { getAvatarAddress, getDisplayName, getProfileImage } from '@/lib/utils';
 import { Pressable, Text, View } from 'react-native';
 import FastAvatar from './FastAvatar';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,7 +7,7 @@ import { formatAmount, getTokenMetadata } from '@raylac/shared';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { formatDistanceToNowStrict, Locale } from 'date-fns';
 import { ja, enUS } from 'date-fns/locale';
-import { TransferItem } from '@/types';
+import { AddressOrUser, TransferItem } from '@/types';
 import { useTranslation } from 'react-i18next';
 import spacing from '@/lib/styles/spacing';
 import fontSizes from '@/lib/styles/fontSizes';
@@ -39,35 +33,26 @@ const formatDate = ({
 const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
   const { transfer, type } = props;
 
-  if (transfer.transactions.length === 0) {
-    return null;
-  }
-
   const tokenId = transfer.transactions[0].traces[0].tokenId;
 
-  const finalTransfers = getFinalTransfers(transfer);
   const { i18n } = useTranslation();
 
-  const amount = finalTransfers
-    .reduce((acc, curr) => acc + BigInt(curr.amount!), 0n)
-    .toString();
+  const amount = transfer.amount;
 
   const tokenMeta = getTokenMetadata(tokenId);
   const formattedAmount = formatAmount(amount, tokenMeta.decimals);
 
   const navigation = useTypedNavigation();
 
-  const from =
-    finalTransfers[0].UserStealthAddressFrom?.user || finalTransfers[0].from;
-  const to =
-    finalTransfers[0].UserStealthAddressTo?.user || finalTransfers[0].to;
+  const from = (transfer.fromUser || transfer.fromAddress) as AddressOrUser;
+  const to = (transfer.toUser || transfer.toAddress) as AddressOrUser;
 
   const avatarAddress =
     type === 'outgoing' ? getAvatarAddress(to) : getAvatarAddress(from);
 
   const blockTimestamp = new Date(Number(transfer.timestamp) * 1000);
 
-  const transferUsdAmount = getUsdTransferAmount(transfer);
+  const transferUsdAmount = transfer.usdAmount;
 
   return (
     <Pressable
