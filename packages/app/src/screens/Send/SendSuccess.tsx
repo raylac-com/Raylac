@@ -3,7 +3,7 @@ import Feather from '@expo/vector-icons/Feather';
 import StyledButton from '@/components/StyledButton';
 import { useTranslation } from 'react-i18next';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 
 /**
  * Screen shown after a transfer succeeds
@@ -20,10 +20,10 @@ const SendSuccess = () => {
         alignItems: 'center',
       }}
     >
-      <Feather name="check-circle" size={64} color={theme.green} />
+      <Feather name="check-circle" size={64} color={colors.green} />
       <Text
         style={{
-          color: theme.text,
+          color: colors.text,
           marginTop: 24,
           fontSize: 24,
         }}
@@ -31,6 +31,7 @@ const SendSuccess = () => {
         {t('transferSuccessful')}
       </Text>
       <StyledButton
+        variant="primary"
         title={t('backToHome')}
         style={{
           marginTop: 24,

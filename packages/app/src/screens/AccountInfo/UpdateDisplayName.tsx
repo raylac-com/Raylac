@@ -2,6 +2,7 @@ import StyledButton from '@/components/StyledButton';
 import StyledTextInput from '@/components/StyledTextInput';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
+import spacing from '@/lib/styles/spacing';
 import { trpc } from '@/lib/trpc';
 import userKeys from '@/queryKeys/userKeys';
 import { useQueryClient } from '@tanstack/react-query';
@@ -41,9 +42,10 @@ const UpdateDisplayName = () => {
   return (
     <View
       style={{
-        marginTop: 12,
+        rowGap: spacing.base,
         alignItems: 'center',
-        paddingHorizontal: 16,
+        padding: spacing.small,
+        width: '100%',
       }}
     >
       <StyledTextInput
@@ -52,9 +54,7 @@ const UpdateDisplayName = () => {
         onChangeText={setNewDisplayname}
       ></StyledTextInput>
       <StyledButton
-        style={{
-          marginTop: 12,
-        }}
+        variant="primary"
         title={t('save')}
         disabled={
           newDisplayName === signedInUser.name ||

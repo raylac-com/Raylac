@@ -69,18 +69,12 @@ importers:
       '@trpc/server':
         specifier: ^11.0.0-rc.439
         version: 11.0.0-rc.439
-      '@types/express':
-        specifier: ^5.0.0
-        version: 5.0.0
       '@types/node':
         specifier: ^20.11.17
         version: 20.16.5
       axios:
         specifier: ^1.7.2
         version: 1.7.7
-      express:
-        specifier: ^4.21.1
-        version: 4.21.1
       firebase-admin:
         specifier: ^12.4.0
         version: 12.5.0
@@ -423,6 +417,15 @@ importers:
       '@raylac/shared-backend':
         specifier: workspace:*
         version: link:../shared-backend
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.0
+      express:
+        specifier: ^4.21.1
+        version: 4.21.1
+      node-cache:
+        specifier: ^5.1.2
+        version: 5.1.2
       viem:
         specifier: ^2.17.0
         version: 2.21.10(bufferutil@4.0.8)(typescript@5.6.2)(utf-8-validate@6.0.4)(zod@3.23.8)

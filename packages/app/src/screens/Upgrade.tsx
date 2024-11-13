@@ -1,5 +1,5 @@
 import StyledButton from '@/components/StyledButton';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { useTranslation } from 'react-i18next';
 import { View, Text } from 'react-native';
 
@@ -22,13 +22,17 @@ const Upgrade = () => {
         style={{
           fontSize: 28,
           fontWeight: 'bold',
-          color: theme.text,
+          color: colors.text,
           textAlign: 'center',
         }}
       >
         {t('upgradeAccount', { ns: 'Upgrade' })}
       </Text>
-      <StyledButton title="Update" onPress={handleUpgradePress} />
+      <StyledButton
+        variant="primary"
+        title="Update"
+        onPress={handleUpgradePress}
+      ></StyledButton>
     </View>
   );
 };

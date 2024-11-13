@@ -5,11 +5,12 @@ import { useCallback, useState } from 'react';
 import Toast from 'react-native-toast-message';
 import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { useTranslation } from 'react-i18next';
 import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
 import { Feather } from '@expo/vector-icons';
 import SupportedChainsBanner from '@/components/SuppotedChainsBanner';
+import fontSizes from '@/lib/styles/fontSizes';
 
 interface DepositAddressProps {
   address: Hex;
@@ -36,10 +37,10 @@ const DepositAddress = (props: DepositAddressProps) => {
       >
         <Text
           style={{
-            fontSize: 18,
+            fontSize: fontSizes.base,
             fontWeight: 'bold',
             textAlign: 'center',
-            color: theme.text,
+            color: colors.text,
           }}
           onPress={onCopyClick}
         >
@@ -52,7 +53,7 @@ const DepositAddress = (props: DepositAddressProps) => {
         <Feather
           name="copy"
           size={16}
-          color={theme.text}
+          color={colors.text}
           onPress={onCopyClick}
         />
       </View>
@@ -104,7 +105,7 @@ const Deposit = () => {
           style={{
             fontSize: 16,
             textAlign: 'center',
-            color: theme.text,
+            color: colors.text,
           }}
         >
           {t('depositToFreshAddress')}
@@ -128,6 +129,7 @@ const Deposit = () => {
         )}
         {!depositAddress || isGeneratingAddress ? (
           <StyledButton
+            variant="primary"
             title={t('getDepositAddress')}
             onPress={async () => {
               const account = await getNewDepositAccount('');
@@ -140,6 +142,7 @@ const Deposit = () => {
           ></StyledButton>
         ) : (
           <StyledButton
+            variant="outline"
             title={t('copyAddress')}
             onPress={() => {
               onCopyClick();

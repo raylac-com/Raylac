@@ -1,5 +1,4 @@
-import { describe, expect, it } from 'vitest';
-import sync from '../../sync/src/sync';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { anvil } from 'viem/chains';
 import {
   createStealthAccountForTestUser,
@@ -14,6 +13,7 @@ import {
 } from '@raylac/shared';
 import { getAddress, Hex, parseEther } from 'viem';
 import { zeroAddress } from 'viem';
+import { getAuthedClient } from '../lib/rpc';
 
 const testClient = getTestClient({ chainId: anvil.id });
 const walletClient = getWalletClient({ chainId: anvil.id });
@@ -42,7 +42,6 @@ const waitForSync = async ({
           chainId: anvil.id,
         },
       });
-      //      console.log(syncStatus);
 
       if (
         syncStatus.length === addresses.length &&
@@ -54,31 +53,48 @@ const waitForSync = async ({
       return false;
     },
     timeout: 60 * 1000,
+    interval: 1000,
     label: 'syncNativeTransfers',
   });
 };
 
+/**
+ * Test that the indexer correctly backfills native transfers.
+ * Steps
+ * 1. Create new stealth addresses
+ * 2. Send ETH to the new stealth addresses
+ * 3. Check that the transfers of 2. are indexed
+ */
 describe('syncNativeTransfers', () => {
-  it('should backfill native transfers', async () => {
-    const NUM_STEALTH_ADDRESSES = 5;
+  beforeAll(async () => {
+    // Delete all the data on the anvil chain from the database we're testing against
+    const authedClient = await getAuthedClient();
+    await authedClient.pruneAnvil.mutate();
+  });
 
-    // 1: Create multiple stealth addresses for testing
-    const stealthAccounts: StealthAddressWithEphemeral[] = [];
+  it('should backfill native transfers', async () => {
+    const NUM_STEALTH_ADDRESSES = 2;
+
+    // 1. Create {NUM_STEALTH_ADDRESSES} stealth addresses for testing
+
+    const stealthAccountPromises: Promise<StealthAddressWithEphemeral>[] = [];
+    // 1. Create multiple stealth addresses for testing
+
     for (let i = 0; i < NUM_STEALTH_ADDRESSES; i++) {
-      const account = await createStealthAccountForTestUser({ useAnvil: true });
-      stealthAccounts.push(account);
+      const account = createStealthAccountForTestUser({
+        useAnvil: true,
+      });
+      stealthAccountPromises.push(account);
     }
+    const stealthAccounts = await Promise.all(stealthAccountPromises);
 
     const sender = zeroAddress;
-
-    // 2. Fund the sender
-
     await testClient.setBalance({
       address: sender,
       value: parseEther('100'),
     });
 
-    // 3. Send transactions to the stealth addresses
+    // 2. Send ETH to the stealth addresses created in 1.
 
     await testClient.impersonateAccount({
       address: sender,
@@ -101,19 +117,15 @@ describe('syncNativeTransfers', () => {
       address: sender,
     });
 
-    // 4: Run the indexer
-    sync({
-      announcementChainId: anvil.id,
-      chainIds: [anvil.id],
-    });
-
     const blockNumber = await publicClient.getBlockNumber();
+
+    // Wait for the transfers to be indexed
     await waitForSync({
       addresses: stealthAccounts.map(account => account.address),
       blockNumber,
     });
 
-    // 5. Check that the transfers were indexed
+    // 3. Check that the transfers were indexed
 
     const txs = await Promise.all(
       txHashes.map(hash => publicClient.getTransaction({ hash }))

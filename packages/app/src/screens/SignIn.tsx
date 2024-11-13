@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import * as bip39 from 'bip39';
 import Toast from 'react-native-toast-message';
+import spacing from '@/lib/styles/spacing';
 
 /**
  * Sign in screen
@@ -52,8 +53,8 @@ const SignIn = () => {
       style={{
         flex: 1,
         alignItems: 'center',
-        rowGap: 24,
-        marginTop: 24,
+        rowGap: spacing.base,
+        padding: spacing.base,
       }}
     >
       <StyledTextInput
@@ -63,7 +64,6 @@ const SignIn = () => {
         value={mnemonic}
         onChangeText={setMnemonic}
         inputStyle={{
-          width: 280,
           height: 100,
         }}
       ></StyledTextInput>
@@ -72,6 +72,7 @@ const SignIn = () => {
         title={t('signIn')}
         onPress={onSignInPress}
         disabled={!isMnemonicValid}
+        variant="primary"
       ></StyledButton>
     </View>
   );

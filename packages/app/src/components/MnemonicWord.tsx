@@ -1,4 +1,4 @@
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { Text, View } from 'react-native';
 
 interface MnemonicWordProps {
@@ -15,12 +15,12 @@ const MnemonicWord = (props: MnemonicWordProps) => {
         borderRadius: 8,
         paddingVertical: 8,
         paddingHorizontal: 10,
-        backgroundColor: bgColor || theme.text,
+        backgroundColor: bgColor || colors.text,
       }}
     >
       <Text
         style={{
-          color: theme.background,
+          color: colors.background,
         }}
       >
         {index} {word}

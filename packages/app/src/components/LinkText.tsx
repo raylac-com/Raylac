@@ -1,4 +1,4 @@
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { Linking, Text } from 'react-native';
 
 interface LinkTextProps {
@@ -11,7 +11,7 @@ const LinkText = (props: LinkTextProps) => {
   return (
     <Text
       style={{
-        color: theme.primary,
+        color: colors.primary,
         textDecorationLine: 'underline',
       }}
       onPress={() => {

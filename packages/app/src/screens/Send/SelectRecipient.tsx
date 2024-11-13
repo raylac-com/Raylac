@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { trpc } from '@/lib/trpc';
 import StyledTextInput from '@/components/StyledTextInput';
 import { RouterOutput } from '@/types';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { RootStackParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import useSignedInUser from '@/hooks/useSignedInUser';
@@ -12,6 +12,7 @@ import { publicKeyToAddress } from 'viem/accounts';
 import { Hex, isAddress } from 'viem';
 import { useTranslation } from 'react-i18next';
 import { shortenAddress } from '@/lib/utils';
+import fontSizes from '@/lib/styles/fontSizes';
 // import useEnsName from '@/hooks/useEnsName';
 
 interface UserListItemProps {
@@ -47,9 +48,9 @@ const UserListItem = (props: UserListItemProps) => {
       >
         <Text
           style={{
-            fontSize: 16,
+            fontSize: fontSizes.base,
             fontWeight: 'bold',
-            color: theme.text,
+            color: colors.text,
           }}
         >
           {props.user.name}
@@ -58,7 +59,7 @@ const UserListItem = (props: UserListItemProps) => {
           style={{
             fontSize: 14,
             opacity: 0.6,
-            color: theme.text,
+            color: colors.text,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >
@@ -102,9 +103,9 @@ const AddressListItem = (props: AddressListItemProps) => {
       >
         <Text
           style={{
-            fontSize: 16,
+            fontSize: fontSizes.base,
             fontWeight: 'bold',
-            color: theme.text,
+            color: colors.text,
           }}
         >
           {shortenAddress(address)}

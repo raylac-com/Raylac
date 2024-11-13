@@ -8,13 +8,17 @@ import {
 import { Pressable, Text, View } from 'react-native';
 import FastAvatar from './FastAvatar';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { formatAmount, getTokenMetadata } from '@raylac/shared';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { formatDistanceToNowStrict, Locale } from 'date-fns';
 import { ja, enUS } from 'date-fns/locale';
 import { TransferItem } from '@/types';
 import { useTranslation } from 'react-i18next';
+import spacing from '@/lib/styles/spacing';
+import fontSizes from '@/lib/styles/fontSizes';
+import opacity from '@/lib/styles/opacity';
+import avatarSizes from '@/lib/styles/avatarSizes';
 // import useEnsName from '@/hooks/useEnsName';
 
 interface TransferHistoryListItemProps {
@@ -71,8 +75,9 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
         flex: 1,
         flexDirection: 'column',
         borderBottomWidth: 1,
-        paddingVertical: 12,
-        rowGap: 4,
+        borderColor: colors.border,
+        paddingVertical: spacing.small,
+        rowGap: spacing.xxSmall,
       }}
       onPress={() => {
         navigation.navigate('TransferDetails', {
@@ -92,7 +97,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            columnGap: 8,
+            columnGap: spacing.xSmall,
           }}
         >
           <FastAvatar
@@ -100,11 +105,11 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
             imageUrl={
               type === 'outgoing' ? getProfileImage(to) : getProfileImage(from)
             }
-            size={36}
+            size={avatarSizes.small}
           ></FastAvatar>
           <Text
             style={{
-              color: theme.text,
+              color: colors.text,
             }}
           >
             {getDisplayName(type === 'outgoing' ? to : from)}
@@ -114,14 +119,14 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           style={{
             flexDirection: 'column',
             alignItems: 'flex-end',
-            rowGap: 4,
+            rowGap: spacing.xxSmall,
           }}
         >
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              columnGap: 4,
+              columnGap: spacing.xxSmall,
             }}
           >
             <Ionicons
@@ -129,13 +134,13 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
                 type === 'outgoing' ? 'arrow-up-outline' : 'arrow-down-outline'
               }
               size={18}
-              color={type === 'outgoing' ? theme.waning : theme.green}
+              color={type === 'outgoing' ? colors.warning : colors.green}
             />
             <Text
               style={{
                 fontWeight: 'bold',
-                fontSize: 16,
-                color: type === 'incoming' ? theme.green : theme.waning,
+                fontSize: fontSizes.base,
+                color: type === 'incoming' ? colors.green : colors.warning,
               }}
             >
               {formattedAmount} {tokenMeta.symbol}
@@ -144,9 +149,9 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           {transferUsdAmount && (
             <Text
               style={{
-                color: theme.text,
+                color: colors.text,
                 textAlign: 'right',
-                opacity: 0.5,
+                opacity: opacity.dimmed,
               }}
               // eslint-disable-next-line react/jsx-no-literals
             >
@@ -157,9 +162,9 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
       </View>
       <Text
         style={{
-          color: theme.text,
+          color: colors.text,
           textAlign: 'right',
-          opacity: 0.5,
+          opacity: opacity.dimmed,
         }}
       >
         {blockTimestamp

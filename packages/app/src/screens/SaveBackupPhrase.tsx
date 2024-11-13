@@ -3,7 +3,9 @@ import StyledButton from '@/components/StyledButton';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { getMnemonicAndKeys } from '@/lib/key';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
+import fontSizes from '@/lib/styles/fontSizes';
+import spacing from '@/lib/styles/spacing';
 import { copyToClipboard } from '@/lib/utils';
 import { Feather } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
@@ -59,7 +61,7 @@ const SaveBackupPhrase = () => {
         <Text
           style={{
             fontSize: 20,
-            color: theme.text,
+            color: colors.text,
             textAlign: 'center',
             fontWeight: 'bold',
           }}
@@ -68,9 +70,9 @@ const SaveBackupPhrase = () => {
         </Text>
         <Text
           style={{
-            fontSize: 16,
+            fontSize: fontSizes.base,
             textAlign: 'center',
-            color: theme.gray,
+            color: colors.gray,
           }}
         >
           {t('writeDownOrSave')}
@@ -91,7 +93,7 @@ const SaveBackupPhrase = () => {
               justifyContent: 'space-between',
               alignContent: 'center',
               borderWidth: 1,
-              borderColor: theme.gray,
+              borderColor: colors.gray,
               borderRadius: 8,
               padding: 8,
             }}
@@ -126,27 +128,31 @@ const SaveBackupPhrase = () => {
             }}
             onPress={onCopyPress}
           >
-            <Feather name="copy" size={18} color={theme.text} />
+            <Feather name="copy" size={18} color={colors.text} />
             <Text
               style={{
-                color: theme.text,
+                color: colors.text,
               }}
             >
               {t('copyBackupPhrase')}
             </Text>
           </Pressable>
         )}
-        {mnemonic ? (
-          <StyledButton
-            title={'Hide backup phrase'}
-            onPress={onHidePress}
-          ></StyledButton>
-        ) : (
-          <StyledButton
-            title={'Reveal backup phrase'}
-            onPress={onRevealPress}
-          ></StyledButton>
-        )}
+        <View style={{ width: '62%', marginTop: spacing.base }}>
+          {mnemonic ? (
+            <StyledButton
+              variant="underline"
+              title={'Hide backup phrase'}
+              onPress={onHidePress}
+            ></StyledButton>
+          ) : (
+            <StyledButton
+              variant="underline"
+              title={'Reveal backup phrase'}
+              onPress={onRevealPress}
+            ></StyledButton>
+          )}
+        </View>
       </View>
       <View
         style={{
@@ -155,6 +161,7 @@ const SaveBackupPhrase = () => {
         }}
       >
         <StyledButton
+          variant="primary"
           title="I saved my backup phrase"
           onPress={() => {
             navigation.navigate('ConfirmBackupPhrase');

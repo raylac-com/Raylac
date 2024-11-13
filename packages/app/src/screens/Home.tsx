@@ -9,7 +9,6 @@ import {
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { theme } from '@/lib/theme';
 import { useCallback, useEffect, useState } from 'react';
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
@@ -20,6 +19,11 @@ import useSignedInUser from '@/hooks/useSignedInUser';
 import useTokenBalances from '@/hooks/useTokenBalance';
 import { getTransferType } from '@/lib/utils';
 import FontAwesome5 from '@expo/vector-icons/build/FontAwesome5';
+import spacing from '@/lib/styles/spacing';
+import borderRadius from '@/lib/styles/borderRadius';
+import colors from '@/lib/styles/colors';
+import fontSizes from '@/lib/styles/fontSizes';
+import opacity from '@/lib/styles/opacity';
 
 interface TokenBalanceItemProps {
   formattedBalance: string;
@@ -41,11 +45,11 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        columnGap: 8,
-        borderRadius: 8,
+        columnGap: spacing.small,
+        borderRadius: borderRadius.base,
         borderWidth: 1,
-        padding: 12,
-        borderColor: theme.gray,
+        padding: spacing.small,
+        borderColor: colors.gray,
       }}
     >
       <Image
@@ -60,13 +64,13 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
           flexDirection: 'column',
           justifyContent: 'center',
           alignItems: 'center',
-          rowGap: 4,
+          rowGap: spacing.xxSmall,
         }}
       >
         <Text
           style={{
-            color: theme.text,
-            fontSize: 20,
+            color: colors.text,
+            fontSize: fontSizes.base,
           }}
         >
           {t('fiatDenominatedBalance', {
@@ -75,9 +79,9 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
         </Text>
         <Text
           style={{
-            color: theme.text,
-            fontSize: 16,
-            opacity: 0.5,
+            color: colors.text,
+            fontSize: fontSizes.base,
+            opacity: opacity.dimmed,
           }}
         >
           {`${formattedBalance} ${tokenMetadata.symbol}`}
@@ -115,7 +119,7 @@ const MenuItem = (props: MenuItemProps) => {
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: color ?? theme.text,
+          backgroundColor: color ?? colors.text,
           padding: 12,
           borderRadius: 100,
         }}
@@ -126,7 +130,7 @@ const MenuItem = (props: MenuItemProps) => {
         style={{
           fontSize: 16,
           marginTop: 8,
-          color: color ?? theme.text,
+          color: color ?? colors.text,
           textAlign: 'center',
         }}
       >
@@ -196,226 +200,265 @@ const HomeScreen = () => {
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'column',
+    <ScrollView
+      contentContainerStyle={{
+        rowGap: spacing.base,
+        paddingHorizontal: spacing.small,
+        paddingTop: spacing.small,
       }}
+      refreshControl={
+        <RefreshControl
+          tintColor={colors.primary}
+          refreshing={isRefetchingBalance || isRefetchingTransferHistory}
+          onRefresh={onRefresh}
+        />
+      }
     >
-      <ScrollView
-        contentContainerStyle={{
-          rowGap: 24,
-          paddingHorizontal: 16,
+      <View
+        style={{
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
-        refreshControl={
-          <RefreshControl
-            tintColor={theme.primary}
-            refreshing={isRefetchingBalance || isRefetchingTransferHistory}
-            onRefresh={onRefresh}
-          />
-        }
       >
-        <View
+        <Text
           style={{
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: 24,
+            fontSize: fontSizes.large,
+            color: colors.text,
+            fontWeight: 500,
           }}
         >
+          {t('fiatDenominatedBalance', { balance: totalUsdBalance })}
+        </Text>
+      </View>
+      {/* Action menus (Deposit, Send, Receive) */}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          columnGap: spacing.large,
+        }}
+      >
+        <MenuItem
+          icon={<AntDesign name="plus" size={24} color={colors.background} />}
+          title={t('deposit')}
+          onPress={() => {
+            navigation.navigate('Deposit');
+          }}
+          testID="deposit"
+        />
+        <MenuItem
+          icon={
+            <AntDesign name="arrowdown" size={24} color={colors.background} />
+          }
+          title={t('receive')}
+          onPress={() => {
+            navigation.navigate('Receive');
+          }}
+          testID="receive"
+        />
+        <MenuItem
+          icon={
+            <AntDesign name="arrowup" size={24} color={colors.background} />
+          }
+          title={t('send')}
+          onPress={() => {
+            navigation.navigate('SelectRecipient');
+          }}
+          testID="send"
+        />
+      </View>
+      {/* Token list */}
+      <ScrollView
+        horizontal
+        style={{
+          flexDirection: 'row',
+          height: 80,
+          paddingHorizontal: spacing.base,
+        }}
+        contentContainerStyle={{
+          columnGap: 16,
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+        }}
+      >
+        {tokenBalances?.map(
+          ({ tokenId, formattedBalance, formattedUsdBalance }, i) => {
+            return (
+              <TokenBalanceItem
+                key={i}
+                formattedBalance={formattedBalance}
+                formattedUsdBalance={formattedUsdBalance}
+                tokenId={tokenId}
+              />
+            );
+          }
+        )}
+        {tokenBalances?.length > 3 && (
+          <AntDesign name="arrowright" size={24} color={colors.gray} />
+        )}
+      </ScrollView>
+      {/* Action menus (Deposit, Send, Receive) */}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingHorizontal: 20,
+        }}
+      >
+        <MenuItem
+          icon={<AntDesign name="plus" size={24} color={colors.background} />}
+          title={t('deposit')}
+          onPress={() => {
+            navigation.navigate('Deposit');
+          }}
+          testID="deposit"
+        />
+        <MenuItem
+          icon={
+            <AntDesign name="arrowdown" size={24} color={colors.background} />
+          }
+          title={t('receive')}
+          onPress={() => {
+            navigation.navigate('Receive');
+          }}
+          testID="receive"
+        />
+        <MenuItem
+          icon={
+            <AntDesign name="arrowup" size={24} color={colors.background} />
+          }
+          title={t('send')}
+          onPress={() => {
+            navigation.navigate('SelectRecipient');
+          }}
+          testID="send"
+        />
+        <MenuItem
+          icon={
+            <AntDesign name="ellipsis1" size={24} color={colors.background} />
+          }
+          title={t('other')}
+          onPress={() => {
+            if (otherMenuItemsModalVisible) {
+              setOtherMenuItemsModalVisible(false);
+            } else {
+              setOtherMenuItemsModalVisible(true);
+            }
+          }}
+          testID="other"
+        />
+      </View>
+      {/* Other menu items */}
+      <Animated.View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingHorizontal: 20,
+          height: otherMenuItemsModalVisible ? 'auto' : 0,
+          opacity: otherMenuItemsModalVisible ? 1 : 0,
+          transform: [
+            {
+              translateY: otherMenuItemsModalVisible ? 0 : -20,
+            },
+          ],
+        }}
+      >
+        <MenuItem
+          icon={
+            <FontAwesome5
+              name="feather-alt"
+              size={20}
+              color={colors.background}
+            />
+          }
+          title={t('askForAngel')}
+          color={colors.angelPink}
+          onPress={() => {
+            navigation.navigate('AboutAngels');
+          }}
+          testID="askForAngel"
+        />
+      </Animated.View>
+      {/* Token list */}
+      <ScrollView
+        horizontal
+        style={{
+          flexDirection: 'row',
+          height: 80,
+          paddingHorizontal: 20,
+        }}
+        contentContainerStyle={{
+          columnGap: 16,
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+        }}
+      >
+        {tokenBalances?.map(
+          ({ tokenId, formattedBalance, formattedUsdBalance }, i) => {
+            return (
+              <TokenBalanceItem
+                key={i}
+                formattedBalance={formattedBalance}
+                formattedUsdBalance={formattedUsdBalance}
+                tokenId={tokenId}
+              />
+            );
+          }
+        )}
+        {tokenBalances?.length > 3 && (
+          <AntDesign name="arrowright" size={24} color={colors.gray} />
+        )}
+      </ScrollView>
+      {/* Transfer history */}
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'column',
+        }}
+      >
+        {transferHistory?.map((transfer, i) => (
+          <TransferHistoryListItem
+            key={i}
+            transfer={transfer}
+            type={getTransferType(transfer, signedInUser.id)}
+          />
+        ))}
+        {transferHistory && transferHistory.length >= NUM_TRANSFERS_TO_FETCH ? (
           <Text
             style={{
-              fontSize: 24,
-              color: theme.text,
-              fontWeight: 500,
+              textAlign: 'right',
+              marginTop: 20,
+              marginRight: 20,
+              marginBottom: 20,
+              textDecorationLine: 'underline',
+              color: colors.text,
+            }}
+            onPress={() => {
+              navigation.navigate('TransferHistory');
             }}
           >
-            {t('fiatDenominatedBalance', { balance: totalUsdBalance })}
+            {t('seeAll')}
           </Text>
-        </View>
-        {/* Action menus (Deposit, Send, Receive) */}
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 20,
-          }}
-        >
-          <MenuItem
-            icon={<AntDesign name="plus" size={24} color={theme.background} />}
-            title={t('deposit')}
-            onPress={() => {
-              navigation.navigate('Deposit');
+        ) : null}
+        {transferHistory?.length === 0 ? (
+          <Text
+            style={{
+              textAlign: 'center',
+              marginTop: 20,
+              opacity: 0.5,
+              color: colors.text,
             }}
-            testID="deposit"
-          />
-          <MenuItem
-            icon={
-              <AntDesign name="arrowdown" size={24} color={theme.background} />
-            }
-            title={t('receive')}
-            onPress={() => {
-              navigation.navigate('Receive');
-            }}
-            testID="receive"
-          />
-          <MenuItem
-            icon={
-              <AntDesign name="arrowup" size={24} color={theme.background} />
-            }
-            title={t('send')}
-            onPress={() => {
-              navigation.navigate('SelectRecipient');
-            }}
-            testID="send"
-          />
-          <MenuItem
-            icon={
-              <AntDesign name="ellipsis1" size={24} color={theme.background} />
-            }
-            title={t('other')}
-            onPress={() => {
-              if (otherMenuItemsModalVisible) {
-                setOtherMenuItemsModalVisible(false);
-              } else {
-                setOtherMenuItemsModalVisible(true);
-              }
-            }}
-            testID="other"
-          />
-        </View>
-        {/* Other menu items */}
-        <Animated.View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            paddingHorizontal: 20,
-            height: otherMenuItemsModalVisible ? 'auto' : 0,
-            opacity: otherMenuItemsModalVisible ? 1 : 0,
-            transform: [
-              {
-                translateY: otherMenuItemsModalVisible ? 0 : -20,
-              },
-            ],
-          }}
-        >
-          <MenuItem
-            icon={
-              <FontAwesome5
-                name="feather-alt"
-                size={20}
-                color={theme.background}
-              />
-            }
-            title={t('askForAngel')}
-            color={theme.angelPink}
-            onPress={() => {
-              navigation.navigate('AboutAngels');
-            }}
-            testID="askForAngel"
-          />
-        </Animated.View>
-        {/* Token list */}
-        <ScrollView
-          horizontal
-          style={{
-            flexDirection: 'row',
-            height: 80,
-            paddingHorizontal: 20,
-          }}
-          contentContainerStyle={{
-            columnGap: 16,
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%',
-          }}
-        >
-          {tokenBalances?.map(
-            ({ tokenId, formattedBalance, formattedUsdBalance }, i) => {
-              return (
-                <TokenBalanceItem
-                  key={i}
-                  formattedBalance={formattedBalance}
-                  formattedUsdBalance={formattedUsdBalance}
-                  tokenId={tokenId}
-                />
-              );
-            }
-          )}
-          {tokenBalances?.length > 3 && (
-            <AntDesign name="arrowright" size={24} color={theme.gray} />
-          )}
-        </ScrollView>
-        {/* Transfer history */}
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'column',
-          }}
-        >
-          {transferHistory?.map((transfer, i) => (
-            <TransferHistoryListItem
-              key={i}
-              transfer={transfer}
-              type={getTransferType(transfer, signedInUser.id)}
-            />
-          ))}
-          {transferHistory &&
-          transferHistory.length >= NUM_TRANSFERS_TO_FETCH ? (
-            <Text
-              style={{
-                textAlign: 'right',
-                marginTop: 20,
-                marginRight: 20,
-                marginBottom: 20,
-                textDecorationLine: 'underline',
-                color: theme.text,
-              }}
-              onPress={() => {
-                navigation.navigate('TransferHistory');
-              }}
-            >
-              {t('seeAll')}
-            </Text>
-          ) : null}
-          {transferHistory?.length === 0 ? (
-            <Text
-              style={{
-                textAlign: 'center',
-                marginTop: 20,
-                opacity: 0.5,
-                color: theme.text,
-              }}
-            >
-              {t('noTransfers')}
-            </Text>
-          ) : null}
-        </View>
-      </ScrollView>
-      {/**
-       * 
-      <View style={{ flex: 1 }}>
-        <Modal
-          isVisible={otherMenuItemsModalVisible}
-          onDismiss={() => {
-            setOtherMenuItemsModalVisible(false);
-          }}
-          style={{}}
-          onBackdropPress={() => {
-            setOtherMenuItemsModalVisible(false);
-          }}
-        >
-          <View
-            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
           >
-            <Text>{t('other')}</Text>
-          </View>
-        </Modal>
+            {t('noTransfers')}
+          </Text>
+        ) : null}
       </View>
-      */}
-    </View>
+    </ScrollView>
   );
 };
 

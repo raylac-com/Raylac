@@ -67,19 +67,19 @@ const UpdateUsername = () => {
         }
         username={newUsername}
       ></UsernameAvailabilityIndicator>
-      <StyledButton
-        style={{
-          marginTop: 12,
-        }}
-        title={t('save')}
-        disabled={
-          !canSave ||
-          newUsername === signedInUser?.username ||
-          newUsername === '' ||
-          isUpdating
-        }
-        onPress={onSavePress}
-      ></StyledButton>
+      <View style={{ width: '100%', marginTop: 12 }}>
+        <StyledButton
+          variant="primary"
+          title={t('save')}
+          disabled={
+            !canSave ||
+            newUsername === signedInUser?.username ||
+            newUsername === '' ||
+            isUpdating
+          }
+          onPress={onSavePress}
+        ></StyledButton>
+      </View>
     </View>
   );
 };
