@@ -31,7 +31,7 @@ const getChainBlockNumber = async ({ chainId }: { chainId: number }) => {
   return await publicClient.getBlockNumber();
 };
 
-const SCAN_PAST_BUFFER = 2 * 60 * 1000; // 2 minutes
+const SCAN_PAST_BUFFER = 30 * 1000; // 30 seconds
 
 export const announce = async ({
   stealthAccount,
@@ -45,7 +45,6 @@ export const announce = async ({
     supportedChains.map(async chain => {
       const blockNumber = await getChainBlockNumber({ chainId: chain.id });
 
-       
       const blockTime = CHAIN_BLOCK_TIME[chain.id];
       const scanPastBufferBlocks = Math.floor(SCAN_PAST_BUFFER / blockTime);
 
