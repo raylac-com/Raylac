@@ -58,6 +58,7 @@ const Start = () => {
           variant="outline"
         ></StyledButton>
         <StyledButton
+          variant="primary"
           title={t('createAccount')}
           onPress={onCreateAccountPress}
           style={{

@@ -5,11 +5,12 @@ import { useCallback, useState } from 'react';
 import Toast from 'react-native-toast-message';
 import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { useTranslation } from 'react-i18next';
 import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
 import { Feather } from '@expo/vector-icons';
 import useSignedInUser from '@/hooks/useSignedInUser';
+import fontSizes from '@/lib/styles/fontSizes';
 
 interface AddressWithChainIconProps {
   address: Hex;
@@ -44,7 +45,7 @@ const AddressWithChainIcon = (props: AddressWithChainIconProps) => {
             fontSize: 18,
             fontWeight: 'bold',
             textAlign: 'center',
-            color: theme.text,
+            color: colors.text,
           }}
           onPress={onCopyClick}
         >
@@ -57,7 +58,7 @@ const AddressWithChainIcon = (props: AddressWithChainIconProps) => {
         <Feather
           name="copy"
           size={16}
-          color={theme.text}
+          color={colors.text}
           onPress={onCopyClick}
         />
       </View>
@@ -119,7 +120,7 @@ const Receive = () => {
             fontSize: 24,
             textAlign: 'center',
             fontWeight: 'bold',
-            color: theme.text,
+            color: colors.text,
           }}
         >
           {t('receiveOn')}
@@ -135,9 +136,9 @@ const Receive = () => {
       >
         <Text
           style={{
-            fontSize: 16,
+            fontSize: fontSizes.base,
             textAlign: 'center',
-            color: theme.text,
+            color: colors.text,
             fontWeight: 'bold',
           }}
         >
@@ -146,9 +147,9 @@ const Receive = () => {
 
         <Text
           style={{
-            fontSize: 16,
+            fontSize: fontSizes.base,
             textAlign: 'center',
-            color: theme.text,
+            color: colors.text,
           }}
         >
           {t('yourRaylacUsername')}
@@ -158,15 +159,15 @@ const Receive = () => {
             borderRadius: 16,
             paddingVertical: 8,
             paddingHorizontal: 16,
-            backgroundColor: theme.text,
+            backgroundColor: colors.text,
           }}
           onPress={onUsernameCopyClick}
         >
           <Text
             style={{
-              fontSize: 16,
+              fontSize: fontSizes.base,
               textAlign: 'center',
-              color: theme.gray,
+              color: colors.gray,
             }}
             // eslint-disable-next-line react/jsx-no-literals
           >
@@ -201,9 +202,9 @@ const Receive = () => {
             >
               <Text
                 style={{
-                  fontSize: 16,
+                  fontSize: fontSizes.base,
                   textAlign: 'center',
-                  color: theme.text,
+                  color: colors.text,
                 }}
               >
                 {t('receiveTo')}
@@ -218,9 +219,9 @@ const Receive = () => {
         </View>
         <Text
           style={{
-            fontSize: 16,
+            fontSize: fontSizes.base,
             textAlign: 'center',
-            color: theme.text,
+            color: colors.text,
             fontWeight: 'bold',
           }}
         >
@@ -228,7 +229,7 @@ const Receive = () => {
         </Text>
         <Text
           style={{
-            color: theme.text,
+            color: colors.text,
             fontSize: 14,
             textAlign: 'center',
           }}
@@ -237,6 +238,7 @@ const Receive = () => {
         </Text>
         {!depositAddress || isGeneratingAddress ? (
           <StyledButton
+            variant="primary"
             title={t('getReceivingAddress')}
             onPress={async () => {
               const account = await getNewDepositAccount('');
@@ -249,6 +251,7 @@ const Receive = () => {
           ></StyledButton>
         ) : (
           <StyledButton
+            variant="outline"
             title={t('copyAddress')}
             onPress={() => {
               onCopyClick();

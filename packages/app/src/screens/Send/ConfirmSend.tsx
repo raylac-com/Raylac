@@ -5,7 +5,8 @@ import useSend from '@/hooks/useSend';
 import useTokenPrice from '@/hooks/useTokenPrice';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import mixpanel from '@/lib/mixpanel';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
+import fontSizes from '@/lib/styles/fontSizes';
 import { trpc } from '@/lib/trpc';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
@@ -134,7 +135,7 @@ const ConfirmSend = ({ route }: Props) => {
           style={{
             fontSize: 20,
             textAlign: 'center',
-            color: theme.text,
+            color: colors.text,
           }}
         >
           {t('sendToUser', {
@@ -146,14 +147,14 @@ const ConfirmSend = ({ route }: Props) => {
             fontSize: 32,
             fontWeight: 'bold',
             textAlign: 'center',
-            color: theme.text,
+            color: colors.text,
           }}
         >
           {formattedAmount.toLocaleString()} {tokenMeta.symbol}
         </Text>
         <Text
           style={{
-            color: theme.text,
+            color: colors.text,
             fontSize: 20,
             opacity: 0.6,
           }}
@@ -164,8 +165,8 @@ const ConfirmSend = ({ route }: Props) => {
         </Text>
         <Text
           style={{
-            color: theme.text,
-            fontSize: 16,
+            color: colors.text,
+            fontSize: fontSizes.base,
           }}
         >
           {t('receivesAmountOnChain', {
@@ -187,6 +188,7 @@ const ConfirmSend = ({ route }: Props) => {
         }}
         disabled={gasInfo ? false : true}
         testID="send"
+        variant="primary"
       ></StyledButton>
     </View>
   );

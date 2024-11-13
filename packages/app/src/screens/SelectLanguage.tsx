@@ -1,4 +1,4 @@
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { Pressable, Text, View } from 'react-native';
 import Entypo from '@expo/vector-icons/Entypo';
 import { useTranslation } from 'react-i18next';
@@ -29,7 +29,7 @@ const LanguageItem = (props: LanguageItemProps) => {
       style={{
         padding: 24,
         borderBottomColor: 'gray',
-        backgroundColor: theme.background,
+        backgroundColor: colors.background,
         borderBottomWidth: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -42,14 +42,14 @@ const LanguageItem = (props: LanguageItemProps) => {
     >
       <Text
         style={{
-          color: theme.text,
-          fontWeight: 'bold',    
+          color: colors.text,
+          fontWeight: 'bold',
         }}
       >
         {language}
       </Text>
       {i18n.language === code && (
-        <Entypo name="check" size={12} color={theme.blue} />
+        <Entypo name="check" size={12} color={colors.primary} />
       )}
     </Pressable>
   );

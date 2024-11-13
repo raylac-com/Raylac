@@ -1,4 +1,5 @@
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
+import spacing from '@/lib/styles/spacing';
 import { trpc } from '@/lib/trpc';
 import { copyToClipboard, shortenAddress } from '@/lib/utils';
 import { Feather } from '@expo/vector-icons';
@@ -30,9 +31,9 @@ const AddressListItem = (props: AddressListItemProps) => {
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
-        padding: 16,
+        padding: spacing.small,
         borderBottomWidth: 1,
-        borderBottomColor: theme.gray,
+        borderBottomColor: colors.border,
       }}
     >
       <View
@@ -42,7 +43,7 @@ const AddressListItem = (props: AddressListItemProps) => {
       >
         <Text
           style={{
-            color: theme.text,
+            color: colors.text,
           }}
         >
           {shortenAddress(address)}
@@ -57,7 +58,7 @@ const AddressListItem = (props: AddressListItemProps) => {
         <Feather
           name="copy"
           size={20}
-          color={theme.primary}
+          color={colors.primary}
           onPress={onCopyPress}
         />
       </View>
@@ -78,14 +79,13 @@ const Addresses = () => {
       style={{
         flex: 1,
         justifyContent: 'center',
-        marginTop: 16,
       }}
     >
       <FlatList
         ListEmptyComponent={
           <Text
             style={{
-              color: theme.text,
+              color: colors.text,
               textAlign: 'center',
               padding: 16,
             }}
