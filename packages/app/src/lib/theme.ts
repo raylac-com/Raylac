@@ -12,4 +12,5 @@ export const theme = {
   border: '#171717',
   notification: '#285181',
   gray: '#696969',
+  angelPink: '#ff748c',
 };

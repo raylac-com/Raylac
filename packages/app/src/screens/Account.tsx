@@ -9,7 +9,7 @@ import { Alert, Text, TouchableHighlight, View } from 'react-native';
 import { Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { Entypo } from '@expo/vector-icons';
+import { Entypo, FontAwesome5 } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import useSetProfileImage from '@/hooks/useSetProfileImage';
 import Toast from 'react-native-toast-message';
@@ -217,10 +217,34 @@ const Account = () => {
       >
         <SettingListItem
           icon={
+            <FontAwesome5
+              name="feather-alt"
+              size={20}
+              color={theme.angelPink}
+            />
+          }
+          title={t('angelTransfer')}
+          onPress={() => navigation.navigate('SelectAngelRequest')}
+          color={theme.angelPink}
+        />
+        <SettingListItem
+          icon={
             <MaterialIcons name="account-circle" size={24} color={theme.gray} />
           }
           title={t('accountInfo')}
           onPress={() => navigation.navigate('AccountInfo')}
+          color={theme.text}
+        />
+        <SettingListItem
+          icon={
+            <FontAwesome5
+              name="feather-alt"
+              size={20}
+              color={theme.angelPink}
+            />
+          }
+          title={t('userAngelRequests')}
+          onPress={() => navigation.navigate('UserAngelRequests')}
           color={theme.text}
         />
         <SettingListItem

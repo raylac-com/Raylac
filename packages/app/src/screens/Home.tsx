@@ -1,9 +1,16 @@
-import { Text, View, ScrollView, RefreshControl, Image } from 'react-native';
+import {
+  Text,
+  View,
+  ScrollView,
+  RefreshControl,
+  Animated,
+  Image,
+} from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { theme } from '@/lib/theme';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +19,7 @@ import { supportedTokens } from '@raylac/shared';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTokenBalances from '@/hooks/useTokenBalance';
 import { getTransferType } from '@/lib/utils';
+import FontAwesome5 from '@expo/vector-icons/build/FontAwesome5';
 
 interface TokenBalanceItemProps {
   formattedBalance: string;
@@ -84,10 +92,11 @@ interface MenuItemProps {
   title: string;
   testID: string;
   onPress: () => void;
+  color?: string;
 }
 
 const MenuItem = (props: MenuItemProps) => {
-  const { icon, title, onPress, testID } = props;
+  const { icon, title, onPress, testID, color } = props;
 
   return (
     <StyledPressable
@@ -95,6 +104,7 @@ const MenuItem = (props: MenuItemProps) => {
       style={{
         flexDirection: 'column',
         alignItems: 'center',
+        width: 90,
       }}
       testID={testID}
     >
@@ -105,7 +115,7 @@ const MenuItem = (props: MenuItemProps) => {
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: theme.text,
+          backgroundColor: color ?? theme.text,
           padding: 12,
           borderRadius: 100,
         }}
@@ -116,7 +126,7 @@ const MenuItem = (props: MenuItemProps) => {
         style={{
           fontSize: 16,
           marginTop: 8,
-          color: theme.text,
+          color: color ?? theme.text,
           textAlign: 'center',
         }}
       >
@@ -132,6 +142,9 @@ const HomeScreen = () => {
   const { t } = useTranslation('Home');
   const { data: isSignedIn } = useIsSignedIn();
   const { data: signedInUser } = useSignedInUser();
+
+  const [otherMenuItemsModalVisible, setOtherMenuItemsModalVisible] =
+    useState(true);
 
   const {
     data: tokenBalances,
@@ -224,8 +237,9 @@ const HomeScreen = () => {
         <View
           style={{
             flexDirection: 'row',
-            justifyContent: 'center',
-            columnGap: 40,
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 20,
           }}
         >
           <MenuItem
@@ -256,7 +270,53 @@ const HomeScreen = () => {
             }}
             testID="send"
           />
+          <MenuItem
+            icon={
+              <AntDesign name="ellipsis1" size={24} color={theme.background} />
+            }
+            title={t('other')}
+            onPress={() => {
+              if (otherMenuItemsModalVisible) {
+                setOtherMenuItemsModalVisible(false);
+              } else {
+                setOtherMenuItemsModalVisible(true);
+              }
+            }}
+            testID="other"
+          />
         </View>
+        {/* Other menu items */}
+        <Animated.View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: 20,
+            height: otherMenuItemsModalVisible ? 'auto' : 0,
+            opacity: otherMenuItemsModalVisible ? 1 : 0,
+            transform: [
+              {
+                translateY: otherMenuItemsModalVisible ? 0 : -20,
+              },
+            ],
+          }}
+        >
+          <MenuItem
+            icon={
+              <FontAwesome5
+                name="feather-alt"
+                size={20}
+                color={theme.background}
+              />
+            }
+            title={t('askForAngel')}
+            color={theme.angelPink}
+            onPress={() => {
+              navigation.navigate('AboutAngels');
+            }}
+            testID="askForAngel"
+          />
+        </Animated.View>
         {/* Token list */}
         <ScrollView
           horizontal
@@ -334,6 +394,27 @@ const HomeScreen = () => {
           ) : null}
         </View>
       </ScrollView>
+      {/**
+       * 
+      <View style={{ flex: 1 }}>
+        <Modal
+          isVisible={otherMenuItemsModalVisible}
+          onDismiss={() => {
+            setOtherMenuItemsModalVisible(false);
+          }}
+          style={{}}
+          onBackdropPress={() => {
+            setOtherMenuItemsModalVisible(false);
+          }}
+        >
+          <View
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          >
+            <Text>{t('other')}</Text>
+          </View>
+        </Modal>
+      </View>
+      */}
     </View>
   );
 };

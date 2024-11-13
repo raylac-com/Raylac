@@ -35,6 +35,11 @@ import { logger } from '@raylac/shared-backend';
 import pruneAnvil from './api/pruneAnvil';
 import getSyncStatus from './api/getSyncStatus';
 import buildMultiChainSendUserOps from './api/buildMultiChainSendUserOps';
+import createAngelRequest from './api/createAngelRequest';
+import updateAngelRequest from './api/updateAngelRequest';
+import deleteAngelRequest from './api/deleteAngelRequest';
+import getUserAngelRequests from './api/getUserAngelRequests';
+import getAngelRequest from './api/getAngelRequest';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -387,6 +392,69 @@ export const appRouter = router({
     const prices = await getTokenPrices();
     return prices;
   }),
+
+  createAngelRequest: authedProcedure
+    .input(
+      z.object({
+        description: z.string(),
+        usdAmount: z.string(),
+      })
+    )
+    .mutation(async opts => {
+      const { input } = opts;
+      const userId = opts.ctx.userId;
+
+      const angelRequest = await createAngelRequest({
+        userId,
+        description: input.description,
+        usdAmount: input.usdAmount,
+      });
+
+      return angelRequest;
+    }),
+
+  updateAngelRequest: authedProcedure
+    .input(
+      z.object({
+        angelRequestId: z.number(),
+        description: z.string(),
+        usdAmount: z.string(),
+      })
+    )
+    .mutation(async opts => {
+      const { input } = opts;
+      await updateAngelRequest({
+        angelRequestId: input.angelRequestId,
+        description: input.description,
+        usdAmount: input.usdAmount,
+      });
+    }),
+
+  deleteAngelRequest: authedProcedure
+    .input(z.object({ angelRequestId: z.number() }))
+    .mutation(async opts => {
+      const { input } = opts;
+      await deleteAngelRequest({
+        userId: opts.ctx.userId,
+        angelRequestId: input.angelRequestId,
+      });
+    }),
+
+  getUserAngelRequests: authedProcedure.query(async opts => {
+    const userId = opts.ctx.userId;
+    const angelRequests = await getUserAngelRequests({ userId });
+    return angelRequests;
+  }),
+
+  getAngelRequest: authedProcedure
+    .input(z.object({ angelRequestId: z.number() }))
+    .query(async opts => {
+      const { input } = opts;
+      const angelRequest = await getAngelRequest({
+        angelRequestId: input.angelRequestId,
+      });
+      return angelRequest;
+    }),
 
   deleteAccount: authedProcedure.mutation(async opts => {
     const userId = opts.ctx.userId;

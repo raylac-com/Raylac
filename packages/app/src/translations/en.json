@@ -1,5 +1,6 @@
 {
   "Account": {
+    "angelTransfer": "Angel transfer",
     "accountInfo": "Account info",
     "addresses": "Addresses",
     "advanced": "Advanced",
@@ -9,7 +10,8 @@
     "confirmSignOutTitle": "Sign out?",
     "language": "Language",
     "signOut": "Sign out",
-    "title": "Account"
+    "title": "Account",
+    "userAngelRequests": "Angel requests"
   },
   "AccountInfo": {
     "displayName": "Name",
@@ -69,7 +71,8 @@
     "receive": "Receive",
     "seeAll": "See all",
     "send": "Send",
-    "title": "Home"
+    "title": "Home",
+    "askForAngel": "Find angels"
   },
   "Receive": {
     "backToHome": "Back to home",
@@ -149,11 +152,44 @@
     "title": "Upgrade",
     "upgradeAccount": "Apply latest update to your account"
   },
+  "AboutAngels": {
+    "title": "About angels",
+    "explanation1": "Angels are users who are willing to help you pay certain expenses",
+    "explanation2": "Try to write a request with a clear purpose",
+    "explanation3": "Once you receive an angel's help, you should provide them with a receipt or proof of payment.",
+    "explanation4": "Angels will give you a review, once you complete your expense.",
+    "next": "Next"
+  },
+  "AskForAngel": {
+    "title": "Ask for angel",
+    "writeARequest": "Write a request",
+    "angelDescription": "Share your request with angels who can help you pay your expense",
+    "descriptionPlaceholder": "I want to pay for...",
+    "requestAmount": "Request amount",
+    "next": "Next",
+    "amountLimitExceeded": "You can ask for up to ${{ amount }}"
+  },
+  "ConfirmAskForAngel": {
+    "title": "Confirm angel request",
+    "copyLink": "Copy link",
+    "shareOnSocial": "Share on social",
+    "amountInUsd": "{{ amount }} USD"
+  },
+  "SelectAngelRequest": {
+    "title": "Select angel request"
+  },
+  "AngelTransfer": {
+    "title": "Angel transfer"
+  },
+  "AngelRequestDetails": {
+    "title": "Angel request details"
+  },
   "common": {
     "copied": "Copied",
     "copiedAddress": "Copied address",
     "headerBackTitle": "Back",
     "next": "Next",
-    "signUpBonus": "Sign up bonus"
+    "signUpBonus": "Sign up bonus",
+    "usd": "USD"
   }
 }
