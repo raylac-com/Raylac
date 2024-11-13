@@ -2,7 +2,7 @@ import FastAvatar from '@/components/FastAvatar';
 import LinkText from '@/components/LinkText';
 import TransferDetailListItem from '@/components/TransferDetailListItem';
 import useSignedInUser from '@/hooks/useSignedInUser';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import {
   copyToClipboard,
@@ -66,7 +66,7 @@ const TraceListItem = ({ trace }: { trace: TraceItem }) => {
         value={
           <Text
             style={{
-              color: theme.text,
+              color: colors.text,
             }}
           >
             {formatAmount(amount, tokenMeta.decimals)} {tokenMeta.symbol}
@@ -147,7 +147,7 @@ const TransferDetails = ({ route }: Props) => {
         rowGap: 10,
       }}
       style={{
-        backgroundColor: theme.background,
+        backgroundColor: colors.background,
         paddingTop: 60,
       }}
     >
@@ -162,7 +162,7 @@ const TransferDetails = ({ route }: Props) => {
       >
         <Text
           style={{
-            color: theme.text,
+            color: colors.text,
             fontSize: 14,
           }}
         >
@@ -170,11 +170,11 @@ const TransferDetails = ({ route }: Props) => {
             ? t('sentTo', { name: displayName })
             : t('receivedFrom', { name: displayName })}
         </Text>
-        <Feather name="copy" size={14} color={theme.text} />
+        <Feather name="copy" size={14} color={colors.text} />
       </Pressable>
       <Text
         style={{
-          color: theme.text,
+          color: colors.text,
           fontSize: 24,
           fontWeight: 'bold',
         }}
@@ -185,7 +185,7 @@ const TransferDetails = ({ route }: Props) => {
       {transferUsdAmount && (
         <Text
           style={{
-            color: theme.text,
+            color: colors.text,
             opacity: 0.5,
             fontSize: 16,
           }}
@@ -196,7 +196,7 @@ const TransferDetails = ({ route }: Props) => {
       )}
       <Text
         style={{
-          color: theme.text,
+          color: colors.text,
           opacity: 0.5,
         }}
       >
@@ -214,7 +214,7 @@ const TransferDetails = ({ route }: Props) => {
       >
         <Text
           style={{
-            color: theme.text,
+            color: colors.text,
             fontSize: 14,
             fontWeight: 'bold',
           }}
@@ -224,7 +224,7 @@ const TransferDetails = ({ route }: Props) => {
         <Entypo
           name={showTraces ? 'chevron-up' : 'chevron-down'}
           size={18}
-          color={theme.gray}
+          color={colors.gray}
         />
       </Pressable>
       {showTraces && (
@@ -236,7 +236,7 @@ const TransferDetails = ({ route }: Props) => {
           <Text
             style={{
               opacity: 0.6,
-              color: theme.text,
+              color: colors.text,
               fontSize: 14,
               textAlign: 'center',
             }}

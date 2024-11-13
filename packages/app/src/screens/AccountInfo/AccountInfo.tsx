@@ -1,7 +1,7 @@
 import StyledButton from '@/components/StyledButton';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 
@@ -20,7 +20,7 @@ const AccountInfoListItem = (props: AccountInfoListItemProps) => {
         width: '100%',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        borderBottomColor: theme.primary,
+        borderBottomColor: colors.primary,
         borderBottomWidth: 1,
         paddingBottom: 8,
       }}
@@ -28,7 +28,7 @@ const AccountInfoListItem = (props: AccountInfoListItemProps) => {
       <View>
         <Text
           style={{
-            color: theme.text,
+            color: colors.text,
             fontSize: 14,
           }}
         >
@@ -37,7 +37,7 @@ const AccountInfoListItem = (props: AccountInfoListItemProps) => {
         <Text
           style={{
             marginTop: 8,
-            color: theme.text,
+            color: colors.text,
             fontSize: 20,
           }}
         >

@@ -2,7 +2,7 @@ import { Text, View, ScrollView, RefreshControl, Image } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { useCallback, useEffect } from 'react';
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
@@ -37,7 +37,7 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
         borderRadius: 8,
         borderWidth: 1,
         padding: 12,
-        borderColor: theme.gray,
+        borderColor: colors.gray,
       }}
     >
       <Image
@@ -57,7 +57,7 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
       >
         <Text
           style={{
-            color: theme.text,
+            color: colors.text,
             fontSize: 20,
           }}
         >
@@ -67,7 +67,7 @@ const TokenBalanceItem = (props: TokenBalanceItemProps) => {
         </Text>
         <Text
           style={{
-            color: theme.text,
+            color: colors.text,
             fontSize: 16,
             opacity: 0.5,
           }}
@@ -105,7 +105,7 @@ const MenuItem = (props: MenuItemProps) => {
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: theme.text,
+          backgroundColor: colors.text,
           padding: 12,
           borderRadius: 100,
         }}
@@ -116,7 +116,7 @@ const MenuItem = (props: MenuItemProps) => {
         style={{
           fontSize: 16,
           marginTop: 8,
-          color: theme.text,
+          color: colors.text,
           textAlign: 'center',
         }}
       >
@@ -196,7 +196,7 @@ const HomeScreen = () => {
         }}
         refreshControl={
           <RefreshControl
-            tintColor={theme.primary}
+            tintColor={colors.primary}
             refreshing={isRefetchingBalance || isRefetchingTransferHistory}
             onRefresh={onRefresh}
           />
@@ -213,7 +213,7 @@ const HomeScreen = () => {
           <Text
             style={{
               fontSize: 24,
-              color: theme.text,
+              color: colors.text,
               fontWeight: 500,
             }}
           >
@@ -229,7 +229,7 @@ const HomeScreen = () => {
           }}
         >
           <MenuItem
-            icon={<AntDesign name="plus" size={24} color={theme.background} />}
+            icon={<AntDesign name="plus" size={24} color={colors.background} />}
             title={t('deposit')}
             onPress={() => {
               navigation.navigate('Deposit');
@@ -238,7 +238,7 @@ const HomeScreen = () => {
           />
           <MenuItem
             icon={
-              <AntDesign name="arrowdown" size={24} color={theme.background} />
+              <AntDesign name="arrowdown" size={24} color={colors.background} />
             }
             title={t('receive')}
             onPress={() => {
@@ -248,7 +248,7 @@ const HomeScreen = () => {
           />
           <MenuItem
             icon={
-              <AntDesign name="arrowup" size={24} color={theme.background} />
+              <AntDesign name="arrowup" size={24} color={colors.background} />
             }
             title={t('send')}
             onPress={() => {
@@ -285,7 +285,7 @@ const HomeScreen = () => {
             }
           )}
           {tokenBalances?.length > 3 && (
-            <AntDesign name="arrowright" size={24} color={theme.gray} />
+            <AntDesign name="arrowright" size={24} color={colors.gray} />
           )}
         </ScrollView>
         {/* Transfer history */}
@@ -311,7 +311,7 @@ const HomeScreen = () => {
                 marginRight: 20,
                 marginBottom: 20,
                 textDecorationLine: 'underline',
-                color: theme.text,
+                color: colors.text,
               }}
               onPress={() => {
                 navigation.navigate('TransferHistory');
@@ -326,7 +326,7 @@ const HomeScreen = () => {
                 textAlign: 'center',
                 marginTop: 20,
                 opacity: 0.5,
-                color: theme.text,
+                color: colors.text,
               }}
             >
               {t('noTransfers')}

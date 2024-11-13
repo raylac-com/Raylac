@@ -1,5 +1,5 @@
 import StyledButton from '@/components/StyledButton';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -36,10 +36,10 @@ const AmountInput = (props: AmountInputProps) => {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'flex-end',
-        backgroundColor: theme.background,
+        backgroundColor: colors.background,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: theme.gray,
+        borderColor: colors.gray,
         height: 52,
       }}
     >
@@ -55,7 +55,7 @@ const AmountInput = (props: AmountInputProps) => {
           flex: 1,
           fontSize: 28,
           textAlign: 'right',
-          color: theme.text,
+          color: colors.text,
         }}
         keyboardType="decimal-pad"
       />
@@ -251,7 +251,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           />
           <Text
             style={{
-              color: theme.text,
+              color: colors.text,
               marginTop: 4,
               textAlign: 'center',
               opacity: 0.8,
@@ -279,7 +279,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
         />
         <Text
           style={{
-            color: theme.text,
+            color: colors.text,
             textAlign: 'center',
             opacity: 0.8,
             width: 120,
@@ -326,7 +326,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
           ></FastAvatar>
           <Text
             style={{
-              color: theme.text,
+              color: colors.text,
             }}
           >
             {recipientDisplayName} {t('receivesOn', {})}
@@ -340,7 +340,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
             borderWidth: 0,
           }}
           textStyle={{
-            color: theme.text,
+            color: colors.text,
           }}
           theme="DARK"
           containerStyle={{
@@ -363,7 +363,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
       {isBalanceSufficient === false ? (
         <Text
           style={{
-            color: theme.waning,
+            color: colors.warning,
             marginBottom: 10,
           }}
         >
@@ -374,7 +374,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
         <View>
           <Text
             style={{
-              color: theme.text,
+              color: colors.text,
               textAlign: 'center',
               opacity: 0.8,
               marginTop: 32,

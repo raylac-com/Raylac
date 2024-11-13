@@ -1,4 +1,4 @@
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { Text, View } from 'react-native';
 
 interface TransferDetailListItemProps {
@@ -18,7 +18,7 @@ const TransferDetailListItem = (props: TransferDetailListItemProps) => {
     >
       <Text
         style={{
-          color: theme.gray,
+          color: colors.gray,
           fontSize: 14,
         }}
       >

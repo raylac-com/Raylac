@@ -1,4 +1,4 @@
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import { copyToClipboard, shortenAddress } from '@/lib/utils';
 import { Feather } from '@expo/vector-icons';
@@ -32,7 +32,7 @@ const AddressListItem = (props: AddressListItemProps) => {
         justifyContent: 'space-between',
         padding: 16,
         borderBottomWidth: 1,
-        borderBottomColor: theme.gray,
+        borderBottomColor: colors.gray,
       }}
     >
       <View
@@ -42,7 +42,7 @@ const AddressListItem = (props: AddressListItemProps) => {
       >
         <Text
           style={{
-            color: theme.text,
+            color: colors.text,
           }}
         >
           {shortenAddress(address)}
@@ -57,7 +57,7 @@ const AddressListItem = (props: AddressListItemProps) => {
         <Feather
           name="copy"
           size={20}
-          color={theme.primary}
+          color={colors.primary}
           onPress={onCopyPress}
         />
       </View>
@@ -85,7 +85,7 @@ const Addresses = () => {
         ListEmptyComponent={
           <Text
             style={{
-              color: theme.text,
+              color: colors.text,
               textAlign: 'center',
               padding: 16,
             }}

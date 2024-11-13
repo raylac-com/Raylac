@@ -1,4 +1,4 @@
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import React, { useState } from 'react';
 import {
   Pressable,
@@ -48,12 +48,12 @@ const StyledButton = (props: StyledButtonProps) => {
   switch (props.variant) {
     case 'primary':
       textStyle = {
-        color: theme.text,
+        color: colors.text,
       };
       break;
     case 'outline':
       textStyle = {
-        color: theme.primary,
+        color: colors.primary,
       };
       break;
     case 'underline':
@@ -61,7 +61,7 @@ const StyledButton = (props: StyledButtonProps) => {
       break;
     default:
       textStyle = {
-        color: theme.text,
+        color: colors.text,
       };
   }
 
@@ -71,7 +71,7 @@ const StyledButton = (props: StyledButtonProps) => {
       style={{
         ...pressableStyle,
         ...style,
-        opacity: (disabled || isPressed || isLoading) ? 0.4 : 1,
+        opacity: disabled || isPressed || isLoading ? 0.4 : 1,
       }}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
@@ -101,7 +101,7 @@ const StyledButton = (props: StyledButtonProps) => {
       }
       <Text
         style={{
-          color: theme.text,
+          color: colors.text,
           fontWeight: 'bold',
           fontSize: 16,
           ...textStyle,
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.primary,
+    backgroundColor: colors.primary,
     paddingHorizontal: 36,
     paddingVertical: 12,
     borderRadius: 30,
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-    borderColor: theme.primary,
+    borderColor: colors.primary,
     borderWidth: 1,
     paddingHorizontal: 36,
     paddingVertical: 12,
@@ -142,9 +142,9 @@ const styles = StyleSheet.create({
   },
   underlineText: {
     textDecorationLine: 'underline',
-    textDecorationColor: theme.primary,
+    textDecorationColor: colors.primary,
     textDecorationStyle: 'solid',
-    color: theme.text,
+    color: colors.text,
     opacity: 0.7,
   },
 });

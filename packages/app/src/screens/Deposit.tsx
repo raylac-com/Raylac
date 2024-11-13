@@ -5,7 +5,7 @@ import { useCallback, useState } from 'react';
 import Toast from 'react-native-toast-message';
 import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { useTranslation } from 'react-i18next';
 import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
 import { Feather, Ionicons } from '@expo/vector-icons';
@@ -43,7 +43,7 @@ const AddressWithChainIcon = (props: AddressWithChainIconProps) => {
             fontSize: 18,
             fontWeight: 'bold',
             textAlign: 'center',
-            color: theme.text,
+            color: colors.text,
           }}
           onPress={onCopyClick}
         >
@@ -56,7 +56,7 @@ const AddressWithChainIcon = (props: AddressWithChainIconProps) => {
         <Feather
           name="copy"
           size={16}
-          color={theme.text}
+          color={colors.text}
           onPress={onCopyClick}
         />
       </View>
@@ -122,14 +122,14 @@ const Deposit = () => {
             <Ionicons
               name="add-circle-outline"
               size={32}
-              color={theme.primary}
+              color={colors.primary}
             />
             <Text
               style={{
                 fontSize: 24,
                 textAlign: 'center',
                 fontWeight: 'bold',
-                color: theme.text,
+                color: colors.text,
               }}
             >
               {t('depositOn')}
@@ -139,7 +139,7 @@ const Deposit = () => {
             style={{
               fontSize: 16,
               textAlign: 'center',
-              color: theme.text,
+              color: colors.text,
             }}
           >
             {t('depositToFreshAddress')}

@@ -1,7 +1,7 @@
 // 3. React Native needs crypto.getRandomValues polyfill and sha512
 import 'react-native-get-random-values';
 import { StatusBar } from 'expo-status-bar';
-import { theme } from './lib/theme';
+import colors from './lib/styles/colors';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RootStackParamsList, RootTabsParamsList } from './navigation/types';
@@ -124,7 +124,7 @@ const Screens = () => {
     <SafeAreaView
       style={{
         flex: 1,
-        backgroundColor: theme.background,
+        backgroundColor: colors.background,
       }}
     >
       <RootStack.Navigator initialRouteName="Tabs">
@@ -335,7 +335,7 @@ const Screens = () => {
 
 const NavigationTheme = {
   dark: true,
-  colors: theme,
+  colors,
 };
 
 const queryClient = new QueryClient({

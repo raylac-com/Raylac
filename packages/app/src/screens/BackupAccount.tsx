@@ -3,7 +3,7 @@ import { getMnemonicAndKeys } from '@/lib/key';
 import { useCallback, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { AntDesign, Feather } from '@expo/vector-icons';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { copyToClipboard } from '@/lib/utils';
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
@@ -65,7 +65,7 @@ const BackupAccount = () => {
           <AntDesign name="warning" size={24} color="orange" />
           <Text
             style={{
-              color: theme.text,
+              color: colors.text,
               fontWeight: 'bold',
             }}
           >
@@ -83,7 +83,7 @@ const BackupAccount = () => {
           <AntDesign name="eye" size={24} color="lightblue" />
           <Text
             style={{
-              color: theme.text,
+              color: colors.text,
               fontWeight: 'bold',
             }}
           >
@@ -103,12 +103,12 @@ const BackupAccount = () => {
         >
           <Text
             style={{
-              borderColor: theme.text,
+              borderColor: colors.text,
               borderWidth: 1,
               paddingHorizontal: 16,
               paddingVertical: 16,
               borderRadius: 8,
-              color: theme.text,
+              color: colors.text,
               width: '80%',
               marginTop: 24,
               fontSize: 18,
@@ -125,10 +125,10 @@ const BackupAccount = () => {
               marginTop: 12,
             }}
           >
-            <Feather name="copy" size={18} color={theme.text} />
+            <Feather name="copy" size={18} color={colors.text} />
             <Text
               style={{
-                color: theme.text,
+                color: colors.text,
               }}
             >
               {t('copyBackupPhrase')}

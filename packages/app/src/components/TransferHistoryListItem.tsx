@@ -8,7 +8,7 @@ import {
 import { Pressable, Text, View } from 'react-native';
 import FastAvatar from './FastAvatar';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { formatAmount, getTokenMetadata } from '@raylac/shared';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { formatDistanceToNowStrict, Locale } from 'date-fns';
@@ -96,7 +96,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           ></FastAvatar>
           <Text
             style={{
-              color: theme.text,
+              color: colors.text,
             }}
           >
             {getDisplayName(type === 'outgoing' ? to : from)}
@@ -121,13 +121,13 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
                 type === 'outgoing' ? 'arrow-up-outline' : 'arrow-down-outline'
               }
               size={18}
-              color={type === 'outgoing' ? theme.waning : theme.green}
+              color={type === 'outgoing' ? colors.warning : colors.green}
             />
             <Text
               style={{
                 fontWeight: 'bold',
                 fontSize: 16,
-                color: type === 'incoming' ? theme.green : theme.waning,
+                color: type === 'incoming' ? colors.green : colors.warning,
               }}
             >
               {formattedAmount} {tokenMeta.symbol}
@@ -136,7 +136,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           {transferUsdAmount && (
             <Text
               style={{
-                color: theme.text,
+                color: colors.text,
                 textAlign: 'right',
                 opacity: 0.5,
               }}
@@ -149,7 +149,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
       </View>
       <Text
         style={{
-          color: theme.text,
+          color: colors.text,
           textAlign: 'right',
           opacity: 0.5,
         }}

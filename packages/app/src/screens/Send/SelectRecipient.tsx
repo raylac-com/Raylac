@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { trpc } from '@/lib/trpc';
 import StyledTextInput from '@/components/StyledTextInput';
 import { RouterOutput } from '@/types';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { RootStackParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import useSignedInUser from '@/hooks/useSignedInUser';
@@ -49,7 +49,7 @@ const UserListItem = (props: UserListItemProps) => {
           style={{
             fontSize: 16,
             fontWeight: 'bold',
-            color: theme.text,
+            color: colors.text,
           }}
         >
           {props.user.name}
@@ -58,7 +58,7 @@ const UserListItem = (props: UserListItemProps) => {
           style={{
             fontSize: 14,
             opacity: 0.6,
-            color: theme.text,
+            color: colors.text,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >
@@ -104,7 +104,7 @@ const AddressListItem = (props: AddressListItemProps) => {
           style={{
             fontSize: 16,
             fontWeight: 'bold',
-            color: theme.text,
+            color: colors.text,
           }}
         >
           {shortenAddress(address)}

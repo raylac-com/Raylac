@@ -3,7 +3,7 @@ import StyledButton from '@/components/StyledButton';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { getMnemonicAndKeys } from '@/lib/key';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { copyToClipboard } from '@/lib/utils';
 import { Feather } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
@@ -59,7 +59,7 @@ const SaveBackupPhrase = () => {
         <Text
           style={{
             fontSize: 20,
-            color: theme.text,
+            color: colors.text,
             textAlign: 'center',
             fontWeight: 'bold',
           }}
@@ -70,7 +70,7 @@ const SaveBackupPhrase = () => {
           style={{
             fontSize: 16,
             textAlign: 'center',
-            color: theme.gray,
+            color: colors.gray,
           }}
         >
           {t('writeDownOrSave')}
@@ -91,7 +91,7 @@ const SaveBackupPhrase = () => {
               justifyContent: 'space-between',
               alignContent: 'center',
               borderWidth: 1,
-              borderColor: theme.gray,
+              borderColor: colors.gray,
               borderRadius: 8,
               padding: 8,
             }}
@@ -126,10 +126,10 @@ const SaveBackupPhrase = () => {
             }}
             onPress={onCopyPress}
           >
-            <Feather name="copy" size={18} color={theme.text} />
+            <Feather name="copy" size={18} color={colors.text} />
             <Text
               style={{
-                color: theme.text,
+                color: colors.text,
               }}
             >
               {t('copyBackupPhrase')}

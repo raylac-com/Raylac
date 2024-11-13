@@ -1,7 +1,7 @@
 import StyledButton from '@/components/StyledButton';
 import StyledTextInput from '@/components/StyledTextInput';
 import useSignUp from '@/hooks/useSignUp';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { isValidUsername } from '@raylac/shared';
 import { RootStackParamsList } from '@/navigation/types';
 import { useNavigation } from '@react-navigation/native';
@@ -71,7 +71,7 @@ const SignUp = () => {
           style={{
             fontSize: 14,
             fontWeight: 'bold',
-            color: theme.text,
+            color: colors.text,
           }}
         >
           {t('name')}
@@ -99,7 +99,7 @@ const SignUp = () => {
         <Text
           style={{
             fontSize: 14,
-            color: theme.text,
+            color: colors.text,
             fontWeight: 'bold',
           }}
         >
