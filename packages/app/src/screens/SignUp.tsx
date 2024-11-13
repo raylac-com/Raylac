@@ -1,7 +1,7 @@
 import StyledButton from '@/components/StyledButton';
 import StyledTextInput from '@/components/StyledTextInput';
 import useSignUp from '@/hooks/useSignUp';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { isValidUsername } from '@raylac/shared';
 import { RootStackParamsList } from '@/navigation/types';
 import { useNavigation } from '@react-navigation/native';
@@ -15,6 +15,7 @@ import { Text, View } from 'react-native';
 import useCheckUsername from '@/hooks/useCheckUsername';
 import UsernameAvailabilityIndicator from '@/components/UsernameAvailabilityIndicator';
 import { sleep } from '@raylac/shared';
+import spacing from '@/lib/styles/spacing';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Props = NativeStackScreenProps<RootStackParamsList, 'SignUp'>;
@@ -71,7 +72,7 @@ const SignUp = () => {
           style={{
             fontSize: 14,
             fontWeight: 'bold',
-            color: theme.text,
+            color: colors.text,
           }}
         >
           {t('name')}
@@ -99,7 +100,7 @@ const SignUp = () => {
         <Text
           style={{
             fontSize: 14,
-            color: theme.text,
+            color: colors.text,
             fontWeight: 'bold',
           }}
         >
@@ -122,26 +123,26 @@ const SignUp = () => {
         isUsernameAvailable={isUsernameAvailable}
         username={username}
       ></UsernameAvailabilityIndicator>
-      <StyledButton
-        style={{
-          marginTop: 20,
-        }}
-        disabled={!canGoNext || isSigningUp}
-        onPress={async () => {
-          setIsSigningUp(true);
-          await sleep(300);
+      <View style={{ width: '100%', marginTop: spacing.base }}>
+        <StyledButton
+          variant="primary"
+          disabled={!canGoNext || isSigningUp}
+          onPress={async () => {
+            setIsSigningUp(true);
+            await sleep(300);
 
-          await signUp({
-            name,
-            username,
-          });
-          setIsSigningUp(false);
+            await signUp({
+              name,
+              username,
+            });
+            setIsSigningUp(false);
 
-          navigation.navigate('SaveBackupPhrase');
-        }}
-        isLoading={isSigningUp}
-        title={isSigningUp ? 'Creating wallet...' : t('signUp')}
-      ></StyledButton>
+            navigation.navigate('SaveBackupPhrase');
+          }}
+          isLoading={isSigningUp}
+          title={isSigningUp ? 'Creating wallet...' : t('signUp')}
+        ></StyledButton>
+      </View>
     </View>
   );
 };

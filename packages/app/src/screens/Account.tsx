@@ -2,7 +2,7 @@ import FastAvatar from '@/components/FastAvatar';
 import useSignOut from '@/hooks/useSignOut';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Text, TouchableHighlight, View } from 'react-native';
@@ -13,6 +13,9 @@ import { Entypo } from '@expo/vector-icons';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import useSetProfileImage from '@/hooks/useSetProfileImage';
 import Toast from 'react-native-toast-message';
+import fontSizes from '@/lib/styles/fontSizes';
+import spacing from '@/lib/styles/spacing';
+import opacity from '@/lib/styles/opacity';
 
 interface SettingListItemProps {
   icon: React.ReactNode;
@@ -34,7 +37,6 @@ const SettingListItem = (props: SettingListItemProps) => {
         height: 56,
       }}
       onPress={onPress}
-      underlayColor={theme.backgroundHover}
     >
       <View
         style={{
@@ -60,11 +62,11 @@ const SettingListItem = (props: SettingListItemProps) => {
           </View>
           <Text
             style={{
-              marginLeft: 10,
-              fontSize: 16,
+              marginLeft: spacing.small,
+              fontSize: fontSizes.base,
               textAlign: 'center',
               fontWeight: '500',
-              color: color ? color : theme.text,
+              color: color ? color : colors.text,
             }}
           >
             {title}
@@ -72,8 +74,9 @@ const SettingListItem = (props: SettingListItemProps) => {
         </View>
         <Entypo
           name="chevron-right"
-          size={18}
-          color={theme.text}
+          size={fontSizes.base}
+          color={colors.text}
+          a
           style={{
             opacity: 0.7,
           }}
@@ -151,8 +154,7 @@ const Account = () => {
         flex: 1,
         flexDirection: 'column',
         alignItems: 'center',
-        marginTop: 40,
-        paddingHorizontal: 16,
+        padding: spacing.base,
       }}
     >
       <View
@@ -177,7 +179,7 @@ const Account = () => {
           <AntDesign
             name="camera"
             size={20}
-            color={theme.text}
+            color={colors.text}
             style={{
               opacity: 0.9,
               right: 22,
@@ -191,16 +193,16 @@ const Account = () => {
         </View>
         <Text
           style={{
-            fontSize: 24,
-            color: theme.text,
+            fontSize: fontSizes.large,
+            color: colors.text,
           }}
         >
           {user.name}
         </Text>
         <Text
           style={{
-            opacity: 0.5,
-            color: theme.text,
+            opacity: opacity.dimmed,
+            color: colors.text,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >
@@ -212,46 +214,52 @@ const Account = () => {
           flex: 1,
           flexDirection: 'column',
           alignItems: 'center',
-          marginTop: 40,
+          marginTop: spacing.base,
         }}
       >
         <SettingListItem
           icon={
-            <MaterialIcons name="account-circle" size={24} color={theme.gray} />
+            <MaterialIcons
+              name="account-circle"
+              size={24}
+              color={colors.gray}
+            />
           }
           title={t('accountInfo')}
           onPress={() => navigation.navigate('AccountInfo')}
-          color={theme.text}
+          color={colors.text}
         />
         <SettingListItem
-          icon={<MaterialIcons name="backup" size={24} color={theme.gray} />}
+          icon={<MaterialIcons name="backup" size={24} color={colors.gray} />}
           title={t('backupAccount')}
           onPress={() => navigation.navigate('BackupAccount')}
-          color={theme.text}
+          color={colors.text}
         />
         <SettingListItem
-          icon={<MaterialIcons name="list" size={24} color={theme.gray} />}
+          icon={<MaterialIcons name="list" size={24} color={colors.gray} />}
           title={t('addresses')}
           onPress={() => navigation.navigate('Addresses')}
-          color={theme.text}
+          color={colors.text}
         />
         <SettingListItem
-          icon={<MaterialIcons name="settings" size={24} color={theme.gray} />}
+          icon={<MaterialIcons name="settings" size={24} color={colors.gray} />}
           title={t('advanced')}
           onPress={() => navigation.navigate('Advanced')}
-          color={theme.text}
+          color={colors.text}
         />
         <SettingListItem
-          icon={<Entypo name="language" size={24} color={theme.gray} />}
+          icon={<Entypo name="language" size={24} color={colors.gray} />}
           title={t('language')}
           onPress={onChangeLanguagePress}
-          color={theme.text}
+          color={colors.text}
         />
         <SettingListItem
-          icon={<MaterialIcons name="logout" size={24} color={theme.waning} />}
+          icon={
+            <MaterialIcons name="logout" size={24} color={colors.warning} />
+          }
           title={t('signOut')}
           onPress={onSignOutPress}
-          color={theme.waning}
+          color={colors.warning}
         />
       </View>
     </View>

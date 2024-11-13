@@ -1,5 +1,5 @@
 import useMnemonic from '@/hooks/useMnemonic';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import * as bip39 from 'bip39';
@@ -9,6 +9,7 @@ import Toast from 'react-native-toast-message';
 import { setBackupVerificationStatus } from '@/lib/key';
 import MnemonicWord from '@/components/MnemonicWord';
 import { useTranslation } from 'react-i18next';
+import fontSizes from '@/lib/styles/fontSizes';
 
 const generateRandomNumbers = ({
   max,
@@ -164,7 +165,7 @@ const ConfirmBackupPhrase = () => {
               <MnemonicWord
                 word={hide ? fillWord : item}
                 index={index + 1}
-                bgColor={hide ? theme.primary : theme.text}
+                bgColor={hide ? colors.primary : colors.text}
               ></MnemonicWord>
             </View>
           );
@@ -176,9 +177,9 @@ const ConfirmBackupPhrase = () => {
       ></FlatList>
       <Text
         style={{
-          color: theme.text,
+          color: colors.text,
           textAlign: 'center',
-          fontSize: 16,
+          fontSize: fontSizes.base,
         }}
       >
         {t('choose3Words')}
@@ -209,7 +210,7 @@ const ConfirmBackupPhrase = () => {
               >
                 <MnemonicWord
                   word={item}
-                  bgColor={disabled ? theme.gray : theme.text}
+                  bgColor={disabled ? colors.gray : colors.text}
                 ></MnemonicWord>
               </Pressable>
             );

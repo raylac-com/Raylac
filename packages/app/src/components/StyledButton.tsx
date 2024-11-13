@@ -1,18 +1,23 @@
-import { theme } from '@/lib/theme';
+import borderRadius from '@/lib/styles/borderRadius';
+import colors from '@/lib/styles/colors';
+import fontSizes from '@/lib/styles/fontSizes';
+import opacity from '@/lib/styles/opacity';
+import spacing from '@/lib/styles/spacing';
 import React, { useState } from 'react';
 import {
   Pressable,
   Text,
   ActivityIndicator,
   PressableProps,
-  StyleSheet,
   View,
+  ViewStyle,
+  TextStyle,
 } from 'react-native';
 
 type StyledButtonProps = {
   title: string;
   isLoading?: boolean;
-  variant?: 'primary' | 'outline' | 'underline';
+  variant: 'primary' | 'outline' | 'underline';
   icon?: React.ReactNode;
 } & PressableProps;
 
@@ -29,40 +34,54 @@ const StyledButton = (props: StyledButtonProps) => {
     setIsPressed(false);
   };
 
-  let pressableStyle;
+  const pressableStyle: ViewStyle = {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    columnGap: spacing.xSmall,
+    paddingVertical: 14,
+  };
+
   switch (props.variant) {
     case 'primary':
-      pressableStyle = styles.primaryButton;
+      pressableStyle.backgroundColor = colors.primary;
+      pressableStyle.borderRadius = borderRadius.xLarge;
       break;
     case 'outline':
-      pressableStyle = styles.outlineButton;
+      pressableStyle.backgroundColor = 'transparent';
+      pressableStyle.borderRadius = borderRadius.xLarge;
+      pressableStyle.borderColor = colors.primary;
+      pressableStyle.borderWidth = 1;
       break;
     case 'underline':
-      pressableStyle = styles.underlineButton;
       break;
     default:
-      pressableStyle = styles.primaryButton;
+      pressableStyle.backgroundColor = colors.primary;
   }
 
-  let textStyle;
+  const textStyle: TextStyle = {
+    color: colors.text,
+    fontWeight: 'bold',
+    fontSize: fontSizes.base,
+    textAlign: 'center',
+  };
   switch (props.variant) {
     case 'primary':
-      textStyle = {
-        color: theme.text,
-      };
+      textStyle.color = colors.text;
       break;
     case 'outline':
-      textStyle = {
-        color: theme.primary,
-      };
+      textStyle.color = colors.primary;
       break;
     case 'underline':
-      textStyle = styles.underlineText;
+      textStyle.textDecorationLine = 'underline';
+      textStyle.textDecorationColor = colors.primary;
+      textStyle.textDecorationStyle = 'solid';
+      textStyle.color = colors.text;
+      textStyle.opacity = 0.7;
       break;
     default:
-      textStyle = {
-        color: theme.text,
-      };
+      textStyle.color = colors.text;
   }
 
   return (
@@ -71,7 +90,7 @@ const StyledButton = (props: StyledButtonProps) => {
       style={{
         ...pressableStyle,
         ...style,
-        opacity: (disabled || isPressed || isLoading) ? 0.4 : 1,
+        opacity: disabled || isPressed || isLoading ? opacity.dimmed : 1,
       }}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
@@ -82,7 +101,7 @@ const StyledButton = (props: StyledButtonProps) => {
           <ActivityIndicator
             size="small"
             style={{
-              marginRight: 10,
+              marginRight: spacing.xSmall,
             }}
           ></ActivityIndicator>
         )
@@ -99,54 +118,9 @@ const StyledButton = (props: StyledButtonProps) => {
           </View>
         )
       }
-      <Text
-        style={{
-          color: theme.text,
-          fontWeight: 'bold',
-          fontSize: 16,
-          ...textStyle,
-        }}
-      >
-        {title}
-      </Text>
+      <Text style={textStyle}>{title}</Text>
     </Pressable>
   );
 };
-
-const styles = StyleSheet.create({
-  primaryButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: theme.primary,
-    paddingHorizontal: 36,
-    paddingVertical: 12,
-    borderRadius: 30,
-  },
-  outlineButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-    borderColor: theme.primary,
-    borderWidth: 1,
-    paddingHorizontal: 36,
-    paddingVertical: 12,
-    borderRadius: 30,
-  },
-  underlineButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-  },
-  underlineText: {
-    textDecorationLine: 'underline',
-    textDecorationColor: theme.primary,
-    textDecorationStyle: 'solid',
-    color: theme.text,
-    opacity: 0.7,
-  },
-});
 
 export default StyledButton;

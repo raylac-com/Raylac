@@ -1,7 +1,7 @@
 import StyledButton from '@/components/StyledButton';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import userKeys from '@/queryKeys/userKeys';
 import { useQueryClient } from '@tanstack/react-query';
@@ -9,6 +9,7 @@ import { useCallback } from 'react';
 import { Alert, Text, View } from 'react-native';
 import * as Updates from 'expo-updates';
 import useSignOut from '@/hooks/useSignOut';
+import fontSizes from '@/lib/styles/fontSizes';
 
 const Advanced = () => {
   const { data: signedInUser } = useSignedInUser();
@@ -72,10 +73,11 @@ const Advanced = () => {
       }}
     >
       <StyledButton
+        variant="primary"
         title="Delete account"
         onPress={onDeleteAccountPress}
         style={{
-          backgroundColor: theme.waning,
+          backgroundColor: colors.warning,
         }}
       ></StyledButton>
       <View
@@ -88,8 +90,8 @@ const Advanced = () => {
       >
         <Text
           style={{
-            color: theme.text,
-            fontSize: 14,
+            color: colors.text,
+            fontSize: fontSizes.small,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >
@@ -97,8 +99,8 @@ const Advanced = () => {
         </Text>
         <Text
           style={{
-            color: theme.text,
-            fontSize: 14,
+            color: colors.text,
+            fontSize: fontSizes.small,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >
@@ -106,8 +108,8 @@ const Advanced = () => {
         </Text>
         <Text
           style={{
-            color: theme.text,
-            fontSize: 14,
+            color: colors.text,
+            fontSize: fontSizes.small,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >
@@ -115,8 +117,8 @@ const Advanced = () => {
         </Text>
         <Text
           style={{
-            color: theme.text,
-            fontSize: 14,
+            color: colors.text,
+            fontSize: fontSizes.small,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >
@@ -124,8 +126,8 @@ const Advanced = () => {
         </Text>
         <Text
           style={{
-            color: theme.text,
-            fontSize: 14,
+            color: colors.text,
+            fontSize: fontSizes.small,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >
@@ -133,8 +135,8 @@ const Advanced = () => {
         </Text>
         <Text
           style={{
-            color: theme.text,
-            fontSize: 14,
+            color: colors.text,
+            fontSize: fontSizes.small,
           }}
           // eslint-disable-next-line react/jsx-no-literals
         >

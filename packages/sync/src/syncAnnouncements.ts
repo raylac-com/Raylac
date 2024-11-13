@@ -1,10 +1,10 @@
 import {
   bigIntMax,
-  devChains,
   ERC5564_ANNOUNCER_ADDRESS,
   ERC5564_SCHEME_ID,
   getSenderAddressV2,
   sleep,
+  devChains,
 } from '@raylac/shared';
 import prisma from './lib/prisma';
 import {
@@ -19,6 +19,7 @@ import { ERC5564Announcement, Prisma, SyncJob } from '@raylac/db';
 import { supportedTokens } from '@raylac/shared';
 import { getChainName } from '@raylac/shared';
 import { logger } from '@raylac/shared-backend';
+import { anvil } from 'viem/_types/chains/definitions/anvil';
 const SCAN_PAST_BUFFER = 2 * 60 * 1000; // 2 minutes
 
 /**
@@ -87,6 +88,12 @@ const createSyncTasks = async ({
   const promises = [];
 
   for (const chainId of chainIds) {
+    if (announcement.chainId === anvil.id && chainId !== anvil.id) {
+      // We don't create sync tasks for production chains when the announcement
+      // is on the anvil chain
+      continue;
+    }
+
     promises.push(createSyncTaskForChain({ announcement, chainId }));
   }
 };

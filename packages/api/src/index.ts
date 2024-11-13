@@ -29,9 +29,7 @@ import getUser from './api/getUser';
 import deleteAccount from './api/deleteAccount';
 import getTransferDetails from './api/getTransferDetails';
 import addStealthAccount from './api/addStealthAccount';
-import express from 'express';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
-import { logger } from '@raylac/shared-backend';
 import pruneAnvil from './api/pruneAnvil';
 import getSyncStatus from './api/getSyncStatus';
 import buildMultiChainSendUserOps from './api/buildMultiChainSendUserOps';
@@ -415,6 +413,10 @@ export const appRouter = router({
         chainIds: input.chainIds,
       });
     }),
+
+  getGitCommit: publicProcedure.query(async () => {
+    return process.env.RENDER_GIT_COMMIT ?? '';
+  }),
 });
 
 export const createCaller = createCallerFactory(appRouter);
@@ -427,19 +429,4 @@ const server = createHTTPServer({
   createContext,
 });
 
-const app = express();
-
-app.get('/version', (_req, res) => {
-  const RENDER_GIT_COMMIT = process.env.RENDER_GIT_COMMIT;
-
-  if (!RENDER_GIT_COMMIT) {
-    throw new Error('RENDER_GIT_COMMIT is not set');
-  }
-
-  logger.info(`RENDER_GIT_COMMIT: ${RENDER_GIT_COMMIT}`);
-
-  res.send(RENDER_GIT_COMMIT);
-});
-
 server.listen(3000);
-app.listen(4000);

@@ -1,4 +1,4 @@
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { MIN_USERNAME_LENGTH, USERNAME_REGEX } from '@raylac/shared';
 import { useTranslation } from 'react-i18next';
 import { Text } from 'react-native';
@@ -23,7 +23,7 @@ const UsernameAvailabilityIndicator = (
     return (
       <Text
         style={{
-          color: theme.waning,
+          color: colors.warning,
         }}
       >
         {t('usernameLengthWarning', { minChars: MIN_USERNAME_LENGTH })}
@@ -35,7 +35,7 @@ const UsernameAvailabilityIndicator = (
     return (
       <Text
         style={{
-          color: theme.waning,
+          color: colors.warning,
         }}
       >
         {t('usernameInvalid')}
@@ -47,7 +47,7 @@ const UsernameAvailabilityIndicator = (
     return (
       <Text
         style={{
-          color: theme.waning,
+          color: colors.warning,
         }}
       >
         {t('usernameTaken')}

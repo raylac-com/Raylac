@@ -1,4 +1,4 @@
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { Text, TextInput, TextInputProps, View, ViewProps } from 'react-native';
 
 type StyledTextInputProps = {
@@ -19,7 +19,7 @@ const StyledTextInput = (props: StyledTextInputProps) => {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: theme.text,
+        backgroundColor: colors.text,
         paddingHorizontal: 24,
         paddingVertical: 12,
         borderRadius: 12,
@@ -30,8 +30,8 @@ const StyledTextInput = (props: StyledTextInputProps) => {
       <TextInput
         {...props}
         style={{
-          color: theme.background,
-          width:  "100%", 
+          color: colors.background,
+          width: '100%',
           height: 32,
           ...inputStyle,
         }}
@@ -40,7 +40,7 @@ const StyledTextInput = (props: StyledTextInputProps) => {
         <Text
           style={{
             opacity: 0.6,
-            color: theme.text,
+            color: colors.text,
             marginRight: -8,
           }}
         >

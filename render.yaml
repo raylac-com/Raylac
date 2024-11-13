@@ -11,14 +11,6 @@ services:
     startCommand: NODE_ENV=production pnpm -F api start
     preDeployCommand: pnpm -F db migrate:prod
     autoDeploy: true
-    buildFilter:
-      ignoredPaths:
-        - ./packages/app/**/*
-        - ./packages/tests/**/*
-        - ./packages/contracts/**/*
-        - ./README.md
-        - ./LICENSE
-        - ./.gitignore
     envVars:
       - fromGroup: raylac
       - key: NODE_VERSION
@@ -32,8 +24,8 @@ services:
           name: anvil
           type: web
           envVarKey: RENDER_EXTERNAL_URL
-  - type: worker
-    name: raylac-sync
+  - type: web
+    name: raylac-indexer
     plan: standard
     previewPlan: starter
     runtime: node
@@ -43,15 +35,6 @@ services:
     preDeployCommand: pnpm -F db migrate:prod
     rootDir: ./
     autoDeploy: true
-    buildFilter:
-      ignoredPaths:
-        - ./packages/app/**/*
-        - ./packages/tests/**/*
-        - ./packages/api/**/*
-        - ./packages/contracts/**/*
-        - ./README.md
-        - ./LICENSE
-        - ./.gitignore
     envVars:
       - fromGroup: raylac
       - key: NODE_VERSION
@@ -60,6 +43,11 @@ services:
         fromDatabase:
           name: raylac
           property: connectionString
+      - key: ANVIL_RPC_URL
+        fromService:
+          name: anvil
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
   - type: web
     name: anvil
     plan: standard
@@ -70,9 +58,7 @@ services:
     region: oregon
     autoDeploy: false
     rootDir: ./
-    buildFilter:
-      paths:
-        - ./packages/ci/Dockerfile.foundary
+
 databases:
   - name: raylac
     databaseName: raylac

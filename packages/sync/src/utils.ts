@@ -511,3 +511,24 @@ export const endTimer = (timer: Timer) => {
   const duration = endTime - timer.startTime;
   logger.info(`${timer.label} took ${duration}ms`);
 };
+
+/**
+ * Loop function with error handling
+ */
+export const loop = async ({
+  fn,
+  interval,
+}: {
+  fn: () => Promise<void>;
+  interval: number;
+}) => {
+  while (true) {
+    try {
+      await fn();
+    } catch (err) {
+      logger.error(err);
+    }
+
+    await sleep(interval);
+  }
+};
