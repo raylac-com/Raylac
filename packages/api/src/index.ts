@@ -63,7 +63,8 @@ export const appRouter = router({
     .input(
       z.object({
         userOps: z.array(z.any()),
-        tokenPrice: z.number().optional(),
+        tokenPrice: z.number(),
+        toStealthAddress: z.string().optional(),
       })
     )
     .mutation(async opts => {
@@ -73,6 +74,7 @@ export const appRouter = router({
         userId: opts.ctx.userId,
         userOps: input.userOps as UserOperation[],
         tokenPrice: input.tokenPrice,
+        toStealthAddress: input.toStealthAddress as Hex | undefined,
       });
 
       return result;
