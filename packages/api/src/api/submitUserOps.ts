@@ -3,13 +3,16 @@ import {
   decodeUserOpCalldata,
   decodeUserOperationContext,
   EntryPointAbi,
+  ERC20Abi,
   getChainName,
   getNativeTransferTracesInBlock,
   getPublicClient,
+  getTokenId,
   getWebsocketClient,
   UserOperation,
 } from '@raylac/shared';
 import {
+  decodeEventLog,
   getAddress,
   Hex,
   hexToBigInt,
@@ -108,9 +111,9 @@ const saveUserAction = async ({
 };
 
 /**
- * Save the native transfer traces of a transaction to the db
+ * Save the native transfer traces as `Trace` records to the db
  */
-const saveTxTraces = async ({
+const saveNativeTransferTraces = async ({
   txReceipt,
   chainId,
   tokenPrice,
@@ -139,34 +142,106 @@ const saveTxTraces = async ({
     });
   }
 
-  const traceCreateInput = await Promise.all(
-    txTraces.map(async trace => {
-      const from = getAddress(trace.from);
+  const traceCreateInput = txTraces.map(trace => {
+    const from = getAddress(trace.from);
 
-      const data: Prisma.TraceCreateManyInput = {
-        from,
-        to: getAddress(trace.to),
-        amount: hexToBigInt(trace.value).toString(),
-        tokenId: 'eth',
-        transactionHash: txReceipt.transactionHash,
-        chainId,
-        traceAddress: trace.traceAddress.join('_'),
-        tokenPriceAtTrace: tokenPrice,
-      };
+    const data: Prisma.TraceCreateManyInput = {
+      from,
+      to: getAddress(trace.to),
+      amount: hexToBigInt(trace.value).toString(),
+      tokenId: 'eth',
+      transactionHash: txReceipt.transactionHash,
+      chainId,
+      traceAddress: trace.traceAddress.join('_'),
+      tokenPriceAtTrace: tokenPrice,
+    };
 
-      // Set the `fromStealthAddress` field if the `from` address is a UserOperation sender
-      if (userOpSenderAddresses.includes(from)) {
-        data.fromStealthAddress = from;
-      }
+    // Set the `fromStealthAddress` field if the `from` address is a UserOperation sender
+    if (userOpSenderAddresses.includes(from)) {
+      data.fromStealthAddress = from;
+    }
 
-      // Set the `toStealthAddress` field if the recipient is a Raylac user
-      if (toStealthAddress) {
-        data.toStealthAddress = toStealthAddress;
-      }
+    // Set the `toStealthAddress` field if the recipient is a Raylac user
+    if (toStealthAddress) {
+      data.toStealthAddress = toStealthAddress;
+    }
 
-      return data;
-    })
-  );
+    return data;
+  });
+
+  await prisma.trace.createMany({
+    data: traceCreateInput,
+    skipDuplicates: true,
+  });
+};
+
+/**
+ * Save the ERC20 Transfer logs as `Trace` records to the db
+ */
+const saveERC20TransferLogs = async ({
+  txReceipt,
+  chainId,
+  tokenPrice,
+  tokenId,
+  userOpSenderAddresses,
+  toStealthAddress,
+}: {
+  txReceipt: TransactionReceipt;
+  chainId: number;
+  tokenPrice: number;
+  tokenId: string;
+  userOpSenderAddresses: Hex[];
+  toStealthAddress?: Hex;
+}) => {
+  const transferLogs = parseEventLogs({
+    abi: ERC20Abi,
+    logs: txReceipt.logs,
+    eventName: 'Transfer',
+  });
+
+  // Array of `Trace` records to create
+  const traceCreateInput: Prisma.TraceCreateManyInput[] = [];
+
+  // Iterate over each `Transfer` log and create the input for the `Trace` record
+  for (const log of transferLogs) {
+    const decodedLog = decodeEventLog({
+      abi: ERC20Abi,
+      data: log.data,
+      topics: log.topics,
+    });
+
+    if (decodedLog.eventName !== 'Transfer') {
+      throw new Error('Event name is not `Transfer`');
+    }
+
+    const { args } = decodedLog;
+
+    const from = getAddress(args.from);
+    const to = getAddress(args.to);
+
+    const data: Prisma.TraceCreateManyInput = {
+      from,
+      to,
+      tokenId,
+      amount: args.value.toString(),
+      transactionHash: txReceipt.transactionHash,
+      logIndex: log.logIndex,
+      chainId,
+      tokenPriceAtTrace: tokenPrice,
+    };
+
+    // Set the `fromStealthAddress` field if the `from` address is a UserOperation sender
+    if (userOpSenderAddresses.includes(from)) {
+      data.fromStealthAddress = from;
+    }
+
+    // Set the `toStealthAddress` field if the recipient is a Raylac user
+    if (toStealthAddress) {
+      data.toStealthAddress = toStealthAddress;
+    }
+
+    traceCreateInput.push(data);
+  }
 
   await prisma.trace.createMany({
     data: traceCreateInput,
@@ -264,11 +339,13 @@ const submitUserOpsForChain = async ({
   chainId,
   userOps,
   tokenPrice,
+  tokenId,
   toStealthAddress,
 }: {
   chainId: number;
   userOps: UserOperation[];
   tokenPrice: number;
+  tokenId: string;
   toStealthAddress?: Hex;
 }) => {
   // Call the EntryPoint's `handleOps` function
@@ -288,13 +365,24 @@ const submitUserOpsForChain = async ({
 
   const userOpSenderAddresses = userOps.map(userOp => userOp.sender);
 
-  await saveTxTraces({
-    txReceipt,
-    chainId,
-    tokenPrice,
-    toStealthAddress,
-    userOpSenderAddresses,
-  });
+  if (tokenId === 'eth') {
+    await saveNativeTransferTraces({
+      txReceipt,
+      chainId,
+      tokenPrice,
+      toStealthAddress,
+      userOpSenderAddresses,
+    });
+  } else {
+    await saveERC20TransferLogs({
+      txReceipt,
+      chainId,
+      tokenPrice,
+      tokenId,
+      toStealthAddress,
+      userOpSenderAddresses,
+    });
+  }
 
   await saveUserOpEventLos({ txReceipt, chainId });
 
@@ -325,6 +413,13 @@ const submitUserOps = async ({
   const executeArgs = userOps.map(decodeUserOpCalldata);
   const isNativeTransfer = executeArgs[0].data === '0x';
 
+  const tokenId = isNativeTransfer
+    ? 'eth'
+    : getTokenId({
+        chainId: userOps[0].chainId,
+        tokenAddress: executeArgs[0].to,
+      });
+
   validateUserOps({ userOps, isNativeTransfer });
 
   // Mapping of chainId to UserOps to submit
@@ -350,6 +445,7 @@ const submitUserOps = async ({
         chainId: Number(chainId),
         userOps,
         tokenPrice,
+        tokenId,
         toStealthAddress,
       })
     );
