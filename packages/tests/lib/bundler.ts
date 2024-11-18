@@ -7,7 +7,7 @@ import {
   getChainName,
 } from '@raylac/shared';
 import { logger } from '@raylac/shared-backend';
-import { parseEther, zeroAddress } from 'viem';
+import { parseEther } from 'viem';
 import { getTestClient } from './utils';
 
 export const handleOps = async ({
@@ -17,7 +17,7 @@ export const handleOps = async ({
   userOps: UserOperation[];
   chainId: number;
 }) => {
-  const bundler = zeroAddress;
+  const bundler = '0x3333333333333333333333333333333333333333';
 
   const beneficiary = bundler;
 
@@ -62,6 +62,10 @@ export const handleOps = async ({
   return { txHash, userOpHashes };
 };
 
+/**
+ * Submit UserOperations to the bundler and return the tx hashes.
+ * This functions groups the user ops by chain and submits them in the respective chains.
+ */
 export const submitUserOps = async ({
   userOps,
 }: {

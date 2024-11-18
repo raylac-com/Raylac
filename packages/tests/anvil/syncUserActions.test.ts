@@ -2,27 +2,18 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   createStealthAccountForTestUser,
   getTestClient,
-  signUserOpWithPaymasterAccount,
-  signUserOpWithTestUserAccount,
+  transfer,
   waitFor,
 } from '../lib/utils';
 import prisma from '../lib/prisma';
 import {
+  generateRandomMultiChainTag,
   StealthAddressWithEphemeral,
-  UserActionType,
-  UserOperation,
 } from '@raylac/shared';
 import { Hex, parseEther } from 'viem';
 import { zeroAddress } from 'viem';
-import {
-  encodeUserActionTag,
-  generateRandomMultiChainTag,
-  getGasInfo,
-} from '@raylac/shared/src/utils';
 import { anvil } from 'viem/chains';
 import { devChains } from '@raylac/shared/src/devChains';
-import { buildUserOp } from '@raylac/shared/src/erc4337';
-import { submitUserOps } from '../lib/bundler';
 
 const waitForUserActionSync = async ({ txHashes }: { txHashes: Hex[] }) => {
   await waitFor({
@@ -153,62 +144,22 @@ describe('syncUserActions', () => {
 
     const amount = parseEther('0.0001');
 
-    const gasInfo = await getGasInfo({
-      chainIds: devChains.map(c => c.id),
-    });
-
-    const signedUserOps: UserOperation[] = [];
     const groupTag = generateRandomMultiChainTag();
 
-    const chain = devChains[0];
-
-    const chainGasInfo = gasInfo.find(g => g.chainId === chain.id);
-
-    if (!chainGasInfo) {
-      throw new Error(`Gas info not found for chain ${chain.id}`);
-    }
-
-    const tag = encodeUserActionTag({
-      groupTag,
-      groupSize: 1,
-      userActionType: UserActionType.Transfer,
-    });
-
-    const userOp = buildUserOp({
-      stealthSigner: stealthAccount.signerAddress,
+    const txHash = await transfer({
+      from: stealthAccount,
       to: zeroAddress,
       value: amount,
-      data: '0x',
-      tag,
-      chainId: chain.id,
-      gasInfo: chainGasInfo,
-      nonce: null,
-    });
-
-    // Get the paymaster signature
-    const paymasterSignedUserOp = await signUserOpWithPaymasterAccount({
-      userOp,
-    });
-
-    // Sign the user operation with the test user's stealth account
-    const signedUserOp = await signUserOpWithTestUserAccount({
-      userOp: paymasterSignedUserOp,
-      stealthAccount,
-    });
-
-    signedUserOps.push(signedUserOp);
-
-    // Submit the user operations to the RPC endpoint
-    const txHashes = await submitUserOps({
-      userOps: signedUserOps,
+      groupTag,
+      chainId: anvil.id,
     });
 
     // 3. Wait for the transfers to synched again
-    await waitForUserActionSync({ txHashes });
+    await waitForUserActionSync({ txHashes: [txHash] });
 
     // 4. Check that the UserAction is correctly indexed
     const userAction = await prisma.userAction.findUnique({
-      where: { txHashes },
+      where: { txHashes: [txHash] },
     });
 
     expect(userAction).not.toBeNull();

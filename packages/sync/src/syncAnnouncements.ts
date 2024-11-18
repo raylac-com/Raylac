@@ -43,6 +43,15 @@ const createSyncTaskForChain = async ({
     });
   }
 
+  syncTasks.push({
+    address: announcement.address as Hex,
+    chainId,
+    blockNumber: scanFromBlock,
+    tokenId: 'userOps',
+    eRC5564AnnouncementId: announcement.id,
+    blockHash: '0x',
+  });
+
   await prisma.addressSyncStatus.createMany({
     data: syncTasks,
     skipDuplicates: true,
@@ -74,6 +83,8 @@ const createSyncTasks = async ({
       })
     );
   }
+
+  await Promise.all(promises);
 };
 
 export const handleERC5564AnnouncementLog = async ({

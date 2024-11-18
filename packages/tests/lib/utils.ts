@@ -1,8 +1,10 @@
 import { webcrypto } from 'node:crypto';
 import {
+  encodeUserActionTag,
   ERC20Abi,
   generateStealthAddressV2,
   getDevChainRpcUrl,
+  getGasInfo,
   getPublicClient,
   getSpendingPrivKey,
   getTokenAddressOnChain,
@@ -10,16 +12,20 @@ import {
   RAYLAC_PAYMASTER_V2_ADDRESS,
   signUserOpWithStealthAccount,
   sleep,
+  UserActionType,
   StealthAddressWithEphemeral,
   supportedTokens,
   toCoingeckoTokenId,
   UserOperation,
 } from '@raylac/shared';
 import { createTestClient, Hex, http, parseUnits } from 'viem';
+import { buildUserOp } from '@raylac/shared/src/erc4337';
 import { anvil } from 'viem/chains';
 import { client, getAuthedClient, getTestUserId } from './rpc';
 import { TEST_ACCOUNT_MNEMONIC } from './auth';
 import { encodePaymasterAndData } from '@raylac/shared/src/utils';
+import { devChains } from '@raylac/shared/src/devChains';
+import { handleOps } from './bundler';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -225,25 +231,71 @@ export const fromUsdAmount = async ({
 };
 
 /**
- * Get the token balance of the test user across all chains and stealth addresses
+ * Transfer tokens from a stealth account to an address
+ * @returns the tx hashes of the submitted user operations
  */
-export const getTestUserTokenBalance = async ({
-  tokenId,
+export const transfer = async ({
+  from,
+  to,
+  value,
+  groupTag,
+  chainId,
 }: {
-  tokenId: string;
+  from: StealthAddressWithEphemeral;
+  to: Hex;
+  value: bigint;
+  groupTag: Hex;
+  chainId: number;
 }) => {
-  const authedClient = await getAuthedClient();
-  const senderTokenBalances = await authedClient.getTokenBalances.query();
+  const gasInfo = await getGasInfo({
+    chainIds: devChains.map(c => c.id),
+  });
 
-  const senderBalance = senderTokenBalances.find(
-    balance => balance.tokenId === tokenId
-  )?.balance;
+  const signedUserOps: UserOperation[] = [];
 
-  if (!senderBalance) {
-    throw new Error(`Sender does not have ${tokenId} balance`);
+  const chainGasInfo = gasInfo.find(g => g.chainId === chainId);
+
+  if (!chainGasInfo) {
+    throw new Error(`Gas info not found for chain ${chainId}`);
   }
 
-  return BigInt(senderBalance);
+  const tag = encodeUserActionTag({
+    groupTag,
+    groupSize: 1,
+    userActionType: UserActionType.Transfer,
+  });
+
+  const userOp = buildUserOp({
+    stealthSigner: from.signerAddress,
+    to,
+    value,
+    data: '0x',
+    tag,
+    chainId,
+    gasInfo: chainGasInfo,
+    nonce: null,
+  });
+
+  // Get the paymaster signature
+  const paymasterSignedUserOp = await signUserOpWithPaymasterAccount({
+    userOp,
+  });
+
+  // Sign the user operation with the test user's stealth account
+  const signedUserOp = await signUserOpWithTestUserAccount({
+    userOp: paymasterSignedUserOp,
+    stealthAccount: from,
+  });
+
+  signedUserOps.push(signedUserOp);
+
+  // Submit the user operations to the EntryPoint
+  const { txHash } = await handleOps({
+    userOps: signedUserOps,
+    chainId,
+  });
+
+  return txHash;
 };
 
 export const waitFor = async ({
