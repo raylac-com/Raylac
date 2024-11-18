@@ -131,7 +131,7 @@ jobs:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
 
       - name: Run integration tests
-        run: pnpm -F tests test syncNativeTransfers.test.ts
+        run: pnpm -F tests test
         env:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           ANVIL_RPC_URL: https://anvil-pr-${{ github.event.pull_request.number }}.onrender.com
