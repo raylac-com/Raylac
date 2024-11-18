@@ -119,6 +119,8 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Lint
+        run: pnpm lint
       - name: Setup test environment
         run: pnpm -F ci run setup
 

@@ -11,7 +11,16 @@ import {
 } from '@raylac/shared';
 import { privateKeyToAccount, nonceManager } from 'viem/accounts';
 import { logger } from '@raylac/shared-backend';
-import { CHAIN_BLOCK_TIME } from '@raylac/sync';
+import { base, arbitrum, optimism, scroll, polygon, anvil } from 'viem/chains';
+
+const CHAIN_BLOCK_TIME: Record<number, number> = {
+  [base.id]: 2000,
+  [arbitrum.id]: 250,
+  [optimism.id]: 2000,
+  [scroll.id]: 3000,
+  [polygon.id]: 2000,
+  [anvil.id]: 250,
+};
 
 const ANNOUNCER_PRIVATE_KEY = process.env.ANNOUNCER_PRIVATE_KEY;
 
