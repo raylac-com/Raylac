@@ -10,7 +10,7 @@ if (!JWT_PRIV_KEY) {
 }
 
 /**
- * Sort tx traces by trace address in descending order
+ * Sort tx traces by trace address in descending order in the execution trace
  */
 const sortTxTracesByTraceAddress = (
   tx: TransferQueryResult['transactions'][number]
@@ -23,12 +23,15 @@ const sortTxTracesByTraceAddress = (
     const aTraceAddress = a.traceAddress.split('_');
     const bTraceAddress = b.traceAddress.split('_');
 
-    if (aTraceAddress.length !== bTraceAddress.length) {
-      throw new Error(
-        `Trace address length mismatch for transaction ${tx.hash}`
-      );
+    if (bTraceAddress.length > aTraceAddress.length) {
+      return 1;
     }
 
+    if (aTraceAddress.length > bTraceAddress.length) {
+      return -1;
+    }
+
+    // The trace addresses are the same length, so we can compare the last element
     const aTraceIndex = parseInt(aTraceAddress[aTraceAddress.length - 1]);
     const bTraceIndex = parseInt(bTraceAddress[bTraceAddress.length - 1]);
 
