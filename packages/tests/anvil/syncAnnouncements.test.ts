@@ -2,38 +2,29 @@ import { describe, expect, it } from 'vitest';
 import { anvil } from 'viem/chains';
 import { createStealthAccountForTestUser, waitFor } from '../lib/utils';
 import prisma from '../lib/prisma';
-import {
-  ERC5564_SCHEME_ID,
-  getPublicClient,
-  StealthAddressWithEphemeral,
-} from '@raylac/shared';
-import { SyncJob } from '@prisma/client';
+import { ERC5564_SCHEME_ID, StealthAddressWithEphemeral } from '@raylac/shared';
 import { logger } from '../../shared-backend/out';
+import { Hex } from 'viem';
 
-const publicClient = getPublicClient({ chainId: anvil.id });
+const ANNOUNCEMENT_CHAIN_ID = anvil.id;
+const SYNC_ON_CHAIN_IDS = [anvil.id];
 
 const waitForAnnouncementsSync = async ({
-  blockNumber,
+  addresses,
 }: {
-  blockNumber: bigint;
+  addresses: Hex[];
 }) => {
   return waitFor({
     fn: async () => {
-      const syncStatus = await prisma.syncStatus.findFirst({
-        select: {
-          lastSyncedBlockNum: true,
-        },
+      const announcements = await prisma.eRC5564Announcement.findMany({
         where: {
-          job: SyncJob.Announcements,
-          chainId: anvil.id,
+          address: {
+            in: addresses,
+          },
         },
       });
 
-      if (syncStatus && syncStatus.lastSyncedBlockNum >= blockNumber) {
-        return true;
-      }
-
-      return false;
+      return announcements.length === addresses.length;
     },
     timeout: 30 * 1000,
     label: 'syncAnnouncements',
@@ -55,9 +46,6 @@ describe('syncAnnouncements', () => {
     // 1: Create multiple stealth accounts
     // ###################################
 
-    const ANNOUNCEMENT_CHAIN_ID = anvil.id;
-    const SYNC_ON_CHAIN_IDS = [anvil.id];
-
     const stealthAccounts: StealthAddressWithEphemeral[] = [];
     for (let i = 0; i < NUM_STEALTH_ADDRESSES; i++) {
       const account = await createStealthAccountForTestUser({
@@ -71,10 +59,8 @@ describe('syncAnnouncements', () => {
       logger.debug(`Created stealth account ${account.address}`);
     }
 
-    const blockNumber = await publicClient.getBlockNumber();
-
     await waitForAnnouncementsSync({
-      blockNumber: BigInt(blockNumber),
+      addresses: stealthAccounts.map(account => account.address),
     });
 
     // ###################################

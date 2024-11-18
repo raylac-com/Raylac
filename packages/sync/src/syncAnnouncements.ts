@@ -153,19 +153,22 @@ const syncAnnouncements = async ({
         address: ERC5564_ANNOUNCER_ADDRESS,
         event: announcementAbiItem,
         handleLogs: async logs => {
-          for (const log of logs) {
-            await handleERC5564AnnouncementLog({
-              log,
-              announcementChainId,
-            });
-          }
+          await Promise.all(
+            logs.map(
+              async log =>
+                await handleERC5564AnnouncementLog({
+                  log,
+                  announcementChainId,
+                })
+            )
+          );
         },
         args: {
           schemeId: ERC5564_SCHEME_ID,
         },
       });
     },
-    interval: 3 * 1000,
+    interval: 1 * 1000,
   });
 };
 
