@@ -45,10 +45,11 @@
   },
   "Deposit": {
     "copyAddress": "Copy address",
-    "depositOn": "Deposit ETH or USDC on Base",
+    "depositOn": "Deposit",
     "depositToFreshAddress": "Deposit to a fresh address to keep your balance private",
     "getDepositAddress": "Get deposit address",
     "pastDepositAddresses": "Past deposit addresses",
+    "supportedChainsAndTokens": "Supported tokens",
     "title": "Deposit"
   },
   "EnterSendAmount": {
@@ -68,20 +69,23 @@
     "receive": "Receive",
     "seeAll": "See all",
     "send": "Send",
-    "title": "Home"
+    "title": "Home",
+    "transferHistory": "Transfers",
+    "assets": "Assets"
   },
   "Receive": {
     "backToHome": "Back to home",
     "orReceiveFromAnyone": "Or receive from anyone",
     "receiveFromRaylacUser": "Receive from a Raylac user",
-    "receiveOn": "Receive ETH or USDC on Base",
+    "receiveOn": "Receive",
     "receiveTo": "Receive to",
     "receiveToFreshAddress": "Receive to a fresh address to keep your transfers private",
     "title": "Receive",
     "yourRaylacUsername": "Your Raylac username",
     "pastReceivingAddresses": "Past receiving addresses",
     "getReceivingAddress": "Get receiving address",
-    "copyAddress": "Copy address"
+    "copyAddress": "Copy address",
+    "supportedChainsAndTokens": "Supported tokens"
   },
   "SaveBackupPhrase": {
     "backupPhrase": "Backup phrase",
@@ -123,15 +127,23 @@
     "signIn": "Sign in",
     "title": ""
   },
+
+  "TransferHistory": {
+    "noTransfers": "No transfers yet",
+    "title": "Transfer History"
+  },
   "TransferDetails": {
     "title": "Transfer details",
     "traces": "Traces",
     "sentTo": "Sent to {{ name }}",
     "receivedFrom": "Received from {{ name }}"
   },
-  "TransferHistory": {
-    "noTransfers": "No transfers yet",
-    "title": "Transfer History"
+  "TokenBalances": {
+    "title": "Token balances"
+  },
+  "TokenBalanceDetails": {
+    "title": "Token balance",
+    "addresses": "Addresses"
   },
   "UpdateDisplayName": {
     "displayName": "Name",
@@ -147,7 +159,16 @@
     "title": "Upgrade",
     "upgradeAccount": "Apply latest update to your account"
   },
+  "SupportedChains": {
+    "title": "Supported tokens",
+    "viewAll": "View all"
+  },
+  "SupportedTokens": {
+    "title": "Supported tokens",
+    "tokensOnChain": "Tokens on {{ chain }}"
+  },
   "common": {
+    "fiatDenominatedBalance": "${{ balance }}",
     "copied": "Copied",
     "copiedAddress": "Copied address",
     "headerBackTitle": "Back",

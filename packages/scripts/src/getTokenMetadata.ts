@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { Alchemy, Network } from 'alchemy-sdk';
+import { getCoingeckoClient } from '@raylac/shared';
 
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY;
 
@@ -14,11 +15,10 @@ const getTokenMetadata = async () => {
   };
   const alchemy = new Alchemy(config);
 
-  const metadata = await alchemy.core.getTokenMetadata(
-    '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'
-  );
+  const coingecko = getCoingeckoClient();
 
-  console.log(metadata);
+  const response = await coingecko.get(`/v3/coins/ethereum`);
+  console.log(response.data);
 };
 
 getTokenMetadata();

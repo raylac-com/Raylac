@@ -1,17 +1,26 @@
 import { TRPCError } from '@trpc/server';
 import {
   decodeUserOpCalldata,
+  decodeUserOperationContext,
   EntryPointAbi,
   ERC20Abi,
+  getChainName,
   getNativeTransferTracesInBlock,
+  getPublicClient,
   getTokenId,
-  getUserOpHash,
   getWebsocketClient,
   UserOperation,
 } from '@raylac/shared';
-import { getAddress, parseEventLogs, toHex } from 'viem';
+import {
+  decodeEventLog,
+  getAddress,
+  Hex,
+  hexToBigInt,
+  parseEventLogs,
+  TransactionReceipt,
+} from 'viem';
 import { handleOps } from '../lib/bundler';
-import { handleERC20TransferLog, handleUserOpEvent } from '@raylac/sync';
+import { upsertTransaction, upsertUserOpEventLog } from '@raylac/sync';
 import { logger } from '@raylac/shared-backend';
 import prisma from '../lib/prisma';
 import { Prisma } from '@raylac/db';
@@ -34,59 +43,236 @@ const canUserSubmitOps = async (userId: number) => {
   return numTransfers < MAX_TRANSFERS;
 };
 
-const upsertUserOps = async ({
+/**
+ * Get the timestamp of a block from the RPC
+ */
+const getBlockTimestamp = async ({
+  chainId,
+  blockNumber,
+}: {
+  chainId: number;
+  blockNumber: bigint;
+}) => {
+  const publicClient = getPublicClient({ chainId });
+  const block = await publicClient.getBlock({ blockNumber });
+
+  return block.timestamp;
+};
+
+/**
+ * Creates the `UserAction` record for the UserOperations
+ */
+const saveUserAction = async ({
   userOps,
-  tokenPrice,
+  txReceipts,
 }: {
   userOps: UserOperation[];
-  tokenPrice?: number;
+  txReceipts: (TransactionReceipt & { chainId: number })[];
 }) => {
-  const data: Prisma.UserOperationCreateInput[] = userOps.map(userOp => ({
-    hash: getUserOpHash({ userOp }),
-    chainId: userOp.chainId,
-    tokenPriceAtOp: tokenPrice ?? null,
-  }));
+  const executeArgs = userOps.map(decodeUserOpCalldata);
 
-  await prisma.userOperation.createMany({
-    data,
+  const contexts = executeArgs.map(args => args.tag);
+
+  const decodedContexts = contexts.map(context =>
+    decodeUserOperationContext({
+      txHash: txReceipts[0].transactionHash,
+      context,
+    })
+  );
+
+  const multiChainTag = decodedContexts[0].multiChainTag;
+  const numChains = decodedContexts[0].numChains;
+
+  // TODO: Get the timestamp from the chain that has the fastest RPC endpoint
+  const blockTimestamp = await getBlockTimestamp({
+    chainId: txReceipts[0].chainId,
+    blockNumber: txReceipts[0].blockNumber,
+  });
+
+  const txHashes = txReceipts.map(tx => tx.transactionHash).sort();
+
+  const data: Prisma.UserActionCreateInput = {
+    timestamp: blockTimestamp,
+    transactions: {
+      connect: txHashes.map(hash => ({ hash })),
+    },
+    txHashes,
+    groupTag: multiChainTag,
+    groupSize: numChains,
+  };
+
+  const result = await prisma.$transaction(async tx => {
+    return await tx.userAction.upsert({
+      where: {
+        txHashes,
+      },
+      update: data,
+      create: data,
+    });
+  });
+
+  return result;
+};
+
+/**
+ * Save the native transfer traces as `Trace` records to the db
+ */
+const saveNativeTransferTraces = async ({
+  txReceipt,
+  chainId,
+  tokenPrice,
+  userOpSenderAddresses,
+  toStealthAddress,
+}: {
+  txReceipt: TransactionReceipt;
+  chainId: number;
+  tokenPrice: number;
+  userOpSenderAddresses: Hex[];
+  toStealthAddress?: Hex;
+}) => {
+  const tracesWithValueInBlocks = await getNativeTransferTracesInBlock({
+    blockNumber: txReceipt.blockNumber,
+    chainId,
+  });
+
+  const txTraces = tracesWithValueInBlocks.filter(
+    call => call.txHash === txReceipt.transactionHash
+  );
+
+  if (txTraces.length === 0) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: `No native transfer traces found for tx ${txReceipt.transactionHash}`,
+    });
+  }
+
+  const traceCreateInput = txTraces.map(trace => {
+    const from = getAddress(trace.from);
+
+    const data: Prisma.TraceCreateManyInput = {
+      from,
+      to: getAddress(trace.to),
+      amount: hexToBigInt(trace.value).toString(),
+      tokenId: 'eth',
+      transactionHash: txReceipt.transactionHash,
+      chainId,
+      traceAddress: trace.traceAddress.join('_'),
+      tokenPriceAtTrace: tokenPrice,
+    };
+
+    // Set the `fromStealthAddress` field if the `from` address is a UserOperation sender
+    if (userOpSenderAddresses.includes(from)) {
+      data.fromStealthAddress = from;
+    }
+
+    // Set the `toStealthAddress` field if the recipient is a Raylac user
+    if (toStealthAddress) {
+      data.toStealthAddress = toStealthAddress;
+    }
+
+    return data;
+  });
+
+  await prisma.trace.createMany({
+    data: traceCreateInput,
     skipDuplicates: true,
   });
 };
 
-const submitUserOps = async ({
-  userId,
+/**
+ * Save the ERC20 Transfer logs as `Trace` records to the db
+ */
+const saveERC20TransferLogs = async ({
+  txReceipt,
+  chainId,
   tokenPrice,
-  userOps,
+  tokenId,
+  userOpSenderAddresses,
+  toStealthAddress,
 }: {
-  userId: number;
-  tokenPrice?: number;
-  userOps: UserOperation[];
+  txReceipt: TransactionReceipt;
+  chainId: number;
+  tokenPrice: number;
+  tokenId: string;
+  userOpSenderAddresses: Hex[];
+  toStealthAddress?: Hex;
 }) => {
-  const canSubmit = await canUserSubmitOps(userId);
+  const transferLogs = parseEventLogs({
+    abi: ERC20Abi,
+    logs: txReceipt.logs,
+    eventName: 'Transfer',
+  });
 
-  if (!canSubmit) {
-    throw new TRPCError({
-      code: 'BAD_REQUEST',
-      message: `User ${userId} has exceeded the maximum number of transfers`,
+  // Array of `Trace` records to create
+  const traceCreateInput: Prisma.TraceCreateManyInput[] = [];
+
+  // Iterate over each `Transfer` log and create the input for the `Trace` record
+  for (const log of transferLogs) {
+    const decodedLog = decodeEventLog({
+      abi: ERC20Abi,
+      data: log.data,
+      topics: log.topics,
     });
+
+    if (decodedLog.eventName !== 'Transfer') {
+      throw new Error('Event name is not `Transfer`');
+    }
+
+    const { args } = decodedLog;
+
+    const from = getAddress(args.from);
+    const to = getAddress(args.to);
+
+    const data: Prisma.TraceCreateManyInput = {
+      from,
+      to,
+      tokenId,
+      amount: args.value.toString(),
+      transactionHash: txReceipt.transactionHash,
+      logIndex: log.logIndex,
+      chainId,
+      tokenPriceAtTrace: tokenPrice,
+    };
+
+    // Set the `fromStealthAddress` field if the `from` address is a UserOperation sender
+    if (userOpSenderAddresses.includes(from)) {
+      data.fromStealthAddress = from;
+    }
+
+    // Set the `toStealthAddress` field if the recipient is a Raylac user
+    if (toStealthAddress) {
+      data.toStealthAddress = toStealthAddress;
+    }
+
+    traceCreateInput.push(data);
   }
 
-  // Sanity check that all user ops have the same chainId
-  const chainIds = userOps.map(userOp => userOp.chainId);
-  if (new Set(chainIds).size !== 1) {
-    throw new TRPCError({
-      code: 'BAD_REQUEST',
-      message: 'All user ops must have the same chainId',
-    });
-  }
+  await prisma.trace.createMany({
+    data: traceCreateInput,
+    skipDuplicates: true,
+  });
+};
 
-  // Sanity check that all user ops are pointing to the same token
+/**
+ * Validate an array of user ops
+ * Throws an error if the user ops are invalid
+ * TODO: Check checksums of the addresses (e.g. UserOperation sender)
+ */
+const validateUserOps = ({
+  userOps,
+  isNativeTransfer,
+}: {
+  userOps: UserOperation[];
+  isNativeTransfer: boolean;
+}) => {
   const executeArgs = userOps.map(decodeUserOpCalldata);
-  const isNativeTransfer = executeArgs[0].data === '0x';
 
   if (isNativeTransfer) {
+    // Check that all execute calls have empty calldata
     if (!executeArgs.every(args => args.data === '0x')) {
+      // Get the user ops that are not native transfers
       const invalidOps = executeArgs.filter(args => args.data !== '0x');
+
       throw new TRPCError({
         code: 'BAD_REQUEST',
         message: `Native transfers must have empty data. Found ${JSON.stringify(
@@ -95,6 +281,7 @@ const submitUserOps = async ({
       });
     }
   } else {
+    // Check that all execute calls point the same token address
     const tokenAddresses = executeArgs[0].to;
 
     if (!executeArgs.every(args => args.to === tokenAddresses)) {
@@ -107,133 +294,209 @@ const submitUserOps = async ({
     }
   }
 
-  // Save the token price at the time of the user operation
-  await upsertUserOps({ userOps, tokenPrice });
+  const userOpContexts = executeArgs.map(args => args.tag);
+  const decodedContexts = userOpContexts.map(tag =>
+    decodeUserOperationContext({
+      // We don't need to provide the tx hash to validate the context because
+      // the tx hash is used only as a fallback for the multiChain tag when the
+      // decoding fails
+      txHash: '0x',
+      context: tag,
+    })
+  );
 
-  const chainId = userOps[0].chainId;
+  if (
+    !decodedContexts.every(
+      context => context.multiChainTag === decodedContexts[0].multiChainTag
+    )
+  ) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: `All user ops must have the same multi-chain tag`,
+    });
+  }
+};
 
-  const { txHash } = await handleOps({
-    userOps,
-    chainId,
-  });
-
-  //  const publicClient = getPublicClient({ chainId });
-  const websocketClient = getWebsocketClient({ chainId });
-
-  logger.info(`waiting tx ${txHash} to confirm`);
-  const start = Date.now();
-  const txReceipt = await websocketClient.waitForTransactionReceipt({
-    hash: txHash,
-  });
-
-  const end = Date.now();
-  logger.info(`waitForTransactionReceipt ${end - start}ms`);
-
+/**
+ * Save the UserOperationEvent logs for a transaction
+ */
+const saveUserOpEventLos = async ({
+  txReceipt,
+  chainId,
+}: {
+  txReceipt: TransactionReceipt;
+  chainId: number;
+}) => {
+  // Get all the UserOperationEvent logs from the transaction
   const userOpEventLogs = parseEventLogs({
     abi: EntryPointAbi,
     logs: txReceipt.logs,
     eventName: 'UserOperationEvent',
   });
 
-  // Save user ops and traces to the db
+  await Promise.all(
+    userOpEventLogs.map(log => upsertUserOpEventLog({ log, chainId }))
+  );
+};
 
-  try {
-    await Promise.all(
-      userOpEventLogs.map(log => handleUserOpEvent({ log, chainId }))
-    );
+const submitUserOpsForChain = async ({
+  chainId,
+  userOps,
+  tokenPrice,
+  tokenId,
+  toStealthAddress,
+}: {
+  chainId: number;
+  userOps: UserOperation[];
+  tokenPrice: number;
+  tokenId: string;
+  toStealthAddress?: Hex;
+}) => {
+  // Call the EntryPoint's `handleOps` function
+  const { txHash } = await handleOps({ userOps, chainId });
 
-    if (isNativeTransfer) {
-      const callsWithValue = await getNativeTransferTracesInBlock({
-        blockNumber: txReceipt.blockNumber,
-        chainId,
-      });
+  logger.info(`submitted tx ${txHash} on ${getChainName(chainId)}`);
+  const websocketClient = getWebsocketClient({ chainId });
 
-      const txTraces = callsWithValue.filter(call => call.txHash === txHash);
+  const txReceipt = await websocketClient.waitForTransactionReceipt({
+    hash: txHash,
+  });
 
-      if (txTraces.length === 0) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: `No native transfer traces found for tx ${txHash}`,
-        });
-      }
+  await upsertTransaction({
+    txHash: txReceipt.transactionHash,
+    chainId,
+  });
 
-      const traceCreateInput: Prisma.TraceCreateManyInput[] = await Promise.all(
-        userOps.map(async userOp => {
-          const { to, value: amount } = decodeUserOpCalldata(userOp);
+  const userOpSenderAddresses = userOps.map(userOp => userOp.sender);
 
-          const toUser = await prisma.userStealthAddress.findUnique({
-            select: { address: true },
-            where: { address: to },
-          });
-
-          const trace = txTraces.find(
-            call =>
-              getAddress(call.from) === userOp.sender &&
-              getAddress(call.to) === to &&
-              call.value === toHex(amount)
-          );
-
-          if (!trace) {
-            const userOpHash = getUserOpHash({ userOp });
-            throw new TRPCError({
-              code: 'BAD_REQUEST',
-              message: `No native transfer trace found for user op ${userOpHash} in ${txHash}`,
-            });
-          }
-
-          return {
-            from: userOp.sender,
-            to,
-            fromStealthAddress: userOp.sender,
-            toStealthAddress: toUser?.address || null,
-            amount: amount.toString(),
-            tokenId: 'eth',
-            chainId,
-            traceAddress: trace.traceAddress.join('_'),
-            transactionHash: txHash,
-          };
-        })
-      );
-
-      await prisma.trace.createMany({
-        data: traceCreateInput,
-        skipDuplicates: true,
-      });
-    } else {
-      const tokenAddresses = executeArgs[0].to;
-
-      const tokenId = getTokenId({
-        chainId,
-        tokenAddress: tokenAddresses,
-      });
-
-      const transferLogs = parseEventLogs({
-        abi: ERC20Abi,
-        logs: txReceipt.logs,
-        eventName: 'Transfer',
-      });
-
-      await Promise.all(
-        transferLogs.map(log =>
-          handleERC20TransferLog({ log, tokenId, chainId })
-        )
-      );
-    }
-  } catch (err) {
-    logger.error(err);
-  }
-
-  const success = userOpEventLogs.every(log => log.args.success);
-
-  // Inform the client that the user operation failed
-  if (!success) {
-    throw new TRPCError({
-      code: 'BAD_REQUEST',
-      message: `User operation failed with success=false (txHash: ${txHash})`,
+  if (tokenId === 'eth') {
+    await saveNativeTransferTraces({
+      txReceipt,
+      chainId,
+      tokenPrice,
+      toStealthAddress,
+      userOpSenderAddresses,
+    });
+  } else {
+    await saveERC20TransferLogs({
+      txReceipt,
+      chainId,
+      tokenPrice,
+      tokenId,
+      toStealthAddress,
+      userOpSenderAddresses,
     });
   }
 
-  return txHash;
+  await saveUserOpEventLos({ txReceipt, chainId });
+
+  return { chainId, ...txReceipt };
+};
+
+const submitUserOps = async ({
+  userId,
+  toStealthAddress,
+  tokenPrice,
+  userOps,
+}: {
+  userId: number;
+  toStealthAddress?: Hex;
+  tokenPrice: number;
+  userOps: UserOperation[];
+}) => {
+  const canSubmit = await canUserSubmitOps(userId);
+
+  if (!canSubmit) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: `User ${userId} has exceeded the maximum number of transfers`,
+    });
+  }
+
+  // Sanity check that all user ops are pointing to the same token
+  const executeArgs = userOps.map(decodeUserOpCalldata);
+  const isNativeTransfer = executeArgs[0].data === '0x';
+
+  const tokenId = isNativeTransfer
+    ? 'eth'
+    : getTokenId({
+        chainId: userOps[0].chainId,
+        tokenAddress: executeArgs[0].to,
+      });
+
+  validateUserOps({ userOps, isNativeTransfer });
+
+  // Mapping of chainId to UserOps to submit
+  const userOpsByChainId: Record<number, UserOperation[]> = {};
+
+  // Group user ops by chain id
+  for (const userOp of userOps) {
+    userOpsByChainId[userOp.chainId] = [
+      ...(userOpsByChainId[userOp.chainId] ?? []),
+      userOp,
+    ];
+  }
+
+  const start = Date.now();
+
+  // Array of `submitUserOpsForChain` promises
+  const submitPromises = [];
+
+  // Submit user ops on each chain concurrently
+  for (const [chainId, userOps] of Object.entries(userOpsByChainId)) {
+    submitPromises.push(
+      submitUserOpsForChain({
+        chainId: Number(chainId),
+        userOps,
+        tokenPrice,
+        tokenId,
+        toStealthAddress,
+      })
+    );
+  }
+  const txReceipts = await Promise.all(submitPromises);
+  const end = Date.now();
+  logger.info(`submitUserOps ${end - start}ms`);
+
+  // Check if all transactions were successful
+  const txsSuccess = txReceipts.every(
+    txReceipt => txReceipt.status === 'success'
+  );
+
+  // Check if the `success` field in the UserOperationEvent logs are all true
+  for (const txReceipt of txReceipts) {
+    const userOpEventLogs = parseEventLogs({
+      abi: EntryPointAbi,
+      logs: txReceipt.logs,
+      eventName: 'UserOperationEvent',
+    });
+
+    if (userOpEventLogs.some(log => !log.args.success)) {
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message: 'One or more UserOperation failed',
+      });
+    }
+  }
+
+  // Create the `UserAction` record
+  const userAction = await saveUserAction({
+    userOps,
+    txReceipts,
+  });
+
+  // Inform the client that the user operation failed
+  if (!txsSuccess) {
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: 'One or more transactions failed',
+    });
+  }
+
+  return {
+    transferId: userAction.id,
+    txHashes: txReceipts.map(txReceipt => txReceipt.transactionHash),
+  };
 };
 
 export default submitUserOps;

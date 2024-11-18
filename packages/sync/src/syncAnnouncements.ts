@@ -1,25 +1,18 @@
 import {
-  bigIntMax,
   ERC5564_ANNOUNCER_ADDRESS,
   ERC5564_SCHEME_ID,
   getSenderAddressV2,
-  sleep,
+  decodeERC5564MetadataAsViewTag,
+  devChains,
 } from '@raylac/shared';
 import prisma from './lib/prisma';
-import {
-  announcementAbiItem,
-  CHAIN_BLOCK_TIME,
-  endTimer,
-  startTimer,
-} from './utils';
+import { announcementAbiItem, loop } from './utils';
 import processLogs from './processLogs';
 import { decodeEventLog, Hex, Log, parseAbi } from 'viem';
 import { ERC5564Announcement, Prisma, SyncJob } from '@raylac/db';
 import { supportedTokens } from '@raylac/shared';
-import { anvil } from 'viem/chains';
 import { getChainName } from '@raylac/shared';
 import { logger } from '@raylac/shared-backend';
-const SCAN_PAST_BUFFER = 2 * 60 * 1000; // 2 minutes
 
 /**
  * Create sync tasks for an announcement on a given chain
@@ -30,77 +23,76 @@ const SCAN_PAST_BUFFER = 2 * 60 * 1000; // 2 minutes
 const createSyncTaskForChain = async ({
   announcement,
   chainId,
+  scanFromBlock,
 }: {
   announcement: ERC5564Announcement;
   chainId: number;
+  scanFromBlock: bigint;
 }) => {
-  // eslint-disable-next-line security/detect-object-injection
-  const blockTime = CHAIN_BLOCK_TIME[chainId];
-  const scanPastBufferBlocks = Math.floor(SCAN_PAST_BUFFER / blockTime);
-
-  let fromBlock;
-
-  if (chainId === anvil.id) {
-    fromBlock = 0n;
-  } else {
-    fromBlock = bigIntMax([
-      announcement.blockNumber - BigInt(scanPastBufferBlocks),
-      0n,
-    ]);
-  }
-
   const tokenIds = supportedTokens.map(token => token.tokenId);
 
-  const syncTasks: Prisma.AddressSyncStatusCreateManyInput[] = [];
+  const syncTasks: Prisma.SyncTaskCreateManyInput[] = [];
   for (const tokenId of tokenIds) {
     syncTasks.push({
       address: announcement.address as Hex,
       chainId,
-      blockNumber: fromBlock,
+      blockNumber: scanFromBlock,
       tokenId,
       eRC5564AnnouncementId: announcement.id,
       blockHash: '0x',
     });
   }
 
-  await prisma.addressSyncStatus.createMany({
+  syncTasks.push({
+    address: announcement.address as Hex,
+    chainId,
+    blockNumber: scanFromBlock,
+    tokenId: 'userOps',
+    eRC5564AnnouncementId: announcement.id,
+    blockHash: '0x',
+  });
+
+  await prisma.syncTask.createMany({
     data: syncTasks,
     skipDuplicates: true,
   });
 
-  logger.info(
+  logger.debug(
     `Created sync tasks for announcement of address ${announcement.address} on ${getChainName(chainId)}`
   );
 };
 
 const createSyncTasks = async ({
   announcement,
-  chainIds,
 }: {
   announcement: ERC5564Announcement;
-  chainIds: number[];
 }) => {
   const promises = [];
 
-  for (const chainId of chainIds) {
-    if (announcement.chainId === anvil.id && chainId !== anvil.id) {
-      // We don't create sync tasks for production chains when the announcement
-      // is on the anvil chain
-      continue;
-    }
+  const decodedAnnouncementMetadata = decodeERC5564MetadataAsViewTag(
+    announcement.metadata as Hex
+  );
+  const chainInfos = decodedAnnouncementMetadata.chainInfos;
 
-    promises.push(createSyncTaskForChain({ announcement, chainId }));
+  for (const chainInfo of chainInfos) {
+    promises.push(
+      createSyncTaskForChain({
+        announcement,
+        chainId: chainInfo.chainId,
+        scanFromBlock: chainInfo.scanFromBlock,
+      })
+    );
   }
+
+  await Promise.all(promises);
 };
 
 export const handleERC5564AnnouncementLog = async ({
   log,
   announcementChainId,
-  chainIds,
 }: {
   log: Log<bigint, number, false>;
   announcementChainId: number;
-  chainIds: number[];
 }) => {
   const decodedLog = decodeEventLog({
     abi: parseAbi([
@@ -141,45 +133,7 @@ export const handleERC5564AnnouncementLog = async ({
     },
   });
 
-  await createSyncTasks({ announcement, chainIds });
-};
-
-/**
- * Delete all v1 accounts and related records from the database
- */
-const deleteV1Accounts = async () => {
-  const v1Announcements = await prisma.eRC5564Announcement.findMany({
-    select: {
-      address: true,
-    },
-    where: {
-      schemeId: 1,
-    },
-  });
-
-  const v1Addresses = v1Announcements
-    .map(a => a.address)
-    .filter(a => a !== null);
-
-  await prisma.addressSyncStatus.deleteMany({
-    where: {
-      address: { in: v1Addresses },
-    },
-  });
-
-  await prisma.userStealthAddress.deleteMany({
-    where: {
-      address: { in: v1Addresses },
-    },
-  });
-
-  await prisma.userOperation.deleteMany({
-    where: {
-      sender: { in: v1Addresses },
-    },
-  });
-
-  logger.info(`Deleted ${v1Addresses.length} v1 accounts`);
+  await createSyncTasks({ announcement });
 };
 
 /**
@@ -189,37 +143,37 @@ const deleteV1Accounts = async () => {
  */
 const syncAnnouncements = async ({
   announcementChainId,
-  chainIds,
 }: {
   announcementChainId: number;
-  chainIds: number[];
 }) => {
-  await deleteV1Accounts();
+  const devChainIds = devChains.map(chain => chain.id) as number[];
+  const isDevChain = devChainIds.includes(announcementChainId);
 
-  while (true) {
-    const announcementBackfillTimer = startTimer('announcementBackfill');
-    await processLogs({
-      chainId: announcementChainId,
-      job: SyncJob.Announcements,
-      address: ERC5564_ANNOUNCER_ADDRESS,
-      event: announcementAbiItem,
-      handleLogs: async logs => {
-        for (const log of logs) {
-          await handleERC5564AnnouncementLog({
-            log,
-            announcementChainId,
-            chainIds,
-          });
-        }
-      },
-      args: {
-        schemeId: ERC5564_SCHEME_ID,
-      },
-    });
-
-    endTimer(announcementBackfillTimer);
-    await sleep(3 * 1000);
-  }
+  await loop({
+    fn: async () => {
+      await processLogs({
+        chainId: announcementChainId,
+        job: SyncJob.Announcements,
+        address: ERC5564_ANNOUNCER_ADDRESS,
+        event: announcementAbiItem,
+        handleLogs: async logs => {
+          await Promise.all(
+            logs.map(
+              async log =>
+                await handleERC5564AnnouncementLog({
+                  log,
+                  announcementChainId,
+                })
+            )
+          );
+        },
+        args: {
+          schemeId: ERC5564_SCHEME_ID,
+        },
+      });
+    },
+    interval: isDevChain ? 500 : 15 * 1000,
+  });
 };
 
 export default syncAnnouncements;

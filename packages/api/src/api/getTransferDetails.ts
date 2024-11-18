@@ -1,85 +1,29 @@
 import prisma from '../lib/prisma';
+import selectTransfer from '../queries/selectTransfer';
+import { parseTransferData } from '../utils';
 
 /**
  * Get the details of a transfer by its transaction hash and trace address
  */
 const getTransferDetails = async ({
+  transferId,
   userId,
-  txHash,
 }: {
+  transferId: number;
   userId: number;
-  txHash: string;
 }) => {
-  const tx = await prisma.transaction.findUnique({
-    select: {
-      block: {
-        select: {
-          number: true,
-          timestamp: true,
-        },
-      },
-      userOps: {
-        select: {
-          hash: true,
-          tokenPriceAtOp: true,
-        },
-      },
-      traces: {
-        select: {
-          traceAddress: true,
-          logIndex: true,
-          tokenId: true,
-          chainId: true,
-          tokenPriceAtTrace: true,
-          UserStealthAddressFrom: {
-            select: {
-              userId: true,
-              address: true,
-              user: {
-                select: {
-                  spendingPubKey: true,
-                  name: true,
-                  username: true,
-                  profileImage: true,
-                },
-              },
-            },
-          },
-          UserStealthAddressTo: {
-            select: {
-              userId: true,
-              address: true,
-              user: {
-                select: {
-                  spendingPubKey: true,
-                  name: true,
-                  username: true,
-                  profileImage: true,
-                },
-              },
-            },
-          },
-          from: true,
-          to: true,
-          amount: true,
-          transactionHash: true,
-        },
-      },
-      hash: true,
-    },
+  const transfer = await prisma.userAction.findUnique({
+    select: selectTransfer,
     where: {
-      hash: txHash,
+      id: transferId,
     },
   });
 
-  return {
-    ...tx,
-    traces: tx?.traces.filter(
-      trace =>
-        trace.UserStealthAddressTo?.userId === userId ||
-        trace.UserStealthAddressFrom?.userId === userId
-    ),
-  };
+  if (!transfer) {
+    throw new Error(`Transfer with id ${transferId} not found`);
+  }
+
+  return parseTransferData({ transfer, userId });
 };
 
 export default getTransferDetails;

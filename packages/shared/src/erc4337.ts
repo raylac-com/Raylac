@@ -27,8 +27,8 @@ import axios from 'axios';
 import { getSenderAddressV2, recoveryStealthPrivKey } from './stealth';
 import { increaseByPercent, sleep } from './utils';
 import { signMessage } from 'viem/accounts';
-import { anvil } from 'viem/chains';
 import { getPublicClient } from './ethRpc';
+import { devChains } from './devChains';
 
 /**
  * Get the init code for creating a stealth contract account
@@ -79,15 +79,9 @@ export const buildUserOp = ({
   value: bigint;
   data: Hex;
   tag: Hex;
-  gasInfo: ChainGasInfo[];
+  gasInfo: ChainGasInfo;
   nonce: number | null;
 }): UserOperation => {
-  const chainGasInfo = gasInfo.find(gasInfo => gasInfo.chainId === chainId);
-
-  if (!chainGasInfo) {
-    throw new Error('Chain gas info not found');
-  }
-
   const initCode = getInitCode({ stealthSigner });
 
   const senderAddress = getSenderAddressV2({
@@ -107,12 +101,12 @@ export const buildUserOp = ({
   });
 
   const baseFeeBuffed = increaseByPercent({
-    value: chainGasInfo.baseFeePerGas,
+    value: gasInfo.baseFeePerGas,
     percent: 10,
   });
 
   const maxPriorityFeePerGasBuffed = increaseByPercent({
-    value: chainGasInfo.maxPriorityFeePerGas,
+    value: gasInfo.maxPriorityFeePerGas,
     percent: 20,
   });
 
@@ -381,7 +375,9 @@ export const getMaxPriorityFeePerGas = async ({
     throw new Error(JSON.stringify(result.data.error));
   }
 
-  if (chainId === anvil.id) {
+  const devChainIds = devChains.map(c => c.id) as number[];
+  const isDevChain = devChainIds.includes(chainId);
+  if (isDevChain) {
     return 100000n;
   }
 

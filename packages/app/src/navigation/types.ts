@@ -12,6 +12,11 @@ export type RootStackParamsList = {
   SignIn: undefined;
   SignUp: undefined;
 
+  SupportedChains: undefined;
+  SupportedTokens: {
+    chainId: number;
+  };
+
   SignInWithMnemonic: undefined;
 
   AccountInfo: undefined;
@@ -26,16 +31,22 @@ export type RootStackParamsList = {
   ConfirmSend: {
     recipientUserOrAddress: User | Hex;
     tokenId: string;
-    outputChainId: number;
     amount: string;
+    outputChainId?: number;
   };
 
   // Deposit stack
   Deposit: undefined;
   TransferHistory: undefined;
   TransferDetails: {
-    txHash: string;
+    transferId: number;
   };
+
+  TokenBalances: undefined;
+  TokenBalanceDetails: {
+    tokenId: string;
+  };
+
   Receive: undefined;
   BackupAccount: undefined;
   Advanced: undefined;

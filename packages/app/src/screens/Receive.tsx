@@ -1,4 +1,4 @@
-import { ActivityIndicator, Text, View, Image, Pressable } from 'react-native';
+import { Text, View, Pressable } from 'react-native';
 import { copyToClipboard, shortenAddress } from '@/lib/utils';
 import { Hex } from 'viem';
 import { useCallback, useState } from 'react';
@@ -10,16 +10,16 @@ import { useTranslation } from 'react-i18next';
 import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
 import { Feather } from '@expo/vector-icons';
 import useSignedInUser from '@/hooks/useSignedInUser';
+import SupportedChainsBanner from '@/components/SuppotedChainsBanner';
 import fontSizes from '@/lib/styles/fontSizes';
 
-interface AddressWithChainIconProps {
+interface ReceivingAddressProps {
   address: Hex;
   onCopyClick: () => void;
-  isLoading: boolean;
 }
 
-const AddressWithChainIcon = (props: AddressWithChainIconProps) => {
-  const { address, onCopyClick, isLoading } = props;
+const ReceivingAddress = (props: ReceivingAddressProps) => {
+  const { address, onCopyClick } = props;
   return (
     <View
       style={{
@@ -35,11 +35,6 @@ const AddressWithChainIcon = (props: AddressWithChainIconProps) => {
           columnGap: 8,
         }}
       >
-        <Image
-          // eslint-disable-next-line @typescript-eslint/no-require-imports
-          source={require('../../assets/base.png')}
-          style={{ width: 20, height: 20 }}
-        ></Image>
         <Text
           style={{
             fontSize: 18,
@@ -49,11 +44,7 @@ const AddressWithChainIcon = (props: AddressWithChainIconProps) => {
           }}
           onPress={onCopyClick}
         >
-          {isLoading ? (
-            <ActivityIndicator></ActivityIndicator>
-          ) : (
-            shortenAddress(address)
-          )}
+          {shortenAddress(address)}
         </Text>
         <Feather
           name="copy"
@@ -111,8 +102,10 @@ const Receive = () => {
       <View
         style={{
           flex: 1,
-          justifyContent: 'center',
           alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'column',
+          rowGap: 16,
         }}
       >
         <Text
@@ -120,35 +113,6 @@ const Receive = () => {
             fontSize: 24,
             textAlign: 'center',
             fontWeight: 'bold',
-            color: colors.text,
-          }}
-        >
-          {t('receiveOn')}
-        </Text>
-      </View>
-      <View
-        style={{
-          flex: 2,
-          alignItems: 'center',
-          flexDirection: 'column',
-          rowGap: 16,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: fontSizes.base,
-            textAlign: 'center',
-            color: colors.text,
-            fontWeight: 'bold',
-          }}
-        >
-          {t('receiveFromRaylacUser')}
-        </Text>
-
-        <Text
-          style={{
-            fontSize: fontSizes.base,
-            textAlign: 'center',
             color: colors.text,
           }}
         >
@@ -209,10 +173,9 @@ const Receive = () => {
               >
                 {t('receiveTo')}
               </Text>
-              <AddressWithChainIcon
+              <ReceivingAddress
                 address={depositAddress}
                 onCopyClick={onCopyClick}
-                isLoading={isGeneratingAddress}
               />
             </View>
           )}
@@ -227,6 +190,7 @@ const Receive = () => {
         >
           {t('orReceiveFromAnyone')}
         </Text>
+        <SupportedChainsBanner size={20} />
         <Text
           style={{
             color: colors.text,
@@ -270,8 +234,16 @@ const Receive = () => {
           style={{
             width: '100%',
           }}
-          variant="underline"
+          variant="outline"
           testID="past-receiving-addresses"
+        ></StyledButton>
+        <StyledButton
+          title={t('supportedChainsAndTokens')}
+          onPress={() => {
+            navigation.navigate('SupportedChains');
+          }}
+          style={{ width: '100%' }}
+          variant="underline"
         ></StyledButton>
       </View>
     </View>

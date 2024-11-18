@@ -3,16 +3,23 @@ import {
   Chain,
   decodeFunctionData,
   formatUnits,
+  fromHex,
   getAddress,
   Hex,
+  keccak256,
+  pad,
   parseUnits,
+  toBytes,
+  toHex,
 } from 'viem';
 import {
   AnvilBlockTraceResponse,
   BlockTraceResponse,
   BlockTransactionResponse,
   ChainGasInfo,
+  DecodedUserOperationContext,
   TraceWithTraceAddress,
+  UserActionType,
   UserOperation,
 } from './types';
 import RaylacAccountV2Abi from './abi/RaylacAccountV2Abi';
@@ -21,34 +28,91 @@ import * as chains from 'viem/chains';
 import { supportedTokens, NATIVE_TOKEN_ADDRESS } from './supportedTokens';
 import { getPublicClient } from './ethRpc';
 import {
+  devChains,
   getERC20TokenBalance,
   getMaxPriorityFeePerGas,
+  supportedChains,
   traceBlockByNumber,
 } from '.';
 import axios from 'axios';
-import { anvil } from 'viem/chains';
 
-export const encodeERC5564Metadata = (viewTag: Hex): Hex => {
-  if (viewTag.length !== 4) {
+const VIEW_TAG_BYTES = 1;
+const CHAIN_ID_BYTES = 4;
+const SCAN_FROM_BLOCK_BYTES = 4;
+
+export const encodeERC5564Metadata = ({
+  viewTag,
+  chainInfo,
+}: {
+  viewTag: Hex;
+  chainInfo: {
+    chainId: number;
+    scanFromBlock: bigint;
+  }[];
+}): Hex => {
+  if (toBytes(viewTag).byteLength !== VIEW_TAG_BYTES) {
     throw new Error(
-      `viewTag must be exactly 4 bytes, got ${viewTag.length} hex chars`
+      `viewTag must be exactly 1 byte, got ${viewTag.length} hex chars`
     );
   }
 
-  const metadata = viewTag;
+  let metadata = viewTag;
+
+  for (const chain of chainInfo) {
+    metadata += toHex(chain.chainId, { size: CHAIN_ID_BYTES }).replace(
+      '0x',
+      ''
+    );
+    metadata += toHex(chain.scanFromBlock, {
+      size: SCAN_FROM_BLOCK_BYTES,
+    }).replace('0x', '');
+  }
+
   return metadata;
 };
 
 export const decodeERC5564MetadataAsViewTag = (metadata: Hex) => {
-  if (metadata.length !== 4) {
-    throw new Error(
-      `metadata must be exactly 1 byte, got ${metadata.length} hex chars`
+  const metadataBytes = toBytes(metadata);
+  const viewTag = toHex(metadataBytes.slice(0, VIEW_TAG_BYTES));
+
+  const chainInfos: {
+    chainId: number;
+    scanFromBlock: bigint;
+  }[] = [];
+
+  const supportedChainIds = [...devChains, ...supportedChains].map(
+    chain => chain.id
+  );
+
+  for (
+    let i = VIEW_TAG_BYTES;
+    i < metadataBytes.byteLength;
+    i += CHAIN_ID_BYTES + SCAN_FROM_BLOCK_BYTES
+  ) {
+    const chainId = fromHex(
+      toHex(metadataBytes.slice(i, i + CHAIN_ID_BYTES)),
+      'number'
     );
+
+    // Ignore scan requests for unsupported chains
+    if (!supportedChainIds.includes(chainId)) {
+      continue;
+    }
+
+    const scanFromBlock = fromHex(
+      toHex(
+        metadataBytes.slice(
+          i + CHAIN_ID_BYTES,
+          i + CHAIN_ID_BYTES + SCAN_FROM_BLOCK_BYTES
+        )
+      ),
+      'bigint'
+    );
+
+    chainInfos.push({ chainId, scanFromBlock });
   }
 
-  const viewTag = metadata.slice(0, 4) as Hex;
-
-  return { viewTag };
+  return { viewTag, chainInfos };
 };
 
 export const hexToProjectivePoint = (hex: Hex) => {
@@ -181,20 +245,48 @@ export const decodeUserOpCalldata = (userOp: UserOperation) => {
     throw new Error("Function name must be 'execute'");
   }
 
-  const [to, value, data] = args;
+  const [to, value, data, tag] = args;
 
   return {
     to: getAddress(to),
     value,
     data,
+    tag,
   };
+};
+
+/**
+ * Decode the `tag` argument in the `execute` function of RaylacAccount.sol
+ */
+export const decodeUserOperationContext = ({
+  txHash,
+  context,
+}: {
+  txHash: Hex;
+  context: Hex;
+}): DecodedUserOperationContext => {
+  try {
+    const contextRaw = context.replace('0x', '');
+    // The first 32 bytes are the grouping tag
+    const multiChainTag = `0x${contextRaw.slice(0, 64)}` as Hex;
+
+    // The last 2 bytes are the group size
+    const numChains = fromHex(`0x${contextRaw.slice(64, 68)}`, 'number');
+
+    return { multiChainTag, numChains };
+  } catch (_err: any) {
+    // If we fail to decode the context,
+    // just use the tx hash as the multi chain tag
+    // and assume this UserAction only spans one chain
+    return { multiChainTag: txHash, numChains: 1 };
+  }
 };
 
 /**
  * Returns viem's `Chain` object from a chain ID
  */
 export const getChainFromId = (chainId: number): Chain => {
-  const chain = Object.entries(chains).find(
+  const chain = Object.entries([...Object.values(chains), ...devChains]).find(
     ([_, chain]) => chain.id === chainId
   );
 
@@ -323,6 +415,8 @@ export const getBlockExplorerUrl = (chainId: number) => {
       return `https://sepolia.basescan.org`;
     case chains.base.id:
       return `https://basescan.org`;
+    case chains.arbitrum.id:
+      return `https://arbiscan.io`;
     default:
       throw new Error(`Chain ${chainId} not supported`);
   }
@@ -490,7 +584,9 @@ export const getNativeTransferTracesInBlock = async ({
     blockNumber,
   });
 
-  if (chainId === anvil.id) {
+  const devChainIds = devChains.map(c => c.id) as number[];
+
+  if (devChainIds.includes(chainId)) {
     const callsWithValues = (
       traceBlockResult as AnvilBlockTraceResponse
     ).filter(tx => tx.action.callType === 'call' && tx.action.value !== '0x0');
@@ -518,4 +614,51 @@ export const getNativeTransferTracesInBlock = async ({
 
 export const getChainName = (chainId: number) => {
   return `${getChainFromId(chainId).name} (${chainId})`;
+};
+
+export const encodeUserActionTag = ({
+  groupTag,
+  groupSize,
+  userActionType,
+}: {
+  groupTag: Hex;
+  groupSize: number;
+  userActionType: UserActionType;
+}) => {
+  if (groupSize < 1 || groupSize > 255) {
+    throw new Error('Group size must be between 1 and 255');
+  }
+
+  if (groupTag.replace('0x', '').length !== 64) {
+    throw new Error('Group tag must be 32 bytes');
+  }
+
+  const groupSizeHex = toHex(groupSize, { size: 2 }).replace('0x', '');
+  const userActionTypeHex = userActionType.replace('0x', '');
+
+  const tag = `${groupTag}${groupSizeHex}${userActionTypeHex}` as Hex;
+
+  return tag;
+};
+
+/**
+ * Get the hash of a UserAction from the tx hashes that constitute it
+ */
+export const getUserActionHash = (txHashes: Hex[]) => {
+  const sortedTxHashes = txHashes.sort();
+
+  let txHashesBytes = Buffer.alloc(0);
+
+  for (const txHash of sortedTxHashes) {
+    txHashesBytes = Buffer.concat([txHashesBytes, toBytes(txHash)]);
+  }
+
+  return keccak256(txHashesBytes);
+};
+
+export const generateRandomMultiChainTag = (): Hex => {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+
+  return pad(toHex(array), { size: 32 });
 };

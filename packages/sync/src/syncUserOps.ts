@@ -1,76 +1,36 @@
 import {
+  devChains,
   ENTRY_POINT_ADDRESS,
-  EntryPointAbi,
-  RAYLAC_PAYMASTER_V2_ADDRESS,
-  sleep,
+  getPublicClient,
 } from '@raylac/shared';
-import { decodeEventLog, Log, parseAbiItem } from 'viem';
+import { Hex, Log, parseAbiItem } from 'viem';
+import {
+  loop,
+  upsertTransaction,
+  upsertUserOpEventLog,
+  waitForAnnouncementsBackfill,
+} from './utils';
+import { logger } from '@raylac/shared-backend';
 import prisma from './lib/prisma';
-import { upsertTransaction } from './utils';
-import { Prisma } from '@raylac/db';
-import processLogs from './processLogs';
+import { bigIntMin } from '@raylac/shared/src/utils';
 
 const userOpEvent = parseAbiItem(
   'event UserOperationEvent(bytes32 indexed userOpHash, address indexed sender, address indexed paymaster, uint256 nonce, bool success, uint256 actualGasCost, uint256 actualGasUsed)'
 );
 
-export const handleUserOpEvent = async ({
+const handleUserOpEvent = async ({
   log,
   chainId,
 }: {
   log: Log<bigint, number, false>;
   chainId: number;
 }) => {
-  const decodedLog = decodeEventLog({
-    abi: EntryPointAbi,
-    data: log.data,
-    topics: log.topics,
-  });
-
-  if (decodedLog.eventName !== 'UserOperationEvent') {
-    throw new Error('Event name is not `UserOperationEvent`');
-  }
-
-  const { args } = decodedLog;
-
-  const txHash = log.transactionHash;
-
-  const userOpHash = args.userOpHash;
-  const sender = args.sender;
-  const paymaster = args.paymaster;
-  const nonce = args.nonce;
-  const success = args.success;
-  const actualGasCost = args.actualGasCost;
-  const actualGasUsed = args.actualGasUsed;
-
   await upsertTransaction({
-    txHash,
+    txHash: log.transactionHash,
     chainId,
   });
 
-  const data: Prisma.UserOperationCreateInput = {
-    chainId,
-    hash: userOpHash,
-    sender,
-    paymaster,
-    nonce: Number(nonce),
-    success,
-    actualGasCost,
-    actualGasUsed,
-    Transaction: {
-      connect: {
-        hash: txHash,
-      },
-    },
-  };
-
-  await prisma.userOperation.upsert({
-    create: data,
-    update: data,
-    where: {
-      hash: userOpHash,
-    },
-  });
+  await upsertUserOpEventLog({ log, chainId });
 };
 
 /**
@@ -80,17 +40,87 @@ export const handleUserOpEvent = async ({
  * @param fromBlock - (Optional) The block to start syncing from. This is useful for indexing on test environments where we only want to backfill a few blocks
  */
 export const syncUserOpsForChain = async ({ chainId }: { chainId: number }) => {
-  await processLogs({
-    chainId,
-    job: 'UserOps',
-    address: ENTRY_POINT_ADDRESS,
-    event: userOpEvent,
-    args: {
-      paymaster: RAYLAC_PAYMASTER_V2_ADDRESS,
-    },
-    handleLogs: async logs => {
-      for (const log of logs) {
-        await handleUserOpEvent({ log, chainId });
+  const publicClient = getPublicClient({ chainId });
+
+  const devChainIds = devChains.map(chain => chain.id) as number[];
+
+  const isDevChain = devChainIds.includes(chainId);
+
+  await loop({
+    interval: isDevChain ? 1 * 1000 : 10 * 1000,
+    async fn() {
+      const syncTasks = await prisma.syncTask.findMany({
+        select: {
+          blockNumber: true,
+          chainId: true,
+          address: true,
+        },
+        where: {
+          tokenId: 'userOps',
+          chainId,
+        },
+        orderBy: {
+          blockNumber: 'asc',
+        },
+      });
+
+      if (syncTasks.length === 0) {
+        return;
+      }
+
+      const fromBlock = syncTasks[0].blockNumber;
+      const latestBlockNumber = await publicClient.getBlockNumber();
+
+      const addressBatchSize = 100;
+      const blockBatchSize = 100000n;
+
+      for (
+        let blockNumber = fromBlock;
+        blockNumber <= latestBlockNumber;
+        blockNumber += blockBatchSize
+      ) {
+        const toBlock = bigIntMin([
+          blockNumber + blockBatchSize,
+          latestBlockNumber,
+        ]);
+
+        const addressesToSync = syncTasks
+          .filter(address => address.blockNumber < toBlock)
+          .map(address => address.address as Hex);
+
+        if (addressesToSync.length === 0) {
+          continue;
+        }
+
+        for (let i = 0; i < addressesToSync.length; i += addressBatchSize) {
+          const batch = addressesToSync.slice(i, i + addressBatchSize);
+
+          const logs = await publicClient.getLogs({
+            address: ENTRY_POINT_ADDRESS,
+            event: userOpEvent,
+            fromBlock,
+            toBlock,
+            args: {
+              sender: batch,
+            },
+          });
+
+          for (const log of logs) {
+            await handleUserOpEvent({ log, chainId });
+          }
+
+          // Update the address sync statuses to the latest block number
+          await prisma.syncTask.updateMany({
+            data: {
+              blockNumber: toBlock,
+            },
+            where: {
+              address: { in: batch },
+              chainId,
+              tokenId: 'userOps',
+            },
+          });
+        }
       }
     },
   });
@@ -104,19 +134,24 @@ export const syncUserOpsForChain = async ({ chainId }: { chainId: number }) => {
  * Therefore we only need this indexing job to make sure we index UserOperations
  * that failed to be indexed for any reason.
  */
-const syncUserOps = async ({ chainIds }: { chainIds: number[] }) => {
-  while (true) {
-    const promises = [];
+const syncUserOps = async ({
+  announcementChainId,
+  chainIds,
+}: {
+  announcementChainId: number;
+  chainIds: number[];
+}) => {
+  logger.info('syncUserOps: Waiting for announcements backfill to complete');
+  await waitForAnnouncementsBackfill({ announcementChainId });
+  logger.info(`syncUserOps: Announcements backfill complete`);
 
-    for (const chainId of chainIds) {
-      promises.push(syncUserOpsForChain({ chainId }));
-    }
+  const promises = [];
 
-    await Promise.all(promises);
-
-    // TODO: Figure out the right interval
-    await sleep(15 * 1000);
+  for (const chainId of chainIds) {
+    promises.push(syncUserOpsForChain({ chainId }));
   }
+
+  await Promise.all(promises);
 };
 
 export default syncUserOps;

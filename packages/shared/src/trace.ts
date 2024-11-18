@@ -5,9 +5,24 @@ import {
   BlockTraceResponse,
   TraceResponseData,
 } from './types';
-import { getQuickNodeRpcUrl } from './ethRpc';
+import { getDevChainRpcUrl, getQuickNodeRpcUrl } from './ethRpc';
 import { getChainFromId } from './utils';
-import { anvil } from 'viem/chains';
+import { devChains } from './devChains';
+
+/**
+ * Get the RPC URL to call tracing methods
+ */
+const getTracingRpcUrl = ({ chainId }: { chainId: number }): string => {
+  const devChainsIds = devChains.map(c => c.id) as number[];
+
+  const rpcUrl = devChainsIds.includes(chainId)
+    ? // Get the RPC URL for the dev chain
+      getDevChainRpcUrl({ chainId })
+    : // Get the RPC URL for a production chain
+      getQuickNodeRpcUrl({ chain: getChainFromId(chainId) });
+
+  return rpcUrl;
+};
 
 /**
  * Calls the `trace_filter` RPC method
@@ -39,9 +54,7 @@ export const traceFilter = async ({
       message: string;
     };
   }>(
-    getQuickNodeRpcUrl({
-      chain: getChainFromId(chainId),
-    }),
+    getTracingRpcUrl({ chainId }),
     {
       id: 1,
       jsonrpc: '2.0',
@@ -72,6 +85,10 @@ export const traceBlockByNumber = async ({
   blockNumber: bigint;
   chainId: number;
 }): Promise<AnvilBlockTraceResponse | BlockTraceResponse> => {
+  const devChainIds = devChains.map(c => c.id) as number[];
+
+  const isDevChain = devChainIds.includes(chainId);
+
   const config = {
     headers: {
       accept: 'application/json',
@@ -79,13 +96,19 @@ export const traceBlockByNumber = async ({
     },
   };
 
-  const method =
-    chainId === anvil.id ? 'trace_block' : 'debug_traceBlockByNumber';
+  const method = isDevChain ? 'trace_block' : 'debug_traceBlockByNumber';
 
-  const params =
-    chainId === anvil.id
-      ? [toHex(blockNumber)]
-      : [toHex(blockNumber), { tracer: 'callTracer', tracerConfig: {} }];
+  const params = isDevChain
+    ? [toHex(blockNumber)]
+    : [
+        toHex(blockNumber),
+        {
+          tracer: 'callTracer',
+          tracerConfig: {
+            onlyTopCall: false,
+          },
+        },
+      ];
 
   const result = await axios.post<{
     result: BlockTraceResponse | AnvilBlockTraceResponse;
@@ -94,9 +117,7 @@ export const traceBlockByNumber = async ({
       message: string;
     };
   }>(
-    getQuickNodeRpcUrl({
-      chain: getChainFromId(chainId),
-    }),
+    getTracingRpcUrl({ chainId }),
     {
       id: 1,
       jsonrpc: '2.0',
@@ -110,7 +131,7 @@ export const traceBlockByNumber = async ({
     throw new Error(result.data.error.message);
   }
 
-  if (chainId === anvil.id) {
+  if (isDevChain) {
     return result.data.result as AnvilBlockTraceResponse;
   } else {
     return result.data.result as BlockTraceResponse;
@@ -138,9 +159,7 @@ export const traceBlockByHash = async ({
       message: string;
     };
   }>(
-    getQuickNodeRpcUrl({
-      chain: getChainFromId(chainId),
-    }),
+    getTracingRpcUrl({ chainId }),
     {
       id: 1,
       jsonrpc: '2.0',
@@ -189,9 +208,8 @@ export const traceTransaction = async ({
       message: string;
     };
   }>(
-    getQuickNodeRpcUrl({
-      chain: getChainFromId(chainId),
-    }),
+    getTracingRpcUrl({ chainId }),
+
     {
       id: 1,
       jsonrpc: '2.0',

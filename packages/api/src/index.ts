@@ -29,10 +29,11 @@ import getUser from './api/getUser';
 import deleteAccount from './api/deleteAccount';
 import getTransferDetails from './api/getTransferDetails';
 import addStealthAccount from './api/addStealthAccount';
-import getAddressNonces from './api/getAddressNonces';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import pruneAnvil from './api/pruneAnvil';
 import getSyncStatus from './api/getSyncStatus';
+import buildMultiChainSendUserOps from './api/buildMultiChainSendUserOps';
+import { getTokenBalanceDetails } from './api/getTokenBalanceDetails';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -63,19 +64,21 @@ export const appRouter = router({
     .input(
       z.object({
         userOps: z.array(z.any()),
-        tokenPrice: z.number().optional(),
+        tokenPrice: z.number(),
+        toStealthAddress: z.string().optional(),
       })
     )
     .mutation(async opts => {
       const { input } = opts;
 
-      const txHash = await submitUserOps({
+      const result = await submitUserOps({
         userId: opts.ctx.userId,
         userOps: input.userOps as UserOperation[],
         tokenPrice: input.tokenPrice,
+        toStealthAddress: input.toStealthAddress as Hex | undefined,
       });
 
-      return txHash;
+      return result;
     }),
 
   /**
@@ -118,6 +121,28 @@ export const appRouter = router({
       return balances;
     }),
 
+  buildMultiChainSendUserOps: authedProcedure
+    .input(
+      z.object({
+        to: z.string(),
+        tokenId: z.string(),
+        amount: z.string(),
+      })
+    )
+    .mutation(async opts => {
+      const { input } = opts;
+      const userId = opts.ctx.userId;
+
+      const userOps = await buildMultiChainSendUserOps({
+        to: input.to as Hex,
+        userId,
+        tokenId: input.tokenId,
+        amount: input.amount,
+      });
+
+      return userOps;
+    }),
+
   /**
    * Get the balances of tokens for all chains and supported tokens
    */
@@ -128,6 +153,23 @@ export const appRouter = router({
     return balances;
   }),
 
+  getTokenBalanceDetails: authedProcedure
+    .input(
+      z.object({
+        tokenId: z.string(),
+      })
+    )
+    .query(async opts => {
+      const { input } = opts;
+      const userId = opts.ctx.userId;
+      const details = await getTokenBalanceDetails({
+        userId,
+        tokenId: input.tokenId,
+      });
+
+      return details;
+    }),
+
   /**
    * Get the stealth accounts of the user
    */
@@ -137,14 +179,6 @@ export const appRouter = router({
     const addressWithBalances = await getStealthAccounts({ userId });
 
     return addressWithBalances;
-  }),
-
-  getAddressNonces: authedProcedure.query(async opts => {
-    const userId = opts.ctx.userId;
-
-    const addressNonces = await getAddressNonces({ userId });
-
-    return addressNonces;
   }),
 
   /**
@@ -179,7 +213,7 @@ export const appRouter = router({
   getTransferDetails: authedProcedure
     .input(
       z.object({
-        txHash: z.string(),
+        transferId: z.number(),
       })
     )
     .query(async opts => {
@@ -187,7 +221,7 @@ export const appRouter = router({
 
       const details = await getTransferDetails({
         userId: opts.ctx.userId,
-        txHash: input.txHash,
+        transferId: input.transferId,
       });
 
       return details;
@@ -279,7 +313,8 @@ export const appRouter = router({
         viewTag: z.string(),
         userId: z.number(),
         label: z.string(),
-        useAnvil: z.boolean().optional(),
+        syncOnChainIds: z.array(z.number()),
+        announcementChainId: z.number(),
       })
     )
     .mutation(async opts => {
@@ -294,7 +329,8 @@ export const appRouter = router({
           viewTag: input.viewTag as Hex,
         },
         label: input.label,
-        useAnvil: input.useAnvil,
+        syncOnChainIds: input.syncOnChainIds,
+        announcementChainId: input.announcementChainId,
       });
     }),
 

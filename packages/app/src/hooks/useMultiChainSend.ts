@@ -1,14 +1,13 @@
 import { getMnemonicAndKeys } from '@/lib/key';
 import { trpc } from '@/lib/trpc';
-import { getPaymasterAndData } from '@/lib/utils';
 import { User } from '@/types';
 import {
-  AddressTokenBalance,
-  ChainGasInfo,
+  ERC5564_ANNOUNCEMENT_CHAIN,
   StealthAddressWithEphemeral,
-  buildMultiChainSendRequestBody,
+  UserOperation,
   generateStealthAddressV2,
   signUserOpWithStealthAccount,
+  supportedChains,
 } from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
@@ -25,12 +24,15 @@ BigInt.prototype.toJSON = function () {
 /**
  * Hook to build and send user operations
  */
-const useSend = () => {
+const useMultiChainSend = () => {
   const { mutateAsync: submitUserOps, error } =
     trpc.submitUserOps.useMutation();
 
   const { mutateAsync: addNewStealthAccount } =
     trpc.addStealthAccount.useMutation();
+
+  const { mutateAsync: buildMultiChainSendUserOps } =
+    trpc.buildMultiChainSendUserOps.useMutation();
 
   const queryClient = useQueryClient();
 
@@ -48,22 +50,13 @@ const useSend = () => {
     mutationFn: async ({
       amount,
       tokenId,
-      chainId,
       recipientUserOrAddress,
-      addressBalancesPerChain,
-      stealthAddresses,
-      addressNonces,
-      gasInfo,
       tokenPrice,
     }: {
       amount: bigint;
       tokenId: string;
       chainId: number;
       recipientUserOrAddress: Hex | User;
-      gasInfo: ChainGasInfo[];
-      addressBalancesPerChain: AddressTokenBalance[];
-      stealthAddresses: StealthAddressWithEphemeral[];
-      addressNonces: Record<Hex, number | null>;
       tokenPrice: number;
     }) => {
       const { viewingPrivKey, spendingPrivKey } = await getMnemonicAndKeys();
@@ -84,40 +77,26 @@ const useSend = () => {
           ephemeralPubKey: to.ephemeralPubKey,
           viewTag: to.viewTag,
           label: '',
+          syncOnChainIds: supportedChains.map(chain => chain.id),
+          announcementChainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
         });
       }
 
       const toAddress = typeof to === 'string' ? to : to.address;
 
-      const userOps = await buildMultiChainSendRequestBody({
-        amount,
+      // Choose the stealth accounts to use as inputs for the transfer
+      const result = await buildMultiChainSendUserOps({
+        amount: amount.toString(),
         tokenId,
         to: toAddress,
-        addressTokenBalances: addressBalancesPerChain,
-        stealthAddresses,
-        addressNonces,
-        chainId,
-        gasInfo,
       });
 
       const signedUserOps = [];
-      for (const userOp of userOps) {
-        userOp.paymasterAndData = await getPaymasterAndData(userOp);
-
-        const stealthAccount = stealthAddresses.find(
-          stealthAddress => stealthAddress.address === userOp.sender
-        ) as StealthAddressWithEphemeral;
-
-        if (!stealthAccount) {
-          throw new Error(
-            `Stealth account not found for sender ${userOp.sender}`
-          );
-        }
-
+      for (const { userOp, stealthAccount } of result) {
         // Sign the user operation with the stealth account
         const signedUserOp = await signUserOpWithStealthAccount({
-          userOp,
-          stealthAccount,
+          userOp: userOp as UserOperation,
+          stealthAccount: stealthAccount as StealthAddressWithEphemeral,
           spendingPrivKey,
           viewingPrivKey,
         });
@@ -144,4 +123,4 @@ const useSend = () => {
   });
 };
 
-export default useSend;
+export default useMultiChainSend;

@@ -1,20 +1,15 @@
 import FastAvatar from '@/components/FastAvatar';
 import StyledButton from '@/components/StyledButton';
 import useGasInfo from '@/hooks/useGasInfo';
-import useSend from '@/hooks/useSend';
+import useMultiChainSend from '@/hooks/useMultiChainSend';
 import useTokenPrice from '@/hooks/useTokenPrice';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import mixpanel from '@/lib/mixpanel';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
-import { trpc } from '@/lib/trpc';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
-import {
-  AddressTokenBalance,
-  formatAmount,
-  StealthAddressWithEphemeral,
-} from '@raylac/shared';
+import { formatAmount } from '@raylac/shared';
 import { supportedChains } from '@raylac/shared';
 import { supportedTokens } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -30,16 +25,10 @@ const ConfirmSend = ({ route }: Props) => {
   const { t } = useTranslation('ConfirmSend');
   const { amount, recipientUserOrAddress, tokenId, outputChainId } =
     route.params;
-  const { mutateAsync: send, isPending: isSending } = useSend();
+  const { mutateAsync: send, isPending: isSending } = useMultiChainSend();
   const navigation = useTypedNavigation();
   const [usdAmount, setUsdAmount] = useState<string | null>(null);
   const { data: tokenPrice } = useTokenPrice(tokenId);
-
-  const { data: stealthAddresses } = trpc.getStealthAccounts.useQuery();
-  const { data: addressBalancesPerChain } =
-    trpc.getAddressBalancesPerChain.useQuery();
-
-  const { data: addressNonces } = trpc.getAddressNonces.useQuery();
 
   const { data: gasInfo } = useGasInfo();
 
@@ -51,10 +40,6 @@ const ConfirmSend = ({ route }: Props) => {
       tokenId,
       chainId: outputChainId,
       recipientUserOrAddress,
-      gasInfo,
-      stealthAddresses: stealthAddresses as StealthAddressWithEphemeral[],
-      addressBalancesPerChain: addressBalancesPerChain as AddressTokenBalance[],
-      addressNonces: addressNonces as Record<Hex, number | null>,
       tokenPrice,
     });
 
@@ -64,15 +49,7 @@ const ConfirmSend = ({ route }: Props) => {
 
     // Navigate to the `SendSuccess` screen
     navigation.navigate('SendSuccess');
-  }, [
-    recipientUserOrAddress,
-    send,
-    amount,
-    gasInfo,
-    stealthAddresses,
-    addressBalancesPerChain,
-    tokenPrice,
-  ]);
+  }, [recipientUserOrAddress, send, amount, tokenPrice]);
 
   const tokenMeta = supportedTokens.find(token => token.tokenId === tokenId);
 

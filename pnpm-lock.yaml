@@ -454,9 +454,6 @@ importers:
       '@raylac/shared':
         specifier: workspace:*
         version: link:../shared
-      '@raylac/sync':
-        specifier: workspace:*
-        version: link:../sync
       bip39:
         specifier: ^3.1.0
         version: 3.1.0

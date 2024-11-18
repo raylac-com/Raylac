@@ -10,7 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model AddressSyncStatus {
+model SyncTask {
   id Int @id @default(autoincrement())
 
   chainId Int
@@ -39,12 +39,12 @@ model ERC5564Announcement {
   blockNumber     BigInt
   address         String
 
-  addressSyncStatus AddressSyncStatus[]
-  logIndex          Int
-  txIndex           Int
-  chainId           Int
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
+  syncTasks SyncTask[]
+  logIndex  Int
+  txIndex   Int
+  chainId   Int
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   @@unique([blockNumber, logIndex, txIndex, chainId])
 }
@@ -73,6 +73,8 @@ model UserStealthAddress {
   viewTag         String
   signerAddress   String
   label           String?
+
+  userOps UserOperation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -128,6 +130,10 @@ model Transaction {
 
   userOps UserOperation[]
   traces  Trace[]
+  tag     String?
+
+  UserAction   UserAction? @relation(fields: [userActionId], references: [id])
+  userActionId Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -136,17 +142,18 @@ model Transaction {
 model UserOperation {
   hash String @id
 
-  sender         String?
-  paymaster      String?
-  nonce          Int?
-  success        Boolean?
-  actualGasCost  BigInt?
-  actualGasUsed  BigInt?
-  chainId        Int
-  tokenPriceAtOp Float?
+  sender        String?
+  paymaster     String?
+  nonce         Int?
+  success       Boolean?
+  actualGasCost BigInt?
+  actualGasUsed BigInt?
+  chainId       Int
 
   Transaction     Transaction? @relation(fields: [transactionHash], references: [hash])
   transactionHash String?
+
+  UserStealthAddress UserStealthAddress? @relation(fields: [sender], references: [address])
 }
 
 enum SyncJob {
@@ -177,4 +184,19 @@ model Block {
   Transaction Transaction[]
 
   @@unique([number, chainId])
+}
+
+model UserAction {
+  id Int @id @default(autoincrement())
+
+  groupTag     String?
+  groupSize    Int
+  transactions Transaction[]
+
+  txHashes String[] @unique
+
+  timestamp BigInt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

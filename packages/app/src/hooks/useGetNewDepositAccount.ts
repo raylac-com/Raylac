@@ -4,7 +4,11 @@ import { Hex } from 'viem';
 import { trpc } from '@/lib/trpc';
 import Toast from 'react-native-toast-message';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { generateStealthAddressV2 } from '@raylac/shared';
+import {
+  ERC5564_ANNOUNCEMENT_CHAIN,
+  generateStealthAddressV2,
+  supportedChains,
+} from '@raylac/shared';
 import { getQueryKey } from '@trpc/react-query';
 
 /**
@@ -45,6 +49,8 @@ const useGetNewDepositAccount = () => {
         ephemeralPubKey: account.ephemeralPubKey,
         viewTag: account.viewTag,
         label,
+        announcementChainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
+        syncOnChainIds: supportedChains.map(chain => chain.id),
       });
 
       return account;

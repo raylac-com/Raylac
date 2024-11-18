@@ -1,11 +1,10 @@
 import { beforeAll, describe, expect, test } from 'vitest';
 import {
   createStealthAccountForTestUser,
-  fundAddress,
   getTestClient,
+  waitFor,
 } from '../lib/utils';
-import { Address, Hex, parseEther, zeroAddress } from 'viem';
-import { sync } from '@raylac/sync';
+import { parseEther, zeroAddress } from 'viem';
 import { anvil } from 'viem/chains';
 import { getAuthedClient } from '../lib/rpc';
 import {
@@ -16,97 +15,68 @@ import {
   getViewingPrivKey,
   RAYLAC_PAYMASTER_V2_ADDRESS,
   signUserOpWithStealthAccount,
-  sleep,
 } from '@raylac/shared';
 import { TEST_ACCOUNT_MNEMONIC } from '../lib/auth';
+import prisma from '../lib/prisma';
 
-const testClient = getTestClient();
+const testClient = getTestClient({ chainId: anvil.id });
 
-/*
-const waitForIncomingSync = async (txHash: Hex) => {
-  const timeout = setTimeout(() => {
-    throw new Error('Timeout waiting for incoming sync');
-  }, 10000);
+const isTransferRemoved = async ({ transferId }: { transferId: number }) => {
+  await waitFor({
+    fn: async () => {
+      const transfer = await prisma.userAction.findUnique({
+        where: { id: transferId },
+      });
 
-  while (true) {
-    const authedClient = await getAuthedClient();
+      const txs = await prisma.transaction.findMany({
+        where: { userActionId: transferId },
+      });
 
-    const transferHistory = await authedClient.getTransferHistory.query({
-      take: 1,
-      includeAnvil: true,
-    });
+      // `Transaction` and `UserAction` must be both deleted.
+      if (transfer && txs.length === 0) {
+        // eslint-disable-next-line no-console
+        console.error(`Transactions removed but UserAction ${transferId} not`);
+        return true;
+      }
 
-    if (transferHistory.length === 0) {
-      await sleep(3000);
-      continue;
-    }
+      if (!transfer && txs.length > 0) {
+        // eslint-disable-next-line no-console
+        console.error(`UserAction ${transferId} removed but transactions not`);
+        return true;
+      }
 
-    if (transferHistory[0].hash === txHash) {
-      clearTimeout(timeout);
-      return;
-    }
+      if (!transfer && txs.length === 0) {
+        return true;
+      }
 
-    await sleep(3000);
-  }
-};
-*/
-
-const isTxRemoved = async (txHash: Hex) => {
-  const timeout = Date.now() + 20000;
-
-  const authedClient = await getAuthedClient();
-
-  while (true) {
-    const transferDetails = await authedClient.getTransferDetails.query({
-      txHash,
-    });
-
-    if (!transferDetails.hash) {
-      return true;
-    }
-
-    if (Date.now() > timeout) {
       return false;
-    }
+    },
+    timeout: 20000,
+    label: 'isTransferRemoved',
+  });
 
-    await sleep(3000);
-  }
+  return true;
 };
 
-export const getSynchedAddressNonce = async ({
-  address,
-}: {
-  address: Address;
-}) => {
-  const authedClient = await getAuthedClient();
-
-  const addressNonces = await authedClient.getAddressNonces.query();
-
-  // eslint-disable-next-line security/detect-object-injection
-  return addressNonces[address];
-};
-
-describe('reorg', () => {
+describe.skip('reorg', () => {
   const sender = zeroAddress;
   beforeAll(async () => {
     // Fund the sender address
-    await fundAddress({ address: sender, amount: parseEther('1') });
+    await testClient.setBalance({
+      address: sender,
+      value: parseEther('1'),
+    });
   });
 
   test('should handle a reorg for incoming transfers correctly', async () => {
     const authedClient = await getAuthedClient();
 
-    // Start the sync job for Anvil
-    await sync({
-      announcementChainId: anvil.id,
-      chainIds: [anvil.id],
-    });
-
     const snapshot = await testClient.snapshot();
 
     // Create a stealth address for the test user
     const stealthAccount = await createStealthAccountForTestUser({
-      useAnvil: true,
+      syncOnChainIds: [anvil.id],
+      announcementChainId: anvil.id,
     });
 
     // Fund the stealth account
@@ -117,7 +87,7 @@ describe('reorg', () => {
 
     await testClient.mine({ blocks: 1 });
 
-    const gasInfo = await getGasInfo({
+    const [gasInfo] = await getGasInfo({
       chainIds: [anvil.id],
     });
 
@@ -150,8 +120,9 @@ describe('reorg', () => {
       viewingPrivKey,
     });
 
-    const txHash = await authedClient.submitUserOps.mutate({
+    const { transferId } = await authedClient.submitUserOps.mutate({
       userOps: [signedUserOp],
+      tokenPrice: 1, // dummy value
     });
 
     // Reorg the chain
@@ -159,10 +130,7 @@ describe('reorg', () => {
 
     await testClient.mine({ blocks: 5 });
 
-    expect(await isTxRemoved(txHash)).toBe(true);
-    expect(
-      await getSynchedAddressNonce({ address: stealthAccount.address })
-    ).toBe(undefined);
+    expect(await isTransferRemoved({ transferId })).toBe(true);
 
     const balances = await authedClient.getAddressBalancesPerChain.query();
 

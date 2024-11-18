@@ -3,9 +3,7 @@ import { supportedTokens } from '@raylac/shared';
 import { decodeEventLog, getAddress, Hex, Log, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
 import {
-  endTimer,
-  startTimer,
-  updateAddressesSyncStatus,
+  updateSyncTasks,
   upsertTransaction,
   waitForAnnouncementsBackfill,
 } from './utils';
@@ -100,7 +98,7 @@ export const syncERC20TransfersForChain = async ({
   tokenId: string;
   tokenAddress: Hex;
 }) => {
-  const addressSyncStatuses = await prisma.addressSyncStatus.findMany({
+  const syncTasks = await prisma.syncTask.findMany({
     select: {
       blockNumber: true,
       chainId: true,
@@ -115,20 +113,20 @@ export const syncERC20TransfersForChain = async ({
     },
   });
 
-  if (addressSyncStatuses.length === 0) {
+  if (syncTasks.length === 0) {
     return;
   }
 
   const client = getPublicClient({ chainId });
 
-  const addressBatchSize = 100;
+  const syncTasksBatchSize = 100;
   const blockBatchSize = 100000n;
 
-  for (let i = 0; i < addressSyncStatuses.length; i += addressBatchSize) {
+  for (let i = 0; i < syncTasks.length; i += syncTasksBatchSize) {
     // TODO: Try not to call this here every time
     const latestBlockNumber = await client.getBlockNumber();
 
-    const batch = addressSyncStatuses.slice(i, i + addressBatchSize);
+    const batch = syncTasks.slice(i, i + syncTasksBatchSize);
 
     const fromBlock = batch[0].blockNumber;
 
@@ -143,8 +141,8 @@ export const syncERC20TransfersForChain = async ({
       ]);
 
       const addressesToSync = batch
-        .filter(address => address.blockNumber < toBlock)
-        .map(address => address.address as Hex);
+        .filter(task => task.blockNumber < toBlock)
+        .map(task => task.address as Hex);
 
       if (addressesToSync.length === 0) {
         continue;
@@ -183,7 +181,7 @@ export const syncERC20TransfersForChain = async ({
       }
       await Promise.all(handleLogsPromises);
 
-      await updateAddressesSyncStatus({
+      await updateSyncTasks({
         addresses: addressesToSync,
         chainId,
         tokenId,
@@ -212,7 +210,6 @@ const syncERC20Transfers = async ({
 
   while (true) {
     try {
-      const syncTimer = startTimer('syncERC20Transfers');
       const allTokensSyncPromises = [];
       for (const token of erc20Tokens) {
         // Sync ERC20 transfers for each chain concurrently
@@ -237,8 +234,6 @@ const syncERC20Transfers = async ({
       }
 
       await Promise.all(allTokensSyncPromises);
-
-      endTimer(syncTimer);
     } catch (err) {
       logger.error(err);
     }

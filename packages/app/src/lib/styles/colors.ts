@@ -9,6 +9,7 @@ const colors = {
   border: '#262626',
   background: '#121212',
   text: '#E5E5E5',
+  subbedText: '#808080',
   card: '#121212',
   notification: '#285181',
 };

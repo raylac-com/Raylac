@@ -1,7 +1,7 @@
-import { anvil } from 'viem/chains';
 import prisma from '../lib/prisma';
-import { supportedChains } from '@raylac/shared';
-
+import { devChains, supportedChains } from '@raylac/shared';
+import selectTransfer from '../queries/selectTransfer';
+import { parseTransferData } from '../utils';
 /**
  * Get the transaction history of all stealth addresses for a user
  */
@@ -19,106 +19,48 @@ const getTransferHistory = async ({
   const chainIds = supportedChains.map(chain => chain.id);
 
   if (includeAnvil) {
-    chainIds.push(anvil.id);
+    chainIds.push(...devChains.map(c => c.id));
   }
 
-  const transactions = await prisma.transaction.findMany({
-    select: {
-      block: {
-        select: {
-          number: true,
-          timestamp: true,
-        },
-      },
-      userOps: {
-        select: {
-          tokenPriceAtOp: true,
-        },
-      },
-      traces: {
-        select: {
-          tokenId: true,
-          chainId: true,
-          traceAddress: true,
-          logIndex: true,
-          tokenPriceAtTrace: true,
-          UserStealthAddressFrom: {
-            select: {
-              userId: true,
-              address: true,
-              user: {
-                select: {
-                  spendingPubKey: true,
-                  name: true,
-                  profileImage: true,
-                },
-              },
-            },
-          },
-          UserStealthAddressTo: {
-            select: {
-              userId: true,
-              address: true,
-              user: {
-                select: {
-                  spendingPubKey: true,
-                  name: true,
-                  profileImage: true,
-                },
-              },
-            },
-          },
-          from: true,
-          to: true,
-          amount: true,
-          transactionHash: true,
-        },
-      },
-      hash: true,
-    },
+  const transfers = await prisma.userAction.findMany({
+    select: selectTransfer,
     where: {
-      OR: [
-        {
-          traces: {
-            some: {
-              UserStealthAddressFrom: {
-                userId,
+      transactions: {
+        some: {
+          OR: [
+            {
+              traces: {
+                some: {
+                  UserStealthAddressFrom: {
+                    userId,
+                  },
+                },
               },
             },
-          },
-        },
-        {
-          traces: {
-            some: {
-              UserStealthAddressTo: {
-                userId,
+            {
+              traces: {
+                some: {
+                  UserStealthAddressTo: {
+                    userId,
+                  },
+                },
               },
             },
-          },
+          ],
+          chainId: { in: chainIds },
         },
-      ],
-      chainId: { in: chainIds },
-    },
-    orderBy: {
-      block: {
-        number: 'desc',
       },
     },
     take,
     skip,
+    orderBy: {
+      timestamp: 'desc',
+    },
   });
 
-  // Filter out the traces that are not to the user's stealth address
-  const filteredTransactions = transactions.map(tx => {
-    return {
-      ...tx,
-      traces: tx.traces.filter(
-        trace =>
-          trace.UserStealthAddressTo?.userId === userId ||
-          trace.UserStealthAddressFrom?.userId === userId
-      ),
-    };
-  });
+  const filteredTransactions = transfers.map(transfer =>
+    parseTransferData({ transfer, userId })
+  );
 
   return filteredTransactions;
 };

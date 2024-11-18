@@ -1,16 +1,21 @@
 import { initTRPC } from '@trpc/server';
 import type { Context } from './context';
+import { ZodError } from 'zod';
 import { logger } from '@raylac/shared-backend';
 
 const t = initTRPC.context<Context>().create({
-  errorFormatter({ shape, error }) {
-    logger.error('TRPC error', { shape, error });
+  errorFormatter(opts) {
+    const { shape, error } = opts;
 
+    logger.error(error);
     return {
       ...shape,
       data: {
         ...shape.data,
-        error: error.message,
+        zodError:
+          error.code === 'BAD_REQUEST' && error.cause instanceof ZodError
+            ? error.cause?.flatten()
+            : null,
       },
     };
   },

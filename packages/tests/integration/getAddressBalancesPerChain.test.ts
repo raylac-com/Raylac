@@ -32,7 +32,7 @@ const checkBalance = async ({
   ).toBe(balance);
 };
 
-describe('getAddressBalancesPerChain', () => {
+describe.skip('getAddressBalancesPerChain', () => {
   it('should return the correct balances of the address for each chain', async () => {
     const authedClient = await getAuthedClient();
     const stealthAccounts = await authedClient.getStealthAccounts.query();

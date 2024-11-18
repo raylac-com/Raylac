@@ -1,9 +1,7 @@
 import { webcrypto } from 'node:crypto';
 import 'dotenv/config';
 import { describe, expect, test } from 'vitest';
-import { client } from '../lib/rpc';
 import {
-  ERC5564_ANNOUNCEMENT_CHAIN,
   ERC5564_ANNOUNCER_ADDRESS,
   getPublicClient,
   getViewingPrivKey,
@@ -11,19 +9,23 @@ import {
   recoveryStealthPrivKey,
   sleep,
   ERC5564_SCHEME_ID,
-  generateStealthAddressV2,
+  decodeERC5564MetadataAsViewTag,
+  supportedChains,
+  ERC5564_ANNOUNCEMENT_CHAIN,
 } from '@raylac/shared';
 import { Hex, parseAbiItem } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { TEST_ACCOUNT_MNEMONIC } from '../lib/auth';
-import { getTestUser } from '../lib/utils';
+import { createStealthAccountForTestUser } from '../lib/utils';
+
+const ANNOUNCEMENT_CHAIN_ID = ERC5564_ANNOUNCEMENT_CHAIN.id;
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 
 const pollAnnouncementLog = async (signerAddress: Hex) => {
   const publicClient = getPublicClient({
-    chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
+    chainId: ANNOUNCEMENT_CHAIN_ID,
   });
 
   const timeoutMs = 15000;
@@ -54,22 +56,10 @@ const pollAnnouncementLog = async (signerAddress: Hex) => {
 
 describe('new stealth account', () => {
   test('create and recover stealth account', async () => {
-    const user = await getTestUser();
-
     // Generate a new stealth address for the test user
-    const newStealthAccount = generateStealthAddressV2({
-      spendingPubKey: user.spendingPubKey as Hex,
-      viewingPubKey: user.viewingPubKey as Hex,
-    });
-
-    // Submit the stealth address to the server
-    await client.addStealthAccount.mutate({
-      address: newStealthAccount.address,
-      signerAddress: newStealthAccount.signerAddress,
-      ephemeralPubKey: newStealthAccount.ephemeralPubKey,
-      viewTag: newStealthAccount.viewTag,
-      userId: user.id,
-      label: '',
+    const newStealthAccount = await createStealthAccountForTestUser({
+      syncOnChainIds: supportedChains.map(c => c.id),
+      announcementChainId: ANNOUNCEMENT_CHAIN_ID,
     });
 
     // Poll for the announcement log
@@ -85,7 +75,16 @@ describe('new stealth account', () => {
     expect(announcementLog.args.stealthAddress).toEqual(
       newStealthAccount.signerAddress
     );
-    expect(announcementLog.args.metadata).toEqual(newStealthAccount.viewTag);
+
+    const decodedMetadata = decodeERC5564MetadataAsViewTag(
+      announcementLog.args.metadata as Hex
+    );
+
+    expect(decodedMetadata.viewTag).toEqual(newStealthAccount.viewTag);
+    expect(
+      decodedMetadata.chainInfos.map(chainInfo => chainInfo.chainId)
+    ).toEqual(supportedChains.map(chain => chain.id));
+
     expect(announcementLog.args.schemeId).toEqual(ERC5564_SCHEME_ID);
 
     const spendingPrivKey = getSpendingPrivKey(TEST_ACCOUNT_MNEMONIC);

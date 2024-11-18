@@ -23,12 +23,14 @@ const maxFee = parseGwei('0.05');
  * Throws an error if it does not.
  */
 const validateUserOp = (userOp: UserOperation) => {
+  // Check that the expected `callGasLimit` is used
   if (userOp.callGasLimit !== TRANSFER_OP_CALL_GAS_LIMIT) {
     throw new Error(
       `Invalid callGasLimit ${userOp.callGasLimit}. Expected ${TRANSFER_OP_CALL_GAS_LIMIT}`
     );
   }
 
+  // Check that the expected `verificationGasLimit` is used
   if (
     userOp.initCode !== '0x' &&
     userOp.verificationGasLimit !== TRANSFER_OP_INIT_VERIFICATION_GAS_LIMIT
@@ -38,6 +40,7 @@ const validateUserOp = (userOp: UserOperation) => {
     );
   }
 
+  // Check that the expected `verificationGasLimit` is used
   if (
     userOp.initCode === '0x' &&
     userOp.verificationGasLimit !== TRANSFER_OP_VERIFICATION_GAS_LIMIT
@@ -47,18 +50,21 @@ const validateUserOp = (userOp: UserOperation) => {
     );
   }
 
+  // Check that the expected `preVerificationGas` is used
   if (userOp.preVerificationGas !== TRANSFER_OP_PRE_VERIFICATION_GAS) {
     throw new Error(
       `Invalid preVerificationGas ${userOp.preVerificationGas}. Expected ${TRANSFER_OP_PRE_VERIFICATION_GAS}`
     );
   }
 
+  // Check that the expected `callGasLimit` is used
   if (userOp.callGasLimit !== TRANSFER_OP_CALL_GAS_LIMIT) {
     throw new Error(
       `Invalid callGasLimit ${userOp.callGasLimit}. Expected ${TRANSFER_OP_CALL_GAS_LIMIT}`
     );
   }
 
+  // Check that the `maxFeePerGas` doesn't exceed what we allow
   if (BigInt(userOp.maxFeePerGas) > maxFee) {
     throw new Error(
       `maxFeePerGas exceeds maxFee ${BigInt(userOp.maxFeePerGas)} > ${maxFee}`

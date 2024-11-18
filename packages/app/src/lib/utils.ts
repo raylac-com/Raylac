@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import { Hex } from 'viem';
 import * as Clipboard from 'expo-clipboard';
-import { AddressOrUser, TransferItem } from '@/types';
+import { AddressOrUser, TraceItem, TransferItem } from '@/types';
 import { publicKeyToAddress } from 'viem/accounts';
 import {
   formatAmount,
@@ -48,35 +48,37 @@ export const getClipboardText = async () => {
   return text;
 };
 
-export const getFinalTransfer = (transfer: TransferItem) => {
-  if (transfer.traces[0].logIndex !== null) {
-    const finalTransfer = transfer.traces.sort(
-      (a, b) => b.logIndex - a.logIndex
-    )[0];
+/**
+ * Get the final transfers for each chain in a multi-chain transfer.
+ */
+export const getFinalTransfers = (transfer: TransferItem) => {
+  const finalTransfers: TraceItem[] = [];
 
-    return finalTransfer;
+  const toUserId =
+    transfer.transactions[0].traces[0].UserStealthAddressTo.userId;
+
+  for (const transaction of transfer.transactions) {
+    const finalTransfer = transaction.traces.find(
+      trace => trace.UserStealthAddressTo.userId === toUserId
+    );
+
+    if (!finalTransfer) {
+      throw new Error('No final transfer found');
+    }
+
+    finalTransfers.push(finalTransfer);
   }
 
-  const finalTransfer = transfer.traces.sort((a, b) => {
-    const aTraceAddress = a.traceAddress.split('_');
-    const bTraceAddress = b.traceAddress.split('_');
-
-    return (
-      parseInt(bTraceAddress[bTraceAddress.length - 1]) -
-      parseInt(aTraceAddress[aTraceAddress.length - 1])
-    );
-  })[0];
-
-  return finalTransfer;
+  return finalTransfers;
 };
 
 export const getTransferType = (
   transfer: TransferItem,
   signedInUserId: number
 ): 'incoming' | 'outgoing' => {
-  const finalTransfer = getFinalTransfer(transfer);
+  const finalTransfers = getFinalTransfers(transfer);
 
-  return finalTransfer.UserStealthAddressFrom?.userId === signedInUserId
+  return finalTransfers[0].UserStealthAddressFrom?.userId === signedInUserId
     ? 'outgoing'
     : 'incoming';
 };
@@ -106,27 +108,20 @@ export const getDisplayName = (addressOrUser: AddressOrUser) => {
 /**
  * Get the USD amount of a transfer.
  *
- * If the transfer has a token price at op, use that.
- * Otherwise, if the transfer has a token price at trace, use that.
- * Otherwise, return null.
+ * Use the token price logged to the trace record to determine the USD amount.
  */
-export const getUsdTransferAmount = (transfer: TransferItem): string | null => {
-  const finalTransfer = getFinalTransfer(transfer);
+export const getUsdTransferAmount = (
+  transfer: TransferItem,
+  tokenId: Hex
+): string | null => {
+  const tokenMeta = getTokenMetadata(tokenId);
 
-  const amount = finalTransfer.amount as string;
+  const amount = transfer.amount;
 
-  const tokenMeta = getTokenMetadata(finalTransfer.tokenId);
   const formattedAmount = Number(formatAmount(amount, tokenMeta.decimals));
 
-  const userOps = transfer.userOps;
-  const tokenPriceAtOp = userOps?.length > 0 ? userOps[0].tokenPriceAtOp : null;
-
-  if (tokenPriceAtOp) {
-    // Prioritize token price at op
-    return (tokenPriceAtOp * formattedAmount).toFixed(2);
-  }
-
-  const tokenPriceAtTrace = finalTransfer.tokenPriceAtTrace;
+  const tokenPriceAtTrace =
+    transfer.transactions[0].traces[0].tokenPriceAtTrace;
 
   if (tokenPriceAtTrace) {
     return (tokenPriceAtTrace * formattedAmount).toFixed(2);

@@ -10,6 +10,9 @@ import {
 import * as chains from 'viem/chains';
 import { Chain } from 'viem/chains';
 import { getChainFromId } from './utils';
+import { devChains } from './devChains';
+
+const devChainsIds = devChains.map(c => c.id) as number[];
 
 export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
   const apiKey =
@@ -71,17 +74,37 @@ export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
   return `https://${alchemySubdomain}.g.alchemy.com/v2/${apiKey}`;
 };
 
-export const getQuickNodeRpcUrl = ({ chain }: { chain: Chain }) => {
-  if (chain.id === chains.anvil.id) {
-    const ANVIL_RPC_URL = process.env.ANVIL_RPC_URL;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const getDevChainRpcUrl = ({ chainId }: { chainId: number }): string => {
+  /*
+  const ANVIL_1_RPC_URL = process.env.ANVIL_1_RPC_URL;
+  const ANVIL_2_RPC_URL = process.env.ANVIL_2_RPC_URL;
 
-    if (!ANVIL_RPC_URL) {
-      throw new Error('ANVIL_RPC_URL is not set');
-    }
+  switch (chainId) {
+    case anvil1.id:
+      if (!ANVIL_1_RPC_URL) {
+        throw new Error('ANVIL_1_RPC_URL is not set');
+      }
+      return ANVIL_1_RPC_URL;
+    case anvil2.id:
+      if (!ANVIL_2_RPC_URL) {
+        throw new Error('ANVIL_2_RPC_URL is not set');
+      }
+      return ANVIL_2_RPC_URL;
+    default:
+      throw new Error(`getDevChainRpcUrl: Unknown chain id: ${chainId}`);
+  }
+  */
+  const ANVIL_RPC_URL = process.env.ANVIL_RPC_URL;
 
-    return ANVIL_RPC_URL;
+  if (!ANVIL_RPC_URL) {
+    throw new Error('ANVIL_RPC_URL is not set');
   }
 
+  return ANVIL_RPC_URL;
+};
+
+export const getQuickNodeRpcUrl = ({ chain }: { chain: Chain }): string => {
   const apiKey = process.env.QUICKNODE_API_KEY;
 
   if (!apiKey) {
@@ -134,7 +157,7 @@ export const getQuickNodeRpcUrl = ({ chain }: { chain: Chain }) => {
       quickNodeSubdomain = 'zksync-mainnet';
       break;
     default:
-      throw new Error(`Unknown chain id: ${chain.id}`);
+      throw new Error(`getQuickNodeRpcUrl: Unknown chain id: ${chain.id}`);
   }
 
   return `https://shy-wild-shard.${quickNodeSubdomain}.quiknode.pro/${apiKey}`;
@@ -151,17 +174,15 @@ export const getPublicClient = ({
 }): PublicClient<HttpTransport, Chain> => {
   const chain = getChainFromId(chainId);
 
-  const ANVIL_RPC_URL = process.env.ANVIL_RPC_URL as string;
-
-  if (chainId === chains.anvil.id && !ANVIL_RPC_URL) {
-    throw new Error('ANVIL_RPC_URL is not set');
-  }
+  const rpcUrl = devChainsIds.includes(chainId)
+    ? // Get the RPC URL for the dev chain
+      getDevChainRpcUrl({ chainId })
+    : // Get the RPC URL for a production chain
+      getAlchemyRpcUrl({ chain });
 
   const client = createPublicClient({
     chain,
-    transport: http(
-      chainId === chains.anvil.id ? ANVIL_RPC_URL : getAlchemyRpcUrl({ chain })
-    ),
+    transport: http(rpcUrl),
   });
 
   return client as PublicClient<HttpTransport, Chain>;
@@ -173,28 +194,35 @@ export const getPublicClient = ({
  */
 export const getWalletClient = ({ chainId }: { chainId: number }) => {
   const chain = getChainFromId(chainId);
+
+  const rpcUrl = devChainsIds.includes(chainId)
+    ? // Get the RPC URL for custom chain
+      getDevChainRpcUrl({ chainId })
+    : // Get the RPC URL for a standard chain
+      getQuickNodeRpcUrl({ chain });
+
   return createWalletClient({
     chain,
-    transport: http(getQuickNodeRpcUrl({ chain })),
+    transport: http(rpcUrl),
   });
 };
 
 export const getWebsocketClient = ({ chainId }: { chainId: number }) => {
   const chain = getChainFromId(chainId);
 
-  const ANVIL_RPC_URL = process.env.ANVIL_RPC_URL as string;
-
-  if (chainId === chains.anvil.id && !ANVIL_RPC_URL) {
-    throw new Error('ANVIL_RPC_URL is not set');
-  }
+  const rpcUrl = devChainsIds.includes(chainId)
+    ? // Get the RPC URL for the dev chain
+      getDevChainRpcUrl({ chainId }).replace('http', 'ws')
+    : // Get the RPC URL for a production chain
+      getAlchemyRpcUrl({ chain });
 
   const client = createPublicClient({
     chain,
-    transport: webSocket(
-      chainId === chains.anvil.id
-        ? ANVIL_RPC_URL?.replace('http', 'ws')
-        : getAlchemyRpcUrl({ chain })
-    ),
+    transport: webSocket(rpcUrl, {
+      reconnect: {
+        attempts: 30,
+      },
+    }),
   });
 
   return client as PublicClient<WebSocketTransport, Chain>;

@@ -8,7 +8,7 @@ const getSyncStatus = async ({
   addresses: Hex[];
   chainIds: number[];
 }) => {
-  const syncStatus = await prisma.addressSyncStatus.findMany({
+  const syncStatus = await prisma.syncTask.findMany({
     select: {
       address: true,
       chainId: true,

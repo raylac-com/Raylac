@@ -1,10 +1,4 @@
-import {
-  getAvatarAddress,
-  getDisplayName,
-  getFinalTransfer,
-  getProfileImage,
-  getUsdTransferAmount,
-} from '@/lib/utils';
+import { getAvatarAddress, getDisplayName, getProfileImage } from '@/lib/utils';
 import { Pressable, Text, View } from 'react-native';
 import FastAvatar from './FastAvatar';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,7 +7,7 @@ import { formatAmount, getTokenMetadata } from '@raylac/shared';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { formatDistanceToNowStrict, Locale } from 'date-fns';
 import { ja, enUS } from 'date-fns/locale';
-import { TransferItem } from '@/types';
+import { AddressOrUser, TransferItem } from '@/types';
 import { useTranslation } from 'react-i18next';
 import spacing from '@/lib/styles/spacing';
 import fontSizes from '@/lib/styles/fontSizes';
@@ -39,27 +33,26 @@ const formatDate = ({
 const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
   const { transfer, type } = props;
 
-  const tokenId = transfer.traces[0].tokenId;
+  const tokenId = transfer.transactions[0].traces[0].tokenId;
 
-  const finalTransfer = getFinalTransfer(transfer);
   const { i18n } = useTranslation();
 
-  const amount = finalTransfer.amount as string;
+  const amount = transfer.amount;
 
   const tokenMeta = getTokenMetadata(tokenId);
   const formattedAmount = formatAmount(amount, tokenMeta.decimals);
 
   const navigation = useTypedNavigation();
 
-  const from = finalTransfer.UserStealthAddressFrom?.user || finalTransfer.from;
-  const to = finalTransfer.UserStealthAddressTo?.user || finalTransfer.to;
+  const from = (transfer.fromUser || transfer.fromAddress) as AddressOrUser;
+  const to = (transfer.toUser || transfer.toAddress) as AddressOrUser;
 
   const avatarAddress =
     type === 'outgoing' ? getAvatarAddress(to) : getAvatarAddress(from);
 
-  const blockTimestamp = new Date(Number(transfer.block.timestamp) * 1000);
+  const blockTimestamp = new Date(Number(transfer.timestamp) * 1000);
 
-  const transferUsdAmount = getUsdTransferAmount(transfer);
+  const transferUsdAmount = transfer.usdAmount;
 
   return (
     <Pressable
@@ -73,7 +66,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
       }}
       onPress={() => {
         navigation.navigate('TransferDetails', {
-          txHash: transfer.hash,
+          transferId: transfer.id,
         });
       }}
     >
@@ -102,6 +95,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           <Text
             style={{
               color: colors.text,
+              fontWeight: 'bold',
             }}
           >
             {getDisplayName(type === 'outgoing' ? to : from)}

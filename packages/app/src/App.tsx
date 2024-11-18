@@ -47,6 +47,10 @@ import Receive from './screens/Receive';
 import Upgrade from './screens/Upgrade';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
+import SupportedChains from './screens/SupportedChains';
+import SupportedTokens from './screens/SupportedTokens';
+import TokenBalances from './screens/TokenBalances';
+import TokenBalanceDetails from './screens/TokenBalanceDetails';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -258,6 +262,20 @@ const Screens = () => {
           }}
         ></RootStack.Screen>
         <RootStack.Screen
+          name="TokenBalances"
+          component={TokenBalances}
+          options={{
+            title: t('title', { ns: 'TokenBalances' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="TokenBalanceDetails"
+          component={TokenBalanceDetails}
+          options={{
+            title: t('title', { ns: 'TokenBalanceDetails' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
           name="SelectLanguage"
           component={SelectLanguage}
           options={{
@@ -327,6 +345,23 @@ const Screens = () => {
             headerBackVisible: false,
           }}
         ></RootStack.Screen>
+        <RootStack.Screen
+          name="SupportedChains"
+          component={SupportedChains}
+          options={{
+            title: t('title', { ns: 'SupportedChains' }),
+            headerBackVisible: true,
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="SupportedTokens"
+          component={SupportedTokens}
+          options={{
+            title: t('title', { ns: 'SupportedTokens' }),
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
       </RootStack.Navigator>
       <Toast></Toast>
     </SafeAreaView>
@@ -373,7 +408,7 @@ const App = () => {
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <PersistQueryClientProvider
           client={queryClient}
-          persistOptions={{ persister: asyncStoragePersister }}
+          persistOptions={{ persister: asyncStoragePersister, buster: '42' }}
         >
           <ThemeProvider value={NavigationTheme}>
             <Screens></Screens>

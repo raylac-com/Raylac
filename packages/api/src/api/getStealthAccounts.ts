@@ -1,17 +1,12 @@
 import prisma from '../lib/prisma';
+import selectStealthAccounts from '../queries/selectStealthAccounts';
 
 /**
  * Get all stealth accounts for a user
  */
 const getStealthAccounts = async ({ userId }: { userId: number }) => {
-  const addresses = await prisma.userStealthAddress.findMany({
-    select: {
-      address: true,
-      signerAddress: true,
-      viewTag: true,
-      ephemeralPubKey: true,
-      label: true,
-    },
+  const accounts = await prisma.userStealthAddress.findMany({
+    select: selectStealthAccounts,
     where: {
       userId,
     },
@@ -20,7 +15,7 @@ const getStealthAccounts = async ({ userId }: { userId: number }) => {
     },
   });
 
-  return addresses;
+  return accounts;
 };
 
 export default getStealthAccounts;
