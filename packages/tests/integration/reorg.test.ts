@@ -73,7 +73,8 @@ describe('reorg', () => {
 
     // Create a stealth address for the test user
     const stealthAccount = await createStealthAccountForTestUser({
-      useAnvil: true,
+      syncOnChainIds: [anvil.id],
+      announcementChainId: anvil.id,
     });
 
     // Fund the stealth account
@@ -85,7 +86,7 @@ describe('reorg', () => {
     await testClient.mine({ blocks: 1 });
 
     const [gasInfo] = await getGasInfo({
-      chainIds: [anvil1.id],
+      chainIds: [anvil.id],
     });
 
     const userOp = buildUserOp({
@@ -119,6 +120,7 @@ describe('reorg', () => {
 
     const { transferId } = await authedClient.submitUserOps.mutate({
       userOps: [signedUserOp],
+      tokenPrice: 1, // dummy value
     });
 
     // Reorg the chain

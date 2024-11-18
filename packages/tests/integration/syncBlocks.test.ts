@@ -3,15 +3,10 @@ import { beforeAll, describe, expect, test } from 'vitest';
 import { anvil } from 'viem/chains';
 import { Hex, parseEther, zeroAddress } from 'viem';
 import { backFillFromFinalizedBlock, manageReorgsForChain } from '@raylac/sync';
-import {
-  anvil1,
-  getPublicClient,
-  getWalletClient,
-  sleep,
-} from '@raylac/shared';
+import { getPublicClient, getWalletClient, sleep } from '@raylac/shared';
 import { getTestClient } from '../lib/utils';
 
-const chain = anvil1;
+const chain = anvil;
 
 const waitForBlockSync = async (blockHash: Hex) => {
   const timeoutAt = Date.now() + 20 * 1000;

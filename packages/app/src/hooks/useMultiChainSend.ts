@@ -2,10 +2,12 @@ import { getMnemonicAndKeys } from '@/lib/key';
 import { trpc } from '@/lib/trpc';
 import { User } from '@/types';
 import {
+  ERC5564_ANNOUNCEMENT_CHAIN,
   StealthAddressWithEphemeral,
   UserOperation,
   generateStealthAddressV2,
   signUserOpWithStealthAccount,
+  supportedChains,
 } from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
@@ -75,6 +77,8 @@ const useMultiChainSend = () => {
           ephemeralPubKey: to.ephemeralPubKey,
           viewTag: to.viewTag,
           label: '',
+          syncOnChainIds: supportedChains.map(chain => chain.id),
+          announcementChainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
         });
       }
 
