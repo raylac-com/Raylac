@@ -49,6 +49,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
 import SupportedChains from './screens/SupportedChains';
 import SupportedTokens from './screens/SupportedTokens';
+import TokenBalances from './screens/TokenBalances';
+import TokenBalanceDetails from './screens/TokenBalanceDetails';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -257,6 +259,20 @@ const Screens = () => {
             title: t('title', { ns: 'TransferDetails' }),
             headerBackVisible: true,
             headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="TokenBalances"
+          component={TokenBalances}
+          options={{
+            title: t('title', { ns: 'TokenBalances' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="TokenBalanceDetails"
+          component={TokenBalanceDetails}
+          options={{
+            title: t('title', { ns: 'TokenBalanceDetails' }),
           }}
         ></RootStack.Screen>
         <RootStack.Screen

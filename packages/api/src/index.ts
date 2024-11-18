@@ -33,6 +33,7 @@ import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import pruneAnvil from './api/pruneAnvil';
 import getSyncStatus from './api/getSyncStatus';
 import buildMultiChainSendUserOps from './api/buildMultiChainSendUserOps';
+import { getTokenBalanceDetails } from './api/getTokenBalanceDetails';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -151,6 +152,23 @@ export const appRouter = router({
     const balances = await getTokenBalances({ userId });
     return balances;
   }),
+
+  getTokenBalanceDetails: authedProcedure
+    .input(
+      z.object({
+        tokenId: z.string(),
+      })
+    )
+    .query(async opts => {
+      const { input } = opts;
+      const userId = opts.ctx.userId;
+      const details = await getTokenBalanceDetails({
+        userId,
+        tokenId: input.tokenId,
+      });
+
+      return details;
+    }),
 
   /**
    * Get the stealth accounts of the user

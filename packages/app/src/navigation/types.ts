@@ -41,6 +41,12 @@ export type RootStackParamsList = {
   TransferDetails: {
     transferId: number;
   };
+
+  TokenBalances: undefined;
+  TokenBalanceDetails: {
+    tokenId: string;
+  };
+
   Receive: undefined;
   BackupAccount: undefined;
   Advanced: undefined;

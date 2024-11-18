@@ -1,4 +1,4 @@
-import { Text, View, ScrollView, RefreshControl, Image } from 'react-native';
+import { Text, View, ScrollView, RefreshControl } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -8,79 +8,13 @@ import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import { useTranslation } from 'react-i18next';
 import StyledPressable from '@/components/StyledPressable';
-import { supportedTokens } from '@raylac/shared';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTokenBalances from '@/hooks/useTokenBalance';
 import spacing from '@/lib/styles/spacing';
 import fontSizes from '@/lib/styles/fontSizes';
 import borderRadius from '@/lib/styles/borderRadius';
 import opacity from '@/lib/styles/opacity';
-
-interface TokenBalanceItemProps {
-  formattedBalance: string;
-  formattedUsdBalance: string;
-  tokenId: string;
-}
-
-const TokenBalanceItem = (props: TokenBalanceItemProps) => {
-  const { tokenId, formattedBalance, formattedUsdBalance } = props;
-  const { t } = useTranslation('Home');
-
-  const tokenMetadata = supportedTokens.find(
-    token => token.tokenId === tokenId
-  );
-
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        columnGap: spacing.small,
-        borderRadius: borderRadius.base,
-        borderWidth: 1,
-        padding: spacing.small,
-        borderColor: colors.gray,
-      }}
-    >
-      <Image
-        source={{ uri: tokenMetadata.logoURI }}
-        style={{
-          width: 24,
-          height: 24,
-        }}
-      />
-      <View
-        style={{
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          rowGap: spacing.xxSmall,
-        }}
-      >
-        <Text
-          style={{
-            color: colors.text,
-            fontSize: fontSizes.base,
-          }}
-        >
-          {t('fiatDenominatedBalance', {
-            balance: formattedUsdBalance,
-          })}
-        </Text>
-        <Text
-          style={{
-            color: colors.text,
-            fontSize: fontSizes.base,
-            opacity: opacity.dimmed,
-          }}
-        >
-          {`${formattedBalance} ${tokenMetadata.symbol}`}
-        </Text>
-      </View>
-    </View>
-  );
-};
+import TokenBalanceListItem from '@/components/TokenBalanceListItem';
 
 interface MenuItemProps {
   icon: React.ReactNode;
@@ -253,41 +187,18 @@ const HomeScreen = () => {
           testID="send"
         />
       </View>
-      {/* Token list */}
-      <ScrollView
-        horizontal
+      {/* Transfer history */}
+      <Text
         style={{
-          flexDirection: 'row',
-          height: 80,
-          paddingHorizontal: spacing.base,
-        }}
-        contentContainerStyle={{
-          columnGap: 16,
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: '100%',
+          fontSize: fontSizes.large,
+          color: colors.text,
+          fontWeight: 'bold',
         }}
       >
-        {tokenBalances?.map(
-          ({ tokenId, formattedBalance, formattedUsdBalance }, i) => {
-            return (
-              <TokenBalanceItem
-                key={i}
-                formattedBalance={formattedBalance}
-                formattedUsdBalance={formattedUsdBalance}
-                tokenId={tokenId}
-              />
-            );
-          }
-        )}
-        {tokenBalances?.length > 3 && (
-          <AntDesign name="arrowright" size={24} color={colors.gray} />
-        )}
-      </ScrollView>
-      {/* Transfer history */}
+        {t('transferHistory')}
+      </Text>
       <View
         style={{
-          flex: 1,
           flexDirection: 'column',
         }}
       >
@@ -325,6 +236,25 @@ const HomeScreen = () => {
             {t('noTransfers')}
           </Text>
         ) : null}
+      </View>
+      {/* Assets list */}
+      <Text
+        style={{
+          fontSize: fontSizes.large,
+          color: colors.text,
+          fontWeight: 'bold',
+        }}
+      >
+        {t('assets')}
+      </Text>
+      <View style={{ flexDirection: 'column', rowGap: spacing.base }}>
+        {tokenBalances?.map((tokenBalance, i) => (
+          <TokenBalanceListItem
+            key={i}
+            balance={BigInt(tokenBalance.balance)}
+            tokenId={tokenBalance.tokenId}
+          />
+        ))}
       </View>
     </ScrollView>
   );

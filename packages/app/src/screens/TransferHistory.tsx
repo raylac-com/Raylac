@@ -1,5 +1,6 @@
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useSignedInUser from '@/hooks/useSignedInUser';
+import spacing from '@/lib/styles/spacing';
 import { trpc } from '@/lib/trpc';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Text, View } from 'react-native';
@@ -12,7 +13,7 @@ const TransferHistory = () => {
   return (
     <View
       style={{
-        marginTop: 40,
+        marginTop: spacing.base,
         flex: 1,
         flexDirection: 'column',
       }}

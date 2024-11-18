@@ -69,7 +69,9 @@
     "receive": "Receive",
     "seeAll": "See all",
     "send": "Send",
-    "title": "Home"
+    "title": "Home",
+    "transferHistory": "Transfers",
+    "assets": "Assets"
   },
   "Receive": {
     "backToHome": "Back to home",
@@ -125,15 +127,22 @@
     "signIn": "Sign in",
     "title": ""
   },
+
+  "TransferHistory": {
+    "noTransfers": "No transfers yet",
+    "title": "Transfer History"
+  },
   "TransferDetails": {
     "title": "Transfer details",
     "traces": "Traces",
     "sentTo": "Sent to {{ name }}",
     "receivedFrom": "Received from {{ name }}"
   },
-  "TransferHistory": {
-    "noTransfers": "No transfers yet",
-    "title": "Transfer History"
+  "TokenBalances": {
+    "title": "Token balances"
+  },
+  "TokenBalanceDetails": {
+    "title": "Token balance details"
   },
   "UpdateDisplayName": {
     "displayName": "Name",
@@ -150,6 +159,7 @@
     "upgradeAccount": "Apply latest update to your account"
   },
   "common": {
+    "fiatDenominatedBalance": "${{ balance }}",
     "copied": "Copied",
     "copiedAddress": "Copied address",
     "headerBackTitle": "Back",
