@@ -161,8 +161,8 @@ const Deposit = () => {
           style={{
             width: '100%',
           }}
-          testID="secondary"
           variant="outline"
+          testID="past-deposit-addresses"
         ></StyledButton>
         <StyledButton
           title={t('supportedChainsAndTokens')}
@@ -173,7 +173,6 @@ const Deposit = () => {
             width: '100%',
           }}
           variant="underline"
-          testID="past-deposit-addresses"
         ></StyledButton>
       </View>
     </View>
