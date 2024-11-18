@@ -187,16 +187,6 @@ const HomeScreen = () => {
           testID="send"
         />
       </View>
-      {/* Transfer history */}
-      <Text
-        style={{
-          fontSize: fontSizes.large,
-          color: colors.text,
-          fontWeight: 'bold',
-        }}
-      >
-        {t('transferHistory')}
-      </Text>
       <View
         style={{
           flexDirection: 'column',
@@ -240,7 +230,7 @@ const HomeScreen = () => {
       {/* Assets list */}
       <Text
         style={{
-          fontSize: fontSizes.large,
+          fontSize: fontSizes.base,
           color: colors.text,
           fontWeight: 'bold',
         }}

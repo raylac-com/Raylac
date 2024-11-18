@@ -1,5 +1,7 @@
 import { getChainLogo } from '@/lib/logo';
 import colors from '@/lib/styles/colors';
+import fontSizes from '@/lib/styles/fontSizes';
+import spacing from '@/lib/styles/spacing';
 import { RootStackParamsList } from '@/navigation/types';
 import {
   getChainFromId,
@@ -20,18 +22,24 @@ const SupportedTokenListItem = (props: { token: SupportedToken }) => {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
-        columnGap: 8,
-        borderBottomColor: colors.gray,
+        columnGap: spacing.xSmall,
         backgroundColor: colors.background,
-        borderBottomWidth: 1,
-        paddingVertical: 16,
+        paddingVertical: spacing.small,
       }}
     >
       <Image
         source={{ uri: token.logoURI }}
-        style={{ width: 20, height: 20 }}
+        style={{ width: 28, height: 28 }}
       />
-      <Text style={{ color: colors.text, fontSize: 16 }}>{token.name}</Text>
+      <Text
+        style={{
+          color: colors.text,
+          fontSize: fontSizes.base,
+          fontWeight: 'bold',
+        }}
+      >
+        {token.name}
+      </Text>
     </View>
   );
 };
@@ -50,16 +58,22 @@ const SupportedTokens = ({ route }: Props) => {
   const chain = getChainFromId(chainId);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, padding: spacing.base }}>
       <View
         style={{
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
-          columnGap: 8,
+          columnGap: spacing.small,
         }}
       >
-        <Text style={{ color: colors.text, fontSize: 18 }}>
+        <Text
+          style={{
+            color: colors.text,
+            fontSize: fontSizes.large,
+            fontWeight: 'bold',
+          }}
+        >
           {t('tokensOnChain', { chain: chain.name })}
         </Text>
         <Image

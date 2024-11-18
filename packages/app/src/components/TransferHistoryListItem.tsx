@@ -95,6 +95,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           <Text
             style={{
               color: colors.text,
+              fontWeight: 'bold',
             }}
           >
             {getDisplayName(type === 'outgoing' ? to : from)}

@@ -11,7 +11,8 @@ export const supportedTokens: SupportedToken[] = [
     symbol: 'USDC',
     name: 'USD Coin',
     decimals: 6,
-    logoURI: 'https://static.alchemyapi.io/images/assets/3408.png',
+    logoURI:
+      'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/usdc.png',
     addresses: [
       // https://developers.circle.com/stablecoins/docs/usdc-on-test-networks
       /*
@@ -83,10 +84,10 @@ export const supportedTokens: SupportedToken[] = [
   {
     tokenId: 'eth',
     symbol: 'ETH',
-    name: 'ETH',
+    name: 'Ethereum',
     decimals: 18,
     logoURI:
-      'https://assets.coingecko.com/coins/images/279/standard/ethereum.png?1696501628',
+      'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/eth.png',
     addresses: [...supportedChains, chains.anvil].map(chain => ({
       address: NATIVE_TOKEN_ADDRESS,
       chain,

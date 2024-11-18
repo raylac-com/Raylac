@@ -78,7 +78,13 @@ const TokenBalanceListItem = (props: TokenBalanceListItemProps) => {
             height: avatarSizes.small,
           }}
         />
-        <Text style={{ fontSize: fontSizes.base, color: colors.text }}>
+        <Text
+          style={{
+            fontSize: fontSizes.base,
+            color: colors.text,
+            fontWeight: 'bold',
+          }}
+        >
           {tokenMetadata.name}
         </Text>
       </View>

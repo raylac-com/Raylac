@@ -359,6 +359,7 @@ const Screens = () => {
           component={SupportedTokens}
           options={{
             title: t('title', { ns: 'SupportedTokens' }),
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
           }}
         ></RootStack.Screen>
       </RootStack.Navigator>

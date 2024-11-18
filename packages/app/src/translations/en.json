@@ -142,7 +142,8 @@
     "title": "Token balances"
   },
   "TokenBalanceDetails": {
-    "title": "Token balance details"
+    "title": "Token balance",
+    "addresses": "Addresses"
   },
   "UpdateDisplayName": {
     "displayName": "Name",
@@ -157,6 +158,14 @@
   "Upgrade": {
     "title": "Upgrade",
     "upgradeAccount": "Apply latest update to your account"
+  },
+  "SupportedChains": {
+    "title": "Supported tokens",
+    "viewAll": "View all"
+  },
+  "SupportedTokens": {
+    "title": "Supported tokens",
+    "tokensOnChain": "Tokens on {{ chain }}"
   },
   "common": {
     "fiatDenominatedBalance": "${{ balance }}",
