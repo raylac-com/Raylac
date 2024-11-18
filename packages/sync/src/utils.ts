@@ -294,20 +294,27 @@ export const upsertTransaction = async ({
     );
   }
 
-  const data: Prisma.TransactionCreateManyInput = {
+  const data: Prisma.TransactionCreateInput = {
     hash: txHash,
     fromAddress: getAddress(tx.from),
     toAddress: getAddress(tx.to as Hex),
     chainId,
-    blockHash: tx.blockHash,
+    block: {
+      connect: {
+        hash: tx.blockHash,
+      },
+    },
     tag,
   };
 
-  // We use `createMany` instead of `upsert` because,
-  // because `upsert` occasionally fails with a unique constraint error. (This is likely due to upserts being run in parallel)
-  await prisma.transaction.createMany({
-    data: [data],
-    skipDuplicates: true,
+  await prisma.$transaction(async tx => {
+    await tx.transaction.upsert({
+      where: {
+        hash: txHash,
+      },
+      create: data,
+      update: data,
+    });
   });
 };
 

@@ -212,6 +212,9 @@ describe('submitUserOps', () => {
         tokenPrice: tokenPrice.usd,
       });
 
+      const testClient = getTestClient({ chainId: anvil.id });
+      await testClient.mine({ blocks: 1 });
+
       const sortedTxHashes = result.txHashes.sort();
 
       txHashes = sortedTxHashes;

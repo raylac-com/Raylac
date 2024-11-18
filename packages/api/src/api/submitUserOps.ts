@@ -101,13 +101,17 @@ const saveUserAction = async ({
     groupSize: numChains,
   };
 
-  return await prisma.userAction.upsert({
-    where: {
-      txHashes,
-    },
-    update: data,
-    create: data,
+  const result = await prisma.$transaction(async tx => {
+    return await tx.userAction.upsert({
+      where: {
+        txHashes,
+      },
+      update: data,
+      create: data,
+    });
   });
+
+  return result;
 };
 
 /**

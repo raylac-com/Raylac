@@ -218,7 +218,11 @@ export const getWebsocketClient = ({ chainId }: { chainId: number }) => {
 
   const client = createPublicClient({
     chain,
-    transport: webSocket(rpcUrl),
+    transport: webSocket(rpcUrl, {
+      reconnect: {
+        attempts: 30,
+      },
+    }),
   });
 
   return client as PublicClient<WebSocketTransport, Chain>;

@@ -83,10 +83,12 @@ const syncMultiChainTransfers = async ({
           ),
         };
 
-        await prisma.userAction.upsert({
-          where: { txHashes },
-          update: data,
-          create: data,
+        await prisma.$transaction(async tx => {
+          await tx.userAction.upsert({
+            where: { txHashes },
+            update: data,
+            create: data,
+          });
         });
       }
     },

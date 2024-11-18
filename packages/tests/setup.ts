@@ -212,7 +212,7 @@ const initDevChainState = async ({ chainId }: { chainId: number }) => {
   }
 };
 
-const setup = async () => {
+export const setup = async () => {
   logger.info(`RPC_URL ${process.env.RPC_URL}`);
 
   // Wait for the RPC server and the indexer to get ready
@@ -234,5 +234,3 @@ const setup = async () => {
     devChains.map(chain => initDevChainState({ chainId: chain.id }))
   );
 };
-
-await setup();
