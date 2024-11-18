@@ -1,4 +1,8 @@
-import { ENTRY_POINT_ADDRESS, getPublicClient } from '@raylac/shared';
+import {
+  devChains,
+  ENTRY_POINT_ADDRESS,
+  getPublicClient,
+} from '@raylac/shared';
 import { Hex, Log, parseAbiItem } from 'viem';
 import {
   loop,
@@ -38,8 +42,12 @@ const handleUserOpEvent = async ({
 export const syncUserOpsForChain = async ({ chainId }: { chainId: number }) => {
   const publicClient = getPublicClient({ chainId });
 
+  const devChainIds = devChains.map(chain => chain.id) as number[];
+
+  const isDevChain = devChainIds.includes(chainId);
+
   await loop({
-    interval: 10 * 1000,
+    interval: isDevChain ? 1 * 1000 : 10 * 1000,
     async fn() {
       const syncTasks = await prisma.syncTask.findMany({
         select: {
@@ -137,18 +145,13 @@ const syncUserOps = async ({
   await waitForAnnouncementsBackfill({ announcementChainId });
   logger.info(`syncUserOps: Announcements backfill complete`);
 
-  await loop({
-    interval: 15 * 1000,
-    async fn() {
-      const promises = [];
+  const promises = [];
 
-      for (const chainId of chainIds) {
-        promises.push(syncUserOpsForChain({ chainId }));
-      }
+  for (const chainId of chainIds) {
+    promises.push(syncUserOpsForChain({ chainId }));
+  }
 
-      await Promise.all(promises);
-    },
-  });
+  await Promise.all(promises);
 };
 
 export default syncUserOps;

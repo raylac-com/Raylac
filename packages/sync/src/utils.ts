@@ -412,7 +412,7 @@ export const waitForAnnouncementsBackfill = async ({
       break;
     }
 
-    await sleep(3000);
+    await sleep(1500);
   }
 };
 

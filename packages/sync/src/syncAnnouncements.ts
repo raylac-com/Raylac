@@ -3,6 +3,7 @@ import {
   ERC5564_SCHEME_ID,
   getSenderAddressV2,
   decodeERC5564MetadataAsViewTag,
+  devChains,
 } from '@raylac/shared';
 import prisma from './lib/prisma';
 import { announcementAbiItem, loop } from './utils';
@@ -145,6 +146,9 @@ const syncAnnouncements = async ({
 }: {
   announcementChainId: number;
 }) => {
+  const devChainIds = devChains.map(chain => chain.id) as number[];
+  const isDevChain = devChainIds.includes(announcementChainId);
+
   await loop({
     fn: async () => {
       await processLogs({
@@ -168,7 +172,7 @@ const syncAnnouncements = async ({
         },
       });
     },
-    interval: 1 * 1000,
+    interval: isDevChain ? 500 : 15 * 1000,
   });
 };
 
