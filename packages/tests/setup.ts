@@ -64,8 +64,6 @@ const waitForRpcServer = async () => {
 
       try {
         const gitCommit = await client.getGitCommit.query();
-        // eslint-disable-next-line no-console
-        console.log(`waiting for RPC server: ${gitCommit} === ${GIT_COMMIT}`);
 
         return gitCommit === GIT_COMMIT;
       } catch (_e: any) {
@@ -97,9 +95,6 @@ const waitForIndexer = async () => {
       try {
         const result = await fetch(`${INDEXER_URL}/git-commit`);
         const gitCommit = await result.text();
-
-        // eslint-disable-next-line no-console
-        console.log(`waiting for indexer: ${gitCommit} === ${GIT_COMMIT}`);
 
         return gitCommit === GIT_COMMIT;
       } catch (_e: any) {
