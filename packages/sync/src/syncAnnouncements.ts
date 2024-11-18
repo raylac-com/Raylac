@@ -2,11 +2,10 @@ import {
   ERC5564_ANNOUNCER_ADDRESS,
   ERC5564_SCHEME_ID,
   getSenderAddressV2,
-  sleep,
   decodeERC5564MetadataAsViewTag,
 } from '@raylac/shared';
 import prisma from './lib/prisma';
-import { announcementAbiItem } from './utils';
+import { announcementAbiItem, loop } from './utils';
 import processLogs from './processLogs';
 import { decodeEventLog, Hex, Log, parseAbi } from 'viem';
 import { ERC5564Announcement, Prisma, SyncJob } from '@raylac/db';
@@ -31,7 +30,7 @@ const createSyncTaskForChain = async ({
 }) => {
   const tokenIds = supportedTokens.map(token => token.tokenId);
 
-  const syncTasks: Prisma.AddressSyncStatusCreateManyInput[] = [];
+  const syncTasks: Prisma.SyncTaskCreateManyInput[] = [];
   for (const tokenId of tokenIds) {
     syncTasks.push({
       address: announcement.address as Hex,
@@ -52,7 +51,7 @@ const createSyncTaskForChain = async ({
     blockHash: '0x',
   });
 
-  await prisma.addressSyncStatus.createMany({
+  await prisma.syncTask.createMany({
     data: syncTasks,
     skipDuplicates: true,
   });
@@ -146,27 +145,28 @@ const syncAnnouncements = async ({
 }: {
   announcementChainId: number;
 }) => {
-  while (true) {
-    await processLogs({
-      chainId: announcementChainId,
-      job: SyncJob.Announcements,
-      address: ERC5564_ANNOUNCER_ADDRESS,
-      event: announcementAbiItem,
-      handleLogs: async logs => {
-        for (const log of logs) {
-          await handleERC5564AnnouncementLog({
-            log,
-            announcementChainId,
-          });
-        }
-      },
-      args: {
-        schemeId: ERC5564_SCHEME_ID,
-      },
-    });
-
-    await sleep(3 * 1000);
-  }
+  await loop({
+    fn: async () => {
+      await processLogs({
+        chainId: announcementChainId,
+        job: SyncJob.Announcements,
+        address: ERC5564_ANNOUNCER_ADDRESS,
+        event: announcementAbiItem,
+        handleLogs: async logs => {
+          for (const log of logs) {
+            await handleERC5564AnnouncementLog({
+              log,
+              announcementChainId,
+            });
+          }
+        },
+        args: {
+          schemeId: ERC5564_SCHEME_ID,
+        },
+      });
+    },
+    interval: 3 * 1000,
+  });
 };
 
 export default syncAnnouncements;

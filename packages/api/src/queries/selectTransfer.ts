@@ -12,11 +12,6 @@ const selectTransfer = {
           timestamp: true,
         },
       },
-      userOps: {
-        select: {
-          tokenPriceAtOp: true,
-        },
-      },
       traces: {
         select: {
           tokenId: true,

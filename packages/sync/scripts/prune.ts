@@ -9,7 +9,7 @@ const prune = async () => {
   await prisma.transaction.deleteMany();
   await prisma.block.deleteMany();
   await prisma.syncStatus.deleteMany();
-  await prisma.addressSyncStatus.deleteMany();
+  await prisma.syncTask.deleteMany();
   await prisma.eRC5564Announcement.deleteMany();
   await prisma.userStealthAddress.deleteMany();
 };

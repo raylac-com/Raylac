@@ -145,7 +145,7 @@ export type ERC20TransferLogType = ParseEventLogsReturnType<
   true
 >[number];
 
-export const updateAddressesSyncStatus = async ({
+export const updateSyncTasks = async ({
   addresses,
   chainId,
   tokenId,
@@ -157,7 +157,7 @@ export const updateAddressesSyncStatus = async ({
   blockNumber: bigint;
 }) => {
   // Update sync status records for addresses that have one
-  await prisma.addressSyncStatus.updateMany({
+  await prisma.syncTask.updateMany({
     data: {
       blockHash: '0x',
       blockNumber,

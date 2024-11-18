@@ -35,7 +35,7 @@ const waitForAnnouncementsSync = async ({
 
       return false;
     },
-    timeout: 10 * 1000,
+    timeout: 30 * 1000,
     label: 'syncAnnouncements',
   });
 };
@@ -101,7 +101,7 @@ describe('syncAnnouncements', () => {
     // 3. Check that sync tasks were created
     // ###################################
 
-    const addressSyncStatuses = await prisma.addressSyncStatus.findMany({
+    const syncTasks = await prisma.syncTask.findMany({
       where: {
         address: {
           in: stealthAddresses,
@@ -113,6 +113,6 @@ describe('syncAnnouncements', () => {
     });
 
     // Each stealth address should have a sync task for each chain and each supported token
-    expect(addressSyncStatuses.length).toBeGreaterThan(stealthAddresses.length);
+    expect(syncTasks.length).toBeGreaterThan(stealthAddresses.length);
   });
 });

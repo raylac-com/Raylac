@@ -6,7 +6,7 @@ const devChainIds = devChains.map(c => c.id);
 
 const pruneAnvil = async () => {
   await prisma.$transaction(async tx => {
-    await tx.addressSyncStatus.deleteMany({
+    await tx.syncTask.deleteMany({
       where: {
         chainId: {
           in: devChainIds,

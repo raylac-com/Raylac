@@ -10,7 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model AddressSyncStatus {
+model SyncTask {
   id Int @id @default(autoincrement())
 
   chainId Int
@@ -39,12 +39,12 @@ model ERC5564Announcement {
   blockNumber     BigInt
   address         String
 
-  addressSyncStatus AddressSyncStatus[]
-  logIndex          Int
-  txIndex           Int
-  chainId           Int
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
+  syncTasks SyncTask[]
+  logIndex  Int
+  txIndex   Int
+  chainId   Int
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
   @@unique([blockNumber, logIndex, txIndex, chainId])
 }
@@ -142,14 +142,13 @@ model Transaction {
 model UserOperation {
   hash String @id
 
-  sender         String?
-  paymaster      String?
-  nonce          Int?
-  success        Boolean?
-  actualGasCost  BigInt?
-  actualGasUsed  BigInt?
-  chainId        Int
-  tokenPriceAtOp Float?
+  sender        String?
+  paymaster     String?
+  nonce         Int?
+  success       Boolean?
+  actualGasCost BigInt?
+  actualGasUsed BigInt?
+  chainId       Int
 
   Transaction     Transaction? @relation(fields: [transactionHash], references: [hash])
   transactionHash String?

@@ -1,4 +1,4 @@
-import { ENTRY_POINT_ADDRESS, getPublicClient, sleep } from '@raylac/shared';
+import { ENTRY_POINT_ADDRESS, getPublicClient } from '@raylac/shared';
 import { Hex, Log, parseAbiItem } from 'viem';
 import {
   loop,
@@ -41,7 +41,7 @@ export const syncUserOpsForChain = async ({ chainId }: { chainId: number }) => {
   await loop({
     interval: 10 * 1000,
     async fn() {
-      const addressSyncStatuses = await prisma.addressSyncStatus.findMany({
+      const syncTasks = await prisma.syncTask.findMany({
         select: {
           blockNumber: true,
           chainId: true,
@@ -56,11 +56,11 @@ export const syncUserOpsForChain = async ({ chainId }: { chainId: number }) => {
         },
       });
 
-      if (addressSyncStatuses.length === 0) {
+      if (syncTasks.length === 0) {
         return;
       }
 
-      const fromBlock = addressSyncStatuses[0].blockNumber;
+      const fromBlock = syncTasks[0].blockNumber;
       const latestBlockNumber = await publicClient.getBlockNumber();
 
       const addressBatchSize = 100;
@@ -76,7 +76,7 @@ export const syncUserOpsForChain = async ({ chainId }: { chainId: number }) => {
           latestBlockNumber,
         ]);
 
-        const addressesToSync = addressSyncStatuses
+        const addressesToSync = syncTasks
           .filter(address => address.blockNumber < toBlock)
           .map(address => address.address as Hex);
 
@@ -102,7 +102,7 @@ export const syncUserOpsForChain = async ({ chainId }: { chainId: number }) => {
           }
 
           // Update the address sync statuses to the latest block number
-          await prisma.addressSyncStatus.updateMany({
+          await prisma.syncTask.updateMany({
             data: {
               blockNumber: toBlock,
             },
@@ -137,18 +137,18 @@ const syncUserOps = async ({
   await waitForAnnouncementsBackfill({ announcementChainId });
   logger.info(`syncUserOps: Announcements backfill complete`);
 
-  while (true) {
-    const promises = [];
+  await loop({
+    interval: 15 * 1000,
+    async fn() {
+      const promises = [];
 
-    for (const chainId of chainIds) {
-      promises.push(syncUserOpsForChain({ chainId }));
-    }
+      for (const chainId of chainIds) {
+        promises.push(syncUserOpsForChain({ chainId }));
+      }
 
-    await Promise.all(promises);
-
-    // TODO: Figure out the right interval
-    await sleep(15 * 1000);
-  }
+      await Promise.all(promises);
+    },
+  });
 };
 
 export default syncUserOps;

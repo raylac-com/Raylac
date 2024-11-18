@@ -11,7 +11,7 @@ import { Prisma } from '@raylac/db';
 import {
   getBlockTimestamp,
   loop,
-  updateAddressesSyncStatus,
+  updateSyncTasks,
   upsertTransaction,
   waitForAnnouncementsBackfill,
 } from './utils';
@@ -40,7 +40,7 @@ const getNativeTransferTracesInBlocks = async ({
 };
 
 const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
-  const addressSyncStatuses = await prisma.addressSyncStatus.findMany({
+  const syncTasks = await prisma.syncTask.findMany({
     select: {
       blockNumber: true,
       chainId: true,
@@ -55,11 +55,11 @@ const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
     },
   });
 
-  if (addressSyncStatuses.length === 0) {
+  if (syncTasks.length === 0) {
     return;
   }
 
-  const fromBlock = addressSyncStatuses[0].blockNumber;
+  const fromBlock = syncTasks[0].blockNumber;
 
   const client = getPublicClient({ chainId });
 
@@ -86,18 +86,19 @@ const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
     });
 
     // Get addresses that needs to be scanned for this batch
-    const addresses = addressSyncStatuses.filter(
-      addressSyncStatus =>
-        BigInt(addressSyncStatus.blockNumber) <= blocks[blocks.length - 1]
-    );
+    const addresses = syncTasks
+      .filter(
+        syncTask => BigInt(syncTask.blockNumber) <= blocks[blocks.length - 1]
+      )
+      .map(syncTask => syncTask.address as Hex);
 
     const callsWithAddresses = callsWithValue.filter(call => {
       const to = getAddress(call.to);
       const from = getAddress(call.from);
 
       return (
-        addresses.some(address => address.address === to) ||
-        addresses.some(address => address.address === from)
+        addresses.some(address => address === to) ||
+        addresses.some(address => address === from)
       );
     });
 
@@ -127,8 +128,8 @@ const syncNativeTransfersWithTraceBlock = async (chainId: number) => {
       });
     }
 
-    await updateAddressesSyncStatus({
-      addresses: addresses.map(address => address.address as Hex),
+    await updateSyncTasks({
+      addresses,
       chainId,
       tokenId: 'eth',
       blockNumber: blocks[blocks.length - 1],
@@ -141,7 +142,7 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
     throw new Error(`Cannot use trace_filter for ${getChainName(chainId)}`);
   }
 
-  const addressWithSyncStatus = await prisma.addressSyncStatus.findMany({
+  const addressWithSyncStatus = await prisma.syncTask.findMany({
     select: {
       address: true,
       blockNumber: true,
@@ -243,7 +244,7 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
         });
       }
 
-      await updateAddressesSyncStatus({
+      await updateSyncTasks({
         addresses: addressesToSync,
         chainId,
         tokenId: 'eth',
