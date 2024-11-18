@@ -22,6 +22,7 @@ import {
 } from '../lib/utils';
 import prisma from '../lib/prisma';
 import { Prisma } from '@raylac/db';
+import { anvil } from 'viem/chains';
 
 /**
  * Get the current USD price of a token
@@ -120,7 +121,8 @@ describe('submitUserOps', () => {
 
   beforeAll(async () => {
     stealthAccount = await createStealthAccountForTestUser({
-      useAnvil: true,
+      syncOnChainIds: devChains.map(c => c.id),
+      announcementChainId: anvil.id,
     });
 
     // Fund the stealth account on all dev chains

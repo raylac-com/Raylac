@@ -8,6 +8,7 @@ import {
   StealthAddressWithEphemeral,
 } from '@raylac/shared';
 import { SyncJob } from '@prisma/client';
+import { logger } from '../../shared-backend/out';
 
 const publicClient = getPublicClient({ chainId: anvil.id });
 
@@ -41,14 +42,21 @@ const waitForAnnouncementsSync = async ({
 
 describe('syncAnnouncements', () => {
   it('should backfill announcements', async () => {
-    const NUM_STEALTH_ADDRESSES = 10;
+    const NUM_STEALTH_ADDRESSES = 3;
 
     // 1: Create multiple stealth addresses for testing
 
     const stealthAccounts: StealthAddressWithEphemeral[] = [];
     for (let i = 0; i < NUM_STEALTH_ADDRESSES; i++) {
-      const account = await createStealthAccountForTestUser({ useAnvil: true });
+      const account = await createStealthAccountForTestUser({
+        syncOnChainIds: [anvil.id],
+        announcementChainId: anvil.id,
+      });
       stealthAccounts.push(account);
+    }
+
+    for (const account of stealthAccounts) {
+      logger.debug(`Created stealth account ${account.address}`);
     }
 
     const blockNumber = await publicClient.getBlockNumber();

@@ -23,12 +23,14 @@ const addStealthAccount = async ({
   userId,
   stealthAccount,
   label,
-  useAnvil,
+  syncOnChainIds,
+  announcementChainId,
 }: {
   userId: number;
   stealthAccount: StealthAddressWithEphemeral;
   label: string;
-  useAnvil?: boolean;
+  syncOnChainIds: number[];
+  announcementChainId: number;
 }) => {
   const canAdd = await canUserAddStealthAccount(userId);
 
@@ -55,7 +57,8 @@ const addStealthAccount = async ({
   // We don't await this because it's slow and we don't want to block the response.
   erc5564.announce({
     stealthAccount,
-    useAnvil,
+    syncOnChainIds,
+    announcementChainId,
   });
 };
 

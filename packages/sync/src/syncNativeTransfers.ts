@@ -155,10 +155,6 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
     },
   });
 
-  logger.info(
-    `Syncing native transfers for ${addressWithSyncStatus.length} addresses`
-  );
-
   const addressBatchSize = 100;
   const blockBatchSize = 100000n;
 
@@ -260,6 +256,8 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
 const syncNativeTransfersForChain = async (chainId: number) => {
   await loop({
     fn: async () => {
+      logger.info(`Syncing native transfers for ${getChainName(chainId)}`);
+
       if (chainId === base.id || chainId === optimism.id) {
         await syncNativeTransfersWithTraceFilter(chainId);
       } else {

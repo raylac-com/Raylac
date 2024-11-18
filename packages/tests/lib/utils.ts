@@ -120,9 +120,11 @@ export const getTestUser = async () => {
  * - Submits the stealth address to the server which will announce it to the ERC5564 contract on anvil
  */
 export const createStealthAccountForTestUser = async ({
-  useAnvil,
+  syncOnChainIds,
+  announcementChainId,
 }: {
-  useAnvil: boolean;
+  syncOnChainIds: number[];
+  announcementChainId: number;
 }): Promise<StealthAddressWithEphemeral> => {
   const user = await getTestUser();
 
@@ -142,7 +144,8 @@ export const createStealthAccountForTestUser = async ({
     viewTag: newStealthAccount.viewTag,
     userId: user.id,
     label: '',
-    useAnvil,
+    syncOnChainIds,
+    announcementChainId,
   });
 
   return newStealthAccount;

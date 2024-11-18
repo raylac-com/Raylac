@@ -80,7 +80,9 @@ export const decodeERC5564MetadataAsViewTag = (metadata: Hex) => {
     scanFromBlock: bigint;
   }[] = [];
 
-  const supportedChainIds = supportedChains.map(chain => chain.id);
+  const supportedChainIds = [...devChains, ...supportedChains].map(
+    chain => chain.id
+  );
 
   for (
     let i = VIEW_TAG_BYTES;

@@ -27,7 +27,6 @@ import {
 } from './lib/bytecode';
 import { parseEther } from 'viem';
 import { logger } from '../shared-backend/out';
-import { spawn } from 'child_process';
 
 const TEST_USER_NAME = 'Test User';
 const TEST_USER_USERNAME = 'testuser';
@@ -213,47 +212,7 @@ const initDevChainState = async ({ chainId }: { chainId: number }) => {
   }
 };
 
-/**
- * Spawn an anvil instance as a child process.
- * *NOTE: This function doesn't throw even if the anvil process is already running and the port is already in use. The caller
- * * should use the existing anvil instance if it exists.
- */
-const startAnvil = ({ port, chainId }: { port: number; chainId: number }) => {
-  const anvil = spawn(
-    'anvil',
-    [
-      '--base-fee',
-      '10000',
-      '--port',
-      port.toString(),
-      '--chain-id',
-      chainId.toString(),
-    ],
-    {
-      detached: false, // The child process is not detached from the parent
-    }
-  );
-
-  // Listen for the process's output (optional if stdio is not 'inherit')
-  anvil.stdout.on('data', data => {
-    logger.debug(`anvil: ${data}`);
-  });
-
-  anvil.stderr.on('error', data => {
-    logger.error(`anvil error: ${data}`);
-  });
-
-  // Handle process exit
-  anvil.on('close', code => {
-    logger.info(`anvil exited with code ${code}`);
-  });
-};
-
 const setup = async () => {
-  for (const chain of devChains) {
-    startAnvil({ port: chain.port, chainId: chain.id });
-  }
-
   logger.info(`RPC_URL ${process.env.RPC_URL}`);
 
   // Wait for the RPC server and the indexer to get ready

@@ -3,8 +3,6 @@ import { supportedTokens } from '@raylac/shared';
 import { decodeEventLog, getAddress, Hex, Log, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
 import {
-  endTimer,
-  startTimer,
   updateAddressesSyncStatus,
   upsertTransaction,
   waitForAnnouncementsBackfill,
@@ -212,7 +210,6 @@ const syncERC20Transfers = async ({
 
   while (true) {
     try {
-      const syncTimer = startTimer('syncERC20Transfers');
       const allTokensSyncPromises = [];
       for (const token of erc20Tokens) {
         // Sync ERC20 transfers for each chain concurrently
@@ -237,8 +234,6 @@ const syncERC20Transfers = async ({
       }
 
       await Promise.all(allTokensSyncPromises);
-
-      endTimer(syncTimer);
     } catch (err) {
       logger.error(err);
     }

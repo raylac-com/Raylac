@@ -6,10 +6,9 @@ import {
   decodeERC5564MetadataAsViewTag,
 } from '@raylac/shared';
 import prisma from './lib/prisma';
-import { announcementAbiItem, endTimer, startTimer } from './utils';
+import { announcementAbiItem } from './utils';
 import processLogs from './processLogs';
 import { decodeEventLog, Hex, Log, parseAbi } from 'viem';
-import { anvil } from 'viem/chains';
 import { ERC5564Announcement, Prisma, SyncJob } from '@raylac/db';
 import { supportedTokens } from '@raylac/shared';
 import { getChainName } from '@raylac/shared';
@@ -49,7 +48,7 @@ const createSyncTaskForChain = async ({
     skipDuplicates: true,
   });
 
-  logger.info(
+  logger.debug(
     `Created sync tasks for announcement of address ${announcement.address} on ${getChainName(chainId)}`
   );
 };
@@ -67,12 +66,6 @@ const createSyncTasks = async ({
   const chainInfos = decodedAnnouncementMetadata.chainInfos;
 
   for (const chainInfo of chainInfos) {
-    if (announcement.chainId === anvil.id && chainInfo.chainId !== anvil.id) {
-      // We don't create sync tasks for production chains when the announcement
-      // is on the anvil chain
-      continue;
-    }
-
     promises.push(
       createSyncTaskForChain({
         announcement,
@@ -183,7 +176,6 @@ const syncAnnouncements = async ({
   await deleteV1Accounts();
 
   while (true) {
-    const announcementBackfillTimer = startTimer('announcementBackfill');
     await processLogs({
       chainId: announcementChainId,
       job: SyncJob.Announcements,
@@ -202,7 +194,6 @@ const syncAnnouncements = async ({
       },
     });
 
-    endTimer(announcementBackfillTimer);
     await sleep(3 * 1000);
   }
 };

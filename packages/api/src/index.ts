@@ -313,7 +313,8 @@ export const appRouter = router({
         viewTag: z.string(),
         userId: z.number(),
         label: z.string(),
-        useAnvil: z.boolean().optional(),
+        syncOnChainIds: z.array(z.number()),
+        announcementChainId: z.number(),
       })
     )
     .mutation(async opts => {
@@ -328,7 +329,8 @@ export const appRouter = router({
           viewTag: input.viewTag as Hex,
         },
         label: input.label,
-        useAnvil: input.useAnvil,
+        syncOnChainIds: input.syncOnChainIds,
+        announcementChainId: input.announcementChainId,
       });
     }),
 

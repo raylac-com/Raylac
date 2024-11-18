@@ -2,7 +2,6 @@ import { webcrypto } from 'node:crypto';
 import 'dotenv/config';
 import { describe, expect, test } from 'vitest';
 import {
-  ERC5564_ANNOUNCEMENT_CHAIN,
   ERC5564_ANNOUNCER_ADDRESS,
   getPublicClient,
   getViewingPrivKey,
@@ -12,18 +11,21 @@ import {
   ERC5564_SCHEME_ID,
   decodeERC5564MetadataAsViewTag,
   supportedChains,
+  ERC5564_ANNOUNCEMENT_CHAIN,
 } from '@raylac/shared';
 import { Hex, parseAbiItem } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { TEST_ACCOUNT_MNEMONIC } from '../lib/auth';
 import { createStealthAccountForTestUser } from '../lib/utils';
 
+const ANNOUNCEMENT_CHAIN_ID = ERC5564_ANNOUNCEMENT_CHAIN.id;
+
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
 
 const pollAnnouncementLog = async (signerAddress: Hex) => {
   const publicClient = getPublicClient({
-    chainId: ERC5564_ANNOUNCEMENT_CHAIN.id,
+    chainId: ANNOUNCEMENT_CHAIN_ID,
   });
 
   const timeoutMs = 15000;
@@ -56,7 +58,8 @@ describe('new stealth account', () => {
   test('create and recover stealth account', async () => {
     // Generate a new stealth address for the test user
     const newStealthAccount = await createStealthAccountForTestUser({
-      useAnvil: false,
+      syncOnChainIds: supportedChains.map(c => c.id),
+      announcementChainId: ANNOUNCEMENT_CHAIN_ID,
     });
 
     // Poll for the announcement log

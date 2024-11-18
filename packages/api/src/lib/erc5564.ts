@@ -1,8 +1,6 @@
 import { Hex } from 'viem';
 import {
-  anvil1,
   encodeERC5564Metadata,
-  ERC5564_ANNOUNCEMENT_CHAIN,
   ERC5564_ANNOUNCER_ADDRESS,
   ERC5564_SCHEME_ID,
   ERC5564AnnouncerAbi,
@@ -10,7 +8,6 @@ import {
   getSenderAddressV2,
   getWalletClient,
   StealthAddressWithEphemeral,
-  supportedChains,
 } from '@raylac/shared';
 import { privateKeyToAccount, nonceManager } from 'viem/accounts';
 import { logger } from '@raylac/shared-backend';
@@ -33,24 +30,38 @@ const getChainBlockNumber = async ({ chainId }: { chainId: number }) => {
 
 const SCAN_PAST_BUFFER = 30 * 1000; // 30 seconds
 
+/**
+ * Announce a stealth address to the ERC5564 announcer contract.
+ * @param stealthAccount - The stealth account to announce
+ * @param syncOnChainIds - The chains the stealth account needs to be indexed on
+ * @param announcementChainId - The chain to announce the stealth account on
+ */
 export const announce = async ({
   stealthAccount,
-  useAnvil = false,
+  syncOnChainIds,
+  announcementChainId,
 }: {
   stealthAccount: StealthAddressWithEphemeral;
-  useAnvil?: boolean;
+  syncOnChainIds: number[];
+  announcementChainId: number;
 }) => {
   // Get the block number for all supported chains
   const chainInfos = await Promise.all(
-    supportedChains.map(async chain => {
-      const blockNumber = await getChainBlockNumber({ chainId: chain.id });
+    syncOnChainIds.map(async chainId => {
+      const blockNumber = await getChainBlockNumber({ chainId });
 
-      const blockTime = CHAIN_BLOCK_TIME[chain.id];
+      // eslint-disable-next-line security/detect-object-injection
+      const blockTime = CHAIN_BLOCK_TIME[chainId];
       const scanPastBufferBlocks = Math.floor(SCAN_PAST_BUFFER / blockTime);
 
+      const scanFromBlock =
+        blockNumber - BigInt(scanPastBufferBlocks) > BigInt(0)
+          ? blockNumber - BigInt(scanPastBufferBlocks)
+          : BigInt(0);
+
       return {
-        chainId: chain.id,
-        scanFromBlock: blockNumber - BigInt(scanPastBufferBlocks),
+        chainId,
+        scanFromBlock,
       };
     })
   );
@@ -73,7 +84,7 @@ export const announce = async ({
   }
 
   const walletClient = getWalletClient({
-    chainId: useAnvil ? anvil1.id : ERC5564_ANNOUNCEMENT_CHAIN.id,
+    chainId: announcementChainId,
   });
 
   try {
@@ -88,6 +99,11 @@ export const announce = async ({
         stealthAccount.ephemeralPubKey,
         metadata,
       ],
+    });
+
+    logger.debug('Announced stealth account', {
+      stealthAccount,
+      chainInfos,
     });
   } catch (_err) {
     logger.warn('Failed to announce stealth address', {
