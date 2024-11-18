@@ -4,6 +4,7 @@ import {
   getUserOpHash,
   UserOperation,
   getWalletClient,
+  getChainName,
 } from '@raylac/shared';
 import { logger } from '@raylac/shared-backend';
 import { parseEther, zeroAddress } from 'viem';
@@ -85,6 +86,10 @@ export const submitUserOps = async ({
         // eslint-disable-next-line security/detect-object-injection
         userOps: userOpsByChainId[chainId],
         chainId,
+      });
+
+      logger.debug(`Submitted UserOperations on ${getChainName(chainId)}`, {
+        txHash,
       });
 
       return txHash;

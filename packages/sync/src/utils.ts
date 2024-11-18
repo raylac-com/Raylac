@@ -4,6 +4,7 @@ import prisma from './lib/prisma';
 import {
   decodeEventLog,
   decodeFunctionData,
+  getAddress,
   Hex,
   Log,
   parseAbiItem,
@@ -232,7 +233,7 @@ export const upsertTransaction = async ({
 
   let tag: Hex = '0x';
 
-  if (tx.to === ENTRY_POINT_ADDRESS) {
+  if (getAddress(tx.to as Hex) === ENTRY_POINT_ADDRESS) {
     const handleOpsInput = decodeFunctionData({
       abi: EntryPointAbi,
       data: tx.input,
@@ -295,8 +296,8 @@ export const upsertTransaction = async ({
 
   const data: Prisma.TransactionCreateManyInput = {
     hash: txHash,
-    fromAddress: tx.from,
-    toAddress: tx.to,
+    fromAddress: getAddress(tx.from),
+    toAddress: getAddress(tx.to as Hex),
     chainId,
     blockHash: tx.blockHash,
     tag,
