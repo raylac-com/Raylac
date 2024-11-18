@@ -226,7 +226,9 @@ describe('submitUserOps', () => {
     });
 
     it(`should save the transactions`, () => {
-      const savedTxHashes = savedUserAction!.transactions.map(t => t.hash);
+      const savedTxHashes = savedUserAction!.transactions
+        .map(t => t.hash)
+        .sort();
       expect(savedTxHashes).toEqual(txHashes);
     });
 
