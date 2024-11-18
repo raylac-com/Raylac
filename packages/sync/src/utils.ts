@@ -1,5 +1,5 @@
 import { Prisma, SyncJob } from '@raylac/db';
-import { arbitrum, base, optimism, polygon, scroll } from 'viem/chains';
+import { anvil, arbitrum, base, optimism, polygon, scroll } from 'viem/chains';
 import prisma from './lib/prisma';
 import {
   decodeEventLog,
@@ -10,8 +10,6 @@ import {
   ParseEventLogsReturnType,
 } from 'viem';
 import {
-  anvil1,
-  anvil2,
   bigIntMin,
   ENTRY_POINT_ADDRESS,
   EntryPointAbi,
@@ -34,8 +32,7 @@ export const RAYLAC_DEPLOYED_BLOCK: {
   [base.id]: BigInt(22047405),
 
   // It's 0s on dev chains because we deploy the contracts right after starting the chain
-  [anvil1.id]: BigInt(0),
-  [anvil2.id]: BigInt(0),
+  [anvil.id]: BigInt(0),
 };
 
 /**
@@ -398,8 +395,7 @@ export const CHAIN_BLOCK_TIME: Record<number, number> = {
   [optimism.id]: 2000,
   [scroll.id]: 3000,
   [polygon.id]: 2000,
-  [anvil1.id]: 250,
-  [anvil2.id]: 250,
+  [anvil.id]: 250,
 };
 
 export const CHAIN_GENESIS_BLOCK_TIME: Record<number, number> = {

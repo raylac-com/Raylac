@@ -584,7 +584,7 @@ export const getNativeTransferTracesInBlock = async ({
     blockNumber,
   });
 
-  const devChainIds = devChains.map(c => c.id);
+  const devChainIds = devChains.map(c => c.id) as number[];
 
   if (devChainIds.includes(chainId)) {
     const callsWithValues = (

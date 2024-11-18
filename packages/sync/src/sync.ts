@@ -14,47 +14,10 @@ import {
   ERC5564_ANNOUNCEMENT_CHAIN,
   supportedChains,
 } from '@raylac/shared';
-import { spawn } from 'child_process';
 import { logger } from '@raylac/shared-backend';
 
 const runAnvil =
   process.env.RENDER !== 'true' || process.env.IS_PULL_REQUEST === 'true';
-
-/**
- * Spawn an anvil instance as a child process.
- * *NOTE: This function doesn't throw even if the anvil process is already running and the port is already in use. The caller
- * * should use the existing anvil instance if it exists.
- */
-const startAnvil = ({ port, chainId }: { port: number; chainId: number }) => {
-  const anvil = spawn(
-    'anvil',
-    [
-      '--base-fee',
-      '10000',
-      '--port',
-      port.toString(),
-      '--chain-id',
-      chainId.toString(),
-    ],
-    {
-      detached: false, // The child process is not detached from the parent
-    }
-  );
-
-  // Listen for the process's output (optional if stdio is not 'inherit')
-  anvil.stdout.on('data', data => {
-    logger.debug(`anvil: ${data}`);
-  });
-
-  anvil.stderr.on('error', data => {
-    logger.error(`anvil error: ${data}`);
-  });
-
-  // Handle process exit
-  anvil.on('close', code => {
-    logger.info(`anvil exited with code ${code}`);
-  });
-};
 
 const sync = async () => {
   const chainIds = supportedChains.map(chain => chain.id);
@@ -83,10 +46,7 @@ const sync = async () => {
   ];
 
   if (runAnvil) {
-    logger.info('ANVIL_RPC_URL is set, running and indexing anvil nodes');
-    for (const chain of devChains) {
-      startAnvil({ port: chain.port, chainId: chain.id });
-    }
+    logger.info('ANVIL_RPC_URL is set, indexing anvil');
 
     const devChainIds = devChains.map(chain => chain.id);
     const DEV_CHAIN_ANNOUNCEMENT_CHAIN_ID = anvil.id;

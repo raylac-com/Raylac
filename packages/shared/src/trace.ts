@@ -13,7 +13,7 @@ import { devChains } from './devChains';
  * Get the RPC URL to call tracing methods
  */
 const getTracingRpcUrl = ({ chainId }: { chainId: number }): string => {
-  const devChainsIds = devChains.map(c => c.id);
+  const devChainsIds = devChains.map(c => c.id) as number[];
 
   const rpcUrl = devChainsIds.includes(chainId)
     ? // Get the RPC URL for the dev chain
@@ -85,7 +85,7 @@ export const traceBlockByNumber = async ({
   blockNumber: bigint;
   chainId: number;
 }): Promise<AnvilBlockTraceResponse | BlockTraceResponse> => {
-  const devChainIds = devChains.map(c => c.id);
+  const devChainIds = devChains.map(c => c.id) as number[];
 
   const isDevChain = devChainIds.includes(chainId);
 

@@ -10,9 +10,9 @@ import {
 import * as chains from 'viem/chains';
 import { Chain } from 'viem/chains';
 import { getChainFromId } from './utils';
-import { anvil1, anvil2, devChains } from './devChains';
+import { devChains } from './devChains';
 
-const devChainsIds = devChains.map(c => c.id);
+const devChainsIds = devChains.map(c => c.id) as number[];
 
 export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
   const apiKey =
@@ -74,7 +74,9 @@ export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
   return `https://${alchemySubdomain}.g.alchemy.com/v2/${apiKey}`;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const getDevChainRpcUrl = ({ chainId }: { chainId: number }): string => {
+  /*
   const ANVIL_1_RPC_URL = process.env.ANVIL_1_RPC_URL;
   const ANVIL_2_RPC_URL = process.env.ANVIL_2_RPC_URL;
 
@@ -92,6 +94,14 @@ export const getDevChainRpcUrl = ({ chainId }: { chainId: number }): string => {
     default:
       throw new Error(`getDevChainRpcUrl: Unknown chain id: ${chainId}`);
   }
+  */
+  const ANVIL_RPC_URL = process.env.ANVIL_RPC_URL;
+
+  if (!ANVIL_RPC_URL) {
+    throw new Error('ANVIL_RPC_URL is not set');
+  }
+
+  return ANVIL_RPC_URL;
 };
 
 export const getQuickNodeRpcUrl = ({ chain }: { chain: Chain }): string => {

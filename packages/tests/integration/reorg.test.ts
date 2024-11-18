@@ -17,10 +17,9 @@ import {
   signUserOpWithStealthAccount,
 } from '@raylac/shared';
 import { TEST_ACCOUNT_MNEMONIC } from '../lib/auth';
-import { anvil1 } from '@raylac/shared/src/devChains';
 import prisma from '../lib/prisma';
 
-const testClient = getTestClient({ chainId: anvil1.id });
+const testClient = getTestClient({ chainId: anvil.id });
 
 const isTransferRemoved = async ({ transferId }: { transferId: number }) => {
   await waitFor({

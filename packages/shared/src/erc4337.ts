@@ -375,7 +375,7 @@ export const getMaxPriorityFeePerGas = async ({
     throw new Error(JSON.stringify(result.data.error));
   }
 
-  const devChainIds = devChains.map(c => c.id);
+  const devChainIds = devChains.map(c => c.id) as number[];
   const isDevChain = devChainIds.includes(chainId);
   if (isDevChain) {
     return 100000n;

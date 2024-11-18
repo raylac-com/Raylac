@@ -1,6 +1,7 @@
-import { defineChain } from 'viem';
+// import { defineChain } from 'viem';
 import { anvil } from 'viem/chains';
 
+/*
 export const anvil1 = defineChain({
   ...anvil,
   name: 'Anvil 1',
@@ -13,5 +14,6 @@ export const anvil2 = defineChain({
   name: 'Anvil 2',
   port: 8546,
 });
+*/
 
-export const devChains = [anvil1, anvil2];
+export const devChains = [anvil];

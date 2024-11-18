@@ -19,9 +19,10 @@ import {
   generateRandomMultiChainTag,
   getGasInfo,
 } from '@raylac/shared/src/utils';
+import { anvil } from 'viem/chains';
 import { devChains } from '@raylac/shared/src/devChains';
 import { buildUserOp } from '@raylac/shared/src/erc4337';
-import { getAuthedClient } from '../lib/rpc';
+import { submitUserOps } from '../lib/bundler';
 
 const waitForUserActionSync = async ({ txHashes }: { txHashes: Hex[] }) => {
   await waitFor({
@@ -42,6 +43,7 @@ const waitForUserActionSync = async ({ txHashes }: { txHashes: Hex[] }) => {
 
 /**
  * Test that UserAction are correctly backfilled
+ * TODO: directly call the bundler contract so we don't need to go through the RPC endpoint
  *
  * Steps:
  * 1. Create a new stealth account for the test user
@@ -58,7 +60,8 @@ describe('syncUserActions', () => {
 
   beforeEach(async () => {
     stealthAccount = await createStealthAccountForTestUser({
-      useAnvil: true,
+      syncOnChainIds: devChains.map(c => c.id),
+      announcementChainId: anvil.id,
     });
 
     // Fund the stealth account on all dev chains
@@ -71,10 +74,9 @@ describe('syncUserActions', () => {
     }
   });
 
+  /*
   it('should backfill multicahin transfers', async () => {
     // 1. Send multi-chain transfers
-
-    const authedClient = await getAuthedClient();
 
     const amount = parseEther('0.0001');
 
@@ -125,32 +127,11 @@ describe('syncUserActions', () => {
     }
 
     // Submit the user operations to the RPC endpoint
-    const { txHashes } = await authedClient.submitUserOps.mutate({
+    const txHashes = await submitUserOps({
       userOps: signedUserOps,
     });
 
     const sortedTxHashes = txHashes.sort();
-    /*
-
-    // Set the `userActionId` to `null` of the transactions so we can delete the `UserAction`
-    await prisma.transaction.updateMany({
-      data: {
-        userActionId: null,
-      },
-      where: {
-        hash: {
-          in: sortedTxHashes,
-        },
-      },
-    });
-
-    // Delete the `UserAction`
-    await prisma.userAction.delete({
-      where: {
-        txHashes: sortedTxHashes,
-      },
-    });
-    */
 
     // 3. Wait for the transfers to synched again
     await waitForUserActionSync({ txHashes: sortedTxHashes });
@@ -165,11 +146,10 @@ describe('syncUserActions', () => {
     expect(userAction?.groupSize).toBe(groupSize);
     expect(userAction?.groupTag).toBe(groupTag);
   });
+  */
 
   it('should backfill single chain transfers', async () => {
     // 1. Send single-chain transfers
-
-    const authedClient = await getAuthedClient();
 
     const amount = parseEther('0.0001');
 
@@ -219,7 +199,7 @@ describe('syncUserActions', () => {
     signedUserOps.push(signedUserOp);
 
     // Submit the user operations to the RPC endpoint
-    const { txHashes } = await authedClient.submitUserOps.mutate({
+    const txHashes = await submitUserOps({
       userOps: signedUserOps,
     });
 
