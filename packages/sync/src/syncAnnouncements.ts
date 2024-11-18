@@ -126,44 +126,6 @@ export const handleERC5564AnnouncementLog = async ({
 };
 
 /**
- * Delete all v1 accounts and related records from the database
- */
-const deleteV1Accounts = async () => {
-  const v1Announcements = await prisma.eRC5564Announcement.findMany({
-    select: {
-      address: true,
-    },
-    where: {
-      schemeId: 1,
-    },
-  });
-
-  const v1Addresses = v1Announcements
-    .map(a => a.address)
-    .filter(a => a !== null);
-
-  await prisma.addressSyncStatus.deleteMany({
-    where: {
-      address: { in: v1Addresses },
-    },
-  });
-
-  await prisma.userStealthAddress.deleteMany({
-    where: {
-      address: { in: v1Addresses },
-    },
-  });
-
-  await prisma.userOperation.deleteMany({
-    where: {
-      sender: { in: v1Addresses },
-    },
-  });
-
-  logger.info(`Deleted ${v1Addresses.length} v1 accounts`);
-};
-
-/**
  * Sync ERC5564 announcements made on a given chain
  *
  * @param chainIds - The chains to sync announcements for
@@ -173,8 +135,6 @@ const syncAnnouncements = async ({
 }: {
   announcementChainId: number;
 }) => {
-  await deleteV1Accounts();
-
   while (true) {
     await processLogs({
       chainId: announcementChainId,
