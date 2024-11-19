@@ -1,9 +1,14 @@
-import { Text, View, ScrollView, RefreshControl } from 'react-native';
+import {
+  Text,
+  View,
+  ScrollView,
+  RefreshControl,
+  Pressable,
+} from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import colors from '@/lib/styles/colors';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import { useTranslation } from 'react-i18next';
@@ -11,20 +16,25 @@ import StyledPressable from '@/components/StyledPressable';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTokenBalances from '@/hooks/useTokenBalance';
 import spacing from '@/lib/styles/spacing';
+import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
-import borderRadius from '@/lib/styles/borderRadius';
-import opacity from '@/lib/styles/opacity';
 import TokenBalanceListItem from '@/components/TokenBalanceListItem';
+import FastAvatar from '@/components/FastAvatar';
+import { Hex } from 'viem';
+import { publicKeyToAddress } from 'viem/accounts';
+import borderRadius from '@/lib/styles/borderRadius';
+import { SheetManager } from 'react-native-actions-sheet';
 
 interface MenuItemProps {
   icon: React.ReactNode;
   title: string;
   testID: string;
   onPress: () => void;
+  color?: string;
 }
 
 const MenuItem = (props: MenuItemProps) => {
-  const { icon, title, onPress, testID } = props;
+  const { icon, title, onPress, testID, color } = props;
 
   return (
     <StyledPressable
@@ -43,7 +53,7 @@ const MenuItem = (props: MenuItemProps) => {
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: colors.text,
+          backgroundColor: color ?? colors.text,
           borderRadius: borderRadius.rounded,
         }}
       >
@@ -51,8 +61,8 @@ const MenuItem = (props: MenuItemProps) => {
       </View>
       <Text
         style={{
-          fontSize: fontSizes.base,
-          color: colors.text,
+          fontSize: 16,
+          color: color ?? colors.text,
           textAlign: 'center',
         }}
       >
@@ -62,12 +72,42 @@ const MenuItem = (props: MenuItemProps) => {
   );
 };
 
-const NUM_TRANSFERS_TO_FETCH = 7;
+const HomeHeader = () => {
+  const { data: signedInUser } = useSignedInUser();
+  const navigation = useTypedNavigation();
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+      }}
+    >
+      <Pressable
+        onPress={() => {
+          navigation.navigate('Tabs', { screen: 'Account' });
+        }}
+      >
+        <FastAvatar
+          name={signedInUser?.name}
+          address={publicKeyToAddress(signedInUser?.spendingPubKey as Hex)}
+          size={40}
+          imageUrl={signedInUser?.profileImage}
+        />
+      </Pressable>
+    </View>
+  );
+};
+
+const NUM_TRANSFERS_TO_FETCH = 5;
 
 const HomeScreen = () => {
   const { t } = useTranslation('Home');
   const { data: isSignedIn } = useIsSignedIn();
   const { data: signedInUser } = useSignedInUser();
+
+  const [otherMenuItemsModalVisible, setOtherMenuItemsModalVisible] =
+    useState(false);
 
   const {
     data: tokenBalances,
@@ -133,6 +173,7 @@ const HomeScreen = () => {
         />
       }
     >
+      <HomeHeader />
       <View
         style={{
           flexDirection: 'column',
@@ -142,7 +183,7 @@ const HomeScreen = () => {
       >
         <Text
           style={{
-            fontSize: fontSizes.large,
+            fontSize: 28,
             color: colors.text,
             fontWeight: 500,
           }}
@@ -155,7 +196,7 @@ const HomeScreen = () => {
         style={{
           flexDirection: 'row',
           justifyContent: 'center',
-          columnGap: spacing.large,
+          columnGap: spacing.base,
         }}
       >
         <MenuItem
@@ -186,7 +227,24 @@ const HomeScreen = () => {
           }}
           testID="send"
         />
+        <MenuItem
+          icon={
+            <AntDesign name="ellipsis1" size={24} color={colors.background} />
+          }
+          title={t('other')}
+          onPress={() => {
+            SheetManager.show('home-other-menus');
+
+            if (otherMenuItemsModalVisible) {
+              setOtherMenuItemsModalVisible(false);
+            } else {
+              setOtherMenuItemsModalVisible(true);
+            }
+          }}
+          testID="other"
+        />
       </View>
+      {/* Transfer history */}
       <View
         style={{
           flexDirection: 'column',
@@ -204,7 +262,6 @@ const HomeScreen = () => {
             style={{
               textAlign: 'right',
               marginVertical: spacing.base,
-              marginRight: spacing.base,
               textDecorationLine: 'underline',
               color: colors.text,
             }}
@@ -219,7 +276,8 @@ const HomeScreen = () => {
           <Text
             style={{
               textAlign: 'center',
-              opacity: opacity.dimmed,
+              marginTop: 20,
+              opacity: 0.5,
               color: colors.text,
             }}
           >
@@ -237,7 +295,7 @@ const HomeScreen = () => {
       >
         {t('assets')}
       </Text>
-      <View style={{ flexDirection: 'column', rowGap: spacing.base }}>
+      <View style={{ flexDirection: 'column' }}>
         {tokenBalances?.map((tokenBalance, i) => (
           <TokenBalanceListItem
             key={i}

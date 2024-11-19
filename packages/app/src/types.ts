@@ -11,6 +11,9 @@ export type TransferItem = RouterOutput['getTransferHistory'][0];
 export type TraceItem =
   RouterOutput['getTransferDetails']['transactions'][0]['traces'][0];
 
+export type UserAngelRequestReturnType =
+  RouterOutput['getUserAngelRequests'][0];
+
 export type AddressOrUser =
   | string
   | { spendingPubKey?: string; profileImage?: string; name?: string };

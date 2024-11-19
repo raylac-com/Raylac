@@ -11,7 +11,7 @@
     "prepare": "husky",
     "build": "turbo build",
     "lint": "turbo lint",
-    "build:all:watch": "pnpm -F shared build:watch & pnpm -F api build:watch & pnpm -F sync build:watch",
+    "build:watch": "turbo build:watch",
     "anvil": "anvil --base-fee 10000"
   },
   "keywords": [],

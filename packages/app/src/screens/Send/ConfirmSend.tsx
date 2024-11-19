@@ -96,6 +96,7 @@ const ConfirmSend = ({ route }: Props) => {
         }}
       >
         <FastAvatar
+          name={recipientName}
           address={
             typeof recipientUserOrAddress === 'string'
               ? recipientUserOrAddress

@@ -62,6 +62,7 @@ model User {
   createdAt          DateTime             @default(now())
   updatedAt          DateTime             @updatedAt
   UserStealthAddress UserStealthAddress[]
+  AngelRequest       AngelRequest[]
 }
 
 model UserStealthAddress {
@@ -195,8 +196,24 @@ model UserAction {
 
   txHashes String[] @unique
 
-  timestamp BigInt
+  timestamp          BigInt
+  paidAngelRequest   AngelRequest? @relation(fields: [paidAngelRequestId], references: [id])
+  paidAngelRequestId Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AngelRequest {
+  id Int @id @default(autoincrement())
+
+  description String
+  amount      Decimal
+  userId      Int
+  user        User    @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  paidBy UserAction[]
 }

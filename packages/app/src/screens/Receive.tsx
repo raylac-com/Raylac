@@ -10,7 +10,6 @@ import { useTranslation } from 'react-i18next';
 import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
 import { Feather } from '@expo/vector-icons';
 import useSignedInUser from '@/hooks/useSignedInUser';
-import SupportedChainsBanner from '@/components/SuppotedChainsBanner';
 import fontSizes from '@/lib/styles/fontSizes';
 
 interface ReceivingAddressProps {
@@ -190,7 +189,6 @@ const Receive = () => {
         >
           {t('orReceiveFromAnyone')}
         </Text>
-        <SupportedChainsBanner size={20} />
         <Text
           style={{
             color: colors.text,
@@ -237,6 +235,8 @@ const Receive = () => {
           variant="outline"
           testID="past-receiving-addresses"
         ></StyledButton>
+        {/**
+           * 
         <StyledButton
           title={t('supportedChainsAndTokens')}
           onPress={() => {
@@ -245,6 +245,7 @@ const Receive = () => {
           style={{ width: '100%' }}
           variant="underline"
         ></StyledButton>
+        */}
       </View>
     </View>
   );

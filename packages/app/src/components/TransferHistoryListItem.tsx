@@ -1,7 +1,12 @@
-import { getAvatarAddress, getDisplayName, getProfileImage } from '@/lib/utils';
+import {
+  getAvatarAddress,
+  getDisplayName,
+  getNameIfUser,
+  getProfileImage,
+} from '@/lib/utils';
 import { Pressable, Text, View } from 'react-native';
 import FastAvatar from './FastAvatar';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import colors from '@/lib/styles/colors';
 import { formatAmount, getTokenMetadata } from '@raylac/shared';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -65,16 +70,21 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
         rowGap: spacing.xxSmall,
       }}
       onPress={() => {
-        navigation.navigate('TransferDetails', {
-          transferId: transfer.id,
-        });
+        if (transfer.paidAngelRequest) {
+          navigation.navigate('PaidAngelRequestDetails', {
+            angelRequestId: transfer.paidAngelRequest.id,
+          });
+        } else {
+          navigation.navigate('TransferDetails', {
+            transferId: transfer.id,
+          });
+        }
       }}
     >
       <View
         style={{
           flex: 1,
           flexDirection: 'row',
-          alignItems: 'center',
           justifyContent: 'space-between',
         }}
       >
@@ -86,20 +96,58 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           }}
         >
           <FastAvatar
+            name={type === 'outgoing' ? getNameIfUser(to) : getNameIfUser(from)}
             address={avatarAddress}
             imageUrl={
               type === 'outgoing' ? getProfileImage(to) : getProfileImage(from)
             }
             size={avatarSizes.small}
           ></FastAvatar>
-          <Text
+          <View
             style={{
-              color: colors.text,
-              fontWeight: 'bold',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              rowGap: spacing.xxSmall,
             }}
           >
-            {getDisplayName(type === 'outgoing' ? to : from)}
-          </Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                columnGap: spacing.xSmall,
+              }}
+            >
+              <Text
+                style={{
+                  color: colors.text,
+                  fontWeight: 'bold',
+                }}
+              >
+                {getDisplayName(type === 'outgoing' ? to : from)}
+              </Text>
+              {transfer.paidAngelRequest && (
+                <FontAwesome5
+                  name="feather-alt"
+                  size={14}
+                  color={colors.angelPink}
+                />
+              )}
+            </View>
+            <Text
+              style={{
+                color: colors.text,
+                textAlign: 'right',
+                opacity: opacity.dimmed,
+              }}
+            >
+              {blockTimestamp
+                ? formatDate({
+                    timestamp: blockTimestamp,
+                    locale: i18n.language === 'ja' ? ja : enUS,
+                  })
+                : ''}
+            </Text>
+          </View>
         </View>
         <View
           style={{
@@ -146,20 +194,6 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           )}
         </View>
       </View>
-      <Text
-        style={{
-          color: colors.text,
-          textAlign: 'right',
-          opacity: opacity.dimmed,
-        }}
-      >
-        {blockTimestamp
-          ? formatDate({
-              timestamp: blockTimestamp,
-              locale: i18n.language === 'ja' ? ja : enUS,
-            })
-          : ''}
-      </Text>
     </Pressable>
   );
 };

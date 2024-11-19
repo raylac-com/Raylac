@@ -361,6 +361,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
             style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
           >
             <FastAvatar
+              name={recipientUserOrAddress.name}
               imageUrl={recipientUserOrAddress.profileImage}
               address={publicKeyToAddress(
                 recipientUserOrAddress.spendingPubKey as Hex

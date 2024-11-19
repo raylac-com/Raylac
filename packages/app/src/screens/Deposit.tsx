@@ -1,4 +1,4 @@
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, Image, Text, View } from 'react-native';
 import { copyToClipboard, shortenAddress } from '@/lib/utils';
 import { Hex } from 'viem';
 import { useCallback, useState } from 'react';
@@ -9,8 +9,10 @@ import colors from '@/lib/styles/colors';
 import { useTranslation } from 'react-i18next';
 import useGetNewDepositAccount from '@/hooks/useGetNewDepositAccount';
 import { Feather } from '@expo/vector-icons';
-import SupportedChainsBanner from '@/components/SuppotedChainsBanner';
 import fontSizes from '@/lib/styles/fontSizes';
+import { base } from 'viem/chains';
+import { getChainLogo } from '@/lib/logo';
+import spacing from '@/lib/styles/spacing';
 
 interface DepositAddressProps {
   address: Hex;
@@ -100,7 +102,28 @@ const Deposit = () => {
           rowGap: 16,
         }}
       >
-        <SupportedChainsBanner size={32} />
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            columnGap: spacing.xSmall,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: fontSizes.large,
+              fontWeight: 'bold',
+              textAlign: 'center',
+              color: colors.text,
+            }}
+          >
+            {t('depositUSDCOnBase')}
+          </Text>
+          <Image
+            source={getChainLogo(base.id)}
+            style={{ width: 32, height: 32 }}
+          />
+        </View>
         <Text
           style={{
             fontSize: 16,
@@ -164,6 +187,8 @@ const Deposit = () => {
           variant="outline"
           testID="past-deposit-addresses"
         ></StyledButton>
+        {/**
+           
         <StyledButton
           title={t('supportedChainsAndTokens')}
           onPress={() => {
@@ -174,6 +199,8 @@ const Deposit = () => {
           }}
           variant="underline"
         ></StyledButton>
+        * 
+           */}
       </View>
     </View>
   );
