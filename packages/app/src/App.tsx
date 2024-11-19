@@ -59,6 +59,7 @@ import AngelTransfer from './screens/AngelTransfer';
 import UserAngelRequests from './screens/UserAngelRequests';
 import AngelRequestDetails from './screens/AngelRequestDetails';
 import EditAngelRequest from './screens/EditAngelRequest';
+import PaidAngelRequestDetails from './screens/PaidAngelRequestDetails';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -423,6 +424,14 @@ const Screens = () => {
           component={AngelRequestDetails}
           options={{
             title: t('title', { ns: 'AngelRequestDetails' }),
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="PaidAngelRequestDetails"
+          component={PaidAngelRequestDetails}
+          options={{
+            title: t('title', { ns: 'PaidAngelRequestDetails' }),
             headerBackTitle: t('headerBackTitle', { ns: 'common' }),
           }}
         ></RootStack.Screen>

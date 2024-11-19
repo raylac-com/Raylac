@@ -204,6 +204,9 @@
   "EditAngelRequest": {
     "title": "Edit angel request"
   },
+  "PaidAngelRequestDetails": {
+    "title": "Angel request"
+  },
   "UserAngelRequests": {
     "title": "Angel requests",
     "noAngelRequests": "No angel requests yet"

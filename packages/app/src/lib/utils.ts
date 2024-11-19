@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import { Hex } from 'viem';
 import * as Clipboard from 'expo-clipboard';
-import { AddressOrUser, TraceItem, TransferItem } from '@/types';
+import { AddressOrUser, TransferItem } from '@/types';
 import { publicKeyToAddress } from 'viem/accounts';
 import {
   formatAmount,
@@ -46,41 +46,6 @@ export const copyToClipboard = async (text: string) => {
 export const getClipboardText = async () => {
   const text = await Clipboard.getStringAsync();
   return text;
-};
-
-/**
- * Get the final transfers for each chain in a multi-chain transfer.
- */
-export const getFinalTransfers = (transfer: TransferItem) => {
-  const finalTransfers: TraceItem[] = [];
-
-  const toUserId =
-    transfer.transactions[0].traces[0].UserStealthAddressTo.userId;
-
-  for (const transaction of transfer.transactions) {
-    const finalTransfer = transaction.traces.find(
-      trace => trace.UserStealthAddressTo.userId === toUserId
-    );
-
-    if (!finalTransfer) {
-      throw new Error('No final transfer found');
-    }
-
-    finalTransfers.push(finalTransfer);
-  }
-
-  return finalTransfers;
-};
-
-export const getTransferType = (
-  transfer: TransferItem,
-  signedInUserId: number
-): 'incoming' | 'outgoing' => {
-  const finalTransfers = getFinalTransfers(transfer);
-
-  return finalTransfers[0].UserStealthAddressFrom?.userId === signedInUserId
-    ? 'outgoing'
-    : 'incoming';
 };
 
 export const isAddress = (

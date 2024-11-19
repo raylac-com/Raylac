@@ -67,6 +67,10 @@ export type RootStackParamsList = {
     angelRequestId: number;
   };
 
+  PaidAngelRequestDetails: {
+    angelRequestId: number;
+  };
+
   EditAngelRequest: {
     angelRequestId: number;
   };

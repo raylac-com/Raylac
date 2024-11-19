@@ -23,6 +23,45 @@ const getAngelRequest = async ({
         },
       },
       createdAt: true,
+      paidBy: {
+        select: {
+          id: true,
+          transactions: {
+            select: {
+              traces: {
+                select: {
+                  UserStealthAddressFrom: {
+                    select: {
+                      id: true,
+                      user: {
+                        select: {
+                          id: true,
+                          name: true,
+                          username: true,
+                          profileImage: true,
+                        },
+                      },
+                    },
+                  },
+                  UserStealthAddressTo: {
+                    select: {
+                      id: true,
+                      user: {
+                        select: {
+                          id: true,
+                          name: true,
+                          username: true,
+                          profileImage: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     },
     where: { id: angelRequestId },
   });
