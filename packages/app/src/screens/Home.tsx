@@ -4,7 +4,6 @@ import {
   ScrollView,
   RefreshControl,
   Pressable,
-  Animated,
 } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc } from '@/lib/trpc';
@@ -16,7 +15,6 @@ import { useTranslation } from 'react-i18next';
 import StyledPressable from '@/components/StyledPressable';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTokenBalances from '@/hooks/useTokenBalance';
-import FontAwesome5 from '@expo/vector-icons/build/FontAwesome5';
 import spacing from '@/lib/styles/spacing';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
@@ -25,6 +23,7 @@ import FastAvatar from '@/components/FastAvatar';
 import { Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
 import borderRadius from '@/lib/styles/borderRadius';
+import { SheetManager } from 'react-native-actions-sheet';
 
 interface MenuItemProps {
   icon: React.ReactNode;
@@ -108,7 +107,7 @@ const HomeScreen = () => {
   const { data: signedInUser } = useSignedInUser();
 
   const [otherMenuItemsModalVisible, setOtherMenuItemsModalVisible] =
-    useState(true);
+    useState(false);
 
   const {
     data: tokenBalances,
@@ -234,6 +233,8 @@ const HomeScreen = () => {
           }
           title={t('other')}
           onPress={() => {
+            SheetManager.show('home-other-menus');
+
             if (otherMenuItemsModalVisible) {
               setOtherMenuItemsModalVisible(false);
             } else {
@@ -243,37 +244,6 @@ const HomeScreen = () => {
           testID="other"
         />
       </View>
-      {/* Other menu items */}
-      <Animated.View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'center',
-          columnGap: spacing.base,
-          height: otherMenuItemsModalVisible ? 'auto' : 0,
-          opacity: otherMenuItemsModalVisible ? 1 : 0,
-          transform: [
-            {
-              translateY: otherMenuItemsModalVisible ? 0 : -20,
-            },
-          ],
-        }}
-      >
-        <MenuItem
-          icon={
-            <FontAwesome5
-              name="feather-alt"
-              size={20}
-              color={colors.background}
-            />
-          }
-          title={t('askForAngel')}
-          color={colors.angelPink}
-          onPress={() => {
-            navigation.navigate('AskForAngel');
-          }}
-          testID="askForAngel"
-        />
-      </Animated.View>
       {/* Transfer history */}
       <View
         style={{

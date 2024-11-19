@@ -60,6 +60,8 @@ import UserAngelRequests from './screens/UserAngelRequests';
 import AngelRequestDetails from './screens/AngelRequestDetails';
 import EditAngelRequest from './screens/EditAngelRequest';
 import PaidAngelRequestDetails from './screens/PaidAngelRequestDetails';
+import { SheetProvider } from 'react-native-actions-sheet';
+import './Sheets';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -134,318 +136,320 @@ const Screens = () => {
   }, [signedInUser, isLoadingUser]);
 
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: colors.background,
-      }}
-    >
-      <RootStack.Navigator initialRouteName="Tabs">
-        <RootStack.Screen
-          name="Tabs"
-          component={Tabs}
-          options={{
-            headerShown: false,
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="SignUp"
-          component={SignUp}
-          options={{
-            title: t('title', { ns: 'SignUp' }),
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="SignIn"
-          component={SignIn}
-          options={{
-            headerBackVisible: true,
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="Start"
-          component={Start}
-          options={{
-            title: t('title', { ns: 'Start' }),
-            headerBackVisible: false,
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="Addresses"
-          component={Addresses}
-          options={{
-            title: t('title', { ns: 'Addresses' }),
-            headerBackVisible: true,
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="BackupAccount"
-          component={BackupAccount}
-          options={{
-            title: t('title', { ns: 'BackupAccount' }),
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="Advanced"
-          component={Advanced}
-          options={{
-            title: t('title', { ns: 'Advanced' }),
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="Receive"
-          component={Receive}
-          options={{
-            title: t('title', { ns: 'Receive' }),
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Group
-          screenOptions={{
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        >
+    <SheetProvider>
+      <SafeAreaView
+        style={{
+          flex: 1,
+          backgroundColor: colors.background,
+        }}
+      >
+        <RootStack.Navigator initialRouteName="Tabs">
           <RootStack.Screen
-            name="Deposit"
-            component={Deposit}
+            name="Tabs"
+            component={Tabs}
             options={{
-              title: t('title', { ns: 'Deposit' }),
-              headerBackVisible: true,
+              headerShown: false,
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="SignUp"
+            component={SignUp}
+            options={{
+              title: t('title', { ns: 'SignUp' }),
               headerBackTitle: t('headerBackTitle', { ns: 'common' }),
             }}
           ></RootStack.Screen>
-        </RootStack.Group>
-        <RootStack.Group
-          screenOptions={{
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        >
           <RootStack.Screen
-            name="SelectRecipient"
-            component={SelectRecipient}
+            name="SignIn"
+            component={SignIn}
             options={{
-              title: t('title', { ns: 'SelectRecipient' }),
-              headerBackVisible: true,
-            }}
-          ></RootStack.Screen>
-          <RootStack.Screen
-            name="EnterSendAmount"
-            component={EnterSendAmount}
-            options={{
-              title: t('title', { ns: 'EnterSendAmount' }),
               headerBackVisible: true,
               headerBackTitle: t('headerBackTitle', { ns: 'common' }),
             }}
           ></RootStack.Screen>
           <RootStack.Screen
-            name="ConfirmSend"
-            component={ConfirmSend}
+            name="Start"
+            component={Start}
             options={{
-              title: t('title', { ns: 'ConfirmSend' }),
+              title: t('title', { ns: 'Start' }),
+              headerBackVisible: false,
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="Addresses"
+            component={Addresses}
+            options={{
+              title: t('title', { ns: 'Addresses' }),
               headerBackVisible: true,
               headerBackTitle: t('headerBackTitle', { ns: 'common' }),
             }}
           ></RootStack.Screen>
-        </RootStack.Group>
-        <RootStack.Screen
-          name="TransferHistory"
-          component={TransferHistory}
-          options={{
-            title: t('title', { ns: 'TransferHistory' }),
-            headerBackVisible: true,
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="TransferDetails"
-          component={TransferDetails}
-          options={{
-            title: t('title', { ns: 'TransferDetails' }),
-            headerBackVisible: true,
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="TokenBalances"
-          component={TokenBalances}
-          options={{
-            title: t('title', { ns: 'TokenBalances' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="TokenBalanceDetails"
-          component={TokenBalanceDetails}
-          options={{
-            title: t('title', { ns: 'TokenBalanceDetails' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="SelectLanguage"
-          component={SelectLanguage}
-          options={{
-            title: t('title', { ns: 'SelectLanguage' }),
-            headerBackVisible: true,
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="SendSuccess"
-          component={SendSuccess}
-          options={{
-            title: t('title', { ns: 'SendSuccess' }),
-            headerBackVisible: true,
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="AccountInfo"
-          component={AccountInfo}
-          options={{
-            title: t('title', { ns: 'AccountInfo' }),
-            headerBackVisible: true,
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="UpdateDisplayName"
-          component={UpdateDisplayName}
-          options={{
-            title: t('title', { ns: 'UpdateDisplayName' }),
-            headerBackVisible: true,
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="UpdateUsername"
-          component={UpdateUsername}
-          options={{
-            title: t('title', { ns: 'UpdateUsername' }),
-            headerBackVisible: true,
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="SaveBackupPhrase"
-          component={SaveBackupPhrase}
-          options={{
-            title: t('title', { ns: 'SaveBackupPhrase' }),
-            headerBackVisible: false,
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="ConfirmBackupPhrase"
-          component={ConfirmBackupPhrase}
-          options={{
-            title: t('title', { ns: 'ConfirmBackupPhrase' }),
-            headerBackVisible: true,
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="Upgrade"
-          component={Upgrade}
-          options={{
-            title: t('title', { ns: 'Upgrade' }),
-            headerBackVisible: false,
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="SupportedChains"
-          component={SupportedChains}
-          options={{
-            title: t('title', { ns: 'SupportedChains' }),
-            headerBackVisible: true,
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="SupportedTokens"
-          component={SupportedTokens}
-          options={{
-            title: t('title', { ns: 'SupportedTokens' }),
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="AboutAngels"
-          component={AboutAngels}
-          options={{
-            title: t('title', { ns: 'AboutAngels' }),
-            headerBackTitle: t('title', { ns: 'Home' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="AskForAngel"
-          component={AskForAngel}
-          options={{
-            title: t('title', { ns: 'AskForAngel' }),
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="ConfirmAskForAngel"
-          component={ConfirmAskForAngel}
-          options={{
-            title: t('title', { ns: 'ConfirmAskForAngel' }),
-            headerBackVisible: false,
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="SelectAngelRequest"
-          component={SelectAngelRequest}
-          options={{
-            title: t('title', { ns: 'SelectAngelRequest' }),
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="AngelTransfer"
-          component={AngelTransfer}
-          options={{
-            title: t('title', { ns: 'AngelTransfer' }),
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="UserAngelRequests"
-          component={UserAngelRequests}
-          options={{
-            title: t('title', { ns: 'UserAngelRequests' }),
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="AngelRequestDetails"
-          component={AngelRequestDetails}
-          options={{
-            title: t('title', { ns: 'AngelRequestDetails' }),
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="PaidAngelRequestDetails"
-          component={PaidAngelRequestDetails}
-          options={{
-            title: t('title', { ns: 'PaidAngelRequestDetails' }),
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-        <RootStack.Screen
-          name="EditAngelRequest"
-          component={EditAngelRequest}
-          options={{
-            title: t('title', { ns: 'EditAngelRequest' }),
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
-          }}
-        ></RootStack.Screen>
-      </RootStack.Navigator>
-      <Toast></Toast>
-    </SafeAreaView>
+          <RootStack.Screen
+            name="BackupAccount"
+            component={BackupAccount}
+            options={{
+              title: t('title', { ns: 'BackupAccount' }),
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="Advanced"
+            component={Advanced}
+            options={{
+              title: t('title', { ns: 'Advanced' }),
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="Receive"
+            component={Receive}
+            options={{
+              title: t('title', { ns: 'Receive' }),
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Group
+            screenOptions={{
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          >
+            <RootStack.Screen
+              name="Deposit"
+              component={Deposit}
+              options={{
+                title: t('title', { ns: 'Deposit' }),
+                headerBackVisible: true,
+                headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+              }}
+            ></RootStack.Screen>
+          </RootStack.Group>
+          <RootStack.Group
+            screenOptions={{
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          >
+            <RootStack.Screen
+              name="SelectRecipient"
+              component={SelectRecipient}
+              options={{
+                title: t('title', { ns: 'SelectRecipient' }),
+                headerBackVisible: true,
+              }}
+            ></RootStack.Screen>
+            <RootStack.Screen
+              name="EnterSendAmount"
+              component={EnterSendAmount}
+              options={{
+                title: t('title', { ns: 'EnterSendAmount' }),
+                headerBackVisible: true,
+                headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+              }}
+            ></RootStack.Screen>
+            <RootStack.Screen
+              name="ConfirmSend"
+              component={ConfirmSend}
+              options={{
+                title: t('title', { ns: 'ConfirmSend' }),
+                headerBackVisible: true,
+                headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+              }}
+            ></RootStack.Screen>
+          </RootStack.Group>
+          <RootStack.Screen
+            name="TransferHistory"
+            component={TransferHistory}
+            options={{
+              title: t('title', { ns: 'TransferHistory' }),
+              headerBackVisible: true,
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="TransferDetails"
+            component={TransferDetails}
+            options={{
+              title: t('title', { ns: 'TransferDetails' }),
+              headerBackVisible: true,
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="TokenBalances"
+            component={TokenBalances}
+            options={{
+              title: t('title', { ns: 'TokenBalances' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="TokenBalanceDetails"
+            component={TokenBalanceDetails}
+            options={{
+              title: t('title', { ns: 'TokenBalanceDetails' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="SelectLanguage"
+            component={SelectLanguage}
+            options={{
+              title: t('title', { ns: 'SelectLanguage' }),
+              headerBackVisible: true,
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="SendSuccess"
+            component={SendSuccess}
+            options={{
+              title: t('title', { ns: 'SendSuccess' }),
+              headerBackVisible: true,
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="AccountInfo"
+            component={AccountInfo}
+            options={{
+              title: t('title', { ns: 'AccountInfo' }),
+              headerBackVisible: true,
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="UpdateDisplayName"
+            component={UpdateDisplayName}
+            options={{
+              title: t('title', { ns: 'UpdateDisplayName' }),
+              headerBackVisible: true,
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="UpdateUsername"
+            component={UpdateUsername}
+            options={{
+              title: t('title', { ns: 'UpdateUsername' }),
+              headerBackVisible: true,
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="SaveBackupPhrase"
+            component={SaveBackupPhrase}
+            options={{
+              title: t('title', { ns: 'SaveBackupPhrase' }),
+              headerBackVisible: false,
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="ConfirmBackupPhrase"
+            component={ConfirmBackupPhrase}
+            options={{
+              title: t('title', { ns: 'ConfirmBackupPhrase' }),
+              headerBackVisible: true,
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="Upgrade"
+            component={Upgrade}
+            options={{
+              title: t('title', { ns: 'Upgrade' }),
+              headerBackVisible: false,
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="SupportedChains"
+            component={SupportedChains}
+            options={{
+              title: t('title', { ns: 'SupportedChains' }),
+              headerBackVisible: true,
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="SupportedTokens"
+            component={SupportedTokens}
+            options={{
+              title: t('title', { ns: 'SupportedTokens' }),
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="AboutAngels"
+            component={AboutAngels}
+            options={{
+              title: t('title', { ns: 'AboutAngels' }),
+              headerBackTitle: t('title', { ns: 'Home' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="AskForAngel"
+            component={AskForAngel}
+            options={{
+              title: t('title', { ns: 'AskForAngel' }),
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="ConfirmAskForAngel"
+            component={ConfirmAskForAngel}
+            options={{
+              title: t('title', { ns: 'ConfirmAskForAngel' }),
+              headerBackVisible: false,
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="SelectAngelRequest"
+            component={SelectAngelRequest}
+            options={{
+              title: t('title', { ns: 'SelectAngelRequest' }),
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="AngelTransfer"
+            component={AngelTransfer}
+            options={{
+              title: t('title', { ns: 'AngelTransfer' }),
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="UserAngelRequests"
+            component={UserAngelRequests}
+            options={{
+              title: t('title', { ns: 'UserAngelRequests' }),
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="AngelRequestDetails"
+            component={AngelRequestDetails}
+            options={{
+              title: t('title', { ns: 'AngelRequestDetails' }),
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="PaidAngelRequestDetails"
+            component={PaidAngelRequestDetails}
+            options={{
+              title: t('title', { ns: 'PaidAngelRequestDetails' }),
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="EditAngelRequest"
+            component={EditAngelRequest}
+            options={{
+              title: t('title', { ns: 'EditAngelRequest' }),
+              headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            }}
+          ></RootStack.Screen>
+        </RootStack.Navigator>
+        <Toast></Toast>
+      </SafeAreaView>
+    </SheetProvider>
   );
 };
 
