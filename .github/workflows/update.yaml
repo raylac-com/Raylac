@@ -3,10 +3,10 @@ on:
     branches:
       - main
     paths:
-      - packages/shared/src/**
-      - packages/sync/src/**
-      - packages/api/src/**
-      - packages/app/src/**
+      - packages/shared/**
+      - packages/sync/**
+      - packages/api/**
+      - packages/app/**
       - packages/db/**
       - .github/workflows/**
 
