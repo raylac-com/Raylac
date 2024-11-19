@@ -34,6 +34,7 @@ const UserListItem = (props: UserListItemProps) => {
       }}
     >
       <FastAvatar
+        name={props.user.name}
         address={publicKeyToAddress(props.user.spendingPubKey as Hex)}
         imageUrl={props.user.profileImage}
         size={36}

@@ -99,6 +99,10 @@ export const getProfileImage = (addressOrUser: AddressOrUser) => {
   return isAddress(addressOrUser) ? undefined : addressOrUser.profileImage;
 };
 
+export const getNameIfUser = (addressOrUser: AddressOrUser) => {
+  return isAddress(addressOrUser) ? null : addressOrUser.name;
+};
+
 export const getDisplayName = (addressOrUser: AddressOrUser) => {
   return isAddress(addressOrUser)
     ? shortenAddress(addressOrUser as Hex)

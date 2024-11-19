@@ -117,7 +117,7 @@ const Deposit = () => {
               color: colors.text,
             }}
           >
-            {'Deposit USDC on Base'}
+            {t('depositUSDCOnBase')}
           </Text>
           <Image
             source={getChainLogo(base.id)}

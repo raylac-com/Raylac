@@ -45,7 +45,7 @@
   },
   "Deposit": {
     "copyAddress": "Copy address",
-    "depositOn": "Deposit",
+    "depositUSDCOnBase": "Deposit USDC on Base",
     "depositToFreshAddress": "Deposit to a fresh address to keep your balance private",
     "getDepositAddress": "Get deposit address",
     "pastDepositAddresses": "Past deposit addresses",
@@ -64,7 +64,7 @@
   },
   "Home": {
     "deposit": "Deposit",
-    "fiatDenominatedBalance": "{{ balance }} USD",
+    "fiatDenominatedBalance": "${{ balance }}",
     "noTransfers": "No transfers yet.",
     "receive": "Receive",
     "seeAll": "See all",
@@ -77,7 +77,6 @@
     "backToHome": "Back to home",
     "orReceiveFromAnyone": "Or receive USDC on Base from anyone",
     "receiveFromRaylacUser": "Receive from a Raylac user",
-    "receiveOn": "Receive",
     "receiveTo": "Receive to",
     "receiveToFreshAddress": "Receive to a fresh address to keep your transfers private",
     "title": "Receive",

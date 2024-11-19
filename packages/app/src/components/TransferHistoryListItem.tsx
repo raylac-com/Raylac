@@ -1,4 +1,9 @@
-import { getAvatarAddress, getDisplayName, getProfileImage } from '@/lib/utils';
+import {
+  getAvatarAddress,
+  getDisplayName,
+  getNameIfUser,
+  getProfileImage,
+} from '@/lib/utils';
 import { Pressable, Text, View } from 'react-native';
 import FastAvatar from './FastAvatar';
 import { Ionicons } from '@expo/vector-icons';
@@ -85,6 +90,7 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           }}
         >
           <FastAvatar
+            name={type === 'outgoing' ? getNameIfUser(to) : getNameIfUser(from)}
             address={avatarAddress}
             imageUrl={
               type === 'outgoing' ? getProfileImage(to) : getProfileImage(from)

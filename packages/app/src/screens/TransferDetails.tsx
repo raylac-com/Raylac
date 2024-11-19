@@ -142,6 +142,7 @@ const TransferDetails = ({ route }: Props) => {
       }}
     >
       <FastAvatar
+        name={displayName}
         address={avatarAddress}
         imageUrl={profileImage}
         size={80}

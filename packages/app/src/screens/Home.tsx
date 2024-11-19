@@ -1,4 +1,10 @@
-import { Text, View, ScrollView, RefreshControl } from 'react-native';
+import {
+  Text,
+  View,
+  ScrollView,
+  RefreshControl,
+  Pressable,
+} from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -67,6 +73,7 @@ const MenuItem = (props: MenuItemProps) => {
 
 const HomeHeader = () => {
   const { data: signedInUser } = useSignedInUser();
+  const navigation = useTypedNavigation();
 
   return (
     <View
@@ -75,11 +82,18 @@ const HomeHeader = () => {
         justifyContent: 'flex-start',
       }}
     >
-      <FastAvatar
-        address={publicKeyToAddress(signedInUser?.spendingPubKey as Hex)}
-        size={32}
-        imageUrl={signedInUser?.profileImage}
-      ></FastAvatar>
+      <Pressable
+        onPress={() => {
+          navigation.navigate('Tabs', { screen: 'Account' });
+        }}
+      >
+        <FastAvatar
+          name={signedInUser?.name}
+          address={publicKeyToAddress(signedInUser?.spendingPubKey as Hex)}
+          size={40}
+          imageUrl={signedInUser?.profileImage}
+        />
+      </Pressable>
     </View>
   );
 };
@@ -165,7 +179,7 @@ const HomeScreen = () => {
       >
         <Text
           style={{
-            fontSize: fontSizes.large,
+            fontSize: 28,
             color: colors.text,
             fontWeight: 500,
           }}

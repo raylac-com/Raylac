@@ -172,6 +172,7 @@ const Account = () => {
           }}
         >
           <FastAvatar
+            name={user.name}
             address={publicKeyToAddress(user.spendingPubKey as Hex)}
             size={64}
             imageUrl={user.profileImage}
