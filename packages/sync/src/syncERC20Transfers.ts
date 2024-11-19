@@ -105,6 +105,12 @@ export const syncERC20TransfersForChain = async ({
   tokenId: string;
   tokenAddress: Hex;
 }) => {
+  logger.info(
+    `syncERC20TransfersForChain: ${tokenId} ${tokenAddress} on ${getChainName(
+      chainId
+    )}`
+  );
+
   const syncTasks = await prisma.syncTask.findMany({
     select: {
       blockNumber: true,

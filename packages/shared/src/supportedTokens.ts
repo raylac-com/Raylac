@@ -5,6 +5,8 @@ import { zeroAddress } from 'viem';
 
 export const NATIVE_TOKEN_ADDRESS = zeroAddress;
 
+export const MOCK_ERC20_ADDRESS = '0xf2Bc834bf2D69edAC6EA193b88d9eF6e82C43A2A';
+
 export const supportedTokens: SupportedToken[] = [
   {
     tokenId: 'usdc',
@@ -29,6 +31,11 @@ export const supportedTokens: SupportedToken[] = [
         address: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
         chain: chains.base,
         syncFrom: BigInt(20576125),
+      },
+      {
+        address: MOCK_ERC20_ADDRESS,
+        chain: chains.anvil,
+        syncFrom: BigInt(0),
       },
       /*
       {
