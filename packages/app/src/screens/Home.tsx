@@ -4,22 +4,22 @@ import {
   ScrollView,
   RefreshControl,
   Pressable,
+  Animated,
 } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import colors from '@/lib/styles/colors';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import { useTranslation } from 'react-i18next';
 import StyledPressable from '@/components/StyledPressable';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTokenBalances from '@/hooks/useTokenBalance';
+import FontAwesome5 from '@expo/vector-icons/build/FontAwesome5';
 import spacing from '@/lib/styles/spacing';
+import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
-import borderRadius from '@/lib/styles/borderRadius';
-import opacity from '@/lib/styles/opacity';
 import TokenBalanceListItem from '@/components/TokenBalanceListItem';
 import FastAvatar from '@/components/FastAvatar';
 import { Hex } from 'viem';
@@ -30,10 +30,11 @@ interface MenuItemProps {
   title: string;
   testID: string;
   onPress: () => void;
+  color?: string;
 }
 
 const MenuItem = (props: MenuItemProps) => {
-  const { icon, title, onPress, testID } = props;
+  const { icon, title, onPress, testID, color } = props;
 
   return (
     <StyledPressable
@@ -41,7 +42,7 @@ const MenuItem = (props: MenuItemProps) => {
       style={{
         flexDirection: 'column',
         alignItems: 'center',
-        rowGap: spacing.xSmall,
+        width: 90,
       }}
       testID={testID}
     >
@@ -52,16 +53,18 @@ const MenuItem = (props: MenuItemProps) => {
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
-          backgroundColor: colors.text,
-          borderRadius: borderRadius.rounded,
+          backgroundColor: color ?? colors.text,
+          padding: 12,
+          borderRadius: 100,
         }}
       >
         {icon}
       </View>
       <Text
         style={{
-          fontSize: fontSizes.base,
-          color: colors.text,
+          fontSize: 16,
+          marginTop: 8,
+          color: color ?? colors.text,
           textAlign: 'center',
         }}
       >
@@ -104,6 +107,9 @@ const HomeScreen = () => {
   const { t } = useTranslation('Home');
   const { data: isSignedIn } = useIsSignedIn();
   const { data: signedInUser } = useSignedInUser();
+
+  const [otherMenuItemsModalVisible, setOtherMenuItemsModalVisible] =
+    useState(true);
 
   const {
     data: tokenBalances,
@@ -224,6 +230,91 @@ const HomeScreen = () => {
           testID="send"
         />
       </View>
+      {/* Action menus (Deposit, Send, Receive) */}
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingHorizontal: 20,
+        }}
+      >
+        <MenuItem
+          icon={<AntDesign name="plus" size={24} color={colors.background} />}
+          title={t('deposit')}
+          onPress={() => {
+            navigation.navigate('Deposit');
+          }}
+          testID="deposit"
+        />
+        <MenuItem
+          icon={
+            <AntDesign name="arrowdown" size={24} color={colors.background} />
+          }
+          title={t('receive')}
+          onPress={() => {
+            navigation.navigate('Receive');
+          }}
+          testID="receive"
+        />
+        <MenuItem
+          icon={
+            <AntDesign name="arrowup" size={24} color={colors.background} />
+          }
+          title={t('send')}
+          onPress={() => {
+            navigation.navigate('SelectRecipient');
+          }}
+          testID="send"
+        />
+        <MenuItem
+          icon={
+            <AntDesign name="ellipsis1" size={24} color={colors.background} />
+          }
+          title={t('other')}
+          onPress={() => {
+            if (otherMenuItemsModalVisible) {
+              setOtherMenuItemsModalVisible(false);
+            } else {
+              setOtherMenuItemsModalVisible(true);
+            }
+          }}
+          testID="other"
+        />
+      </View>
+      {/* Other menu items */}
+      <Animated.View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingHorizontal: 20,
+          height: otherMenuItemsModalVisible ? 'auto' : 0,
+          opacity: otherMenuItemsModalVisible ? 1 : 0,
+          transform: [
+            {
+              translateY: otherMenuItemsModalVisible ? 0 : -20,
+            },
+          ],
+        }}
+      >
+        <MenuItem
+          icon={
+            <FontAwesome5
+              name="feather-alt"
+              size={20}
+              color={colors.background}
+            />
+          }
+          title={t('askForAngel')}
+          color={colors.angelPink}
+          onPress={() => {
+            navigation.navigate('AboutAngels');
+          }}
+          testID="askForAngel"
+        />
+      </Animated.View>
+      {/* Transfer history */}
       <View
         style={{
           flexDirection: 'column',
@@ -255,7 +346,8 @@ const HomeScreen = () => {
           <Text
             style={{
               textAlign: 'center',
-              opacity: opacity.dimmed,
+              marginTop: 20,
+              opacity: 0.5,
               color: colors.text,
             }}
           >

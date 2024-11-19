@@ -51,6 +51,13 @@ import SupportedChains from './screens/SupportedChains';
 import SupportedTokens from './screens/SupportedTokens';
 import TokenBalances from './screens/TokenBalances';
 import TokenBalanceDetails from './screens/TokenBalanceDetails';
+import AskForAngel from './screens/AskForAngel';
+import ConfirmAskForAngel from './screens/ConfirmAskForAngel';
+import AboutAngels from './screens/AboutAngels';
+import SelectAngelRequest from './screens/SelectAngelRequest';
+import AngelTransfer from './screens/AngelTransfer';
+import UserAngelRequests from './screens/UserAngelRequests';
+import AngelRequestDetails from './screens/AngelRequestDetails';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -359,6 +366,62 @@ const Screens = () => {
           component={SupportedTokens}
           options={{
             title: t('title', { ns: 'SupportedTokens' }),
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="AboutAngels"
+          component={AboutAngels}
+          options={{
+            title: t('title', { ns: 'AboutAngels' }),
+            headerBackTitle: t('title', { ns: 'Home' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="AskForAngel"
+          component={AskForAngel}
+          options={{
+            title: t('title', { ns: 'AskForAngel' }),
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="ConfirmAskForAngel"
+          component={ConfirmAskForAngel}
+          options={{
+            title: t('title', { ns: 'ConfirmAskForAngel' }),
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="SelectAngelRequest"
+          component={SelectAngelRequest}
+          options={{
+            title: t('title', { ns: 'SelectAngelRequest' }),
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="AngelTransfer"
+          component={AngelTransfer}
+          options={{
+            title: t('title', { ns: 'AngelTransfer' }),
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="UserAngelRequests"
+          component={UserAngelRequests}
+          options={{
+            title: t('userAngelRequests'),
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="AngelRequestDetails"
+          component={AngelRequestDetails}
+          options={{
+            title: t('title', { ns: 'AngelRequestDetails' }),
             headerBackTitle: t('headerBackTitle', { ns: 'common' }),
           }}
         ></RootStack.Screen>

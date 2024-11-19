@@ -47,6 +47,28 @@ export type RootStackParamsList = {
     tokenId: string;
   };
 
+  AskForAngel: undefined;
+
+  ConfirmAskForAngel: {
+    description: string;
+    usdAmount: string;
+    angelRequestId: number;
+  };
+
+  AboutAngels: undefined;
+
+  SelectAngelRequest: undefined;
+
+  AngelTransfer: {
+    angelRequestId: number;
+  };
+
+  AngelRequestDetails: {
+    angelRequestId: number;
+  };
+
+  UserAngelRequests: undefined;
+
   Receive: undefined;
   BackupAccount: undefined;
   Advanced: undefined;

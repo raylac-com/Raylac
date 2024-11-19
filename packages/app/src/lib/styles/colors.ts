@@ -3,6 +3,7 @@ const colors = {
   green: '#228B22',
   secondary: '#41B9E0',
   gray: '#696969',
+  angelPink: '#ff748c',
 
   // Required colors by react-navigation https://reactnavigation.org/docs/themes/
   primary: '#4169E1',
