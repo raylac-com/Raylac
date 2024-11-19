@@ -8,6 +8,7 @@ import 'account-abstraction-0.6.0/contracts/interfaces/IEntryPoint.sol';
 import '@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol';
 import './Utils.s.sol';
 import '../src/RaylacPaymaster.sol';
+import '../src/MockERC20.sol';
 
 contract DeployV2 is Script, Utils {
   function run() external {
@@ -77,6 +78,17 @@ contract DeployV2 is Script, Utils {
         'RayalcPaymaster already deployed at:',
         address(raylacPaymaster)
       );
+    }
+
+    MockERC20 mockERC20;
+    address mockERC20Address = getAddress(type(MockERC20).creationCode, '');
+
+    if (!isDeployed(mockERC20Address)) {
+      mockERC20 = new MockERC20{ salt: 0 }('MockERC20', 'MOCK');
+      console.log('MockERC20 deployed at:', address(mockERC20));
+    } else {
+      mockERC20 = MockERC20(payable(mockERC20Address));
+      console.log('MockERC20 already deployed at:', address(mockERC20));
     }
 
     vm.stopBroadcast();

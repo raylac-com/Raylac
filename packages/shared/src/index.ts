@@ -5,6 +5,7 @@ export { default as RaylacAccountProxyAbi } from './abi/RaylacAccountProxyAbi';
 export { default as RaylacPaymasterAbi } from './abi/RaylacPaymasterAbi';
 export { default as ERC5564AnnouncerAbi } from './abi/ERC5564AnnouncerAbi';
 export { default as ERC20Abi } from './abi/ERC20Abi';
+export { default as MockERC20Abi } from './abi/MockERC20Abi';
 export { default as RaylacAccountProxyBytecode } from './bytecode/RaylacAccountProxyBytecode';
 export * from './stealth';
 export * from './addresses';

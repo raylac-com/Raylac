@@ -12,6 +12,7 @@ import {
   getWalletClient,
   RAYLAC_PAYMASTER_V2_ADDRESS,
   RaylacPaymasterAbi,
+  MOCK_ERC20_ADDRESS,
 } from '@raylac/shared';
 import { privateKeyToAccount } from 'viem/accounts';
 import { client, getAuthedClient } from './lib/rpc';
@@ -24,6 +25,7 @@ import {
   ERC5564_ANNOUNCER_BYTECODE,
   RAYLAC_PAYMASTER_BYTECODE,
   SENDER_CREATOR_BYTECODE,
+  MOCK_ERC20_BYTECODE,
 } from './lib/bytecode';
 import { parseEther } from 'viem';
 import { logger } from '../shared-backend/out';
@@ -160,6 +162,12 @@ const initDevChainState = async ({ chainId }: { chainId: number }) => {
   await testClient.setCode({
     address: ERC5564_ANNOUNCER_ADDRESS,
     bytecode: ERC5564_ANNOUNCER_BYTECODE,
+  });
+
+  // Deploy the Mock ERC20 contract
+  await testClient.setCode({
+    address: MOCK_ERC20_ADDRESS,
+    bytecode: MOCK_ERC20_BYTECODE,
   });
 
   // Deposit funds to the EntryPoint

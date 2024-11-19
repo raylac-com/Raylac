@@ -1,11 +1,15 @@
 import {
   devChains,
   ENTRY_POINT_ADDRESS,
+  getChainName,
   getPublicClient,
 } from '@raylac/shared';
 import { Hex, Log, parseAbiItem } from 'viem';
 import {
+  endTimer,
   loop,
+  startTimer,
+  updateSyncTasks,
   upsertTransaction,
   upsertUserOpEventLog,
   waitForAnnouncementsBackfill,
@@ -71,8 +75,8 @@ export const syncUserOpsForChain = async ({ chainId }: { chainId: number }) => {
       const fromBlock = syncTasks[0].blockNumber;
       const latestBlockNumber = await publicClient.getBlockNumber();
 
-      const addressBatchSize = 100;
-      const blockBatchSize = 100000n;
+      const addressBatchSize = 10;
+      const blockBatchSize = 2000n;
 
       for (
         let blockNumber = fromBlock;
@@ -85,8 +89,8 @@ export const syncUserOpsForChain = async ({ chainId }: { chainId: number }) => {
         ]);
 
         const addressesToSync = syncTasks
-          .filter(address => address.blockNumber < toBlock)
-          .map(address => address.address as Hex);
+          .filter(syncTask => syncTask.blockNumber < toBlock)
+          .map(syncTask => syncTask.address as Hex);
 
         if (addressesToSync.length === 0) {
           continue;
@@ -95,30 +99,36 @@ export const syncUserOpsForChain = async ({ chainId }: { chainId: number }) => {
         for (let i = 0; i < addressesToSync.length; i += addressBatchSize) {
           const batch = addressesToSync.slice(i, i + addressBatchSize);
 
+          const timer = startTimer('getLogs(userOps)');
+
           const logs = await publicClient.getLogs({
             address: ENTRY_POINT_ADDRESS,
             event: userOpEvent,
-            fromBlock,
+            fromBlock: blockNumber,
             toBlock,
             args: {
               sender: batch,
             },
           });
 
+          endTimer(timer);
+
+          logger.info(
+            `Found ${logs.length} UserOperation logs between ${fromBlock} and ${toBlock} on ${getChainName(
+              chainId
+            )}`
+          );
+
           for (const log of logs) {
             await handleUserOpEvent({ log, chainId });
           }
 
           // Update the address sync statuses to the latest block number
-          await prisma.syncTask.updateMany({
-            data: {
-              blockNumber: toBlock,
-            },
-            where: {
-              address: { in: batch },
-              chainId,
-              tokenId: 'userOps',
-            },
+          await updateSyncTasks({
+            addresses: batch,
+            chainId,
+            tokenId: 'userOps',
+            blockNumber: toBlock,
           });
         }
       }
