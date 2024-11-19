@@ -1,14 +1,21 @@
-import { bigIntMin, ERC20Abi, getPublicClient, sleep } from '@raylac/shared';
+import {
+  bigIntMin,
+  ERC20Abi,
+  getChainName,
+  getPublicClient,
+  sleep,
+} from '@raylac/shared';
 import { supportedTokens } from '@raylac/shared';
 import { decodeEventLog, getAddress, Hex, Log, parseAbiItem } from 'viem';
 import prisma from './lib/prisma';
 import {
+  startTimer,
+  endTimer,
   updateSyncTasks,
   upsertTransaction,
   waitForAnnouncementsBackfill,
 } from './utils';
 import { logger } from '@raylac/shared-backend';
-
 import { Prisma } from '@raylac/db';
 
 export const handleERC20TransferLog = async ({
@@ -119,14 +126,18 @@ export const syncERC20TransfersForChain = async ({
 
   const client = getPublicClient({ chainId });
 
-  const syncTasksBatchSize = 100;
-  const blockBatchSize = 100000n;
+  const syncTasksBatchSize = 10;
+  const blockBatchSize = 2000n;
+
+  const numBatches = Math.ceil(syncTasks.length / syncTasksBatchSize);
 
   for (let i = 0; i < syncTasks.length; i += syncTasksBatchSize) {
     // TODO: Try not to call this here every time
     const latestBlockNumber = await client.getBlockNumber();
 
     const batch = syncTasks.slice(i, i + syncTasksBatchSize);
+
+    const batchIndex = i / syncTasksBatchSize + 1;
 
     const fromBlock = batch[0].blockNumber;
 
@@ -148,6 +159,8 @@ export const syncERC20TransfersForChain = async ({
         continue;
       }
 
+      const incomingLogsTimer = startTimer('getLogs(incoming ERC20)');
+
       const incomingLogs = await client.getLogs({
         address: tokenAddress,
         event: parseAbiItem(
@@ -156,10 +169,19 @@ export const syncERC20TransfersForChain = async ({
         args: {
           to: addressesToSync,
         },
-        fromBlock,
+        fromBlock: blockNumber,
         toBlock,
       });
 
+      endTimer(incomingLogsTimer);
+
+      logger.info(
+        `Found ${incomingLogs.length} incoming ERC20 transfer logs on ${getChainName(
+          chainId
+        )} for addresses batch ${batchIndex}/${numBatches}`
+      );
+
+      const outgoingLogsTimer = startTimer('getLogs(outgoing ERC20)');
       const outgoingLogs = await client.getLogs({
         address: tokenAddress,
         event: parseAbiItem(
@@ -168,9 +190,16 @@ export const syncERC20TransfersForChain = async ({
         args: {
           from: addressesToSync,
         },
-        fromBlock,
+        fromBlock: blockNumber,
         toBlock,
       });
+      endTimer(outgoingLogsTimer);
+
+      logger.info(
+        `Found ${outgoingLogs.length} outgoing ERC20 transfer logs on ${getChainName(
+          chainId
+        )} for addresses batch ${batchIndex}/${numBatches}`
+      );
 
       // Handle logs concurrently
       const handleLogsPromises = [];

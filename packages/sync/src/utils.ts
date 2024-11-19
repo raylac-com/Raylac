@@ -22,6 +22,7 @@ import {
   sleep,
 } from '@raylac/shared';
 import { logger } from '@raylac/shared-backend';
+import chalk from 'chalk';
 
 export const announcementAbiItem = parseAbiItem(
   'event Announcement(uint256 indexed schemeId, address indexed stealthAddress, address indexed caller, bytes viewTag, bytes ephemeralPubKey)'
@@ -431,7 +432,20 @@ export const startTimer = (label: string): Timer => {
 export const endTimer = (timer: Timer) => {
   const endTime = Date.now();
   const duration = endTime - timer.startTime;
-  logger.info(`${timer.label} took ${duration}ms`);
+
+  if (process.env.RAYLAC_PROFILER) {
+    const message = `${timer.label} took ${duration}ms`;
+
+    if (process.env.RENDER) {
+      // If we're running on Render, we want to pass a JSON as well
+      logger.info(message, {
+        label: timer.label,
+        duration,
+      });
+    } else {
+      logger.info(chalk.cyan(message));
+    }
+  }
 };
 
 /**
