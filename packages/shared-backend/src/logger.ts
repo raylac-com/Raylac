@@ -40,14 +40,14 @@ export const logger = winston.createLogger({
         new winston.transports.File({
           filename: `logs/${logFileName}-app.log`,
           level: 'info', // Minimum logging level for this transport,
-          format: winston.format.printf(({ message }) => message),
+          format: winston.format.json(),
         }),
 
         // Error log file
         new winston.transports.File({
           filename: `logs/${logFileName}-error.log`,
           level: 'error', // Log only errors in this file
-          format: winston.format.printf(({ message }) => message),
+          format: winston.format.json(),
         }),
       ],
 });
