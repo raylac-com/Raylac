@@ -54,6 +54,18 @@ const selectTransfer = {
       hash: true,
     },
   },
+  paidAngelRequest: {
+    select: {
+      id: true,
+      amount: true,
+      user: {
+        select: {
+          name: true,
+          profileImage: true,
+        },
+      },
+    },
+  },
 } satisfies Prisma.UserActionSelect;
 
 export type TransferQueryResult = Prisma.UserActionGetPayload<{

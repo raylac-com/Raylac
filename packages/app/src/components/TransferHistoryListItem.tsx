@@ -6,7 +6,7 @@ import {
 } from '@/lib/utils';
 import { Pressable, Text, View } from 'react-native';
 import FastAvatar from './FastAvatar';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import colors from '@/lib/styles/colors';
 import { formatAmount, getTokenMetadata } from '@raylac/shared';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -70,9 +70,15 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
         rowGap: spacing.xxSmall,
       }}
       onPress={() => {
-        navigation.navigate('TransferDetails', {
-          transferId: transfer.id,
-        });
+        if (transfer.paidAngelRequest) {
+          navigation.navigate('PaidAngelRequestDetails', {
+            angelRequestId: transfer.paidAngelRequest.id,
+          });
+        } else {
+          navigation.navigate('TransferDetails', {
+            transferId: transfer.id,
+          });
+        }
       }}
     >
       <View
@@ -104,14 +110,29 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
               rowGap: spacing.xxSmall,
             }}
           >
-            <Text
+            <View
               style={{
-                color: colors.text,
-                fontWeight: 'bold',
+                flexDirection: 'row',
+                alignItems: 'center',
+                columnGap: spacing.xSmall,
               }}
             >
-              {getDisplayName(type === 'outgoing' ? to : from)}
-            </Text>
+              <Text
+                style={{
+                  color: colors.text,
+                  fontWeight: 'bold',
+                }}
+              >
+                {getDisplayName(type === 'outgoing' ? to : from)}
+              </Text>
+              {transfer.paidAngelRequest && (
+                <FontAwesome5
+                  name="feather-alt"
+                  size={14}
+                  color={colors.angelPink}
+                />
+              )}
+            </View>
             <Text
               style={{
                 color: colors.text,

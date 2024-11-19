@@ -86,6 +86,8 @@ const SettingListItem = (props: SettingListItemProps) => {
   );
 };
 
+const ANGEL_USER_IDS = [15];
+
 const Account = () => {
   const { data: user } = useSignedInUser();
   const { mutateAsync: signOut } = useSignOut();
@@ -218,18 +220,20 @@ const Account = () => {
           marginTop: spacing.base,
         }}
       >
-        <SettingListItem
-          icon={
-            <FontAwesome5
-              name="feather-alt"
-              size={20}
-              color={colors.angelPink}
-            />
-          }
-          title={t('angelTransfer')}
-          onPress={() => navigation.navigate('SelectAngelRequest')}
-          color={colors.angelPink}
-        />
+        {ANGEL_USER_IDS.includes(user.id) && (
+          <SettingListItem
+            icon={
+              <FontAwesome5
+                name="feather-alt"
+                size={20}
+                color={colors.angelPink}
+              />
+            }
+            title={t('angelTransfer')}
+            onPress={() => navigation.navigate('SelectAngelRequest')}
+            color={colors.angelPink}
+          />
+        )}
         <SettingListItem
           icon={
             <MaterialIcons
