@@ -50,6 +50,9 @@ const getUserAngelRequests = async ({ userId }: { userId: number }) => {
     where: {
       userId,
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
   });
   return angelRequests;
 };

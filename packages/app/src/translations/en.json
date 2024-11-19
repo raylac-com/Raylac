@@ -186,10 +186,11 @@
     "amountLimitExceeded": "You can ask for up to ${{ amount }}"
   },
   "ConfirmAskForAngel": {
-    "title": "Confirm angel request",
+    "title": "",
     "copyLink": "Copy link",
     "shareOnSocial": "Share on social",
-    "amountInUsd": "{{ amount }} USD"
+    "amountInUsd": "{{ amount }} USD",
+    "backToHome": "Back to home"
   },
   "SelectAngelRequest": {
     "title": "Select angel request"
@@ -199,6 +200,13 @@
   },
   "AngelRequestDetails": {
     "title": "Angel request details"
+  },
+  "EditAngelRequest": {
+    "title": "Edit angel request"
+  },
+  "UserAngelRequests": {
+    "title": "Angel requests",
+    "noAngelRequests": "No angel requests yet"
   },
   "common": {
     "fiatDenominatedBalance": "${{ balance }}",

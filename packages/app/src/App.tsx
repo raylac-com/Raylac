@@ -58,6 +58,7 @@ import SelectAngelRequest from './screens/SelectAngelRequest';
 import AngelTransfer from './screens/AngelTransfer';
 import UserAngelRequests from './screens/UserAngelRequests';
 import AngelRequestDetails from './screens/AngelRequestDetails';
+import EditAngelRequest from './screens/EditAngelRequest';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -390,7 +391,7 @@ const Screens = () => {
           component={ConfirmAskForAngel}
           options={{
             title: t('title', { ns: 'ConfirmAskForAngel' }),
-            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+            headerBackVisible: false,
           }}
         ></RootStack.Screen>
         <RootStack.Screen
@@ -413,7 +414,7 @@ const Screens = () => {
           name="UserAngelRequests"
           component={UserAngelRequests}
           options={{
-            title: t('userAngelRequests'),
+            title: t('title', { ns: 'UserAngelRequests' }),
             headerBackTitle: t('headerBackTitle', { ns: 'common' }),
           }}
         ></RootStack.Screen>
@@ -422,6 +423,14 @@ const Screens = () => {
           component={AngelRequestDetails}
           options={{
             title: t('title', { ns: 'AngelRequestDetails' }),
+            headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+          }}
+        ></RootStack.Screen>
+        <RootStack.Screen
+          name="EditAngelRequest"
+          component={EditAngelRequest}
+          options={{
+            title: t('title', { ns: 'EditAngelRequest' }),
             headerBackTitle: t('headerBackTitle', { ns: 'common' }),
           }}
         ></RootStack.Screen>

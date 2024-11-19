@@ -1,6 +1,9 @@
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import colors from '@/lib/styles/colors';
+import fontSizes from '@/lib/styles/fontSizes';
+import spacing from '@/lib/styles/spacing';
 import { trpc } from '@/lib/trpc';
+import { shortenText } from '@/lib/utils';
 import { UserAngelRequestReturnType } from '@/types';
 import { FlatList, Pressable, Text } from 'react-native';
 
@@ -15,10 +18,13 @@ const UserAngelRequestItem = ({ angelRequest }: UserAngelRequestItemProps) => {
     <Pressable
       style={{
         flex: 1,
-        flexDirection: 'column',
+        flexDirection: 'row',
+        alignItems: 'center',
+        columnGap: spacing.base,
+        borderBottomColor: colors.border,
         borderBottomWidth: 1,
-        paddingVertical: 12,
-        rowGap: 4,
+        paddingVertical: spacing.base,
+        rowGap: spacing.base,
       }}
       onPress={() => {
         navigation.navigate('AngelRequestDetails', {
@@ -26,7 +32,22 @@ const UserAngelRequestItem = ({ angelRequest }: UserAngelRequestItemProps) => {
         });
       }}
     >
-      <Text style={{ color: colors.text }}>{angelRequest.description}</Text>
+      <Text
+        style={{
+          color: colors.text,
+          fontSize: fontSizes.large,
+          fontWeight: 'bold',
+        }}
+      >{`$${angelRequest.amount}`}</Text>
+      <Text
+        style={{
+          color: colors.text,
+          fontSize: fontSizes.base,
+          flexShrink: 1,
+        }}
+      >
+        {shortenText(angelRequest.description, 80)}
+      </Text>
     </Pressable>
   );
 };
@@ -37,7 +58,7 @@ const UserAngelRequests = () => {
   return (
     <FlatList
       data={angelRequests}
-      style={{ paddingHorizontal: 16 }}
+      style={{ padding: spacing.base }}
       renderItem={({ item }) => <UserAngelRequestItem angelRequest={item} />}
     />
   );

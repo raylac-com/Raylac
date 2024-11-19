@@ -22,6 +22,7 @@ const getAngelRequest = async ({
           profileImage: true,
         },
       },
+      createdAt: true,
     },
     where: { id: angelRequestId },
   });

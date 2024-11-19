@@ -1,16 +1,22 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
-import { Text, TextInput, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { RootStackParamsList } from '@/navigation/types';
 import StyledButton from '@/components/StyledButton';
 import colors from '@/lib/styles/colors';
 import { copyToClipboard } from '@/lib/utils';
-import { useCallback } from 'react';
-import FontAwesome5 from '@expo/vector-icons/build/FontAwesome5';
+import fontSizes from '@/lib/styles/fontSizes';
+import MultiLineInput from '@/components/MultiLineInput';
+import spacing from '@/lib/styles/spacing';
+import Toast from 'react-native-toast-message';
+import useTypedNavigation from '@/hooks/useTypedNavigation';
+// import { useCallback } from 'react';
+// import FontAwesome5 from '@expo/vector-icons/build/FontAwesome5';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'ConfirmAskForAngel'>;
 
 const ConfirmAskForAngel = ({ route }: Props) => {
+  const navigation = useTypedNavigation();
   const { t } = useTranslation('ConfirmAskForAngel');
   const { description, usdAmount, angelRequestId } = route.params;
 
@@ -18,9 +24,19 @@ const ConfirmAskForAngel = ({ route }: Props) => {
 
   const onCopyPress = () => {
     copyToClipboard(link);
+    Toast.show({
+      type: 'success',
+      text1: t('copied', { ns: 'common' }),
+      position: 'top',
+      visibilityTime: 1000,
+    });
   };
 
-  const onSharePress = useCallback(() => {}, []);
+  const onBackToHomePress = () => {
+    navigation.navigate('Tabs', { screen: 'Home' });
+  };
+
+  // const onSharePress = useCallback(() => {}, []);
 
   return (
     <View
@@ -28,59 +44,68 @@ const ConfirmAskForAngel = ({ route }: Props) => {
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'space-between',
-        padding: 16,
+        padding: spacing.base,
       }}
     >
       <View
         style={{
-          flex: 0.62,
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          rowGap: 8,
+          rowGap: spacing.base,
         }}
       >
-        <FontAwesome5 name="feather-alt" size={48} color={colors.angelPink} />
-        <TextInput
-          editable={false}
-          value={description}
+        <Text
           style={{
-            fontSize: 16,
-            height: 240,
-            color: colors.text,
-            width: '100%',
-            borderWidth: 1,
-            borderColor: colors.gray,
-            borderRadius: 8,
-            padding: 16,
+            fontSize: fontSizes.large,
+            fontWeight: 'bold',
+            color: colors.angelPink,
+            textAlign: 'center',
+            lineHeight: 32,
           }}
-          multiline={true}
-        />
+        >
+          {`Share your request \n with angels`}
+        </Text>
+        {/* <FontAwesome5 name="feather-alt" size={48} color={colors.angelPink} /> */}
         <Text
           style={{
             color: colors.text,
-            fontSize: 20,
-            opacity: 0.6,
+            fontSize: fontSizes.large,
+            fontWeight: 'bold',
           }}
         >
           {t('amountInUsd', {
             amount: usdAmount,
           })}
         </Text>
+        <MultiLineInput
+          placeholder={''}
+          value={description}
+          onChangeText={() => {}}
+        />
       </View>
       <View style={{ flexDirection: 'column', rowGap: 8, width: '100%' }}>
         <StyledButton
           disabled={!link}
           title={t('copyLink')}
           onPress={onCopyPress}
-          variant="outline"
+          variant="primary"
         />
+        <StyledButton
+          variant="outline"
+          disabled={!link}
+          title={t('backToHome')}
+          onPress={onBackToHomePress}
+        />
+        {/**
+           * 
         <StyledButton
           variant="outline"
           disabled={!link}
           title={t('shareOnSocial')}
           onPress={onSharePress}
         />
+        */}
       </View>
     </View>
   );

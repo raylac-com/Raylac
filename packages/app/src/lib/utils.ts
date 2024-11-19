@@ -109,6 +109,12 @@ export const getDisplayName = (addressOrUser: AddressOrUser) => {
     : addressOrUser.name;
 };
 
+export const shortenText = (text: string, maxLength: number) => {
+  return text.length > maxLength
+    ? `${text.slice(0, maxLength).trim()}...`
+    : text;
+};
+
 /**
  * Get the USD amount of a transfer.
  *

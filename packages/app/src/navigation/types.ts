@@ -67,6 +67,10 @@ export type RootStackParamsList = {
     angelRequestId: number;
   };
 
+  EditAngelRequest: {
+    angelRequestId: number;
+  };
+
   UserAngelRequests: undefined;
 
   Receive: undefined;
