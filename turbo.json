@@ -8,6 +8,9 @@
       "dependsOn": ["^db:generate", "^build"],
       "outputs": ["out/**"]
     },
+    "build:watch": {
+      "outputs": ["out/**"]
+    },
     "lint": {
       "dependsOn": ["^build"]
     }
