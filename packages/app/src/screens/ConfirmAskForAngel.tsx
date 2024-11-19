@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Text, TextInput, View } from 'react-native';
 import { RootStackParamsList } from '@/navigation/types';
 import StyledButton from '@/components/StyledButton';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { copyToClipboard } from '@/lib/utils';
 import { useCallback } from 'react';
 import FontAwesome5 from '@expo/vector-icons/build/FontAwesome5';
@@ -40,17 +40,17 @@ const ConfirmAskForAngel = ({ route }: Props) => {
           rowGap: 8,
         }}
       >
-        <FontAwesome5 name="feather-alt" size={48} color={theme.angelPink} />
+        <FontAwesome5 name="feather-alt" size={48} color={colors.angelPink} />
         <TextInput
           editable={false}
           value={description}
           style={{
             fontSize: 16,
             height: 240,
-            color: theme.text,
+            color: colors.text,
             width: '100%',
             borderWidth: 1,
-            borderColor: theme.gray,
+            borderColor: colors.gray,
             borderRadius: 8,
             padding: 16,
           }}
@@ -58,7 +58,7 @@ const ConfirmAskForAngel = ({ route }: Props) => {
         />
         <Text
           style={{
-            color: theme.text,
+            color: colors.text,
             fontSize: 20,
             opacity: 0.6,
           }}
@@ -76,6 +76,7 @@ const ConfirmAskForAngel = ({ route }: Props) => {
           variant="outline"
         />
         <StyledButton
+          variant="outline"
           disabled={!link}
           title={t('shareOnSocial')}
           onPress={onSharePress}

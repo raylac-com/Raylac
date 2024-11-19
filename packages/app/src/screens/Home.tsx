@@ -24,6 +24,7 @@ import TokenBalanceListItem from '@/components/TokenBalanceListItem';
 import FastAvatar from '@/components/FastAvatar';
 import { Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
+import borderRadius from '@/lib/styles/borderRadius';
 
 interface MenuItemProps {
   icon: React.ReactNode;
@@ -42,7 +43,7 @@ const MenuItem = (props: MenuItemProps) => {
       style={{
         flexDirection: 'column',
         alignItems: 'center',
-        width: 90,
+        rowGap: spacing.xSmall,
       }}
       testID={testID}
     >
@@ -54,8 +55,7 @@ const MenuItem = (props: MenuItemProps) => {
           justifyContent: 'center',
           alignItems: 'center',
           backgroundColor: color ?? colors.text,
-          padding: 12,
-          borderRadius: 100,
+          borderRadius: borderRadius.rounded,
         }}
       >
         {icon}
@@ -63,7 +63,6 @@ const MenuItem = (props: MenuItemProps) => {
       <Text
         style={{
           fontSize: 16,
-          marginTop: 8,
           color: color ?? colors.text,
           textAlign: 'center',
         }}
@@ -198,45 +197,7 @@ const HomeScreen = () => {
         style={{
           flexDirection: 'row',
           justifyContent: 'center',
-          columnGap: spacing.large,
-        }}
-      >
-        <MenuItem
-          icon={<AntDesign name="plus" size={24} color={colors.background} />}
-          title={t('deposit')}
-          onPress={() => {
-            navigation.navigate('Deposit');
-          }}
-          testID="deposit"
-        />
-        <MenuItem
-          icon={
-            <AntDesign name="arrowdown" size={24} color={colors.background} />
-          }
-          title={t('receive')}
-          onPress={() => {
-            navigation.navigate('Receive');
-          }}
-          testID="receive"
-        />
-        <MenuItem
-          icon={
-            <AntDesign name="arrowup" size={24} color={colors.background} />
-          }
-          title={t('send')}
-          onPress={() => {
-            navigation.navigate('SelectRecipient');
-          }}
-          testID="send"
-        />
-      </View>
-      {/* Action menus (Deposit, Send, Receive) */}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingHorizontal: 20,
+          columnGap: spacing.base,
         }}
       >
         <MenuItem
@@ -286,9 +247,8 @@ const HomeScreen = () => {
       <Animated.View
         style={{
           flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingHorizontal: 20,
+          justifyContent: 'center',
+          columnGap: spacing.base,
           height: otherMenuItemsModalVisible ? 'auto' : 0,
           opacity: otherMenuItemsModalVisible ? 1 : 0,
           transform: [
@@ -309,7 +269,7 @@ const HomeScreen = () => {
           title={t('askForAngel')}
           color={colors.angelPink}
           onPress={() => {
-            navigation.navigate('AboutAngels');
+            navigation.navigate('AskForAngel');
           }}
           testID="askForAngel"
         />

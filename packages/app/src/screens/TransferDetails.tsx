@@ -9,6 +9,7 @@ import {
   copyToClipboard,
   getAvatarAddress,
   getDisplayName,
+  getNameIfUser,
   getProfileImage,
   shortenAddress,
 } from '@/lib/utils';
@@ -142,7 +143,7 @@ const TransferDetails = ({ route }: Props) => {
       }}
     >
       <FastAvatar
-        name={displayName}
+        name={type === 'outgoing' ? getNameIfUser(to) : getNameIfUser(from)}
         address={avatarAddress}
         imageUrl={profileImage}
         size={80}

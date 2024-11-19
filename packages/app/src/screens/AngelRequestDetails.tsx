@@ -1,6 +1,6 @@
-import AmountInput from '@/components/AmountInput';
+import FiatAmountInput from '@/components/FiatAmountInput';
 import MultiLineInput from '@/components/MultiLineInput';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import { RootStackParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -31,11 +31,11 @@ const AngelRequestDetails = ({ route }: Props) => {
       style={{
         flexDirection: 'column',
         paddingHorizontal: 16,
-        backgroundColor: theme.background,
+        backgroundColor: colors.background,
       }}
     >
       <View style={{ marginBottom: 16 }}>
-        <AmountInput
+        <FiatAmountInput
           amount={newAmount}
           onInputChange={setNewAmount}
           autoFocus={false}

@@ -1,4 +1,4 @@
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import { TextInput } from 'react-native';
@@ -7,13 +7,13 @@ const containsNonNumberChars = (str: string): boolean => {
   return !/^(-?)([0-9]*)\.?([0-9]*)$/.test(str);
 };
 
-interface AmountInputProps {
+interface FiatAmountInputProps {
   amount: string;
   onInputChange: (amount: string) => void;
   autoFocus: boolean;
 }
 
-const AmountInput = (props: AmountInputProps) => {
+const FiatAmountInput = (props: FiatAmountInputProps) => {
   const { amount, onInputChange } = props;
 
   const { t } = useTranslation();
@@ -38,9 +38,9 @@ const AmountInput = (props: AmountInputProps) => {
           flex: 1,
           fontSize: 28,
           textAlign: 'right',
-          color: theme.text,
+          color: colors.text,
           borderWidth: 1,
-          borderColor: theme.gray,
+          borderColor: colors.gray,
           borderRadius: 8,
           paddingHorizontal: 8,
           height: 52,
@@ -49,7 +49,7 @@ const AmountInput = (props: AmountInputProps) => {
       />
       <Text
         style={{
-          color: theme.text,
+          color: colors.text,
           textAlign: 'center',
           opacity: 0.8,
           width: 62,
@@ -63,4 +63,4 @@ const AmountInput = (props: AmountInputProps) => {
   );
 };
 
-export default AmountInput;
+export default FiatAmountInput;

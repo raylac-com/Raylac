@@ -1,5 +1,5 @@
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import { UserAngelRequestReturnType } from '@/types';
 import { FlatList, Pressable, Text } from 'react-native';
@@ -26,7 +26,7 @@ const UserAngelRequestItem = ({ angelRequest }: UserAngelRequestItemProps) => {
         });
       }}
     >
-      <Text style={{ color: theme.text }}>{angelRequest.description}</Text>
+      <Text style={{ color: colors.text }}>{angelRequest.description}</Text>
     </Pressable>
   );
 };

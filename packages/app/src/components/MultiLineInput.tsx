@@ -1,4 +1,4 @@
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { TextInput } from 'react-native';
 
 interface MultiLineInputProps {
@@ -17,10 +17,10 @@ const MultiLineInput = ({
       style={{
         fontSize: 16,
         height: 240,
-        color: theme.text,
+        color: colors.text,
         width: '100%',
         borderWidth: 1,
-        borderColor: theme.gray,
+        borderColor: colors.gray,
         borderRadius: 8,
         padding: 16,
       }}

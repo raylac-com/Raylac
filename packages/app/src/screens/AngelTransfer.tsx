@@ -1,6 +1,6 @@
 import FastAvatar from '@/components/FastAvatar';
 import StyledButton from '@/components/StyledButton';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import { RootStackParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -27,7 +27,7 @@ const AngelTransfer = ({ route }: Props) => {
   if (!isPending && !angelRequest) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ fontSize: 16, fontWeight: 'bold', color: theme.text }}>
+        <Text style={{ fontSize: 16, fontWeight: 'bold', color: colors.text }}>
           {`Angel request not found`}
         </Text>
       </View>
@@ -62,7 +62,7 @@ const AngelTransfer = ({ route }: Props) => {
             fontSize: 20,
             fontWeight: 'bold',
             textAlign: 'center',
-            color: theme.text,
+            color: colors.text,
           }}
         >
           {angelRequest?.user.name}
@@ -71,14 +71,14 @@ const AngelTransfer = ({ route }: Props) => {
           style={{
             fontSize: 16,
             textAlign: 'center',
-            color: theme.text,
+            color: colors.text,
             opacity: 0.6,
           }}
         >
           {angelRequest?.description}
         </Text>
       </View>
-      <StyledButton style={{ width: '100%' }} title="Pay" onPress={() => {}} />
+      <StyledButton variant="primary" title="Pay" onPress={() => {}} />
     </View>
   );
 };

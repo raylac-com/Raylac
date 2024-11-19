@@ -1,11 +1,11 @@
 import { View, Text, TextInput } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { useCallback, useState } from 'react';
 import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { trpc } from '@/lib/trpc';
-import AmountInput from '@/components/AmountInput';
+import FiatAmountInput from '@/components/FiatAmountInput';
 
 const ASK_AMOUNT_LIMIT_USD = 1000;
 
@@ -51,20 +51,20 @@ const AskForAngel = () => {
         paddingTop: 16,
       }}
     >
-      <Text style={{ color: theme.text, fontSize: 24, fontWeight: 'bold' }}>
+      <Text style={{ color: colors.text, fontSize: 24, fontWeight: 'bold' }}>
         {t('writeARequest')}
       </Text>
-      <Text style={{ color: theme.text, fontSize: 16 }}>
+      <Text style={{ color: colors.text, fontSize: 16 }}>
         {t('angelDescription')}
       </Text>
       <TextInput
         style={{
           fontSize: 16,
           height: 240,
-          color: theme.text,
+          color: colors.text,
           width: '100%',
           borderWidth: 1,
-          borderColor: theme.gray,
+          borderColor: colors.gray,
           borderRadius: 8,
           padding: 16,
         }}
@@ -79,7 +79,7 @@ const AskForAngel = () => {
           rowGap: 8,
         }}
       >
-        <Text style={{ color: theme.text, fontSize: 16, opacity: 0.6 }}>
+        <Text style={{ color: colors.text, fontSize: 16, opacity: 0.6 }}>
           {t('requestAmount')}
         </Text>
         <View
@@ -90,26 +90,14 @@ const AskForAngel = () => {
             alignItems: 'center',
           }}
         >
-          <AmountInput
+          <FiatAmountInput
             autoFocus={true}
             amount={usdAmount}
             onInputChange={setUsdAmount}
           />
-          <Text
-            style={{
-              color: theme.text,
-              textAlign: 'center',
-              opacity: 0.8,
-              width: 120,
-            }}
-          >
-            {t('usd', {
-              ns: 'common',
-            })}
-          </Text>
         </View>
         {!isAmountWithinLimit && (
-          <Text style={{ color: theme.waning, fontSize: 16 }}>
+          <Text style={{ color: colors.warning, fontSize: 16 }}>
             {t('amountLimitExceeded', {
               amount: ASK_AMOUNT_LIMIT_USD.toLocaleString(),
             })}
@@ -117,11 +105,9 @@ const AskForAngel = () => {
         )}
       </View>
       <StyledButton
+        variant="primary"
         title={t('next')}
         isLoading={isCreatingAngelRequest}
-        style={{
-          width: '100%',
-        }}
         onPress={onNextPress}
       />
     </View>

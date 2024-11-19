@@ -1,6 +1,6 @@
 import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import { useState } from 'react';
 import { TextInput, View } from 'react-native';
 
@@ -27,10 +27,10 @@ const SelectAngelRequest = () => {
       <TextInput
         style={{
           fontSize: 16,
-          color: theme.text,
+          color: colors.text,
           width: '100%',
           borderWidth: 1,
-          borderColor: theme.gray,
+          borderColor: colors.gray,
           borderRadius: 8,
           padding: 16,
         }}
@@ -45,8 +45,8 @@ const SelectAngelRequest = () => {
         keyboardType="numeric"
       />
       <StyledButton
+        variant="primary"
         title="Next"
-        style={{ width: '100%' }}
         disabled={!selectedAngelRequestId}
         onPress={() => {
           navigation.navigate('AngelTransfer', {

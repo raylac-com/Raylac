@@ -1,6 +1,6 @@
 import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { theme } from '@/lib/theme';
+import colors from '@/lib/styles/colors';
 import FontAwesome5 from '@expo/vector-icons/build/FontAwesome5';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -62,7 +62,7 @@ const AboutAngels = () => {
             <View
               style={{
                 marginHorizontal: 20,
-                backgroundColor: theme.primary,
+                backgroundColor: colors.primary,
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: 16,
@@ -72,11 +72,11 @@ const AboutAngels = () => {
               <FontAwesome5
                 name="feather-alt"
                 size={48}
-                color={theme.angelPink}
+                color={colors.angelPink}
               />
               <Text
                 style={{
-                  color: theme.text,
+                  color: colors.text,
                   fontSize: 24,
                   fontWeight: 'bold',
                   textAlign: 'center',
@@ -90,9 +90,7 @@ const AboutAngels = () => {
         ))}
       </Animated.View>
       <StyledButton
-        style={{
-          width: '100%',
-        }}
+        variant="primary"
         title={t('next')}
         onPress={() => {
           if (panel === panels.length - 1) {
