@@ -43,7 +43,7 @@ const HomeOtherMenusActionSheet = () => {
     <ActionSheet
       containerStyle={{
         flexDirection: 'column',
-        backgroundColor: '#181818',
+        backgroundColor: colors.background,
         paddingHorizontal: spacing.large,
         paddingVertical: spacing.base,
       }}
