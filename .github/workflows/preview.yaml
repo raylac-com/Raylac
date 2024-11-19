@@ -3,10 +3,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - packages/shared/src/**
-      - packages/sync/src/**
-      - packages/api/src/**
-      - packages/app/src/**
+      - packages/shared/**
+      - packages/shared-backend/**
+      - packages/sync/**
+      - packages/api/**
+      - packages/app/**
       - .github/workflows/preview.yaml
   workflow_dispatch:
 
