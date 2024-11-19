@@ -74,7 +74,6 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
         style={{
           flex: 1,
           flexDirection: 'row',
-          alignItems: 'center',
           justifyContent: 'space-between',
         }}
       >
@@ -92,14 +91,36 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
             }
             size={avatarSizes.small}
           ></FastAvatar>
-          <Text
+          <View
             style={{
-              color: colors.text,
-              fontWeight: 'bold',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              rowGap: spacing.xxSmall,
             }}
           >
-            {getDisplayName(type === 'outgoing' ? to : from)}
-          </Text>
+            <Text
+              style={{
+                color: colors.text,
+                fontWeight: 'bold',
+              }}
+            >
+              {getDisplayName(type === 'outgoing' ? to : from)}
+            </Text>
+            <Text
+              style={{
+                color: colors.text,
+                textAlign: 'right',
+                opacity: opacity.dimmed,
+              }}
+            >
+              {blockTimestamp
+                ? formatDate({
+                    timestamp: blockTimestamp,
+                    locale: i18n.language === 'ja' ? ja : enUS,
+                  })
+                : ''}
+            </Text>
+          </View>
         </View>
         <View
           style={{
@@ -146,20 +167,6 @@ const TransferHistoryListItem = (props: TransferHistoryListItemProps) => {
           )}
         </View>
       </View>
-      <Text
-        style={{
-          color: colors.text,
-          textAlign: 'right',
-          opacity: opacity.dimmed,
-        }}
-      >
-        {blockTimestamp
-          ? formatDate({
-              timestamp: blockTimestamp,
-              locale: i18n.language === 'ja' ? ja : enUS,
-            })
-          : ''}
-      </Text>
     </Pressable>
   );
 };

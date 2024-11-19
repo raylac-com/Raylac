@@ -75,7 +75,7 @@
   },
   "Receive": {
     "backToHome": "Back to home",
-    "orReceiveFromAnyone": "Or receive from anyone",
+    "orReceiveFromAnyone": "Or receive USDC on Base from anyone",
     "receiveFromRaylacUser": "Receive from a Raylac user",
     "receiveOn": "Receive",
     "receiveTo": "Receive to",

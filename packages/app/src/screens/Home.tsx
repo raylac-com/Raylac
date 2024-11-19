@@ -15,6 +15,9 @@ import fontSizes from '@/lib/styles/fontSizes';
 import borderRadius from '@/lib/styles/borderRadius';
 import opacity from '@/lib/styles/opacity';
 import TokenBalanceListItem from '@/components/TokenBalanceListItem';
+import FastAvatar from '@/components/FastAvatar';
+import { Hex } from 'viem';
+import { publicKeyToAddress } from 'viem/accounts';
 
 interface MenuItemProps {
   icon: React.ReactNode;
@@ -62,7 +65,26 @@ const MenuItem = (props: MenuItemProps) => {
   );
 };
 
-const NUM_TRANSFERS_TO_FETCH = 7;
+const HomeHeader = () => {
+  const { data: signedInUser } = useSignedInUser();
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+      }}
+    >
+      <FastAvatar
+        address={publicKeyToAddress(signedInUser?.spendingPubKey as Hex)}
+        size={32}
+        imageUrl={signedInUser?.profileImage}
+      ></FastAvatar>
+    </View>
+  );
+};
+
+const NUM_TRANSFERS_TO_FETCH = 5;
 
 const HomeScreen = () => {
   const { t } = useTranslation('Home');
@@ -133,6 +155,7 @@ const HomeScreen = () => {
         />
       }
     >
+      <HomeHeader />
       <View
         style={{
           flexDirection: 'column',
@@ -204,7 +227,6 @@ const HomeScreen = () => {
             style={{
               textAlign: 'right',
               marginVertical: spacing.base,
-              marginRight: spacing.base,
               textDecorationLine: 'underline',
               color: colors.text,
             }}
@@ -237,7 +259,7 @@ const HomeScreen = () => {
       >
         {t('assets')}
       </Text>
-      <View style={{ flexDirection: 'column', rowGap: spacing.base }}>
+      <View style={{ flexDirection: 'column' }}>
         {tokenBalances?.map((tokenBalance, i) => (
           <TokenBalanceListItem
             key={i}

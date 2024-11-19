@@ -70,7 +70,7 @@ const Tabs = () => {
         name="Home"
         component={Home}
         options={{
-          title: t('title', { ns: 'Home' }),
+          headerShown: false,
           tabBarIcon: ({ color }) => (
             <AntDesign name="home" size={24} color={color} />
           ),
