@@ -1,7 +1,6 @@
 import StyledButton from '@/components/StyledButton';
 import StyledTextInput from '@/components/StyledTextInput';
 import useSignUp from '@/hooks/useSignUp';
-import colors from '@/lib/styles/colors';
 import { isValidUsername } from '@raylac/shared';
 import { RootStackParamsList } from '@/navigation/types';
 import { useNavigation } from '@react-navigation/native';
@@ -11,11 +10,12 @@ import {
 } from '@react-navigation/native-stack';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import useCheckUsername from '@/hooks/useCheckUsername';
 import UsernameAvailabilityIndicator from '@/components/UsernameAvailabilityIndicator';
 import { sleep } from '@raylac/shared';
 import spacing from '@/lib/styles/spacing';
+import InputLabel from '@/components/InputLabel';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type Props = NativeStackScreenProps<RootStackParamsList, 'SignUp'>;
@@ -56,32 +56,23 @@ const SignUp = () => {
       style={{
         flex: 1,
         alignItems: 'center',
-        rowGap: 8,
-        marginTop: 24,
-        paddingHorizontal: 16,
+        rowGap: spacing.small,
+        padding: spacing.small,
       }}
     >
       <View
         style={{
+          width: '100%',
           flexDirection: 'column',
           alignItems: 'flex-start',
-          rowGap: 8,
+          rowGap: spacing.xSmall,
         }}
       >
-        <Text
-          style={{
-            fontSize: 14,
-            fontWeight: 'bold',
-            color: colors.text,
-          }}
-        >
-          {t('name')}
-        </Text>
+        <InputLabel label={t('name')}></InputLabel>
         <StyledTextInput
           autoFocus
           autoCapitalize="none"
           value={name}
-          placeholder={t('name')}
           onChangeText={text => {
             setName(text);
           }}
@@ -89,23 +80,14 @@ const SignUp = () => {
       </View>
       <View
         style={{
+          width: '100%',
           flexDirection: 'column',
           alignItems: 'flex-start',
-          rowGap: 8,
-          marginTop: 8,
+          rowGap: spacing.xSmall,
         }}
       >
-        <Text
-          style={{
-            fontSize: 14,
-            color: colors.text,
-            fontWeight: 'bold',
-          }}
-        >
-          {t('username')}
-        </Text>
+        <InputLabel label={t('username')}></InputLabel>
         <StyledTextInput
-          placeholder={t('username')}
           value={username}
           inputMode="text"
           autoComplete="off"

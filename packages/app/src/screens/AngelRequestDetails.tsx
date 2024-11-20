@@ -84,7 +84,7 @@ const AngelRequestDetails = ({ route }: Props) => {
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'space-between',
-        padding: spacing.base,
+        padding: spacing.small,
       }}
     >
       <View style={{ flexDirection: 'column', rowGap: spacing.small }}>

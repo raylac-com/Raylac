@@ -107,7 +107,6 @@ const AskForAngel = () => {
           placeholder={t('descriptionPlaceholder')}
           value={description}
           onChangeText={setDescription}
-          editable={true}
         />
       </View>
       <View
@@ -126,11 +125,7 @@ const AskForAngel = () => {
             alignItems: 'center',
           }}
         >
-          <FiatAmountInput
-            autoFocus={true}
-            amount={usdAmount}
-            onInputChange={setUsdAmount}
-          />
+          <FiatAmountInput amount={usdAmount} onInputChange={setUsdAmount} />
         </View>
         {!isAmountWithinLimit && (
           <Text style={{ color: colors.warning, fontSize: 16 }}>

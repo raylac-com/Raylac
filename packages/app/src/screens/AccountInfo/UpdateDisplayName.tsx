@@ -42,7 +42,7 @@ const UpdateDisplayName = () => {
   return (
     <View
       style={{
-        rowGap: spacing.base,
+        rowGap: spacing.small,
         alignItems: 'center',
         padding: spacing.small,
         width: '100%',

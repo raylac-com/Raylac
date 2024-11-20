@@ -11,7 +11,7 @@ const containsNonNumberChars = (str: string): boolean => {
 interface FiatAmountInputProps {
   amount: string;
   onInputChange: (amount: string) => void;
-  autoFocus: boolean;
+  autoFocus?: boolean;
 }
 
 const FiatAmountInput = (props: FiatAmountInputProps) => {

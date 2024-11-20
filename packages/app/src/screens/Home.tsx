@@ -297,24 +297,28 @@ const HomeScreen = () => {
         ) : null}
       </View>
       {/* Assets list */}
-      <Text
-        style={{
-          fontSize: fontSizes.base,
-          color: colors.text,
-          fontWeight: 'bold',
-        }}
-      >
-        {t('assets')}
-      </Text>
-      <View style={{ flexDirection: 'column' }}>
-        {tokenBalances?.map((tokenBalance, i) => (
-          <TokenBalanceListItem
-            key={i}
-            balance={BigInt(tokenBalance.balance)}
-            tokenId={tokenBalance.tokenId}
-          />
-        ))}
-      </View>
+      {tokenBalances && tokenBalances.length > 0 && (
+        <>
+          <Text
+            style={{
+              fontSize: fontSizes.base,
+              color: colors.text,
+              fontWeight: 'bold',
+            }}
+          >
+            {t('assets')}
+          </Text>
+          <View style={{ flexDirection: 'column' }}>
+            {tokenBalances?.map((tokenBalance, i) => (
+              <TokenBalanceListItem
+                key={i}
+                balance={BigInt(tokenBalance.balance)}
+                tokenId={tokenBalance.tokenId}
+              />
+            ))}
+          </View>
+        </>
+      )}
       {/* Angel requests */}
       {unpaidAngelRequests && unpaidAngelRequests.length > 0 ? (
         <View
