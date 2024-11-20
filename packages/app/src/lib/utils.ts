@@ -76,7 +76,7 @@ export const getDisplayName = (addressOrUser: AddressOrUser) => {
 
 export const shortenText = (text: string, maxLength: number) => {
   return text.length > maxLength
-    ? `${text.slice(0, maxLength).trim()}...`
+    ? `${text.slice(0, maxLength).trimEnd()}...`
     : text;
 };
 

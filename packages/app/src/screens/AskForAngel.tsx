@@ -1,4 +1,4 @@
-import { View, Text, TextInput } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import colors from '@/lib/styles/colors';
 import { useCallback, useState } from 'react';
@@ -6,17 +6,27 @@ import StyledButton from '@/components/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { trpc } from '@/lib/trpc';
 import FiatAmountInput from '@/components/FiatAmountInput';
+import { useQueryClient } from '@tanstack/react-query';
+import { getQueryKey } from '@trpc/react-query';
+import fontSizes from '@/lib/styles/fontSizes';
+import MultiLineInput from '@/components/MultiLineInput';
+import spacing from '@/lib/styles/spacing';
+import StyledTextInput from '@/components/StyledTextInput';
+import InputLabel from '@/components/InputLabel';
 
-const ASK_AMOUNT_LIMIT_USD = 1000;
+const ASK_AMOUNT_LIMIT_USD = 5000;
 
 const AskForAngel = () => {
   const { t } = useTranslation('AskForAngel');
   const [usdAmount, setUsdAmount] = useState<string>('');
 
   const [description, setDescription] = useState<string>('');
+  const [title, setTitle] = useState<string>('');
 
   const { mutateAsync: createAngelRequest, isPending: isCreatingAngelRequest } =
     trpc.createAngelRequest.useMutation();
+
+  const queryClient = useQueryClient();
 
   const navigation = useTypedNavigation();
 
@@ -25,69 +35,94 @@ const AskForAngel = () => {
 
   const onNextPress = useCallback(async () => {
     const angelRequest = await createAngelRequest({
+      title,
       description,
       usdAmount,
     });
 
+    queryClient.invalidateQueries({
+      queryKey: getQueryKey(trpc.getUserAngelRequests),
+    });
+
     if (angelRequest) {
       navigation.navigate('ConfirmAskForAngel', {
+        title,
         description,
         usdAmount,
         angelRequestId: angelRequest.id!,
       });
     }
-  }, [description, usdAmount]);
+  }, [description, title, usdAmount]);
 
-  const canCreateRequest = description && usdAmount;
+  const canCreateRequest = description && title && usdAmount;
 
   return (
-    <View
-      style={{
-        flex: 1,
+    <ScrollView
+      contentContainerStyle={{
         alignItems: 'center',
-        paddingHorizontal: 16,
+        paddingHorizontal: spacing.small,
+        paddingTop: spacing.small,
+        paddingBottom: spacing.large,
         width: '100%',
-        rowGap: 16,
-        paddingTop: 16,
+        rowGap: spacing.small,
       }}
     >
-      <Text style={{ color: colors.text, fontSize: 24, fontWeight: 'bold' }}>
-        {t('writeARequest')}
-      </Text>
-      <Text style={{ color: colors.text, fontSize: 16 }}>
-        {t('angelDescription')}
-      </Text>
-      <TextInput
+      <Text
         style={{
-          fontSize: 16,
-          height: 240,
           color: colors.text,
-          width: '100%',
-          borderWidth: 1,
-          borderColor: colors.gray,
-          borderRadius: 8,
-          padding: 16,
-        }}
-        placeholderTextColor={colors.gray}
-        multiline={true}
-        placeholder={t('descriptionPlaceholder')}
-        value={description}
-        onChangeText={setDescription}
-      />
-      <View
-        style={{
-          flex: 1,
-          rowGap: 8,
+          fontSize: fontSizes.large,
+          fontWeight: 'bold',
         }}
       >
-        <Text style={{ color: colors.text, fontSize: 16, opacity: 0.6 }}>
-          {t('requestAmount')}
-        </Text>
+        {t('writeARequest')}
+      </Text>
+      <Text style={{ color: colors.text, fontSize: fontSizes.base }}>
+        {t('angelDescription')}
+      </Text>
+      <View
+        style={{
+          width: '100%',
+          flexDirection: 'column',
+          rowGap: spacing.xxSmall,
+          justifyContent: 'flex-start',
+        }}
+      >
+        <InputLabel label={t('titleLabel')} />
+        <StyledTextInput
+          autoFocus
+          placeholder={t('titlePlaceholder')}
+          value={title}
+          onChangeText={setTitle}
+        />
+      </View>
+      <View
+        style={{
+          flexDirection: 'column',
+          width: '100%',
+          rowGap: spacing.xxSmall,
+        }}
+      >
+        <InputLabel label={t('descriptionLabel')} />
+        <MultiLineInput
+          placeholder={t('descriptionPlaceholder')}
+          value={description}
+          onChangeText={setDescription}
+          editable={true}
+        />
+      </View>
+      <View
+        style={{
+          flexDirection: 'column',
+          width: '100%',
+          rowGap: spacing.xxSmall,
+        }}
+      >
+        <InputLabel label={t('requestAmount')} />
         <View
           style={{
             width: '100%',
             flexDirection: 'row',
-            columnGap: 8,
+            columnGap: spacing.xxSmall,
             alignItems: 'center',
           }}
         >
@@ -111,8 +146,9 @@ const AskForAngel = () => {
         title={t('createRequest')}
         isLoading={isCreatingAngelRequest}
         onPress={onNextPress}
+        style={{ marginTop: spacing.large }}
       />
-    </View>
+    </ScrollView>
   );
 };
 

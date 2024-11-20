@@ -7,6 +7,7 @@ const getUserAngelRequests = async ({ userId }: { userId: number }) => {
   const angelRequests = await prisma.angelRequest.findMany({
     select: {
       id: true,
+      title: true,
       description: true,
       amount: true,
       paidBy: {

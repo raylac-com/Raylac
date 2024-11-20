@@ -24,6 +24,8 @@ import { Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
 import borderRadius from '@/lib/styles/borderRadius';
 import { SheetManager } from 'react-native-actions-sheet';
+import UserAngelRequestListItem from '@/components/UserAngelRequestListItem';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 interface MenuItemProps {
   icon: React.ReactNode;
@@ -129,6 +131,10 @@ const HomeScreen = () => {
     }
   );
 
+  const { data: angelRequests } = trpc.getUserAngelRequests.useQuery(null, {
+    throwOnError: false,
+  });
+
   const navigation = useTypedNavigation();
 
   const onRefresh = useCallback(() => {
@@ -155,12 +161,17 @@ const HomeScreen = () => {
     return null;
   }
 
+  const unpaidAngelRequests = angelRequests?.filter(
+    angelRequest => angelRequest.paidBy.length === 0
+  );
+
   return (
     <ScrollView
       contentContainerStyle={{
         rowGap: spacing.base,
         paddingHorizontal: spacing.small,
         paddingTop: spacing.small,
+        paddingBottom: spacing.large,
       }}
       refreshControl={
         <RefreshControl
@@ -249,21 +260,29 @@ const HomeScreen = () => {
             type={transfer.transferType as 'incoming' | 'outgoing'}
           />
         ))}
-        {transferHistory && transferHistory.length >= NUM_TRANSFERS_TO_FETCH ? (
-          <Text
-            style={{
-              textAlign: 'right',
-              marginVertical: spacing.base,
-              textDecorationLine: 'underline',
-              color: colors.text,
-            }}
-            onPress={() => {
-              navigation.navigate('TransferHistory');
-            }}
-          >
-            {t('seeAll')}
-          </Text>
-        ) : null}
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            marginVertical: spacing.base,
+          }}
+        >
+          {transferHistory &&
+          transferHistory.length >= NUM_TRANSFERS_TO_FETCH ? (
+            <Text
+              style={{
+                textAlign: 'right',
+                textDecorationLine: 'underline',
+                color: colors.text,
+              }}
+              onPress={() => {
+                navigation.navigate('TransferHistory');
+              }}
+            >
+              {t('seeAll')}
+            </Text>
+          ) : null}
+        </View>
         {transferHistory?.length === 0 ? (
           <Text
             style={{
@@ -296,6 +315,44 @@ const HomeScreen = () => {
           />
         ))}
       </View>
+      {/* Angel requests */}
+      {unpaidAngelRequests && unpaidAngelRequests.length > 0 ? (
+        <View
+          style={{
+            flexDirection: 'column',
+            marginTop: spacing.base,
+          }}
+        >
+          <Pressable
+            onPress={() => {
+              navigation.navigate('UserAngelRequests');
+            }}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              columnGap: spacing.xSmall,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: fontSizes.base,
+                color: colors.text,
+                fontWeight: 'bold',
+              }}
+            >
+              {t('angelRequests')}
+            </Text>
+            <FontAwesome5
+              name="feather-alt"
+              size={16}
+              color={colors.angelPink}
+            />
+          </Pressable>
+          {unpaidAngelRequests?.map((angelRequest, i) => (
+            <UserAngelRequestListItem key={i} angelRequest={angelRequest} />
+          ))}
+        </View>
+      ) : null}
     </ScrollView>
   );
 };

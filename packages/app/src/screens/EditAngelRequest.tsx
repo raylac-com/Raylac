@@ -1,6 +1,8 @@
 import FiatAmountInput from '@/components/FiatAmountInput';
+import InputLabel from '@/components/InputLabel';
 import MultiLineInput from '@/components/MultiLineInput';
 import StyledButton from '@/components/StyledButton';
+import StyledTextInput from '@/components/StyledTextInput';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import spacing from '@/lib/styles/spacing';
 import { trpc } from '@/lib/trpc';
@@ -9,12 +11,14 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'EditAngelRequest'>;
 
 const EditAngelRequest = ({ route }: Props) => {
+  const { t } = useTranslation('EditAngelRequest');
   const navigation = useTypedNavigation();
   const { angelRequestId } = route.params;
 
@@ -24,10 +28,12 @@ const EditAngelRequest = ({ route }: Props) => {
 
   const [newAmount, setNewAmount] = useState<string>('');
   const [newDescription, setNewDescription] = useState<string>('');
+  const [newTitle, setNewTitle] = useState<string>('');
 
   useEffect(() => {
     if (angelRequest) {
       setNewAmount(angelRequest.amount.toString());
+      setNewTitle(angelRequest.title);
       setNewDescription(angelRequest.description);
     }
   }, [angelRequest]);
@@ -41,6 +47,7 @@ const EditAngelRequest = ({ route }: Props) => {
     await updateAngelRequest({
       angelRequestId,
       usdAmount: newAmount,
+      title: newTitle,
       description: newDescription,
     });
 
@@ -64,6 +71,7 @@ const EditAngelRequest = ({ route }: Props) => {
     updateAngelRequest,
     newAmount,
     newDescription,
+    newTitle,
     angelRequestId,
     queryClient,
   ]);
@@ -77,17 +85,41 @@ const EditAngelRequest = ({ route }: Props) => {
         padding: spacing.base,
       }}
     >
-      <View style={{ flexDirection: 'column', rowGap: spacing.small }}>
-        <FiatAmountInput
-          autoFocus
-          amount={newAmount}
-          onInputChange={setNewAmount}
-        />
-        <MultiLineInput
-          placeholder="Description"
-          value={newDescription}
-          onChangeText={setNewDescription}
-        />
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'column',
+          rowGap: spacing.small,
+          justifyContent: 'center',
+        }}
+      >
+        <View style={{ rowGap: spacing.xxSmall }}>
+          <InputLabel label={t('titleLabel')} />
+          <StyledTextInput
+            autoFocus
+            placeholder="Title"
+            value={newTitle}
+            onChangeText={setNewTitle}
+          />
+        </View>
+
+        <View style={{ rowGap: spacing.xxSmall }}>
+          <InputLabel label={t('descriptionLabel')} />
+          <MultiLineInput
+            placeholder="Description"
+            value={newDescription}
+            onChangeText={setNewDescription}
+            editable={true}
+          />
+        </View>
+        <View style={{ rowGap: spacing.xxSmall }}>
+          <InputLabel label={t('amountLabel')} />
+          <FiatAmountInput
+            autoFocus={false}
+            amount={newAmount}
+            onInputChange={setNewAmount}
+          />
+        </View>
       </View>
       <View style={{ flexDirection: 'column', rowGap: spacing.small }}>
         <StyledButton

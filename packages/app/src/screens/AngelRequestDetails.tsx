@@ -115,6 +115,15 @@ const AngelRequestDetails = ({ route }: Props) => {
             </Text>
           </View>
         )}
+        <Text style={{ fontSize: fontSizes.base, color: colors.text }}>
+          {angelRequest?.title}
+        </Text>
+        <MultiLineInput
+          editable={false}
+          placeholder="Description"
+          value={angelRequest?.description}
+          onChangeText={() => {}}
+        />
         <Text
           style={{
             fontSize: fontSizes.large,
@@ -125,11 +134,6 @@ const AngelRequestDetails = ({ route }: Props) => {
         >
           {`$${angelRequest?.amount}`}
         </Text>
-        <MultiLineInput
-          placeholder="Description"
-          value={angelRequest?.description}
-          onChangeText={() => {}}
-        />
       </View>
       <View style={{ flexDirection: 'column', rowGap: spacing.small }}>
         <StyledButton

@@ -50,6 +50,7 @@ export type RootStackParamsList = {
   AskForAngel: undefined;
 
   ConfirmAskForAngel: {
+    title: string;
     description: string;
     usdAmount: string;
     angelRequestId: number;

@@ -73,8 +73,6 @@ const Tab = createBottomTabNavigator<RootTabsParamsList>();
 const RootStack = createNativeStackNavigator<RootStackParamsList>();
 
 const Tabs = () => {
-  const { t } = useTranslation();
-
   return (
     <Tab.Navigator initialRouteName="Home">
       <Tab.Screen
@@ -91,7 +89,7 @@ const Tabs = () => {
         name="Account"
         component={Account}
         options={{
-          title: t('title', { ns: 'Account' }),
+          headerShown: false,
           tabBarIcon: ({ color }) => (
             <AntDesign name="user" size={24} color={color} />
           ),

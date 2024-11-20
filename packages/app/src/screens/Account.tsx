@@ -100,7 +100,7 @@ const Account = () => {
     reset: resetSetProfileImage,
   } = useSetProfileImage();
 
-  const onSignOutPress = useCallback(async () => {
+  const onSignOutPress = useCallback(() => {
     Alert.alert(t('confirmSignOutTitle'), '', [
       {
         text: t('cancel'),
@@ -244,18 +244,6 @@ const Account = () => {
           }
           title={t('accountInfo')}
           onPress={() => navigation.navigate('AccountInfo')}
-          color={colors.text}
-        />
-        <SettingListItem
-          icon={
-            <FontAwesome5
-              name="feather-alt"
-              size={20}
-              color={colors.angelPink}
-            />
-          }
-          title={t('userAngelRequests')}
-          onPress={() => navigation.navigate('UserAngelRequests')}
           color={colors.text}
         />
         <SettingListItem

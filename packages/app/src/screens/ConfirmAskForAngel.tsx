@@ -18,7 +18,7 @@ type Props = NativeStackScreenProps<RootStackParamsList, 'ConfirmAskForAngel'>;
 const ConfirmAskForAngel = ({ route }: Props) => {
   const navigation = useTypedNavigation();
   const { t } = useTranslation('ConfirmAskForAngel');
-  const { description, usdAmount, angelRequestId } = route.params;
+  const { title, description, usdAmount, angelRequestId } = route.params;
 
   const link = `https://raylac.com/request/${angelRequestId}`;
 
@@ -66,7 +66,6 @@ const ConfirmAskForAngel = ({ route }: Props) => {
         >
           {`Share your request \n with angels`}
         </Text>
-        {/* <FontAwesome5 name="feather-alt" size={48} color={colors.angelPink} /> */}
         <Text
           style={{
             color: colors.text,
@@ -78,10 +77,14 @@ const ConfirmAskForAngel = ({ route }: Props) => {
             amount: usdAmount,
           })}
         </Text>
+        <Text style={{ color: colors.text, fontSize: fontSizes.base }}>
+          {title}
+        </Text>
         <MultiLineInput
           placeholder={''}
           value={description}
           onChangeText={() => {}}
+          editable={false}
         />
       </View>
       <View style={{ flexDirection: 'column', rowGap: 8, width: '100%' }}>

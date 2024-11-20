@@ -5,16 +5,18 @@ import prisma from '../lib/prisma';
  */
 const updateAngelRequest = async ({
   angelRequestId,
+  title,
   description,
   usdAmount,
 }: {
   angelRequestId: number;
+  title: string;
   description: string;
   usdAmount: string;
 }) => {
   await prisma.angelRequest.update({
     where: { id: angelRequestId },
-    data: { description, amount: usdAmount },
+    data: { description, amount: usdAmount, title },
   });
 };
 
