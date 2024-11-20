@@ -58,14 +58,12 @@ const SignIn = () => {
       }}
     >
       <StyledTextInput
+        autoFocus
         autoCapitalize="none"
         multiline
         placeholder={t('enterYourMnemonic')}
         value={mnemonic}
         onChangeText={setMnemonic}
-        inputStyle={{
-          height: 100,
-        }}
       ></StyledTextInput>
       <StyledButton
         isLoading={isSigningIn}

@@ -49,6 +49,7 @@ const UpdateDisplayName = () => {
       }}
     >
       <StyledTextInput
+        autoFocus
         placeholder={t('displayName')}
         value={newDisplayName}
         onChangeText={setNewDisplayname}

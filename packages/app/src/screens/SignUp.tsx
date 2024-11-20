@@ -78,12 +78,10 @@ const SignUp = () => {
           {t('name')}
         </Text>
         <StyledTextInput
+          autoFocus
           autoCapitalize="none"
           value={name}
           placeholder={t('name')}
-          style={{
-            marginTop: 40,
-          }}
           onChangeText={text => {
             setName(text);
           }}

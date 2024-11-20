@@ -56,6 +56,7 @@ const UpdateUsername = () => {
       }}
     >
       <StyledTextInput
+        autoFocus
         placeholder={t('username')}
         value={newUsername}
         onChangeText={setNewUsername}
