@@ -20,6 +20,7 @@ const getAngelRequest = async ({
           name: true,
           username: true,
           spendingPubKey: true,
+          viewingPubKey: true,
           profileImage: true,
         },
       },

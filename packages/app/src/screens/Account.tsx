@@ -86,7 +86,7 @@ const SettingListItem = (props: SettingListItemProps) => {
   );
 };
 
-const ANGEL_USER_IDS = [15];
+const ANGEL_USER_IDS = [15, 1];
 
 const Account = () => {
   const { data: user } = useSignedInUser();

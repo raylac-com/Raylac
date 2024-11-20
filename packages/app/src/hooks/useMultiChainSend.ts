@@ -55,7 +55,6 @@ const useMultiChainSend = () => {
     }: {
       amount: bigint;
       tokenId: string;
-      chainId: number;
       recipientUserOrAddress: Hex | User;
       tokenPrice: number;
     }) => {
