@@ -19,7 +19,7 @@ const config: ExpoConfig = {
     config: {
       usesNonExemptEncryption: false,
     },
-    bundleIdentifier: 'com.raylac',
+    bundleIdentifier: IS_DEV ? 'com.raylac.dev' : 'com.raylac',
   },
   android: {
     adaptiveIcon: {
@@ -28,7 +28,7 @@ const config: ExpoConfig = {
         : './assets/adaptive-icon.png',
       backgroundColor: '#ffffff',
     },
-    package: 'com.raylac',
+    package: IS_DEV ? 'com.raylac.dev' : 'com.raylac',
   },
   plugins: [
     [
