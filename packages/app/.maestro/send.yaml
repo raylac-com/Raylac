@@ -1,4 +1,4 @@
-appId: com.raylac
+appId: com.raylac.dev
 ---
 - launchApp
 - runFlow: ./sign-in.yaml
