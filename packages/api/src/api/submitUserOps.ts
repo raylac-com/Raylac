@@ -150,7 +150,7 @@ const saveNativeTransferTraces = async ({
     const data: Prisma.TraceCreateManyInput = {
       from,
       to: getAddress(trace.to),
-      amount: parseFloat(hexToBigInt(trace.value).toString()),
+      amount: hexToBigInt(trace.value).toString(),
       tokenId: 'eth',
       transactionHash: txReceipt.transactionHash,
       chainId,
@@ -225,7 +225,7 @@ const saveERC20TransferLogs = async ({
       from,
       to,
       tokenId,
-      amount: parseFloat(args.value.toString()),
+      amount: args.value.toString(),
       transactionHash: txReceipt.transactionHash,
       logIndex: log.logIndex,
       chainId,

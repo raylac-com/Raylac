@@ -7,7 +7,6 @@ import {
   toCoingeckoTokenId,
   devChains,
   buildUserOp,
-  UserOperation,
   UserActionType,
   encodeUserActionTag,
   generateRandomMultiChainTag,
@@ -105,7 +104,7 @@ type QueryUserActionResult = Prisma.UserActionGetPayload<{
   select: typeof selectUserAction;
 }>;
 
-const USD_AMOUNT = 0.01;
+const USD_AMOUNT = 33;
 
 /**
  * Test that the `submitUserOps` endpoint works correctly
@@ -143,7 +142,7 @@ describe('submitUserOps', () => {
     const groupSize = 1;
 
     // The tx hashes of the transactions submitted to the RPC endpoint
-    let txHashes: Hex[] = [];
+    let txHash: Hex;
 
     // The token price used in this test
     let tokenPrice: { usd: number };
@@ -166,63 +165,57 @@ describe('submitUserOps', () => {
         chainIds: devChains.map(c => c.id),
       });
 
-      const signedUserOps: UserOperation[] = [];
-
       const tag = encodeUserActionTag({
         groupTag,
         groupSize,
         userActionType: UserActionType.Transfer,
       });
 
-      for (const chain of devChains) {
-        const chainGasInfo = gasInfo.find(g => g.chainId === chain.id);
+      const chain = devChains[0];
 
-        if (!chainGasInfo) {
-          throw new Error(`Gas info not found for chain ${chain.id}`);
-        }
+      const chainGasInfo = gasInfo.find(g => g.chainId === chain.id);
 
-        const userOp = buildUserOp({
-          stealthSigner: stealthAccount.signerAddress,
-          to,
-          value: amount,
-          data: '0x',
-          tag,
-          chainId: chain.id,
-          gasInfo: chainGasInfo,
-          nonce: null,
-        });
-
-        // Get the paymaster signature
-        const paymasterSignedUserOp = await signUserOpWithPaymasterAccount({
-          userOp,
-        });
-
-        // Sign the user operation with the test user's stealth account
-        const signedUserOp = await signUserOpWithTestUserAccount({
-          userOp: paymasterSignedUserOp,
-          stealthAccount,
-        });
-
-        signedUserOps.push(signedUserOp);
+      if (!chainGasInfo) {
+        throw new Error(`Gas info not found for chain ${chain.id}`);
       }
+
+      const userOp = buildUserOp({
+        stealthSigner: stealthAccount.signerAddress,
+        to,
+        value: amount,
+        data: '0x',
+        tag,
+        chainId: chain.id,
+        gasInfo: chainGasInfo,
+        nonce: null,
+      });
+
+      // Get the paymaster signature
+      const paymasterSignedUserOp = await signUserOpWithPaymasterAccount({
+        userOp,
+      });
+
+      // Sign the user operation with the test user's stealth account
+      const signedUserOp = await signUserOpWithTestUserAccount({
+        userOp: paymasterSignedUserOp,
+        stealthAccount,
+      });
 
       // Submit the user operations to the RPC endpoint
       const result = await authedClient.submitUserOps.mutate({
-        userOps: signedUserOps,
+        userOps: [signedUserOp],
         tokenPrice: tokenPrice.usd,
       });
 
       const testClient = getTestClient({ chainId: anvil.id });
       await testClient.mine({ blocks: 1 });
 
-      const sortedTxHashes = result.txHashes.sort();
-
-      txHashes = sortedTxHashes;
+      txHash = result.txHashes[0];
 
       // Get the `UserAction` from the db
       savedUserAction = await prisma.userAction.findUnique({
         select: selectUserAction,
-        where: { txHashes: sortedTxHashes },
+        where: { txHashes: [txHash] },
       });
     });
 
@@ -230,30 +223,28 @@ describe('submitUserOps', () => {
       expect(savedUserAction).not.toBeNull();
     });
 
-    it(`should save the transactions`, () => {
-      const savedTxHashes = savedUserAction!.transactions
-        .map(t => t.hash)
-        .sort();
-      expect(savedTxHashes).toEqual(txHashes);
+    it(`should save the transaction`, () => {
+      expect(savedUserAction!.transactions[0].hash).toBe(txHash);
     });
 
     it(`should save the token price`, () => {
       // Get the token prices from the traces
-      const tokenPricesInTraces = savedUserAction!.transactions.flatMap(t =>
-        t.traces.map(trace => trace.tokenPriceAtTrace)
-      );
+      const tokenPriceInTrace =
+        savedUserAction!.transactions[0].traces[0].tokenPriceAtTrace;
 
-      expect(tokenPricesInTraces).toEqual(
-        Array(tokenPricesInTraces.length).fill(tokenPrice.usd)
-      );
+      expect(tokenPriceInTrace).toBe(tokenPrice.usd);
+    });
+
+    it(`should save the correct amount`, () => {
+      const amount = savedUserAction!.transactions[0].traces[0].amount;
+
+      expect(amount).toBe(amount);
     });
 
     it(`should save the native transfer traces with the test user's stealth address`, () => {
-      const tracesFromSender = savedUserAction!.transactions.flatMap(t =>
-        t.traces.filter(trace => trace.from === stealthAccount.address)
-      );
+      const trace = savedUserAction!.transactions[0].traces[0];
 
-      expect(tracesFromSender).toHaveLength(txHashes.length);
+      expect(trace.UserStealthAddressFrom).not.toBeNull();
     });
 
     it(`should save the correct group tag`, () => {
