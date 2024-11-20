@@ -172,6 +172,7 @@ const HomeScreen = () => {
           onRefresh={onRefresh}
         />
       }
+      testID="home"
     >
       <HomeHeader />
       <View

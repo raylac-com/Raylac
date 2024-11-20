@@ -1,4 +1,4 @@
-appId: com.raylac
+appId: com.raylac.dev
 ---
 - launchApp
 - assertVisible: 'Sign in'
@@ -11,4 +11,5 @@ appId: com.raylac
 - tapOn: 'Enter your mnemonic'
 - inputText: ${TEST_ACCOUNT_MNEMONIC}
 - tapOn: 'Sign in'
-- assertVisible: 'Home'
+- assertVisible:
+    id: home

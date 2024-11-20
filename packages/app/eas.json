@@ -13,7 +13,12 @@
         "image": "latest"
       },
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
+        "EXPO_PUBLIC_ALCHEMY_API_KEY": "GBAe59-NKtf1q21Il9zJE3NXkgFvRMIY",
+        "APP_VARIANT": "development"
+      }
     },
     "test": {
       "ios": {
@@ -24,15 +29,22 @@
         "image": "latest"
       },
       "distribution": "internal",
-      "channel": "test"
+      "channel": "test",
+      "env": {
+        "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
+        "EXPO_PUBLIC_ALCHEMY_API_KEY": "GBAe59-NKtf1q21Il9zJE3NXkgFvRMIY",
+        "APP_VARIANT": "development"
+      }
     },
-    "preview": {
-      "android": {
-        "buildType": "apk",
-        "image": "latest"
-      },
+    "staging": {
+      "channel": "staging",
+      "autoIncrement": true,
       "distribution": "internal",
-      "channel": "production"
+      "env": {
+        "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
+        "EXPO_PUBLIC_ALCHEMY_API_KEY": "GBAe59-NKtf1q21Il9zJE3NXkgFvRMIY",
+        "APP_VARIANT": "development"
+      }
     },
     "production": {
       "channel": "production",
