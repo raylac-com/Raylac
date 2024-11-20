@@ -5,6 +5,7 @@ import spacing from '@/lib/styles/spacing';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Pressable, Text } from 'react-native';
 import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface OtherMenuItemProps {
   icon: React.ReactNode;
@@ -41,9 +42,11 @@ const OtherMenuItem = ({ icon, title, onPress }: OtherMenuItemProps) => {
 
 const HomeOtherMenusActionSheet = () => {
   const navigation = useTypedNavigation();
+  const insets = useSafeAreaInsets();
 
   return (
     <ActionSheet
+      safeAreaInsets={insets}
       containerStyle={{
         flexDirection: 'column',
         backgroundColor: colors.background,
