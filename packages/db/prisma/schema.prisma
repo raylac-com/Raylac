@@ -154,6 +154,9 @@ model UserOperation {
   Transaction     Transaction? @relation(fields: [transactionHash], references: [hash])
   transactionHash String?
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
   UserStealthAddress UserStealthAddress? @relation(fields: [sender], references: [address])
 }
 
@@ -183,6 +186,9 @@ model Block {
   timestamp BigInt?
 
   Transaction Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([number, chainId])
 }

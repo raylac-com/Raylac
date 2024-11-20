@@ -21,7 +21,7 @@ import {
   RaylacAccountV2Abi,
   sleep,
 } from '@raylac/shared';
-import { logger } from '@raylac/shared-backend';
+import { logger, safeUpsert } from '@raylac/shared-backend';
 import chalk from 'chalk';
 
 export const announcementAbiItem = parseAbiItem(
@@ -280,20 +280,15 @@ export const upsertTransaction = async ({
     chainId,
   };
 
-  try {
-    // Sometimes this fails because the chain is going through a reorg
-    await prisma.block.upsert({
+  await safeUpsert(() =>
+    prisma.block.upsert({
       create: blockCreateInput,
       update: blockCreateInput,
       where: {
         hash: tx.blockHash,
       },
-    });
-  } catch (_err) {
-    logger.error(
-      `Error upserting block ${tx.blockHash} on ${getChainName(chainId)}`
-    );
-  }
+    })
+  );
 
   const data: Prisma.TransactionCreateInput = {
     hash: txHash,
@@ -308,15 +303,15 @@ export const upsertTransaction = async ({
     tag,
   };
 
-  await prisma.$transaction(async tx => {
-    await tx.transaction.upsert({
+  await safeUpsert(async () =>
+    prisma.transaction.upsert({
       where: {
         hash: txHash,
       },
       create: data,
       update: data,
-    });
-  });
+    })
+  );
 };
 
 /**

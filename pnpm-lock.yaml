@@ -401,6 +401,9 @@ importers:
 
   packages/shared-backend:
     dependencies:
+      '@raylac/db':
+        specifier: workspace:*
+        version: link:../db
       winston:
         specifier: ^3.15.0
         version: 3.15.0

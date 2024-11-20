@@ -2,7 +2,7 @@ import { Prisma } from '@raylac/db';
 import prisma from './lib/prisma';
 import { Hex } from 'viem';
 import { bigIntMax, decodeUserOperationContext } from '@raylac/shared';
-import { logger } from '@raylac/shared-backend';
+import { logger, safeUpsert } from '@raylac/shared-backend';
 import { loop } from './utils';
 
 /**
@@ -69,27 +69,29 @@ const syncMultiChainTransfers = async ({
 
         const txHashes = txsInGroup.map(tx => tx.hash).sort();
 
+        // Use the timestamp of the latest transaction as the timestamp of the UserAction
+        const timestamp = bigIntMax(
+          txsInGroup.map(tx => BigInt(tx.block.timestamp || 0n))
+        );
+
         // Create a new UserAction for the group
-        const data: Prisma.UserActionCreateInput = {
+        const createInput: Prisma.UserActionCreateInput = {
           groupTag: multiChainTag,
           groupSize: numChains,
           transactions: {
             connect: txHashes.map(hash => ({ hash })),
           },
           txHashes,
-          // Use the timestamp of the latest transaction as the timestamp of the UserAction
-          timestamp: bigIntMax(
-            txsInGroup.map(tx => BigInt(tx.block.timestamp || 0n))
-          ),
+          timestamp,
         };
 
-        await prisma.$transaction(async tx => {
-          await tx.userAction.upsert({
+        await safeUpsert(() =>
+          prisma.userAction.upsert({
             where: { txHashes },
-            update: data,
-            create: data,
-          });
-        });
+            create: createInput,
+            update: createInput,
+          })
+        );
       }
     },
     interval: 2000,
