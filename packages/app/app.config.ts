@@ -5,7 +5,7 @@ const IS_DEV = process.env.APP_VARIANT === 'development';
 const config: ExpoConfig = {
   name: IS_DEV ? 'Raylac (dev)' : 'Raylac',
   slug: 'raylac',
-  version: '1.0.0',
+  version: '1.1.0',
   orientation: 'portrait',
   icon: IS_DEV ? './assets/icon-dev.png' : './assets/icon.png',
   userInterfaceStyle: 'light',
