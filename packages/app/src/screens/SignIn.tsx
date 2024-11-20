@@ -3,7 +3,7 @@ import { useSignIn } from '@/hooks/useSIgnIn';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { KeyboardAvoidingView } from 'react-native';
 import * as bip39 from 'bip39';
 import Toast from 'react-native-toast-message';
 import spacing from '@/lib/styles/spacing';
@@ -49,7 +49,7 @@ const SignIn = () => {
   }, [mnemonic]);
 
   return (
-    <View
+    <KeyboardAvoidingView
       style={{
         flex: 1,
         flexDirection: 'column',
@@ -75,7 +75,7 @@ const SignIn = () => {
         disabled={!isMnemonicValid}
         variant="primary"
       ></StyledButton>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
