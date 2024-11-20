@@ -372,12 +372,14 @@ export const upsertUserOpEventLog = async ({
     },
   };
 
-  await prisma.userOperation.upsert({
-    create: data,
-    update: data,
-    where: {
-      hash: userOpHash,
-    },
+  await prisma.$transaction(async tx => {
+    await tx.userOperation.upsert({
+      create: data,
+      update: data,
+      where: {
+        hash: userOpHash,
+      },
+    });
   });
 };
 
