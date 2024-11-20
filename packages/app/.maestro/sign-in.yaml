@@ -11,4 +11,5 @@ appId: com.raylac.dev
 - tapOn: 'Enter your mnemonic'
 - inputText: ${TEST_ACCOUNT_MNEMONIC}
 - tapOn: 'Sign in'
-- assertVisible: 'Home'
+- assertVisible:
+    id: home
