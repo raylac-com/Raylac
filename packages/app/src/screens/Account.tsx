@@ -3,7 +3,7 @@ import useSignOut from '@/hooks/useSignOut';
 import useSignedInUser from '@/hooks/useSignedInUser';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import colors from '@/lib/styles/colors';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Text, TouchableHighlight, View } from 'react-native';
 import { Hex } from 'viem';
@@ -100,7 +100,7 @@ const Account = () => {
     reset: resetSetProfileImage,
   } = useSetProfileImage();
 
-  const onSignOutPress = useCallback(() => {
+  const onSignOutPress = () => {
     Alert.alert(t('confirmSignOutTitle'), '', [
       {
         text: t('cancel'),
@@ -116,7 +116,7 @@ const Account = () => {
         style: 'destructive',
       },
     ]);
-  }, [signOut, navigation]);
+  };
 
   useEffect(() => {
     if (isSettingProfileImage) {
@@ -146,9 +146,9 @@ const Account = () => {
     return null;
   }
 
-  const onChangeLanguagePress = useCallback(() => {
+  const onChangeLanguagePress = () => {
     navigation.navigate('SelectLanguage');
-  }, []);
+  };
 
   return (
     <View
