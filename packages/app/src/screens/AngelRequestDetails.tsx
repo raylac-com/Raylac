@@ -10,8 +10,11 @@ import { copyToClipboard } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import { UserAngelRequestReturnType } from '@/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useQueryClient } from '@tanstack/react-query';
+import { getQueryKey } from '@trpc/react-query';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
+import { Text, View, Alert } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'AngelRequestDetails'>;
@@ -25,6 +28,11 @@ const AngelRequestDetails = ({ route }: Props) => {
     angelRequestId,
   });
 
+  const { mutateAsync: deleteAngelRequest } =
+    trpc.deleteAngelRequest.useMutation();
+
+  const queryClient = useQueryClient();
+
   const link = `https://raylac.com/request/${angelRequestId}`;
 
   const onCopyPress = () => {
@@ -36,6 +44,25 @@ const AngelRequestDetails = ({ route }: Props) => {
       visibilityTime: 1000,
     });
   };
+
+  const onDeletePress = useCallback(() => {
+    Alert.alert('Delete', 'Are you sure you want to delete this request?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          await deleteAngelRequest({ angelRequestId });
+
+          queryClient.invalidateQueries({
+            queryKey: getQueryKey(trpc.getUserAngelRequests),
+          });
+
+          navigation.goBack();
+        },
+      },
+    ]);
+  }, [deleteAngelRequest, angelRequestId]);
 
   if (!angelRequest) {
     return null;
@@ -119,6 +146,18 @@ const AngelRequestDetails = ({ route }: Props) => {
           }}
           variant="outline"
         />
+        <Text
+          style={{
+            color: colors.warning,
+            padding: spacing.small,
+            fontSize: fontSizes.base,
+            fontWeight: 'bold',
+            textAlign: 'center',
+          }}
+          onPress={onDeletePress}
+        >
+          {'Delete'}
+        </Text>
       </View>
     </View>
   );
