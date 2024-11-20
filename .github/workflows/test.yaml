@@ -71,18 +71,14 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Link branch to test channel
-        run: eas channel:edit test --branch ${{ github.event.pull_request.head.ref }}
-        working-directory: packages/app
-
       - name: Create a .env file
         run: printf "EXPO_PUBLIC_RPC_URL=https://raylac-api-pr-${{ github.event.pull_request.number }}.onrender.com\nEXPO_PUBLIC_ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}\n" > .env
         working-directory: packages/app
 
-      - name: Run eas update for the test channel
+      - name: Run eas update for the test branch
         uses: expo/expo-github-action/preview@v8
         with:
-          command: eas update --auto --channel test
+          command: eas update --auto --branch test
           working-directory: packages/app
 
   test-ios:
