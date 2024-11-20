@@ -8,7 +8,7 @@ import {
 import { Hex } from 'viem';
 import { supportedTokens } from '@raylac/shared';
 import { logger } from '@raylac/shared-backend';
-import { loop } from './utils';
+import { endTimer, loop, startTimer } from './utils';
 
 const getAddressBalanceFromDb = async ({
   address,
@@ -140,6 +140,7 @@ const checkAddressBalances = async ({ chainIds }: { chainIds: number[] }) => {
       let matches = 0;
       let mismatches = 0;
 
+      const timer = startTimer('Balance check');
       for (const syncTask of syncTasks) {
         const balanceFromDb = await getAddressBalanceFromDb({
           address: syncTask.address as Hex,
@@ -190,6 +191,7 @@ const checkAddressBalances = async ({ chainIds }: { chainIds: number[] }) => {
           }
         }
       }
+      endTimer(timer);
 
       logger.info(
         `Balance check: ${matches} matches, ${mismatches} mismatches`,
