@@ -99,7 +99,7 @@ const HomeHeader = () => {
   );
 };
 
-const NUM_TRANSFERS_TO_FETCH = 5;
+const NUM_TRANSFERS_TO_FETCH = 3;
 
 const HomeScreen = () => {
   const { t } = useTranslation('Home');
