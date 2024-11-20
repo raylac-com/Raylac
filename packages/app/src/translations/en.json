@@ -202,7 +202,8 @@
     "title": "Angel transfer"
   },
   "AngelRequestDetails": {
-    "title": "Angel request details"
+    "title": "Angel request details",
+    "deletedRequest": "Deleted request"
   },
   "EditAngelRequest": {
     "title": "Edit angel request",

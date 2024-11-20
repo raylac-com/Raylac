@@ -132,6 +132,8 @@ const HomeScreen = () => {
   );
 
   const { data: angelRequests } = trpc.getUserAngelRequests.useQuery(null, {
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
     throwOnError: false,
   });
 

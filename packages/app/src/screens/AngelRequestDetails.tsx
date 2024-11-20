@@ -58,6 +58,13 @@ const AngelRequestDetails = ({ route }: Props) => {
             queryKey: getQueryKey(trpc.getUserAngelRequests),
           });
 
+          Toast.show({
+            type: 'success',
+            text1: t('deletedRequest'),
+            position: 'top',
+            visibilityTime: 1000,
+          });
+
           navigation.goBack();
         },
       },
