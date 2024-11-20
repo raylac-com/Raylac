@@ -13,9 +13,7 @@ const AskForAngel = () => {
   const { t } = useTranslation('AskForAngel');
   const [usdAmount, setUsdAmount] = useState<string>('');
 
-  const [description, setDescription] = useState<string>(
-    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-  );
+  const [description, setDescription] = useState<string>('');
 
   const { mutateAsync: createAngelRequest, isPending: isCreatingAngelRequest } =
     trpc.createAngelRequest.useMutation();
@@ -39,6 +37,8 @@ const AskForAngel = () => {
       });
     }
   }, [description, usdAmount]);
+
+  const canCreateRequest = description && usdAmount;
 
   return (
     <View
@@ -68,6 +68,7 @@ const AskForAngel = () => {
           borderRadius: 8,
           padding: 16,
         }}
+        placeholderTextColor={colors.gray}
         multiline={true}
         placeholder={t('descriptionPlaceholder')}
         value={description}
@@ -105,8 +106,9 @@ const AskForAngel = () => {
         )}
       </View>
       <StyledButton
+        disabled={!canCreateRequest}
         variant="primary"
-        title={t('next')}
+        title={t('createRequest')}
         isLoading={isCreatingAngelRequest}
         onPress={onNextPress}
       />

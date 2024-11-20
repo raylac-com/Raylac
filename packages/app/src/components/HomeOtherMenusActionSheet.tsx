@@ -1,9 +1,10 @@
+import useTypedNavigation from '@/hooks/useTypedNavigation';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
 import spacing from '@/lib/styles/spacing';
 import { FontAwesome5 } from '@expo/vector-icons';
 import { Pressable, Text } from 'react-native';
-import ActionSheet from 'react-native-actions-sheet';
+import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
 
 interface OtherMenuItemProps {
   icon: React.ReactNode;
@@ -39,6 +40,8 @@ const OtherMenuItem = ({ icon, title, onPress }: OtherMenuItemProps) => {
 };
 
 const HomeOtherMenusActionSheet = () => {
+  const navigation = useTypedNavigation();
+
   return (
     <ActionSheet
       containerStyle={{
@@ -53,7 +56,10 @@ const HomeOtherMenusActionSheet = () => {
           <FontAwesome5 name="feather-alt" size={16} color={colors.angelPink} />
         }
         title="Find angels"
-        onPress={() => {}}
+        onPress={() => {
+          SheetManager.hide('home-other-menus');
+          navigation.navigate('AskForAngel');
+        }}
       />
     </ActionSheet>
   );

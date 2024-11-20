@@ -182,7 +182,7 @@
     "angelDescription": "Share your request with angels who can help you pay your expense",
     "descriptionPlaceholder": "I want to pay for...",
     "requestAmount": "Request amount",
-    "next": "Next",
+    "createRequest": "Create request",
     "amountLimitExceeded": "You can ask for up to ${{ amount }}"
   },
   "ConfirmAskForAngel": {

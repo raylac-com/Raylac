@@ -8,7 +8,7 @@ import {
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import { useTranslation } from 'react-i18next';
@@ -105,9 +105,6 @@ const HomeScreen = () => {
   const { t } = useTranslation('Home');
   const { data: isSignedIn } = useIsSignedIn();
   const { data: signedInUser } = useSignedInUser();
-
-  const [otherMenuItemsModalVisible, setOtherMenuItemsModalVisible] =
-    useState(false);
 
   const {
     data: tokenBalances,
@@ -235,12 +232,6 @@ const HomeScreen = () => {
           title={t('other')}
           onPress={() => {
             SheetManager.show('home-other-menus');
-
-            if (otherMenuItemsModalVisible) {
-              setOtherMenuItemsModalVisible(false);
-            } else {
-              setOtherMenuItemsModalVisible(true);
-            }
           }}
           testID="other"
         />
