@@ -31,6 +31,20 @@ const waitForAnnouncementsSync = async ({
   });
 };
 
+const waitForSyncTasks = async ({ addresses }: { addresses: Hex[] }) => {
+  return waitFor({
+    fn: async () => {
+      const syncTasks = await prisma.syncTask.findMany({
+        where: { address: { in: addresses } },
+      });
+
+      return syncTasks.length > 0;
+    },
+    timeout: 30 * 1000,
+    label: 'waitForSyncTasks',
+  });
+};
+
 /**
  * Test that the indexer correctly backfills announcements.
  * Steps
@@ -86,6 +100,8 @@ describe('syncAnnouncements', () => {
     // ###################################
     // 3. Check that sync tasks were created
     // ###################################
+
+    await waitForSyncTasks({ addresses: stealthAddresses });
 
     const syncTasks = await prisma.syncTask.findMany({
       where: {

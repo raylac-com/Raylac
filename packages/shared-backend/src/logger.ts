@@ -2,7 +2,7 @@ import winston from 'winston';
 
 const DATADOG_API_KEY = process.env.DATADOG_API_KEY;
 
-const SERVICE_NAME = 'raylac-sync';
+const SERVICE_NAME = process.env.RENDER_EXTERNAL_HOSTNAME || 'raylac-sync';
 
 const httpTransportOptions = {
   host: 'http-intake.logs.ap1.datadoghq.com',

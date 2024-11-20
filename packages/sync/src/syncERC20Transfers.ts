@@ -15,7 +15,7 @@ import {
   upsertTransaction,
   waitForAnnouncementsBackfill,
 } from './utils';
-import { logger } from '@raylac/shared-backend';
+import { logger, safeUpsert } from '@raylac/shared-backend';
 import { Prisma } from '@raylac/db';
 
 export const handleERC20TransferLog = async ({
@@ -80,16 +80,18 @@ export const handleERC20TransferLog = async ({
     data.UserStealthAddressFrom = { connect: { address: from } };
   }
 
-  await prisma.trace.upsert({
-    create: data,
-    update: data,
-    where: {
-      transactionHash_logIndex: {
-        transactionHash: log.transactionHash,
-        logIndex: log.logIndex,
+  await safeUpsert(() =>
+    prisma.trace.upsert({
+      create: data,
+      update: data,
+      where: {
+        transactionHash_logIndex: {
+          transactionHash: log.transactionHash,
+          logIndex: log.logIndex,
+        },
       },
-    },
-  });
+    })
+  );
 
   logger.info(
     `Inserted ${tokenId} transfer ${log.transactionHash} on ${chainId}`

@@ -3,71 +3,77 @@ import {
   AccountBalancePerChainQueryResult,
   ERC20Abi,
   getPublicClient,
-  sleep,
   getChainName,
 } from '@raylac/shared';
 import { Hex } from 'viem';
 import { supportedTokens } from '@raylac/shared';
 import { logger } from '@raylac/shared-backend';
+import { loop } from './utils';
 
 const getAddressBalanceFromDb = async ({
   address,
   tokenId,
   chainId,
+  blockNumber,
 }: {
   address: Hex;
   tokenId: string;
   chainId: number;
+  blockNumber: bigint;
 }) => {
   const accountBalancePerChain = await prisma.$queryRaw<
     AccountBalancePerChainQueryResult[]
   >`
         WITH incoming_transfers AS (
-	SELECT
-		sum(amount) AS amount,
-		"tokenId",
-                "chainId",
-                "address"
-	FROM
-		"Trace" t
-	LEFT JOIN "UserStealthAddress" u ON t. "toStealthAddress" = u.address
-        WHERE
-            u."address" = ${address}
-            AND t."tokenId" = ${tokenId}
-            AND "chainId" = ${chainId}
-        GROUP BY
-            "tokenId",
-            "address",
-            "chainId"
-        ),
-        outgoing_transfers AS (
-            SELECT
-                sum(amount) AS amount,
-                "tokenId",
-                "chainId",
-                "address"
-            FROM
-                "Trace" t
-            LEFT JOIN "UserStealthAddress" u ON t. "fromStealthAddress" = u.address
-            WHERE
-                u."address" = ${address}
-                AND t."tokenId" = ${tokenId}
-                AND "chainId" = ${chainId}
-        GROUP BY
-            "tokenId",
-            "chainId",
-            "address"
-        )
-        SELECT
-            COALESCE(i. "tokenId", o. "tokenId") AS "tokenId",
-            COALESCE(i.amount, 0) - COALESCE(o.amount, 0) AS balance,
-            i."chainId",
-            i."address"
-        FROM
-            incoming_transfers i
-            LEFT JOIN outgoing_transfers o ON i. "tokenId" = o. "tokenId"
-            AND i. "chainId" = o. "chainId"
-            AND i. "address" = o. "address"
+      SELECT
+        sum(amount) AS amount,
+        t. "tokenId",
+        t. "chainId",
+        t. "to"
+      FROM
+        "Trace" t
+      LEFT JOIN "Transaction" tx ON t. "transactionHash" = tx. "hash"
+      LEFT JOIN "Block" b ON tx. "blockHash" = b. "hash"
+    WHERE
+      t. "to" = ${address}
+      AND t. "tokenId" = ${tokenId}
+      AND t. "chainId" = ${chainId}
+      AND b."number" <= ${blockNumber}
+    GROUP BY
+      t. "tokenId",
+      t. "to",
+      t. "chainId"
+    ),
+    outgoing_transfers AS (
+      SELECT
+        sum(amount) AS amount,
+        t. "tokenId",
+        t. "chainId",
+        t. "from"
+      FROM
+        "Trace" t
+      LEFT JOIN "Transaction" tx ON t. "transactionHash" = tx. "hash"
+      LEFT JOIN "Block" b ON tx. "blockHash" = b. "hash"
+    WHERE
+      t. "from" = ${address}
+      AND t. "tokenId" = ${tokenId}
+      AND t. "chainId" = ${chainId}
+      AND b."number" <= ${blockNumber}
+    GROUP BY
+      t. "tokenId",
+      t. "from",
+      t. "chainId"
+    )
+    SELECT
+      COALESCE(i. "tokenId", o. "tokenId") AS "tokenId",
+      COALESCE(i.amount, 0) - COALESCE(o.amount, 0) AS balance,
+      i. "chainId",
+      i. "to" AS "address"
+    FROM
+      incoming_transfers i
+      LEFT JOIN outgoing_transfers o ON i. "tokenId" = o. "tokenId"
+        AND i. "chainId" = o. "chainId"
+        AND i. "to" = o. "from"
   `;
 
   if (accountBalancePerChain.length === 0) {
@@ -80,22 +86,26 @@ const getAddressBalanceFromDb = async ({
 const getNativeBalance = async ({
   address,
   chainId,
+  blockNumber,
 }: {
   address: Hex;
   chainId: number;
+  blockNumber: bigint;
 }) => {
   const client = getPublicClient({ chainId });
-  return await client.getBalance({ address });
+  return await client.getBalance({ address, blockNumber });
 };
 
 const getERC20Balance = async ({
   address,
   tokenAddress,
   chainId,
+  blockNumber,
 }: {
   address: Hex;
   tokenAddress: Hex;
   chainId: number;
+  blockNumber: bigint;
 }) => {
   const client = getPublicClient({ chainId });
 
@@ -104,81 +114,92 @@ const getERC20Balance = async ({
     abi: ERC20Abi,
     functionName: 'balanceOf',
     args: [address],
+    blockNumber,
   });
 
   return balance;
 };
 
 const checkAddressBalances = async ({ chainIds }: { chainIds: number[] }) => {
-  while (true) {
-    await sleep(60 * 10 * 1000); // 10 minutes
-
-    try {
-      const addresses = await prisma.userStealthAddress.findMany({
+  await loop({
+    interval: 1000 * 60 * 10, // 10 minutes
+    fn: async () => {
+      const syncTasks = await prisma.syncTask.findMany({
         select: {
           address: true,
+          tokenId: true,
+          chainId: true,
+          blockNumber: true,
+        },
+        where: {
+          tokenId: { not: 'userOps' },
+          chainId: { in: chainIds },
         },
       });
-      logger.info(`Checking balances for ${addresses.length} addresses`);
 
-      for (const address of addresses) {
-        for (const token of supportedTokens) {
-          for (const chainId of chainIds) {
-            const balanceFromDb = await getAddressBalanceFromDb({
-              address: address.address as Hex,
-              tokenId: token.tokenId,
-              chainId,
-            });
+      let matches = 0;
+      let mismatches = 0;
 
-            if (token.tokenId === 'eth') {
-              const nativeBalance = await getNativeBalance({
-                address: address.address as Hex,
-                chainId,
-              });
+      for (const syncTask of syncTasks) {
+        const balanceFromDb = await getAddressBalanceFromDb({
+          address: syncTask.address as Hex,
+          tokenId: syncTask.tokenId,
+          chainId: syncTask.chainId,
+          blockNumber: syncTask.blockNumber,
+        });
 
-              if (balanceFromDb !== nativeBalance) {
-                logger.error(
-                  `Native balance mismatch for address ${address.address} on ${getChainName(chainId)}: ${balanceFromDb} !== ${nativeBalance}`
-                );
-              } else {
-                logger.info(
-                  `Balance check: Native balance for address ${address.address} on ${getChainName(chainId)}: ${nativeBalance} = ${balanceFromDb}`
-                );
-              }
-            } else {
-              const tokenAddress = token.addresses.find(
-                tokenAddress => tokenAddress.chain.id === chainId
-              )?.address;
+        if (syncTask.tokenId === 'eth') {
+          const nativeBalance = await getNativeBalance({
+            address: syncTask.address as Hex,
+            chainId: syncTask.chainId,
+            blockNumber: syncTask.blockNumber,
+          });
 
-              if (!tokenAddress) {
-                throw new Error(
-                  `Token ${token.tokenId} not found on ${getChainName(chainId)}`
-                );
-              }
+          if (balanceFromDb !== nativeBalance) {
+            logger.error(
+              `Native balance mismatch for address ${syncTask.address} on ${getChainName(syncTask.chainId)}: ${balanceFromDb} !== ${nativeBalance} at block ${syncTask.blockNumber}`
+            );
+            mismatches++;
+          } else {
+            matches++;
+          }
+        } else {
+          const tokenAddress = supportedTokens
+            .find(token => token.tokenId === syncTask.tokenId)
+            ?.addresses.find(
+              tokenAddress => tokenAddress.chain.id === syncTask.chainId
+            )?.address;
 
-              const erc20Balance = await getERC20Balance({
-                address: address.address as Hex,
-                tokenAddress: tokenAddress,
-                chainId,
-              });
+          if (!tokenAddress) {
+            throw new Error(
+              `Token ${syncTask.tokenId} not found on ${getChainName(syncTask.chainId)}`
+            );
+          }
 
-              if (balanceFromDb !== erc20Balance) {
-                logger.error(
-                  `ERC20 balance mismatch for address ${address.address} on ${getChainName(chainId)}: ${balanceFromDb} !== ${erc20Balance}`
-                );
-              } else {
-                logger.info(
-                  `Balance check: ERC20 balance for address ${address.address} on ${getChainName(chainId)}: ${erc20Balance} = ${balanceFromDb} `
-                );
-              }
-            }
+          const erc20Balance = await getERC20Balance({
+            address: syncTask.address as Hex,
+            tokenAddress,
+            chainId: syncTask.chainId,
+            blockNumber: syncTask.blockNumber,
+          });
+
+          if (balanceFromDb !== erc20Balance) {
+            logger.error(
+              `ERC20 balance mismatch for address ${syncTask.address} on ${getChainName(syncTask.chainId)}: ${balanceFromDb} !== ${erc20Balance} at block ${syncTask.blockNumber}`
+            );
           }
         }
       }
-    } catch (err) {
-      logger.error(err);
-    }
-  }
+
+      logger.info(
+        `Balance check: ${matches} matches, ${mismatches} mismatches`,
+        {
+          matches,
+          mismatches,
+        }
+      );
+    },
+  });
 };
 
 export default checkAddressBalances;

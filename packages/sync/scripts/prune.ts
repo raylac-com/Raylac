@@ -12,6 +12,7 @@ const prune = async () => {
   await prisma.syncTask.deleteMany();
   await prisma.eRC5564Announcement.deleteMany();
   await prisma.userStealthAddress.deleteMany();
+  await prisma.userAction.deleteMany();
 };
 
 prune();

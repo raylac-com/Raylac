@@ -21,7 +21,7 @@ import {
 } from 'viem';
 import { handleOps } from '../lib/bundler';
 import { upsertTransaction, upsertUserOpEventLog } from '@raylac/sync';
-import { logger } from '@raylac/shared-backend';
+import { logger, safeUpsert } from '@raylac/shared-backend';
 import prisma from '../lib/prisma';
 import { Prisma } from '@raylac/db';
 
@@ -101,17 +101,15 @@ const saveUserAction = async ({
     groupSize: numChains,
   };
 
-  const result = await prisma.$transaction(async tx => {
-    return await tx.userAction.upsert({
-      where: {
-        txHashes,
-      },
-      update: data,
+  const userAction = await safeUpsert(() =>
+    prisma.userAction.upsert({
+      where: { txHashes: txHashes },
       create: data,
-    });
-  });
+      update: data,
+    })
+  );
 
-  return result;
+  return userAction;
 };
 
 /**
@@ -152,7 +150,7 @@ const saveNativeTransferTraces = async ({
     const data: Prisma.TraceCreateManyInput = {
       from,
       to: getAddress(trace.to),
-      amount: hexToBigInt(trace.value).toString(),
+      amount: parseFloat(hexToBigInt(trace.value).toString()),
       tokenId: 'eth',
       transactionHash: txReceipt.transactionHash,
       chainId,
@@ -227,7 +225,7 @@ const saveERC20TransferLogs = async ({
       from,
       to,
       tokenId,
-      amount: args.value.toString(),
+      amount: parseFloat(args.value.toString()),
       transactionHash: txReceipt.transactionHash,
       logIndex: log.logIndex,
       chainId,

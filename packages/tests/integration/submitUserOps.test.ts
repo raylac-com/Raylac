@@ -10,8 +10,9 @@ import {
   UserOperation,
   UserActionType,
   encodeUserActionTag,
+  generateRandomMultiChainTag,
 } from '@raylac/shared';
-import { parseUnits, parseEther, zeroAddress, pad, Hex } from 'viem';
+import { parseUnits, parseEther, zeroAddress, Hex } from 'viem';
 import { client, getAuthedClient } from '../lib/rpc';
 import { describe } from 'node:test';
 import {
@@ -135,12 +136,11 @@ describe('submitUserOps', () => {
     }
   });
 
-  describe(`send ETH on multiple chains`, () => {
-    // The group tag is hardcoded for this test
-    const groupTag = pad('0x3333', { size: 32 });
+  describe(`send ETH on a single chain`, () => {
+    const groupTag = generateRandomMultiChainTag();
 
     // The group size is hardcoded for this test
-    const groupSize = 2;
+    const groupSize = 1;
 
     // The tx hashes of the transactions submitted to the RPC endpoint
     let txHashes: Hex[] = [];

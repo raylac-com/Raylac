@@ -228,7 +228,7 @@ const syncNativeTransfersWithTraceFilter = async (chainId: number) => {
         data.push({
           from: getAddress(trace.action.from),
           to: getAddress(trace.action.to),
-          amount: hexToBigInt(trace.action.value).toString(),
+          amount: parseFloat(trace.action.value.toString()),
           traceAddress: trace.traceAddress.join('_'),
           transactionHash: trace.transactionHash,
           tokenPriceAtTrace: tokenPrice || null,
