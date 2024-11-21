@@ -1,5 +1,4 @@
 import StyledButton from '@/components/StyledButton';
-import StyledTextInput from '@/components/StyledTextInput';
 import { useSignIn } from '@/hooks/useSIgnIn';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -8,6 +7,7 @@ import { View } from 'react-native';
 import * as bip39 from 'bip39';
 import Toast from 'react-native-toast-message';
 import spacing from '@/lib/styles/spacing';
+import MultiLineInput from '@/components/MultiLineInput';
 
 /**
  * Sign in screen
@@ -52,21 +52,21 @@ const SignIn = () => {
     <View
       style={{
         flex: 1,
+        flexDirection: 'column',
         alignItems: 'center',
-        rowGap: spacing.base,
-        padding: spacing.base,
+        rowGap: spacing.small,
+        padding: spacing.small,
       }}
     >
-      <StyledTextInput
+      <MultiLineInput
+        editable
+        autoFocus
         autoCapitalize="none"
         multiline
         placeholder={t('enterYourMnemonic')}
         value={mnemonic}
         onChangeText={setMnemonic}
-        inputStyle={{
-          height: 100,
-        }}
-      ></StyledTextInput>
+      ></MultiLineInput>
       <StyledButton
         isLoading={isSigningIn}
         title={t('signIn')}

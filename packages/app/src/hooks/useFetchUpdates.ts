@@ -1,5 +1,6 @@
 import * as Updates from 'expo-updates';
 import Constants from 'expo-constants';
+import * as Device from 'expo-device';
 import { useEffect, useState } from 'react';
 
 const useFetchUpdates = () => {
@@ -9,7 +10,7 @@ const useFetchUpdates = () => {
 
   useEffect(() => {
     (async () => {
-      if (!isExpoGo) {
+      if (!isExpoGo && Device.isDevice) {
         const { isAvailable } = await Updates.checkForUpdateAsync();
         if (isAvailable) {
           await Updates.fetchUpdateAsync();

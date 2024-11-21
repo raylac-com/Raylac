@@ -416,6 +416,7 @@ export const appRouter = router({
   createAngelRequest: authedProcedure
     .input(
       z.object({
+        title: z.string(),
         description: z.string(),
         usdAmount: z.string(),
       })
@@ -426,6 +427,7 @@ export const appRouter = router({
 
       const angelRequest = await createAngelRequest({
         userId,
+        title: input.title,
         description: input.description,
         usdAmount: input.usdAmount,
       });
@@ -437,6 +439,7 @@ export const appRouter = router({
     .input(
       z.object({
         angelRequestId: z.number(),
+        title: z.string(),
         description: z.string(),
         usdAmount: z.string(),
       })
@@ -445,6 +448,7 @@ export const appRouter = router({
       const { input } = opts;
       await updateAngelRequest({
         angelRequestId: input.angelRequestId,
+        title: input.title,
         description: input.description,
         usdAmount: input.usdAmount,
       });

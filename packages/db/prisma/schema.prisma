@@ -213,6 +213,7 @@ model UserAction {
 model AngelRequest {
   id Int @id @default(autoincrement())
 
+  title       String
   description String
   amount      Decimal
   userId      Int

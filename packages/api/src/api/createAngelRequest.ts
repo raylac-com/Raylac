@@ -5,15 +5,18 @@ import prisma from '../lib/prisma';
  */
 const createAngelRequest = async ({
   userId,
+  title,
   description,
   usdAmount,
 }: {
   userId: number;
+  title: string;
   description: string;
   usdAmount: string;
 }) => {
   const angelRequest = await prisma.angelRequest.create({
     data: {
+      title,
       description,
       amount: usdAmount,
       userId,

@@ -1,4 +1,5 @@
 import colors from '@/lib/styles/colors';
+import spacing from '@/lib/styles/spacing';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import { TextInput } from 'react-native';
@@ -10,7 +11,7 @@ const containsNonNumberChars = (str: string): boolean => {
 interface FiatAmountInputProps {
   amount: string;
   onInputChange: (amount: string) => void;
-  autoFocus: boolean;
+  autoFocus?: boolean;
 }
 
 const FiatAmountInput = (props: FiatAmountInputProps) => {
@@ -23,7 +24,7 @@ const FiatAmountInput = (props: FiatAmountInputProps) => {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        columnGap: 8,
+        columnGap: spacing.xSmall,
       }}
     >
       <TextInput

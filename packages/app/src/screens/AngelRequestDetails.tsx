@@ -10,8 +10,11 @@ import { copyToClipboard } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import { UserAngelRequestReturnType } from '@/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useQueryClient } from '@tanstack/react-query';
+import { getQueryKey } from '@trpc/react-query';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, View } from 'react-native';
+import { Text, View, Alert } from 'react-native';
 import Toast from 'react-native-toast-message';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'AngelRequestDetails'>;
@@ -25,6 +28,11 @@ const AngelRequestDetails = ({ route }: Props) => {
     angelRequestId,
   });
 
+  const { mutateAsync: deleteAngelRequest } =
+    trpc.deleteAngelRequest.useMutation();
+
+  const queryClient = useQueryClient();
+
   const link = `https://raylac.com/request/${angelRequestId}`;
 
   const onCopyPress = () => {
@@ -36,6 +44,32 @@ const AngelRequestDetails = ({ route }: Props) => {
       visibilityTime: 1000,
     });
   };
+
+  const onDeletePress = useCallback(() => {
+    Alert.alert('Delete', 'Are you sure you want to delete this request?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          await deleteAngelRequest({ angelRequestId });
+
+          queryClient.invalidateQueries({
+            queryKey: getQueryKey(trpc.getUserAngelRequests),
+          });
+
+          Toast.show({
+            type: 'success',
+            text1: t('deletedRequest'),
+            position: 'top',
+            visibilityTime: 1000,
+          });
+
+          navigation.goBack();
+        },
+      },
+    ]);
+  }, [deleteAngelRequest, angelRequestId]);
 
   if (!angelRequest) {
     return null;
@@ -57,7 +91,7 @@ const AngelRequestDetails = ({ route }: Props) => {
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'space-between',
-        padding: spacing.base,
+        padding: spacing.small,
       }}
     >
       <View style={{ flexDirection: 'column', rowGap: spacing.small }}>
@@ -88,6 +122,15 @@ const AngelRequestDetails = ({ route }: Props) => {
             </Text>
           </View>
         )}
+        <Text style={{ fontSize: fontSizes.base, color: colors.text }}>
+          {angelRequest?.title}
+        </Text>
+        <MultiLineInput
+          editable={false}
+          placeholder="Description"
+          value={angelRequest?.description}
+          onChangeText={() => {}}
+        />
         <Text
           style={{
             fontSize: fontSizes.large,
@@ -98,11 +141,6 @@ const AngelRequestDetails = ({ route }: Props) => {
         >
           {`$${angelRequest?.amount}`}
         </Text>
-        <MultiLineInput
-          placeholder="Description"
-          value={angelRequest?.description}
-          onChangeText={() => {}}
-        />
       </View>
       <View style={{ flexDirection: 'column', rowGap: spacing.small }}>
         <StyledButton
@@ -119,6 +157,18 @@ const AngelRequestDetails = ({ route }: Props) => {
           }}
           variant="outline"
         />
+        <Text
+          style={{
+            color: colors.warning,
+            padding: spacing.small,
+            fontSize: fontSizes.base,
+            fontWeight: 'bold',
+            textAlign: 'center',
+          }}
+          onPress={onDeletePress}
+        >
+          {'Delete'}
+        </Text>
       </View>
     </View>
   );

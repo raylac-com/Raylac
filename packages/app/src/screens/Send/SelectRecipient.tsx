@@ -13,6 +13,7 @@ import { Hex, isAddress } from 'viem';
 import { useTranslation } from 'react-i18next';
 import { shortenAddress } from '@/lib/utils';
 import fontSizes from '@/lib/styles/fontSizes';
+import spacing from '@/lib/styles/spacing';
 // import useEnsName from '@/hooks/useEnsName';
 
 interface UserListItemProps {
@@ -177,18 +178,13 @@ const SelectRecipient = ({ navigation }: Props) => {
         flexDirection: 'column',
         position: 'relative',
         alignItems: 'center',
-        paddingHorizontal: 16,
+        padding: spacing.small,
       }}
     >
       <StyledTextInput
+        autoFocus
         value={searchInput}
         placeholder={t('searchUser')}
-        containerStyle={{
-          marginTop: 12,
-        }}
-        inputStyle={{
-          height: 24,
-        }}
         onChangeText={setSearchInput}
         testID="search-user-or-ethereum-address"
       ></StyledTextInput>

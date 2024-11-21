@@ -83,10 +83,14 @@ const PaidAngelRequestDetails = ({ route }: Props) => {
         >
           {`$${angelRequest?.amount}`}
         </Text>
+        <Text style={{ fontSize: fontSizes.base, color: colors.text }}>
+          {angelRequest?.title}
+        </Text>
         <MultiLineInput
           placeholder="Description"
           value={angelRequest?.description}
           onChangeText={() => {}}
+          editable={false}
         />
       </View>
     </View>

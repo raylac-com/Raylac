@@ -42,13 +42,14 @@ const UpdateDisplayName = () => {
   return (
     <View
       style={{
-        rowGap: spacing.base,
+        rowGap: spacing.small,
         alignItems: 'center',
         padding: spacing.small,
         width: '100%',
       }}
     >
       <StyledTextInput
+        autoFocus
         placeholder={t('displayName')}
         value={newDisplayName}
         onChangeText={setNewDisplayname}

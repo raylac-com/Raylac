@@ -10,7 +10,6 @@
     "confirmSignOutTitle": "Sign out?",
     "language": "Language",
     "signOut": "Sign out",
-    "title": "Account",
     "userAngelRequests": "Angel requests"
   },
   "AccountInfo": {
@@ -73,7 +72,8 @@
     "send": "Send",
     "title": "Home",
     "assets": "Assets",
-    "askForAngel": "Find angels"
+    "askForAngel": "Find angels",
+    "angelRequests": "Angel requests"
   },
   "Receive": {
     "backToHome": "Back to home",
@@ -180,10 +180,13 @@
     "title": "Ask for angel",
     "writeARequest": "Write a request",
     "angelDescription": "Share your request with angels who can help you pay your expense",
-    "descriptionPlaceholder": "I want to pay for...",
     "requestAmount": "Request amount",
-    "next": "Next",
-    "amountLimitExceeded": "You can ask for up to ${{ amount }}"
+    "createRequest": "Create request",
+    "amountLimitExceeded": "You can ask for up to ${{ amount }}",
+    "titleLabel": "Title",
+    "descriptionLabel": "Description",
+    "titlePlaceholder": "e.g. Buying a new laptop",
+    "descriptionPlaceholder": "e.g. I want to buy a new laptop for school"
   },
   "ConfirmAskForAngel": {
     "title": "",
@@ -199,10 +202,14 @@
     "title": "Angel transfer"
   },
   "AngelRequestDetails": {
-    "title": "Angel request details"
+    "title": "Angel request details",
+    "deletedRequest": "Deleted request"
   },
   "EditAngelRequest": {
-    "title": "Edit angel request"
+    "title": "Edit angel request",
+    "titleLabel": "Title",
+    "descriptionLabel": "Description",
+    "amountLabel": "Amount"
   },
   "PaidAngelRequestDetails": {
     "title": "Angel request"

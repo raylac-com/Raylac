@@ -14,6 +14,7 @@ import { formatAmount } from '@raylac/shared';
 import FastAvatar from '@/components/FastAvatar';
 import { publicKeyToAddress } from 'viem/accounts';
 import useTokenPrice from '@/hooks/useTokenPrice';
+import spacing from '@/lib/styles/spacing';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'EnterSendAmount'>;
 
@@ -193,7 +194,7 @@ const EnterSendAmount = ({ navigation, route }: Props) => {
       style={{
         flex: 1,
         alignItems: 'center',
-        paddingHorizontal: 16,
+        paddingHorizontal: spacing.small,
       }}
     >
       <View

@@ -11,6 +11,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
+import spacing from '@/lib/styles/spacing';
 
 const UpdateUsername = () => {
   const { data: signedInUser } = useSignedInUser();
@@ -50,12 +51,13 @@ const UpdateUsername = () => {
   return (
     <View
       style={{
-        marginTop: 12,
         alignItems: 'center',
-        paddingHorizontal: 16,
+        padding: spacing.small,
+        rowGap: spacing.small,
       }}
     >
       <StyledTextInput
+        autoFocus
         placeholder={t('username')}
         value={newUsername}
         onChangeText={setNewUsername}
@@ -67,7 +69,7 @@ const UpdateUsername = () => {
         }
         username={newUsername}
       ></UsernameAvailabilityIndicator>
-      <View style={{ width: '100%', marginTop: 12 }}>
+      <View style={{ width: '100%' }}>
         <StyledButton
           variant="primary"
           title={t('save')}

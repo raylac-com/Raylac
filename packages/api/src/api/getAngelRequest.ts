@@ -11,6 +11,7 @@ const getAngelRequest = async ({
   const angelRequest = await prisma.angelRequest.findUnique({
     select: {
       id: true,
+      title: true,
       description: true,
       amount: true,
       user: {
@@ -19,6 +20,7 @@ const getAngelRequest = async ({
           name: true,
           username: true,
           spendingPubKey: true,
+          viewingPubKey: true,
           profileImage: true,
         },
       },

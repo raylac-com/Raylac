@@ -8,7 +8,7 @@ import {
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc } from '@/lib/trpc';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import TransferHistoryListItem from '@/components/TransferHistoryListItem';
 import useIsSignedIn from '@/hooks/useIsSignedIn';
 import { useTranslation } from 'react-i18next';
@@ -24,6 +24,8 @@ import { Hex } from 'viem';
 import { publicKeyToAddress } from 'viem/accounts';
 import borderRadius from '@/lib/styles/borderRadius';
 import { SheetManager } from 'react-native-actions-sheet';
+import UserAngelRequestListItem from '@/components/UserAngelRequestListItem';
+import { FontAwesome5 } from '@expo/vector-icons';
 
 interface MenuItemProps {
   icon: React.ReactNode;
@@ -99,15 +101,12 @@ const HomeHeader = () => {
   );
 };
 
-const NUM_TRANSFERS_TO_FETCH = 5;
+const NUM_TRANSFERS_TO_FETCH = 3;
 
 const HomeScreen = () => {
   const { t } = useTranslation('Home');
   const { data: isSignedIn } = useIsSignedIn();
   const { data: signedInUser } = useSignedInUser();
-
-  const [otherMenuItemsModalVisible, setOtherMenuItemsModalVisible] =
-    useState(false);
 
   const {
     data: tokenBalances,
@@ -131,6 +130,12 @@ const HomeScreen = () => {
       throwOnError: false,
     }
   );
+
+  const { data: angelRequests } = trpc.getUserAngelRequests.useQuery(null, {
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    throwOnError: false,
+  });
 
   const navigation = useTypedNavigation();
 
@@ -158,12 +163,17 @@ const HomeScreen = () => {
     return null;
   }
 
+  const unpaidAngelRequests = angelRequests?.filter(
+    angelRequest => angelRequest.paidBy.length === 0
+  );
+
   return (
     <ScrollView
       contentContainerStyle={{
         rowGap: spacing.base,
         paddingHorizontal: spacing.small,
         paddingTop: spacing.small,
+        paddingBottom: spacing.large,
       }}
       refreshControl={
         <RefreshControl
@@ -235,12 +245,6 @@ const HomeScreen = () => {
           title={t('other')}
           onPress={() => {
             SheetManager.show('home-other-menus');
-
-            if (otherMenuItemsModalVisible) {
-              setOtherMenuItemsModalVisible(false);
-            } else {
-              setOtherMenuItemsModalVisible(true);
-            }
           }}
           testID="other"
         />
@@ -258,21 +262,29 @@ const HomeScreen = () => {
             type={transfer.transferType as 'incoming' | 'outgoing'}
           />
         ))}
-        {transferHistory && transferHistory.length >= NUM_TRANSFERS_TO_FETCH ? (
-          <Text
-            style={{
-              textAlign: 'right',
-              marginVertical: spacing.base,
-              textDecorationLine: 'underline',
-              color: colors.text,
-            }}
-            onPress={() => {
-              navigation.navigate('TransferHistory');
-            }}
-          >
-            {t('seeAll')}
-          </Text>
-        ) : null}
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+            marginVertical: spacing.base,
+          }}
+        >
+          {transferHistory &&
+          transferHistory.length >= NUM_TRANSFERS_TO_FETCH ? (
+            <Text
+              style={{
+                textAlign: 'right',
+                textDecorationLine: 'underline',
+                color: colors.text,
+              }}
+              onPress={() => {
+                navigation.navigate('TransferHistory');
+              }}
+            >
+              {t('seeAll')}
+            </Text>
+          ) : null}
+        </View>
         {transferHistory?.length === 0 ? (
           <Text
             style={{
@@ -287,24 +299,66 @@ const HomeScreen = () => {
         ) : null}
       </View>
       {/* Assets list */}
-      <Text
-        style={{
-          fontSize: fontSizes.base,
-          color: colors.text,
-          fontWeight: 'bold',
-        }}
-      >
-        {t('assets')}
-      </Text>
-      <View style={{ flexDirection: 'column' }}>
-        {tokenBalances?.map((tokenBalance, i) => (
-          <TokenBalanceListItem
-            key={i}
-            balance={BigInt(tokenBalance.balance)}
-            tokenId={tokenBalance.tokenId}
-          />
-        ))}
-      </View>
+      {tokenBalances && tokenBalances.length > 0 && (
+        <>
+          <Text
+            style={{
+              fontSize: fontSizes.base,
+              color: colors.text,
+              fontWeight: 'bold',
+            }}
+          >
+            {t('assets')}
+          </Text>
+          <View style={{ flexDirection: 'column' }}>
+            {tokenBalances?.map((tokenBalance, i) => (
+              <TokenBalanceListItem
+                key={i}
+                balance={BigInt(tokenBalance.balance)}
+                tokenId={tokenBalance.tokenId}
+              />
+            ))}
+          </View>
+        </>
+      )}
+      {/* Angel requests */}
+      {unpaidAngelRequests && unpaidAngelRequests.length > 0 ? (
+        <View
+          style={{
+            flexDirection: 'column',
+            marginTop: spacing.base,
+          }}
+        >
+          <Pressable
+            onPress={() => {
+              navigation.navigate('UserAngelRequests');
+            }}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              columnGap: spacing.xSmall,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: fontSizes.base,
+                color: colors.text,
+                fontWeight: 'bold',
+              }}
+            >
+              {t('angelRequests')}
+            </Text>
+            <FontAwesome5
+              name="feather-alt"
+              size={16}
+              color={colors.angelPink}
+            />
+          </Pressable>
+          {unpaidAngelRequests?.map((angelRequest, i) => (
+            <UserAngelRequestListItem key={i} angelRequest={angelRequest} />
+          ))}
+        </View>
+      ) : null}
     </ScrollView>
   );
 };

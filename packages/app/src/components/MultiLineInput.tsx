@@ -1,33 +1,31 @@
 import colors from '@/lib/styles/colors';
-import { TextInput } from 'react-native';
+import spacing from '@/lib/styles/spacing';
+import borderRadius from '@/lib/styles/borderRadius';
+import { TextInput, TextInputProps } from 'react-native';
+import fontSizes from '@/lib/styles/fontSizes';
 
-interface MultiLineInputProps {
+type MultiLineInputProps = {
   placeholder: string;
   value: string;
   onChangeText: (text: string) => void;
-}
+} & TextInputProps;
 
-const MultiLineInput = ({
-  placeholder,
-  value,
-  onChangeText,
-}: MultiLineInputProps) => {
+const MultiLineInput = (props: MultiLineInputProps) => {
   return (
     <TextInput
+      {...props}
       style={{
-        fontSize: 16,
+        fontSize: fontSizes.base,
         height: 240,
         color: colors.text,
         width: '100%',
         borderWidth: 1,
         borderColor: colors.gray,
-        borderRadius: 8,
-        padding: 16,
+        borderRadius: borderRadius.small,
+        padding: spacing.small,
       }}
+      placeholderTextColor={colors.gray}
       multiline={true}
-      placeholder={placeholder}
-      value={value}
-      onChangeText={onChangeText}
     />
   );
 };
