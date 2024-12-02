@@ -1,16 +1,13 @@
 import {
   ACCOUNT_FACTORY_V2_ADDRESS,
+  AccountFactoryV2Abi,
   ENTRY_POINT_ADDRESS,
+  getSenderAddressV2,
   RAYLAC_PAYMASTER_V2_ADDRESS,
-} from './addresses';
-import {
-  ChainGasInfo,
-  StealthAddressWithEphemeral,
-  UserOperation,
-} from './types';
-import RaylacAccountV2Abi from './abi/RaylacAccountV2Abi';
-import AccountFactoryV2Abi from './abi/AccountFactoryV2';
-import EntryPointAbi from './abi/EntryPointAbi';
+} from '@raylac/shared';
+import { ChainGasInfo, UserOperation } from '@raylac/shared';
+import { RaylacAccountV2Abi } from '@raylac/shared';
+import { EntryPointAbi } from '@raylac/shared';
 import {
   Chain,
   Hex,
@@ -24,22 +21,19 @@ import {
   toHex,
 } from 'viem';
 import axios from 'axios';
-import { getSenderAddressV2, recoveryStealthPrivKey } from './stealth';
-import { increaseByPercent, sleep } from './utils';
-import { signMessage } from 'viem/accounts';
-import { getPublicClient } from './ethRpc';
-import { devChains } from './devChains';
+import { increaseByPercent } from '@raylac/shared';
+import { getPublicClient } from '@raylac/shared';
 
 /**
  * Get the init code for creating a stealth contract account
  */
-export const getInitCode = ({ stealthSigner }: { stealthSigner: Hex }) => {
+export const getInitCode = ({ singerAddress }: { singerAddress: Hex }) => {
   const factoryAddress = ACCOUNT_FACTORY_V2_ADDRESS;
 
   const factoryData = encodeFunctionData({
     abi: AccountFactoryV2Abi,
     functionName: 'createAccount',
-    args: [stealthSigner],
+    args: [singerAddress],
   });
 
   const initCode = (factoryAddress + factoryData.slice(2)) as Hex;
@@ -61,43 +55,39 @@ export const TRANSFER_OP_INIT_VERIFICATION_GAS_LIMIT = toHex(210_000);
 
 /**
  * Build an unsigned user operation.
- * The `sender` address of the user operation is derived from the given `stealthSigner`.
+ * The `sender` address of the user operation is derived from the given `singerAddress`.
  */
 export const buildUserOp = ({
   chainId,
-  stealthSigner,
+  singerAddress,
   to,
   value,
   data,
-  tag,
   gasInfo,
   nonce,
 }: {
   chainId: number;
-  stealthSigner: Hex;
+  singerAddress: Hex;
   to: Hex;
   value: bigint;
   data: Hex;
-  tag: Hex;
   gasInfo: ChainGasInfo;
-  nonce: number | null;
+  nonce: number;
 }): UserOperation => {
-  const initCode = getInitCode({ stealthSigner });
+  const initCode = getInitCode({ singerAddress });
 
   const senderAddress = getSenderAddressV2({
-    stealthSigner,
+    singerAddress,
   });
 
   if (!senderAddress) {
     throw new Error('Failed to get sender address');
   }
 
-  const nextNonce = nonce === null ? 0 : Number(nonce) + 1;
-
   const callData = encodeFunctionData({
     abi: RaylacAccountV2Abi,
     functionName: 'execute',
-    args: [to, value, data, tag],
+    args: [to, value, data, '0x0'],
   });
 
   const baseFeeBuffed = increaseByPercent({
@@ -114,16 +104,13 @@ export const buildUserOp = ({
 
   const userOp: UserOperation = {
     sender: senderAddress,
-    nonce: toHex(nextNonce),
-    initCode: nonce === null ? initCode : '0x',
+    nonce: toHex(nonce),
+    initCode: nonce === 0 ? initCode : '0x',
     callData,
-    preVerificationGas: TRANSFER_OP_PRE_VERIFICATION_GAS,
-    callGasLimit: TRANSFER_OP_CALL_GAS_LIMIT,
+    preVerificationGas: toHex(1_500_000),
+    callGasLimit: toHex(1_500_000),
     // Use a higher gas limit for the verification step if the sender needs to be deployed
-    verificationGasLimit:
-      nonce === null
-        ? TRANSFER_OP_INIT_VERIFICATION_GAS_LIMIT
-        : TRANSFER_OP_VERIFICATION_GAS_LIMIT,
+    verificationGasLimit: toHex(1_500_000),
     maxFeePerGas: toHex(maxFeePerGas),
     maxPriorityFeePerGas: toHex(maxPriorityFeePerGasBuffed),
     paymasterAndData: '0x',
@@ -135,79 +122,13 @@ export const buildUserOp = ({
 };
 
 /**
- * Function that mirrors the `pack` function in https://github.com/eth-infinitism/account-abstraction/blob/v0.6.0/contracts/interfaces/UserOperation.sol
- */
-const packUserOp = ({ userOp }: { userOp: UserOperation }) => {
-  const hashInitCode = keccak256(userOp.initCode);
-  const hashCallData = keccak256(userOp.callData);
-  const hashPaymasterAndData = keccak256(userOp.paymasterAndData);
-
-  return encodeAbiParameters(
-    parseAbiParameters(
-      'address sender, uint256 nonce, bytes32 hashInitCode, bytes32 hashCallData, uint256 callGasLimit, uint256 verificationGasLimit, uint256 preVerificationGas, uint256 maxFeePerGas, uint256 maxPriorityFeePerGas, bytes32 hashPaymasterAndData'
-    ),
-    [
-      userOp.sender,
-      hexToBigInt(userOp.nonce),
-      hashInitCode,
-      hashCallData,
-      hexToBigInt(userOp.callGasLimit),
-      hexToBigInt(userOp.verificationGasLimit),
-      hexToBigInt(userOp.preVerificationGas),
-      hexToBigInt(userOp.maxFeePerGas),
-      hexToBigInt(userOp.maxPriorityFeePerGas),
-      hashPaymasterAndData,
-    ]
-  );
-};
-
-export const getUserOpHash = ({ userOp }: { userOp: UserOperation }) => {
-  const packedUserOp = packUserOp({ userOp });
-
-  return keccak256(
-    encodeAbiParameters(parseAbiParameters('bytes32, address, uint256'), [
-      keccak256(packedUserOp),
-      ENTRY_POINT_ADDRESS,
-      BigInt(userOp.chainId),
-    ])
-  );
-};
-
-export const getUserOpHashAsync = async ({
-  client,
-  userOp,
-}: {
-  client: PublicClient;
-  userOp: UserOperation;
-}) => {
-  const userOpHash = await client.readContract({
-    address: ENTRY_POINT_ADDRESS,
-    abi: EntryPointAbi,
-    functionName: 'getUserOpHash',
-    args: [
-      {
-        sender: userOp.sender,
-        nonce: hexToBigInt(userOp.nonce),
-        initCode: userOp.initCode,
-        callData: userOp.callData,
-        callGasLimit: hexToBigInt(userOp.callGasLimit),
-        verificationGasLimit: hexToBigInt(userOp.verificationGasLimit),
-        preVerificationGas: hexToBigInt(userOp.preVerificationGas),
-        maxFeePerGas: hexToBigInt(userOp.maxFeePerGas),
-        maxPriorityFeePerGas: hexToBigInt(userOp.maxPriorityFeePerGas),
-        paymasterAndData: userOp.paymasterAndData,
-        signature: userOp.signature,
-      },
-    ],
-  });
-
-  return userOpHash;
-};
-
-/**
  * Function that mirrors the `pack` function in RaylacPaymaster.sol
  */
-const packPaymasterSigMessage = ({ userOp }: { userOp: UserOperation }) => {
+export const packPaymasterSigMessage = ({
+  userOp,
+}: {
+  userOp: UserOperation;
+}) => {
   return encodeAbiParameters(
     parseAbiParameters(
       'address sender, uint256 nonce, bytes initCode, bytes callData, uint256 callGasLimit, uint256 verificationGasLimit, uint256 preVerificationGas, uint256 maxFeePerGas, uint256 maxPriorityFeePerGas'
@@ -375,12 +296,6 @@ export const getMaxPriorityFeePerGas = async ({
     throw new Error(JSON.stringify(result.data.error));
   }
 
-  const devChainIds = devChains.map(c => c.id) as number[];
-  const isDevChain = devChainIds.includes(chainId);
-  if (isDevChain) {
-    return 100000n;
-  }
-
   return BigInt(result.data.result!);
 };
 
@@ -454,96 +369,21 @@ export const getUserOpReceipt = async ({
   return result.data!;
 };
 
-/**
- * Sign a user operation with a stealth account
- */
-export const signUserOpWithStealthAccount = async ({
-  userOp,
-  stealthAccount,
-  spendingPrivKey,
-  viewingPrivKey,
+export const getAccountNonce = async ({
+  chainId,
+  address,
 }: {
-  userOp: UserOperation;
-  stealthAccount: StealthAddressWithEphemeral;
-  spendingPrivKey: Hex;
-  viewingPrivKey: Hex;
-}): Promise<UserOperation> => {
-  const userOpHash = getUserOpHash({
-    userOp,
+  chainId: number;
+  address: Hex;
+}) => {
+  const client = getPublicClient({ chainId });
+
+  const nonce = await client.readContract({
+    address: ENTRY_POINT_ADDRESS,
+    abi: EntryPointAbi,
+    functionName: 'getNonce',
+    args: [address, BigInt(0)],
   });
 
-  const stealthPrivKey = recoveryStealthPrivKey({
-    ephemeralPubKey: stealthAccount.ephemeralPubKey,
-    spendingPrivKey: spendingPrivKey,
-    viewingPrivKey: viewingPrivKey,
-  });
-
-  const sig = await signMessage({
-    privateKey: stealthPrivKey,
-    message: {
-      raw: userOpHash,
-    },
-  });
-
-  return {
-    ...userOp,
-    signature: sig,
-  };
-};
-
-export const submitUserOpWithRetry = async ({
-  signAndSubmitUserOp,
-  userOp,
-}: {
-  signAndSubmitUserOp: (userOp: UserOperation) => Promise<Hex>;
-  userOp: UserOperation;
-}): Promise<Hex> => {
-  const maxRetries = 5;
-
-  let retries = 0;
-
-  let currentMaxFeePerGas = hexToBigInt(userOp.maxFeePerGas);
-  let currentMaxPriorityFeePerGas = hexToBigInt(userOp.maxPriorityFeePerGas);
-
-  let errAfterRetries;
-  while (retries < maxRetries) {
-    try {
-      userOp = {
-        ...userOp,
-        maxFeePerGas: toHex(currentMaxFeePerGas),
-        maxPriorityFeePerGas: toHex(currentMaxPriorityFeePerGas),
-      };
-
-      const userOpHash = await signAndSubmitUserOp(userOp);
-
-      return userOpHash;
-    } catch (error: any) {
-      if (error.message.includes('replacement transaction underpriced')) {
-        // eslint-disable-next-line no-console
-        console.log('Replacement underpriced, increasing gas prices');
-
-        currentMaxFeePerGas = increaseByPercent({
-          value: currentMaxFeePerGas,
-          percent: 10,
-        });
-
-        currentMaxPriorityFeePerGas = increaseByPercent({
-          value: currentMaxPriorityFeePerGas,
-          percent: 10,
-        });
-      } else {
-        // eslint-disable-next-line no-console
-        console.log('Error sending user op:', error.message);
-      }
-
-      errAfterRetries = error;
-
-      await sleep(1500);
-      retries++;
-    }
-  }
-
-  throw new Error(
-    `Failed to submit user operation: ${errAfterRetries.message}`
-  );
+  return nonce;
 };

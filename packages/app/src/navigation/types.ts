@@ -1,6 +1,6 @@
 export type RootTabsParamsList = {
   Home: undefined;
-  Account: undefined;
+  Swap: undefined;
 };
 
 export type RootStackParamsList = {

@@ -6,4 +6,6 @@ node_modules
 google-service-account.json
 .turbo
 
+out/
+
 logs/

@@ -260,3 +260,18 @@ export interface AlchemyTokenPriceResponse {
     value: string;
   }[];
 }
+
+export interface RelaySwapMultiInputRequestBody {
+  user: Hex;
+  recipient: Hex;
+  origins: {
+    chainId: number;
+    currency: string;
+    amount: string;
+  }[];
+  destinationCurrency: string;
+  destinationChainId: number;
+  partial: boolean;
+  tradeType: 'EXACT_INPUT' | 'EXACT_OUTPUT';
+  useUserOperation: boolean;
+}

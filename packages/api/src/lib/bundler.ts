@@ -1,19 +1,13 @@
 import {
   ENTRY_POINT_ADDRESS,
   EntryPointAbi,
-  getUserOpHash,
   UserOperation,
   getWalletClient,
+  getUserOpHash,
 } from '@raylac/shared';
-import { Hex } from 'viem';
 import { privateKeyToAccount, nonceManager } from 'viem/accounts';
 import { logger } from '@raylac/shared-backend';
-
-const BUNDLER_PRIV_KEY = process.env.BUNDLER_PRIV_KEY as Hex;
-
-if (!BUNDLER_PRIV_KEY) {
-  throw new Error('BUNDLER_PRIV_KEY is not set');
-}
+import { BUNDLER_PRIV_KEY } from './envVars';
 
 export const bundlerAccount = privateKeyToAccount(BUNDLER_PRIV_KEY, {
   nonceManager,

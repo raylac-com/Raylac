@@ -24,6 +24,7 @@ import * as Localization from 'expo-localization';
 import { SheetProvider } from 'react-native-actions-sheet';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import './Sheets';
+import Swap from './screens/Swap';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -45,6 +46,13 @@ const Tabs = () => {
           tabBarIcon: ({ color }) => (
             <AntDesign name="home" size={24} color={color} />
           ),
+        }}
+      ></Tab.Screen>
+      <Tab.Screen
+        name="Swap"
+        component={Swap}
+        options={{
+          headerShown: false,
         }}
       ></Tab.Screen>
     </Tab.Navigator>

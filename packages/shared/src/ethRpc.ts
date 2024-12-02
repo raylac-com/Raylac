@@ -10,9 +10,6 @@ import {
 import * as chains from 'viem/chains';
 import { Chain } from 'viem/chains';
 import { getChainFromId } from './utils';
-import { devChains } from './devChains';
-
-const devChainsIds = devChains.map(c => c.id) as number[];
 
 export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
   const apiKey =
@@ -174,11 +171,7 @@ export const getPublicClient = ({
 }): PublicClient<HttpTransport, Chain> => {
   const chain = getChainFromId(chainId);
 
-  const rpcUrl = devChainsIds.includes(chainId)
-    ? // Get the RPC URL for the dev chain
-      getDevChainRpcUrl({ chainId })
-    : // Get the RPC URL for a production chain
-      getAlchemyRpcUrl({ chain });
+  const rpcUrl = getAlchemyRpcUrl({ chain });
 
   const client = createPublicClient({
     chain,
@@ -195,11 +188,7 @@ export const getPublicClient = ({
 export const getWalletClient = ({ chainId }: { chainId: number }) => {
   const chain = getChainFromId(chainId);
 
-  const rpcUrl = devChainsIds.includes(chainId)
-    ? // Get the RPC URL for custom chain
-      getDevChainRpcUrl({ chainId })
-    : // Get the RPC URL for a standard chain
-      getQuickNodeRpcUrl({ chain });
+  const rpcUrl = getQuickNodeRpcUrl({ chain });
 
   return createWalletClient({
     chain,
@@ -210,11 +199,7 @@ export const getWalletClient = ({ chainId }: { chainId: number }) => {
 export const getWebsocketClient = ({ chainId }: { chainId: number }) => {
   const chain = getChainFromId(chainId);
 
-  const rpcUrl = devChainsIds.includes(chainId)
-    ? // Get the RPC URL for the dev chain
-      getDevChainRpcUrl({ chainId }).replace('http', 'ws')
-    : // Get the RPC URL for a production chain
-      getAlchemyRpcUrl({ chain });
+  const rpcUrl = getQuickNodeRpcUrl({ chain }).replace('http', 'ws');
 
   const client = createPublicClient({
     chain,
