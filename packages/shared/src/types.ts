@@ -230,3 +230,33 @@ export enum UserActionType {
   Swap = '0x02',
   Bridge = '0x03',
 }
+
+export enum Token {
+  ETH = 'ETH',
+  USDC = 'USDC',
+}
+
+export interface MultiChainTokenBalance {
+  name: string;
+  symbol: string;
+  logoUrl: string;
+  decimals: number;
+  balance: string;
+  usdValue?: number;
+  tokenPrice?: number;
+  breakdown: {
+    chainId: number;
+    balance: string;
+    tokenAddress: Hex;
+  }[];
+}
+
+export interface AlchemyTokenPriceResponse {
+  network: 'string';
+  address: Hex;
+  prices: {
+    currency: 'usd';
+    lastUpdatedAt: string;
+    value: string;
+  }[];
+}

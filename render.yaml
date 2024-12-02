@@ -7,7 +7,7 @@ services:
     previewPlan: starter
     runtime: node
     region: oregon
-    buildCommand: rm -rf ./packages/{app,tests,ci,contracts,scripts} && pnpm i --ignore-scripts && pnpm build
+    buildCommand: rm -rf ./packages/{app,contracts,scripts} && pnpm i --ignore-scripts && pnpm build
     startCommand: NODE_ENV=production pnpm -F api start
     preDeployCommand: pnpm -F db migrate:prod
     autoDeploy: true
@@ -24,40 +24,6 @@ services:
           name: anvil
           type: web
           envVarKey: RENDER_EXTERNAL_URL
-  - type: web
-    name: raylac-indexer
-    plan: standard
-    previewPlan: starter
-    runtime: node
-    region: oregon
-    buildCommand: rm -rf ./packages/{app,tests,api,ci,contracts,scripts} && pnpm i --ignore-scripts && pnpm build
-    startCommand: pnpm -F sync start
-    preDeployCommand: pnpm -F db migrate:prod
-    rootDir: ./
-    autoDeploy: true
-    envVars:
-      - fromGroup: raylac
-      - key: NODE_VERSION
-        value: 18.17.0
-      - key: DATABASE_URL
-        fromDatabase:
-          name: raylac
-          property: connectionString
-      - key: ANVIL_RPC_URL
-        fromService:
-          name: anvil
-          type: web
-          envVarKey: RENDER_EXTERNAL_URL
-  - type: web
-    name: anvil
-    plan: standard
-    previewPlan: starter
-    runtime: docker
-    dockerfilePath: ./packages/ci/Dockerfile.foundary
-    dockerCommand: anvil --host 0.0.0.0 --base-fee 10000
-    region: oregon
-    autoDeploy: false
-    rootDir: ./
 
 databases:
   - name: raylac

@@ -1,138 +1,211 @@
-import { getTokenMetadata } from '@raylac/shared';
-import { formatAmount } from '@raylac/shared';
-import { TransferQueryResult } from './queries/selectTransfer';
-import { logger } from '@raylac/shared-backend';
+import {
+  Chain,
+  createPublicClient,
+  http,
+  webSocket,
+  WebSocketTransport,
+  PublicClient,
+} from 'viem';
+import * as chains from 'viem/chains';
+import { ALCHEMY_API_KEY } from './lib/envVars';
+import { Network } from 'alchemy-sdk';
 
-export const JWT_PRIV_KEY = process.env.JWT_PRIV_KEY as string;
+export const getWebsocketClient = ({ chainId }: { chainId: number }) => {
+  const chain = getChainFromId(chainId);
 
-if (!JWT_PRIV_KEY) {
-  throw new Error('JWT_PRIV_KEY is required');
-}
+  const alchemySubdomain = getAlchemySubdomain(chainId);
+  const webSocketUrl = `wss://${alchemySubdomain}.g.alchemy.com/v2/${ALCHEMY_API_KEY}`;
 
-/**
- * Sort tx traces by trace address in descending order in the execution trace
- */
-const sortTxTracesByTraceAddress = (
-  tx: TransferQueryResult['transactions'][number]
-) => {
-  return tx.traces.sort((a, b) => {
-    if (!a.traceAddress || !b.traceAddress) {
-      throw new Error(`Trace address is null for transaction ${tx.hash}`);
-    }
+  const client = createPublicClient({
+    chain,
+    transport: webSocket(webSocketUrl, {
+      reconnect: {
+        attempts: 30,
+      },
+    }),
+  });
 
-    const aTraceAddress = a.traceAddress.split('_');
-    const bTraceAddress = b.traceAddress.split('_');
+  return client as PublicClient<WebSocketTransport, Chain>;
+};
 
-    if (bTraceAddress.length > aTraceAddress.length) {
-      return 1;
-    }
+export const getPublicClient = ({ chainId }: { chainId: number }) => {
+  const chain = getChainFromId(chainId);
 
-    if (aTraceAddress.length > bTraceAddress.length) {
-      return -1;
-    }
-
-    // The trace addresses are the same length, so we can compare the last element
-    const aTraceIndex = parseInt(aTraceAddress[aTraceAddress.length - 1]);
-    const bTraceIndex = parseInt(bTraceAddress[bTraceAddress.length - 1]);
-
-    logger.info(`${aTraceIndex} - ${bTraceIndex}`);
-
-    return bTraceIndex - aTraceIndex;
+  return createPublicClient({
+    chain,
+    transport: getAlchemyHttpTransport({
+      chainId: chain.id,
+      apiKey: ALCHEMY_API_KEY,
+    }),
   });
 };
 
-/**
- * Sort tx traces by log index in descending order
- */
-const sortTxByLogIndex = (tx: TransferQueryResult['transactions'][number]) => {
-  return tx.traces.sort((a, b) => {
-    if (!a.logIndex || !b.logIndex) {
-      throw new Error(`Log index is null for transaction ${tx.hash}`);
-    }
+export const getAlchemySubdomain = (chainId: number) => {
+  let alchemySubdomain;
 
-    return b.logIndex - a.logIndex;
-  });
+  switch (chainId) {
+    case chains.mainnet.id:
+      alchemySubdomain = 'eth-mainnet';
+      break;
+    case chains.sepolia.id:
+      alchemySubdomain = 'eth-sepolia';
+      break;
+    case chains.base.id:
+      alchemySubdomain = 'base-mainnet';
+      break;
+    case chains.baseSepolia.id:
+      alchemySubdomain = 'base-sepolia';
+      break;
+    case chains.optimism.id:
+      alchemySubdomain = 'opt-mainnet';
+      break;
+    case chains.optimismSepolia.id:
+      alchemySubdomain = 'opt-sepolia';
+      break;
+    case chains.blast.id:
+      alchemySubdomain = 'blast-mainnet';
+      break;
+    case chains.blastSepolia.id:
+      alchemySubdomain = 'blast-sepolia';
+      break;
+    case chains.arbitrum.id:
+      alchemySubdomain = 'arb-mainnet';
+      break;
+    case chains.arbitrumSepolia.id:
+      alchemySubdomain = 'arb-sepolia';
+      break;
+    case chains.polygon.id:
+      alchemySubdomain = 'polygon-mainnet';
+      break;
+    case chains.polygonAmoy.id:
+      alchemySubdomain = 'polygon-amoy';
+      break;
+    case chains.scroll.id:
+      alchemySubdomain = 'scroll-mainnet';
+      break;
+    case chains.zksync.id:
+      alchemySubdomain = 'zksync-mainnet';
+      break;
+    case chains.zora.id:
+      alchemySubdomain = 'zora-mainnet';
+      break;
+    default:
+      throw new Error(`Unknown chain id: ${chainId}`);
+  }
+
+  return alchemySubdomain;
+};
+
+export const getQuickNodeSubDomain = (chainId: number) => {
+  let quickNodeSubdomain;
+
+  switch (chainId) {
+    case chains.mainnet.id:
+      quickNodeSubdomain = 'eth-mainnet';
+      break;
+    case chains.sepolia.id:
+      quickNodeSubdomain = 'eth-sepolia';
+      break;
+    case chains.base.id:
+      quickNodeSubdomain = 'base-mainnet';
+      break;
+    case chains.baseSepolia.id:
+      quickNodeSubdomain = 'base-sepolia';
+      break;
+    case chains.optimism.id:
+      quickNodeSubdomain = 'optimism';
+      break;
+    case chains.optimismSepolia.id:
+      quickNodeSubdomain = 'optimism-sepolia';
+      break;
+    case chains.blast.id:
+      quickNodeSubdomain = 'blast-mainnet';
+      break;
+    case chains.blastSepolia.id:
+      quickNodeSubdomain = 'blast-sepolia';
+      break;
+    case chains.arbitrum.id:
+      quickNodeSubdomain = 'arbitrum-mainnet';
+      break;
+    case chains.arbitrumSepolia.id:
+      quickNodeSubdomain = 'arb-sepolia';
+      break;
+    case chains.polygon.id:
+      quickNodeSubdomain = 'matic';
+      break;
+    case chains.polygonAmoy.id:
+      quickNodeSubdomain = 'polygon-amoy';
+      break;
+    case chains.scroll.id:
+      quickNodeSubdomain = 'scroll-mainnet';
+      break;
+    case chains.zksync.id:
+      quickNodeSubdomain = 'zksync-mainnet';
+      break;
+    case chains.zora.id:
+      quickNodeSubdomain = 'zora-mainnet';
+      break;
+    default:
+      throw new Error(`getQuickNodeRpcUrl: Unknown chain id: ${chainId}`);
+  }
+
+  return quickNodeSubdomain;
+};
+
+export const getQuickNodeHttpTransport = ({
+  chainId,
+  apiKey,
+}: {
+  chainId: number;
+  apiKey: string;
+}) => {
+  const subDomain = getQuickNodeSubDomain(chainId);
+
+  return http(`https://shy-wild-shard.${subDomain}.quiknode.pro/${apiKey}`);
+};
+
+export const getAlchemyHttpTransport = ({
+  chainId,
+  apiKey,
+}: {
+  chainId: number;
+  apiKey: string;
+}) => {
+  const alchemySubdomain = getAlchemySubdomain(chainId);
+
+  return http(`https://${alchemySubdomain}.g.alchemy.com/v2/${apiKey}`);
+};
+
+export const getChainName = (chainId: number) => {
+  const name = Object.values(chains).find(chain => chain.id === chainId)?.name;
+
+  return `${name} (${chainId})`;
 };
 
 /**
- * Get the amount of a transfer by summing up the amounts of the traces
+ * Returns viem's `Chain` object from a chain ID
  */
-const getTransferAmount = (
-  transfer: TransferQueryResult
-): { amount: bigint; usdAmount: string | null } => {
-  let amount = 0n;
-
-  const tokenId = transfer.transactions[0].traces[0].tokenId;
-  const isNativeTransfer = tokenId === 'eth';
-
-  for (const transaction of transfer.transactions) {
-    const sortedTraces = isNativeTransfer
-      ? sortTxTracesByTraceAddress(transaction)
-      : sortTxByLogIndex(transaction);
-
-    const lastTrace = sortedTraces[0];
-
-    amount += BigInt(lastTrace.amount.toString());
-  }
-
-  const tokenPriceAtTrace =
-    transfer.transactions[0].traces[0].tokenPriceAtTrace;
-
-  const tokenMeta = getTokenMetadata(tokenId);
-
-  if (!tokenMeta) {
-    throw new Error(`Token metadata not found for token ${tokenId}`);
-  }
-
-  const formattedAmount = Number(
-    formatAmount(amount.toString(), tokenMeta.decimals)
+export const getChainFromId = (chainId: number): Chain => {
+  const chain = Object.entries(chains).find(
+    ([_, chain]) => chain.id === chainId
   );
 
-  const usdAmount =
-    tokenPriceAtTrace !== null
-      ? (tokenPriceAtTrace * Number(formattedAmount)).toFixed(2)
-      : null;
+  if (!chain) {
+    throw new Error(`Chain with ID ${chainId} not found`);
+  }
 
-  return { amount, usdAmount };
+  return chain[1] as Chain;
 };
 
-export const parseTransferData = ({
-  transfer,
-  userId,
-}: {
-  transfer: TransferQueryResult;
-  userId: number;
-}) => {
-  const isNativeTransfer = transfer.transactions[0].traces[0].tokenId === 'eth';
-
-  const { amount, usdAmount } = getTransferAmount(transfer);
-
-  // We can determine the sender and recipient by looking at the last trace in one of the transactions
-  const sortedTraces = isNativeTransfer
-    ? sortTxTracesByTraceAddress(transfer.transactions[0])
-    : sortTxByLogIndex(transfer.transactions[0]);
-
-  const lastTrace = sortedTraces[0];
-
-  const fromUser = lastTrace.UserStealthAddressFrom?.user;
-  const toUser = lastTrace.UserStealthAddressTo?.user;
-
-  const fromAddress = lastTrace.from;
-  const toAddress = lastTrace.to;
-
-  const transferType =
-    lastTrace.UserStealthAddressFrom?.userId === userId
-      ? 'outgoing'
-      : 'incoming';
-
-  return {
-    ...transfer,
-    amount: amount.toString(),
-    usdAmount,
-    fromUser,
-    toUser,
-    fromAddress,
-    toAddress,
-    transferType,
-  };
+export const toAlchemyNetwork = (chainId: number): Network => {
+  switch (chainId) {
+    case chains.mainnet.id:
+      return Network.ETH_MAINNET;
+    case chains.base.id:
+      return Network.BASE_MAINNET;
+    case chains.arbitrum.id:
+      return Network.ARB_MAINNET;
+    default:
+      throw new Error(`Unknown chain id: ${chainId}`);
+  }
 };

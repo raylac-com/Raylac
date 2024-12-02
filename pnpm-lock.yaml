@@ -72,9 +72,15 @@ importers:
       '@types/node':
         specifier: ^20.11.17
         version: 20.16.5
+      alchemy-sdk:
+        specifier: ^3.5.0
+        version: 3.5.0(bufferutil@4.0.8)(utf-8-validate@6.0.4)
       axios:
         specifier: ^1.7.2
         version: 1.7.7
+      chalk:
+        specifier: ^5.3.0
+        version: 5.3.0
       firebase-admin:
         specifier: ^12.4.0
         version: 12.5.0
@@ -2954,6 +2960,9 @@ packages:
 
   alchemy-sdk@3.4.1:
     resolution: {integrity: sha512-GeL8J6VIiE7tIgXevkcm0VqdZnhO0EpOXQQCzUMsoMrj92hBKj9ZmUjyPxXF8tUdsHYixQApng2eJXoRWmv5lw==}
+
+  alchemy-sdk@3.5.0:
+    resolution: {integrity: sha512-ggY7y+cM6hZKynU7mg6jBUhhAS/68kWn7dPYSyvl9TlCQZnKl3norZKLxbP972NmRDMCqKEDPyYJpvEC6kMj1w==}
 
   anser@1.4.10:
     resolution: {integrity: sha512-hCv9AqTQ8ycjpSd3upOJd7vFwW1JaoYQ7tpham03GJ1ca8/65rqn0RpaWpItOAd6ylW9wAw6luXYPJIyPFVOww==}
@@ -10478,6 +10487,28 @@ snapshots:
       uri-js: 4.4.1
 
   alchemy-sdk@3.4.1(bufferutil@4.0.8)(utf-8-validate@6.0.4):
+    dependencies:
+      '@ethersproject/abi': 5.7.0
+      '@ethersproject/abstract-provider': 5.7.0
+      '@ethersproject/bignumber': 5.7.0
+      '@ethersproject/bytes': 5.7.0
+      '@ethersproject/contracts': 5.7.0
+      '@ethersproject/hash': 5.7.0
+      '@ethersproject/networks': 5.7.1
+      '@ethersproject/providers': 5.7.2(bufferutil@4.0.8)(utf-8-validate@6.0.4)
+      '@ethersproject/units': 5.7.0
+      '@ethersproject/wallet': 5.7.0
+      '@ethersproject/web': 5.7.1
+      axios: 1.7.7
+      sturdy-websocket: 0.2.1
+      websocket: 1.0.35
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - supports-color
+      - utf-8-validate
+
+  alchemy-sdk@3.5.0(bufferutil@4.0.8)(utf-8-validate@6.0.4):
     dependencies:
       '@ethersproject/abi': 5.7.0
       '@ethersproject/abstract-provider': 5.7.0

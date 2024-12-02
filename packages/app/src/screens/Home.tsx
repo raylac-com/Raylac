@@ -1,171 +1,26 @@
-import {
-  Text,
-  View,
-  ScrollView,
-  RefreshControl,
-  Pressable,
-} from 'react-native';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import { trpc } from '@/lib/trpc';
-import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { useCallback, useEffect } from 'react';
-import TransferHistoryListItem from '@/components/TransferHistoryListItem';
-import useIsSignedIn from '@/hooks/useIsSignedIn';
-import { useTranslation } from 'react-i18next';
-import StyledPressable from '@/components/StyledPressable';
-import useSignedInUser from '@/hooks/useSignedInUser';
-import useTokenBalances from '@/hooks/useTokenBalance';
+import { ScrollView, RefreshControl, Text, FlatList } from 'react-native';
 import spacing from '@/lib/styles/spacing';
 import colors from '@/lib/styles/colors';
-import fontSizes from '@/lib/styles/fontSizes';
-import TokenBalanceListItem from '@/components/TokenBalanceListItem';
-import FastAvatar from '@/components/FastAvatar';
-import { Hex } from 'viem';
-import { publicKeyToAddress } from 'viem/accounts';
-import borderRadius from '@/lib/styles/borderRadius';
-import { SheetManager } from 'react-native-actions-sheet';
-import UserAngelRequestListItem from '@/components/UserAngelRequestListItem';
-import { FontAwesome5 } from '@expo/vector-icons';
-
-interface MenuItemProps {
-  icon: React.ReactNode;
-  title: string;
-  testID: string;
-  onPress: () => void;
-  color?: string;
-}
-
-const MenuItem = (props: MenuItemProps) => {
-  const { icon, title, onPress, testID, color } = props;
-
-  return (
-    <StyledPressable
-      onPress={onPress}
-      style={{
-        flexDirection: 'column',
-        alignItems: 'center',
-        rowGap: spacing.xSmall,
-      }}
-      testID={testID}
-    >
-      <View
-        style={{
-          width: 50,
-          height: 50,
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: color ?? colors.text,
-          borderRadius: borderRadius.rounded,
-        }}
-      >
-        {icon}
-      </View>
-      <Text
-        style={{
-          fontSize: 16,
-          color: color ?? colors.text,
-          textAlign: 'center',
-        }}
-      >
-        {title}
-      </Text>
-    </StyledPressable>
-  );
-};
-
-const HomeHeader = () => {
-  const { data: signedInUser } = useSignedInUser();
-  const navigation = useTypedNavigation();
-
-  return (
-    <View
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-      }}
-    >
-      <Pressable
-        onPress={() => {
-          navigation.navigate('Tabs', { screen: 'Account' });
-        }}
-      >
-        <FastAvatar
-          name={signedInUser?.name}
-          address={publicKeyToAddress(signedInUser?.spendingPubKey as Hex)}
-          size={40}
-          imageUrl={signedInUser?.profileImage}
-        />
-      </Pressable>
-    </View>
-  );
-};
-
-const NUM_TRANSFERS_TO_FETCH = 3;
+import useUserAddress from '@/hooks/useUserAddress';
+import { trpc } from '@/lib/trpc';
+import { TokenBalanceCard } from '@/components/TokenBalnaceCard';
+import { MultiChainTokenBalance } from '@raylac/shared';
 
 const HomeScreen = () => {
-  const { t } = useTranslation('Home');
-  const { data: isSignedIn } = useIsSignedIn();
-  const { data: signedInUser } = useSignedInUser();
+  const { data: userAddress } = useUserAddress();
 
-  const {
-    data: tokenBalances,
-    refetch: refetchBalances,
-    isRefetching: isRefetchingBalance,
-  } = useTokenBalances();
-
-  const {
-    data: transferHistory,
-    refetch: refetchTransferHistory,
-    isRefetching: isRefetchingTransferHistory,
-  } = trpc.getTransferHistory.useQuery(
+  const { data: tokenBalances } = trpc.getTokenBalances.useQuery(
     {
-      take: NUM_TRANSFERS_TO_FETCH,
-      skip: 0,
+      address: userAddress,
     },
     {
-      enabled: isSignedIn,
-      refetchOnWindowFocus: true,
-      refetchOnMount: true,
-      throwOnError: false,
+      enabled: !!userAddress,
     }
   );
 
-  const { data: angelRequests } = trpc.getUserAngelRequests.useQuery(null, {
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-    throwOnError: false,
-  });
-
-  const navigation = useTypedNavigation();
-
-  const onRefresh = useCallback(() => {
-    refetchBalances();
-    refetchTransferHistory();
-  }, [refetchBalances, refetchTransferHistory]);
-
-  useEffect(() => {
-    if (isSignedIn === false) {
-      navigation.navigate('Start');
-    }
-  }, [isSignedIn]);
-
-  const totalUsdBalance = tokenBalances
-    ? tokenBalances.reduce((acc, { formattedUsdBalance }) => {
-        const balance = parseFloat(formattedUsdBalance);
-
-        // Round to 2 decimal places
-        return Math.round((acc + balance) * 100) / 100;
-      }, 0)
-    : null;
-
-  if (!isSignedIn || !signedInUser || totalUsdBalance === null) {
-    return null;
-  }
-
-  const unpaidAngelRequests = angelRequests?.filter(
-    angelRequest => angelRequest.paidBy.length === 0
-  );
+  const accountUsdValue = tokenBalances?.reduce((acc, tokenBalance) => {
+    return acc + (tokenBalance.usdValue ?? 0);
+  }, 0);
 
   return (
     <ScrollView
@@ -178,187 +33,19 @@ const HomeScreen = () => {
       refreshControl={
         <RefreshControl
           tintColor={colors.primary}
-          refreshing={isRefetchingBalance || isRefetchingTransferHistory}
-          onRefresh={onRefresh}
+          refreshing={false}
+          onRefresh={() => {}}
         />
       }
       testID="home"
     >
-      <HomeHeader />
-      <View
-        style={{
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 28,
-            color: colors.text,
-            fontWeight: 500,
-          }}
-        >
-          {t('fiatDenominatedBalance', { balance: totalUsdBalance })}
-        </Text>
-      </View>
-      {/* Action menus (Deposit, Send, Receive) */}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'center',
-          columnGap: spacing.base,
-        }}
-      >
-        <MenuItem
-          icon={<AntDesign name="plus" size={24} color={colors.background} />}
-          title={t('deposit')}
-          onPress={() => {
-            navigation.navigate('Deposit');
-          }}
-          testID="deposit"
-        />
-        <MenuItem
-          icon={
-            <AntDesign name="arrowdown" size={24} color={colors.background} />
-          }
-          title={t('receive')}
-          onPress={() => {
-            navigation.navigate('Receive');
-          }}
-          testID="receive"
-        />
-        <MenuItem
-          icon={
-            <AntDesign name="arrowup" size={24} color={colors.background} />
-          }
-          title={t('send')}
-          onPress={() => {
-            navigation.navigate('SelectRecipient');
-          }}
-          testID="send"
-        />
-        <MenuItem
-          icon={
-            <AntDesign name="ellipsis1" size={24} color={colors.background} />
-          }
-          title={t('other')}
-          onPress={() => {
-            SheetManager.show('home-other-menus');
-          }}
-          testID="other"
-        />
-      </View>
-      {/* Transfer history */}
-      <View
-        style={{
-          flexDirection: 'column',
-        }}
-      >
-        {transferHistory?.map((transfer, i) => (
-          <TransferHistoryListItem
-            key={i}
-            transfer={transfer}
-            type={transfer.transferType as 'incoming' | 'outgoing'}
-          />
-        ))}
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'flex-end',
-            marginVertical: spacing.base,
-          }}
-        >
-          {transferHistory &&
-          transferHistory.length >= NUM_TRANSFERS_TO_FETCH ? (
-            <Text
-              style={{
-                textAlign: 'right',
-                textDecorationLine: 'underline',
-                color: colors.text,
-              }}
-              onPress={() => {
-                navigation.navigate('TransferHistory');
-              }}
-            >
-              {t('seeAll')}
-            </Text>
-          ) : null}
-        </View>
-        {transferHistory?.length === 0 ? (
-          <Text
-            style={{
-              textAlign: 'center',
-              marginTop: 20,
-              opacity: 0.5,
-              color: colors.text,
-            }}
-          >
-            {t('noTransfers')}
-          </Text>
-        ) : null}
-      </View>
-      {/* Assets list */}
-      {tokenBalances && tokenBalances.length > 0 && (
-        <>
-          <Text
-            style={{
-              fontSize: fontSizes.base,
-              color: colors.text,
-              fontWeight: 'bold',
-            }}
-          >
-            {t('assets')}
-          </Text>
-          <View style={{ flexDirection: 'column' }}>
-            {tokenBalances?.map((tokenBalance, i) => (
-              <TokenBalanceListItem
-                key={i}
-                balance={BigInt(tokenBalance.balance)}
-                tokenId={tokenBalance.tokenId}
-              />
-            ))}
-          </View>
-        </>
-      )}
-      {/* Angel requests */}
-      {unpaidAngelRequests && unpaidAngelRequests.length > 0 ? (
-        <View
-          style={{
-            flexDirection: 'column',
-            marginTop: spacing.base,
-          }}
-        >
-          <Pressable
-            onPress={() => {
-              navigation.navigate('UserAngelRequests');
-            }}
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              columnGap: spacing.xSmall,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: fontSizes.base,
-                color: colors.text,
-                fontWeight: 'bold',
-              }}
-            >
-              {t('angelRequests')}
-            </Text>
-            <FontAwesome5
-              name="feather-alt"
-              size={16}
-              color={colors.angelPink}
-            />
-          </Pressable>
-          {unpaidAngelRequests?.map((angelRequest, i) => (
-            <UserAngelRequestListItem key={i} angelRequest={angelRequest} />
-          ))}
-        </View>
-      ) : null}
+      <Text>{accountUsdValue}</Text>
+      <FlatList
+        data={tokenBalances}
+        renderItem={({ item }) => (
+          <TokenBalanceCard {...(item as MultiChainTokenBalance)} />
+        )}
+      ></FlatList>
     </ScrollView>
   );
 };
