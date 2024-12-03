@@ -22,8 +22,8 @@ const normalizedStories = [
 ];
 
 declare global {
-  const view: ReturnType<typeof start>;
-  const STORIES: typeof normalizedStories;
+  let view: ReturnType<typeof start>;
+  let STORIES: typeof normalizedStories;
 }
 
 const annotations = [

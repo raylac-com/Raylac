@@ -4,10 +4,23 @@
     "appVersionSource": "remote"
   },
   "build": {
-    "development": {
+    "simulator": {
       "ios": {
         "simulator": true
       },
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      },
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
+        "EXPO_PUBLIC_ALCHEMY_API_KEY": "GBAe59-NKtf1q21Il9zJE3NXkgFvRMIY",
+        "APP_VARIANT": "development"
+      }
+    },
+    "development": {
       "android": {
         "buildType": "apk",
         "image": "latest"
