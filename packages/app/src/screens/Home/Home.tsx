@@ -25,10 +25,8 @@ const HomeScreen = () => {
   return (
     <ScrollView
       contentContainerStyle={{
-        rowGap: spacing.base,
-        paddingHorizontal: spacing.small,
-        paddingTop: spacing.small,
-        paddingBottom: spacing.large,
+        rowGap: spacing.default,
+        padding: spacing.default,
       }}
       refreshControl={
         <RefreshControl

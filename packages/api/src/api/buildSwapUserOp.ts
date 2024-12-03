@@ -3,30 +3,18 @@ import {
   RelayGetQuoteResponseBody,
   getGasInfo,
   getSenderAddressV2,
+  BuildSwapUserOpRequestBody,
 } from '@raylac/shared';
 import { ed, st } from '@raylac/shared-backend';
-import { Hex, hexToBigInt } from 'viem';
 import { relayApi } from '../lib/relay';
 import { buildUserOp, getAccountNonce } from '../lib/erc4337';
 import { paymasterSignUserOp } from '../lib/paymaster';
 
 const buildSwapUserOp = async ({
   singerAddress,
-  origins,
-  recipient,
-  destinationChainId,
-  destinationTokenAddress,
-}: {
-  singerAddress: Hex;
-  origins: {
-    chainId: number;
-    tokenAddress: Hex;
-    amount: Hex;
-  }[];
-  recipient: Hex;
-  destinationChainId: number;
-  destinationTokenAddress: Hex;
-}) => {
+  swapInput,
+  swapOutput,
+}: BuildSwapUserOpRequestBody) => {
   // Get quote from Relay
   const senderAddress = getSenderAddressV2({
     singerAddress,
@@ -34,14 +22,14 @@ const buildSwapUserOp = async ({
 
   const requestBody: RelaySwapMultiInputRequestBody = {
     user: senderAddress,
-    recipient,
-    origins: origins.map(origin => ({
+    recipient: senderAddress,
+    origins: swapInput.map(origin => ({
       chainId: origin.chainId,
       currency: origin.tokenAddress,
-      amount: hexToBigInt(origin.amount).toString(),
+      amount: origin.amount.toString(),
     })),
-    destinationCurrency: destinationTokenAddress,
-    destinationChainId,
+    destinationCurrency: swapOutput.tokenAddress,
+    destinationChainId: swapOutput.chainId,
     partial: true,
     tradeType: 'EXACT_INPUT',
     useUserOperation: true,
@@ -63,16 +51,16 @@ const buildSwapUserOp = async ({
   const unsignedUserOps = [];
 
   for (const step of quote.steps) {
-    const nonce = await getAccountNonce({
-      chainId: destinationChainId,
-      address: senderAddress,
-    });
-
-    const gasInfo = await getGasInfo({
-      chainIds: [step.items[0].data.chainId],
-    });
-
     for (const [i, item] of step.items.entries()) {
+      const nonce = await getAccountNonce({
+        chainId: item.data.chainId,
+        address: senderAddress,
+      });
+
+      const gasInfo = await getGasInfo({
+        chainIds: [item.data.chainId],
+      });
+
       const userOp = buildUserOp({
         to: item.data.to,
         data: item.data.data,

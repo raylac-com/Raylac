@@ -241,12 +241,12 @@ export interface MultiChainTokenBalance {
   symbol: string;
   logoUrl: string;
   decimals: number;
-  balance: string;
+  balance: Hex;
   usdValue?: number;
   tokenPrice?: number;
   breakdown: {
     chainId: number;
-    balance: string;
+    balance: Hex;
     tokenAddress: Hex;
   }[];
 }
@@ -274,4 +274,40 @@ export interface RelaySwapMultiInputRequestBody {
   partial: boolean;
   tradeType: 'EXACT_INPUT' | 'EXACT_OUTPUT';
   useUserOperation: boolean;
+}
+
+export type RelaySupportedCurrenciesResponseBody = {
+  groupID: string;
+  chainId: number;
+  address: string;
+  symbol: string;
+  name: string;
+  decimals: number;
+  vmType: string;
+  metadata: {
+    logoURI: string;
+    verified: boolean;
+    isNative: boolean;
+  };
+}[][];
+
+export interface BuildSwapUserOpRequestBody {
+  singerAddress: Hex;
+  swapInput: {
+    tokenAddress: Hex;
+    amount: Hex;
+    chainId: number;
+  }[];
+  swapOutput: {
+    tokenAddress: Hex;
+    chainId: number;
+  };
+}
+
+export interface GetSwapQuoteRequestBody {
+  senderAddress: Hex;
+  inputTokenAddress: Hex;
+  outputTokenAddress: Hex;
+  amount: Hex;
+  tradeType: 'EXACT_INPUT' | 'EXACT_OUTPUT';
 }

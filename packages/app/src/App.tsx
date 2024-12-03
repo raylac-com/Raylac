@@ -5,7 +5,7 @@ import colors from './lib/styles/colors';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RootStackParamsList, RootTabsParamsList } from './navigation/types';
-import Home from './screens/Home';
+import Home from './screens/Home/Home';
 import { NavigationContainer, ThemeProvider } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc, getRpcLinks } from './lib/trpc';
@@ -24,7 +24,7 @@ import * as Localization from 'expo-localization';
 import { SheetProvider } from 'react-native-actions-sheet';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import './Sheets';
-import Swap from './screens/Swap';
+import Swap from './screens/Swap/Swap';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',

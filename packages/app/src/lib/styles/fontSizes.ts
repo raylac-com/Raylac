@@ -1,7 +1,7 @@
 const fontSizes = {
-  small: 12,
   base: 16,
-  large: 24,
+  large: 20,
+  twoXLarge: 28,
   xLarge: 32,
 };
 

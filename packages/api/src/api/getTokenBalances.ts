@@ -1,4 +1,11 @@
-import { formatEther, formatUnits, getAddress, Hex, hexToBigInt } from 'viem';
+import {
+  formatEther,
+  formatUnits,
+  getAddress,
+  Hex,
+  hexToBigInt,
+  toHex,
+} from 'viem';
 import { getPublicClient, toAlchemyNetwork } from '../utils';
 import {
   supportedChains,
@@ -99,10 +106,10 @@ const getMultiChainERC20Balances = async ({
       symbol: token,
       logoUrl: '',
       decimals,
-      balance: balance.toString(),
+      balance: toHex(balance),
       breakdown: knownTokenBalances.map(balance => ({
         chainId: balance.chainId,
-        balance: balance.tokenBalance ?? '',
+        balance: toHex(balance.tokenBalance ?? '0'),
         tokenAddress: getAddress(balance.contractAddress),
       })),
     });
@@ -134,11 +141,11 @@ const getMultiChainERC20Balances = async ({
       symbol: tokenMetadata.symbol ?? '',
       logoUrl: tokenMetadata.logo ?? '',
       decimals: tokenMetadata.decimals,
-      balance: alchemyTokenBalance.tokenBalance ?? '',
+      balance: toHex(alchemyTokenBalance.tokenBalance ?? '0'),
       breakdown: [
         {
           chainId: alchemyTokenBalance.chainId,
-          balance: alchemyTokenBalance.tokenBalance ?? '',
+          balance: toHex(alchemyTokenBalance.tokenBalance ?? '0'),
           tokenAddress: alchemyTokenBalance.contractAddress as Hex,
         },
       ],
@@ -239,12 +246,12 @@ const getMultiChainETHBalance = async ({
     logoUrl:
       'https://assets.coingecko.com/coins/images/279/large/ethereum.png?1698802923',
     decimals: 18,
-    balance: multiChainETHBalance.toString(),
+    balance: toHex(multiChainETHBalance),
     usdValue,
     tokenPrice: usdPrice ? Number(usdPrice) : undefined,
     breakdown: balances.map(balance => ({
       chainId: balance.chainId,
-      balance: balance.balance.toString(),
+      balance: toHex(balance.balance),
       tokenAddress: '0x0000000000000000000000000000000000000000',
     })),
   };

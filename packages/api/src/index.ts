@@ -8,6 +8,12 @@ import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { Hex } from 'viem';
 import buildSwapUserOp from './api/buildSwapUserOp';
 import submitUserOps from './api/submitUserOps';
+import getSupportedTokens from './api/getSupportedTokens';
+import {
+  BuildSwapUserOpRequestBody,
+  GetSwapQuoteRequestBody,
+} from '@raylac/shared';
+import getSwapQuote from './api/getSwapQuote';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -33,26 +39,41 @@ export const appRouter = router({
     .input(
       z.object({
         singerAddress: z.string(),
-        origins: z.array(
+        swapInput: z.array(
           z.object({
             chainId: z.number(),
             tokenAddress: z.string(),
             amount: z.string(),
           })
         ),
-        recipient: z.string(),
-        destinationChainId: z.number(),
-        destinationTokenAddress: z.string(),
+        swapOutput: z.object({
+          chainId: z.number(),
+          tokenAddress: z.string(),
+        }),
       })
     )
     .query(async ({ input }) => {
-      return buildSwapUserOp(input as any);
+      return buildSwapUserOp(input as BuildSwapUserOpRequestBody);
     }),
 
   submitUserOps: publicProcedure
     .input(z.array(z.any()))
     .mutation(async ({ input }) => {
       return submitUserOps(input as any);
+    }),
+
+  getSwapQuote: publicProcedure.input(z.any()).query(async ({ input }) => {
+    return getSwapQuote(input as GetSwapQuoteRequestBody);
+  }),
+
+  getSupportedTokens: publicProcedure
+    .input(
+      z.object({
+        chainIds: z.array(z.number()),
+      })
+    )
+    .query(async ({ input }) => {
+      return getSupportedTokens(input.chainIds);
     }),
 
   getGitCommit: publicProcedure.query(async () => {
