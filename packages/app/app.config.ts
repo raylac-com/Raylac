@@ -65,6 +65,7 @@ const config: ExpoConfig = {
     eas: {
       projectId: 'f1bcc97f-3192-41c1-a32e-5b1dd12049cd',
     },
+    storybookEnabled: process.env.STORYBOOK_ENABLED,
   },
   updates: {
     url: 'https://u.expo.dev/f1bcc97f-3192-41c1-a32e-5b1dd12049cd',

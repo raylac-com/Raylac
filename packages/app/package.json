@@ -9,7 +9,8 @@
     "web": "expo start --web",
     "lint": "eslint . & tsc --noEmit",
     "check-i18n": "sync-i18n --files 'src/translations/*.json' --primary en --languages ja --space 1 --check",
-    "eas-build-post-install": "pnpm -w build"
+    "eas-build-post-install": "pnpm -w build",
+    "storybook-generate": "sb-rn-get-stories"
   },
   "dependencies": {
     "@expo/config": "~10.0.5",
@@ -72,8 +73,18 @@
   "devDependencies": {
     "@babel/core": "^7.24.4",
     "@babel/runtime": "^7.24.7",
+    "@gorhom/bottom-sheet": "^5.0.6",
+    "@react-native-community/datetimepicker": "^8.2.0",
+    "@react-native-community/slider": "^4.5.5",
+    "@storybook/addon-ondevice-actions": "^8.4.2",
+    "@storybook/addon-ondevice-controls": "^8.4.2",
+    "@storybook/react-native": "^8.4.2",
+    "babel-loader": "^8.4.1",
     "babel-preset-expo": "^12.0.3",
-    "i18next-json-sync": "^3.1.2"
+    "i18next-json-sync": "^3.1.2",
+    "react-dom": "18.3.1",
+    "react-native-reanimated": "^3.16.3",
+    "react-native-svg": "^15.9.0"
   },
   "private": true
 }

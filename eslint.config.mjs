@@ -41,6 +41,12 @@ export default tseslint.config(
     },
   },
   {
+    files: ['packages/app/.storybook/**'],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off"
+    },
+  },
+  {
     ignores: [
       '**/node_modules/**',
       'packages/contracts/dependencies',

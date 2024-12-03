@@ -2,6 +2,7 @@
 /* eslint-env node */
 const { getSentryExpoConfig } = require('@sentry/react-native/metro');
 const path = require('path');
+const withStorybook = require('@storybook/react-native/metro/withStorybook');
 
 const defaultConfig = getSentryExpoConfig(__dirname);
 defaultConfig.resolver.sourceExts.push('cjs');
@@ -19,4 +20,10 @@ defaultConfig.resolver.nodeModulesPaths = [
   path.resolve(monorepoRoot, 'node_modules'),
 ];
 
-module.exports = defaultConfig;
+module.exports = withStorybook(defaultConfig, {
+  // Set to false to remove storybook specific options
+  // you can also use a env variable to set this
+  enabled: true,
+  // Path to your storybook config
+  configPath: path.resolve(__dirname, './.storybook'),
+});
