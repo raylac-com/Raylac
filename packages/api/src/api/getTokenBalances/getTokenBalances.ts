@@ -6,19 +6,19 @@ import {
   hexToBigInt,
   toHex,
 } from 'viem';
-import { getPublicClient, toAlchemyNetwork } from '../utils';
+import { getPublicClient, toAlchemyNetwork } from '../../utils';
 import {
   supportedChains,
   MultiChainTokenBalance,
   AlchemyTokenPriceResponse,
 } from '@raylac/shared';
 import { Network, TokenBalance } from 'alchemy-sdk';
-import { KNOWN_TOKENS } from '../lib/knownTokes';
+import { KNOWN_TOKENS } from '../../lib/knownTokes';
 import {
   getAlchemyClient,
   getTokenPriceBySymbol,
   getTokenPrices,
-} from '../lib/alchemy';
+} from '../../lib/alchemy';
 import { logger } from '@raylac/shared-backend';
 /**
  * Get the balance of ERC20 tokens for a given address on a specific chain

@@ -60,6 +60,12 @@ const config: ExpoConfig = {
       },
     ],
     ['expo-localization'],
+    [
+      'expo-font',
+      {
+        fonts: ['./assets/Lato-Regular.ttf'],
+      },
+    ],
   ],
   extra: {
     eas: {

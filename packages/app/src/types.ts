@@ -13,5 +13,3 @@ export interface MnemonicAndKeys {
 
 export type SwapInput = BuildSwapUserOpRequestBody['swapInput'];
 export type SwapOutput = BuildSwapUserOpRequestBody['swapOutput'];
-
-export type SupportedToken = RouterOutput['getSupportedTokens'][number];

@@ -13,3 +13,4 @@ export * from './types';
 export * from './erc20';
 export * from './ethRpc';
 export * from './supportedChains';
+export * from './rpcTypes';

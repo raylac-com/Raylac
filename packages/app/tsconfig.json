@@ -6,5 +6,6 @@
   },
   "extends": "expo/tsconfig.base",
   "include": ["./src/**/*", "./app/**/*"],
-  "strict": true
+  "strict": true,
+  "strictNullChecks": true
 }

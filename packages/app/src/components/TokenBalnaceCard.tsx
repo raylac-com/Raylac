@@ -6,7 +6,7 @@ import { Image, Text, View } from 'react-native';
 export const TokenBalanceCard = (props: {
   name: string;
   symbol: string;
-  usdValue: string;
+  usdValue: number;
   logoUrl: string;
 }) => {
   return (
@@ -39,11 +39,15 @@ export const TokenBalanceCard = (props: {
             rowGap: 4,
           }}
         >
-          <Text>{props.name}</Text>
-          <Text style={{ color: colors.border }}>{props.symbol}</Text>
+          <Text style={{ fontFamily: 'Lato-Regular' }}>{props.name}</Text>
+          <Text style={{ color: colors.border, fontFamily: 'Lato-Regular' }}>
+            {props.symbol}
+          </Text>
         </View>
       </View>
-      <Text style={{ fontWeight: 'bold' }}>{`$${props.usdValue}`}</Text>
+      <Text
+        style={{ fontWeight: 'bold', fontFamily: 'Lato-Regular' }}
+      >{`$${props.usdValue}`}</Text>
     </View>
   );
 };

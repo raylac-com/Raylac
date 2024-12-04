@@ -1,10 +1,9 @@
-import { ScrollView, RefreshControl, Text, FlatList } from 'react-native';
+import { ScrollView, RefreshControl, Text } from 'react-native';
 import spacing from '@/lib/styles/spacing';
 import colors from '@/lib/styles/colors';
 import useUserAddress from '@/hooks/useUserAddress';
 import { trpc } from '@/lib/trpc';
 import { TokenBalanceCard } from '@/components/TokenBalnaceCard';
-import { MultiChainTokenBalance } from '@raylac/shared';
 
 const HomeScreen = () => {
   const { data: userAddress } = useUserAddress();
@@ -38,12 +37,17 @@ const HomeScreen = () => {
       testID="home"
     >
       <Text>{accountUsdValue}</Text>
-      <FlatList
-        data={tokenBalances}
-        renderItem={({ item }) => (
-          <TokenBalanceCard {...(item as MultiChainTokenBalance)} />
-        )}
-      ></FlatList>
+      {tokenBalances
+        ?.slice(0, 5)
+        .map((tokenBalance, index) => (
+          <TokenBalanceCard
+            key={index}
+            symbol={tokenBalance.symbol}
+            name={tokenBalance.name}
+            usdValue={tokenBalance.usdValue}
+            logoUrl={tokenBalance.logoUrl}
+          />
+        ))}
     </ScrollView>
   );
 };

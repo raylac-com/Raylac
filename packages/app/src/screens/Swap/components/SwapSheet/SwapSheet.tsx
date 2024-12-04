@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button, View } from 'react-native';
-import SwapInputCard from './components/SwapInputCard/SwapInputCard';
-import SwapOutputCard from './components/SwapOutputCard/SwapOutputCard';
+import SwapInputCard from '../SwapInputCard/SwapInputCard';
+import SwapOutputCard from '../SwapOutputCard/SwapOutputCard';
 import { trpc } from '@/lib/trpc';
 import { hexToBigInt, zeroAddress } from 'viem';
 import useUserAddress from '@/hooks/useUserAddress';
@@ -50,7 +50,7 @@ const Swap = () => {
   )?.balance;
 
   return (
-    <View style={{ flex: 1, flexDirection: 'column' }}>
+    <View style={{ flexDirection: 'column', rowGap: 16 }}>
       <SwapInputCard
         token={inputToken}
         setToken={setInputToken}

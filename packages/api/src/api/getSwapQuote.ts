@@ -6,7 +6,7 @@ import {
 import { ed, st } from '@raylac/shared-backend';
 import { relayApi } from '../lib/relay';
 import { Hex, hexToBigInt } from 'viem';
-import getTokenBalances from './getTokenBalances';
+import getTokenBalances from './getTokenBalances/getTokenBalances';
 
 const chooseInputs = async ({
   tokenAddress,

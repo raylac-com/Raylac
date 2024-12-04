@@ -26,6 +26,10 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import './Sheets';
 import Swap from './screens/Swap/Swap';
 import Constants from 'expo-constants';
+// import { useFonts } from 'expo-font';
+// import * as SplashScreen from 'expo-splash-screen';
+
+// SplashScreen.preventAutoHideAsync();
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -128,6 +132,27 @@ const asyncStoragePersister = createAsyncStoragePersister({
 });
 
 const App = () => {
+  /*
+  const [loaded, error] = useFonts({
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    'Lato-Regular': require('./assets/fonts/Lato-Regular.ttf'),
+  });
+
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
+
+  if (error) {
+    console.error(error);
+  }
+
+  if (!loaded) {
+    return null;
+  }
+  */
+
   const { isFetchingUpdates } = useFetchUpdates();
 
   if (isFetchingUpdates) {

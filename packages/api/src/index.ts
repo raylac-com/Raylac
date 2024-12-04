@@ -3,17 +3,20 @@ import { z } from 'zod';
 import { publicProcedure, router, createCallerFactory } from './trpc';
 import { createContext } from './context';
 import { webcrypto } from 'node:crypto';
-import getTokenBalances from './api/getTokenBalances';
+import getTokenBalances from './api/getTokenBalances/getTokenBalances';
+import getTokenBalancesMock from './api/getTokenBalances/getTokenBalances.mock';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { Hex } from 'viem';
 import buildSwapUserOp from './api/buildSwapUserOp';
 import submitUserOps from './api/submitUserOps';
-import getSupportedTokens from './api/getSupportedTokens';
+import getSupportedTokens from './api/getSupportedTokens/getSupportedTokens';
+import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.mock';
 import {
   BuildSwapUserOpRequestBody,
   GetSwapQuoteRequestBody,
 } from '@raylac/shared';
 import getSwapQuote from './api/getSwapQuote';
+import { logger } from '@raylac/shared-backend';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -24,6 +27,14 @@ BigInt.prototype.toJSON = function () {
   return this.toString();
 };
 
+const MOCK_RESPONSE = process.env.MOCK_RESPONSE === 'true';
+
+if (MOCK_RESPONSE) {
+  logger.info('Starting API server in mock mode');
+} else {
+  logger.info('Starting API server in production mode');
+}
+
 export const appRouter = router({
   getTokenBalances: publicProcedure
     .input(
@@ -32,7 +43,9 @@ export const appRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return getTokenBalances({ address: input.address as Hex });
+      return MOCK_RESPONSE
+        ? getTokenBalancesMock({ address: input.address as Hex })
+        : getTokenBalances({ address: input.address as Hex });
     }),
 
   buildSwapUserOp: publicProcedure
@@ -73,7 +86,9 @@ export const appRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return getSupportedTokens(input.chainIds);
+      return MOCK_RESPONSE
+        ? getSupportedTokensMock(input.chainIds)
+        : getSupportedTokens(input.chainIds);
     }),
 
   getGitCommit: publicProcedure.query(async () => {

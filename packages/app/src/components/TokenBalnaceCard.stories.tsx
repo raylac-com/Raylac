@@ -15,7 +15,7 @@ const meta = {
   args: {
     name: 'USD Coin',
     symbol: 'USDC',
-    usdValue: '100',
+    usdValue: 100,
     logoUrl:
       'https://firebasestorage.googleapis.com/v0/b/raylac-72351.appspot.com/o/usdc.png?alt=media&token=4e91000d-a063-4f34-bbcb-599a44151ff9',
   },
@@ -36,7 +36,7 @@ export const Basic: Story = {
   args: {
     name: 'USD Coin',
     symbol: 'USDC',
-    usdValue: '100',
+    usdValue: 100,
   },
 };
 
@@ -44,6 +44,6 @@ export const AnotherExample: Story = {
   args: {
     name: 'Etheruem',
     symbol: 'ETH',
-    usdValue: '100',
+    usdValue: 100,
   },
 };
