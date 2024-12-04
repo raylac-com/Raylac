@@ -4,10 +4,10 @@ import { trpc } from '../src/lib/trpc';
 import { getRpcLinks } from '../src/lib/trpc';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
+import { SheetProvider } from 'react-native-actions-sheet';
 
 const Provider = ({ children }: { children: React.ReactNode }) => {
   const [loaded, _error] = useFonts({
-     
     'Lato-Regular': require('../assets/Lato-Regular.ttf'),
   });
 
@@ -23,7 +23,7 @@ const Provider = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        {children}
+        <SheetProvider>{children}</SheetProvider>
       </trpc.Provider>
     </QueryClientProvider>
   );

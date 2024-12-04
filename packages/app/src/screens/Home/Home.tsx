@@ -1,9 +1,10 @@
-import { ScrollView, RefreshControl, Text } from 'react-native';
+import { ScrollView, RefreshControl, Text, Button } from 'react-native';
 import spacing from '@/lib/styles/spacing';
 import colors from '@/lib/styles/colors';
 import useUserAddress from '@/hooks/useUserAddress';
 import { trpc } from '@/lib/trpc';
 import { TokenBalanceCard } from '@/components/TokenBalnaceCard';
+import { SheetManager } from 'react-native-actions-sheet';
 
 const HomeScreen = () => {
   const { data: userAddress } = useUserAddress();
@@ -37,6 +38,10 @@ const HomeScreen = () => {
       testID="home"
     >
       <Text>{accountUsdValue}</Text>
+      <Button
+        title="Show Swap Sheet"
+        onPress={() => SheetManager.show('swap-sheet')}
+      />
       {tokenBalances
         ?.slice(0, 5)
         .map((tokenBalance, index) => (

@@ -6,6 +6,7 @@ import { trpc } from '@/lib/trpc';
 import { hexToBigInt, zeroAddress } from 'viem';
 import useUserAddress from '@/hooks/useUserAddress';
 import { SupportedTokensReturnType } from '@raylac/shared';
+import ActionSheet from 'react-native-actions-sheet';
 
 type Token = SupportedTokensReturnType[number];
 
@@ -26,6 +27,7 @@ const Swap = () => {
     }
   );
 
+  /*
   const { data: _swapQuote } = trpc.getSwapQuote.useQuery({
     senderAddress: zeroAddress,
     swapInput: [
@@ -40,6 +42,7 @@ const Swap = () => {
       chainId: 0,
     },
   });
+  */
 
   const onReviewPress = () => {};
 
@@ -50,25 +53,37 @@ const Swap = () => {
   )?.balance;
 
   return (
-    <View style={{ flexDirection: 'column', rowGap: 16 }}>
-      <SwapInputCard
-        token={inputToken}
-        setToken={setInputToken}
-        amount={inputAmount}
-        setAmount={setInputAmount}
-        balance={inputTokenBalance ? hexToBigInt(inputTokenBalance) : null}
-      />
-      <SwapOutputCard
-        token={outputToken}
-        setToken={setOutputToken}
-        amount={outputAmount}
-        setAmount={setOutputAmount}
-      />
-      {/**
-       * Show quote
-       */}
-      <Button title="Review" onPress={onReviewPress} />
-    </View>
+    <ActionSheet
+      id="swap-sheet"
+      containerStyle={{ borderTopLeftRadius: 32, borderTopRightRadius: 32 }}
+    >
+      <View
+        style={{
+          flexDirection: 'column',
+          paddingVertical: 20,
+          paddingHorizontal: 16,
+          rowGap: 16,
+        }}
+      >
+        <SwapInputCard
+          token={inputToken}
+          setToken={setInputToken}
+          amount={inputAmount}
+          setAmount={setInputAmount}
+          balance={inputTokenBalance ? hexToBigInt(inputTokenBalance) : null}
+        />
+        <SwapOutputCard
+          token={outputToken}
+          setToken={setOutputToken}
+          amount={outputAmount}
+          setAmount={setOutputAmount}
+        />
+        {/**
+         * Show quote
+         */}
+        <Button title="Review" onPress={onReviewPress} />
+      </View>
+    </ActionSheet>
   );
 };
 

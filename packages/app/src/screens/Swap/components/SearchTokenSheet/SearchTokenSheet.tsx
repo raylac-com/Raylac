@@ -1,13 +1,8 @@
+import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import { supportedChains, SupportedTokensReturnType } from '@raylac/shared';
-import {
-  FlatList,
-  Image,
-  Pressable,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { FlatList, Image, Pressable, Text, TextInput } from 'react-native';
+import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
 
 const TokenListItem = ({
   token,
@@ -41,11 +36,22 @@ const TokenListItem = ({
   );
 };
 
-interface SearchTokenProps {
-  onSelectToken: (token: SupportedTokensReturnType[number]) => void;
-}
+const SearchInput = () => {
+  return (
+    <TextInput
+      placeholder="Search for a token"
+      style={{
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 16,
+        padding: 16,
+        height: 54,
+      }}
+    />
+  );
+};
 
-const SearchToken = ({ onSelectToken }: SearchTokenProps) => {
+const SearchTokenSheet = () => {
   const { data: supportedTokens }: { data: SupportedTokensReturnType | null } =
     trpc.getSupportedTokens.useQuery({
       chainIds: supportedChains.map(chain => chain.id),
@@ -56,8 +62,15 @@ const SearchToken = ({ onSelectToken }: SearchTokenProps) => {
   }
 
   return (
-    <View>
-      <TextInput />
+    <ActionSheet
+      id="search-token-sheet"
+      containerStyle={{
+        paddingHorizontal: 16,
+        paddingVertical: 32,
+        height: '90%',
+      }}
+    >
+      <SearchInput />
       <FlatList
         data={supportedTokens}
         contentContainerStyle={{ rowGap: 16 }}
@@ -65,12 +78,16 @@ const SearchToken = ({ onSelectToken }: SearchTokenProps) => {
           <TokenListItem
             token={item}
             balance={BigInt(0)}
-            onPress={() => onSelectToken(item)}
+            onPress={() =>
+              SheetManager.hide('search-token-sheet', {
+                payload: item,
+              })
+            }
           />
         )}
       />
-    </View>
+    </ActionSheet>
   );
 };
 
-export default SearchToken;
+export default SearchTokenSheet;

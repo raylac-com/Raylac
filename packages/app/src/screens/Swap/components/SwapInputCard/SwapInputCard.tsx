@@ -6,7 +6,7 @@ import { SupportedTokensReturnType } from '@raylac/shared';
 
 const SwapInputCard = ({
   token,
-  setToken: _setToken,
+  setToken,
   amount,
   balance,
   setAmount,
@@ -35,6 +35,7 @@ const SwapInputCard = ({
     >
       <SwapAmountInput
         selectedToken={token}
+        setSelectedToken={setToken}
         amount={amount}
         setAmount={setAmount}
       />

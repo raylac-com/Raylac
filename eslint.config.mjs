@@ -53,6 +53,7 @@ export default tseslint.config(
       'packages/scripts/',
       '**/out/',
       '**/metro.config.js',
+      '**/storybook.requires.ts'
     ],
   }
 );

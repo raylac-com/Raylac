@@ -5,7 +5,7 @@ import { SupportedTokensReturnType } from '@raylac/shared';
 
 const SwapOutputCard = ({
   token,
-  setToken: _setToken,
+  setToken,
   amount,
   setAmount,
 }: {
@@ -30,6 +30,7 @@ const SwapOutputCard = ({
         selectedToken={token}
         amount={amount}
         setAmount={setAmount}
+        setSelectedToken={setToken}
       />
     </View>
   );

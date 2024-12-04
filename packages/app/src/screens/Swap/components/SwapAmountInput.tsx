@@ -1,28 +1,44 @@
-import { Image, Text, TextInput, View } from 'react-native';
+import { Image, Pressable, Text, TextInput, View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { SupportedTokensReturnType } from '@raylac/shared';
+import { SheetManager } from 'react-native-actions-sheet';
 
 const SwapAmountInput = ({
   selectedToken,
+  setSelectedToken,
   amount,
   setAmount,
 }: {
   selectedToken: SupportedTokensReturnType[number] | null;
+  setSelectedToken: (token: SupportedTokensReturnType[number]) => void;
   amount: string;
   setAmount: (value: string) => void;
 }) => {
+  const onSelectTokenPress = async () => {
+    const returnValue = await SheetManager.show('search-token-sheet');
+    if (returnValue) {
+      setSelectedToken(returnValue);
+    }
+  };
+
   return (
-    <View
+    <Pressable
       style={{
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
       }}
+      disabled={!!selectedToken}
+      onPress={onSelectTokenPress}
     >
       <View
-        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          columnGap: 8,
+        }}
       >
         {selectedToken ? (
           <Image
@@ -39,18 +55,26 @@ const SwapAmountInput = ({
             }}
           />
         )}
-        <TextInput
-          keyboardType="numeric"
-          value={selectedToken ? amount : ''}
-          onChangeText={setAmount}
-          placeholder={selectedToken ? '0.00' : 'Select token'}
-          style={{
-            fontSize: selectedToken ? fontSizes.twoXLarge : fontSizes.base,
-          }}
-          placeholderTextColor={colors.subbedText}
-        />
+        {selectedToken ? (
+          <TextInput
+            keyboardType="numeric"
+            value={selectedToken ? amount : ''}
+            onChangeText={setAmount}
+            placeholder={'0.00'}
+            style={{
+              fontSize: fontSizes.twoXLarge,
+            }}
+          />
+        ) : (
+          <Text style={{ color: colors.subbedText, fontSize: fontSizes.base }}>
+            {`Select token`}
+          </Text>
+        )}
       </View>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Pressable
+        style={{ flexDirection: 'row', alignItems: 'center' }}
+        onPress={onSelectTokenPress}
+      >
         <Text
           style={{
             fontSize: fontSizes.twoXLarge,
@@ -64,8 +88,8 @@ const SwapAmountInput = ({
           size={24}
           color={colors.subbedText}
         />
-      </View>
-    </View>
+      </Pressable>
+    </Pressable>
   );
 };
 

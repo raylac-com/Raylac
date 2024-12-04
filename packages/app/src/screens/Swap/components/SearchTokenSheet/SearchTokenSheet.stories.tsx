@@ -1,23 +1,25 @@
 import React from 'react';
 import { Button, View } from 'react-native';
 import type { Meta, StoryObj } from '@storybook/react';
-import SwapSheet from './SwapSheet';
+import SearchTokenSheet from './SearchTokenSheet';
 import spacing from '@/lib/styles/spacing';
 import { SheetManager } from 'react-native-actions-sheet';
 
 const meta = {
-  title: 'SwapSheet',
-  component: SwapSheet,
-  args: {},
+  title: 'SearchTokenSheet',
+  component: SearchTokenSheet,
+  args: {
+    onSelectToken: () => {},
+  },
   decorators: [
     Story => {
       return (
         <View style={{ padding: spacing.default }}>
           <Button
-            title="Show Swap Sheet"
+            title="Show Search Token Sheet"
             onPress={() => {
               SheetManager.hideAll();
-              SheetManager.show('swap-sheet');
+              SheetManager.show('search-token-sheet');
             }}
           />
           <Story />
@@ -25,7 +27,7 @@ const meta = {
       );
     },
   ],
-} satisfies Meta<typeof SwapSheet>;
+} satisfies Meta<typeof SearchTokenSheet>;
 
 export default meta;
 
