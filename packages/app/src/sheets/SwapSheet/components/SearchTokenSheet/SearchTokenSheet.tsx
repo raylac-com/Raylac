@@ -87,7 +87,10 @@ const SearchTokenSheet = () => {
         data={supportedTokens.filter(token =>
           token.name.toLowerCase().includes(searchText.toLowerCase())
         )}
-        contentContainerStyle={{ rowGap: 16 }}
+        contentContainerStyle={{
+          marginTop: 14,
+          rowGap: 16,
+        }}
         renderItem={({ item }) => (
           <TokenListItem
             token={item}

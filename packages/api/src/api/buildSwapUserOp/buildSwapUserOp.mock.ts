@@ -5,7 +5,7 @@ import { getSenderAddressV2 } from '@raylac/shared/out/utils';
 const buildSwapUserOpMock = async ({
   singerAddress,
   quote: _quote,
-}: BuildSwapUserOpRequestBody) => {
+}: BuildSwapUserOpRequestBody): Promise<UserOperation[]> => {
   // Get quote from Relay
   const senderAddress = getSenderAddressV2({
     singerAddress,
@@ -26,7 +26,7 @@ const buildSwapUserOpMock = async ({
     chainId: 1,
   };
 
-  return userOp;
+  return [userOp];
 };
 
 export default buildSwapUserOpMock;

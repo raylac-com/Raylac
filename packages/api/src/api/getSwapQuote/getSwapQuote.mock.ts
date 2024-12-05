@@ -1,6 +1,6 @@
 import {
   GetSwapQuoteRequestBody,
-  GetSwapQuoteResponseBody,
+  GetSwapQuoteReturnType,
   RelayGasFee,
 } from '@raylac/shared';
 import { formatUnits, hexToBigInt } from 'viem';
@@ -17,7 +17,7 @@ const mockRelayGasFee: RelayGasFee = {
 
 const getSwapQuote = async (
   args: GetSwapQuoteRequestBody
-): Promise<GetSwapQuoteResponseBody> => {
+): Promise<GetSwapQuoteReturnType> => {
   const sender = args.senderAddress;
   const inputToken = args.inputs[0].tokenAddress;
   const outputToken = args.output.tokenAddress;

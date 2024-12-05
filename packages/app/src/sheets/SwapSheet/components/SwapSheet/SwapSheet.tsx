@@ -3,29 +3,30 @@ import { View } from 'react-native';
 import SwapInputCard from '../SwapInputCard/SwapInputCard';
 import SwapOutputCard from '../SwapOutputCard/SwapOutputCard';
 import { trpc } from '@/lib/trpc';
-import { formatUnits, hexToBigInt, parseUnits, toHex } from 'viem';
+import { formatUnits, hexToBigInt, parseUnits } from 'viem';
 import useUserAddress from '@/hooks/useUserAddress';
 import {
-  buildSwapIo,
-  GetSwapQuoteRequestBody,
+  GetSwapQuoteReturnType,
   supportedChains,
   SupportedTokensReturnType,
   TokenBalancesReturnType,
   TRPCErrorMessage,
-  UserOperation,
 } from '@raylac/shared';
-import ActionSheet from 'react-native-actions-sheet';
-import useSignUserOps from '@/hooks/useSignUserOp';
-import { getSignerAccount } from '@/lib/key';
+import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
 import StyledButton from '@/components/StyledButton/StyledButton';
+import useGetSwapQuote from '@/hooks/useGetSwapQuote';
+import useSwap from '@/hooks/useSwap';
 
 type Token = SupportedTokensReturnType[number];
 
 const SwapSheet = () => {
+  //
+  // Local State
+  //
+
   const [inputToken, setInputToken] = useState<Token | null>(null);
   const [outputToken, setOutputToken] = useState<Token | null>(null);
   const [amount, setAmount] = useState<string>('');
-  const [isSwapping, setIsSwapping] = useState(false);
 
   const { data: userAddress } = useUserAddress();
 
@@ -50,21 +51,11 @@ const SwapSheet = () => {
 
   const {
     mutate: getSwapQuote,
-    error: getSwapQuoteError,
     data: swapQuote,
-  } = trpc.getSwapQuote.useMutation({
-    throwOnError: false,
-  });
+    error: getSwapQuoteError,
+  } = useGetSwapQuote();
 
-  const { mutateAsync: buildSwapUserOp } = trpc.buildSwapUserOp.useMutation({
-    throwOnError: false,
-  });
-
-  const { mutateAsync: submitUserOps } = trpc.submitUserOps.useMutation({
-    throwOnError: false,
-  });
-
-  const { mutateAsync: signUserOps } = useSignUserOps();
+  const { mutate: swap, isPending: isSwapping } = useSwap();
 
   //
   // Effects
@@ -84,68 +75,22 @@ const SwapSheet = () => {
   }, [getSwapQuoteError]);
 
   useEffect(() => {
-    if (userAddress && amount && inputToken && outputToken) {
-      const parsedAmount = toHex(parseUnits(amount, inputToken.decimals));
-
-      if (parsedAmount === '0x0') {
-        return;
-      }
-
-      const tokenBalance = tokenBalances?.find(token =>
-        token.breakdown?.some(breakdown =>
-          inputToken.addresses.some(
-            address =>
-              breakdown.tokenAddress === address.address &&
-              address.chainId === breakdown.chainId
-          )
-        )
-      );
-
-      const hasEnoughBalance =
-        tokenBalance &&
-        hexToBigInt(tokenBalance.balance) >= BigInt(parsedAmount);
-
-      let inputs, output;
-      if (hasEnoughBalance) {
-        const swapIo = buildSwapIo({
-          inputToken,
-          outputToken,
-          amount: BigInt(parsedAmount),
-          tokenBalances: tokenBalances as TokenBalancesReturnType,
-        });
-
-        inputs = swapIo.inputs;
-        output = swapIo.output;
-      } else {
-        inputs = [
-          {
-            tokenAddress: inputToken.addresses[0].address,
-            amount: BigInt(parsedAmount),
-            chainId: inputToken.addresses[0].chainId,
-          },
-        ];
-
-        // TODO: Choose the best output token
-        output = {
-          tokenAddress: outputToken.addresses[0].address,
-          amount: parsedAmount,
-          chainId: outputToken.addresses[0].chainId,
-        };
-      }
-
-      const requestBody: GetSwapQuoteRequestBody = {
-        senderAddress: userAddress,
-        inputs: inputs.map(input => ({
-          ...input,
-          amount: toHex(input.amount),
-        })),
-        output,
-        tradeType: 'EXACT_INPUT',
-      };
-
-      getSwapQuote(requestBody);
+    if (userAddress && amount && inputToken && outputToken && tokenBalances) {
+      getSwapQuote({
+        amount,
+        inputToken,
+        outputToken,
+        tokenBalances: tokenBalances as TokenBalancesReturnType,
+      });
     }
-  }, [inputToken, userAddress, outputToken, amount, getSwapQuote]);
+  }, [
+    inputToken,
+    userAddress,
+    outputToken,
+    amount,
+    getSwapQuote,
+    tokenBalances,
+  ]);
 
   //
   // Handlers
@@ -157,17 +102,9 @@ const SwapSheet = () => {
 
   const onSwapPress = async () => {
     if (swapQuote) {
-      setIsSwapping(true);
-      const singerAddress = await getSignerAccount();
-      const userOps = await buildSwapUserOp({
-        singerAddress: singerAddress.address,
-        quote: swapQuote,
-      });
+      await swap({ swapQuote: swapQuote as GetSwapQuoteReturnType });
 
-      const signedUserOps = await signUserOps(userOps as UserOperation[]);
-
-      await submitUserOps(signedUserOps);
-      setIsSwapping(false);
+      SheetManager.hide('swap-sheet');
     }
   };
 

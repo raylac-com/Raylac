@@ -51,4 +51,4 @@ export interface GetSwapQuoteRequestBody {
   tradeType: 'EXACT_INPUT' | 'EXACT_OUTPUT';
 }
 
-export type GetSwapQuoteResponseBody = RelayGetQuoteResponseBody;
+export type GetSwapQuoteReturnType = RelayGetQuoteResponseBody;

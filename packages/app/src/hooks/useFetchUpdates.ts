@@ -1,16 +1,13 @@
 import * as Updates from 'expo-updates';
-import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import { useEffect, useState } from 'react';
 
 const useFetchUpdates = () => {
   const [isFetchingUpdates, setIsFetchingUpdates] = useState(true);
 
-  const isExpoGo = Constants.executionEnvironment === 'storeClient';
-
   useEffect(() => {
     (async () => {
-      if (!isExpoGo && Device.isDevice) {
+      if (Device.isDevice) {
         const { isAvailable } = await Updates.checkForUpdateAsync();
         if (isAvailable) {
           await Updates.fetchUpdateAsync();
@@ -23,7 +20,7 @@ const useFetchUpdates = () => {
 
       setIsFetchingUpdates(false);
     })();
-  }, []);
+  }, [setIsFetchingUpdates]);
 
   return {
     isFetchingUpdates,

@@ -3,6 +3,7 @@ import type { ExpoConfig } from '@expo/config';
 const IS_DEV = process.env.APP_VARIANT === 'development';
 
 const config: ExpoConfig = {
+  newArchEnabled: true,
   name: IS_DEV ? 'Raylac (dev)' : 'Raylac',
   slug: 'raylac',
   version: '1.1.0',
