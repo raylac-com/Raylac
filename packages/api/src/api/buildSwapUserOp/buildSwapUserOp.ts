@@ -3,8 +3,8 @@ import {
   getSenderAddressV2,
   BuildSwapUserOpRequestBody,
 } from '@raylac/shared';
-import { buildUserOp, getAccountNonce } from '../lib/erc4337';
-import { paymasterSignUserOp } from '../lib/paymaster';
+import { buildUserOp, getAccountNonce } from '../../lib/erc4337';
+import { paymasterSignUserOp } from '../../lib/paymaster';
 
 const buildSwapUserOp = async ({
   singerAddress,

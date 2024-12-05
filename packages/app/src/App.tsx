@@ -18,7 +18,6 @@ import { useTranslation } from 'react-i18next';
 import './i18n';
 import { useEffect } from 'react';
 import { getSelectedLanguage } from './i18n';
-import useFetchUpdates from './hooks/useFetchUpdates';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
 import { SheetManager, SheetProvider } from 'react-native-actions-sheet';
@@ -154,12 +153,6 @@ const App = () => {
   }
 
   if (!loaded) {
-    return null;
-  }
-
-  const { isFetchingUpdates } = useFetchUpdates();
-
-  if (isFetchingUpdates) {
     return null;
   }
 

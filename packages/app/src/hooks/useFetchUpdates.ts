@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 const useFetchUpdates = () => {
   const [isFetchingUpdates, setIsFetchingUpdates] = useState(true);
 
-  const isExpoGo = Constants.appOwnership === 'expo';
+  const isExpoGo = Constants.executionEnvironment === 'storeClient';
 
   useEffect(() => {
     (async () => {

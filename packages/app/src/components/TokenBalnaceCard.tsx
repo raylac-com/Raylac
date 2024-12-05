@@ -28,6 +28,9 @@ export const TokenBalanceCard = (props: {
         borderWidth: 1,
         alignItems: 'center',
         justifyContent: 'space-between',
+        shadowColor: colors.border,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
       }}
     >
       <View

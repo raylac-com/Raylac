@@ -21,7 +21,7 @@ const getSupportedTokens = async (
       name: 'Ethereum',
       decimals: 18,
       logoURI:
-        'https://coin-images.coingecko.com/coins/images/279/large/ethereum.png?1595348886',
+        'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/eth.png',
       addresses: supportedChains.map(chain => ({
         chainId: chain.id,
         address: zeroAddress,

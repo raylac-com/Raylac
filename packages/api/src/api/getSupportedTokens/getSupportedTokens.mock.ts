@@ -15,7 +15,7 @@ const getSupportedTokens = (_chainIds: number[]): SupportedTokensReturnType => {
       ],
       decimals: 18,
       logoURI:
-        'https://assets.coingecko.com/coins/images/279/large/ethereum.png?1796508806',
+        'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/eth.png',
     },
     {
       symbol: 'USDC',

@@ -7,8 +7,8 @@ import getTokenBalances from './api/getTokenBalances/getTokenBalances';
 import getTokenBalancesMock from './api/getTokenBalances/getTokenBalances.mock';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { Hex } from 'viem';
-import buildSwapUserOp from './api/buildSwapUserOp';
-import submitUserOps from './api/submitUserOps';
+import buildSwapUserOp from './api/buildSwapUserOp/buildSwapUserOp';
+import submitUserOps from './api/submitUserOps/submitUserOps';
 import getSupportedTokens from './api/getSupportedTokens/getSupportedTokens';
 import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.mock';
 import {
@@ -18,6 +18,8 @@ import {
 import getSwapQuote from './api/getSwapQuote/getSwapQuote';
 import { logger } from '@raylac/shared-backend';
 import getSwapQuoteMock from './api/getSwapQuote/getSwapQuote.mock';
+import buildSwapUserOpMock from './api/buildSwapUserOp/buildSwapUserOp.mock';
+import submitUserOpsMock from './api/submitUserOps/submitUserOps.mock';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -57,13 +59,17 @@ export const appRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      return buildSwapUserOp(input as BuildSwapUserOpRequestBody);
+      return MOCK_RESPONSE
+        ? buildSwapUserOpMock(input as BuildSwapUserOpRequestBody)
+        : buildSwapUserOp(input as BuildSwapUserOpRequestBody);
     }),
 
   submitUserOps: publicProcedure
     .input(z.array(z.any()))
     .mutation(async ({ input }) => {
-      return submitUserOps(input as any);
+      return MOCK_RESPONSE
+        ? submitUserOpsMock(input as any)
+        : submitUserOps(input as any);
     }),
 
   getSwapQuote: publicProcedure.input(z.any()).mutation(async ({ input }) => {

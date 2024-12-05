@@ -3,7 +3,7 @@ import {
   getWebsocketClient,
   UserOperation,
 } from '@raylac/shared';
-import { handleOps } from '../lib/bundler';
+import { handleOps } from '../../lib/bundler';
 import { logger } from '@raylac/shared-backend';
 
 const submitUserOpsForChain = async ({
