@@ -1,8 +1,9 @@
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import SwapAmountInput from '../SwapAmountInput';
 import { formatUnits } from 'viem';
 import { SupportedTokensReturnType } from '@raylac/shared';
+import StyledText from '@/components/StyledText/StyledText';
 
 const SwapInputCard = ({
   token,
@@ -41,12 +42,15 @@ const SwapInputCard = ({
       />
       {token && (
         <View style={{ flexDirection: 'row' }}>
-          <Text style={{ color: colors.subbedText, fontWeight: 'bold' }}>
+          <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
             {tokenBalanceFormatted} {token.symbol}
-          </Text>
-          <Text style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-            {`  MAX`}
-          </Text>
+          </StyledText>
+          <StyledText
+            style={{
+              color: colors.subbedText,
+              fontWeight: 'bold',
+            }}
+          >{`  MAX`}</StyledText>
         </View>
       )}
     </View>

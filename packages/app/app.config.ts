@@ -63,7 +63,7 @@ const config: ExpoConfig = {
     [
       'expo-font',
       {
-        fonts: ['./assets/Lato-Regular.ttf'],
+        fonts: ['./assets/Lato-Regular.ttf', './assets/Lato-Bold.ttf'],
       },
     ],
   ],

@@ -1,10 +1,10 @@
-import { ScrollView, RefreshControl, Text, Button } from 'react-native';
-import spacing from '@/lib/styles/spacing';
+import { ScrollView, RefreshControl } from 'react-native';
 import colors from '@/lib/styles/colors';
 import useUserAddress from '@/hooks/useUserAddress';
 import { trpc } from '@/lib/trpc';
 import { TokenBalanceCard } from '@/components/TokenBalnaceCard';
-import { SheetManager } from 'react-native-actions-sheet';
+import { hexToBigInt } from 'viem';
+import StyledText from '@/components/StyledText/StyledText';
 
 const HomeScreen = () => {
   const { data: userAddress } = useUserAddress();
@@ -25,8 +25,9 @@ const HomeScreen = () => {
   return (
     <ScrollView
       contentContainerStyle={{
-        rowGap: spacing.default,
-        padding: spacing.default,
+        rowGap: 24,
+        paddingVertical: 32,
+        paddingHorizontal: 16,
       }}
       refreshControl={
         <RefreshControl
@@ -37,16 +38,16 @@ const HomeScreen = () => {
       }
       testID="home"
     >
-      <Text>{accountUsdValue}</Text>
-      <Button
-        title="Show Swap Sheet"
-        onPress={() => SheetManager.show('swap-sheet')}
-      />
+      <StyledText style={{ fontSize: 36, color: colors.text }}>
+        {`$${accountUsdValue?.toFixed(2)}`}
+      </StyledText>
       {tokenBalances
         ?.slice(0, 5)
         .map((tokenBalance, index) => (
           <TokenBalanceCard
             key={index}
+            balance={hexToBigInt(tokenBalance.balance)}
+            tokenDecimals={tokenBalance.decimals}
             symbol={tokenBalance.symbol}
             name={tokenBalance.name}
             usdValue={tokenBalance.usdValue}

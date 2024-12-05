@@ -1,8 +1,9 @@
+import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import { supportedChains, SupportedTokensReturnType } from '@raylac/shared';
 import { useState } from 'react';
-import { FlatList, Image, Pressable, Text, TextInput } from 'react-native';
+import { FlatList, Image, Pressable, TextInput } from 'react-native';
 import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
 
 const TokenListItem = ({
@@ -27,11 +28,11 @@ const TokenListItem = ({
         source={{ uri: token.logoURI }}
         style={{ width: 42, height: 42 }}
       />
-      <Text>{token.name}</Text>
+      <StyledText>{token.name}</StyledText>
       {balance && (
-        <Text>
+        <StyledText>
           {balance.toLocaleString()} {token.symbol}
-        </Text>
+        </StyledText>
       )}
     </Pressable>
   );

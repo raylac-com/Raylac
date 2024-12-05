@@ -9,6 +9,7 @@ import { SheetProvider } from 'react-native-actions-sheet';
 const Provider = ({ children }: { children: React.ReactNode }) => {
   const [loaded, _error] = useFonts({
     'Lato-Regular': require('../assets/Lato-Regular.ttf'),
+    'Lato-Bold': require('../assets/Lato-Bold.ttf'),
   });
 
   if (!loaded) {

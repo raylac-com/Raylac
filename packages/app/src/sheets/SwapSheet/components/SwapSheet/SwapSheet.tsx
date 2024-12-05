@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, View } from 'react-native';
+import { View } from 'react-native';
 import SwapInputCard from '../SwapInputCard/SwapInputCard';
 import SwapOutputCard from '../SwapOutputCard/SwapOutputCard';
 import { trpc } from '@/lib/trpc';
@@ -17,15 +17,21 @@ import {
 import ActionSheet from 'react-native-actions-sheet';
 import useSignUserOps from '@/hooks/useSignUserOp';
 import { getSignerAccount } from '@/lib/key';
+import StyledButton from '@/components/StyledButton/StyledButton';
 
 type Token = SupportedTokensReturnType[number];
 
-const Swap = () => {
+const SwapSheet = () => {
   const [inputToken, setInputToken] = useState<Token | null>(null);
   const [outputToken, setOutputToken] = useState<Token | null>(null);
   const [amount, setAmount] = useState<string>('');
+  const [isSwapping, setIsSwapping] = useState(false);
 
   const { data: userAddress } = useUserAddress();
+
+  //
+  // Fetch data
+  //
 
   const { data: tokenBalances } = trpc.getTokenBalances.useQuery(
     {
@@ -40,12 +46,7 @@ const Swap = () => {
     chainIds: supportedChains.map(chain => chain.id),
   });
 
-  useEffect(() => {
-    if (supportedTokens) {
-      setInputToken(supportedTokens[0] as Token);
-      setOutputToken(supportedTokens[1] as Token);
-    }
-  }, [supportedTokens]);
+  // Mutations
 
   const {
     mutate: getSwapQuote,
@@ -64,6 +65,17 @@ const Swap = () => {
   });
 
   const { mutateAsync: signUserOps } = useSignUserOps();
+
+  //
+  // Effects
+  //
+
+  useEffect(() => {
+    if (supportedTokens) {
+      setInputToken(supportedTokens[0] as Token);
+      setOutputToken(supportedTokens[1] as Token);
+    }
+  }, [supportedTokens]);
 
   useEffect(() => {
     if (getSwapQuoteError) {
@@ -135,12 +147,17 @@ const Swap = () => {
     }
   }, [inputToken, userAddress, outputToken, amount, getSwapQuote]);
 
+  //
+  // Handlers
+  //
+
   const onInputAmountChange = (amount: string) => {
     setAmount(amount);
   };
 
   const onSwapPress = async () => {
     if (swapQuote) {
+      setIsSwapping(true);
       const singerAddress = await getSignerAccount();
       const userOps = await buildSwapUserOp({
         singerAddress: singerAddress.address,
@@ -150,8 +167,13 @@ const Swap = () => {
       const signedUserOps = await signUserOps(userOps as UserOperation[]);
 
       await submitUserOps(signedUserOps);
+      setIsSwapping(false);
     }
   };
+
+  //
+  // Derived state
+  //
 
   const inputTokenBalance = tokenBalances?.find(token =>
     token.breakdown?.some(breakdown =>
@@ -209,7 +231,8 @@ const Swap = () => {
         {/**
          * Show quote
          */}
-        <Button
+        <StyledButton
+          isLoading={isSwapping}
           title={isAmountTooSmall ? 'Amount too small' : 'Swap'}
           onPress={onSwapPress}
         />
@@ -218,4 +241,4 @@ const Swap = () => {
   );
 };
 
-export default Swap;
+export default SwapSheet;

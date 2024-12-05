@@ -1,9 +1,10 @@
-import { Image, Pressable, Text, TextInput, View } from 'react-native';
+import { Image, Pressable, TextInput, View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { SupportedTokensReturnType } from '@raylac/shared';
 import { SheetManager } from 'react-native-actions-sheet';
+import StyledText from '@/components/StyledText/StyledText';
 
 const SwapAmountInput = ({
   selectedToken,
@@ -67,23 +68,25 @@ const SwapAmountInput = ({
             }}
           />
         ) : (
-          <Text style={{ color: colors.subbedText, fontSize: fontSizes.base }}>
+          <StyledText
+            style={{ color: colors.subbedText, fontSize: fontSizes.base }}
+          >
             {`Select token`}
-          </Text>
+          </StyledText>
         )}
       </View>
       <Pressable
         style={{ flexDirection: 'row', alignItems: 'center' }}
         onPress={onSelectTokenPress}
       >
-        <Text
+        <StyledText
           style={{
             fontSize: fontSizes.twoXLarge,
             color: colors.subbedText,
           }}
         >
           {selectedToken ? selectedToken.symbol : ''}
-        </Text>
+        </StyledText>
         <Ionicons
           name="chevron-expand-outline"
           size={24}

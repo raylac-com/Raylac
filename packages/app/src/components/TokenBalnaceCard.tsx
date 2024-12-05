@@ -1,14 +1,23 @@
 import borderRadius from '@/lib/styles/borderRadius';
 import colors from '@/lib/styles/colors';
 import spacing from '@/lib/styles/spacing';
-import { Image, Text, View } from 'react-native';
+import { formatAmount } from '@raylac/shared';
+import { Image, View } from 'react-native';
+import StyledText from './StyledText/StyledText';
 
 export const TokenBalanceCard = (props: {
   name: string;
   symbol: string;
+  balance: bigint;
+  tokenDecimals: number;
   usdValue: number;
   logoUrl: string;
 }) => {
+  const formattedBalance = formatAmount(
+    props.balance.toString(),
+    props.tokenDecimals
+  );
+
   return (
     <View
       style={{
@@ -39,15 +48,15 @@ export const TokenBalanceCard = (props: {
             rowGap: 4,
           }}
         >
-          <Text style={{ fontFamily: 'Lato-Regular' }}>{props.name}</Text>
-          <Text style={{ color: colors.border, fontFamily: 'Lato-Regular' }}>
-            {props.symbol}
-          </Text>
+          <StyledText>{props.name}</StyledText>
+          <StyledText style={{ color: colors.border }}>
+            {formattedBalance} {props.symbol}
+          </StyledText>
         </View>
       </View>
-      <Text
-        style={{ fontWeight: 'bold', fontFamily: 'Lato-Regular' }}
-      >{`$${props.usdValue}`}</Text>
+      <StyledText
+        style={{ fontWeight: 'bold' }}
+      >{`$${props.usdValue}`}</StyledText>
     </View>
   );
 };

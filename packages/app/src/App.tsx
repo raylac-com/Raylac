@@ -21,14 +21,11 @@ import { getSelectedLanguage } from './i18n';
 import useFetchUpdates from './hooks/useFetchUpdates';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
-import { SheetProvider } from 'react-native-actions-sheet';
+import { SheetManager, SheetProvider } from 'react-native-actions-sheet';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import './Sheets';
 import Constants from 'expo-constants';
-// import { useFonts } from 'expo-font';
-// import * as SplashScreen from 'expo-splash-screen';
-
-// SplashScreen.preventAutoHideAsync();
+import { useFonts } from 'expo-font';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -47,11 +44,31 @@ const Tabs = () => {
         component={Home}
         options={{
           headerShown: false,
+          tabBarLabel: () => null,
           tabBarIcon: ({ color }) => (
             <AntDesign name="home" size={24} color={color} />
           ),
         }}
       ></Tab.Screen>
+      <Tab.Screen
+        name="Swap"
+        component={Home}
+        options={{
+          headerShown: false,
+          tabBarLabel: () => null,
+          tabBarIconStyle: {
+            color: colors.primary,
+          },
+          tabBarIcon: () => (
+            <AntDesign
+              name="swap"
+              size={24}
+              color={colors.primary}
+              onPress={() => SheetManager.show('swap-sheet')}
+            />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 };
@@ -124,26 +141,21 @@ const asyncStoragePersister = createAsyncStoragePersister({
 });
 
 const App = () => {
-  /*
   const [loaded, error] = useFonts({
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    'Lato-Regular': require('./assets/fonts/Lato-Regular.ttf'),
+    'Lato-Regular': require('../assets/Lato-Regular.ttf'),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    'Lato-Bold': require('../assets/Lato-Bold.ttf'),
   });
 
-  useEffect(() => {
-    if (loaded || error) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded, error]);
-
   if (error) {
+    // eslint-disable-next-line no-console
     console.error(error);
   }
 
   if (!loaded) {
     return null;
   }
-  */
 
   const { isFetchingUpdates } = useFetchUpdates();
 

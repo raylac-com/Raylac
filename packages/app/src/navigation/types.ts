@@ -1,5 +1,6 @@
 export type RootTabsParamsList = {
   Home: undefined;
+  Swap: undefined;
 };
 
 export type RootStackParamsList = {

@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import type { Meta, StoryObj } from '@storybook/react';
 import { TokenBalanceCard } from './TokenBalnaceCard';
 import spacing from '@/lib/styles/spacing';
+import { parseUnits } from 'viem';
 
 const meta = {
   title: 'TokenBalanceCard',
@@ -37,13 +38,7 @@ export const Basic: Story = {
     name: 'USD Coin',
     symbol: 'USDC',
     usdValue: 100,
-  },
-};
-
-export const AnotherExample: Story = {
-  args: {
-    name: 'Etheruem',
-    symbol: 'ETH',
-    usdValue: 100,
+    balance: parseUnits('1000', 6),
+    tokenDecimals: 6,
   },
 };

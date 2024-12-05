@@ -6,13 +6,13 @@ const colors = {
   angelPink: '#ff748c',
 
   // Required colors by react-navigation https://reactnavigation.org/docs/themes/
-  primary: '#9BD280',
+  primary: '#333333',
   border: '#B8ACAC',
   background: '#FFFFFF',
-  text: '#000000',
+  text: '#333333',
   subbedText: '#B8ACAC',
   card: '#FFFFFF',
-  notification: '#9BD280',
+  notification: '#333333',
 };
 
 export default colors;
