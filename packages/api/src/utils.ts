@@ -9,6 +9,7 @@ import {
 import * as chains from 'viem/chains';
 import { ALCHEMY_API_KEY } from './lib/envVars';
 import { Network } from 'alchemy-sdk';
+import { getChainFromId } from '@raylac/shared';
 
 export const getWebsocketClient = ({ chainId }: { chainId: number }) => {
   const chain = getChainFromId(chainId);
@@ -180,21 +181,6 @@ export const getChainName = (chainId: number) => {
   const name = Object.values(chains).find(chain => chain.id === chainId)?.name;
 
   return `${name} (${chainId})`;
-};
-
-/**
- * Returns viem's `Chain` object from a chain ID
- */
-export const getChainFromId = (chainId: number): Chain => {
-  const chain = Object.entries(chains).find(
-    ([_, chain]) => chain.id === chainId
-  );
-
-  if (!chain) {
-    throw new Error(`Chain with ID ${chainId} not found`);
-  }
-
-  return chain[1] as Chain;
 };
 
 export const toAlchemyNetwork = (chainId: number): Network => {

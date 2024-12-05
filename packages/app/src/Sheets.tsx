@@ -1,6 +1,6 @@
 import { registerSheet, SheetDefinition } from 'react-native-actions-sheet';
-import SwapSheet from './screens/Swap/components/SwapSheet/SwapSheet';
-import SearchTokenSheet from './screens/Swap/components/SearchTokenSheet/SearchTokenSheet';
+import SwapSheet from './sheets/SwapSheet/components/SwapSheet/SwapSheet';
+import SearchTokenSheet from './sheets/SwapSheet/components/SearchTokenSheet/SearchTokenSheet';
 import { SupportedTokensReturnType } from '@raylac/shared';
 
 registerSheet('swap-sheet', SwapSheet);

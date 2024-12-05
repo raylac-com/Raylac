@@ -2,12 +2,17 @@ import {
   RelaySwapMultiInputRequestBody,
   RelayGetQuoteResponseBody,
   GetSwapQuoteRequestBody,
+  TRPCErrorMessage,
 } from '@raylac/shared';
-import { ed, st } from '@raylac/shared-backend';
-import { relayApi } from '../lib/relay';
-import { Hex, hexToBigInt } from 'viem';
-import getTokenBalances from './getTokenBalances/getTokenBalances';
+import { ed, logger, st } from '@raylac/shared-backend';
+import { relayApi } from '../../lib/relay';
+import { hexToBigInt } from 'viem';
+// import getTokenBalances from '../getTokenBalances/getTokenBalances';
+import { base } from 'viem/chains';
+import axios from 'axios';
+import { TRPCError } from '@trpc/server';
 
+/*
 const chooseInputs = async ({
   tokenAddress,
   amount,
@@ -53,6 +58,7 @@ const chooseInputs = async ({
 
   return inputs;
 };
+*/
 
 const getSwapQuote = async ({
   senderAddress,
@@ -61,23 +67,28 @@ const getSwapQuote = async ({
   amount,
   tradeType,
 }: GetSwapQuoteRequestBody) => {
+  /*
   const inputs = await chooseInputs({
     tokenAddress: inputTokenAddress,
     amount: hexToBigInt(amount),
     address: senderAddress,
   });
+  */
 
-  const destinationChainId = inputs[0].chainId;
+  //  const destinationChainId = inputs[0].chainId;
+  const destinationChainId = base.id;
 
   // Get quote from Relay
   const requestBody: RelaySwapMultiInputRequestBody = {
     user: senderAddress,
     recipient: senderAddress,
-    origins: inputs.map(origin => ({
-      chainId: origin.chainId,
-      currency: origin.tokenAddress,
-      amount: origin.amount.toString(),
-    })),
+    origins: [
+      {
+        chainId: base.id,
+        currency: inputTokenAddress,
+        amount: hexToBigInt(amount).toString(),
+      },
+    ],
     destinationCurrency: outputTokenAddress,
     destinationChainId,
     partial: true,
@@ -85,15 +96,33 @@ const getSwapQuote = async ({
     useUserOperation: true,
   };
 
+  logger.info('requestBody', requestBody);
+
   const qt = st('Get quote');
 
-  const { data: quote } = await relayApi.post<RelayGetQuoteResponseBody>(
-    '/execute/swap/multi-input',
-    requestBody
-  );
+  let quote;
+  try {
+    const { data } = await relayApi.post<RelayGetQuoteResponseBody>(
+      '/execute/swap/multi-input',
+      requestBody
+    );
+    quote = data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response?.data?.message?.includes('amount is too small')) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: TRPCErrorMessage.SWAP_AMOUNT_TOO_SMALL,
+          cause: error,
+        });
+      }
+
+      logger.error('Relay API error:', error.response?.data || error.message);
+    }
+    throw error;
+  }
 
   ed(qt);
-
   // Build user op
 
   // Get the nonce of the account

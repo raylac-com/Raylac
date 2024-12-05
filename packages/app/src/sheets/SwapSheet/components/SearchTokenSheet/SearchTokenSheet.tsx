@@ -1,6 +1,7 @@
 import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import { supportedChains, SupportedTokensReturnType } from '@raylac/shared';
+import { useState } from 'react';
 import { FlatList, Image, Pressable, Text, TextInput } from 'react-native';
 import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
 
@@ -36,10 +37,18 @@ const TokenListItem = ({
   );
 };
 
-const SearchInput = () => {
+const SearchInput = ({
+  value,
+  onChangeText,
+}: {
+  value: string;
+  onChangeText: (text: string) => void;
+}) => {
   return (
     <TextInput
       placeholder="Search for a token"
+      value={value}
+      onChangeText={onChangeText}
       style={{
         borderWidth: 1,
         borderColor: colors.border,
@@ -52,6 +61,8 @@ const SearchInput = () => {
 };
 
 const SearchTokenSheet = () => {
+  const [searchText, setSearchText] = useState('');
+
   const { data: supportedTokens }: { data: SupportedTokensReturnType | null } =
     trpc.getSupportedTokens.useQuery({
       chainIds: supportedChains.map(chain => chain.id),
@@ -70,9 +81,11 @@ const SearchTokenSheet = () => {
         height: '90%',
       }}
     >
-      <SearchInput />
+      <SearchInput value={searchText} onChangeText={setSearchText} />
       <FlatList
-        data={supportedTokens}
+        data={supportedTokens.filter(token =>
+          token.name.toLowerCase().includes(searchText.toLowerCase())
+        )}
         contentContainerStyle={{ rowGap: 16 }}
         renderItem={({ item }) => (
           <TokenListItem

@@ -38,6 +38,8 @@ const getSupportedTokens = async (
       tokenAddress: token.address as Hex,
     }));
 
+  // TODO: Group the tokens by tokenAddress
+
   cache.set(`supportedTokens-${chainIds.join('-')}`, supportedTokens);
 
   return supportedTokens;

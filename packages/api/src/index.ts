@@ -15,8 +15,9 @@ import {
   BuildSwapUserOpRequestBody,
   GetSwapQuoteRequestBody,
 } from '@raylac/shared';
-import getSwapQuote from './api/getSwapQuote';
+import getSwapQuote from './api/getSwapQuote/getSwapQuote';
 import { logger } from '@raylac/shared-backend';
+import getSwapQuoteMock from './api/getSwapQuote/getSwapQuote.mock';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -52,20 +53,10 @@ export const appRouter = router({
     .input(
       z.object({
         singerAddress: z.string(),
-        swapInput: z.array(
-          z.object({
-            chainId: z.number(),
-            tokenAddress: z.string(),
-            amount: z.string(),
-          })
-        ),
-        swapOutput: z.object({
-          chainId: z.number(),
-          tokenAddress: z.string(),
-        }),
+        quote: z.any(),
       })
     )
-    .query(async ({ input }) => {
+    .mutation(async ({ input }) => {
       return buildSwapUserOp(input as BuildSwapUserOpRequestBody);
     }),
 
@@ -75,8 +66,10 @@ export const appRouter = router({
       return submitUserOps(input as any);
     }),
 
-  getSwapQuote: publicProcedure.input(z.any()).query(async ({ input }) => {
-    return getSwapQuote(input as GetSwapQuoteRequestBody);
+  getSwapQuote: publicProcedure.input(z.any()).mutation(async ({ input }) => {
+    return MOCK_RESPONSE
+      ? getSwapQuoteMock(input as GetSwapQuoteRequestBody)
+      : getSwapQuote(input as GetSwapQuoteRequestBody);
   }),
 
   getSupportedTokens: publicProcedure

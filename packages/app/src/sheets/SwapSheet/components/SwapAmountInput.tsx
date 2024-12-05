@@ -63,6 +63,7 @@ const SwapAmountInput = ({
             placeholder={'0.00'}
             style={{
               fontSize: fontSizes.twoXLarge,
+              width: '50%',
             }}
           />
         ) : (

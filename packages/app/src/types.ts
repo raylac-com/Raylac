@@ -1,15 +1,10 @@
 import type { AppRouter } from '@raylac/api';
-import { BuildSwapUserOpRequestBody } from '@raylac/shared';
 import type { inferRouterOutputs } from '@trpc/server';
 import { Hex } from 'viem';
 
 export type RouterOutput = inferRouterOutputs<AppRouter>;
 
-export interface MnemonicAndKeys {
+export interface MnemonicAndKey {
   mnemonic: string;
-  spendingPrivKey: Hex;
-  viewingPrivKey: Hex;
+  privKey: Hex;
 }
-
-export type SwapInput = BuildSwapUserOpRequestBody['swapInput'];
-export type SwapOutput = BuildSwapUserOpRequestBody['swapOutput'];

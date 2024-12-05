@@ -1,48 +1,19 @@
 import {
-  RelaySwapMultiInputRequestBody,
-  RelayGetQuoteResponseBody,
   getGasInfo,
   getSenderAddressV2,
   BuildSwapUserOpRequestBody,
 } from '@raylac/shared';
-import { ed, st } from '@raylac/shared-backend';
-import { relayApi } from '../lib/relay';
 import { buildUserOp, getAccountNonce } from '../lib/erc4337';
 import { paymasterSignUserOp } from '../lib/paymaster';
 
 const buildSwapUserOp = async ({
   singerAddress,
-  swapInput,
-  swapOutput,
+  quote,
 }: BuildSwapUserOpRequestBody) => {
   // Get quote from Relay
   const senderAddress = getSenderAddressV2({
     singerAddress,
   });
-
-  const requestBody: RelaySwapMultiInputRequestBody = {
-    user: senderAddress,
-    recipient: senderAddress,
-    origins: swapInput.map(origin => ({
-      chainId: origin.chainId,
-      currency: origin.tokenAddress,
-      amount: origin.amount.toString(),
-    })),
-    destinationCurrency: swapOutput.tokenAddress,
-    destinationChainId: swapOutput.chainId,
-    partial: true,
-    tradeType: 'EXACT_INPUT',
-    useUserOperation: true,
-  };
-
-  const qt = st('Get quote');
-
-  const { data: quote } = await relayApi.post<RelayGetQuoteResponseBody>(
-    '/execute/swap/multi-input',
-    requestBody
-  );
-
-  ed(qt);
 
   // Build user op
 

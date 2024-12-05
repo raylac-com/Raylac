@@ -93,6 +93,74 @@ export interface RelayGetQuoteResponseBody {
     relayerService: RelayGasFee;
     app: RelayGasFee;
   };
+  balances: {
+    userBalance: string;
+    requiredToSolve: string;
+  };
+  details: {
+    operation: string;
+    timeEstimate: number;
+    userBalance: string;
+    sender: string;
+    recipient: string;
+    currencyIn: {
+      currency: {
+        chainId: number;
+        address: string;
+        symbol: string;
+        name: string;
+        decimals: number;
+        metadata: {
+          logoURI: string;
+          verified: boolean;
+          isNative: boolean;
+        };
+      };
+      amount: string;
+      amountFormatted: string;
+      amountUsd: string;
+      minimumAmount: string;
+    };
+    currencyOut: {
+      currency: {
+        chainId: number;
+        address: string;
+        symbol: string;
+        name: string;
+        decimals: number;
+        metadata: {
+          logoURI: string;
+          verified: boolean;
+          isNative: boolean;
+        };
+      };
+      amount: string;
+      amountFormatted: string;
+      amountUsd: string;
+      minimumAmount: string;
+    };
+    totalImpact: {
+      usd: string;
+      percent: string;
+    };
+    swapImpact: {
+      usd: string;
+      percent: string;
+    };
+    rate: string;
+    slippageTolerance: {
+      origin: {
+        usd: string;
+        value: string;
+        percent: string;
+      };
+      destination: {
+        usd: string;
+        value: string;
+        percent: string;
+      };
+    };
+  };
 }
 
 /**

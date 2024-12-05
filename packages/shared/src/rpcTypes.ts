@@ -1,4 +1,9 @@
 import { Hex } from 'viem';
+import { RelayGetQuoteResponseBody } from './types';
+
+export enum TRPCErrorMessage {
+  SWAP_AMOUNT_TOO_SMALL = 'Swap output amount is too small to cover fees required to execute swap',
+}
 
 export type SupportedTokensReturnType = {
   symbol: string;
@@ -25,15 +30,7 @@ export type TokenBalancesReturnType = {
 
 export interface BuildSwapUserOpRequestBody {
   singerAddress: Hex;
-  swapInput: {
-    tokenAddress: Hex;
-    amount: Hex;
-    chainId: number;
-  }[];
-  swapOutput: {
-    tokenAddress: Hex;
-    chainId: number;
-  };
+  quote: RelayGetQuoteResponseBody;
 }
 
 export interface GetSwapQuoteRequestBody {
@@ -43,3 +40,5 @@ export interface GetSwapQuoteRequestBody {
   amount: Hex;
   tradeType: 'EXACT_INPUT' | 'EXACT_OUTPUT';
 }
+
+export type GetSwapQuoteResponseBody = RelayGetQuoteResponseBody;

@@ -24,7 +24,6 @@ import * as Localization from 'expo-localization';
 import { SheetProvider } from 'react-native-actions-sheet';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import './Sheets';
-import Swap from './screens/Swap/Swap';
 import Constants from 'expo-constants';
 // import { useFonts } from 'expo-font';
 // import * as SplashScreen from 'expo-splash-screen';
@@ -51,13 +50,6 @@ const Tabs = () => {
           tabBarIcon: ({ color }) => (
             <AntDesign name="home" size={24} color={color} />
           ),
-        }}
-      ></Tab.Screen>
-      <Tab.Screen
-        name="Swap"
-        component={Swap}
-        options={{
-          headerShown: false,
         }}
       ></Tab.Screen>
     </Tab.Navigator>
