@@ -96,23 +96,25 @@ const getMultiChainERC20Balances = async ({
       )
     );
 
-    // Sum the balances
-    const balance = knownTokenBalances.reduce((acc, balance) => {
-      return acc + BigInt(balance.tokenBalance ?? '0');
-    }, 0n);
+    if (knownTokenBalances.length > 0) {
+      // Sum the balances
+      const balance = knownTokenBalances.reduce((acc, balance) => {
+        return acc + BigInt(balance.tokenBalance ?? '0');
+      }, 0n);
 
-    multiChainTokenBalances.push({
-      name: token,
-      symbol: token,
-      logoUrl: '',
-      decimals,
-      balance: toHex(balance),
-      breakdown: knownTokenBalances.map(balance => ({
-        chainId: balance.chainId,
-        balance: toHex(balance.tokenBalance ?? '0'),
-        tokenAddress: getAddress(balance.contractAddress),
-      })),
-    });
+      multiChainTokenBalances.push({
+        name: token,
+        symbol: token,
+        logoUrl: '',
+        decimals,
+        balance: toHex(balance),
+        breakdown: knownTokenBalances.map(balance => ({
+          chainId: balance.chainId,
+          balance: toHex(balance.tokenBalance ?? '0'),
+          tokenAddress: getAddress(balance.contractAddress),
+        })),
+      });
+    }
   }
 
   // Add balances for the remaining tokens

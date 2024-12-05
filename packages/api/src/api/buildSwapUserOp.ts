@@ -21,12 +21,16 @@ const buildSwapUserOp = async ({
 
   const unsignedUserOps = [];
 
+  const chainNonces: Record<number, bigint> = {};
+
   for (const step of quote.steps) {
-    for (const [i, item] of step.items.entries()) {
-      const nonce = await getAccountNonce({
-        chainId: item.data.chainId,
-        address: senderAddress,
-      });
+    for (const item of step.items) {
+      const nonce =
+        chainNonces[item.data.chainId] ??
+        (await getAccountNonce({
+          chainId: item.data.chainId,
+          address: senderAddress,
+        }));
 
       const gasInfo = await getGasInfo({
         chainIds: [item.data.chainId],
@@ -39,8 +43,10 @@ const buildSwapUserOp = async ({
         chainId: item.data.chainId,
         singerAddress,
         gasInfo: gasInfo[0],
-        nonce: Number(nonce + BigInt(i)),
+        nonce: Number(nonce),
       });
+
+      chainNonces[item.data.chainId] = nonce + BigInt(1);
 
       unsignedUserOps.push(userOp);
     }

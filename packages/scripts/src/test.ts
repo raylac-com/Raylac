@@ -1,17 +1,24 @@
-import { parseEther, parseUnits, toHex } from 'viem';
+import { parseEther, parseUnits, toHex, zeroAddress } from 'viem';
 import { client } from './rpc';
-import { arbitrum, base } from 'viem/chains';
+import { arbitrum, base, optimism } from 'viem/chains';
 import { hdKeyToAccount, mnemonicToAccount, signMessage } from 'viem/accounts';
 import { TRPCError } from '@trpc/server';
 import {
+  buildSwapIo,
   getSenderAddressV2,
+  GetSwapQuoteRequestBody,
   getUserOpHash,
   getWalletClient,
+  TokenBalancesReturnType,
   TRPCErrorMessage,
   UserOperation,
 } from '@raylac/shared';
 
 const test = async () => {
+  const supportedTokens = await client.getSupportedTokens.query({
+    chainIds: [optimism.id, base.id],
+  });
+
   const account = mnemonicToAccount(
     'rain profit typical section elephant expire curious defy basic despair toy scene'
   );
@@ -28,14 +35,48 @@ const test = async () => {
     singerAddress,
   });
 
+  console.log(sender);
+
+  const tokenBalances = await client.getTokenBalances.query({
+    address: sender,
+  });
+
+  const inputToken = supportedTokens.find(token => token.symbol === 'ETH');
+  const outputToken = supportedTokens.find(token => token.symbol === 'USDC');
+
+  console.log(inputToken, outputToken);
+
+  if (!inputToken) {
+    throw new Error('Input token not found');
+  }
+
+  if (!outputToken) {
+    throw new Error('Output token not found');
+  }
+
+  const { inputs, output } = buildSwapIo({
+    inputToken,
+    outputToken,
+    amount: parseUnits('0.0005', 18),
+    tokenBalances: tokenBalances as TokenBalancesReturnType,
+  });
+
+  console.log(inputs, output);
+
+  /*
   try {
-    const quote = await client.getSwapQuote.mutate({
-      senderAddress: singerAddress,
-      inputTokenAddress: '0x4ed4e862860bed51a9570b96d89af5e1b0efefed',
-      outputTokenAddress: '0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf',
-      amount: toHex(parseUnits('1', 18)),
+    const requestBody: GetSwapQuoteRequestBody = {
+      senderAddress: sender,
+      inputs: inputs.map(input => ({
+        ...input,
+        amount: toHex(input.amount),
+      })),
+      output,
       tradeType: 'EXACT_INPUT',
-    });
+    };
+
+    const quote = await client.getSwapQuote.mutate(requestBody);
+    console.log(quote);
   } catch (error: TRPCError | unknown) {
     if (
       error instanceof TRPCError &&
@@ -48,6 +89,7 @@ const test = async () => {
       console.log(error);
     }
   }
+    */
 };
 
 test();

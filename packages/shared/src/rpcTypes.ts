@@ -3,14 +3,18 @@ import { RelayGetQuoteResponseBody } from './types';
 
 export enum TRPCErrorMessage {
   SWAP_AMOUNT_TOO_SMALL = 'Swap output amount is too small to cover fees required to execute swap',
+  SWAP_NO_ROUTES_FOUND = 'No routes found for the requested swap',
 }
 
 export type SupportedTokensReturnType = {
   symbol: string;
   name: string;
-  tokenAddress: Hex;
   decimals: number;
   logoURI: string;
+  addresses: {
+    chainId: number;
+    address: Hex;
+  }[];
 }[];
 
 export type TokenBalancesReturnType = {
@@ -35,9 +39,15 @@ export interface BuildSwapUserOpRequestBody {
 
 export interface GetSwapQuoteRequestBody {
   senderAddress: Hex;
-  inputTokenAddress: Hex;
-  outputTokenAddress: Hex;
-  amount: Hex;
+  inputs: {
+    chainId: number;
+    tokenAddress: Hex;
+    amount: Hex;
+  }[];
+  output: {
+    chainId: number;
+    tokenAddress: Hex;
+  };
   tradeType: 'EXACT_INPUT' | 'EXACT_OUTPUT';
 }
 

@@ -302,6 +302,7 @@ export enum UserActionType {
 export enum Token {
   ETH = 'ETH',
   USDC = 'USDC',
+  RETH = 'RETH',
 }
 
 export interface MultiChainTokenBalance {
@@ -347,7 +348,7 @@ export interface RelaySwapMultiInputRequestBody {
 export type RelaySupportedCurrenciesResponseBody = {
   groupID: string;
   chainId: number;
-  address: string;
+  address: Hex;
   symbol: string;
   name: string;
   decimals: number;

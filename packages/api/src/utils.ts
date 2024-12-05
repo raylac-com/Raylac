@@ -191,6 +191,8 @@ export const toAlchemyNetwork = (chainId: number): Network => {
       return Network.BASE_MAINNET;
     case chains.arbitrum.id:
       return Network.ARB_MAINNET;
+    case chains.optimism.id:
+      return Network.OPT_MAINNET;
     default:
       throw new Error(`Unknown chain id: ${chainId}`);
   }

@@ -6,6 +6,7 @@ export const supportedChains: Chain[] = [
   //  chains.optimism,
   //  chains.optimismSepolia,
   chains.base,
+  chains.optimism,
   //  chains.arbitrum,
   // chains.arbitrum,
   // chains.scroll,

@@ -15,5 +15,5 @@ export const getClipboardText = async () => {
 };
 
 export const getSingedInUserAddress = () => {
-  return '0x28341dF2CCabe2Cc4A3c6e7ef2fe9E706680C196' as Hex;
+  return '0xE817651ebA45df8e716f97F380114192453C6cFD' as Hex;
 };

@@ -23,6 +23,7 @@ import { ACCOUNT_FACTORY_V2_ADDRESS, ENTRY_POINT_ADDRESS } from './addresses';
 import { ACCOUNT_IMPL_V2_ADDRESS } from './addresses';
 import RaylacAccountProxyBytecode from './bytecode/RaylacAccountProxyBytecode';
 import RaylacAccountProxyAbi from './abi/RaylacAccountProxyAbi';
+import { SupportedTokensReturnType, TokenBalancesReturnType } from './rpcTypes';
 
 const VIEW_TAG_BYTES = 1;
 const CHAIN_ID_BYTES = 4;
@@ -283,4 +284,108 @@ export const getGasInfo = async ({
 
 export const getChainName = (chainId: number) => {
   return `${getChainFromId(chainId).name} (${chainId})`;
+};
+
+/**
+ * Builds the swap inputs and outputs
+ */
+export const buildSwapIo = ({
+  inputToken,
+  outputToken,
+  amount,
+  tokenBalances,
+}: {
+  inputToken: SupportedTokensReturnType[number];
+  outputToken: SupportedTokensReturnType[number];
+  amount: bigint;
+  tokenBalances: TokenBalancesReturnType;
+}) => {
+  const inputTokenBalance = tokenBalances.find(token =>
+    token.breakdown?.some(breakdown =>
+      inputToken.addresses.some(
+        address => address.address === breakdown.tokenAddress
+      )
+    )
+  );
+
+  let remainingAmount = amount;
+
+  const inputs: {
+    tokenAddress: Hex;
+    amount: bigint;
+    chainId: number;
+  }[] = [];
+
+  for (const breakdown of inputTokenBalance?.breakdown ?? []) {
+    const balance = hexToBigInt(breakdown.balance);
+
+    if (balance === BigInt(0)) {
+      continue;
+    }
+
+    if (remainingAmount < balance) {
+      inputs.push({
+        tokenAddress: breakdown.tokenAddress,
+        amount: remainingAmount,
+        chainId: breakdown.chainId,
+      });
+
+      remainingAmount = 0n;
+      break;
+    } else {
+      inputs.push({
+        tokenAddress: breakdown.tokenAddress,
+        amount: balance,
+        chainId: breakdown.chainId,
+      });
+
+      remainingAmount = remainingAmount - balance;
+    }
+  }
+
+  if (remainingAmount > 0n) {
+    throw new Error(
+      `Not enough balance for ${inputToken.symbol}, required ${amount}, remaining ${remainingAmount}`
+    );
+  }
+
+  if (inputs.length === 0) {
+    throw new Error('Could not create inputs');
+  }
+
+  // The output chain should be the chain with the largest input amount
+  const bestOutputChain = inputs.sort((a, b) =>
+    a.amount < b.amount ? 1 : -1
+  )[0].chainId;
+
+  if (!bestOutputChain) {
+    throw new Error('Could not determine output chain');
+  }
+
+  const possibleOutputChainIds = outputToken.addresses.map(
+    address => address.chainId
+  );
+
+  const outputChainId = possibleOutputChainIds.find(
+    chainId => chainId === bestOutputChain
+  )
+    ? bestOutputChain
+    : // If the output token doesn't exist on the input chains, just use the first one
+      possibleOutputChainIds[0];
+
+  const output = outputToken.addresses.find(
+    address => address.chainId === outputChainId
+  );
+
+  if (!output) {
+    throw new Error('Could not determine output');
+  }
+
+  return {
+    inputs,
+    output: {
+      tokenAddress: output.address,
+      chainId: output.chainId,
+    },
+  };
 };

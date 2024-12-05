@@ -19,11 +19,11 @@ const getSwapQuote = async (
   args: GetSwapQuoteRequestBody
 ): Promise<GetSwapQuoteResponseBody> => {
   const sender = args.senderAddress;
-  const inputToken = args.inputTokenAddress;
-  const outputToken = args.outputTokenAddress;
+  const inputToken = args.inputs[0].tokenAddress;
+  const outputToken = args.output.tokenAddress;
   const tradeType = args.tradeType;
 
-  const amount = hexToBigInt(args.amount);
+  const amount = hexToBigInt(args.inputs[0].amount);
 
   const inputAmount =
     tradeType === 'EXACT_INPUT'

@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import SwapInputCard from './SwapInputCard';
 import spacing from '@/lib/styles/spacing';
 import { parseEther } from 'viem';
+import { base } from 'viem/chains';
 
 const meta = {
   title: 'SwapInputCard',
@@ -18,7 +19,12 @@ const meta = {
   },
   args: {
     token: {
-      tokenAddress: '0x833589fCD6eDb6E08B1Daf284d278AC3b223312',
+      addresses: [
+        {
+          chainId: base.id,
+          address: '0x833589fCD6eDb6E08B1Daf284d278AC3b223312',
+        },
+      ],
       name: 'USD Coin',
       symbol: 'USDC',
       decimals: 18,

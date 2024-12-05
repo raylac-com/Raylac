@@ -6,9 +6,11 @@ import { trpc } from '@/lib/trpc';
 import { formatUnits, hexToBigInt, parseUnits, toHex } from 'viem';
 import useUserAddress from '@/hooks/useUserAddress';
 import {
+  buildSwapIo,
   GetSwapQuoteRequestBody,
   supportedChains,
   SupportedTokensReturnType,
+  TokenBalancesReturnType,
   TRPCErrorMessage,
   UserOperation,
 } from '@raylac/shared';
@@ -21,14 +23,11 @@ type Token = SupportedTokensReturnType[number];
 const Swap = () => {
   const [inputToken, setInputToken] = useState<Token | null>(null);
   const [outputToken, setOutputToken] = useState<Token | null>(null);
-  const [amount, setAmount] = useState<{
-    amount: string;
-    tradeType: 'EXACT_INPUT' | 'EXACT_OUTPUT';
-  }>();
+  const [amount, setAmount] = useState<string>('');
 
   const { data: userAddress } = useUserAddress();
 
-  const { data: _tokenBalances } = trpc.getTokenBalances.useQuery(
+  const { data: tokenBalances } = trpc.getTokenBalances.useQuery(
     {
       address: userAddress,
     },
@@ -67,43 +66,77 @@ const Swap = () => {
   const { mutateAsync: signUserOps } = useSignUserOps();
 
   useEffect(() => {
-    if (
-      userAddress &&
-      amount &&
-      inputToken &&
-      outputToken &&
-      amount?.tradeType
-    ) {
-      let parsedAmount;
+    if (getSwapQuoteError) {
+      alert(getSwapQuoteError.message);
+    }
+  }, [getSwapQuoteError]);
 
-      if (amount.tradeType === 'EXACT_INPUT') {
-        parsedAmount = toHex(parseUnits(amount.amount, inputToken.decimals));
-      } else {
-        parsedAmount = toHex(parseUnits(amount.amount, outputToken.decimals));
+  useEffect(() => {
+    if (userAddress && amount && inputToken && outputToken) {
+      const parsedAmount = toHex(parseUnits(amount, inputToken.decimals));
+
+      if (parsedAmount === '0x0') {
+        return;
       }
 
-      getSwapQuote({
+      const tokenBalance = tokenBalances?.find(token =>
+        token.breakdown?.some(breakdown =>
+          inputToken.addresses.some(
+            address =>
+              breakdown.tokenAddress === address.address &&
+              address.chainId === breakdown.chainId
+          )
+        )
+      );
+
+      const hasEnoughBalance =
+        tokenBalance &&
+        hexToBigInt(tokenBalance.balance) >= BigInt(parsedAmount);
+
+      let inputs, output;
+      if (hasEnoughBalance) {
+        const swapIo = buildSwapIo({
+          inputToken,
+          outputToken,
+          amount: BigInt(parsedAmount),
+          tokenBalances: tokenBalances as TokenBalancesReturnType,
+        });
+
+        inputs = swapIo.inputs;
+        output = swapIo.output;
+      } else {
+        inputs = [
+          {
+            tokenAddress: inputToken.addresses[0].address,
+            amount: BigInt(parsedAmount),
+            chainId: inputToken.addresses[0].chainId,
+          },
+        ];
+
+        // TODO: Choose the best output token
+        output = {
+          tokenAddress: outputToken.addresses[0].address,
+          amount: parsedAmount,
+          chainId: outputToken.addresses[0].chainId,
+        };
+      }
+
+      const requestBody: GetSwapQuoteRequestBody = {
         senderAddress: userAddress,
-        inputTokenAddress: inputToken?.tokenAddress ?? '',
-        outputTokenAddress: outputToken?.tokenAddress ?? '',
-        amount: parsedAmount,
-        tradeType: amount.tradeType,
-      } as GetSwapQuoteRequestBody);
+        inputs: inputs.map(input => ({
+          ...input,
+          amount: toHex(input.amount),
+        })),
+        output,
+        tradeType: 'EXACT_INPUT',
+      };
+
+      getSwapQuote(requestBody);
     }
   }, [inputToken, userAddress, outputToken, amount, getSwapQuote]);
 
   const onInputAmountChange = (amount: string) => {
-    setAmount({
-      amount,
-      tradeType: 'EXACT_INPUT',
-    });
-  };
-
-  const onOutputAmountChange = (amount: string) => {
-    setAmount({
-      amount,
-      tradeType: 'EXACT_OUTPUT',
-    });
+    setAmount(amount);
   };
 
   const onSwapPress = async () => {
@@ -120,25 +153,25 @@ const Swap = () => {
     }
   };
 
-  const inputTokenBalance = _tokenBalances?.find(token =>
-    token.breakdown?.some(
-      breakdown => breakdown.tokenAddress === inputToken?.tokenAddress
+  const inputTokenBalance = tokenBalances?.find(token =>
+    token.breakdown?.some(breakdown =>
+      inputToken?.addresses.some(
+        address =>
+          breakdown.tokenAddress === address.address &&
+          address.chainId === breakdown.chainId
+      )
     )
   )?.balance;
 
-  const inputAmount =
-    amount?.tradeType === 'EXACT_INPUT'
-      ? parseUnits(amount.amount, inputToken.decimals)
-      : swapQuote?.details?.currencyIn?.amount;
+  const inputAmount = inputToken
+    ? parseUnits(amount, inputToken.decimals)
+    : null;
 
   const inputAmountFormatted = inputAmount
     ? formatUnits(BigInt(inputAmount), inputToken.decimals)
     : null;
 
-  const outputAmount =
-    amount?.tradeType === 'EXACT_OUTPUT'
-      ? parseUnits(amount.amount, outputToken.decimals)
-      : swapQuote?.details?.currencyOut?.amount;
+  const outputAmount = swapQuote?.details?.currencyOut?.amount;
 
   const outputAmountFormatted = outputAmount
     ? formatUnits(BigInt(outputAmount), outputToken.decimals)
@@ -171,7 +204,7 @@ const Swap = () => {
           token={outputToken}
           setToken={setOutputToken}
           amount={outputAmountFormatted}
-          setAmount={onOutputAmountChange}
+          setAmount={() => {}}
         />
         {/**
          * Show quote
