@@ -18,6 +18,11 @@ const History = () => {
   return (
     <View>
       <FlatList
+        contentContainerStyle={{
+          paddingVertical: 32,
+          paddingHorizontal: 16,
+          rowGap: 12,
+        }}
         data={swapHistory}
         renderItem={({ item }) => <SwapHistoryListItem swap={item} />}
       />

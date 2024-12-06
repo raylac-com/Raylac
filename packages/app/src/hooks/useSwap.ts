@@ -40,10 +40,12 @@ const useSwap = () => {
         userOps: signedUserOps,
         swapQuote,
       });
-    },
-    onSuccess: () => {
+
       queryClient.invalidateQueries({
         queryKey: getQueryKey(trpc.getTokenBalances),
+      });
+      queryClient.invalidateQueries({
+        queryKey: getQueryKey(trpc.getSwapHistory),
       });
     },
   });

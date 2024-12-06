@@ -37,6 +37,10 @@ Sentry.init({
 const Tab = createBottomTabNavigator<RootTabsParamsList>();
 const RootStack = createNativeStackNavigator<RootStackParamsList>();
 
+const EmptyScreen = () => {
+  return null;
+};
+
 const Tabs = () => {
   return (
     <Tab.Navigator initialRouteName="Home">
@@ -53,29 +57,28 @@ const Tabs = () => {
       ></Tab.Screen>
       <Tab.Screen
         name="Swap"
-        component={Home}
+        component={EmptyScreen}
         options={{
           headerShown: false,
           tabBarLabel: () => null,
-          tabBarIconStyle: {
-            color: colors.primary,
-          },
-          tabBarIcon: () => (
-            <AntDesign
-              name="swap"
-              size={24}
-              color={colors.primary}
-              onPress={() => SheetManager.show('swap-sheet')}
-            />
+          tabBarIcon: ({ color }) => (
+            <AntDesign name="swap" size={24} color={color} />
           ),
+          tabBarShowLabel: false,
         }}
-      />
+        listeners={{
+          tabPress: e => {
+            e.preventDefault();
+            SheetManager.show('swap-sheet');
+          },
+        }}
+      ></Tab.Screen>
       <Tab.Screen
         name="History"
         component={History}
         options={{
-          title: 'History',
           tabBarLabel: () => null,
+          tabBarShowLabel: false,
           tabBarIcon: ({ color }) => (
             <AntDesign name="clockcircle" size={24} color={color} />
           ),

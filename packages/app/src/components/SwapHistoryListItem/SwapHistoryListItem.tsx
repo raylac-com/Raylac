@@ -4,7 +4,15 @@ import { GetSwapHistoryReturnType } from '@/types';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Entypo from '@expo/vector-icons/Entypo';
 import colors from '@/lib/styles/colors';
+import useTokenMeta from '@/hooks/useTokenMeta';
+import { Hex } from 'viem';
+
 const SwapHistoryItem = (props: { swap: GetSwapHistoryReturnType[number] }) => {
+  const { data: tokenMetaIn } = useTokenMeta(props.swap.tokenAddressIn as Hex);
+  const { data: tokenMetaOut } = useTokenMeta(
+    props.swap.tokenAddressOut as Hex
+  );
+
   return (
     <View
       style={{
@@ -31,19 +39,19 @@ const SwapHistoryItem = (props: { swap: GetSwapHistoryReturnType[number] }) => {
       >
         <Image
           source={{
-            uri: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1746037000',
+            uri: tokenMetaIn?.logoURI,
           }}
           style={{ width: 42, height: 42 }}
         />
         <FontAwesome name="arrow-right" size={24} color="black" />
         <Image
           source={{
-            uri: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1746037000',
+            uri: tokenMetaOut?.logoURI,
           }}
           style={{ width: 42, height: 42 }}
         />
         <StyledText style={{ fontWeight: 'bold' }}>
-          {`$${props.swap.usdAmountIn}`}
+          {`$${Number(props.swap.usdAmountIn).toFixed(2)}`}
         </StyledText>
       </View>
       <View

@@ -71,7 +71,13 @@ const useGetSwapQuote = () => {
         tradeType: 'EXACT_INPUT',
       };
 
-      return getSwapQuote(requestBody);
+      try {
+        const quote = await getSwapQuote(requestBody);
+        return quote;
+      } catch (_error) {
+        // Don't throw error
+        return null;
+      }
     },
   });
 };

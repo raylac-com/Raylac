@@ -41,8 +41,8 @@ const test = async () => {
     address: sender,
   });
 
-  const inputToken = supportedTokens.find(token => token.symbol === 'ETH');
-  const outputToken = supportedTokens.find(token => token.symbol === 'USDC');
+  const inputToken = supportedTokens.find(token => token.symbol === 'USDC');
+  const outputToken = supportedTokens.find(token => token.symbol === 'ETH');
 
   console.log(inputToken, outputToken);
 
@@ -54,42 +54,35 @@ const test = async () => {
     throw new Error('Output token not found');
   }
 
+  const inputTokenBalance = tokenBalances.find(
+    token => token.symbol === inputToken.symbol
+  );
+
+  if (!inputTokenBalance) {
+    throw new Error('Input token balance not found');
+  }
+
   const { inputs, output } = buildSwapIo({
     inputToken,
     outputToken,
-    amount: parseUnits('0.0005', 18),
-    tokenBalances: tokenBalances as TokenBalancesReturnType,
+    amount: parseUnits('1', 6),
+    inputTokenBalance,
   });
 
   console.log(inputs, output);
 
-  /*
-  try {
-    const requestBody: GetSwapQuoteRequestBody = {
-      senderAddress: sender,
-      inputs: inputs.map(input => ({
-        ...input,
-        amount: toHex(input.amount),
-      })),
-      output,
-      tradeType: 'EXACT_INPUT',
-    };
+  const requestBody: GetSwapQuoteRequestBody = {
+    senderAddress: sender,
+    inputs: inputs.map(input => ({
+      ...input,
+      amount: toHex(input.amount),
+    })),
+    output,
+    tradeType: 'EXACT_INPUT',
+  };
 
-    const quote = await client.getSwapQuote.mutate(requestBody);
-    console.log(quote);
-  } catch (error: TRPCError | unknown) {
-    if (
-      error instanceof TRPCError &&
-      error.message === TRPCErrorMessage.SWAP_AMOUNT_TOO_SMALL
-    ) {
-      console.log(
-        `Amount is too small, please increase the amount and try again. ${error.cause}`
-      );
-    } else {
-      console.log(error);
-    }
-  }
-    */
+  const quote = await client.getSwapQuote.mutate(requestBody);
+  console.log(quote);
 };
 
 test();

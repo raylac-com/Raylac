@@ -3,7 +3,7 @@ import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import { supportedChains, SupportedTokensReturnType } from '@raylac/shared';
 import { useState } from 'react';
-import { FlatList, Image, Pressable, TextInput } from 'react-native';
+import { FlatList, Image, Pressable, TextInput, View } from 'react-native';
 import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
 
 const TokenListItem = ({
@@ -28,10 +28,12 @@ const TokenListItem = ({
         source={{ uri: token.logoURI }}
         style={{ width: 42, height: 42 }}
       />
-      <StyledText>{token.name}</StyledText>
-      <StyledText>
-        {balance.toLocaleString()} {token.symbol}
-      </StyledText>
+      <View style={{ flexDirection: 'column', rowGap: 4 }}>
+        <StyledText>{token.name}</StyledText>
+        <StyledText style={{ color: colors.border }}>
+          {balance.toLocaleString()} {token.symbol}
+        </StyledText>
+      </View>
     </Pressable>
   );
 };

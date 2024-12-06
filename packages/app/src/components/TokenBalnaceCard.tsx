@@ -59,7 +59,7 @@ export const TokenBalanceCard = (props: {
       </View>
       <StyledText
         style={{ fontWeight: 'bold' }}
-      >{`$${props.usdValue}`}</StyledText>
+      >{`$${props.usdValue.toFixed(2)}`}</StyledText>
     </View>
   );
 };

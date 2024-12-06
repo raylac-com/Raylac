@@ -23,7 +23,7 @@ const getSupportedTokens = (_chainIds: number[]): SupportedTokensReturnType => {
       addresses: [
         {
           chainId: base.id,
-          address: '0x833589fCD6eDb6E08B1Daf2d5Fb60F3f654AD9D9',
+          address: '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913',
         },
       ],
       decimals: 6,

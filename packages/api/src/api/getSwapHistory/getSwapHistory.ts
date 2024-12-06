@@ -8,9 +8,14 @@ const getSwapHistory = async ({ address }: { address: Hex }) => {
       usdAmountOut: true,
       amountOut: true,
       amountIn: true,
+      tokenAddressIn: true,
+      tokenAddressOut: true,
     },
     where: {
       address,
+    },
+    orderBy: {
+      createdAt: 'desc',
     },
   });
 

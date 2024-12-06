@@ -17,10 +17,15 @@ import StyledButton from '@/components/StyledButton/StyledButton';
 import useGetSwapQuote from '@/hooks/useGetSwapQuote';
 import useSwap from '@/hooks/useSwap';
 import useDebounce from '@/hooks/useDebounce';
+import useTypedNavigation from '@/hooks/useTypedNavigation';
+import StyledText from '@/components/StyledText/StyledText';
+import colors from '@/lib/styles/colors';
 
 type Token = SupportedTokensReturnType[number];
 
 const SwapSheet = () => {
+  const navigation = useTypedNavigation();
+
   //
   // Local State
   //
@@ -66,10 +71,11 @@ const SwapSheet = () => {
   const {
     mutate: getSwapQuote,
     data: swapQuote,
+    isPending: isGettingSwapQuote,
     error: getSwapQuoteError,
   } = useGetSwapQuote();
 
-  const { mutate: swap, isPending: isSwapping } = useSwap();
+  const { mutateAsync: swap, isPending: isSwapping } = useSwap();
 
   //
   // Effects
@@ -131,6 +137,10 @@ const SwapSheet = () => {
     if (swapQuote) {
       await swap({ swapQuote: swapQuote as GetSwapQuoteReturnType });
 
+      navigation.navigate('Tabs', {
+        screen: 'History',
+      });
+
       SheetManager.hide('swap-sheet');
     }
   };
@@ -145,6 +155,7 @@ const SwapSheet = () => {
       : null;
 
   const outputAmount = swapQuote?.details?.currencyOut?.amount;
+  const outputAmountUsd = swapQuote?.details?.currencyOut?.amountUsd;
 
   const outputAmountFormatted =
     outputAmount && outputToken
@@ -181,11 +192,14 @@ const SwapSheet = () => {
           setToken={setOutputToken}
           amount={outputAmountFormatted}
           setAmount={() => {}}
-          isLoadingAmount={false}
+          isLoadingAmount={isGettingSwapQuote}
+          usdAmount={outputAmountUsd ? Number(outputAmountUsd) : 0}
         />
-        {/**
-         * Show quote
-         */}
+        <StyledText style={{ color: colors.border }}>
+          {swapQuote
+            ? `Swap provider fee $${swapQuote.fees.relayerService.amountUsd}`
+            : ''}
+        </StyledText>
         <StyledButton
           isLoading={isSwapping}
           title={
