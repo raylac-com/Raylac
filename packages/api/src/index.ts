@@ -23,6 +23,8 @@ import buildSwapUserOpMock from './api/buildSwapUserOp/buildSwapUserOp.mock';
 import submitUserOpsMock from './api/submitUserOps/submitUserOps.mock';
 import getTokenPrice from './api/getTokenPrice/getTokenPrice';
 import { getTokenPriceMock } from './api/getTokenPrice/getTokenPrice.mock';
+import getSwapHistory from './api/getSwapHistory/getSwapHistory';
+import getSwapHistoryMock from './api/getSwapHistory/getSwapHistory.mock';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -80,6 +82,14 @@ export const appRouter = router({
       ? getSwapQuoteMock(input as GetSwapQuoteRequestBody)
       : getSwapQuote(input as GetSwapQuoteRequestBody);
   }),
+
+  getSwapHistory: publicProcedure
+    .input(z.object({ address: z.string() }))
+    .query(async ({ input }) => {
+      return MOCK_RESPONSE
+        ? getSwapHistoryMock()
+        : getSwapHistory({ address: input.address as Hex });
+    }),
 
   getSupportedTokens: publicProcedure
     .input(

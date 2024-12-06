@@ -26,6 +26,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import './Sheets';
 import Constants from 'expo-constants';
 import { useFonts } from 'expo-font';
+import History from './screens/History/History';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -69,6 +70,17 @@ const Tabs = () => {
           ),
         }}
       />
+      <Tab.Screen
+        name="History"
+        component={History}
+        options={{
+          title: 'History',
+          tabBarLabel: () => null,
+          tabBarIcon: ({ color }) => (
+            <AntDesign name="clockcircle" size={24} color={color} />
+          ),
+        }}
+      ></Tab.Screen>
     </Tab.Navigator>
   );
 };
