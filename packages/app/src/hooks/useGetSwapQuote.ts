@@ -22,12 +22,12 @@ const useGetSwapQuote = () => {
       amount,
       inputToken,
       outputToken,
-      tokenBalances,
+      inputTokenBalance,
     }: {
       amount: string;
       inputToken: SupportedTokensReturnType[number];
       outputToken: SupportedTokensReturnType[number];
-      tokenBalances: TokenBalancesReturnType;
+      inputTokenBalance: TokenBalancesReturnType[number];
     }) => {
       const parsedAmount = toHex(parseUnits(amount, inputToken.decimals));
 
@@ -35,19 +35,8 @@ const useGetSwapQuote = () => {
         return;
       }
 
-      const tokenBalance = tokenBalances?.find(token =>
-        token.breakdown?.some(breakdown =>
-          inputToken.addresses.some(
-            address =>
-              breakdown.tokenAddress === address.address &&
-              address.chainId === breakdown.chainId
-          )
-        )
-      );
-
       const hasEnoughBalance =
-        tokenBalance &&
-        hexToBigInt(tokenBalance.balance) >= BigInt(parsedAmount);
+        hexToBigInt(inputTokenBalance.balance) >= BigInt(parsedAmount);
 
       let inputs, output;
       if (hasEnoughBalance) {
@@ -55,7 +44,7 @@ const useGetSwapQuote = () => {
           inputToken,
           outputToken,
           amount: BigInt(parsedAmount),
-          tokenBalances: tokenBalances as TokenBalancesReturnType,
+          inputTokenBalance,
         });
 
         inputs = swapIo.inputs;

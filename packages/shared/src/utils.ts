@@ -293,21 +293,13 @@ export const buildSwapIo = ({
   inputToken,
   outputToken,
   amount,
-  tokenBalances,
+  inputTokenBalance,
 }: {
   inputToken: SupportedTokensReturnType[number];
   outputToken: SupportedTokensReturnType[number];
   amount: bigint;
-  tokenBalances: TokenBalancesReturnType;
+  inputTokenBalance: TokenBalancesReturnType[number];
 }) => {
-  const inputTokenBalance = tokenBalances.find(token =>
-    token.breakdown?.some(breakdown =>
-      inputToken.addresses.some(
-        address => address.address === breakdown.tokenAddress
-      )
-    )
-  );
-
   let remainingAmount = amount;
 
   const inputs: {
@@ -316,7 +308,7 @@ export const buildSwapIo = ({
     chainId: number;
   }[] = [];
 
-  for (const breakdown of inputTokenBalance?.breakdown ?? []) {
+  for (const breakdown of inputTokenBalance.breakdown ?? []) {
     const balance = hexToBigInt(breakdown.balance);
 
     if (balance === BigInt(0)) {

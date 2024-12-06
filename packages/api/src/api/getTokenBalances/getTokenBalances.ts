@@ -19,7 +19,7 @@ import {
   getTokenPriceBySymbol,
   getTokenPrices,
 } from '../../lib/alchemy';
-import { logger } from '@raylac/shared-backend';
+
 /**
  * Get the balance of ERC20 tokens for a given address on a specific chain
  * @returns Array of MultiChainTokenBalance for the given address on the given chain
@@ -105,7 +105,9 @@ const getMultiChainERC20Balances = async ({
       multiChainTokenBalances.push({
         name: token,
         symbol: token,
-        logoUrl: '',
+        // Temporaory
+        logoUrl:
+          'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389',
         decimals,
         balance: toHex(balance),
         breakdown: knownTokenBalances.map(balance => ({
@@ -170,7 +172,6 @@ const getMultiChainERC20Balances = async ({
         chainId: tokenBalance.breakdown[0].chainId,
       })),
     });
-    logger.info(result);
 
     tokenPrices.push(...result);
   }
@@ -232,8 +233,6 @@ const getMultiChainETHBalance = async ({
 
   const tokenPrice = await getTokenPriceBySymbol('ETH');
 
-  logger.info('eth price', tokenPrice);
-
   const usdPrice = tokenPrice?.[0].prices.find(
     price => price.currency === 'usd'
   )?.value;
@@ -246,7 +245,7 @@ const getMultiChainETHBalance = async ({
     name: 'Ethereum',
     symbol: 'ETH',
     logoUrl:
-      'https://assets.coingecko.com/coins/images/279/large/ethereum.png?1698802923',
+      'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/eth.png',
     decimals: 18,
     balance: toHex(multiChainETHBalance),
     usdValue,

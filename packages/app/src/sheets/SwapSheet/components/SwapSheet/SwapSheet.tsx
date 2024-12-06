@@ -43,6 +43,19 @@ const SwapSheet = () => {
     }
   );
 
+  // Get the selected balacne of the selected input
+  const inputTokenBalance = inputToken
+    ? tokenBalances?.find(token =>
+        token.breakdown?.some(breakdown =>
+          inputToken.addresses.some(
+            address =>
+              breakdown.tokenAddress === address.address &&
+              address.chainId === breakdown.chainId
+          )
+        )
+      )
+    : null;
+
   const { data: supportedTokens } = trpc.getSupportedTokens.useQuery({
     chainIds: supportedChains.map(chain => chain.id),
   });
@@ -75,12 +88,18 @@ const SwapSheet = () => {
   }, [getSwapQuoteError]);
 
   useEffect(() => {
-    if (userAddress && amount && inputToken && outputToken && tokenBalances) {
+    if (
+      userAddress &&
+      amount &&
+      inputToken &&
+      outputToken &&
+      inputTokenBalance
+    ) {
       getSwapQuote({
         amount,
         inputToken,
         outputToken,
-        tokenBalances: tokenBalances as TokenBalancesReturnType,
+        inputTokenBalance: inputTokenBalance as TokenBalancesReturnType[number],
       });
     }
   }, [
@@ -89,7 +108,7 @@ const SwapSheet = () => {
     outputToken,
     amount,
     getSwapQuote,
-    tokenBalances,
+    inputTokenBalance,
   ]);
 
   //
@@ -112,18 +131,12 @@ const SwapSheet = () => {
   // Derived state
   //
 
-  const inputTokenBalance = tokenBalances?.find(token =>
-    token.breakdown?.some(breakdown =>
-      inputToken?.addresses.some(
-        address =>
-          breakdown.tokenAddress === address.address &&
-          address.chainId === breakdown.chainId
-      )
-    )
-  )?.balance;
-
   const inputAmount = inputToken
     ? parseUnits(amount, inputToken.decimals)
+    : null;
+
+  const hasEnoughBalance = inputTokenBalance
+    ? hexToBigInt(inputTokenBalance.balance) >= inputAmount
     : null;
 
   const inputAmountFormatted = inputAmount
@@ -157,7 +170,9 @@ const SwapSheet = () => {
           setToken={setInputToken}
           amount={inputAmountFormatted}
           setAmount={onInputAmountChange}
-          balance={inputTokenBalance ? hexToBigInt(inputTokenBalance) : null}
+          balance={
+            inputTokenBalance ? hexToBigInt(inputTokenBalance.balance) : null
+          }
         />
         <SwapOutputCard
           token={outputToken}
@@ -170,7 +185,13 @@ const SwapSheet = () => {
          */}
         <StyledButton
           isLoading={isSwapping}
-          title={isAmountTooSmall ? 'Amount too small' : 'Swap'}
+          title={
+            isAmountTooSmall
+              ? 'Amount too small'
+              : hasEnoughBalance === false
+                ? 'Insufficient balance'
+                : 'Swap'
+          }
           onPress={onSwapPress}
         />
       </View>
