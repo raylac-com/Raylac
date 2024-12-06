@@ -56,7 +56,7 @@
       "env": {
         "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
         "EXPO_PUBLIC_ALCHEMY_API_KEY": "GBAe59-NKtf1q21Il9zJE3NXkgFvRMIY",
-        "APP_VARIANT": "development"
+        "APP_VARIANT": "staging"
       }
     },
     "production": {
@@ -64,7 +64,8 @@
       "autoIncrement": true,
       "env": {
         "EXPO_PUBLIC_RPC_URL": "https://raylac-api.onrender.com",
-        "EXPO_PUBLIC_ALCHEMY_API_KEY": "GBAe59-NKtf1q21Il9zJE3NXkgFvRMIY"
+        "EXPO_PUBLIC_ALCHEMY_API_KEY": "GBAe59-NKtf1q21Il9zJE3NXkgFvRMIY",
+        "APP_VARIANT": "production"
       }
     }
   },

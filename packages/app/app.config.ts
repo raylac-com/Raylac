@@ -1,14 +1,42 @@
 import type { ExpoConfig } from '@expo/config';
 
-const IS_DEV = process.env.APP_VARIANT === 'development';
+const APP_VARIANT = process.env.APP_VARIANT;
+
+let name: string;
+let bundleIdentifier: string;
+let icon: string;
+let adaptiveIcon: string;
+
+switch (APP_VARIANT) {
+  case 'development':
+    name = 'Raylac (dev)';
+    bundleIdentifier = 'com.raylac.dev';
+    icon = './assets/icon-dev.png';
+    adaptiveIcon = './assets/adaptive-icon-dev.png';
+    break;
+  case 'staging':
+    name = 'Raylac (staging)';
+    bundleIdentifier = 'com.raylac.staging';
+    icon = './assets/icon-staging.png';
+    adaptiveIcon = './assets/adaptive-icon-staging.png';
+    break;
+  case 'production':
+    name = 'Raylac';
+    bundleIdentifier = 'com.raylac';
+    icon = './assets/icon.png';
+    adaptiveIcon = './assets/adaptive-icon.png';
+    break;
+  default:
+    throw new Error(`Unknown app variant: ${APP_VARIANT}`);
+}
 
 const config: ExpoConfig = {
   newArchEnabled: true,
-  name: IS_DEV ? 'Raylac (dev)' : 'Raylac',
+  name,
   slug: 'raylac',
-  version: '1.1.0',
+  version: '1.2.0',
   orientation: 'portrait',
-  icon: IS_DEV ? './assets/icon-dev.png' : './assets/icon.png',
+  icon,
   userInterfaceStyle: 'light',
   splash: {
     image: './assets/splash.png',
@@ -20,16 +48,14 @@ const config: ExpoConfig = {
     config: {
       usesNonExemptEncryption: false,
     },
-    bundleIdentifier: IS_DEV ? 'com.raylac.dev' : 'com.raylac',
+    bundleIdentifier,
   },
   android: {
     adaptiveIcon: {
-      foregroundImage: IS_DEV
-        ? './assets/adaptive-icon-dev.png'
-        : './assets/adaptive-icon.png',
+      foregroundImage: adaptiveIcon,
       backgroundColor: '#ffffff',
     },
-    package: IS_DEV ? 'com.raylac.dev' : 'com.raylac',
+    package: bundleIdentifier,
   },
   plugins: [
     [
@@ -50,7 +76,8 @@ const config: ExpoConfig = {
     [
       'react-native-cloud-storage',
       {
-        iCloudContainerEnvironment: IS_DEV ? 'Development' : 'Production',
+        iCloudContainerEnvironment:
+          APP_VARIANT === 'development' ? 'Development' : 'Production',
       },
     ],
     [
