@@ -8,11 +8,13 @@ const SwapOutputCard = ({
   setToken,
   amount,
   setAmount,
+  isLoadingAmount,
 }: {
   token: SupportedTokensReturnType[number] | null;
   setToken: (value: SupportedTokensReturnType[number] | null) => void;
   amount: string;
   setAmount: (value: string) => void;
+  isLoadingAmount: boolean;
 }) => {
   return (
     <View
@@ -28,6 +30,7 @@ const SwapOutputCard = ({
     >
       <SwapAmountInput
         selectedToken={token}
+        isLoadingAmount={isLoadingAmount}
         amount={amount}
         setAmount={setAmount}
         setSelectedToken={setToken}

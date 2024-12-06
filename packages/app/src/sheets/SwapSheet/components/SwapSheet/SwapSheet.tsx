@@ -16,6 +16,7 @@ import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useGetSwapQuote from '@/hooks/useGetSwapQuote';
 import useSwap from '@/hooks/useSwap';
+import useDebounce from '@/hooks/useDebounce';
 
 type Token = SupportedTokensReturnType[number];
 
@@ -36,7 +37,7 @@ const SwapSheet = () => {
 
   const { data: tokenBalances } = trpc.getTokenBalances.useQuery(
     {
-      address: userAddress,
+      address: userAddress!,
     },
     {
       enabled: !!userAddress,
@@ -91,26 +92,29 @@ const SwapSheet = () => {
     ? parseUnits(amountInputText, inputToken.decimals)
     : null;
 
+  const { debouncedValue: debouncedParsedInputAmount } = useDebounce(
+    parsedInputAmount,
+    200
+  );
+
   useEffect(() => {
     if (
-      parsedInputAmount &&
-      amountInputText &&
+      debouncedParsedInputAmount &&
       inputToken &&
       outputToken &&
       inputTokenBalance
     ) {
       getSwapQuote({
-        amount: parsedInputAmount,
+        amount: debouncedParsedInputAmount,
         inputToken,
         outputToken,
         inputTokenBalance: inputTokenBalance as TokenBalancesReturnType[number],
       });
     }
   }, [
-    parsedInputAmount,
+    debouncedParsedInputAmount,
     userAddress,
     outputToken,
-    amountInputText,
     getSwapQuote,
     inputTokenBalance,
   ]);
@@ -135,15 +139,17 @@ const SwapSheet = () => {
   // Derived state
   //
 
-  const hasEnoughBalance = inputTokenBalance
-    ? hexToBigInt(inputTokenBalance.balance) >= parsedInputAmount
-    : null;
+  const hasEnoughBalance =
+    inputTokenBalance && parsedInputAmount !== null
+      ? hexToBigInt(inputTokenBalance.balance) >= parsedInputAmount
+      : null;
 
   const outputAmount = swapQuote?.details?.currencyOut?.amount;
 
-  const outputAmountFormatted = outputAmount
-    ? formatUnits(BigInt(outputAmount), outputToken.decimals)
-    : null;
+  const outputAmountFormatted =
+    outputAmount && outputToken
+      ? formatUnits(BigInt(outputAmount), outputToken.decimals)
+      : '';
 
   const isAmountTooSmall =
     getSwapQuoteError?.message === TRPCErrorMessage.SWAP_AMOUNT_TOO_SMALL;
@@ -175,6 +181,7 @@ const SwapSheet = () => {
           setToken={setOutputToken}
           amount={outputAmountFormatted}
           setAmount={() => {}}
+          isLoadingAmount={false}
         />
         {/**
          * Show quote

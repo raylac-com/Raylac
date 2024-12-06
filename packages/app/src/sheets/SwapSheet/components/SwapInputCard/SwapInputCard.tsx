@@ -1,14 +1,12 @@
-import { TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import SwapAmountInput from '../SwapAmountInput';
 import { formatUnits } from 'viem';
-import {
-  GetTokenPriceReturnType,
-  SupportedTokensReturnType,
-} from '@raylac/shared';
+import { formatAmount, SupportedTokensReturnType } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
 import { trpc } from '@/lib/trpc';
 import { useEffect, useState } from 'react';
+import Skeleton from '@/components/Skeleton/Skeleton';
 
 const SwapInputCard = ({
   token,
@@ -23,44 +21,61 @@ const SwapInputCard = ({
   setAmount: (value: string) => void;
   balance: bigint | null;
 }) => {
+  const [userInputMode, setUserInputMode] = useState<'USD' | 'TOKEN'>('TOKEN');
   const [usdAmountInput, setUsdAmountInput] = useState<string>('');
 
-  const { data: tokenPrices } =
-    trpc.getTokenPrice.useQuery<GetTokenPriceReturnType>({
-      tokenAddress: token.addresses[0].address,
-      chainId: token.addresses[0].chainId,
-    });
+  const { data: tokenPrice, mutate: getTokenPrice } =
+    trpc.getTokenPrice.useMutation();
 
-  const tokenPrice = tokenPrices?.prices.find(
+  const tokenPriceUSD = tokenPrice?.prices.find(
     price => price.currency === 'usd'
   )?.value;
 
   useEffect(() => {
-    if (tokenPrice !== undefined && amount !== null) {
-      const usdAmount = Number(amount) / Number(tokenPrice);
-
-      setUsdAmountInput(usdAmount.toString());
+    if (token) {
+      getTokenPrice({
+        tokenAddress: token.addresses[0].address,
+        chainId: token.addresses[0].chainId,
+      });
     }
-  }, [tokenPrice, amount]);
+  }, [token]);
 
-  const onUsdAmountChange = (value: string) => {
-    setUsdAmountInput(value);
+  useEffect(() => {
+    if (
+      userInputMode === 'TOKEN' &&
+      tokenPrice !== undefined &&
+      amount !== null
+    ) {
+      const usdAmount = Number(amount) * Number(tokenPriceUSD);
 
-    if (value === '') {
+      if (usdAmountInput === '' && usdAmount === 0) {
+        return;
+      }
+
+      setUsdAmountInput(usdAmount.toFixed(2));
+    }
+  }, [tokenPrice, amount, userInputMode]);
+
+  const onUsdAmountChange = (usdAmountText: string) => {
+    setUserInputMode('USD');
+    setUsdAmountInput(usdAmountText);
+
+    if (usdAmountText === '') {
       setAmount('');
       return;
     }
 
-    if (tokenPrice !== undefined && value !== '') {
-      const tokenAmount = Number(value) / Number(tokenPrice);
+    if (tokenPrice !== undefined && usdAmountText !== '') {
+      const tokenAmount = Number(usdAmountText) / Number(tokenPriceUSD);
 
       setAmount(tokenAmount.toString());
     }
   };
 
-  const tokenBalanceFormatted = balance
-    ? formatUnits(balance, token.decimals)
-    : '';
+  const tokenBalanceFormatted =
+    balance !== null && token
+      ? formatAmount(balance.toString(), token.decimals)
+      : null;
 
   return (
     <View
@@ -77,8 +92,12 @@ const SwapInputCard = ({
       <SwapAmountInput
         selectedToken={token}
         setSelectedToken={setToken}
+        isLoadingAmount={false}
         amount={amount}
-        setAmount={setAmount}
+        setAmount={value => {
+          setUserInputMode('TOKEN');
+          setAmount(value);
+        }}
       />
       {token && (
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -101,21 +120,31 @@ const SwapInputCard = ({
               {`USD`}
             </StyledText>
           </View>
-          <View
+          <Pressable
             style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+            onPress={() => {
+              if (balance !== null && token) {
+                const parsedBalance = formatUnits(balance, token.decimals);
+                setAmount(parsedBalance);
+              }
+            }}
           >
-            <StyledText
-              style={{ color: colors.subbedText, fontWeight: 'bold' }}
-            >
-              {tokenBalanceFormatted} {token.symbol}
-            </StyledText>
+            {tokenBalanceFormatted === null ? (
+              <Skeleton style={{ width: 53, height: 18 }} />
+            ) : (
+              <StyledText
+                style={{ color: colors.subbedText, fontWeight: 'bold' }}
+              >
+                {tokenBalanceFormatted} {token.symbol}
+              </StyledText>
+            )}
             <StyledText
               style={{
                 color: colors.subbedText,
                 fontWeight: 'bold',
               }}
             >{`MAX`}</StyledText>
-          </View>
+          </Pressable>
         </View>
       )}
     </View>

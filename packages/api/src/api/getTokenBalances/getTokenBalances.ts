@@ -233,7 +233,7 @@ const getMultiChainETHBalance = async ({
 
   const tokenPrice = await getTokenPriceBySymbol('ETH');
 
-  const usdPrice = tokenPrice?.[0].prices.find(
+  const usdPrice = tokenPrice.prices.find(
     price => price.currency === 'usd'
   )?.value;
 

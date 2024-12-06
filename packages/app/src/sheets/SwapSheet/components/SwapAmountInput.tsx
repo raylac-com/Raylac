@@ -5,15 +5,18 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { SupportedTokensReturnType } from '@raylac/shared';
 import { SheetManager } from 'react-native-actions-sheet';
 import StyledText from '@/components/StyledText/StyledText';
+import Skeleton from '@/components/Skeleton/Skeleton';
 
 const SwapAmountInput = ({
   selectedToken,
   setSelectedToken,
   amount,
   setAmount,
+  isLoadingAmount,
 }: {
   selectedToken: SupportedTokensReturnType[number] | null;
   setSelectedToken: (token: SupportedTokensReturnType[number]) => void;
+  isLoadingAmount: boolean;
   amount: string;
   setAmount: (value: string) => void;
 }) => {
@@ -30,53 +33,59 @@ const SwapAmountInput = ({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
+        columnGap: 8,
       }}
       disabled={!!selectedToken}
       onPress={onSelectTokenPress}
     >
-      <View
+      {selectedToken ? (
+        <Image
+          source={{ uri: selectedToken.logoURI }}
+          style={{ width: 34, height: 34 }}
+        />
+      ) : (
+        <View
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 34,
+            backgroundColor: '#D9D9D9',
+          }}
+        />
+      )}
+      {isLoadingAmount ? (
+        <Skeleton
+          style={{
+            width: '100%',
+            flexShrink: 1,
+            height: 30,
+          }}
+        />
+      ) : selectedToken ? (
+        <TextInput
+          keyboardType="numeric"
+          value={selectedToken ? amount : ''}
+          onChangeText={setAmount}
+          placeholder={'0.00'}
+          style={{
+            fontSize: fontSizes.twoXLarge,
+            flexShrink: 1,
+            width: '100%',
+          }}
+          numberOfLines={1}
+        />
+      ) : (
+        <StyledText
+          style={{ color: colors.subbedText, fontSize: fontSizes.base }}
+        >
+          {`Select token`}
+        </StyledText>
+      )}
+      <Pressable
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          columnGap: 8,
         }}
-      >
-        {selectedToken ? (
-          <Image
-            source={{ uri: selectedToken.logoURI }}
-            style={{ width: 34, height: 34 }}
-          />
-        ) : (
-          <View
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: 34,
-              backgroundColor: '#D9D9D9',
-            }}
-          />
-        )}
-        {selectedToken ? (
-          <TextInput
-            keyboardType="numeric"
-            value={selectedToken ? amount : ''}
-            onChangeText={setAmount}
-            placeholder={'0.00'}
-            style={{
-              fontSize: fontSizes.twoXLarge,
-              width: '50%',
-            }}
-          />
-        ) : (
-          <StyledText
-            style={{ color: colors.subbedText, fontSize: fontSizes.base }}
-          >
-            {`Select token`}
-          </StyledText>
-        )}
-      </View>
-      <Pressable
-        style={{ flexDirection: 'row', alignItems: 'center' }}
         onPress={onSelectTokenPress}
       >
         <StyledText

@@ -15,7 +15,7 @@ export const getTokenPriceMock = async ({
     prices: [
       {
         currency: 'usd',
-        value: '1.0',
+        value: '1345.54444444444',
         lastUpdatedAt: new Date().toISOString(),
       },
     ],

@@ -60,13 +60,21 @@ const getSwapQuote = async ({
           'No routes found for the requested swap'
         )
       ) {
-        logger.error(
-          `No routes found for the requested swap: ${JSON.stringify(requestBody)}`
-        );
-
         throw new TRPCError({
           code: 'BAD_REQUEST',
           message: TRPCErrorMessage.SWAP_NO_ROUTES_FOUND,
+          cause: error,
+        });
+      }
+
+      if (
+        error.response?.data?.message?.includes(
+          'Solver has insufficient liquidity for this swap'
+        )
+      ) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: TRPCErrorMessage.SWAP_INSUFFICIENT_LIQUIDITY,
           cause: error,
         });
       }

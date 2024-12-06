@@ -24,7 +24,7 @@ export const getTokenPriceBySymbol = async (symbol: string) => {
     headers: headers,
   });
 
-  return response.data.data;
+  return response.data.data[0];
 };
 
 export const getTokenPriceByAddress = async ({

@@ -1,5 +1,9 @@
-import { Hex } from 'viem';
-import { getTokenPriceByAddress } from '../../lib/alchemy';
+import { Hex, zeroAddress } from 'viem';
+import {
+  getTokenPriceByAddress,
+  getTokenPriceBySymbol,
+} from '../../lib/alchemy';
+import { AlchemyTokenPriceResponse } from '@raylac/shared';
 
 const getTokenPrice = async ({
   tokenAddress,
@@ -7,7 +11,11 @@ const getTokenPrice = async ({
 }: {
   tokenAddress: Hex;
   chainId: number;
-}) => {
+}): Promise<AlchemyTokenPriceResponse> => {
+  if (tokenAddress === zeroAddress) {
+    return getTokenPriceBySymbol('ETH');
+  }
+
   return getTokenPriceByAddress({
     address: tokenAddress,
     chainId,
