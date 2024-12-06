@@ -14,6 +14,7 @@ import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.
 import {
   BuildSwapUserOpRequestBody,
   GetSwapQuoteRequestBody,
+  SubmitUserOpsRequestBody,
 } from '@raylac/shared';
 import getSwapQuote from './api/getSwapQuote/getSwapQuote';
 import { logger } from '@raylac/shared-backend';
@@ -67,11 +68,11 @@ export const appRouter = router({
     }),
 
   submitUserOps: publicProcedure
-    .input(z.array(z.any()))
+    .input(z.object({ userOps: z.array(z.any()), swapQuote: z.any() }))
     .mutation(async ({ input }) => {
       return MOCK_RESPONSE
-        ? submitUserOpsMock(input as any)
-        : submitUserOps(input as any);
+        ? submitUserOpsMock(input as SubmitUserOpsRequestBody)
+        : submitUserOps(input as SubmitUserOpsRequestBody);
     }),
 
   getSwapQuote: publicProcedure.input(z.any()).mutation(async ({ input }) => {

@@ -1,10 +1,12 @@
 import {
   getChainName,
   getWebsocketClient,
+  SubmitUserOpsRequestBody,
   UserOperation,
 } from '@raylac/shared';
 import { handleOps } from '../../lib/bundler';
 import { logger } from '@raylac/shared-backend';
+import prisma from '../../lib/prisma';
 
 const submitUserOpsForChain = async ({
   chainId,
@@ -26,7 +28,10 @@ const submitUserOpsForChain = async ({
   return { chainId, ...txReceipt };
 };
 
-const submitUserOps = async (userOps: UserOperation[]) => {
+const submitUserOps = async ({
+  userOps,
+  swapQuote,
+}: SubmitUserOpsRequestBody) => {
   const chainIds = [...new Set(userOps.map(userOp => userOp.chainId))];
 
   const txReceipts = await Promise.all(
@@ -37,6 +42,26 @@ const submitUserOps = async (userOps: UserOperation[]) => {
       })
     )
   );
+
+  const tokenAddressIn = swapQuote.details.currencyIn.currency.address;
+  const tokenAddressOut = swapQuote.details.currencyOut.currency.address;
+  const amountIn = swapQuote.details.currencyIn.amount;
+  const amountOut = swapQuote.details.currencyOut.amount;
+
+  const address = userOps[0].sender;
+
+  await prisma.swap.create({
+    data: {
+      txHash: txReceipts[0].transactionHash,
+      address,
+      tokenAddressIn,
+      tokenAddressOut,
+      amountIn,
+      amountOut,
+      usdAmountIn: swapQuote.details.currencyIn.amountUsd,
+      usdAmountOut: swapQuote.details.currencyOut.amountUsd,
+    },
+  });
 
   return txReceipts;
 };

@@ -1,5 +1,9 @@
 import { Hex } from 'viem';
-import { AlchemyTokenPriceResponse, RelayGetQuoteResponseBody } from './types';
+import {
+  AlchemyTokenPriceResponse,
+  RelayGetQuoteResponseBody,
+  UserOperation,
+} from './types';
 
 export enum TRPCErrorMessage {
   SWAP_AMOUNT_TOO_SMALL = 'Swap output amount is too small to cover fees required to execute swap',
@@ -60,3 +64,8 @@ export interface GetTokenPriceRequestBody {
 }
 
 export type GetTokenPriceReturnType = AlchemyTokenPriceResponse;
+
+export interface SubmitUserOpsRequestBody {
+  userOps: UserOperation[];
+  swapQuote: GetSwapQuoteReturnType;
+}

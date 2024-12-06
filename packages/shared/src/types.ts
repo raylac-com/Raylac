@@ -106,7 +106,7 @@ export interface RelayGetQuoteResponseBody {
     currencyIn: {
       currency: {
         chainId: number;
-        address: string;
+        address: Hex;
         symbol: string;
         name: string;
         decimals: number;
@@ -124,7 +124,7 @@ export interface RelayGetQuoteResponseBody {
     currencyOut: {
       currency: {
         chainId: number;
-        address: string;
+        address: Hex;
         symbol: string;
         name: string;
         decimals: number;

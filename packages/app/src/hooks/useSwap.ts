@@ -36,7 +36,10 @@ const useSwap = () => {
 
       const signedUserOps = await signUserOps(userOps as UserOperation[]);
 
-      await submitUserOps(signedUserOps);
+      await submitUserOps({
+        userOps: signedUserOps,
+        swapQuote,
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
