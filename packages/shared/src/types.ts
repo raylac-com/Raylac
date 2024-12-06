@@ -321,10 +321,10 @@ export interface MultiChainTokenBalance {
 }
 
 export interface AlchemyTokenPriceResponse {
-  network: 'string';
+  network: string;
   address: Hex;
   prices: {
-    currency: 'usd';
+    currency: string;
     lastUpdatedAt: string;
     value: string;
   }[];

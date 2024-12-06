@@ -27,6 +27,38 @@ export const getTokenPriceBySymbol = async (symbol: string) => {
   return response.data.data;
 };
 
+export const getTokenPriceByAddress = async ({
+  chainId,
+  address,
+}: {
+  chainId: number;
+  address: Hex;
+}) => {
+  const headers = {
+    Accept: 'application/json',
+    Authorization: `Bearer ${ALCHEMY_API_KEY}`,
+  };
+
+  const url = `https://api.g.alchemy.com/prices/v1/tokens/by-address`;
+
+  const response = await axios.post<{ data: AlchemyTokenPriceResponse[] }>(
+    url,
+    {
+      addresses: [
+        {
+          address,
+          network: toAlchemyNetwork(chainId),
+        },
+      ],
+    },
+    {
+      headers: headers,
+    }
+  );
+
+  return response.data.data[0];
+};
+
 export const getTokenPrices = async ({
   tokenAddresses,
 }: {

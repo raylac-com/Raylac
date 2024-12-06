@@ -20,6 +20,8 @@ import { logger } from '@raylac/shared-backend';
 import getSwapQuoteMock from './api/getSwapQuote/getSwapQuote.mock';
 import buildSwapUserOpMock from './api/buildSwapUserOp/buildSwapUserOp.mock';
 import submitUserOpsMock from './api/submitUserOps/submitUserOps.mock';
+import getTokenPrice from './api/getTokenPrice/getTokenPrice';
+import { getTokenPriceMock } from './api/getTokenPrice/getTokenPrice.mock';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -88,6 +90,20 @@ export const appRouter = router({
       return MOCK_RESPONSE
         ? getSupportedTokensMock(input.chainIds)
         : getSupportedTokens(input.chainIds);
+    }),
+
+  getTokenPrice: publicProcedure
+    .input(z.object({ tokenAddress: z.string(), chainId: z.number() }))
+    .mutation(async ({ input }) => {
+      return MOCK_RESPONSE
+        ? getTokenPriceMock({
+            tokenAddress: input.tokenAddress as Hex,
+            chainId: input.chainId,
+          })
+        : getTokenPrice({
+            tokenAddress: input.tokenAddress as Hex,
+            chainId: input.chainId,
+          });
     }),
 
   getGitCommit: publicProcedure.query(async () => {

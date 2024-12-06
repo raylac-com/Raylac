@@ -26,7 +26,7 @@ const SwapSheet = () => {
 
   const [inputToken, setInputToken] = useState<Token | null>(null);
   const [outputToken, setOutputToken] = useState<Token | null>(null);
-  const [amount, setAmount] = useState<string>('');
+  const [amountInputText, setAmountInputText] = useState<string>('');
 
   const { data: userAddress } = useUserAddress();
 
@@ -87,26 +87,30 @@ const SwapSheet = () => {
     }
   }, [getSwapQuoteError]);
 
+  const parsedInputAmount = inputToken
+    ? parseUnits(amountInputText, inputToken.decimals)
+    : null;
+
   useEffect(() => {
     if (
-      userAddress &&
-      amount &&
+      parsedInputAmount &&
+      amountInputText &&
       inputToken &&
       outputToken &&
       inputTokenBalance
     ) {
       getSwapQuote({
-        amount,
+        amount: parsedInputAmount,
         inputToken,
         outputToken,
         inputTokenBalance: inputTokenBalance as TokenBalancesReturnType[number],
       });
     }
   }, [
-    inputToken,
+    parsedInputAmount,
     userAddress,
     outputToken,
-    amount,
+    amountInputText,
     getSwapQuote,
     inputTokenBalance,
   ]);
@@ -116,7 +120,7 @@ const SwapSheet = () => {
   //
 
   const onInputAmountChange = (amount: string) => {
-    setAmount(amount);
+    setAmountInputText(amount);
   };
 
   const onSwapPress = async () => {
@@ -131,16 +135,8 @@ const SwapSheet = () => {
   // Derived state
   //
 
-  const inputAmount = inputToken
-    ? parseUnits(amount, inputToken.decimals)
-    : null;
-
   const hasEnoughBalance = inputTokenBalance
-    ? hexToBigInt(inputTokenBalance.balance) >= inputAmount
-    : null;
-
-  const inputAmountFormatted = inputAmount
-    ? formatUnits(BigInt(inputAmount), inputToken.decimals)
+    ? hexToBigInt(inputTokenBalance.balance) >= parsedInputAmount
     : null;
 
   const outputAmount = swapQuote?.details?.currencyOut?.amount;
@@ -168,7 +164,7 @@ const SwapSheet = () => {
         <SwapInputCard
           token={inputToken}
           setToken={setInputToken}
-          amount={inputAmountFormatted}
+          amount={amountInputText}
           setAmount={onInputAmountChange}
           balance={
             inputTokenBalance ? hexToBigInt(inputTokenBalance.balance) : null
