@@ -29,11 +29,9 @@ const TokenListItem = ({
         style={{ width: 42, height: 42 }}
       />
       <StyledText>{token.name}</StyledText>
-      {balance && (
-        <StyledText>
-          {balance.toLocaleString()} {token.symbol}
-        </StyledText>
-      )}
+      <StyledText>
+        {balance.toLocaleString()} {token.symbol}
+      </StyledText>
     </Pressable>
   );
 };
@@ -64,10 +62,9 @@ const SearchInput = ({
 const SearchTokenSheet = () => {
   const [searchText, setSearchText] = useState('');
 
-  const { data: supportedTokens }: { data: SupportedTokensReturnType | null } =
-    trpc.getSupportedTokens.useQuery({
-      chainIds: supportedChains.map(chain => chain.id),
-    });
+  const { data: supportedTokens } = trpc.getSupportedTokens.useQuery({
+    chainIds: supportedChains.map(chain => chain.id),
+  });
 
   if (!supportedTokens) {
     return null;

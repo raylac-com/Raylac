@@ -110,6 +110,8 @@ const getMultiChainERC20Balances = async ({
           'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389',
         decimals,
         balance: toHex(balance),
+        usdValue: Number(formatUnits(balance, decimals)), // USDC
+        tokenPrice: 1,
         breakdown: knownTokenBalances.map(balance => ({
           chainId: balance.chainId,
           balance: toHex(balance.tokenBalance ?? '0'),
@@ -146,6 +148,8 @@ const getMultiChainERC20Balances = async ({
       logoUrl: tokenMetadata.logo ?? '',
       decimals: tokenMetadata.decimals,
       balance: toHex(alchemyTokenBalance.tokenBalance ?? '0'),
+      usdValue: 0,
+      tokenPrice: 1, // Temporary
       breakdown: [
         {
           chainId: alchemyTokenBalance.chainId,
@@ -237,9 +241,11 @@ const getMultiChainETHBalance = async ({
     price => price.currency === 'usd'
   )?.value;
 
-  const usdValue = usdPrice
-    ? Number(usdPrice) * Number(formatEther(multiChainETHBalance))
-    : undefined;
+  if (!usdPrice) {
+    throw new Error('Failed to get ETH price');
+  }
+
+  const usdValue = Number(usdPrice) * Number(formatEther(multiChainETHBalance));
 
   return {
     name: 'Ethereum',
@@ -249,7 +255,7 @@ const getMultiChainETHBalance = async ({
     decimals: 18,
     balance: toHex(multiChainETHBalance),
     usdValue,
-    tokenPrice: usdPrice ? Number(usdPrice) : undefined,
+    tokenPrice: Number(usdPrice),
     breakdown: balances.map(balance => ({
       chainId: balance.chainId,
       balance: toHex(balance.balance),

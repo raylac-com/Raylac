@@ -11,7 +11,7 @@ const HomeScreen = () => {
 
   const { data: tokenBalances } = trpc.getTokenBalances.useQuery(
     {
-      address: userAddress,
+      address: userAddress!,
     },
     {
       enabled: !!userAddress,

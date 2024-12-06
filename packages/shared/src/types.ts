@@ -311,8 +311,8 @@ export interface MultiChainTokenBalance {
   logoUrl: string;
   decimals: number;
   balance: Hex;
-  usdValue?: number;
-  tokenPrice?: number;
+  usdValue: number;
+  tokenPrice: number;
   breakdown: {
     chainId: number;
     balance: Hex;

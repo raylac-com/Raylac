@@ -28,6 +28,10 @@ const useGetSwapQuote = () => {
       outputToken: SupportedTokensReturnType[number];
       inputTokenBalance: TokenBalancesReturnType[number];
     }) => {
+      if (!userAddress) {
+        throw new Error('User address not loaded');
+      }
+
       const hasEnoughBalance = hexToBigInt(inputTokenBalance.balance) >= amount;
 
       let inputs, output;
@@ -53,7 +57,6 @@ const useGetSwapQuote = () => {
         // TODO: Choose the best output token
         output = {
           tokenAddress: outputToken.addresses[0].address,
-          amount: toHex(amount),
           chainId: outputToken.addresses[0].chainId,
         };
       }
