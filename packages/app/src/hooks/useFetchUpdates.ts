@@ -7,7 +7,7 @@ const useFetchUpdates = () => {
 
   useEffect(() => {
     (async () => {
-      if (Device.isDevice) {
+      if (Device.isDevice && !__DEV__) {
         const { isAvailable } = await Updates.checkForUpdateAsync();
         if (isAvailable) {
           await Updates.fetchUpdateAsync();

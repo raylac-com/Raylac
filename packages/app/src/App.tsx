@@ -168,10 +168,14 @@ const App = () => {
   const { isFetchingUpdates } = useFetchUpdates();
 
   if (!loaded) {
+    // eslint-disable-next-line no-console
+    console.log('loading fonts');
     return null;
   }
 
   if (isFetchingUpdates) {
+    // eslint-disable-next-line no-console
+    console.log('isFetchingUpdates', isFetchingUpdates);
     return null;
   }
 
