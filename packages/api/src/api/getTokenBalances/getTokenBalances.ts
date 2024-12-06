@@ -1,75 +1,92 @@
-import {
-  formatEther,
-  formatUnits,
-  getAddress,
-  Hex,
-  hexToBigInt,
-  toHex,
-} from 'viem';
-import { getPublicClient, toAlchemyNetwork } from '../../utils';
+import { formatUnits, Hex, toHex } from 'viem';
+import { getPublicClient } from '../../utils';
 import {
   supportedChains,
   MultiChainTokenBalance,
-  AlchemyTokenPriceResponse,
+  getERC20TokenBalance,
 } from '@raylac/shared';
-import { Network, TokenBalance } from 'alchemy-sdk';
-import { KNOWN_TOKENS } from '../../lib/knownTokes';
 import {
-  getAlchemyClient,
+  getTokenPriceByAddress,
   getTokenPriceBySymbol,
-  getTokenPrices,
 } from '../../lib/alchemy';
+import getSupportedTokens from '../getSupportedTokens/getSupportedTokens';
+import { base } from 'viem/chains';
 
-/**
- * Get the balance of ERC20 tokens for a given address on a specific chain
- * @returns Array of MultiChainTokenBalance for the given address on the given chain
- */
-const getERC20TokenBalancesForChain = async ({
-  address,
-  chainId,
-}: {
-  address: Hex;
-  chainId: number;
-}): Promise<Array<TokenBalance & { chainId: number }>> => {
-  const alchemy = getAlchemyClient(chainId);
+const getETHBalance = async ({ address }: { address: Hex }) => {
+  const client = getPublicClient({ chainId: base.id });
+  const balance = await client.getBalance({ address });
 
-  // Get token balances
-  const tokenBalances = await alchemy.core.getTokenBalances(address);
-
-  return tokenBalances.tokenBalances
-    .map(balance => ({
-      ...balance,
-      chainId,
-    }))
-    .filter(
-      balance =>
-        hexToBigInt((balance.tokenBalance as Hex) ?? '0x0') !== BigInt(0)
-    );
-};
-
-const isKnownToken = ({
-  tokenAddress,
-  chainId,
-}: {
-  tokenAddress: Hex;
-  chainId: number;
-}) => {
-  return Object.values(KNOWN_TOKENS).some(({ addresses }) =>
-    addresses.some(
-      knownToken =>
-        knownToken.address === tokenAddress && knownToken.chainId === chainId
-    )
-  );
+  return balance;
 };
 
 /**
  * Get the balance of ERC20 tokens across all chains for a given address
  */
 const getMultiChainERC20Balances = async ({
-  address: _address,
+  address,
 }: {
   address: Hex;
 }): Promise<MultiChainTokenBalance[]> => {
+  const supportedTokens = await getSupportedTokens(
+    supportedChains.map(chain => chain.id)
+  );
+
+  const multiChainTokenBalances: MultiChainTokenBalance[] = await Promise.all(
+    supportedTokens.map(async token => {
+      const tokenBalance =
+        token.symbol === 'ETH'
+          ? await getETHBalance({ address })
+          : await getERC20TokenBalance({
+              address,
+              contractAddress: token.addresses[0].address,
+              chainId: token.addresses[0].chainId,
+            });
+
+      const tokenPrice =
+        token.symbol === 'ETH'
+          ? await getTokenPriceBySymbol('ETH')
+          : await getTokenPriceByAddress({
+              chainId: base.id,
+              address: token.addresses[0].address,
+            });
+
+      const usdPrice = tokenPrice.prices.find(
+        price => price.currency === 'usd'
+      )?.value;
+
+      const usdValue =
+        tokenBalance && usdPrice
+          ? Number(usdPrice) * Number(formatUnits(tokenBalance, token.decimals))
+          : 0;
+
+      const balance = tokenBalance;
+
+      const multiChainTokenBalance: MultiChainTokenBalance = {
+        name: token.name,
+        symbol: token.symbol,
+        logoUrl: token.logoURI,
+        decimals: token.decimals,
+        balance: toHex(balance),
+        usdValue,
+        tokenPrice: Number(usdPrice),
+        breakdown: [
+          {
+            chainId: base.id,
+            balance: toHex(balance),
+            tokenAddress: token.addresses[0].address,
+          },
+        ],
+      };
+
+      return multiChainTokenBalance;
+    })
+  );
+
+  return multiChainTokenBalances
+    .filter(tokenBalance => tokenBalance.balance !== '0x0')
+    .sort((a, b) => b.usdValue - a.usdValue);
+
+  /*
   // Get token balances for each chain concurrently
   const alchemyTokenBalances = (
     await Promise.all(
@@ -210,13 +227,13 @@ const getMultiChainERC20Balances = async ({
       });
     }
   }
-
-  return withUsdValue;
+    */
 };
 
 /**
  * Get the balance of ETH across all chains for a given address
  */
+/*
 const getMultiChainETHBalance = async ({
   address,
 }: {
@@ -263,12 +280,13 @@ const getMultiChainETHBalance = async ({
     })),
   };
 };
+*/
 
 const getTokenBalances = async ({ address }: { address: Hex }) => {
-  const ethBalance = await getMultiChainETHBalance({ address });
+  //  const ethBalance = await getMultiChainETHBalance({ address });
   const tokenBalances = await getMultiChainERC20Balances({ address });
 
-  return [ethBalance, ...tokenBalances];
+  return [...tokenBalances];
 };
 
 export default getTokenBalances;

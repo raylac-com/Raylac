@@ -5,11 +5,13 @@ import { trpc } from '@/lib/trpc';
 import { TokenBalanceCard } from '@/components/TokenBalnaceCard';
 import { hexToBigInt } from 'viem';
 import StyledText from '@/components/StyledText/StyledText';
+import { useState } from 'react';
 
 const HomeScreen = () => {
+  const [isRefetching, setIsRefetching] = useState(false);
   const { data: userAddress } = useUserAddress();
 
-  const { data: tokenBalances } = trpc.getTokenBalances.useQuery(
+  const { data: tokenBalances, refetch } = trpc.getTokenBalances.useQuery(
     {
       address: userAddress!,
     },
@@ -32,8 +34,12 @@ const HomeScreen = () => {
       refreshControl={
         <RefreshControl
           tintColor={colors.primary}
-          refreshing={false}
-          onRefresh={() => {}}
+          refreshing={isRefetching}
+          onRefresh={async () => {
+            setIsRefetching(true);
+            await refetch();
+            setIsRefetching(false);
+          }}
         />
       }
       testID="home"

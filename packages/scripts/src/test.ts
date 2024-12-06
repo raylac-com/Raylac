@@ -16,7 +16,7 @@ import {
 
 const test = async () => {
   const supportedTokens = await client.getSupportedTokens.query({
-    chainIds: [optimism.id, base.id],
+    chainIds: [base.id],
   });
 
   const account = mnemonicToAccount(
@@ -40,7 +40,9 @@ const test = async () => {
   const tokenBalances = await client.getTokenBalances.query({
     address: sender,
   });
+  console.log(tokenBalances);
 
+  /*
   const inputToken = supportedTokens.find(token => token.symbol === 'USDC');
   const outputToken = supportedTokens.find(token => token.symbol === 'ETH');
 
@@ -83,6 +85,7 @@ const test = async () => {
 
   const quote = await client.getSwapQuote.mutate(requestBody);
   console.log(quote);
+  */
 };
 
 test();

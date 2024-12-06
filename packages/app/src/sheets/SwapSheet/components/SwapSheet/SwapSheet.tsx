@@ -82,11 +82,21 @@ const SwapSheet = () => {
   //
 
   useEffect(() => {
-    if (supportedTokens) {
-      setInputToken(supportedTokens[0] as Token);
-      setOutputToken(supportedTokens[1] as Token);
+    if (tokenBalances) {
+      const inputToken = supportedTokens?.find(
+        token => token.symbol === tokenBalances[0].symbol
+      );
+
+      const outputToken = supportedTokens?.find(
+        token => token.symbol === tokenBalances[1].symbol
+      );
+
+      if (inputToken && outputToken) {
+        setInputToken(inputToken as Token);
+        setOutputToken(outputToken as Token);
+      }
     }
-  }, [supportedTokens]);
+  }, [tokenBalances]);
 
   useEffect(() => {
     if (getSwapQuoteError) {
