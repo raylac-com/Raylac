@@ -40,16 +40,17 @@ const SwapSheet = () => {
   // Fetch data
   //
 
-  const { data: tokenBalances } = trpc.getTokenBalances.useQuery(
-    {
-      address: userAddress!,
-    },
-    {
-      enabled: !!userAddress,
-    }
-  );
+  const { data: tokenBalances, isLoading: isLoadingTokenBalances } =
+    trpc.getTokenBalances.useQuery(
+      {
+        address: userAddress!,
+      },
+      {
+        enabled: !!userAddress,
+      }
+    );
 
-  // Get the selected balacne of the selected input
+  // Get the user's balance of the selected input token
   const inputTokenBalance = inputToken
     ? tokenBalances?.find(token =>
         token.breakdown?.some(breakdown =>
@@ -82,21 +83,28 @@ const SwapSheet = () => {
   //
 
   useEffect(() => {
-    if (tokenBalances) {
-      const inputToken = supportedTokens?.find(
-        token => token.symbol === tokenBalances[0].symbol
-      );
+    if (supportedTokens) {
+      if (tokenBalances && tokenBalances.length > 0) {
+        const inputToken = supportedTokens?.find(
+          token => token.symbol === tokenBalances[0].symbol
+        );
 
-      const outputToken = supportedTokens?.find(
-        token => token.symbol === tokenBalances[1].symbol
-      );
+        if (inputToken) {
+          setInputToken(inputToken as Token);
+        }
+      }
 
-      if (inputToken && outputToken) {
-        setInputToken(inputToken as Token);
-        setOutputToken(outputToken as Token);
+      if (tokenBalances && tokenBalances.length > 1) {
+        const outputToken = supportedTokens?.find(
+          token => token.symbol === tokenBalances[1].symbol
+        );
+
+        if (outputToken) {
+          setOutputToken(outputToken as Token);
+        }
       }
     }
-  }, [tokenBalances]);
+  }, [tokenBalances, supportedTokens]);
 
   useEffect(() => {
     if (getSwapQuoteError) {
@@ -196,6 +204,7 @@ const SwapSheet = () => {
           balance={
             inputTokenBalance ? hexToBigInt(inputTokenBalance.balance) : null
           }
+          isLoadingBalance={isLoadingTokenBalances}
         />
         <SwapOutputCard
           token={outputToken}

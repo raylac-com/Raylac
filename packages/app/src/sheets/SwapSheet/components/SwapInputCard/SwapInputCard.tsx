@@ -13,6 +13,7 @@ const SwapInputCard = ({
   setToken,
   amount,
   balance,
+  isLoadingBalance,
   setAmount,
 }: {
   token: SupportedTokensReturnType[number] | null;
@@ -20,6 +21,7 @@ const SwapInputCard = ({
   amount: string;
   setAmount: (value: string) => void;
   balance: bigint | null;
+  isLoadingBalance: boolean;
 }) => {
   const [userInputMode, setUserInputMode] = useState<'USD' | 'TOKEN'>('TOKEN');
   const [usdAmountInput, setUsdAmountInput] = useState<string>('');
@@ -129,13 +131,13 @@ const SwapInputCard = ({
               }
             }}
           >
-            {tokenBalanceFormatted === null ? (
+            {isLoadingBalance ? (
               <Skeleton style={{ width: 53, height: 18 }} />
             ) : (
               <StyledText
                 style={{ color: colors.subbedText, fontWeight: 'bold' }}
               >
-                {tokenBalanceFormatted} {token.symbol}
+                {tokenBalanceFormatted ?? '0'} {token.symbol}
               </StyledText>
             )}
             <StyledText

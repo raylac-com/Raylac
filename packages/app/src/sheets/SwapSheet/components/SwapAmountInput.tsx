@@ -75,11 +75,16 @@ const SwapAmountInput = ({
           numberOfLines={1}
         />
       ) : (
-        <StyledText
-          style={{ color: colors.subbedText, fontSize: fontSizes.base }}
-        >
-          {`Select token`}
-        </StyledText>
+        <View style={{ flexShrink: 1, width: '100%' }}>
+          <StyledText
+            style={{
+              color: colors.subbedText,
+              fontSize: fontSizes.base,
+            }}
+          >
+            {`Select token`}
+          </StyledText>
+        </View>
       )}
       <Pressable
         style={{
