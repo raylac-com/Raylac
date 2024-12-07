@@ -2,13 +2,14 @@ export type RootTabsParamsList = {
   Home: undefined;
   Swap: undefined;
   History: undefined;
+  Settings: undefined;
 };
 
 export type RootStackParamsList = {
   Tabs: { screen: keyof RootTabsParamsList; params?: any };
   Start: undefined;
-
-  SignInWithMnemonic: undefined;
+  CreateAccount: undefined;
+  ImportAccount: undefined;
 
   AccountInfo: undefined;
 

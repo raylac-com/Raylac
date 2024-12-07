@@ -5,11 +5,27 @@ import { trpc } from '@/lib/trpc';
 import { TokenBalanceCard } from '@/components/TokenBalnaceCard';
 import { hexToBigInt } from 'viem';
 import StyledText from '@/components/StyledText/StyledText';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import useTypedNavigation from '@/hooks/useTypedNavigation';
 
 const HomeScreen = () => {
   const [isRefetching, setIsRefetching] = useState(false);
-  const { data: userAddress } = useUserAddress();
+
+  const navigation = useTypedNavigation();
+
+  const { data: userAddress, isLoading: isLoadingAddress } = useUserAddress();
+
+  useEffect(() => {
+    if (userAddress === null && !isLoadingAddress) {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Start' }],
+      });
+    } else {
+      // eslint-disable-next-line no-console
+      console.log('userAddress', userAddress);
+    }
+  }, [userAddress, isLoadingAddress]);
 
   const { data: tokenBalances, refetch } = trpc.getTokenBalances.useQuery(
     {

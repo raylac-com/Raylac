@@ -5,6 +5,9 @@ import { getRpcLinks } from '../src/lib/trpc';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { SheetProvider } from 'react-native-actions-sheet';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
+import colors from '../src/lib/styles/colors';
+import Toast from 'react-native-toast-message';
 
 const Provider = ({ children }: { children: React.ReactNode }) => {
   const [loaded, _error] = useFonts({
@@ -24,7 +27,17 @@ const Provider = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <SheetProvider>{children}</SheetProvider>
+        <SafeAreaProvider>
+          <SafeAreaView
+            style={{
+              flex: 1,
+              backgroundColor: colors.background,
+            }}
+          >
+            <SheetProvider>{children}</SheetProvider>
+          </SafeAreaView>
+          <Toast></Toast>
+        </SafeAreaProvider>
       </trpc.Provider>
     </QueryClientProvider>
   );

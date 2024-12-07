@@ -13,7 +13,3 @@ export const getClipboardText = async () => {
   const text = await Clipboard.getStringAsync();
   return text;
 };
-
-export const getSingedInUserAddress = () => {
-  return '0xE817651ebA45df8e716f97F380114192453C6cFD' as Hex;
-};

@@ -27,6 +27,11 @@ import './Sheets';
 import Constants from 'expo-constants';
 import { useFonts } from 'expo-font';
 import History from './screens/History/History';
+import Start from './screens/Start/Start';
+import SaveBackupPhrase from './screens/SaveBackupPhrase/SaveBackupPhrase';
+import ConfirmBackupPhrase from './screens/ConfirmBackupPhrase/ConfirmBackupPhrase';
+import ImportAccount from './screens/ImportAccount/ImportAccount';
+import Settings from './screens/Settings/Settings';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -84,6 +89,17 @@ const Tabs = () => {
           ),
         }}
       ></Tab.Screen>
+      <Tab.Screen
+        name="Settings"
+        component={Settings}
+        options={{
+          tabBarLabel: () => null,
+          tabBarShowLabel: false,
+          tabBarIcon: ({ color }) => (
+            <AntDesign name="setting" size={24} color={color} />
+          ),
+        }}
+      ></Tab.Screen>
     </Tab.Navigator>
   );
 };
@@ -121,6 +137,34 @@ const Screens = () => {
               component={Tabs}
               options={{
                 headerShown: false,
+              }}
+            ></RootStack.Screen>
+            <RootStack.Screen
+              name="Start"
+              component={Start}
+              options={{
+                headerShown: false,
+              }}
+            ></RootStack.Screen>
+            <RootStack.Screen
+              name="SaveBackupPhrase"
+              component={SaveBackupPhrase}
+              options={{
+                headerBackVisible: false,
+              }}
+            ></RootStack.Screen>
+            <RootStack.Screen
+              name="ConfirmBackupPhrase"
+              component={ConfirmBackupPhrase}
+              options={{
+                headerBackVisible: true,
+              }}
+            ></RootStack.Screen>
+            <RootStack.Screen
+              name="ImportAccount"
+              component={ImportAccount}
+              options={{
+                headerBackVisible: true,
               }}
             ></RootStack.Screen>
           </RootStack.Navigator>

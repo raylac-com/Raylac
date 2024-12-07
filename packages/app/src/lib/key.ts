@@ -1,29 +1,20 @@
 import * as SecureStore from 'expo-secure-store';
-import Constants from 'expo-constants';
 import * as Device from 'expo-device';
-import { HDAccount, hdKeyToAccount } from 'viem/accounts';
-import { mnemonicToAccount } from 'viem/accounts';
+import { hdKeyToAccount } from 'viem/accounts';
+import { HDKey } from 'viem/accounts';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as bip39 from 'bip39';
+import { Buffer } from 'buffer';
+import { Hex } from 'viem/_types/types/misc';
 
-const MNEMONIC_STORAGE_KEY = 'mnemonic';
-const BACKUP_VERIFICATION_COMPLETE_STORAGE_KEY = 'backupVerificationComplete';
+globalThis.Buffer = Buffer;
 
-const REQUIRE_AUTHENTICATION =
-  Constants.appOwnership !== 'expo' && Device.isDevice;
+const MNEMONIC_AND_PRIV_KEY_STORAGE_KEY = 'raylac-mnemonicAndPrivKey';
+const BACKUP_VERIFICATION_COMPLETE_STORAGE_KEY =
+  'raylac-backupVerificationComplete';
+const USER_ADDRESS_STORAGE_KEY = 'userAddress';
 
-export const getSignerAccount = async (): Promise<HDAccount> => {
-  const mnemonic =
-    'rain profit typical section elephant expire curious defy basic despair toy scene';
-
-  const account = mnemonicToAccount(mnemonic);
-
-  const hdKey = account.getHdKey();
-
-  const hdAccount = hdKeyToAccount(hdKey, {
-    accountIndex: 0,
-  });
-
-  return hdAccount;
-};
+const REQUIRE_AUTHENTICATION = Device.isDevice;
 
 export const isBackupVerificationComplete = async (): Promise<boolean> => {
   return (
@@ -42,10 +33,71 @@ export const setBackupVerificationStatus = async (
 };
 
 /**
- * Delete the mnemonic from secure storage.
+ * Get the private key of an `HDKey` in hex format.
  */
-export const deleteMnemonic = async () => {
-  await SecureStore.deleteItemAsync(MNEMONIC_STORAGE_KEY, {
+const hdKeyToPrivateKey = (hdKey: HDKey): Hex => {
+  return `0x${Buffer.from(hdKey.privateKey!).toString('hex')}`;
+};
+
+export const getAccountFromMnemonic = async (mnemonic: string) => {
+  const seed = bip39.mnemonicToSeedSync(mnemonic);
+
+  const hdKey = HDKey.fromMasterSeed(seed);
+
+  const account = hdKeyToAccount(hdKey, {
+    accountIndex: 0,
+  });
+
+  const privKey = hdKeyToPrivateKey(account.getHdKey());
+
+  return { account, privKey };
+};
+
+/**
+ * Save the mnemonic and private key to secure storage.
+ */
+export const saveMnemonicAndPrivKey = async ({
+  mnemonic,
+  privKey,
+}: {
+  mnemonic: string;
+  privKey: Hex;
+}) => {
+  await SecureStore.setItem(
+    MNEMONIC_AND_PRIV_KEY_STORAGE_KEY,
+    JSON.stringify({ mnemonic, privKey }),
+    {
+      requireAuthentication: REQUIRE_AUTHENTICATION,
+    }
+  );
+};
+
+export const getMnemonicAndPrivKey = async (): Promise<{
+  mnemonic: string;
+  privKey: Hex;
+} | null> => {
+  const item = await SecureStore.getItem(MNEMONIC_AND_PRIV_KEY_STORAGE_KEY, {
     requireAuthentication: REQUIRE_AUTHENTICATION,
   });
+
+  return item ? JSON.parse(item) : null;
+};
+
+export const deleteMnemonicAndPrivKey = async () => {
+  await SecureStore.deleteItemAsync(MNEMONIC_AND_PRIV_KEY_STORAGE_KEY, {
+    requireAuthentication: REQUIRE_AUTHENTICATION,
+  });
+};
+
+export const getUserAddress = async () => {
+  const address = await AsyncStorage.getItem(USER_ADDRESS_STORAGE_KEY);
+  return address as Hex | null;
+};
+
+export const setUserAddress = async (address: Hex) => {
+  await AsyncStorage.setItem(USER_ADDRESS_STORAGE_KEY, address);
+};
+
+export const deleteUserAddress = async () => {
+  await AsyncStorage.removeItem(USER_ADDRESS_STORAGE_KEY);
 };
