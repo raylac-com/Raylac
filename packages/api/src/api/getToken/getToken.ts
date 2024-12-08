@@ -8,10 +8,8 @@ import { KNOWN_TOKENS } from '../../lib/knownTokes';
 
 const getToken = async ({
   tokenAddress,
-  chainId,
 }: {
   tokenAddress: Hex;
-  chainId: number;
 }): Promise<SupportedTokensReturnType[number]> => {
   const knownToken = KNOWN_TOKENS.find(knownToken =>
     knownToken.addresses.some(({ address }) => address === tokenAddress)
@@ -24,7 +22,6 @@ const getToken = async ({
   const currencies = await relayApi.post<RelaySupportedCurrenciesResponseBody>(
     'currencies/v1',
     {
-      chainIds: [chainId],
       address: tokenAddress,
       limit: 1,
     }
@@ -43,7 +40,7 @@ const getToken = async ({
     logoURI: token.metadata.logoURI,
     addresses: [
       {
-        chainId,
+        chainId: token.chainId,
         address: getAddress(token.address),
       },
     ],

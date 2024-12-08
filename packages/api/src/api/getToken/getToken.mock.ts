@@ -1,7 +1,7 @@
 import { Hex, zeroAddress } from 'viem';
 import { base } from 'viem/op-stack';
 
-const getTokenMock = async (_args: { tokenAddress: Hex; chainId: number }) => {
+const getTokenMock = async (_args: { tokenAddress: Hex }) => {
   return {
     symbol: 'ETH',
     name: 'Ethereum',

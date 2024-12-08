@@ -68,4 +68,13 @@ export type GetTokenPriceReturnType = AlchemyTokenPriceResponse;
 export interface SubmitUserOpsRequestBody {
   userOps: UserOperation[];
   swapQuote: GetSwapQuoteReturnType;
+  inputs: {
+    chainId: number;
+    tokenAddress: Hex;
+    amount: Hex;
+  }[];
+  output: {
+    chainId: number;
+    tokenAddress: Hex;
+  };
 }

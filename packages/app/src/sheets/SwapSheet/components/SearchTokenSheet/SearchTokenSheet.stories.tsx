@@ -8,9 +8,7 @@ import { SheetManager } from 'react-native-actions-sheet';
 const meta = {
   title: 'SearchTokenSheet',
   component: SearchTokenSheet,
-  args: {
-    onSelectToken: () => {},
-  },
+  args: {},
   decorators: [
     Story => {
       return (

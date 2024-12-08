@@ -19,6 +19,7 @@ const meta = {
       usdAmountOut: '100',
       tokenAddressIn: '0x4ed4e862860bed51a9570b96d89af5e1b0efefed',
       tokenAddressOut: zeroAddress,
+      transactions: [],
     },
   },
   decorators: [

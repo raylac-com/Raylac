@@ -7,7 +7,7 @@ import { zeroAddress } from 'viem';
 const History = () => {
   const { data: userAccount } = useUserAccount();
 
-  const { data: swapHistory = [] } = trpc.getSwapHistory.useQuery(
+  const { data: swapHistory } = trpc.getSwapHistory.useQuery(
     {
       address: userAccount?.address ?? zeroAddress,
     },
@@ -24,7 +24,7 @@ const History = () => {
           paddingHorizontal: 16,
           rowGap: 12,
         }}
-        data={swapHistory}
+        data={swapHistory ?? []}
         renderItem={({ item }) => <SwapHistoryListItem swap={item} />}
       />
     </View>

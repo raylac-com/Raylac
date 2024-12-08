@@ -25,6 +25,7 @@ const Provider = ({ children }: { children: React.ReactNode }) => {
       queries: {
         gcTime: 0,
         retry: false,
+        throwOnError: true,
       },
     },
   });

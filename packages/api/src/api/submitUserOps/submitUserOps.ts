@@ -7,6 +7,7 @@ import {
 import { handleOps } from '../../lib/bundler';
 import { logger } from '@raylac/shared-backend';
 import prisma from '../../lib/prisma';
+import { hexToBigInt } from 'viem';
 
 const submitUserOpsForChain = async ({
   chainId,
@@ -31,8 +32,12 @@ const submitUserOpsForChain = async ({
 const submitUserOps = async ({
   userOps,
   swapQuote,
+  inputs,
+  output,
 }: SubmitUserOpsRequestBody) => {
   const chainIds = [...new Set(userOps.map(userOp => userOp.chainId))];
+
+  // Submit the user ops
 
   const txReceipts = await Promise.all(
     chainIds.map(chainId =>
@@ -43,9 +48,12 @@ const submitUserOps = async ({
     )
   );
 
-  const tokenAddressIn = swapQuote.details.currencyIn.currency.address;
-  const tokenAddressOut = swapQuote.details.currencyOut.currency.address;
-  const amountIn = swapQuote.details.currencyIn.amount;
+  const tokenAddressIn = inputs[0].tokenAddress;
+  const tokenAddressOut = output.tokenAddress;
+  const amountIn = inputs.reduce(
+    (acc, input) => acc + hexToBigInt(input.amount),
+    BigInt(0)
+  );
   const amountOut = swapQuote.details.currencyOut.amount;
 
   const relayerServiceFeeAmount = swapQuote.fees.relayerService.amount;
@@ -62,8 +70,8 @@ const submitUserOps = async ({
       address,
       tokenAddressIn,
       tokenAddressOut,
-      amountIn,
-      amountOut,
+      amountIn: amountIn.toString(),
+      amountOut: amountOut.toString(),
       usdAmountIn: swapQuote.details.currencyIn.amountUsd,
       usdAmountOut: swapQuote.details.currencyOut.amountUsd,
       relayerServiceFeeAmount,

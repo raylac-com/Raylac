@@ -29,12 +29,10 @@ const getSwapQuote = async ({
     })),
     destinationCurrency: output.tokenAddress,
     destinationChainId,
-    partial: true,
+    partial: false,
     tradeType,
-    useUserOperation: true,
+    useUserOperation: false,
   };
-
-  logger.info('requestBody', requestBody);
 
   const qt = st('Get quote');
 

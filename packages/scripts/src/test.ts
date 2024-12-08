@@ -9,6 +9,7 @@ import {
   GetSwapQuoteRequestBody,
   getUserOpHash,
   getWalletClient,
+  supportedChains,
   TokenBalancesReturnType,
   TRPCErrorMessage,
   UserOperation,
@@ -16,11 +17,9 @@ import {
 
 const test = async () => {
   const supportedTokens = await client.getSupportedTokens.query({
-    chainIds: [base.id],
-    searchTerm: 'USDC',
+    chainIds: supportedChains.map(chain => chain.id),
   });
 
-  console.log(supportedTokens);
   console.log(supportedTokens.length);
 
   const account = mnemonicToAccount(
@@ -39,10 +38,14 @@ const test = async () => {
     singerAddress,
   });
 
+  const tokenBalances = await client.getTokenBalances.query({
+    address: sender,
+  });
+  console.log(tokenBalances);
+
   console.log(sender);
 
-  /*
-  const inputToken = supportedTokens.find(token => token.symbol === 'USDC');
+  const inputToken = supportedTokens.find(token => token.symbol === 'DEGEN');
   const outputToken = supportedTokens.find(token => token.symbol === 'ETH');
 
   console.log(inputToken, outputToken);
@@ -66,7 +69,7 @@ const test = async () => {
   const { inputs, output } = buildSwapIo({
     inputToken,
     outputToken,
-    amount: parseUnits('1', 6),
+    amount: parseUnits('30', 18),
     inputTokenBalance,
   });
 
@@ -83,8 +86,7 @@ const test = async () => {
   };
 
   const quote = await client.getSwapQuote.mutate(requestBody);
-  console.log(quote);
-  */
+  console.log(quote.fees.relayerService);
 };
 
 test();

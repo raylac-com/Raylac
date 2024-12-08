@@ -6,7 +6,6 @@ import { trpc } from '@/lib/trpc';
 import { formatUnits, parseUnits, zeroAddress } from 'viem';
 import useUserAccount from '@/hooks/useUserAccount';
 import {
-  GetSwapQuoteReturnType,
   supportedChains,
   SupportedTokensReturnType,
   TRPCErrorMessage,
@@ -130,7 +129,11 @@ const SwapSheet = () => {
 
   const onSwapPress = async () => {
     if (swapQuote) {
-      await swap({ swapQuote: swapQuote as GetSwapQuoteReturnType });
+      await swap({
+        inputs: swapQuote.inputs,
+        output: swapQuote.output,
+        swapQuote: swapQuote.quote,
+      });
 
       navigation.navigate('Tabs', {
         screen: 'History',
@@ -149,8 +152,8 @@ const SwapSheet = () => {
       ? inputTokenBalance >= parsedInputAmount
       : undefined;
 
-  const outputAmount = swapQuote?.details?.currencyOut?.amount;
-  const outputAmountUsd = swapQuote?.details?.currencyOut?.amountUsd;
+  const outputAmount = swapQuote?.quote?.details?.currencyOut?.amount;
+  const outputAmountUsd = swapQuote?.quote?.details?.currencyOut?.amountUsd;
 
   const outputAmountFormatted =
     outputAmount && outputToken
@@ -191,7 +194,7 @@ const SwapSheet = () => {
         />
         <StyledText style={{ color: colors.border }}>
           {swapQuote
-            ? `Swap provider fee $${swapQuote.fees.relayerService.amountUsd}`
+            ? `Swap provider fee $${swapQuote.quote.fees.relayerService.amountUsd}`
             : ''}
         </StyledText>
         <StyledButton

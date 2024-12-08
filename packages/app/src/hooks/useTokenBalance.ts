@@ -2,7 +2,7 @@ import { trpc } from '@/lib/trpc';
 import { SupportedTokensReturnType } from '@raylac/shared';
 import useUserAccount from './useUserAccount';
 import { useQuery } from '@tanstack/react-query';
-import { hexToBigInt, zeroAddress } from 'viem';
+import { getAddress, hexToBigInt, zeroAddress } from 'viem';
 
 const useTokenBalance = (token: SupportedTokensReturnType[number] | null) => {
   const { data: userAccount } = useUserAccount();
@@ -33,7 +33,8 @@ const useTokenBalance = (token: SupportedTokensReturnType[number] | null) => {
         return balance.breakdown.find(breakdown => {
           return token.addresses.some(
             tokenAddress =>
-              breakdown.tokenAddress === tokenAddress.address &&
+              getAddress(breakdown.tokenAddress) ===
+                getAddress(tokenAddress.address) &&
               breakdown.chainId === tokenAddress.chainId
           );
         });

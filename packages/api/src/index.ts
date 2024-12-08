@@ -59,16 +59,14 @@ export const appRouter = router({
     }),
 
   getToken: publicProcedure
-    .input(z.object({ tokenAddress: z.string(), chainId: z.number() }))
+    .input(z.object({ tokenAddress: z.string() }))
     .query(async ({ input }) => {
       return MOCK_RESPONSE
         ? getTokenMock({
             tokenAddress: input.tokenAddress as Hex,
-            chainId: input.chainId,
           })
         : getToken({
             tokenAddress: input.tokenAddress as Hex,
-            chainId: input.chainId,
           });
     }),
 
@@ -90,6 +88,8 @@ export const appRouter = router({
       z.object({
         userOps: z.array(z.any()),
         swapQuote: z.any(),
+        inputs: z.array(z.any()),
+        output: z.any(),
       })
     )
     .mutation(async ({ input }) => {

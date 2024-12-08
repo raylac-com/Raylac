@@ -92,7 +92,7 @@ const useGetSwapQuote = () => {
 
       try {
         const quote = await getSwapQuote(requestBody);
-        return quote;
+        return { quote, inputs, output };
       } catch (_error) {
         // Don't throw error
         return null;
