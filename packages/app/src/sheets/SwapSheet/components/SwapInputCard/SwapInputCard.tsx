@@ -4,9 +4,9 @@ import SwapAmountInput from '../SwapAmountInput';
 import { formatUnits } from 'viem';
 import { formatAmount, SupportedTokensReturnType } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
-import { trpc } from '@/lib/trpc';
 import { useEffect, useState } from 'react';
 import Skeleton from '@/components/Skeleton/Skeleton';
+import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 
 const SwapInputCard = ({
   token,
@@ -20,35 +20,21 @@ const SwapInputCard = ({
   setToken: (value: SupportedTokensReturnType[number] | null) => void;
   amount: string;
   setAmount: (value: string) => void;
-  balance: bigint | null;
+  balance: bigint | undefined;
   isLoadingBalance: boolean;
 }) => {
   const [userInputMode, setUserInputMode] = useState<'USD' | 'TOKEN'>('TOKEN');
   const [usdAmountInput, setUsdAmountInput] = useState<string>('');
 
-  const { data: tokenPrice, mutate: getTokenPrice } =
-    trpc.getTokenPrice.useMutation();
-
-  const tokenPriceUSD = tokenPrice?.prices.find(
-    price => price.currency === 'usd'
-  )?.value;
-
-  useEffect(() => {
-    if (token) {
-      getTokenPrice({
-        tokenAddress: token.addresses[0].address,
-        chainId: token.addresses[0].chainId,
-      });
-    }
-  }, [token]);
+  const { data: tokenPriceUsd } = useTokenPriceUsd(token);
 
   useEffect(() => {
     if (
       userInputMode === 'TOKEN' &&
-      tokenPrice !== undefined &&
+      tokenPriceUsd !== undefined &&
       amount !== null
     ) {
-      const usdAmount = Number(amount) * Number(tokenPriceUSD);
+      const usdAmount = Number(amount) * Number(tokenPriceUsd);
 
       if (usdAmountInput === '' && usdAmount === 0) {
         return;
@@ -56,7 +42,7 @@ const SwapInputCard = ({
 
       setUsdAmountInput(usdAmount.toFixed(2));
     }
-  }, [tokenPrice, amount, userInputMode]);
+  }, [tokenPriceUsd, amount, userInputMode]);
 
   const onUsdAmountChange = (usdAmountText: string) => {
     setUserInputMode('USD');
@@ -67,17 +53,17 @@ const SwapInputCard = ({
       return;
     }
 
-    if (tokenPrice !== undefined && usdAmountText !== '') {
-      const tokenAmount = Number(usdAmountText) / Number(tokenPriceUSD);
+    if (tokenPriceUsd !== undefined && usdAmountText !== '') {
+      const tokenAmount = Number(usdAmountText) / Number(tokenPriceUsd);
 
       setAmount(tokenAmount.toString());
     }
   };
 
   const tokenBalanceFormatted =
-    balance !== null && token
+    balance !== undefined && token
       ? formatAmount(balance.toString(), token.decimals)
-      : null;
+      : undefined;
 
   return (
     <View
@@ -125,7 +111,7 @@ const SwapInputCard = ({
           <Pressable
             style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
             onPress={() => {
-              if (balance !== null && token) {
+              if (balance !== undefined && token) {
                 const parsedBalance = formatUnits(balance, token.decimals);
                 setAmount(parsedBalance);
               }
@@ -137,7 +123,7 @@ const SwapInputCard = ({
               <StyledText
                 style={{ color: colors.subbedText, fontWeight: 'bold' }}
               >
-                {tokenBalanceFormatted ?? '0'} {token.symbol}
+                {tokenBalanceFormatted} {token.symbol}
               </StyledText>
             )}
             <StyledText

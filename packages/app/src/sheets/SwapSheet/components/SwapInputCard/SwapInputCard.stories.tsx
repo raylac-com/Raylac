@@ -3,7 +3,6 @@ import { View } from 'react-native';
 import type { Meta, StoryObj } from '@storybook/react';
 import SwapInputCard from './SwapInputCard';
 import spacing from '@/lib/styles/spacing';
-import { parseEther } from 'viem';
 import { base } from 'viem/chains';
 
 const meta = {
@@ -16,6 +15,7 @@ const meta = {
       },
     },
     amount: { control: 'text' },
+    isLoadingBalance: { control: 'boolean' },
   },
   args: {
     token: {
@@ -31,7 +31,8 @@ const meta = {
       logoURI:
         'https://firebasestorage.googleapis.com/v0/b/raylac-72351.appspot.com/o/usdc.png?alt=media&token=4e91000d-a063-4f34-bbcb-599a44151ff9',
     },
-    balance: parseEther('1000'),
+    balance: undefined,
+    isLoadingBalance: false,
     amount: '100',
     setToken: () => {},
     setAmount: () => {},

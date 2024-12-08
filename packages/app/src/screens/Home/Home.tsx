@@ -13,6 +13,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { copyToClipboard } from '@/lib/utils';
 import Toast from 'react-native-toast-message';
 import { SheetManager } from 'react-native-actions-sheet';
+import useAccountUsdValue from '@/hooks/useAccountUsdValue';
+import Skeleton from '@/components/Skeleton/Skeleton';
 
 const HomeScreen = () => {
   const navigation = useTypedNavigation();
@@ -36,6 +38,9 @@ const HomeScreen = () => {
       enabled: !!userAddress,
     }
   );
+
+  const { data: accountUsdValue, isLoading: isLoadingAccountUsdValue } =
+    useAccountUsdValue();
 
   ///
   /// Effects
@@ -76,10 +81,6 @@ const HomeScreen = () => {
     SheetManager.show('swap-sheet');
   };
 
-  const accountUsdValue = tokenBalances?.reduce((acc, tokenBalance) => {
-    return acc + (tokenBalance.usdValue ?? 0);
-  }, 0);
-
   return (
     <ScrollView
       contentContainerStyle={{
@@ -101,7 +102,11 @@ const HomeScreen = () => {
       testID="home"
     >
       <StyledText style={{ fontSize: 36, color: colors.text }}>
-        {`$${accountUsdValue?.toFixed(2)}`}
+        {isLoadingAccountUsdValue ? (
+          <Skeleton style={{ width: 100, height: 24 }} />
+        ) : (
+          `$${accountUsdValue?.toFixed(2)}`
+        )}
       </StyledText>
       <View style={{ flexDirection: 'row', columnGap: 20 }}>
         <MenuItem

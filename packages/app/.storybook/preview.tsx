@@ -8,6 +8,7 @@ import { SheetProvider } from 'react-native-actions-sheet';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import colors from '../src/lib/styles/colors';
 import Toast from 'react-native-toast-message';
+import { NavigationContainer } from '@react-navigation/native';
 
 const Provider = ({ children }: { children: React.ReactNode }) => {
   const [loaded, _error] = useFonts({
@@ -19,7 +20,14 @@ const Provider = ({ children }: { children: React.ReactNode }) => {
     return null;
   }
 
-  const queryClient = new QueryClient();
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        gcTime: 0,
+        retry: false,
+      },
+    },
+  });
   const trpcClient = trpc.createClient({
     links: getRpcLinks(),
   });
@@ -27,17 +35,19 @@ const Provider = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <SafeAreaProvider>
-          <SafeAreaView
-            style={{
-              flex: 1,
-              backgroundColor: colors.background,
-            }}
-          >
-            <SheetProvider>{children}</SheetProvider>
-          </SafeAreaView>
-          <Toast></Toast>
-        </SafeAreaProvider>
+        <NavigationContainer>
+          <SafeAreaProvider>
+            <SafeAreaView
+              style={{
+                flex: 1,
+                backgroundColor: colors.background,
+              }}
+            >
+              <SheetProvider>{children}</SheetProvider>
+            </SafeAreaView>
+            <Toast></Toast>
+          </SafeAreaProvider>
+        </NavigationContainer>
       </trpc.Provider>
     </QueryClientProvider>
   );

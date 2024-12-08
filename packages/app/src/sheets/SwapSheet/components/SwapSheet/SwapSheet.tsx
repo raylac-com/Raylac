@@ -3,13 +3,12 @@ import { View } from 'react-native';
 import SwapInputCard from '../SwapInputCard/SwapInputCard';
 import SwapOutputCard from '../SwapOutputCard/SwapOutputCard';
 import { trpc } from '@/lib/trpc';
-import { formatUnits, hexToBigInt, parseUnits } from 'viem';
+import { formatUnits, parseUnits } from 'viem';
 import useUserAddress from '@/hooks/useUserAddress';
 import {
   GetSwapQuoteReturnType,
   supportedChains,
   SupportedTokensReturnType,
-  TokenBalancesReturnType,
   TRPCErrorMessage,
 } from '@raylac/shared';
 import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
@@ -20,6 +19,7 @@ import useDebounce from '@/hooks/useDebounce';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
+import useTokenBalance from '@/hooks/useTokenBalance';
 
 type Token = SupportedTokensReturnType[number];
 
@@ -40,6 +40,8 @@ const SwapSheet = () => {
   // Fetch data
   //
 
+  const { data: inputTokenBalance } = useTokenBalance(inputToken);
+
   const { data: tokenBalances, isLoading: isLoadingTokenBalances } =
     trpc.getTokenBalances.useQuery(
       {
@@ -49,19 +51,6 @@ const SwapSheet = () => {
         enabled: !!userAddress,
       }
     );
-
-  // Get the user's balance of the selected input token
-  const inputTokenBalance = inputToken
-    ? tokenBalances?.find(token =>
-        token.breakdown?.some(breakdown =>
-          inputToken.addresses.some(
-            address =>
-              breakdown.tokenAddress === address.address &&
-              address.chainId === breakdown.chainId
-          )
-        )
-      )
-    : null;
 
   const { data: supportedTokens } = trpc.getSupportedTokens.useQuery({
     chainIds: supportedChains.map(chain => chain.id),
@@ -122,26 +111,14 @@ const SwapSheet = () => {
   );
 
   useEffect(() => {
-    if (
-      debouncedParsedInputAmount &&
-      inputToken &&
-      outputToken &&
-      inputTokenBalance
-    ) {
+    if (debouncedParsedInputAmount && inputToken && outputToken) {
       getSwapQuote({
         amount: debouncedParsedInputAmount,
         inputToken,
         outputToken,
-        inputTokenBalance: inputTokenBalance as TokenBalancesReturnType[number],
       });
     }
-  }, [
-    debouncedParsedInputAmount,
-    userAddress,
-    outputToken,
-    getSwapQuote,
-    inputTokenBalance,
-  ]);
+  }, [debouncedParsedInputAmount, userAddress, outputToken, getSwapQuote]);
 
   //
   // Handlers
@@ -168,9 +145,9 @@ const SwapSheet = () => {
   //
 
   const hasEnoughBalance =
-    inputTokenBalance && parsedInputAmount !== null
-      ? hexToBigInt(inputTokenBalance.balance) >= parsedInputAmount
-      : null;
+    inputTokenBalance !== undefined && parsedInputAmount !== null
+      ? inputTokenBalance >= parsedInputAmount
+      : undefined;
 
   const outputAmount = swapQuote?.details?.currencyOut?.amount;
   const outputAmountUsd = swapQuote?.details?.currencyOut?.amountUsd;
@@ -201,9 +178,7 @@ const SwapSheet = () => {
           setToken={setInputToken}
           amount={amountInputText}
           setAmount={onInputAmountChange}
-          balance={
-            inputTokenBalance ? hexToBigInt(inputTokenBalance.balance) : null
-          }
+          balance={inputTokenBalance}
           isLoadingBalance={isLoadingTokenBalances}
         />
         <SwapOutputCard

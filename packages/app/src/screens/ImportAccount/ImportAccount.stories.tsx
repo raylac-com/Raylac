@@ -2,7 +2,6 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import ImportAccount from './ImportAccount';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { NavigationContainer } from '@react-navigation/native';
 
 const StorybookStack = createNativeStackNavigator();
 
@@ -13,17 +12,15 @@ const meta = {
   args: {},
   decorators: [
     Story => (
-      <NavigationContainer independent>
-        <StorybookStack.Navigator>
-          <StorybookStack.Screen
-            name="ImportAccount"
-            component={() => Story()}
-            options={{
-              headerShown: false,
-            }}
-          ></StorybookStack.Screen>
-        </StorybookStack.Navigator>
-      </NavigationContainer>
+      <StorybookStack.Navigator>
+        <StorybookStack.Screen
+          name="ImportAccount"
+          component={() => Story()}
+          options={{
+            headerShown: false,
+          }}
+        ></StorybookStack.Screen>
+      </StorybookStack.Navigator>
     ),
   ],
 } satisfies Meta<typeof ImportAccount>;

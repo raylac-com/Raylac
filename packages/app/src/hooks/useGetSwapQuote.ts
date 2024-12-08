@@ -1,7 +1,4 @@
-import {
-  GetSwapQuoteRequestBody,
-  TokenBalancesReturnType,
-} from '@raylac/shared/out/rpcTypes';
+import { GetSwapQuoteRequestBody } from '@raylac/shared/out/rpcTypes';
 import { hexToBigInt, toHex } from 'viem';
 import { SupportedTokensReturnType } from '@raylac/shared/out/rpcTypes';
 import { useMutation } from '@tanstack/react-query';
@@ -16,20 +13,43 @@ const useGetSwapQuote = () => {
     throwOnError: false,
   });
 
+  const { data: tokenBalances } = trpc.getTokenBalances.useQuery(
+    {
+      address: userAddress!,
+    },
+    { enabled: !!userAddress }
+  );
+
   return useMutation({
     mutationFn: async ({
       amount,
       inputToken,
       outputToken,
-      inputTokenBalance,
     }: {
       amount: bigint;
       inputToken: SupportedTokensReturnType[number];
       outputToken: SupportedTokensReturnType[number];
-      inputTokenBalance: TokenBalancesReturnType[number];
     }) => {
       if (!userAddress) {
         throw new Error('User address not loaded');
+      }
+
+      if (tokenBalances === undefined) {
+        throw new Error('Token balances not loaded');
+      }
+
+      const inputTokenBalance = tokenBalances.find(balance => {
+        return balance.breakdown.find(breakdown => {
+          return inputToken.addresses.some(
+            address =>
+              address.address === breakdown.tokenAddress &&
+              address.chainId === breakdown.chainId
+          );
+        });
+      });
+
+      if (inputTokenBalance === undefined) {
+        throw new Error(`Input token balance not found for ${inputToken.name}`);
       }
 
       const hasEnoughBalance = hexToBigInt(inputTokenBalance.balance) >= amount;
