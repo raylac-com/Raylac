@@ -1,9 +1,9 @@
+import { View } from 'react-native';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useCreateAccount from '@/hooks/useCreateAccoun';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { sleep } from '@raylac/shared';
 import { useState } from 'react';
-import { View } from 'react-native';
 
 const Start = () => {
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);

@@ -1,24 +1,24 @@
 import { trpc } from '@/lib/trpc';
 import { SupportedTokensReturnType } from '@raylac/shared';
-import useUserAddress from './useUserAddress';
+import useUserAccount from './useUserAccount';
 import { useQuery } from '@tanstack/react-query';
-import { hexToBigInt } from 'viem';
+import { hexToBigInt, zeroAddress } from 'viem';
 
 const useTokenBalance = (token: SupportedTokensReturnType[number] | null) => {
-  const { data: userAddress } = useUserAddress();
+  const { data: userAccount } = useUserAccount();
 
   const { data: tokenBalances, isLoading: isLoadingTokenBalance } =
     trpc.getTokenBalances.useQuery(
       {
-        address: userAddress!,
+        address: userAccount?.address ?? zeroAddress,
       },
       {
-        enabled: !!userAddress,
+        enabled: !!userAccount,
       }
     );
 
   const query = useQuery({
-    queryKey: ['user-token-balance', token, userAddress, tokenBalances],
+    queryKey: ['user-token-balance', token, userAccount, tokenBalances],
     queryFn: () => {
       if (tokenBalances === undefined) {
         throw new Error('Token balances not loaded');
@@ -45,7 +45,7 @@ const useTokenBalance = (token: SupportedTokensReturnType[number] | null) => {
 
       return hexToBigInt(tokenBalance.balance);
     },
-    enabled: !!token && !!tokenBalances && !!userAddress,
+    enabled: !!token && !!tokenBalances && !!userAccount,
   });
 
   return {

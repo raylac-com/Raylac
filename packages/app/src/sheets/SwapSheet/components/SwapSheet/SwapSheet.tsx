@@ -3,8 +3,8 @@ import { View } from 'react-native';
 import SwapInputCard from '../SwapInputCard/SwapInputCard';
 import SwapOutputCard from '../SwapOutputCard/SwapOutputCard';
 import { trpc } from '@/lib/trpc';
-import { formatUnits, parseUnits } from 'viem';
-import useUserAddress from '@/hooks/useUserAddress';
+import { formatUnits, parseUnits, zeroAddress } from 'viem';
+import useUserAccount from '@/hooks/useUserAccount';
 import {
   GetSwapQuoteReturnType,
   supportedChains,
@@ -34,7 +34,7 @@ const SwapSheet = () => {
   const [outputToken, setOutputToken] = useState<Token | null>(null);
   const [amountInputText, setAmountInputText] = useState<string>('');
 
-  const { data: userAddress } = useUserAddress();
+  const { data: userAccount } = useUserAccount();
 
   //
   // Fetch data
@@ -45,10 +45,10 @@ const SwapSheet = () => {
   const { data: tokenBalances, isLoading: isLoadingTokenBalances } =
     trpc.getTokenBalances.useQuery(
       {
-        address: userAddress!,
+        address: userAccount?.address ?? zeroAddress,
       },
       {
-        enabled: !!userAddress,
+        enabled: !!userAccount,
       }
     );
 
@@ -118,7 +118,7 @@ const SwapSheet = () => {
         outputToken,
       });
     }
-  }, [debouncedParsedInputAmount, userAddress, outputToken, getSwapQuote]);
+  }, [debouncedParsedInputAmount, userAccount, outputToken, getSwapQuote]);
 
   //
   // Handlers

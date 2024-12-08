@@ -1,13 +1,13 @@
 import { GetSwapQuoteRequestBody } from '@raylac/shared/out/rpcTypes';
-import { hexToBigInt, toHex } from 'viem';
+import { hexToBigInt, toHex, zeroAddress } from 'viem';
 import { SupportedTokensReturnType } from '@raylac/shared/out/rpcTypes';
 import { useMutation } from '@tanstack/react-query';
 import { trpc } from '@/lib/trpc';
-import useUserAddress from './useUserAddress';
+import useUserAccount from './useUserAccount';
 import { buildSwapIo } from '@raylac/shared/out/utils';
 
 const useGetSwapQuote = () => {
-  const { data: userAddress } = useUserAddress();
+  const { data: userAccount } = useUserAccount();
 
   const { mutateAsync: getSwapQuote } = trpc.getSwapQuote.useMutation({
     throwOnError: false,
@@ -15,9 +15,9 @@ const useGetSwapQuote = () => {
 
   const { data: tokenBalances } = trpc.getTokenBalances.useQuery(
     {
-      address: userAddress!,
+      address: userAccount?.address ?? zeroAddress,
     },
-    { enabled: !!userAddress }
+    { enabled: !!userAccount }
   );
 
   return useMutation({
@@ -30,7 +30,7 @@ const useGetSwapQuote = () => {
       inputToken: SupportedTokensReturnType[number];
       outputToken: SupportedTokensReturnType[number];
     }) => {
-      if (!userAddress) {
+      if (!userAccount) {
         throw new Error('User address not loaded');
       }
 
@@ -48,11 +48,10 @@ const useGetSwapQuote = () => {
         });
       });
 
-      if (inputTokenBalance === undefined) {
-        throw new Error(`Input token balance not found for ${inputToken.name}`);
-      }
-
-      const hasEnoughBalance = hexToBigInt(inputTokenBalance.balance) >= amount;
+      const hasEnoughBalance =
+        inputTokenBalance === undefined
+          ? false
+          : hexToBigInt(inputTokenBalance.balance) >= amount;
 
       let inputs, output;
       if (hasEnoughBalance) {
@@ -60,7 +59,7 @@ const useGetSwapQuote = () => {
           inputToken,
           outputToken,
           amount,
-          inputTokenBalance,
+          inputTokenBalance: inputTokenBalance!,
         });
 
         inputs = swapIo.inputs;
@@ -82,7 +81,7 @@ const useGetSwapQuote = () => {
       }
 
       const requestBody: GetSwapQuoteRequestBody = {
-        senderAddress: userAddress,
+        senderAddress: userAccount.address,
         inputs: inputs.map(input => ({
           ...input,
           amount: toHex(input.amount),

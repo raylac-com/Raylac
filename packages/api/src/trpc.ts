@@ -7,7 +7,10 @@ const t = initTRPC.context<Context>().create({
   errorFormatter(opts) {
     const { shape, error } = opts;
 
-    logger.error(error);
+    logger.error(`${error.message}`, {
+      shape,
+      path: opts.path,
+    });
     return {
       ...shape,
       data: {

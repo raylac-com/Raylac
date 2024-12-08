@@ -65,7 +65,7 @@ export const getAlchemyRpcUrl = ({ chain }: { chain: Chain }) => {
       alchemySubdomain = 'zksync-mainnet';
       break;
     default:
-      throw new Error(`Unknown chain id: ${chain.id}`);
+      throw new Error(`getAlchemyRpcUrl: Unknown chain id: ${chain.id}`);
   }
 
   return `https://${alchemySubdomain}.g.alchemy.com/v2/${apiKey}`;

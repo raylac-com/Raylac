@@ -1,4 +1,3 @@
-import { getSignerAccount } from '@/lib/key';
 import { trpc } from '@/lib/trpc';
 import { GetSwapQuoteReturnType } from '@raylac/shared/out/rpcTypes';
 import { sleep } from '@raylac/shared/out/utils';
@@ -6,9 +5,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import useSignUserOps from './useSignUserOp';
 import { UserOperation } from '@raylac/shared';
 import { getQueryKey } from '@trpc/react-query';
+import useUserAccount from './useUserAccount';
 
 const useSwap = () => {
   const queryClient = useQueryClient();
+  const { data: userAccount } = useUserAccount();
 
   const { mutateAsync: buildSwapUserOp } = trpc.buildSwapUserOp.useMutation({
     throwOnError: false,
@@ -28,9 +29,12 @@ const useSwap = () => {
     }) => {
       await sleep(100);
 
-      const singerAddress = await getSignerAccount();
+      if (!userAccount) {
+        throw new Error('User account not loaded');
+      }
+
       const userOps = await buildSwapUserOp({
-        singerAddress: singerAddress.address,
+        singerAddress: userAccount.singerAddress,
         quote: swapQuote,
       });
 

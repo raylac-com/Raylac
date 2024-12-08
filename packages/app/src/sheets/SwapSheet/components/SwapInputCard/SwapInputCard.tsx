@@ -29,11 +29,7 @@ const SwapInputCard = ({
   const { data: tokenPriceUsd } = useTokenPriceUsd(token);
 
   useEffect(() => {
-    if (
-      userInputMode === 'TOKEN' &&
-      tokenPriceUsd !== undefined &&
-      amount !== null
-    ) {
+    if (userInputMode === 'TOKEN' && tokenPriceUsd !== undefined) {
       const usdAmount = Number(amount) * Number(tokenPriceUsd);
 
       if (usdAmountInput === '' && usdAmount === 0) {

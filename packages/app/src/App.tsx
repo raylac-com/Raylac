@@ -1,5 +1,6 @@
 // 3. React Native needs crypto.getRandomValues polyfill and sha512
 import 'react-native-get-random-values';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import colors from './lib/styles/colors';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -22,7 +23,7 @@ import useFetchUpdates from './hooks/useFetchUpdates';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
 import { SheetManager, SheetProvider } from 'react-native-actions-sheet';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import './Sheets';
 import Constants from 'expo-constants';
 import { useFonts } from 'expo-font';
@@ -32,6 +33,8 @@ import SaveBackupPhrase from './screens/SaveBackupPhrase/SaveBackupPhrase';
 import ConfirmBackupPhrase from './screens/ConfirmBackupPhrase/ConfirmBackupPhrase';
 import ImportAccount from './screens/ImportAccount/ImportAccount';
 import Settings from './screens/Settings/Settings';
+import { Keyboard } from 'react-native';
+import { TouchableWithoutFeedback } from 'react-native';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -124,52 +127,49 @@ const Screens = () => {
 
   return (
     <SafeAreaProvider>
-      <SafeAreaView
-        style={{
-          flex: 1,
-          backgroundColor: colors.background,
-        }}
-      >
-        <SheetProvider>
-          <RootStack.Navigator initialRouteName="Tabs">
-            <RootStack.Screen
-              name="Tabs"
-              component={Tabs}
-              options={{
-                headerShown: false,
-              }}
-            ></RootStack.Screen>
-            <RootStack.Screen
-              name="Start"
-              component={Start}
-              options={{
-                headerShown: false,
-              }}
-            ></RootStack.Screen>
-            <RootStack.Screen
-              name="SaveBackupPhrase"
-              component={SaveBackupPhrase}
-              options={{
-                headerBackVisible: false,
-              }}
-            ></RootStack.Screen>
-            <RootStack.Screen
-              name="ConfirmBackupPhrase"
-              component={ConfirmBackupPhrase}
-              options={{
-                headerBackVisible: true,
-              }}
-            ></RootStack.Screen>
-            <RootStack.Screen
-              name="ImportAccount"
-              component={ImportAccount}
-              options={{
-                headerBackVisible: true,
-              }}
-            ></RootStack.Screen>
-          </RootStack.Navigator>
-          <Toast></Toast>
-        </SheetProvider>
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <SheetProvider>
+            <RootStack.Navigator initialRouteName="Tabs">
+              <RootStack.Screen
+                name="Tabs"
+                component={Tabs}
+                options={{
+                  headerShown: false,
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="Start"
+                component={Start}
+                options={{
+                  headerShown: false,
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="SaveBackupPhrase"
+                component={SaveBackupPhrase}
+                options={{
+                  headerBackVisible: false,
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="ConfirmBackupPhrase"
+                component={ConfirmBackupPhrase}
+                options={{
+                  headerBackVisible: true,
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="ImportAccount"
+                component={ImportAccount}
+                options={{
+                  headerBackVisible: true,
+                }}
+              ></RootStack.Screen>
+            </RootStack.Navigator>
+            <Toast></Toast>
+          </SheetProvider>
+        </TouchableWithoutFeedback>
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -235,11 +235,11 @@ const App = () => {
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <PersistQueryClientProvider
           client={queryClient}
-          persistOptions={{ persister: asyncStoragePersister, buster: '42' }}
+          persistOptions={{ persister: asyncStoragePersister, buster: '43' }}
         >
           <ThemeProvider value={NavigationTheme}>
             <Screens></Screens>
-            <StatusBar style="light" />
+            <StatusBar style="dark" />
           </ThemeProvider>
         </PersistQueryClientProvider>
       </trpc.Provider>

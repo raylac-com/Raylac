@@ -56,15 +56,15 @@ const getSupportedTokens = async ({
     }
   );
 
-  const supportedTokens = currencies.data
-    .map(group => (group.length > 0 ? group[0] : null))
-    .filter(token => token !== null);
-
   const knownTokenSymbols = knownTokens.map(token => token.symbol);
 
-  const returnValue: SupportedTokensReturnType = supportedTokens
+  const supportedTokens: SupportedTokensReturnType = currencies.data
+    .map(group => (group.length > 0 ? group[0] : null))
+    .filter(token => token !== null)
     // Filter out known tokens
     .filter(token => !knownTokenSymbols.includes(token.symbol))
+    // Sort by verified status
+    .sort((a, b) => Number(b.metadata.verified) - Number(a.metadata.verified))
     // Map to `SupportedTokensReturnType`
     .map(token => ({
       symbol: token.symbol,
@@ -79,7 +79,7 @@ const getSupportedTokens = async ({
       ],
     }));
 
-  return returnValue;
+  return [...knownTokens, ...supportedTokens];
 };
 
 export default getSupportedTokens;

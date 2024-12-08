@@ -1,9 +1,9 @@
 import { ScrollView, RefreshControl, View } from 'react-native';
 import colors from '@/lib/styles/colors';
-import useUserAddress from '@/hooks/useUserAddress';
+import useUserAccount from '@/hooks/useUserAccount';
 import { trpc } from '@/lib/trpc';
 import { TokenBalanceCard } from '@/components/TokenBalnaceCard';
-import { hexToBigInt } from 'viem';
+import { hexToBigInt, zeroAddress } from 'viem';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -28,14 +28,14 @@ const HomeScreen = () => {
   /// Queries
   ///
 
-  const { data: userAddress, isLoading: isLoadingAddress } = useUserAddress();
+  const { data: userAccount, isLoading: isLoadingAddress } = useUserAccount();
 
   const { data: tokenBalances, refetch } = trpc.getTokenBalances.useQuery(
     {
-      address: userAddress!,
+      address: userAccount?.address ?? zeroAddress,
     },
     {
-      enabled: !!userAddress,
+      enabled: !!userAccount,
     }
   );
 
@@ -47,24 +47,24 @@ const HomeScreen = () => {
   ///
 
   useEffect(() => {
-    if (userAddress === null && !isLoadingAddress) {
+    if (userAccount === null && !isLoadingAddress) {
       navigation.reset({
         index: 0,
         routes: [{ name: 'Start' }],
       });
     } else {
       // eslint-disable-next-line no-console
-      console.log('userAddress', userAddress);
+      console.log('userAccount', userAccount);
     }
-  }, [userAddress, isLoadingAddress]);
+  }, [userAccount, isLoadingAddress]);
 
   ///
   /// Handlers
   ///
 
   const onDepositPress = () => {
-    if (userAddress) {
-      copyToClipboard(userAddress);
+    if (userAccount) {
+      copyToClipboard(userAccount.address);
       Toast.show({
         type: 'success',
         text1: 'Address copied to clipboard',

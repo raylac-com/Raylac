@@ -4,12 +4,13 @@ import {
   getSenderAddressV2,
   UserOperation,
 } from '@raylac/shared';
-import { getSignerAccount } from '@/lib/key';
-import { HDAccount } from 'viem';
+import { getMnemonicAndPrivKey } from '@/lib/key';
+import { Account } from 'viem';
+import { privateKeyToAccount } from 'viem/accounts';
 
-const signUserOps = async (userOps: UserOperation[], hdAccount: HDAccount) => {
+const signUserOps = async (userOps: UserOperation[], account: Account) => {
   const sender = getSenderAddressV2({
-    singerAddress: hdAccount.address,
+    singerAddress: account.address,
   });
 
   const signedUserOps = await Promise.all(
@@ -22,7 +23,7 @@ const signUserOps = async (userOps: UserOperation[], hdAccount: HDAccount) => {
         throw new Error(`Sender mismatch: ${userOp.sender} !== ${sender}`);
       }
 
-      const sig = await hdAccount.signMessage({
+      const sig = await account.signMessage!({
         message: {
           raw: userOpHash,
         },
@@ -41,8 +42,14 @@ const signUserOps = async (userOps: UserOperation[], hdAccount: HDAccount) => {
 const useSignUserOps = () => {
   return useMutation({
     mutationFn: async (userOps: UserOperation[]) => {
-      const hdAccount = await getSignerAccount();
-      const signedUserOps = await signUserOps(userOps, hdAccount);
+      const mnemonicAndPrivKey = await getMnemonicAndPrivKey();
+
+      if (!mnemonicAndPrivKey) {
+        throw new Error('Mnemonic and private key not found');
+      }
+
+      const account = privateKeyToAccount(mnemonicAndPrivKey.privKey);
+      const signedUserOps = await signUserOps(userOps, account);
       return signedUserOps;
     },
   });

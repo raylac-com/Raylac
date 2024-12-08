@@ -27,9 +27,9 @@ const getMultiChainERC20Balances = async ({
 }: {
   address: Hex;
 }): Promise<MultiChainTokenBalance[]> => {
-  const supportedTokens = await getSupportedTokens(
-    supportedChains.map(chain => chain.id)
-  );
+  const supportedTokens = await getSupportedTokens({
+    chainIds: supportedChains.map(chain => chain.id),
+  });
 
   const multiChainTokenBalances: MultiChainTokenBalance[] = await Promise.all(
     supportedTokens.map(async token => {

@@ -91,7 +91,7 @@ export const getAlchemySubdomain = (chainId: number) => {
       alchemySubdomain = 'zora-mainnet';
       break;
     default:
-      throw new Error(`Unknown chain id: ${chainId}`);
+      throw new Error(`getAlchemySubdomain: Unknown chain id: ${chainId}`);
   }
 
   return alchemySubdomain;
@@ -194,6 +194,6 @@ export const toAlchemyNetwork = (chainId: number): Network => {
     case chains.optimism.id:
       return Network.OPT_MAINNET;
     default:
-      throw new Error(`Unknown chain id: ${chainId}`);
+      throw new Error(`toAlchemyNetwork: Unknown chain id: ${chainId}`);
   }
 };

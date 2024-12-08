@@ -1,22 +1,23 @@
-import useUserAddress from '@/hooks/useUserAddress';
+import useUserAccount from '@/hooks/useUserAccount';
 import { trpc } from '@/lib/trpc';
-import { View, FlatList } from 'react-native';
+import { FlatList, View } from 'react-native';
 import SwapHistoryListItem from '@/components/SwapHistoryListItem/SwapHistoryListItem';
+import { zeroAddress } from 'viem';
 
 const History = () => {
-  const { data: address } = useUserAddress();
+  const { data: userAccount } = useUserAccount();
 
   const { data: swapHistory = [] } = trpc.getSwapHistory.useQuery(
     {
-      address: address!,
+      address: userAccount?.address ?? zeroAddress,
     },
     {
-      enabled: !!address,
+      enabled: !!userAccount,
     }
   );
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <FlatList
         contentContainerStyle={{
           paddingVertical: 32,

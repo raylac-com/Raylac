@@ -107,10 +107,10 @@ export const buildUserOp = ({
     nonce: toHex(nonce),
     initCode: nonce === 0 ? initCode : '0x',
     callData,
-    preVerificationGas: toHex(1_500_000),
-    callGasLimit: toHex(1_500_000),
+    preVerificationGas: toHex(3_000_000),
+    callGasLimit: toHex(3_000_000),
     // Use a higher gas limit for the verification step if the sender needs to be deployed
-    verificationGasLimit: toHex(1_500_000),
+    verificationGasLimit: toHex(2_100_000),
     maxFeePerGas: toHex(maxFeePerGas),
     maxPriorityFeePerGas: toHex(maxPriorityFeePerGasBuffed),
     paymasterAndData: '0x',

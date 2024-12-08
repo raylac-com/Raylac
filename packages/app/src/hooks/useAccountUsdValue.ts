@@ -1,21 +1,22 @@
 import { trpc } from '@/lib/trpc';
-import useUserAddress from './useUserAddress';
+import useUserAccount from './useUserAccount';
 import { useQuery } from '@tanstack/react-query';
+import { zeroAddress } from 'viem';
 
 const useAccountUsdValue = () => {
-  const { data: userAddress } = useUserAddress();
+  const { data: userAccount } = useUserAccount();
 
   const { data: tokenBalances } = trpc.getTokenBalances.useQuery(
     {
-      address: userAddress!,
+      address: userAccount?.address ?? zeroAddress,
     },
     {
-      enabled: !!userAddress,
+      enabled: !!userAccount,
     }
   );
 
   const query = useQuery({
-    queryKey: ['account-usd-value', userAddress, tokenBalances],
+    queryKey: ['account-usd-value', userAccount, tokenBalances],
     queryFn: () => {
       const accountUsdValue = tokenBalances?.reduce((acc, tokenBalance) => {
         return acc + (tokenBalance.usdValue ?? 0);

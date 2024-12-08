@@ -90,8 +90,13 @@ export const deleteMnemonicAndPrivKey = async () => {
 };
 
 export const getUserAddress = async () => {
-  const address = await AsyncStorage.getItem(USER_ADDRESS_STORAGE_KEY);
-  return address as Hex | null;
+  const singerAddress = await AsyncStorage.getItem(USER_ADDRESS_STORAGE_KEY);
+
+  if (!singerAddress) {
+    return null;
+  }
+
+  return singerAddress as Hex;
 };
 
 export const setUserAddress = async (address: Hex) => {

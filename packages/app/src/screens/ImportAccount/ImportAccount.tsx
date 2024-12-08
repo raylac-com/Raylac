@@ -50,21 +50,20 @@ const ImportAccount = () => {
       style={{
         flex: 1,
         flexDirection: 'column',
+        justifyContent: 'space-between',
         rowGap: 16,
         padding: 16,
       }}
     >
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        <MultiLineInput
-          editable
-          autoFocus
-          autoCapitalize="none"
-          multiline
-          placeholder={'Enter your mnemonic'}
-          value={mnemonic}
-          onChangeText={setMnemonic}
-        ></MultiLineInput>
-      </View>
+      <MultiLineInput
+        editable
+        autoFocus
+        autoCapitalize="none"
+        multiline
+        placeholder={'Enter your mnemonic'}
+        value={mnemonic}
+        onChangeText={setMnemonic}
+      ></MultiLineInput>
       <StyledButton
         isLoading={isSigningIn}
         title={'Import account'}

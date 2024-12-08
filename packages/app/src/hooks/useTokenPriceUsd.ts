@@ -20,7 +20,7 @@ const useTokenPriceUsd = (token: SupportedTokensReturnType[number] | null) => {
     queryKey: ['token-price', token],
     queryFn: () => {
       if (tokenPrice === undefined) {
-        return null;
+        throw new Error('tokenPrice is undefined');
       }
 
       const tokenPriceUSD = tokenPrice.prices.find(
@@ -33,7 +33,7 @@ const useTokenPriceUsd = (token: SupportedTokensReturnType[number] | null) => {
 
       return tokenPriceUSD.value;
     },
-    enabled: !!token,
+    enabled: !!token && tokenPrice !== undefined,
   });
 };
 
