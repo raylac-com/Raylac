@@ -10,6 +10,16 @@ const getSwapHistory = async ({ address }: { address: Hex }) => {
       amountIn: true,
       tokenAddressIn: true,
       tokenAddressOut: true,
+      relayerServiceFeeAmount: true,
+      relayerServiceFeeUsd: true,
+      relayerServiceFeeTokenAddress: true,
+      relayerServiceFeeChainId: true,
+      transactions: {
+        select: {
+          hash: true,
+          chainId: true,
+        },
+      },
     },
     where: {
       address,

@@ -1,17 +1,25 @@
-import { supportedChains, Token } from '@raylac/shared';
-import { getAddress, Hex, zeroAddress } from 'viem';
+import { supportedChains, SupportedTokensReturnType } from '@raylac/shared';
+import { getAddress, zeroAddress } from 'viem';
 import { base, optimism } from 'viem/chains';
 
-export const KNOWN_TOKENS = {
-  [Token.ETH]: {
+export const KNOWN_TOKENS: SupportedTokensReturnType = [
+  {
+    symbol: 'ETH',
+    name: 'Ethereum',
     decimals: 18,
+    logoURI:
+      'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/eth.png',
     addresses: supportedChains.map(chain => ({
       chainId: chain.id,
       address: zeroAddress,
     })),
   },
-  [Token.USDC]: {
+  {
+    symbol: 'USDC',
+    name: 'USD Coin',
     decimals: 6,
+    logoURI:
+      'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389',
     addresses: [
       {
         chainId: base.id,
@@ -23,32 +31,4 @@ export const KNOWN_TOKENS = {
       },
     ],
   },
-  [Token.RETH]: {
-    decimals: 18,
-    addresses: [
-      {
-        chainId: base.id,
-        address: getAddress('0xB6fe221Fe9EeF5aBa221c348bA20A1Bf5e73624c'),
-      },
-      {
-        chainId: optimism.id,
-        address: getAddress('0x9Bcef72be871e61ED4fBbc7630889beE758eb81D'),
-      },
-    ],
-  },
-};
-
-export const isKnownToken = ({
-  tokenAddress,
-  chainId,
-}: {
-  tokenAddress: Hex;
-  chainId: number;
-}) => {
-  return Object.values(KNOWN_TOKENS).some(({ addresses }) =>
-    addresses.some(
-      knownToken =>
-        knownToken.address === tokenAddress && knownToken.chainId === chainId
-    )
-  );
-};
+];

@@ -1,22 +1,107 @@
-import { formatUnits, Hex, toHex } from 'viem';
+import { formatUnits, Hex, hexToBigInt, toHex, zeroAddress } from 'viem';
 import { getPublicClient } from '../../utils';
 import {
   supportedChains,
   MultiChainTokenBalance,
   getERC20TokenBalance,
+  RelaySupportedCurrenciesResponseBody,
 } from '@raylac/shared';
 import {
+  getAlchemyClient,
   getTokenPriceByAddress,
   getTokenPriceBySymbol,
 } from '../../lib/alchemy';
-import getSupportedTokens from '../getSupportedTokens/getSupportedTokens';
-import { base } from 'viem/chains';
+import { KNOWN_TOKENS } from '../../lib/knownTokes';
+import { relayApi } from '../../lib/relay';
 
-const getETHBalance = async ({ address }: { address: Hex }) => {
-  const client = getPublicClient({ chainId: base.id });
+const getETHBalance = async ({
+  address,
+  chainId,
+}: {
+  address: Hex;
+  chainId: number;
+}) => {
+  const client = getPublicClient({ chainId });
   const balance = await client.getBalance({ address });
 
   return balance;
+};
+
+const getKnownTokenBalances = async ({
+  address,
+}: {
+  address: Hex;
+}): Promise<MultiChainTokenBalance[]> => {
+  const balances = await Promise.all(
+    KNOWN_TOKENS.map(async token => {
+      const multiChainBalances = await Promise.all(
+        // Get balances on each chain
+        token.addresses.map(async ({ chainId, address: contractAddress }) => {
+          const balance =
+            contractAddress === zeroAddress
+              ? await getETHBalance({ address, chainId })
+              : await getERC20TokenBalance({
+                  address,
+                  contractAddress,
+                  chainId,
+                });
+
+          return {
+            chainId,
+            tokenAddress: contractAddress,
+            balance,
+          };
+        })
+      );
+
+      const totalBalance = multiChainBalances.reduce(
+        (acc, curr) => acc + curr.balance,
+        BigInt(0)
+      );
+
+      if (totalBalance === BigInt(0)) {
+        return null;
+      }
+
+      const tokenPrice =
+        token.symbol === 'ETH'
+          ? await getTokenPriceBySymbol('ETH')
+          : await getTokenPriceByAddress({
+              chainId: token.addresses[0].chainId,
+              address: token.addresses[0].address,
+            });
+
+      const usdPrice = tokenPrice.prices.find(
+        price => price.currency === 'usd'
+      )?.value;
+
+      if (!usdPrice) {
+        throw new Error(`USD price not found for known token ${token.symbol}`);
+      }
+
+      const usdValue =
+        Number(usdPrice) * Number(formatUnits(totalBalance, token.decimals));
+
+      return {
+        name: token.name,
+        symbol: token.symbol,
+        logoUrl: token.logoURI,
+        decimals: token.decimals,
+        balance: toHex(totalBalance),
+        usdValue,
+        tokenPrice: Number(usdPrice),
+        breakdown: multiChainBalances
+          .sort((a, b) => (b.balance > a.balance ? 1 : -1))
+          .map(({ chainId, tokenAddress, balance }) => ({
+            chainId,
+            tokenAddress,
+            balance: toHex(balance),
+          })),
+      };
+    })
+  );
+
+  return balances.filter(balance => balance !== null);
 };
 
 /**
@@ -27,266 +112,128 @@ const getMultiChainERC20Balances = async ({
 }: {
   address: Hex;
 }): Promise<MultiChainTokenBalance[]> => {
-  const supportedTokens = await getSupportedTokens({
-    chainIds: supportedChains.map(chain => chain.id),
-  });
-
-  const multiChainTokenBalances: MultiChainTokenBalance[] = await Promise.all(
-    supportedTokens.map(async token => {
-      const tokenBalance =
-        token.symbol === 'ETH'
-          ? await getETHBalance({ address })
-          : await getERC20TokenBalance({
-              address,
-              contractAddress: token.addresses[0].address,
-              chainId: token.addresses[0].chainId,
-            });
-
-      const tokenPrice =
-        token.symbol === 'ETH'
-          ? await getTokenPriceBySymbol('ETH')
-          : await getTokenPriceByAddress({
-              chainId: base.id,
-              address: token.addresses[0].address,
-            });
-
-      const usdPrice = tokenPrice.prices.find(
-        price => price.currency === 'usd'
-      )?.value;
-
-      const usdValue =
-        tokenBalance && usdPrice
-          ? Number(usdPrice) * Number(formatUnits(tokenBalance, token.decimals))
-          : 0;
-
-      const balance = tokenBalance;
-
-      const multiChainTokenBalance: MultiChainTokenBalance = {
-        name: token.name,
-        symbol: token.symbol,
-        logoUrl: token.logoURI,
-        decimals: token.decimals,
-        balance: toHex(balance),
-        usdValue,
-        tokenPrice: Number(usdPrice),
-        breakdown: [
-          {
-            chainId: base.id,
-            balance: toHex(balance),
-            tokenAddress: token.addresses[0].address,
-          },
-        ],
-      };
-
-      return multiChainTokenBalance;
-    })
-  );
-
-  return multiChainTokenBalances
-    .filter(tokenBalance => tokenBalance.balance !== '0x0')
-    .sort((a, b) => b.usdValue - a.usdValue);
-
-  /*
-  // Get token balances for each chain concurrently
-  const alchemyTokenBalances = (
-    await Promise.all(
-      supportedChains.map(async chain =>
-        getERC20TokenBalancesForChain({
-          address: _address,
-          chainId: chain.id,
-        })
-      )
-    )
+  // Get addresses of all known tokens
+  // We use this to filter out known tokens from the Alchemy response
+  const knownTokenAddresses = KNOWN_TOKENS.map(token =>
+    token.addresses.map(({ address }) => address)
   ).flat();
 
-  // Group known tokens into a single `MultiChainTokenBalance` object
-  const multiChainTokenBalances: MultiChainTokenBalance[] = [];
-
-  // Add balances for each known token
-  for (const [token, { addresses, decimals }] of Object.entries(KNOWN_TOKENS)) {
-    // Find all balances for this known token
-    const knownTokenBalances = alchemyTokenBalances.filter(tokenBalance =>
-      addresses.some(
-        knownToken =>
-          getAddress(tokenBalance.contractAddress) === knownToken.address &&
-          tokenBalance.chainId === knownToken.chainId
-      )
-    );
-
-    if (knownTokenBalances.length > 0) {
-      // Sum the balances
-      const balance = knownTokenBalances.reduce((acc, balance) => {
-        return acc + BigInt(balance.tokenBalance ?? '0');
-      }, 0n);
-
-      multiChainTokenBalances.push({
-        name: token,
-        symbol: token,
-        // Temporaory
-        logoUrl:
-          'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389',
-        decimals,
-        balance: toHex(balance),
-        usdValue: Number(formatUnits(balance, decimals)), // USDC
-        tokenPrice: 1,
-        breakdown: knownTokenBalances.map(balance => ({
-          chainId: balance.chainId,
-          balance: toHex(balance.tokenBalance ?? '0'),
-          tokenAddress: getAddress(balance.contractAddress),
-        })),
-      });
-    }
-  }
-
-  // Add balances for the remaining tokens
-  const promises = alchemyTokenBalances.map(async alchemyTokenBalance => {
-    if (
-      isKnownToken({
-        tokenAddress: getAddress(alchemyTokenBalance.contractAddress),
-        chainId: alchemyTokenBalance.chainId,
-      })
-    ) {
-      return;
-    }
-
-    // Get the token metadata
-    const alchemy = getAlchemyClient(alchemyTokenBalance.chainId);
-    const tokenMetadata = await alchemy.core.getTokenMetadata(
-      getAddress(alchemyTokenBalance.contractAddress)
-    );
-
-    if (!tokenMetadata.name || tokenMetadata.decimals === null) {
-      return;
-    }
-
-    multiChainTokenBalances.push({
-      name: tokenMetadata.name ?? '',
-      symbol: tokenMetadata.symbol ?? '',
-      logoUrl: tokenMetadata.logo ?? '',
-      decimals: tokenMetadata.decimals,
-      balance: toHex(alchemyTokenBalance.tokenBalance ?? '0'),
-      usdValue: 0,
-      tokenPrice: 1, // Temporary
-      breakdown: [
-        {
-          chainId: alchemyTokenBalance.chainId,
-          balance: toHex(alchemyTokenBalance.tokenBalance ?? '0'),
-          tokenAddress: alchemyTokenBalance.contractAddress as Hex,
-        },
-      ],
-    });
-  });
-
-  await Promise.all(promises);
-
-  // Get the token prices
-  const tokenPrices: AlchemyTokenPriceResponse[] = [];
-
-  const batchSize = 25;
-
-  for (let i = 0; i < multiChainTokenBalances.length; i += batchSize) {
-    const tokenBalances = multiChainTokenBalances.slice(i, i + batchSize);
-
-    const result = await getTokenPrices({
-      tokenAddresses: tokenBalances.map(tokenBalance => ({
-        address: tokenBalance.breakdown[0].tokenAddress,
-        chainId: tokenBalance.breakdown[0].chainId,
-      })),
-    });
-
-    tokenPrices.push(...result);
-  }
-
-  //Assign usd value to each token balance
-  const withUsdValue: MultiChainTokenBalance[] = [];
-
-  for (const tokenBalance of multiChainTokenBalances) {
-    const tokenPrice = tokenPrices.find(
-      price =>
-        (price.network as Network) ===
-          toAlchemyNetwork(tokenBalance.breakdown[0].chainId) &&
-        price.address === tokenBalance.breakdown[0].tokenAddress
-    );
-
-    const usdPrice = tokenPrice?.prices.find(
-      price => price.currency === 'usd'
-    )?.value;
-
-    if (usdPrice) {
-      const usdValue =
-        Number(
-          formatUnits(
-            hexToBigInt(tokenBalance.balance as Hex),
-            tokenBalance.decimals
-          )
-        ) * Number(usdPrice);
-
-      withUsdValue.push({
-        ...tokenBalance,
-        usdValue,
-      });
-    }
-  }
-    */
-};
-
-/**
- * Get the balance of ETH across all chains for a given address
- */
-/*
-const getMultiChainETHBalance = async ({
-  address,
-}: {
-  address: Hex;
-}): Promise<MultiChainTokenBalance> => {
-  const balances = await Promise.all(
+  const multiChainTokenBalances = await Promise.all(
     supportedChains.map(async chain => {
-      const client = getPublicClient({ chainId: chain.id });
-      const balance = await client.getBalance({ address });
+      const alchemyClient = getAlchemyClient(chain.id);
 
-      return { balance, chainId: chain.id };
+      // Get token balances on chain
+      const tokenBalances = await alchemyClient.core.getTokenBalances(address);
+
+      // Get token metadata for each balance
+      const withMetadata = await Promise.all(
+        tokenBalances.tokenBalances
+          // Filter out known tokens
+          .filter(
+            tokenBalance =>
+              !knownTokenAddresses.includes(tokenBalance.contractAddress as Hex)
+          )
+          // Filter out balances that are 0
+          .filter(
+            tokenBalance =>
+              tokenBalance !== null &&
+              hexToBigInt(tokenBalance.tokenBalance as Hex) !== BigInt(0)
+          )
+          // Get token metadata for each token
+          .map(async tokenBalance => {
+            const result =
+              await relayApi.post<RelaySupportedCurrenciesResponseBody>(
+                'currencies/v1',
+                {
+                  chainIds: [chain.id],
+                  address: tokenBalance.contractAddress,
+                }
+              );
+
+            const tokenMetadata =
+              result.data.length > 0 ? result.data[0][0] : null;
+
+            if (!tokenMetadata) {
+              return null;
+            }
+
+            return {
+              chainId: chain.id,
+              tokenBalance,
+              tokenMetadata,
+            };
+          })
+      );
+
+      const withUsdValue = await Promise.all(
+        withMetadata
+          .filter(token => token !== null)
+          .map(async ({ tokenBalance, tokenMetadata }) => {
+            // Get token price for the token
+            const tokenPrice = await getTokenPriceByAddress({
+              chainId: chain.id,
+              address: tokenBalance.contractAddress as Hex,
+            });
+
+            const usdPrice = tokenPrice.prices.find(
+              price => price.currency === 'usd'
+            )?.value;
+
+            if (!usdPrice) {
+              return null;
+            }
+
+            // Calculate the USD value of the token
+            const usdValue =
+              Number(usdPrice) *
+              Number(
+                formatUnits(
+                  hexToBigInt(tokenBalance.tokenBalance as Hex),
+                  tokenMetadata.decimals!
+                )
+              );
+
+            return {
+              tokenBalance,
+              tokenMetadata,
+              usdValue,
+            };
+          })
+      );
+
+      const multiChainTokenBalances: MultiChainTokenBalance[] = withUsdValue
+        .filter(token => token !== null)
+        .map(({ tokenBalance, tokenMetadata, usdValue }) => {
+          return {
+            name: tokenMetadata.name,
+            symbol: tokenMetadata.symbol,
+            logoUrl: tokenMetadata.metadata.logoURI,
+            decimals: tokenMetadata.decimals,
+            balance: tokenBalance.tokenBalance as Hex,
+            usdValue,
+            tokenPrice: usdValue,
+            breakdown: [
+              {
+                chainId: chain.id,
+                balance: tokenBalance.tokenBalance as Hex,
+                tokenAddress: tokenBalance.contractAddress as Hex,
+              },
+            ],
+          };
+        });
+
+      return multiChainTokenBalances;
     })
   );
 
-  const multiChainETHBalance = balances.reduce((acc, balance) => {
-    return acc + balance.balance;
-  }, 0n);
-
-  const tokenPrice = await getTokenPriceBySymbol('ETH');
-
-  const usdPrice = tokenPrice.prices.find(
-    price => price.currency === 'usd'
-  )?.value;
-
-  if (!usdPrice) {
-    throw new Error('Failed to get ETH price');
-  }
-
-  const usdValue = Number(usdPrice) * Number(formatEther(multiChainETHBalance));
-
-  return {
-    name: 'Ethereum',
-    symbol: 'ETH',
-    logoUrl:
-      'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/eth.png',
-    decimals: 18,
-    balance: toHex(multiChainETHBalance),
-    usdValue,
-    tokenPrice: Number(usdPrice),
-    breakdown: balances.map(balance => ({
-      chainId: balance.chainId,
-      balance: toHex(balance.balance),
-      tokenAddress: '0x0000000000000000000000000000000000000000',
-    })),
-  };
+  return multiChainTokenBalances.flat();
 };
-*/
 
 const getTokenBalances = async ({ address }: { address: Hex }) => {
-  //  const ethBalance = await getMultiChainETHBalance({ address });
+  const knownTokenBalances = await getKnownTokenBalances({ address });
   const tokenBalances = await getMultiChainERC20Balances({ address });
 
-  return [...tokenBalances];
+  return [...knownTokenBalances, ...tokenBalances];
 };
 
 export default getTokenBalances;

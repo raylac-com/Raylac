@@ -17,7 +17,7 @@ model Swap {
   tokenAddressIn  String
   tokenAddressOut String
 
-  txHash String
+  transactions Transaction[]
 
   amountIn  String
   amountOut String
@@ -25,6 +25,70 @@ model Swap {
   usdAmountIn  String
   usdAmountOut String
 
+  relayerServiceFeeAmount       String
+  relayerServiceFeeUsd          String
+  relayerServiceFeeTokenAddress String
+  relayerServiceFeeChainId      Int
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Send {
+  id String @id @default(cuid())
+
+  transactions Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Receive {
+  id String @id @default(cuid())
+
+  transactions Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Transaction {
+  hash String @id
+
+  from String
+  to   String
+
+  chainId Int
+
+  userOps UserOperation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Swap   Swap?   @relation(fields: [swapId], references: [id])
+  swapId String?
+
+  Send   Send?   @relation(fields: [sendId], references: [id])
+  sendId String?
+
+  Receive   Receive? @relation(fields: [receiveId], references: [id])
+  receiveId String?
+}
+
+model UserOperation {
+  hash String @id
+
+  sender        String
+  paymaster     String
+  nonce         Int
+  success       Boolean
+  actualGasCost BigInt
+  actualGasUsed BigInt
+  chainId       Int
+
+  Transaction     Transaction? @relation(fields: [transactionHash], references: [hash])
+  transactionHash String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }

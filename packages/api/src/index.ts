@@ -25,6 +25,8 @@ import getTokenPrice from './api/getTokenPrice/getTokenPrice';
 import { getTokenPriceMock } from './api/getTokenPrice/getTokenPrice.mock';
 import getSwapHistory from './api/getSwapHistory/getSwapHistory';
 import getSwapHistoryMock from './api/getSwapHistory/getSwapHistory.mock';
+import getToken from './api/getToken/getToken';
+import getTokenMock from './api/getToken/getToken.mock';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -56,6 +58,20 @@ export const appRouter = router({
         : getTokenBalances({ address: input.address as Hex });
     }),
 
+  getToken: publicProcedure
+    .input(z.object({ tokenAddress: z.string(), chainId: z.number() }))
+    .query(async ({ input }) => {
+      return MOCK_RESPONSE
+        ? getTokenMock({
+            tokenAddress: input.tokenAddress as Hex,
+            chainId: input.chainId,
+          })
+        : getToken({
+            tokenAddress: input.tokenAddress as Hex,
+            chainId: input.chainId,
+          });
+    }),
+
   buildSwapUserOp: publicProcedure
     .input(
       z.object({
@@ -70,7 +86,12 @@ export const appRouter = router({
     }),
 
   submitUserOps: publicProcedure
-    .input(z.object({ userOps: z.array(z.any()), swapQuote: z.any() }))
+    .input(
+      z.object({
+        userOps: z.array(z.any()),
+        swapQuote: z.any(),
+      })
+    )
     .mutation(async ({ input }) => {
       return MOCK_RESPONSE
         ? submitUserOpsMock(input as SubmitUserOpsRequestBody)

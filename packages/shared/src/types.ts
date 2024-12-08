@@ -78,7 +78,13 @@ export interface RelayExecutionStep {
 }
 
 export interface RelayGasFee {
-  currency: object;
+  currency: {
+    chainId: number;
+    address: Hex;
+    symbol: string;
+    name: string;
+    decimals: number;
+  };
   amount: string;
   amountFormatted: string;
   amountUsd: string;

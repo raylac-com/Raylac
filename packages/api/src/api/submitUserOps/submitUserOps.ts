@@ -48,11 +48,17 @@ const submitUserOps = async ({
   const amountIn = swapQuote.details.currencyIn.amount;
   const amountOut = swapQuote.details.currencyOut.amount;
 
+  const relayerServiceFeeAmount = swapQuote.fees.relayerService.amount;
+  const relayerServiceFeeUsd = swapQuote.fees.relayerService.amountUsd;
+  const relayerServiceFeeTokenAddress =
+    swapQuote.fees.relayerService.currency.address;
+  const relayerServiceFeeChainId =
+    swapQuote.fees.relayerService.currency.chainId;
+
   const address = userOps[0].sender;
 
   await prisma.swap.create({
     data: {
-      txHash: txReceipts[0].transactionHash,
       address,
       tokenAddressIn,
       tokenAddressOut,
@@ -60,6 +66,28 @@ const submitUserOps = async ({
       amountOut,
       usdAmountIn: swapQuote.details.currencyIn.amountUsd,
       usdAmountOut: swapQuote.details.currencyOut.amountUsd,
+      relayerServiceFeeAmount,
+      relayerServiceFeeUsd,
+      relayerServiceFeeTokenAddress,
+      relayerServiceFeeChainId,
+      transactions: {
+        createMany: {
+          data: txReceipts.map(txReceipt => {
+            if (txReceipt.to === null) {
+              throw new Error(
+                'Transaction should not be deployment transaction (to is null)'
+              );
+            }
+
+            return {
+              hash: txReceipt.transactionHash,
+              from: txReceipt.from,
+              to: txReceipt.to,
+              chainId: txReceipt.chainId,
+            };
+          }),
+        },
+      },
     },
   });
 

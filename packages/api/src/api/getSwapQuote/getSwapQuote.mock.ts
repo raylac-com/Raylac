@@ -3,7 +3,7 @@ import {
   GetSwapQuoteReturnType,
   RelayGasFee,
 } from '@raylac/shared';
-import { formatUnits, hexToBigInt } from 'viem';
+import { formatUnits, hexToBigInt, zeroAddress } from 'viem';
 import { faker } from '@faker-js/faker';
 
 const mockRelayGasFee: RelayGasFee = {
@@ -11,7 +11,11 @@ const mockRelayGasFee: RelayGasFee = {
   amountFormatted: '0.01',
   amountUsd: '1234',
   currency: {
-    symbol: 'USD',
+    chainId: 8453,
+    address: zeroAddress,
+    symbol: 'ETH',
+    name: 'Ethereum',
+    decimals: 18,
   },
 };
 

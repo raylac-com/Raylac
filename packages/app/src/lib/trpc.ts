@@ -13,7 +13,7 @@ const EXPO_PUBLIC_RPC_URL = process.env.EXPO_PUBLIC_RPC_URL;
 export const getRpcLinks = () => {
   return [
     httpBatchLink({
-      url: EXPO_PUBLIC_RPC_URL,
+      url: EXPO_PUBLIC_RPC_URL as string,
       async headers() {
         if (!EXPO_PUBLIC_RPC_URL) {
           throw new Error('Missing EXPO_PUBLIC_RPC_URL');
