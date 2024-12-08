@@ -2,7 +2,10 @@ import { SupportedTokensReturnType } from '@raylac/shared';
 import { zeroAddress } from 'viem';
 import { base } from 'viem/chains';
 
-const getSupportedTokens = (_chainIds: number[]): SupportedTokensReturnType => {
+const getSupportedTokens = (_args: {
+  chainIds: number[];
+  searchTerm?: string;
+}): SupportedTokensReturnType => {
   return [
     {
       symbol: 'ETH',

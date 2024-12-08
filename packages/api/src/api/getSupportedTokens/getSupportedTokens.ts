@@ -1,19 +1,19 @@
 import {
   RelaySupportedCurrenciesResponseBody,
-  //  RelaySupportedCurrenciesResponseBody,
   supportedChains,
   SupportedTokensReturnType,
 } from '@raylac/shared';
 import { relayApi } from '../../lib/relay';
-import NodeCache from 'node-cache';
 import { getAddress, zeroAddress } from 'viem';
 import { base } from 'viem/chains';
 
-const cache = new NodeCache({ stdTTL: 0 });
-
-const getSupportedTokens = async (
-  chainIds: number[]
-): Promise<SupportedTokensReturnType> => {
+const getSupportedTokens = async ({
+  chainIds,
+  searchTerm,
+}: {
+  chainIds: number[];
+  searchTerm?: string;
+}): Promise<SupportedTokensReturnType> => {
   const knownTokens: SupportedTokensReturnType = [
     {
       symbol: 'ETH',
@@ -46,22 +46,13 @@ const getSupportedTokens = async (
       ],
     },
   ];
-  /*
-
-  const cached = cache.get<SupportedTokensReturnType>(
-    `supportedTokens-${chainIds.join('-')}`
-  );
-
-  if (cached) {
-    return cached;
-  }
-    */
 
   const currencies = await relayApi.post<RelaySupportedCurrenciesResponseBody>(
     'currencies/v1',
     {
       chainIds,
-      verified: true,
+      limit: 100,
+      term: searchTerm,
     }
   );
 
@@ -71,14 +62,11 @@ const getSupportedTokens = async (
 
   const knownTokenSymbols = knownTokens.map(token => token.symbol);
 
-  const returnValue: SupportedTokensReturnType = knownTokens;
-
-  for (const token of supportedTokens) {
-    if (knownTokenSymbols.includes(token.symbol)) {
-      continue;
-    }
-
-    returnValue.push({
+  const returnValue: SupportedTokensReturnType = supportedTokens
+    // Filter out known tokens
+    .filter(token => !knownTokenSymbols.includes(token.symbol))
+    // Map to `SupportedTokensReturnType`
+    .map(token => ({
       symbol: token.symbol,
       name: token.name,
       decimals: token.decimals,
@@ -89,10 +77,7 @@ const getSupportedTokens = async (
           address: getAddress(token.address),
         },
       ],
-    });
-  }
-
-  cache.set(`supportedTokens-${chainIds.join('-')}`, returnValue);
+    }));
 
   return returnValue;
 };

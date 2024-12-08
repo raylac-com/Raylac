@@ -95,12 +95,19 @@ export const appRouter = router({
     .input(
       z.object({
         chainIds: z.array(z.number()),
+        searchTerm: z.string().optional(),
       })
     )
     .query(async ({ input }) => {
       return MOCK_RESPONSE
-        ? getSupportedTokensMock(input.chainIds)
-        : getSupportedTokens(input.chainIds);
+        ? getSupportedTokensMock({
+            chainIds: input.chainIds,
+            searchTerm: input.searchTerm,
+          })
+        : getSupportedTokens({
+            chainIds: input.chainIds,
+            searchTerm: input.searchTerm,
+          });
     }),
 
   getTokenPrice: publicProcedure

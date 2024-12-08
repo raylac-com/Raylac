@@ -66,11 +66,8 @@ const SearchTokenSheet = () => {
 
   const { data: supportedTokens } = trpc.getSupportedTokens.useQuery({
     chainIds: supportedChains.map(chain => chain.id),
+    searchTerm: searchText,
   });
-
-  if (!supportedTokens) {
-    return null;
-  }
 
   return (
     <ActionSheet
@@ -83,9 +80,11 @@ const SearchTokenSheet = () => {
     >
       <SearchInput value={searchText} onChangeText={setSearchText} />
       <FlatList
-        data={supportedTokens.filter(token =>
-          token.name.toLowerCase().includes(searchText.toLowerCase())
-        )}
+        data={
+          supportedTokens?.filter(token =>
+            token.name.toLowerCase().includes(searchText.toLowerCase())
+          ) ?? []
+        }
         contentContainerStyle={{
           marginTop: 14,
           rowGap: 16,

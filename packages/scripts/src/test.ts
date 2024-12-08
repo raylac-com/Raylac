@@ -17,7 +17,11 @@ import {
 const test = async () => {
   const supportedTokens = await client.getSupportedTokens.query({
     chainIds: [base.id],
+    searchTerm: 'USDC',
   });
+
+  console.log(supportedTokens);
+  console.log(supportedTokens.length);
 
   const account = mnemonicToAccount(
     'rain profit typical section elephant expire curious defy basic despair toy scene'
@@ -36,11 +40,6 @@ const test = async () => {
   });
 
   console.log(sender);
-
-  const tokenBalances = await client.getTokenBalances.query({
-    address: sender,
-  });
-  console.log(tokenBalances);
 
   /*
   const inputToken = supportedTokens.find(token => token.symbol === 'USDC');
