@@ -1,4 +1,6 @@
+import Skeleton from '@/components/Skeleton/Skeleton';
 import StyledText from '@/components/StyledText/StyledText';
+import useDebounce from '@/hooks/useDebounce';
 import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import { supportedChains, SupportedTokensReturnType } from '@raylac/shared';
@@ -64,9 +66,12 @@ const SearchInput = ({
 const SearchTokenSheet = () => {
   const [searchText, setSearchText] = useState('');
 
+  const { debouncedValue: debouncedSearchText, isPending: isDebouncing } =
+    useDebounce(searchText, 500);
+
   const { data: supportedTokens } = trpc.getSupportedTokens.useQuery({
     chainIds: supportedChains.map(chain => chain.id),
-    searchTerm: searchText,
+    searchTerm: debouncedSearchText,
   });
 
   return (
@@ -81,25 +86,42 @@ const SearchTokenSheet = () => {
       <SearchInput value={searchText} onChangeText={setSearchText} />
       <FlatList
         data={
-          supportedTokens?.filter(token =>
-            token.name.toLowerCase().includes(searchText.toLowerCase())
-          ) ?? []
+          supportedTokens === undefined || isDebouncing
+            ? new Array(3).fill(undefined)
+            : supportedTokens.filter(token =>
+                token.name.toLowerCase().includes(searchText.toLowerCase())
+              )
         }
         contentContainerStyle={{
           marginTop: 14,
           rowGap: 16,
         }}
-        renderItem={({ item }) => (
-          <TokenListItem
-            token={item}
-            balance={BigInt(0)}
-            onPress={() =>
-              SheetManager.hide('search-token-sheet', {
-                payload: item,
-              })
-            }
-          />
-        )}
+        ListEmptyComponent={
+          <StyledText style={{ textAlign: 'center', color: colors.border }}>
+            {`No tokens found`}
+          </StyledText>
+        }
+        renderItem={({
+          item,
+        }: {
+          item: SupportedTokensReturnType[number] | undefined;
+        }) => {
+          if (item === undefined) {
+            return <Skeleton style={{ width: '100%', height: 42 }} />;
+          }
+
+          return (
+            <TokenListItem
+              token={item}
+              balance={BigInt(0)}
+              onPress={() =>
+                SheetManager.hide('search-token-sheet', {
+                  payload: item,
+                })
+              }
+            />
+          );
+        }}
       />
     </ActionSheet>
   );
