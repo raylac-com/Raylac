@@ -35,6 +35,7 @@ import ImportAccount from './screens/ImportAccount/ImportAccount';
 import Settings from './screens/Settings/Settings';
 import { Keyboard } from 'react-native';
 import { TouchableWithoutFeedback } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -128,48 +129,50 @@ const Screens = () => {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <SheetProvider>
-            <RootStack.Navigator initialRouteName="Tabs">
-              <RootStack.Screen
-                name="Tabs"
-                component={Tabs}
-                options={{
-                  headerShown: false,
-                }}
-              ></RootStack.Screen>
-              <RootStack.Screen
-                name="Start"
-                component={Start}
-                options={{
-                  headerShown: false,
-                }}
-              ></RootStack.Screen>
-              <RootStack.Screen
-                name="SaveBackupPhrase"
-                component={SaveBackupPhrase}
-                options={{
-                  headerBackVisible: false,
-                }}
-              ></RootStack.Screen>
-              <RootStack.Screen
-                name="ConfirmBackupPhrase"
-                component={ConfirmBackupPhrase}
-                options={{
-                  headerBackVisible: true,
-                }}
-              ></RootStack.Screen>
-              <RootStack.Screen
-                name="ImportAccount"
-                component={ImportAccount}
-                options={{
-                  headerBackVisible: true,
-                }}
-              ></RootStack.Screen>
-            </RootStack.Navigator>
-            <Toast></Toast>
-          </SheetProvider>
-        </TouchableWithoutFeedback>
+        <GestureHandlerRootView>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <SheetProvider>
+              <RootStack.Navigator initialRouteName="Tabs">
+                <RootStack.Screen
+                  name="Tabs"
+                  component={Tabs}
+                  options={{
+                    headerShown: false,
+                  }}
+                ></RootStack.Screen>
+                <RootStack.Screen
+                  name="Start"
+                  component={Start}
+                  options={{
+                    headerShown: false,
+                  }}
+                ></RootStack.Screen>
+                <RootStack.Screen
+                  name="SaveBackupPhrase"
+                  component={SaveBackupPhrase}
+                  options={{
+                    headerBackVisible: false,
+                  }}
+                ></RootStack.Screen>
+                <RootStack.Screen
+                  name="ConfirmBackupPhrase"
+                  component={ConfirmBackupPhrase}
+                  options={{
+                    headerBackVisible: true,
+                  }}
+                ></RootStack.Screen>
+                <RootStack.Screen
+                  name="ImportAccount"
+                  component={ImportAccount}
+                  options={{
+                    headerBackVisible: true,
+                  }}
+                ></RootStack.Screen>
+              </RootStack.Navigator>
+              <Toast></Toast>
+            </SheetProvider>
+          </TouchableWithoutFeedback>
+        </GestureHandlerRootView>
       </SafeAreaView>
     </SafeAreaProvider>
   );

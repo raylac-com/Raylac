@@ -1,21 +1,24 @@
 import StyledText from '@/components/StyledText/StyledText';
 import { View } from 'react-native';
-
-import ActionSheet, { SheetProps } from 'react-native-actions-sheet';
 import SwapIOCard from './components/SwapIOCard';
 import useTokenMeta from '@/hooks/useTokenMeta';
 import { Hex } from 'viem';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import colors from '@/lib/styles/colors';
 import TokenImageWithChain from '@/components/TokenImageWithChain/TokenImageWithChain';
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import { GetSwapHistoryReturnType } from '@/types';
+import { useRef } from 'react';
 
-export type SwapDetailsSheetProps = SheetProps<'swap-details-sheet'>;
+export interface SwapDetailsSheetProps {
+  swap: GetSwapHistoryReturnType[number];
+  onClose: () => void;
+}
 
-const SwapDetailsSheet = (props: SwapDetailsSheetProps) => {
-  const { payload: swap } = props;
-
-  const { data: tokenMetaIn } = useTokenMeta(swap!.tokenAddressIn as Hex);
-  const { data: tokenMetaOut } = useTokenMeta(swap!.tokenAddressOut as Hex);
+const SwapDetailsSheet = ({ swap, onClose }: SwapDetailsSheetProps) => {
+  const ref = useRef<BottomSheet>(null);
+  const { data: tokenMetaIn } = useTokenMeta(swap.tokenAddressIn as Hex);
+  const { data: tokenMetaOut } = useTokenMeta(swap.tokenAddressOut as Hex);
 
   if (!swap) {
     throw new Error('Swap details sheet requires a swap');
@@ -27,16 +30,20 @@ const SwapDetailsSheet = (props: SwapDetailsSheetProps) => {
   const outputChain = swap.transactions[0].chainId;
 
   return (
-    <ActionSheet
-      id="swap-details-sheet"
-      containerStyle={{
-        borderTopLeftRadius: 32,
-        borderTopRightRadius: 32,
-        paddingHorizontal: 16,
+    <BottomSheet
+      ref={ref}
+      style={{
+        flex: 1,
       }}
+      index={0}
+      onClose={onClose}
+      enablePanDownToClose
+      snapPoints={['100%']}
     >
-      <View
+      <BottomSheetView
         style={{
+          flex: 1,
+          paddingHorizontal: 16,
           flexDirection: 'column',
           alignItems: 'center',
           paddingVertical: 20,
@@ -81,8 +88,8 @@ const SwapDetailsSheet = (props: SwapDetailsSheetProps) => {
             chainId={outputChain}
           />
         </View>
-      </View>
-    </ActionSheet>
+      </BottomSheetView>
+    </BottomSheet>
   );
 };
 

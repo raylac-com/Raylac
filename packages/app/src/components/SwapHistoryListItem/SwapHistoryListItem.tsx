@@ -1,4 +1,4 @@
-import { Image, Pressable, View } from 'react-native';
+import { Image, View } from 'react-native';
 import StyledText from '../StyledText/StyledText';
 import { GetSwapHistoryReturnType } from '@/types';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -6,7 +6,6 @@ import Entypo from '@expo/vector-icons/Entypo';
 import colors from '@/lib/styles/colors';
 import useTokenMeta from '@/hooks/useTokenMeta';
 import { Hex } from 'viem';
-import { SheetManager } from 'react-native-actions-sheet';
 
 const SwapHistoryItem = (props: { swap: GetSwapHistoryReturnType[number] }) => {
   const { data: tokenMetaIn } = useTokenMeta(props.swap.tokenAddressIn as Hex);
@@ -15,12 +14,7 @@ const SwapHistoryItem = (props: { swap: GetSwapHistoryReturnType[number] }) => {
   );
 
   return (
-    <Pressable
-      onPress={() => {
-        SheetManager.show('swap-details-sheet', {
-          payload: props.swap,
-        });
-      }}
+    <View
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -66,7 +60,7 @@ const SwapHistoryItem = (props: { swap: GetSwapHistoryReturnType[number] }) => {
         <StyledText>{`Swap`}</StyledText>
         <Entypo name="swap" size={19} color={colors.green} />
       </View>
-    </Pressable>
+    </View>
   );
 };
 
