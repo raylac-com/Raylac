@@ -3,6 +3,8 @@ import colors from '@/lib/styles/colors';
 import SwapAmountInput from '../SwapAmountInput';
 import { SupportedTokensReturnType } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
+import { useSearchOutputTokenSheet } from '@/contexts/SearchOutputTokenSheetContext';
+import { useEffect } from 'react';
 
 const SwapOutputCard = ({
   token,
@@ -19,6 +21,15 @@ const SwapOutputCard = ({
   setAmount: (value: string) => void;
   isLoadingAmount: boolean;
 }) => {
+  const { setIsOpen: setIsOutputTokenOpen, selectedToken } =
+    useSearchOutputTokenSheet();
+
+  useEffect(() => {
+    if (selectedToken) {
+      setToken(selectedToken);
+    }
+  }, [selectedToken]);
+
   return (
     <View
       style={{
@@ -36,7 +47,9 @@ const SwapOutputCard = ({
         isLoadingAmount={isLoadingAmount}
         amount={amount}
         setAmount={setAmount}
-        setSelectedToken={setToken}
+        onSelectTokenPress={() => {
+          setIsOutputTokenOpen(true);
+        }}
       />
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}

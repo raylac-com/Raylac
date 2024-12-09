@@ -13,11 +13,11 @@ const useTokenMeta = (tokenAddress: Hex | null) => {
   );
 
   return useQuery({
-    queryKey: ['tokenMeta', token],
+    queryKey: ['tokenMeta', token, tokenAddress],
     queryFn: () => {
       return token;
     },
-    enabled: !!token,
+    enabled: !!token && !!tokenAddress,
   });
 };
 

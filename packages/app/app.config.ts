@@ -73,20 +73,6 @@ const config: ExpoConfig = {
         project: 'raylac-app',
       },
     ],
-    [
-      'react-native-cloud-storage',
-      {
-        iCloudContainerEnvironment:
-          APP_VARIANT === 'development' ? 'Development' : 'Production',
-      },
-    ],
-    [
-      'expo-image-picker',
-      {
-        photosPermission:
-          'The app accesses your photos to set your profile picture.',
-      },
-    ],
     ['expo-localization'],
     [
       'expo-font',

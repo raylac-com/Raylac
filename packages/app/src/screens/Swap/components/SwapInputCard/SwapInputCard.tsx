@@ -7,6 +7,7 @@ import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
+import { useSearchTokenSheet } from '@/contexts/SearchInputTokenSheetContext';
 
 const SwapInputCard = ({
   token,
@@ -23,10 +24,18 @@ const SwapInputCard = ({
   balance: bigint | undefined;
   isLoadingBalance: boolean;
 }) => {
+  const { setIsOpen, selectedToken } = useSearchTokenSheet();
+
   const [userInputMode, setUserInputMode] = useState<'USD' | 'TOKEN'>('TOKEN');
   const [usdAmountInput, setUsdAmountInput] = useState<string>('');
 
   const { data: tokenPriceUsd } = useTokenPriceUsd(token);
+
+  useEffect(() => {
+    if (selectedToken) {
+      setToken(selectedToken);
+    }
+  }, [selectedToken]);
 
   useEffect(() => {
     if (userInputMode === 'TOKEN' && tokenPriceUsd !== undefined) {
@@ -75,7 +84,9 @@ const SwapInputCard = ({
     >
       <SwapAmountInput
         selectedToken={token}
-        setSelectedToken={setToken}
+        onSelectTokenPress={() => {
+          setIsOpen(true);
+        }}
         isLoadingAmount={false}
         amount={amount}
         setAmount={value => {

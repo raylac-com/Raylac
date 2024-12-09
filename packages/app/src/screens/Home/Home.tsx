@@ -12,7 +12,6 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { Ionicons } from '@expo/vector-icons';
 import { copyToClipboard } from '@/lib/utils';
 import Toast from 'react-native-toast-message';
-import { SheetManager } from 'react-native-actions-sheet';
 import useAccountUsdValue from '@/hooks/useAccountUsdValue';
 import Skeleton from '@/components/Skeleton/Skeleton';
 
@@ -78,70 +77,74 @@ const HomeScreen = () => {
   };
 
   const onSwapPress = () => {
-    SheetManager.show('swap-sheet');
+    navigation.navigate('Tabs', {
+      screen: 'Swap',
+    });
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={{
-        rowGap: 24,
-        paddingVertical: 32,
-        paddingHorizontal: 16,
-      }}
-      refreshControl={
-        <RefreshControl
-          tintColor={colors.primary}
-          refreshing={isRefetching}
-          onRefresh={async () => {
-            setIsRefetching(true);
-            await refetch();
-            setIsRefetching(false);
-          }}
-        />
-      }
-      testID="home"
-    >
-      <StyledText style={{ fontSize: 36, color: colors.text }}>
-        {isLoadingAccountUsdValue ? (
-          <Skeleton style={{ width: 100, height: 24 }} />
-        ) : (
-          `$${accountUsdValue?.toFixed(2)}`
-        )}
-      </StyledText>
-      <View style={{ flexDirection: 'row', columnGap: 20 }}>
-        <MenuItem
-          icon={<AntDesign name="plus" size={24} color={colors.background} />}
-          title="Deposit"
-          testID="deposit"
-          onPress={onDepositPress}
-        />
-        <MenuItem
-          icon={
-            <Ionicons
-              name="swap-horizontal"
-              size={24}
-              color={colors.background}
-            />
-          }
-          title="Swap"
-          testID="swap"
-          onPress={onSwapPress}
-        />
-      </View>
-      {tokenBalances
-        ?.slice(0, 5)
-        .map((tokenBalance, index) => (
-          <TokenBalanceCard
-            key={index}
-            balance={hexToBigInt(tokenBalance.balance)}
-            tokenDecimals={tokenBalance.decimals}
-            symbol={tokenBalance.symbol}
-            name={tokenBalance.name}
-            usdValue={tokenBalance.usdValue}
-            logoUrl={tokenBalance.logoUrl}
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        contentContainerStyle={{
+          rowGap: 24,
+          paddingVertical: 32,
+          paddingHorizontal: 16,
+        }}
+        refreshControl={
+          <RefreshControl
+            tintColor={colors.primary}
+            refreshing={isRefetching}
+            onRefresh={async () => {
+              setIsRefetching(true);
+              await refetch();
+              setIsRefetching(false);
+            }}
           />
-        ))}
-    </ScrollView>
+        }
+        testID="home"
+      >
+        <StyledText style={{ fontSize: 36, color: colors.text }}>
+          {isLoadingAccountUsdValue ? (
+            <Skeleton style={{ width: 100, height: 24 }} />
+          ) : (
+            `$${accountUsdValue?.toFixed(2)}`
+          )}
+        </StyledText>
+        <View style={{ flexDirection: 'row', columnGap: 20 }}>
+          <MenuItem
+            icon={<AntDesign name="plus" size={24} color={colors.background} />}
+            title="Deposit"
+            testID="deposit"
+            onPress={onDepositPress}
+          />
+          <MenuItem
+            icon={
+              <Ionicons
+                name="swap-horizontal"
+                size={24}
+                color={colors.background}
+              />
+            }
+            title="Swap"
+            testID="swap"
+            onPress={onSwapPress}
+          />
+        </View>
+        {tokenBalances
+          ?.slice(0, 5)
+          .map((tokenBalance, index) => (
+            <TokenBalanceCard
+              key={index}
+              balance={hexToBigInt(tokenBalance.balance)}
+              tokenDecimals={tokenBalance.decimals}
+              symbol={tokenBalance.symbol}
+              name={tokenBalance.name}
+              usdValue={tokenBalance.usdValue}
+              logoUrl={tokenBalance.logoUrl}
+            />
+          ))}
+      </ScrollView>
+    </View>
   );
 };
 

@@ -4,7 +4,6 @@ import { trpc } from '../src/lib/trpc';
 import { getRpcLinks } from '../src/lib/trpc';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
-import { SheetProvider } from 'react-native-actions-sheet';
 import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import colors from '../src/lib/styles/colors';
 import Toast from 'react-native-toast-message';
@@ -44,7 +43,7 @@ const Provider = ({ children }: { children: React.ReactNode }) => {
                 backgroundColor: colors.background,
               }}
             >
-              <SheetProvider>{children}</SheetProvider>
+              {children}
             </SafeAreaView>
             <Toast></Toast>
           </SafeAreaProvider>

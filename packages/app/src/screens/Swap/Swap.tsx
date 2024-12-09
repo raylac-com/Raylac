@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
-import SwapInputCard from '../SwapInputCard/SwapInputCard';
-import SwapOutputCard from '../SwapOutputCard/SwapOutputCard';
+import SwapInputCard from './components/SwapInputCard/SwapInputCard';
+import SwapOutputCard from './components/SwapOutputCard/SwapOutputCard';
 import { trpc } from '@/lib/trpc';
-import { formatUnits, parseUnits, zeroAddress } from 'viem';
+import { formatUnits, getAddress, parseUnits, zeroAddress } from 'viem';
 import useUserAccount from '@/hooks/useUserAccount';
 import {
   supportedChains,
   SupportedTokensReturnType,
   TRPCErrorMessage,
 } from '@raylac/shared';
-import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useGetSwapQuote from '@/hooks/useGetSwapQuote';
 import useSwap from '@/hooks/useSwap';
@@ -19,10 +17,13 @@ import useTypedNavigation from '@/hooks/useTypedNavigation';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import useTokenBalance from '@/hooks/useTokenBalance';
+import { View } from 'react-native';
+import { SearchTokenSheetProvider } from '@/contexts/SearchInputTokenSheetContext';
+import { SearchOutputTokenSheetProvider } from '@/contexts/SearchOutputTokenSheetContext';
 
 type Token = SupportedTokensReturnType[number];
 
-const SwapSheet = () => {
+const Swap = () => {
   const navigation = useTypedNavigation();
 
   //
@@ -73,8 +74,12 @@ const SwapSheet = () => {
   useEffect(() => {
     if (supportedTokens) {
       if (tokenBalances && tokenBalances.length > 0) {
-        const inputToken = supportedTokens?.find(
-          token => token.symbol === tokenBalances[0].symbol
+        const inputToken = supportedTokens?.find(token =>
+          token.addresses.some(
+            tokenAddress =>
+              getAddress(tokenAddress.address) ===
+              getAddress(tokenBalances[0].breakdown[0].tokenAddress)
+          )
         );
 
         if (inputToken) {
@@ -83,8 +88,12 @@ const SwapSheet = () => {
       }
 
       if (tokenBalances && tokenBalances.length > 1) {
-        const outputToken = supportedTokens?.find(
-          token => token.symbol === tokenBalances[1].symbol
+        const outputToken = supportedTokens?.find(token =>
+          token.addresses.some(
+            tokenAddress =>
+              getAddress(tokenAddress.address) ===
+              getAddress(tokenBalances[1].breakdown[0].tokenAddress)
+          )
         );
 
         if (outputToken) {
@@ -138,8 +147,6 @@ const SwapSheet = () => {
       navigation.navigate('Tabs', {
         screen: 'History',
       });
-
-      SheetManager.hide('swap-sheet');
     }
   };
 
@@ -164,53 +171,52 @@ const SwapSheet = () => {
     getSwapQuoteError?.message === TRPCErrorMessage.SWAP_AMOUNT_TOO_SMALL;
 
   return (
-    <ActionSheet
-      id="swap-sheet"
-      containerStyle={{ borderTopLeftRadius: 32, borderTopRightRadius: 32 }}
-    >
-      <View
-        style={{
-          flexDirection: 'column',
-          paddingVertical: 20,
-          paddingHorizontal: 16,
-          rowGap: 16,
-        }}
-      >
-        <SwapInputCard
-          token={inputToken}
-          setToken={setInputToken}
-          amount={amountInputText}
-          setAmount={onInputAmountChange}
-          balance={inputTokenBalance}
-          isLoadingBalance={isLoadingTokenBalances}
-        />
-        <SwapOutputCard
-          token={outputToken}
-          setToken={setOutputToken}
-          amount={outputAmountFormatted}
-          setAmount={() => {}}
-          isLoadingAmount={isGettingSwapQuote}
-          usdAmount={outputAmountUsd ? Number(outputAmountUsd) : 0}
-        />
-        <StyledText style={{ color: colors.border }}>
-          {swapQuote
-            ? `Swap provider fee $${swapQuote.quote.fees.relayerService.amountUsd}`
-            : ''}
-        </StyledText>
-        <StyledButton
-          isLoading={isSwapping}
-          title={
-            isAmountTooSmall
-              ? 'Amount too small'
-              : hasEnoughBalance === false
-                ? 'Insufficient balance'
-                : 'Swap'
-          }
-          onPress={onSwapPress}
-        />
-      </View>
-    </ActionSheet>
+    <SearchOutputTokenSheetProvider>
+      <SearchTokenSheetProvider>
+        <View
+          style={{
+            flexDirection: 'column',
+            paddingVertical: 20,
+            paddingHorizontal: 16,
+            rowGap: 16,
+          }}
+        >
+          <SwapInputCard
+            token={inputToken}
+            setToken={setInputToken}
+            amount={amountInputText}
+            setAmount={onInputAmountChange}
+            balance={inputTokenBalance}
+            isLoadingBalance={isLoadingTokenBalances}
+          />
+          <SwapOutputCard
+            token={outputToken}
+            setToken={setOutputToken}
+            amount={outputAmountFormatted}
+            setAmount={() => {}}
+            isLoadingAmount={isGettingSwapQuote}
+            usdAmount={outputAmountUsd ? Number(outputAmountUsd) : 0}
+          />
+          <StyledText style={{ color: colors.border }}>
+            {swapQuote
+              ? `Swap provider fee $${swapQuote.quote.fees.relayerService.amountUsd}`
+              : ''}
+          </StyledText>
+          <StyledButton
+            isLoading={isSwapping}
+            title={
+              isAmountTooSmall
+                ? 'Amount too small'
+                : hasEnoughBalance === false
+                  ? 'Insufficient balance'
+                  : 'Swap'
+            }
+            onPress={onSwapPress}
+          />
+        </View>
+      </SearchTokenSheetProvider>
+    </SearchOutputTokenSheetProvider>
   );
 };
 
-export default SwapSheet;
+export default Swap;

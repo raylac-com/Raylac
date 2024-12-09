@@ -115,12 +115,9 @@ importers:
       '@expo/config':
         specifier: ~10.0.5
         version: 10.0.5
-      '@expo/vector-icons':
-        specifier: ^14.0.3
-        version: 14.0.3
-      '@noble/secp256k1':
-        specifier: ^2.1.0
-        version: 2.1.0
+      '@gorhom/bottom-sheet':
+        specifier: ^5.0.6
+        version: 5.0.6(@types/react@18.3.12)(react-native-gesture-handler@2.20.2(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1))(react-native-reanimated@3.16.3(@babel/core@7.25.2)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
       '@raylac/api':
         specifier: workspace:*
         version: link:../api
@@ -130,9 +127,6 @@ importers:
       '@react-native-async-storage/async-storage':
         specifier: 1.23.1
         version: 1.23.1(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))
-      '@react-native-picker/picker':
-        specifier: 2.9.0
-        version: 2.9.0(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
       '@react-native/assets-registry':
         specifier: ^0.74.85
         version: 0.74.87
@@ -184,18 +178,12 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
-      ethereum-blockies-base64:
-        specifier: ^1.0.2
-        version: 1.0.2
       expo:
         specifier: ~52.0.14
         version: 52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4)
       expo-asset:
         specifier: ~11.0.1
         version: 11.0.1(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
-      expo-camera:
-        specifier: ~16.0.8
-        version: 16.0.8(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
       expo-clipboard:
         specifier: ~7.0.0
         version: 7.0.0(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
@@ -211,12 +199,6 @@ importers:
       expo-font:
         specifier: ~13.0.1
         version: 13.0.1(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
-      expo-image-manipulator:
-        specifier: ~13.0.5
-        version: 13.0.5(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))
-      expo-image-picker:
-        specifier: ~16.0.3
-        version: 16.0.3(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))
       expo-linking:
         specifier: ~7.0.3
         version: 7.0.3(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
@@ -253,15 +235,6 @@ importers:
       react-native:
         specifier: 0.76.3
         version: 0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4)
-      react-native-actions-sheet:
-        specifier: ^0.9.7
-        version: 0.9.7(react-native-gesture-handler@2.20.2(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1))(react-native-safe-area-context@4.12.0(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))
-      react-native-cloud-storage:
-        specifier: ^1.4.1
-        version: 1.4.1(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
-      react-native-dropdown-picker:
-        specifier: ^5.4.6
-        version: 5.4.6(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
       react-native-fast-image:
         specifier: ^8.6.3
         version: 8.6.3(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
@@ -271,9 +244,6 @@ importers:
       react-native-get-random-values:
         specifier: ^1.11.0
         version: 1.11.0(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))
-      react-native-modal-dropdown:
-        specifier: ^1.0.2
-        version: 1.0.2
       react-native-safe-area-context:
         specifier: 4.12.0
         version: 4.12.0(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
@@ -293,15 +263,6 @@ importers:
       '@babel/runtime':
         specifier: ^7.24.7
         version: 7.25.6
-      '@gorhom/bottom-sheet':
-        specifier: ^5.0.6
-        version: 5.0.6(@types/react@18.3.12)(react-native-gesture-handler@2.20.2(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1))(react-native-reanimated@3.16.3(@babel/core@7.25.2)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
-      '@react-native-community/datetimepicker':
-        specifier: ^8.2.0
-        version: 8.2.0(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
-      '@react-native-community/slider':
-        specifier: ^4.5.5
-        version: 4.5.5
       '@storybook/addon-ondevice-actions':
         specifier: ^8.4.2
         version: 8.4.2(bufferutil@4.0.8)(prettier@2.8.8)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(storybook@8.4.6(bufferutil@4.0.8)(prettier@2.8.8)(utf-8-validate@6.0.4))(utf-8-validate@6.0.4)
@@ -1861,12 +1822,6 @@ packages:
 
   '@react-native-community/slider@4.5.5':
     resolution: {integrity: sha512-x2N415pg4ZxIltArOKczPwn7JEYh+1OxQ4+hTnafomnMsqs65HZuEWcX+Ch8c5r8V83DiunuQUf5hWGWlw8hQQ==}
-
-  '@react-native-picker/picker@2.9.0':
-    resolution: {integrity: sha512-khEhIW/uhfMqq/+tvg4rEAiPGT8GX+Y6QydlP2TSMSmRHoSJK+ShXvXZXSr4Sii4imkj4BwvLunGywwtQDODqg==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
 
   '@react-native/assets-registry@0.74.87':
     resolution: {integrity: sha512-1XmRhqQchN+pXPKEKYdpJlwESxVomJOxtEnIkbo7GAlaN2sym84fHEGDXAjLilih5GVPpcpSmFzTy8jx3LtaFg==}
@@ -3577,9 +3532,6 @@ packages:
     resolution: {integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==}
     engines: {node: '>= 0.6'}
 
-  ethereum-blockies-base64@1.0.2:
-    resolution: {integrity: sha512-Vg2HTm7slcWNKaRhCUl/L3b4KrB8ohQXdd5Pu3OI897EcR6tVRvUqdTwAyx+dnmoDzj8e2bwBLDQ50ByFmcz6w==}
-
   event-emitter@0.3.5:
     resolution: {integrity: sha512-D9rRn9y7kLPnJ+hMq7S/nhvoKwwvVJahBi2BPmx3bvbsEdK3W9ii8cBSGjP+72/LnM4n6fo3+dkCX5FeTQruXA==}
 
@@ -3615,17 +3567,6 @@ packages:
       expo: '*'
       react: '*'
       react-native: '*'
-
-  expo-camera@16.0.8:
-    resolution: {integrity: sha512-QxuHsJot1M/0vCr9wV41OeEdHYp33VkvtmWv7XV2rXL/m8PJBm3m9o1ls5iL5s3hXlAC3tBCsfnt2m7ohfNdWQ==}
-    peerDependencies:
-      expo: '*'
-      react: '*'
-      react-native: '*'
-      react-native-web: '*'
-    peerDependenciesMeta:
-      react-native-web:
-        optional: true
 
   expo-clipboard@7.0.0:
     resolution: {integrity: sha512-4Vuv1zZPTOiKzIeC0BIGUN8nyzkXlE6jKchtLxcoksBjHPdG5W2eH05B+hppTrK9N3+Xh02z4j3h1cFRqPJ1fw==}
@@ -3679,21 +3620,6 @@ packages:
     peerDependencies:
       expo: '*'
       react: '*'
-
-  expo-image-loader@5.0.0:
-    resolution: {integrity: sha512-Eg+5FHtyzv3Jjw9dHwu2pWy4xjf8fu3V0Asyy42kO+t/FbvW/vjUixpTjPtgKQLQh+2/9Nk4JjFDV6FwCnF2ZA==}
-    peerDependencies:
-      expo: '*'
-
-  expo-image-manipulator@13.0.5:
-    resolution: {integrity: sha512-ILBwBKATmO1469VS0o1dQq2iQwekMq32XCyNaeQ9gw9+2NBoN6Z64bRHEZkPxhHe6ULDM+zOTOL32/k+iVluYQ==}
-    peerDependencies:
-      expo: '*'
-
-  expo-image-picker@16.0.3:
-    resolution: {integrity: sha512-c4IOqIQOtx8puWWU4fVsJhuGiAhH6gAIdrVzhimOXSEUHnfxCckRYzvznbd/0cuvaA5y9H0CSYrxpTUc/0WNVw==}
-    peerDependencies:
-      expo: '*'
 
   expo-json-utils@0.14.0:
     resolution: {integrity: sha512-xjGfK9dL0B1wLnOqNkX0jM9p48Y0I5xEPzHude28LY67UmamUyAACkqhZGaPClyPNfdzczk7Ej6WaRMT3HfXvw==}
@@ -5400,9 +5326,6 @@ packages:
     resolution: {integrity: sha512-NCrCHhWmnQklfH4MtJMRjZ2a8c80qXeMlQMv2uVp9ISJMTt562SbGd6n2oq0PaPgKm7Z6pL9E2UlLIhC+SHL3w==}
     engines: {node: '>=4.0.0'}
 
-  pnglib@0.0.1:
-    resolution: {integrity: sha512-95ChzOoYLOPIyVmL+Y6X+abKGXUJlvOVLkB1QQkyXl7Uczc6FElUy/x01NS7r2GX6GRezloO/ecCX9h4U9KadA==}
-
   polished@4.3.1:
     resolution: {integrity: sha512-OBatVyC/N7SCW/FaDHrSd+vn0o5cS855TOmYi4OkdWUMSJCET/xip//ch8xGUvtr3i44X9LVyWwQlRMTN3pwSA==}
     engines: {node: '>=10'}
@@ -5557,30 +5480,6 @@ packages:
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
-  react-native-actions-sheet@0.9.7:
-    resolution: {integrity: sha512-rjUwxUr5dxbdSLDtLDUFAdSlFxpNSpJsbXLhHkBzEBMxEMPUhRT3zqbvKqsPj0JUkjwuRligxrhbIJZkg/6ZDw==}
-    peerDependencies:
-      react-native: '*'
-      react-native-gesture-handler: '*'
-      react-native-safe-area-context: '*'
-
-  react-native-cloud-storage@1.4.1:
-    resolution: {integrity: sha512-VC3niojWeXOcLfGj/dv0mRtTD/miOZLcNrqP9l91LEJI7K+wcxgRjMuKeoPfmHipFKdllwWwF2rZzePSNcCUhw==}
-    engines: {node: '>= 18.0.0'}
-    peerDependencies:
-      expo: '>=48.0.0'
-      react: '*'
-      react-native: '*'
-    peerDependenciesMeta:
-      expo:
-        optional: true
-
-  react-native-dropdown-picker@5.4.6:
-    resolution: {integrity: sha512-T1XBHbE++M6aRU3wFYw3MvcOuabhWZ29RK/Ivdls2r1ZkZ62iEBZknLUPeVLMX3x6iUxj4Zgr3X2DGlEGXeHsA==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
-
   react-native-fast-image@8.6.3:
     resolution: {integrity: sha512-Sdw4ESidXCXOmQ9EcYguNY2swyoWmx53kym2zRsvi+VeFCHEdkO+WG1DK+6W81juot40bbfLNhkc63QnWtesNg==}
     peerDependencies:
@@ -5603,9 +5502,6 @@ packages:
     peerDependencies:
       '@react-native-community/datetimepicker': '>=3.0.0'
       react-native: '>=0.65.0'
-
-  react-native-modal-dropdown@1.0.2:
-    resolution: {integrity: sha512-X13RbwoQdaOb9Ffi7fjRVwh9OXauXIJhum0uXGzYZLMyoCQ5yt5cxf27P/YZbdh80Fb7bdPx6vTA4PTpUK2WDQ==}
 
   react-native-modal-selector@2.1.2:
     resolution: {integrity: sha512-+Cvoz/yNUFmfIkJ7xkmlLR2nhJOUhx00S6BPqp2Ruy8LkmaiNr7WMZ4BzsgzylyEgZ84Q+42HQ0v0QzJYobviA==}
@@ -8884,11 +8780,6 @@ snapshots:
 
   '@react-native-community/slider@4.5.5': {}
 
-  '@react-native-picker/picker@2.9.0(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)':
-    dependencies:
-      react: 18.3.1
-      react-native: 0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4)
-
   '@react-native/assets-registry@0.74.87': {}
 
   '@react-native/assets-registry@0.76.3': {}
@@ -11108,10 +10999,6 @@ snapshots:
 
   etag@1.8.1: {}
 
-  ethereum-blockies-base64@1.0.2:
-    dependencies:
-      pnglib: 0.0.1
-
   event-emitter@0.3.5:
     dependencies:
       d: 1.0.2
@@ -11170,13 +11057,6 @@ snapshots:
       react-native: 0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4)
     transitivePeerDependencies:
       - supports-color
-
-  expo-camera@16.0.8(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1):
-    dependencies:
-      expo: 52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4)
-      invariant: 2.2.4
-      react: 18.3.1
-      react-native: 0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4)
 
   expo-clipboard@7.0.0(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1):
     dependencies:
@@ -11241,20 +11121,6 @@ snapshots:
       expo: 52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4)
       fontfaceobserver: 2.3.0
       react: 18.3.1
-
-  expo-image-loader@5.0.0(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4)):
-    dependencies:
-      expo: 52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4)
-
-  expo-image-manipulator@13.0.5(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4)):
-    dependencies:
-      expo: 52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4)
-      expo-image-loader: 5.0.0(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))
-
-  expo-image-picker@16.0.3(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4)):
-    dependencies:
-      expo: 52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4)
-      expo-image-loader: 5.0.0(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))
 
   expo-json-utils@0.14.0: {}
 
@@ -13187,8 +13053,6 @@ snapshots:
 
   pngjs@3.4.0: {}
 
-  pnglib@0.0.1: {}
-
   polished@4.3.1:
     dependencies:
       '@babel/runtime': 7.25.6
@@ -13355,24 +13219,6 @@ snapshots:
 
   react-is@18.3.1: {}
 
-  react-native-actions-sheet@0.9.7(react-native-gesture-handler@2.20.2(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1))(react-native-safe-area-context@4.12.0(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4)):
-    dependencies:
-      react-native: 0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4)
-      react-native-gesture-handler: 2.20.2(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
-      react-native-safe-area-context: 4.12.0(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
-
-  react-native-cloud-storage@1.4.1(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-      react-native: 0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4)
-    optionalDependencies:
-      expo: 52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4)
-
-  react-native-dropdown-picker@5.4.6(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1):
-    dependencies:
-      react: 18.3.1
-      react-native: 0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4)
-
   react-native-fast-image@8.6.3(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1):
     dependencies:
       react: 18.3.1
@@ -13397,10 +13243,6 @@ snapshots:
       '@react-native-community/datetimepicker': 8.2.0(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
       prop-types: 15.8.1
       react-native: 0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4)
-
-  react-native-modal-dropdown@1.0.2:
-    dependencies:
-      prop-types: 15.8.1
 
   react-native-modal-selector@2.1.2:
     dependencies:

@@ -4,9 +4,9 @@ import useDebounce from '@/hooks/useDebounce';
 import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import { supportedChains, SupportedTokensReturnType } from '@raylac/shared';
-import { useState } from 'react';
-import { FlatList, Image, Pressable, TextInput, View } from 'react-native';
-import ActionSheet, { SheetManager } from 'react-native-actions-sheet';
+import { useRef, useState } from 'react';
+import { Image, Pressable, TextInput, View } from 'react-native';
+import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 
 const TokenListItem = ({
   token,
@@ -63,7 +63,14 @@ const SearchInput = ({
   );
 };
 
-const SearchTokenSheet = () => {
+const SearchTokenSheet = ({
+  onSelectToken,
+  onClose,
+}: {
+  onSelectToken: (token: SupportedTokensReturnType[number]) => void;
+  onClose: () => void;
+}) => {
+  const ref = useRef<BottomSheet>(null);
   const [searchText, setSearchText] = useState('');
 
   const { debouncedValue: debouncedSearchText, isPending: isDebouncing } =
@@ -75,16 +82,20 @@ const SearchTokenSheet = () => {
   });
 
   return (
-    <ActionSheet
-      id="search-token-sheet"
-      containerStyle={{
+    <BottomSheet
+      ref={ref}
+      style={{
+        flex: 1,
         paddingHorizontal: 16,
         paddingVertical: 32,
-        height: '90%',
       }}
+      index={0}
+      snapPoints={['100%']}
+      enablePanDownToClose
+      onClose={onClose}
     >
       <SearchInput value={searchText} onChangeText={setSearchText} />
-      <FlatList
+      <BottomSheetFlatList
         data={
           supportedTokens === undefined || isDebouncing
             ? new Array(3).fill(undefined)
@@ -114,16 +125,14 @@ const SearchTokenSheet = () => {
             <TokenListItem
               token={item}
               balance={BigInt(0)}
-              onPress={() =>
-                SheetManager.hide('search-token-sheet', {
-                  payload: item,
-                })
-              }
+              onPress={() => {
+                onSelectToken(item);
+              }}
             />
           );
         }}
       />
-    </ActionSheet>
+    </BottomSheet>
   );
 };
 

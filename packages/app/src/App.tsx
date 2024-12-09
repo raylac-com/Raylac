@@ -7,6 +7,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RootStackParamsList, RootTabsParamsList } from './navigation/types';
 import Home from './screens/Home/Home';
+import Swap from './screens/Swap/Swap';
 import { NavigationContainer, ThemeProvider } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc, getRpcLinks } from './lib/trpc';
@@ -22,9 +23,7 @@ import { getSelectedLanguage } from './i18n';
 import useFetchUpdates from './hooks/useFetchUpdates';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Localization from 'expo-localization';
-import { SheetManager, SheetProvider } from 'react-native-actions-sheet';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import './Sheets';
 import Constants from 'expo-constants';
 import { useFonts } from 'expo-font';
 import History from './screens/History/History';
@@ -46,10 +45,6 @@ Sentry.init({
 const Tab = createBottomTabNavigator<RootTabsParamsList>();
 const RootStack = createNativeStackNavigator<RootStackParamsList>();
 
-const EmptyScreen = () => {
-  return null;
-};
-
 const Tabs = () => {
   return (
     <Tab.Navigator initialRouteName="Home">
@@ -66,20 +61,13 @@ const Tabs = () => {
       ></Tab.Screen>
       <Tab.Screen
         name="Swap"
-        component={EmptyScreen}
+        component={Swap}
         options={{
-          headerShown: false,
           tabBarLabel: () => null,
           tabBarIcon: ({ color }) => (
             <AntDesign name="swap" size={24} color={color} />
           ),
           tabBarShowLabel: false,
-        }}
-        listeners={{
-          tabPress: e => {
-            e.preventDefault();
-            SheetManager.show('swap-sheet');
-          },
         }}
       ></Tab.Screen>
       <Tab.Screen
@@ -129,50 +117,48 @@ const Screens = () => {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-        <GestureHandlerRootView>
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <SheetProvider>
-              <RootStack.Navigator initialRouteName="Tabs">
-                <RootStack.Screen
-                  name="Tabs"
-                  component={Tabs}
-                  options={{
-                    headerShown: false,
-                  }}
-                ></RootStack.Screen>
-                <RootStack.Screen
-                  name="Start"
-                  component={Start}
-                  options={{
-                    headerShown: false,
-                  }}
-                ></RootStack.Screen>
-                <RootStack.Screen
-                  name="SaveBackupPhrase"
-                  component={SaveBackupPhrase}
-                  options={{
-                    headerBackVisible: false,
-                  }}
-                ></RootStack.Screen>
-                <RootStack.Screen
-                  name="ConfirmBackupPhrase"
-                  component={ConfirmBackupPhrase}
-                  options={{
-                    headerBackVisible: true,
-                  }}
-                ></RootStack.Screen>
-                <RootStack.Screen
-                  name="ImportAccount"
-                  component={ImportAccount}
-                  options={{
-                    headerBackVisible: true,
-                  }}
-                ></RootStack.Screen>
-              </RootStack.Navigator>
-              <Toast></Toast>
-            </SheetProvider>
-          </TouchableWithoutFeedback>
-        </GestureHandlerRootView>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <GestureHandlerRootView>
+            <RootStack.Navigator initialRouteName="Tabs">
+              <RootStack.Screen
+                name="Tabs"
+                component={Tabs}
+                options={{
+                  headerShown: false,
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="Start"
+                component={Start}
+                options={{
+                  headerShown: false,
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="SaveBackupPhrase"
+                component={SaveBackupPhrase}
+                options={{
+                  headerBackVisible: false,
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="ConfirmBackupPhrase"
+                component={ConfirmBackupPhrase}
+                options={{
+                  headerBackVisible: true,
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="ImportAccount"
+                component={ImportAccount}
+                options={{
+                  headerBackVisible: true,
+                }}
+              ></RootStack.Screen>
+            </RootStack.Navigator>
+            <Toast></Toast>
+          </GestureHandlerRootView>
+        </TouchableWithoutFeedback>
       </SafeAreaView>
     </SafeAreaProvider>
   );

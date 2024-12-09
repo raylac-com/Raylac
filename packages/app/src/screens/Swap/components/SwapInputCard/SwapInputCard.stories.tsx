@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import SwapInputCard from './SwapInputCard';
 import spacing from '@/lib/styles/spacing';
 import { base } from 'viem/chains';
+import { zeroAddress } from 'viem';
 
 const meta = {
   title: 'SwapInputCard',
@@ -22,7 +23,7 @@ const meta = {
       addresses: [
         {
           chainId: base.id,
-          address: '0x833589fCD6eDb6E08B1Daf284d278AC3b223312',
+          address: zeroAddress,
         },
       ],
       name: 'USD Coin',
