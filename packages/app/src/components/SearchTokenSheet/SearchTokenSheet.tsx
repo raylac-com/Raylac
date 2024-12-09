@@ -5,7 +5,8 @@ import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import { supportedChains, SupportedTokensReturnType } from '@raylac/shared';
 import { useRef, useState } from 'react';
-import { Image, Pressable, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 
 const TokenListItem = ({
@@ -26,7 +27,7 @@ const TokenListItem = ({
         alignItems: 'center',
       }}
     >
-      <Image
+      <FastImage
         source={{ uri: token.logoURI }}
         style={{ width: 42, height: 42 }}
       />

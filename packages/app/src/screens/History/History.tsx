@@ -1,6 +1,12 @@
 import useUserAccount from '@/hooks/useUserAccount';
 import { trpc } from '@/lib/trpc';
-import { FlatList, Pressable, RefreshControl, View } from 'react-native';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  View,
+} from 'react-native';
 import SwapHistoryListItem from '@/components/SwapHistoryListItem/SwapHistoryListItem';
 import { zeroAddress } from 'viem';
 import colors from '@/lib/styles/colors';
@@ -16,6 +22,7 @@ const History = () => {
 
   const {
     data: swapHistory,
+    isLoading,
     isRefetching,
     refetch,
   } = trpc.getSwapHistory.useQuery(
@@ -29,6 +36,13 @@ const History = () => {
 
   return (
     <View style={{ flex: 1 }}>
+      {isLoading && (
+        <ActivityIndicator
+          style={{
+            marginTop: 16,
+          }}
+        />
+      )}
       <FlatList
         contentContainerStyle={{
           paddingVertical: 32,

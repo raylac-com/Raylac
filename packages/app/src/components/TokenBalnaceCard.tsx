@@ -2,8 +2,9 @@ import borderRadius from '@/lib/styles/borderRadius';
 import colors from '@/lib/styles/colors';
 import spacing from '@/lib/styles/spacing';
 import { formatAmount } from '@raylac/shared';
-import { Image, View } from 'react-native';
+import { View } from 'react-native';
 import StyledText from './StyledText/StyledText';
+import FastImage from 'react-native-fast-image';
 
 export const TokenBalanceCard = (props: {
   name: string;
@@ -40,7 +41,7 @@ export const TokenBalanceCard = (props: {
           columnGap: 8,
         }}
       >
-        <Image
+        <FastImage
           source={{ uri: props.logoUrl }}
           style={{ width: 42, height: 42 }}
         />

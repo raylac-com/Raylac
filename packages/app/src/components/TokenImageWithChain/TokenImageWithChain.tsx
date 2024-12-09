@@ -1,5 +1,6 @@
 import { getChainIcon } from '@/lib/utils';
-import { View, Image } from 'react-native';
+import { View } from 'react-native';
+import FastImage from 'react-native-fast-image';
 
 const TokenImageWithChain = ({
   logoURI,
@@ -10,11 +11,9 @@ const TokenImageWithChain = ({
 }) => {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-      <Image source={{ uri: logoURI }} width={24} height={24} />
-      <Image
+      <FastImage source={{ uri: logoURI }} style={{ width: 24, height: 24 }} />
+      <FastImage
         source={getChainIcon(chainId)}
-        width={12}
-        height={12}
         style={{
           width: 12,
           height: 12,

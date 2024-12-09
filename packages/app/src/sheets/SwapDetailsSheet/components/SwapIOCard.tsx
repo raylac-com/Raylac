@@ -1,7 +1,8 @@
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { formatAmount, SupportedTokensReturnType } from '@raylac/shared';
-import { View, Image } from 'react-native';
+import { View } from 'react-native';
+import FastImage from 'react-native-fast-image';
 
 interface SwapIOCardProps {
   token: SupportedTokensReturnType[number];
@@ -27,7 +28,10 @@ const SwapIOCard = (props: SwapIOCardProps) => {
         paddingVertical: 16,
       }}
     >
-      <Image source={{ uri: token.logoURI }} width={42} height={42} />
+      <FastImage
+        source={{ uri: token.logoURI }}
+        style={{ width: 42, height: 42 }}
+      />
       <View
         style={{ flexDirection: 'column', alignItems: 'center', rowGap: 6 }}
       >

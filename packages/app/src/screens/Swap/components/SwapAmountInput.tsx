@@ -1,4 +1,5 @@
-import { Image, Pressable, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -32,7 +33,7 @@ const SwapAmountInput = ({
         onPress={onSelectTokenPress}
       >
         {selectedToken ? (
-          <Image
+          <FastImage
             source={{ uri: selectedToken.logoURI }}
             style={{ width: 34, height: 34 }}
           />
