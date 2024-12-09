@@ -203,6 +203,12 @@ const Swap = () => {
               : ''}
           </StyledText>
           <StyledButton
+            disabled={
+              isAmountTooSmall ||
+              hasEnoughBalance === false ||
+              isSwapping ||
+              !swapQuote
+            }
             isLoading={isSwapping}
             title={
               isAmountTooSmall

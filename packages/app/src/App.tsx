@@ -117,8 +117,8 @@ const Screens = () => {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <GestureHandlerRootView>
+        <GestureHandlerRootView>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
             <RootStack.Navigator initialRouteName="Tabs">
               <RootStack.Screen
                 name="Tabs"
@@ -156,9 +156,9 @@ const Screens = () => {
                 }}
               ></RootStack.Screen>
             </RootStack.Navigator>
-            <Toast></Toast>
-          </GestureHandlerRootView>
-        </TouchableWithoutFeedback>
+          </TouchableWithoutFeedback>
+          <Toast></Toast>
+        </GestureHandlerRootView>
       </SafeAreaView>
     </SafeAreaProvider>
   );

@@ -1,4 +1,11 @@
-import { formatUnits, Hex, hexToBigInt, toHex, zeroAddress } from 'viem';
+import {
+  formatUnits,
+  getAddress,
+  Hex,
+  hexToBigInt,
+  toHex,
+  zeroAddress,
+} from 'viem';
 import { getPublicClient } from '../../utils';
 import {
   supportedChains,
@@ -115,7 +122,7 @@ const getMultiChainERC20Balances = async ({
   // Get addresses of all known tokens
   // We use this to filter out known tokens from the Alchemy response
   const knownTokenAddresses = KNOWN_TOKENS.map(token =>
-    token.addresses.map(({ address }) => address)
+    token.addresses.map(({ address }) => getAddress(address))
   ).flat();
 
   const multiChainTokenBalances = await Promise.all(
@@ -131,7 +138,9 @@ const getMultiChainERC20Balances = async ({
           // Filter out known tokens
           .filter(
             tokenBalance =>
-              !knownTokenAddresses.includes(tokenBalance.contractAddress as Hex)
+              !knownTokenAddresses.includes(
+                getAddress(tokenBalance.contractAddress as Hex)
+              )
           )
           // Filter out balances that are 0
           .filter(
