@@ -1,8 +1,8 @@
-import { ScrollView, RefreshControl, View } from 'react-native';
+import { ScrollView, RefreshControl, View, Pressable } from 'react-native';
 import colors from '@/lib/styles/colors';
 import useUserAccount from '@/hooks/useUserAccount';
 import { trpc } from '@/lib/trpc';
-import { TokenBalanceCard } from '@/components/TokenBalnaceCard';
+import TokenBalanceCard from '@/components/TokenBalnaceCard';
 import { hexToBigInt, zeroAddress } from 'viem';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
@@ -14,6 +14,8 @@ import { copyToClipboard } from '@/lib/utils';
 import Toast from 'react-native-toast-message';
 import useAccountUsdValue from '@/hooks/useAccountUsdValue';
 import Skeleton from '@/components/Skeleton/Skeleton';
+import TokenBalanceDetailsSheet from '@/components/TokenBalanceDetailsSheet/TokenBalanceDetailsSheet';
+import { TokenBalancesReturnType } from '@raylac/shared';
 
 const HomeScreen = () => {
   const navigation = useTypedNavigation();
@@ -22,6 +24,8 @@ const HomeScreen = () => {
   /// Local state
   ///
   const [isRefetching, setIsRefetching] = useState(false);
+  const [showTokenBalanceDetailsSheet, setShowTokenBalanceDetailsSheet] =
+    useState<TokenBalancesReturnType[number] | null>(null);
 
   ///
   /// Queries
@@ -83,66 +87,78 @@ const HomeScreen = () => {
   };
 
   return (
-    <ScrollView
-      contentContainerStyle={{
-        rowGap: 24,
-        paddingVertical: 32,
-        paddingHorizontal: 16,
-      }}
-      refreshControl={
-        <RefreshControl
-          tintColor={colors.primary}
-          refreshing={isRefetching}
-          onRefresh={async () => {
-            setIsRefetching(true);
-            await refetch();
-            setIsRefetching(false);
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        contentContainerStyle={{
+          rowGap: 24,
+          paddingVertical: 32,
+          paddingHorizontal: 16,
+        }}
+        refreshControl={
+          <RefreshControl
+            tintColor={colors.primary}
+            refreshing={isRefetching}
+            onRefresh={async () => {
+              setIsRefetching(true);
+              await refetch();
+              setIsRefetching(false);
+            }}
+          />
+        }
+        testID="home"
+      >
+        <StyledText style={{ fontSize: 36, color: colors.text }}>
+          {isLoadingAccountUsdValue ? (
+            <Skeleton style={{ width: 100, height: 24 }} />
+          ) : (
+            `$${accountUsdValue?.toFixed(2)}`
+          )}
+        </StyledText>
+        <View style={{ flexDirection: 'row', columnGap: 20 }}>
+          <MenuItem
+            icon={<AntDesign name="plus" size={24} color={colors.background} />}
+            title="Deposit"
+            testID="deposit"
+            onPress={onDepositPress}
+          />
+          <MenuItem
+            icon={
+              <Ionicons
+                name="swap-horizontal"
+                size={24}
+                color={colors.background}
+              />
+            }
+            title="Swap"
+            testID="swap"
+            onPress={onSwapPress}
+          />
+        </View>
+        {tokenBalances?.slice(0, 5).map((tokenBalance, index) => (
+          <Pressable
+            key={index}
+            onPress={() => setShowTokenBalanceDetailsSheet(tokenBalance)}
+          >
+            <TokenBalanceCard
+              balance={hexToBigInt(tokenBalance.balance)}
+              tokenDecimals={tokenBalance.decimals}
+              symbol={tokenBalance.symbol}
+              name={tokenBalance.name}
+              usdValue={tokenBalance.usdValue}
+              logoUrl={tokenBalance.logoUrl}
+            />
+          </Pressable>
+        ))}
+      </ScrollView>
+      {showTokenBalanceDetailsSheet && (
+        <TokenBalanceDetailsSheet
+          tokenBalance={showTokenBalanceDetailsSheet}
+          onClose={() => {
+            setShowTokenBalanceDetailsSheet(null);
           }}
         />
-      }
-      testID="home"
-    >
-      <StyledText style={{ fontSize: 36, color: colors.text }}>
-        {isLoadingAccountUsdValue ? (
-          <Skeleton style={{ width: 100, height: 24 }} />
-        ) : (
-          `$${accountUsdValue?.toFixed(2)}`
-        )}
-      </StyledText>
-      <View style={{ flexDirection: 'row', columnGap: 20 }}>
-        <MenuItem
-          icon={<AntDesign name="plus" size={24} color={colors.background} />}
-          title="Deposit"
-          testID="deposit"
-          onPress={onDepositPress}
-        />
-        <MenuItem
-          icon={
-            <Ionicons
-              name="swap-horizontal"
-              size={24}
-              color={colors.background}
-            />
-          }
-          title="Swap"
-          testID="swap"
-          onPress={onSwapPress}
-        />
-      </View>
-      {tokenBalances
-        ?.slice(0, 5)
-        .map((tokenBalance, index) => (
-          <TokenBalanceCard
-            key={index}
-            balance={hexToBigInt(tokenBalance.balance)}
-            tokenDecimals={tokenBalance.decimals}
-            symbol={tokenBalance.symbol}
-            name={tokenBalance.name}
-            usdValue={tokenBalance.usdValue}
-            logoUrl={tokenBalance.logoUrl}
-          />
-        ))}
-    </ScrollView>
+      )}
+    </View>
   );
 };
 

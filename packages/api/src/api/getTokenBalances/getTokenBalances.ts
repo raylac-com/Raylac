@@ -98,6 +98,7 @@ const getKnownTokenBalances = async ({
         usdValue,
         tokenPrice: Number(usdPrice),
         breakdown: multiChainBalances
+          .filter(balance => balance.balance !== BigInt(0))
           .sort((a, b) => (b.balance > a.balance ? 1 : -1))
           .map(({ chainId, tokenAddress, balance }) => ({
             chainId,

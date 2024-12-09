@@ -5,7 +5,8 @@ import { formatAmount } from '@raylac/shared';
 import { View } from 'react-native';
 import StyledText from './StyledText/StyledText';
 import TokenLogo from './FastImage/TokenLogo';
-export const TokenBalanceCard = (props: {
+
+const TokenBalanceCard = (props: {
   name: string;
   symbol: string;
   balance: bigint;
@@ -63,3 +64,5 @@ export const TokenBalanceCard = (props: {
     </View>
   );
 };
+
+export default TokenBalanceCard;
