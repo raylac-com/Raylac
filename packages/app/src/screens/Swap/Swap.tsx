@@ -20,6 +20,7 @@ import useTokenBalance from '@/hooks/useTokenBalance';
 import { View } from 'react-native';
 import { SearchTokenSheetProvider } from '@/contexts/SearchInputTokenSheetContext';
 import { SearchOutputTokenSheetProvider } from '@/contexts/SearchOutputTokenSheetContext';
+import SwapPath from './components/SwapPath/SwapPath';
 
 type Token = SupportedTokensReturnType[number];
 
@@ -51,6 +52,24 @@ const Swap = () => {
         enabled: !!userAccount,
       }
     );
+
+  const { data: inputTokenMetadata } = trpc.getToken.useQuery(
+    {
+      tokenAddress: inputToken?.addresses[0].address ?? zeroAddress,
+    },
+    {
+      enabled: !!inputToken,
+    }
+  );
+
+  const { data: outputTokenMetadata } = trpc.getToken.useQuery(
+    {
+      tokenAddress: outputToken?.addresses[0].address ?? zeroAddress,
+    },
+    {
+      enabled: !!outputToken,
+    }
+  );
 
   const { data: supportedTokens } = trpc.getSupportedTokens.useQuery({
     chainIds: supportedChains.map(chain => chain.id),
@@ -189,6 +208,18 @@ const Swap = () => {
             balance={inputTokenBalance}
             isLoadingBalance={isLoadingTokenBalances}
           />
+          {swapQuote && inputTokenMetadata && outputTokenMetadata && (
+            <SwapPath
+              inputs={swapQuote.inputs.map(input => ({
+                ...input,
+                token: inputTokenMetadata,
+              }))}
+              output={{
+                chainId: swapQuote.output.chainId,
+                token: outputTokenMetadata,
+              }}
+            />
+          )}
           <SwapOutputCard
             token={outputToken}
             setToken={setOutputToken}
