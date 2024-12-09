@@ -4,8 +4,7 @@ import spacing from '@/lib/styles/spacing';
 import { formatAmount } from '@raylac/shared';
 import { View } from 'react-native';
 import StyledText from './StyledText/StyledText';
-import FastImage from 'react-native-fast-image';
-
+import TokenLogo from './FastImage/TokenLogo';
 export const TokenBalanceCard = (props: {
   name: string;
   symbol: string;
@@ -41,7 +40,7 @@ export const TokenBalanceCard = (props: {
           columnGap: 8,
         }}
       >
-        <FastImage
+        <TokenLogo
           source={{ uri: props.logoUrl }}
           style={{ width: 42, height: 42 }}
         />

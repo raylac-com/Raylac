@@ -1,11 +1,11 @@
 import { Pressable, TextInput, View } from 'react-native';
-import FastImage from 'react-native-fast-image';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { SupportedTokensReturnType } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
 import Skeleton from '@/components/Skeleton/Skeleton';
+import TokenLogo from '@/components/FastImage/TokenLogo';
 
 const SwapAmountInput = ({
   selectedToken,
@@ -33,7 +33,7 @@ const SwapAmountInput = ({
         onPress={onSelectTokenPress}
       >
         {selectedToken ? (
-          <FastImage
+          <TokenLogo
             source={{ uri: selectedToken.logoURI }}
             style={{ width: 34, height: 34 }}
           />

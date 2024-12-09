@@ -1,12 +1,12 @@
 import { View } from 'react-native';
 import StyledText from '../StyledText/StyledText';
 import { GetSwapHistoryReturnType } from '@/types';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import colors from '@/lib/styles/colors';
 import useTokenMeta from '@/hooks/useTokenMeta';
 import { Hex } from 'viem';
-import FastImage from 'react-native-fast-image';
+import TokenLogo from '../FastImage/TokenLogo';
 
 const SwapHistoryItem = (props: { swap: GetSwapHistoryReturnType[number] }) => {
   const { data: tokenMetaIn } = useTokenMeta(props.swap.tokenAddressIn as Hex);
@@ -19,16 +19,10 @@ const SwapHistoryItem = (props: { swap: GetSwapHistoryReturnType[number] }) => {
       style={{
         flexDirection: 'row',
         justifyContent: 'space-between',
-        padding: 16,
-        borderRadius: 16,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
         borderColor: colors.border,
-        borderWidth: 1,
-        shadowColor: 'black',
-        shadowOffset: {
-          width: 0,
-          height: 2,
-        },
-        elevation: 3,
+        borderBottomWidth: 1,
       }}
     >
       <View
@@ -38,18 +32,18 @@ const SwapHistoryItem = (props: { swap: GetSwapHistoryReturnType[number] }) => {
           columnGap: 8,
         }}
       >
-        <FastImage
+        <TokenLogo
           source={{
             uri: tokenMetaIn?.logoURI,
           }}
-          style={{ width: 42, height: 42 }}
+          style={{ width: 38, height: 38 }}
         />
-        <FontAwesome name="arrow-right" size={24} color="black" />
-        <FastImage
+        <AntDesign name="arrowright" size={24} color={colors.subbedText} />
+        <TokenLogo
           source={{
             uri: tokenMetaOut?.logoURI,
           }}
-          style={{ width: 42, height: 42 }}
+          style={{ width: 38, height: 38 }}
         />
         <StyledText style={{ fontWeight: 'bold' }}>
           {`$${Number(props.swap.usdAmountIn).toFixed(2)}`}

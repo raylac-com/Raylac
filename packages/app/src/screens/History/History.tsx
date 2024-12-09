@@ -47,7 +47,6 @@ const History = () => {
         contentContainerStyle={{
           paddingVertical: 32,
           paddingHorizontal: 16,
-          rowGap: 12,
         }}
         data={swapHistory ?? []}
         renderItem={({ item }) => (

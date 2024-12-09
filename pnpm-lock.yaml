@@ -199,6 +199,9 @@ importers:
       expo-font:
         specifier: ~13.0.1
         version: 13.0.1(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
+      expo-image:
+        specifier: ~2.0.3
+        version: 2.0.3(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
       expo-linking:
         specifier: ~7.0.3
         version: 7.0.3(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)
@@ -3620,6 +3623,17 @@ packages:
     peerDependencies:
       expo: '*'
       react: '*'
+
+  expo-image@2.0.3:
+    resolution: {integrity: sha512-+YnHTQv8jbXaut3FY7TDhNiSiGZ927C329mHvTZWV4Fyj32/Hjhhmk7dqq9I6LrA0nqBBiJjFj3u6VdHvCBnZg==}
+    peerDependencies:
+      expo: '*'
+      react: '*'
+      react-native: '*'
+      react-native-web: '*'
+    peerDependenciesMeta:
+      react-native-web:
+        optional: true
 
   expo-json-utils@0.14.0:
     resolution: {integrity: sha512-xjGfK9dL0B1wLnOqNkX0jM9p48Y0I5xEPzHude28LY67UmamUyAACkqhZGaPClyPNfdzczk7Ej6WaRMT3HfXvw==}
@@ -11121,6 +11135,12 @@ snapshots:
       expo: 52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4)
       fontfaceobserver: 2.3.0
       react: 18.3.1
+
+  expo-image@2.0.3(expo@52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4))(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1):
+    dependencies:
+      expo: 52.0.14(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4)
+      react: 18.3.1
+      react-native: 0.76.3(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4)
 
   expo-json-utils@0.14.0: {}
 
