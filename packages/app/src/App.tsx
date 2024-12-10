@@ -63,6 +63,7 @@ const Tabs = () => {
         name="Swap"
         component={Swap}
         options={{
+          headerShown: false,
           tabBarLabel: () => null,
           tabBarIcon: ({ color }) => (
             <AntDesign name="swap" size={24} color={color} />
