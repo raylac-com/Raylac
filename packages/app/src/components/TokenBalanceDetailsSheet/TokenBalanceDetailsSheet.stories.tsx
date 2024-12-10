@@ -23,13 +23,14 @@ const meta = {
         ],
       },
       balance: toHex(parseUnits('100', 6)),
-      usdValue: 100,
-      tokenPrice: 1,
+      usdValue: '100',
+      tokenPrice: '1',
       breakdown: [
         {
           chainId: base.id,
           balance: toHex(parseUnits('100', 6)),
           tokenAddress: zeroAddress,
+          usdValue: '100',
         },
       ],
     },
