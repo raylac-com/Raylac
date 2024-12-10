@@ -21,6 +21,7 @@ import {
 import { KNOWN_TOKENS } from '../../lib/knownTokes';
 import { relayApi } from '../../lib/relay';
 import BigNumber from 'bignumber.js';
+import { logger } from '@raylac/shared-backend';
 
 const getETHBalance = async ({
   address,
@@ -68,6 +69,7 @@ const getKnownTokenBalances = async ({
       );
 
       if (totalBalance === BigInt(0)) {
+        logger.info(`No balance found for known token ${token.symbol}`);
         return null;
       }
 
@@ -161,6 +163,7 @@ const getMultiChainERC20Balances = async ({
                 {
                   chainIds: [chain.id],
                   address: tokenBalance.contractAddress,
+                  useExternalSearch: true,
                 }
               );
 
@@ -168,6 +171,9 @@ const getMultiChainERC20Balances = async ({
               result.data.length > 0 ? result.data[0][0] : null;
 
             if (!tokenMetadata) {
+              logger.error(
+                `No token metadata found for ${tokenBalance.contractAddress}`
+              );
               return null;
             }
 
@@ -194,6 +200,9 @@ const getMultiChainERC20Balances = async ({
             )?.value;
 
             if (!usdPrice) {
+              logger.info(
+                `No USD price found for ${tokenBalance.contractAddress}`
+              );
               return null;
             }
 

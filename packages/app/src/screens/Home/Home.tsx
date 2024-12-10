@@ -134,7 +134,7 @@ const HomeScreen = () => {
             onPress={onSwapPress}
           />
         </View>
-        {tokenBalances?.slice(0, 5).map((tokenBalance, index) => (
+        {tokenBalances?.map((tokenBalance, index) => (
           <Pressable
             key={index}
             onPress={() => setShowTokenBalanceDetailsSheet(tokenBalance)}

@@ -1,6 +1,7 @@
 import {
   findTokenByAddress,
   RelaySupportedCurrenciesResponseBody,
+  supportedChains,
   SupportedTokensReturnType,
 } from '@raylac/shared';
 import { getAddress, Hex } from 'viem';
@@ -24,8 +25,10 @@ const getToken = async ({
   const currencies = await relayApi.post<RelaySupportedCurrenciesResponseBody>(
     'currencies/v1',
     {
+      chainIds: supportedChains.map(chain => chain.id),
       address: tokenAddress,
       limit: 1,
+      useExternalSearch: true,
     }
   );
 

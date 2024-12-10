@@ -58,7 +58,7 @@ const getSwapQuote = async ({
     destinationChainId,
     partial: true,
     tradeType,
-    useUserOperation: true,
+    useUserOperation: false,
   };
 
   const qt = st('Get quote');

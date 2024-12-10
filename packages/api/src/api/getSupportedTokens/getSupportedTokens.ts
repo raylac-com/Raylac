@@ -19,6 +19,7 @@ const getSupportedTokens = async ({
       chainIds,
       limit: 100,
       term: searchTerm,
+      useExternalSearch: true,
     }
   );
 
