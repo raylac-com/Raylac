@@ -20,6 +20,7 @@ import {
 } from '../../lib/alchemy';
 import { KNOWN_TOKENS } from '../../lib/knownTokes';
 import { relayApi } from '../../lib/relay';
+import BigNumber from 'bignumber.js';
 
 const getETHBalance = async ({
   address,
@@ -86,14 +87,15 @@ const getKnownTokenBalances = async ({
         throw new Error(`USD price not found for known token ${token.symbol}`);
       }
 
-      const usdValue =
-        Number(usdPrice) * Number(formatUnits(totalBalance, token.decimals));
+      const usdValue = new BigNumber(usdPrice)
+        .multipliedBy(new BigNumber(formatUnits(totalBalance, token.decimals)))
+        .toString();
 
       const tokenBalance: TokenBalancesReturnType[number] = {
         token,
         balance: toHex(totalBalance),
         usdValue,
-        tokenPrice: Number(usdPrice),
+        tokenPrice: usdPrice,
         breakdown: multiChainBalances
           .filter(balance => balance.balance !== BigInt(0))
           .sort((a, b) => (b.balance > a.balance ? 1 : -1))
@@ -101,6 +103,9 @@ const getKnownTokenBalances = async ({
             chainId,
             tokenAddress,
             balance: toHex(balance),
+            usdValue: new BigNumber(usdPrice)
+              .multipliedBy(new BigNumber(formatUnits(balance, token.decimals)))
+              .toString(),
           })),
       };
 
@@ -193,26 +198,29 @@ const getMultiChainERC20Balances = async ({
             }
 
             // Calculate the USD value of the token
-            const usdValue =
-              Number(usdPrice) *
-              Number(
-                formatUnits(
-                  hexToBigInt(tokenBalance.tokenBalance as Hex),
-                  tokenMetadata.decimals!
+            const usdValue = new BigNumber(usdPrice)
+              .multipliedBy(
+                new BigNumber(
+                  formatUnits(
+                    hexToBigInt(tokenBalance.tokenBalance as Hex),
+                    tokenMetadata.decimals!
+                  )
                 )
-              );
+              )
+              .toString();
 
             return {
               tokenBalance,
               tokenMetadata,
               usdValue,
+              tokenPrice: usdPrice,
             };
           })
       );
 
       const multiChainTokenBalances: TokenBalancesReturnType = withUsdValue
         .filter(token => token !== null)
-        .map(({ tokenBalance, tokenMetadata, usdValue }) => {
+        .map(({ tokenBalance, tokenMetadata, usdValue, tokenPrice }) => {
           return {
             token: {
               name: tokenMetadata.name,
@@ -228,12 +236,13 @@ const getMultiChainERC20Balances = async ({
             },
             balance: tokenBalance.tokenBalance as Hex,
             usdValue,
-            tokenPrice: usdValue,
+            tokenPrice,
             breakdown: [
               {
                 chainId: chain.id,
                 balance: tokenBalance.tokenBalance as Hex,
                 tokenAddress: tokenBalance.contractAddress as Hex,
+                usdValue,
               },
             ],
           };

@@ -31,7 +31,8 @@
     "tsx": "^4.7.1",
     "uuid": "^10.0.0",
     "viem": "^2.17.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "bignumber.js": "9.0.1"
   },
   "devDependencies": {
     "@faker-js/faker": "^9.3.0",

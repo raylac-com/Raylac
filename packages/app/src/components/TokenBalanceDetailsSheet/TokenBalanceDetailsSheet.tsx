@@ -1,6 +1,10 @@
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { useRef } from 'react';
-import { formatAmount, TokenBalancesReturnType } from '@raylac/shared';
+import {
+  formatAmount,
+  formatUsdValue,
+  TokenBalancesReturnType,
+} from '@raylac/shared';
 import StyledText from '../StyledText/StyledText';
 import { Image, View } from 'react-native';
 import TokenLogo from '../FastImage/TokenLogo';
@@ -8,6 +12,7 @@ import colors from '@/lib/styles/colors';
 import { hexToBigInt } from 'viem';
 import fontSizes from '@/lib/styles/fontSizes';
 import { getChainIcon } from '@/lib/utils';
+import BigNumber from 'bignumber.js';
 
 const ChainTokenBalance = ({
   chainId,
@@ -18,7 +23,7 @@ const ChainTokenBalance = ({
   chainId: number;
   symbol: string;
   formattedBalance: string;
-  usdValue: number;
+  usdValue: string;
 }) => {
   return (
     <View
@@ -46,7 +51,7 @@ const ChainTokenBalance = ({
           {formattedBalance} {symbol}
         </StyledText>
       </View>
-      <StyledText>{`$${usdValue}`}</StyledText>
+      <StyledText>{`$${formatUsdValue(new BigNumber(usdValue))}`}</StyledText>
     </View>
   );
 };
@@ -117,7 +122,7 @@ const TokenBalanceDetailsSheet = ({
               )}
             </StyledText>
             <StyledText style={{ color: colors.subbedText }}>
-              {`$${tokenBalance.usdValue}`}
+              {`$${formatUsdValue(new BigNumber(tokenBalance.usdValue))}`}
             </StyledText>
           </View>
         </View>
@@ -131,7 +136,7 @@ const TokenBalanceDetailsSheet = ({
                 hexToBigInt(chainTokenBalance.balance).toString(),
                 tokenBalance.token.decimals
               )}
-              usdValue={0}
+              usdValue={chainTokenBalance.usdValue}
             />
           ))}
         </View>

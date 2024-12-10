@@ -111,7 +111,7 @@ const HomeScreen = () => {
           {isLoadingAccountUsdValue ? (
             <Skeleton style={{ width: 100, height: 24 }} />
           ) : (
-            `$${accountUsdValue?.toFixed(2)}`
+            `$${accountUsdValue}`
           )}
         </StyledText>
         <View style={{ flexDirection: 'row', columnGap: 20 }}>

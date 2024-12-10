@@ -30,6 +30,7 @@ import { ACCOUNT_IMPL_V2_ADDRESS } from './addresses';
 import RaylacAccountProxyBytecode from './bytecode/RaylacAccountProxyBytecode';
 import RaylacAccountProxyAbi from './abi/RaylacAccountProxyAbi';
 import { TokenBalancesReturnType } from './rpcTypes';
+import BigNumber from 'bignumber.js';
 
 const VIEW_TAG_BYTES = 1;
 const CHAIN_ID_BYTES = 4;
@@ -402,4 +403,17 @@ export const findTokenByAddress = ({
       address => getAddress(address.address) === getAddress(tokenAddress)
     )
   );
+};
+
+export const formatUsdValue = (num: BigNumber): string => {
+  // If number is less than or equal to 0.1, use precision
+  // 0.1 -> 0.1
+  // 0.011 -> 0.011
+  // 0.019 -> 0.019
+  // 0.001 -> 0.001
+  if (num.lte(new BigNumber('0.01'))) {
+    return num.toPrecision(2).replace(/\.?0+$/, '');
+  }
+
+  return num.toFormat(2).replace(/\.?0+$/, '');
 };

@@ -1,17 +1,18 @@
 import borderRadius from '@/lib/styles/borderRadius';
 import colors from '@/lib/styles/colors';
 import spacing from '@/lib/styles/spacing';
-import { formatAmount } from '@raylac/shared';
+import { formatAmount, formatUsdValue } from '@raylac/shared';
 import { View } from 'react-native';
 import StyledText from './StyledText/StyledText';
 import TokenLogo from './FastImage/TokenLogo';
+import BigNumber from 'bignumber.js';
 
 const TokenBalanceCard = (props: {
   name: string;
   symbol: string;
   balance: bigint;
   tokenDecimals: number;
-  usdValue: number;
+  usdValue: string;
   logoUrl: string;
 }) => {
   const formattedBalance = formatAmount(
@@ -60,7 +61,7 @@ const TokenBalanceCard = (props: {
       </View>
       <StyledText
         style={{ fontWeight: 'bold' }}
-      >{`$${props.usdValue.toFixed(2)}`}</StyledText>
+      >{`$${formatUsdValue(new BigNumber(props.usdValue))}`}</StyledText>
     </View>
   );
 };

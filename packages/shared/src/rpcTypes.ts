@@ -17,12 +17,13 @@ export type SupportedTokensReturnType = Token[];
 export type TokenBalancesReturnType = {
   token: Token;
   balance: Hex;
-  usdValue: number;
-  tokenPrice: number;
+  usdValue: string;
+  tokenPrice: string;
   breakdown: {
     chainId: number;
     balance: Hex;
     tokenAddress: Hex;
+    usdValue: string;
   }[];
 }[];
 
