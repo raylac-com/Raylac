@@ -40,6 +40,6 @@ export const SearchTokenSheetProvider = ({
 };
 
 // Create a custom hook for consuming the context
-export const useSearchTokenSheet = () => {
+export const useSearchInputTokenSheet = () => {
   return useContext(SearchInputTokenSheetContext);
 };
