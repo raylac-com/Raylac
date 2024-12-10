@@ -145,6 +145,7 @@ const SearchTokenSheet = ({
       snapPoints={['100%']}
       enablePanDownToClose
       onClose={onClose}
+      enableDynamicSizing={false}
     >
       <SearchInput value={searchText} onChangeText={setSearchText} />
       <BottomSheetFlatList
