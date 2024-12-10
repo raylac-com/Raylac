@@ -224,7 +224,10 @@ const App = () => {
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <PersistQueryClientProvider
           client={queryClient}
-          persistOptions={{ persister: asyncStoragePersister, buster: '45' }}
+          persistOptions={{
+            persister: asyncStoragePersister,
+            buster: process.env.EXPO_PUBLIC_CACHE_BUSTER || '0',
+          }}
         >
           <ThemeProvider value={NavigationTheme}>
             <Screens></Screens>
