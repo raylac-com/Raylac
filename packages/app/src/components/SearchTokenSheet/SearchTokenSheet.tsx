@@ -60,6 +60,7 @@ const SearchInput = ({
       placeholder="Search for a token"
       value={value}
       onChangeText={onChangeText}
+      autoCapitalize="none"
       style={{
         borderWidth: 1,
         borderColor: colors.border,
@@ -107,10 +108,20 @@ const SearchTokenSheet = ({
     );
 
   const tokensWithBalances =
-    tokenBalances?.map(token => ({
-      token: token.token,
-      balance: hexToBigInt(token.balance),
-    })) ?? [];
+    tokenBalances
+      ?.filter(
+        token =>
+          token.token.name
+            .toLowerCase()
+            .includes(debouncedSearchText.toLowerCase()) ||
+          token.token.symbol
+            .toLowerCase()
+            .includes(debouncedSearchText.toLowerCase())
+      )
+      .map(token => ({
+        token: token.token,
+        balance: hexToBigInt(token.balance),
+      })) ?? [];
 
   // Get the token addresses of the tokens with balances
   const tokenAddressesWithBalances = tokensWithBalances.flatMap(token =>
@@ -120,11 +131,11 @@ const SearchTokenSheet = ({
   // Get the tokens without balances
   const tokensWithoutBalances =
     supportedTokens
-      ?.filter(token =>
-        token.addresses.some(
-          address =>
-            !tokenAddressesWithBalances.includes(getAddress(address.address))
-        )
+      ?.filter(
+        token =>
+          !token.addresses.some(address =>
+            tokenAddressesWithBalances.includes(getAddress(address.address))
+          )
       )
       .map(token => ({
         token: token,
@@ -152,11 +163,7 @@ const SearchTokenSheet = ({
         data={
           isLoadingTokenBalances || isLoadingSupportedTokens || isDebouncing
             ? new Array(3).fill(undefined)
-            : tokenList.filter(token =>
-                token.token.name
-                  .toLowerCase()
-                  .includes(searchText.toLowerCase())
-              )
+            : tokenList
         }
         contentContainerStyle={{
           marginTop: 14,

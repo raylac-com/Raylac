@@ -18,18 +18,20 @@ const getSupportedTokens = async ({
     {
       chainIds,
       limit: 100,
-      term: searchTerm,
-      useExternalSearch: true,
+      term: searchTerm === '' ? undefined : searchTerm,
+      useExternalSearch: searchTerm !== '' && searchTerm !== undefined,
     }
   );
 
-  const knownTokenSymbols = KNOWN_TOKENS.map(token => token.symbol);
+  const knownTokenAddresses = KNOWN_TOKENS.flatMap(token =>
+    token.addresses.map(address => getAddress(address.address))
+  );
 
   const supportedTokens: SupportedTokensReturnType = currencies.data
     .map(group => (group.length > 0 ? group[0] : null))
     .filter(token => token !== null)
     // Filter out known tokens
-    .filter(token => !knownTokenSymbols.includes(token.symbol))
+    .filter(token => !knownTokenAddresses.includes(getAddress(token.address)))
     // Sort by verified status
     .sort((a, b) => Number(b.metadata.verified) - Number(a.metadata.verified))
     // Map to `SupportedTokensReturnType`
@@ -46,7 +48,15 @@ const getSupportedTokens = async ({
       ],
     }));
 
-  return [...KNOWN_TOKENS, ...supportedTokens];
+  const filteredKnownTokens = searchTerm
+    ? KNOWN_TOKENS.filter(
+        token =>
+          token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          token.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : KNOWN_TOKENS;
+
+  return [...filteredKnownTokens, ...supportedTokens];
 };
 
 export default getSupportedTokens;
