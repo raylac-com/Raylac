@@ -23,8 +23,6 @@ const getSwapQuote = async (
   args: GetSwapQuoteRequestBody
 ): Promise<GetSwapQuoteReturnType> => {
   const sender = args.senderAddress;
-  const inputToken = args.inputs[0].tokenAddress;
-  const outputToken = args.output.tokenAddress;
   const tradeType = args.tradeType;
 
   const amount = hexToBigInt(args.inputs[0].amount);
@@ -69,7 +67,7 @@ const getSwapQuote = async (
       currencyIn: {
         currency: {
           chainId: 8453,
-          address: inputToken,
+          address: zeroAddress,
           symbol: 'USDC',
           name: 'USD Coin',
           decimals: 6,
@@ -87,7 +85,7 @@ const getSwapQuote = async (
       currencyOut: {
         currency: {
           chainId: 8453,
-          address: outputToken,
+          address: zeroAddress,
           symbol: 'USDC',
           name: 'USD Coin',
           decimals: 6,

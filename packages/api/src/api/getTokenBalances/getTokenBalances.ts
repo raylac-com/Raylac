@@ -9,9 +9,9 @@ import {
 import { getPublicClient } from '../../utils';
 import {
   supportedChains,
-  MultiChainTokenBalance,
   getERC20TokenBalance,
   RelaySupportedCurrenciesResponseBody,
+  TokenBalancesReturnType,
 } from '@raylac/shared';
 import {
   getAlchemyClient,
@@ -38,7 +38,7 @@ const getKnownTokenBalances = async ({
   address,
 }: {
   address: Hex;
-}): Promise<MultiChainTokenBalance[]> => {
+}): Promise<TokenBalancesReturnType> => {
   const balances = await Promise.all(
     KNOWN_TOKENS.map(async token => {
       const multiChainBalances = await Promise.all(
@@ -89,11 +89,8 @@ const getKnownTokenBalances = async ({
       const usdValue =
         Number(usdPrice) * Number(formatUnits(totalBalance, token.decimals));
 
-      return {
-        name: token.name,
-        symbol: token.symbol,
-        logoUrl: token.logoURI,
-        decimals: token.decimals,
+      const tokenBalance: TokenBalancesReturnType[number] = {
+        token,
         balance: toHex(totalBalance),
         usdValue,
         tokenPrice: Number(usdPrice),
@@ -106,6 +103,8 @@ const getKnownTokenBalances = async ({
             balance: toHex(balance),
           })),
       };
+
+      return tokenBalance;
     })
   );
 
@@ -119,7 +118,7 @@ const getMultiChainERC20Balances = async ({
   address,
 }: {
   address: Hex;
-}): Promise<MultiChainTokenBalance[]> => {
+}): Promise<TokenBalancesReturnType> => {
   // Get addresses of all known tokens
   // We use this to filter out known tokens from the Alchemy response
   const knownTokenAddresses = KNOWN_TOKENS.map(token =>
@@ -211,14 +210,22 @@ const getMultiChainERC20Balances = async ({
           })
       );
 
-      const multiChainTokenBalances: MultiChainTokenBalance[] = withUsdValue
+      const multiChainTokenBalances: TokenBalancesReturnType = withUsdValue
         .filter(token => token !== null)
         .map(({ tokenBalance, tokenMetadata, usdValue }) => {
           return {
-            name: tokenMetadata.name,
-            symbol: tokenMetadata.symbol,
-            logoUrl: tokenMetadata.metadata.logoURI,
-            decimals: tokenMetadata.decimals,
+            token: {
+              name: tokenMetadata.name,
+              symbol: tokenMetadata.symbol,
+              logoURI: tokenMetadata.metadata.logoURI,
+              decimals: tokenMetadata.decimals,
+              addresses: [
+                {
+                  chainId: chain.id,
+                  address: tokenBalance.contractAddress as Hex,
+                },
+              ],
+            },
             balance: tokenBalance.tokenBalance as Hex,
             usdValue,
             tokenPrice: usdValue,

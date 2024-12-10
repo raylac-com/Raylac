@@ -18,20 +18,47 @@ const getSwapQuote = async ({
 }: GetSwapQuoteRequestBody) => {
   const destinationChainId = output.chainId;
 
+  // Convert GetSwapQuoteRequestBody["inputs"] to RelaySwapMultiInputRequestBody["origins"]
+  const origins = inputs.map(input => {
+    const chainTokenAddress = input.token.addresses.find(
+      address => address.chainId === input.chainId
+    )?.address;
+
+    if (!chainTokenAddress) {
+      throw new Error(
+        `getSwapQuote: chainTokenAddress not found for ${input.token.name} on chain ${input.chainId}`
+      );
+    }
+
+    return {
+      chainId: input.chainId,
+      currency: chainTokenAddress,
+      amount: hexToBigInt(input.amount).toString(),
+    };
+  });
+
+  // Convert GetSwapQuoteRequestBody["output"] to RelaySwapMultiInputRequestBody["destinationCurrency"]
+  const outputTokenAddress = output.token.addresses.find(
+    address => address.chainId === output.chainId
+  )?.address;
+
+  if (!outputTokenAddress) {
+    throw new Error(
+      `getSwapQuote: outputTokenAddress not found for ${output.token.name} on chain ${output.chainId}`
+    );
+  }
+
+  // Get quote from Relay
   // Get quote from Relay
   const requestBody: RelaySwapMultiInputRequestBody = {
     user: senderAddress,
     recipient: senderAddress,
-    origins: inputs.map(input => ({
-      chainId: input.chainId,
-      currency: input.tokenAddress,
-      amount: hexToBigInt(input.amount).toString(),
-    })),
-    destinationCurrency: output.tokenAddress,
+    origins,
+    destinationCurrency: outputTokenAddress,
     destinationChainId,
-    partial: false,
+    partial: true,
     tradeType,
-    useUserOperation: false,
+    useUserOperation: true,
   };
 
   const qt = st('Get quote');
@@ -83,9 +110,6 @@ const getSwapQuote = async ({
   }
 
   ed(qt);
-  // Build user op
-
-  // Get the nonce of the account
 
   return quote;
 };

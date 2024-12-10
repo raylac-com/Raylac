@@ -3,18 +3,25 @@ import StyledText from '@/components/StyledText/StyledText';
 import useDebounce from '@/hooks/useDebounce';
 import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
-import { supportedChains, SupportedTokensReturnType } from '@raylac/shared';
+import { formatAmount, supportedChains, Token } from '@raylac/shared';
 import { useRef, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import TokenLogo from '../FastImage/TokenLogo';
+import useUserAccount from '@/hooks/useUserAccount';
+import { getAddress, hexToBigInt, zeroAddress } from 'viem';
 
 const TokenListItem = ({
   token,
   balance,
   onPress,
 }: {
-  token: SupportedTokensReturnType[number];
+  token: {
+    name: string;
+    symbol: string;
+    decimals: number;
+    logoURI: string;
+  };
   balance: bigint;
   onPress: () => void;
 }) => {
@@ -34,7 +41,7 @@ const TokenListItem = ({
       <View style={{ flexDirection: 'column', rowGap: 4 }}>
         <StyledText>{token.name}</StyledText>
         <StyledText style={{ color: colors.border }}>
-          {balance.toLocaleString()} {token.symbol}
+          {formatAmount(balance.toString(), token.decimals)} {token.symbol}
         </StyledText>
       </View>
     </Pressable>
@@ -68,19 +75,63 @@ const SearchTokenSheet = ({
   onSelectToken,
   onClose,
 }: {
-  onSelectToken: (token: SupportedTokensReturnType[number]) => void;
+  onSelectToken: (token: Token) => void;
   onClose: () => void;
 }) => {
+  const { data: userAccount } = useUserAccount();
   const ref = useRef<BottomSheet>(null);
   const [searchText, setSearchText] = useState('');
 
   const { debouncedValue: debouncedSearchText, isPending: isDebouncing } =
     useDebounce(searchText, 500);
 
-  const { data: supportedTokens } = trpc.getSupportedTokens.useQuery({
-    chainIds: supportedChains.map(chain => chain.id),
-    searchTerm: debouncedSearchText,
-  });
+  const { data: tokenBalances, isLoading: isLoadingTokenBalances } =
+    trpc.getTokenBalances.useQuery(
+      {
+        address: userAccount?.address ?? zeroAddress,
+      },
+      {
+        enabled: !!userAccount,
+      }
+    );
+
+  const { data: supportedTokens, isLoading: isLoadingSupportedTokens } =
+    trpc.getSupportedTokens.useQuery(
+      {
+        chainIds: supportedChains.map(chain => chain.id),
+        searchTerm: debouncedSearchText,
+      },
+      {
+        enabled: !isLoadingTokenBalances,
+      }
+    );
+
+  const tokensWithBalances =
+    tokenBalances?.map(token => ({
+      token: token.token,
+      balance: hexToBigInt(token.balance),
+    })) ?? [];
+
+  // Get the token addresses of the tokens with balances
+  const tokenAddressesWithBalances = tokensWithBalances.flatMap(token =>
+    token.token.addresses.map(address => getAddress(address.address))
+  );
+
+  // Get the tokens without balances
+  const tokensWithoutBalances =
+    supportedTokens
+      ?.filter(token =>
+        token.addresses.some(
+          address =>
+            !tokenAddressesWithBalances.includes(getAddress(address.address))
+        )
+      )
+      .map(token => ({
+        token: token,
+        balance: BigInt(0),
+      })) ?? [];
+
+  const tokenList = [...tokensWithBalances, ...tokensWithoutBalances];
 
   return (
     <BottomSheet
@@ -98,10 +149,12 @@ const SearchTokenSheet = ({
       <SearchInput value={searchText} onChangeText={setSearchText} />
       <BottomSheetFlatList
         data={
-          supportedTokens === undefined || isDebouncing
+          isLoadingTokenBalances || isLoadingSupportedTokens || isDebouncing
             ? new Array(3).fill(undefined)
-            : supportedTokens.filter(token =>
-                token.name.toLowerCase().includes(searchText.toLowerCase())
+            : tokenList.filter(token =>
+                token.token.name
+                  .toLowerCase()
+                  .includes(searchText.toLowerCase())
               )
         }
         contentContainerStyle={{
@@ -116,7 +169,7 @@ const SearchTokenSheet = ({
         renderItem={({
           item,
         }: {
-          item: SupportedTokensReturnType[number] | undefined;
+          item: (typeof tokenList)[number] | undefined;
         }) => {
           if (item === undefined) {
             return <Skeleton style={{ width: '100%', height: 42 }} />;
@@ -124,10 +177,10 @@ const SearchTokenSheet = ({
 
           return (
             <TokenListItem
-              token={item}
-              balance={BigInt(0)}
+              token={item.token}
+              balance={item.balance}
               onPress={() => {
-                onSelectToken(item);
+                onSelectToken(item.token);
               }}
             />
           );

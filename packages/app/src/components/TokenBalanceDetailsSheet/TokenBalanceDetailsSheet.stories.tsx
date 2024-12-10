@@ -9,11 +9,19 @@ const meta = {
   component: TokenBalanceDetailsSheet,
   args: {
     tokenBalance: {
-      name: 'USDC',
-      symbol: 'USDC',
-      logoUrl:
-        'https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png',
-      decimals: 6,
+      token: {
+        name: 'USDC',
+        symbol: 'USDC',
+        logoURI:
+          'https://assets.coingecko.com/coins/images/6319/large/USD_Coin_icon.png',
+        decimals: 6,
+        addresses: [
+          {
+            chainId: base.id,
+            address: zeroAddress,
+          },
+        ],
+      },
       balance: toHex(parseUnits('100', 6)),
       usdValue: 100,
       tokenPrice: 1,

@@ -37,7 +37,9 @@ const StyledButton = ({ title, isLoading, ...props }: StyledButtonProps) => {
 
   return (
     <Pressable
-      onPress={props.onPress}
+      onPress={e => {
+        props.onPress?.(e);
+      }}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >

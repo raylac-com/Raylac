@@ -305,27 +305,6 @@ export enum UserActionType {
   Bridge = '0x03',
 }
 
-export enum Token {
-  ETH = 'ETH',
-  USDC = 'USDC',
-  RETH = 'RETH',
-}
-
-export interface MultiChainTokenBalance {
-  name: string;
-  symbol: string;
-  logoUrl: string;
-  decimals: number;
-  balance: Hex;
-  usdValue: number;
-  tokenPrice: number;
-  breakdown: {
-    chainId: number;
-    balance: Hex;
-    tokenAddress: Hex;
-  }[];
-}
-
 export interface AlchemyTokenPriceResponse {
   network: string;
   address: Hex;
@@ -365,3 +344,25 @@ export type RelaySupportedCurrenciesResponseBody = {
     isNative: boolean;
   };
 }[][];
+
+export interface Token {
+  symbol: string;
+  name: string;
+  decimals: number;
+  logoURI: string;
+  addresses: {
+    chainId: number;
+    address: Hex;
+  }[];
+}
+
+export interface SwapInput {
+  chainId: number;
+  amount: bigint;
+  token: Token;
+}
+
+export interface SwapOutput {
+  chainId: number;
+  token: Token;
+}

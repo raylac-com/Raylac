@@ -2,6 +2,7 @@ import { Hex } from 'viem';
 import {
   AlchemyTokenPriceResponse,
   RelayGetQuoteResponseBody,
+  Token,
   UserOperation,
 } from './types';
 
@@ -11,22 +12,10 @@ export enum TRPCErrorMessage {
   SWAP_INSUFFICIENT_LIQUIDITY = 'Solver has insufficient liquidity for this swap',
 }
 
-export type SupportedTokensReturnType = {
-  symbol: string;
-  name: string;
-  decimals: number;
-  logoURI: string;
-  addresses: {
-    chainId: number;
-    address: Hex;
-  }[];
-}[];
+export type SupportedTokensReturnType = Token[];
 
 export type TokenBalancesReturnType = {
-  name: string;
-  symbol: string;
-  logoUrl: string;
-  decimals: number;
+  token: Token;
   balance: Hex;
   usdValue: number;
   tokenPrice: number;
@@ -46,12 +35,12 @@ export interface GetSwapQuoteRequestBody {
   senderAddress: Hex;
   inputs: {
     chainId: number;
-    tokenAddress: Hex;
+    token: Token;
     amount: Hex;
   }[];
   output: {
     chainId: number;
-    tokenAddress: Hex;
+    token: Token;
   };
   tradeType: 'EXACT_INPUT' | 'EXACT_OUTPUT';
 }
@@ -70,11 +59,11 @@ export interface SubmitUserOpsRequestBody {
   swapQuote: GetSwapQuoteReturnType;
   inputs: {
     chainId: number;
-    tokenAddress: Hex;
+    token: Token;
     amount: Hex;
   }[];
   output: {
     chainId: number;
-    tokenAddress: Hex;
+    token: Token;
   };
 }

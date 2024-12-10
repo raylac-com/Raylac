@@ -1,4 +1,5 @@
 import {
+  findTokenByAddress,
   RelaySupportedCurrenciesResponseBody,
   SupportedTokensReturnType,
 } from '@raylac/shared';
@@ -11,9 +12,10 @@ const getToken = async ({
 }: {
   tokenAddress: Hex;
 }): Promise<SupportedTokensReturnType[number]> => {
-  const knownToken = KNOWN_TOKENS.find(knownToken =>
-    knownToken.addresses.some(({ address }) => address === tokenAddress)
-  );
+  const knownToken = findTokenByAddress({
+    tokens: KNOWN_TOKENS,
+    tokenAddress,
+  });
 
   if (knownToken) {
     return knownToken;

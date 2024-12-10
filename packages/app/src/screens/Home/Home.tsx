@@ -141,11 +141,11 @@ const HomeScreen = () => {
           >
             <TokenBalanceCard
               balance={hexToBigInt(tokenBalance.balance)}
-              tokenDecimals={tokenBalance.decimals}
-              symbol={tokenBalance.symbol}
-              name={tokenBalance.name}
+              tokenDecimals={tokenBalance.token.decimals}
+              symbol={tokenBalance.token.symbol}
+              name={tokenBalance.token.name}
               usdValue={tokenBalance.usdValue}
-              logoUrl={tokenBalance.logoUrl}
+              logoUrl={tokenBalance.token.logoURI}
             />
           </Pressable>
         ))}

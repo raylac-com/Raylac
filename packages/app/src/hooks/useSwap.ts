@@ -6,10 +6,10 @@ import {
 import { sleep } from '@raylac/shared/out/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import useSignUserOps from './useSignUserOp';
-import { UserOperation } from '@raylac/shared';
+import { Token, UserOperation } from '@raylac/shared';
 import { getQueryKey } from '@trpc/react-query';
 import useUserAccount from './useUserAccount';
-import { Hex, toHex } from 'viem';
+import { toHex } from 'viem';
 
 const useSwap = () => {
   const queryClient = useQueryClient();
@@ -31,8 +31,8 @@ const useSwap = () => {
       output,
       swapQuote,
     }: {
-      inputs: { chainId: number; tokenAddress: Hex; amount: bigint }[];
-      output: { chainId: number; tokenAddress: Hex };
+      inputs: { chainId: number; token: Token; amount: bigint }[];
+      output: { chainId: number; token: Token };
       swapQuote: GetSwapQuoteReturnType;
     }) => {
       await sleep(100);

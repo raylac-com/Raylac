@@ -230,7 +230,7 @@ const Swap = () => {
           />
           <StyledText style={{ color: colors.border }}>
             {swapQuote
-              ? `Swap provider fee $${swapQuote.quote.fees.relayerService.amountUsd}`
+              ? `Total fee $${swapQuote.quote.fees.relayer.amountUsd}`
               : ''}
           </StyledText>
           <StyledButton

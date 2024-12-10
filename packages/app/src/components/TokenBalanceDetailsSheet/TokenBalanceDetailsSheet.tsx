@@ -99,21 +99,21 @@ const TokenBalanceDetailsSheet = ({
             style={{ flexDirection: 'column', alignItems: 'center', rowGap: 6 }}
           >
             <TokenLogo
-              source={{ uri: tokenBalance.logoUrl }}
+              source={{ uri: tokenBalance.token.logoURI }}
               style={{
                 width: 90,
                 height: 90,
               }}
             />
             <StyledText style={{ fontSize: fontSizes.large }}>
-              {tokenBalance.name}
+              {tokenBalance.token.name}
             </StyledText>
           </View>
           <View style={{ flexDirection: 'column', alignItems: 'center' }}>
             <StyledText>
               {formatAmount(
                 hexToBigInt(tokenBalance.balance).toString(),
-                tokenBalance.decimals
+                tokenBalance.token.decimals
               )}
             </StyledText>
             <StyledText style={{ color: colors.subbedText }}>
@@ -126,10 +126,10 @@ const TokenBalanceDetailsSheet = ({
             <ChainTokenBalance
               key={i}
               chainId={chainTokenBalance.chainId}
-              symbol={tokenBalance.symbol}
+              symbol={tokenBalance.token.symbol}
               formattedBalance={formatAmount(
                 hexToBigInt(chainTokenBalance.balance).toString(),
-                tokenBalance.decimals
+                tokenBalance.token.decimals
               )}
               usdValue={0}
             />

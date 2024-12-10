@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import type { Meta, StoryObj } from '@storybook/react';
-import { TokenBalanceCard } from './TokenBalnaceCard';
+import TokenBalanceCard from './TokenBalnaceCard';
 import spacing from '@/lib/styles/spacing';
 import { parseUnits } from 'viem';
 

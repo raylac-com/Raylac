@@ -48,8 +48,26 @@ const submitUserOps = async ({
     )
   );
 
-  const tokenAddressIn = inputs[0].tokenAddress;
-  const tokenAddressOut = output.tokenAddress;
+  const tokenAddressIn = inputs[0].token.addresses.find(
+    address => address.chainId === inputs[0].chainId
+  )?.address;
+
+  if (!tokenAddressIn) {
+    throw new Error(
+      `submitUserOps: tokenAddressIn not found for ${inputs[0].token.name} on chain ${inputs[0].chainId}`
+    );
+  }
+
+  const tokenAddressOut = output.token.addresses.find(
+    address => address.chainId === output.chainId
+  )?.address;
+
+  if (!tokenAddressOut) {
+    throw new Error(
+      `submitUserOps: tokenAddressOut not found for ${output.token.name} on chain ${output.chainId}`
+    );
+  }
+
   const amountIn = inputs.reduce(
     (acc, input) => acc + hexToBigInt(input.amount),
     BigInt(0)

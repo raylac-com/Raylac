@@ -29,24 +29,22 @@ const swap = async () => {
     singerAddress,
   });
 
-  console.log(sender);
-
   const tokenBalances = await client.getTokenBalances.query({
     address: sender,
   });
 
-  const inputToken = await client.getToken.query({
-    tokenAddress: '0x4ed4e862860bed51a9570b96d89af5e1b0efefed',
-  });
+  console.log(tokenBalances);
 
-  const outputToken = await client.getToken.query({
+  const inputToken = await client.getToken.query({
     tokenAddress: zeroAddress,
   });
 
-  console.log(inputToken, outputToken);
+  const outputToken = await client.getToken.query({
+    tokenAddress: '0x4ed4e862860bed51a9570b96d89af5e1b0efefed',
+  });
 
   const inputTokenBalance = tokenBalances.find(
-    token => token.symbol === inputToken.symbol
+    token => token.token.symbol === inputToken.symbol
   );
 
   if (!inputTokenBalance) {
@@ -56,9 +54,11 @@ const swap = async () => {
   const { inputs, output } = buildSwapIo({
     inputToken,
     outputToken,
-    amount: parseUnits('23', 18),
-    inputTokenBalance,
+    amount: parseUnits('0.0001', 18),
+    inputTokenBalance: inputTokenBalance,
   });
+
+  console.log(inputs, output);
 
   const requestBody: GetSwapQuoteRequestBody = {
     senderAddress: sender,

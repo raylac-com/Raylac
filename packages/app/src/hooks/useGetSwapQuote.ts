@@ -5,6 +5,7 @@ import { useMutation } from '@tanstack/react-query';
 import { trpc } from '@/lib/trpc';
 import useUserAccount from './useUserAccount';
 import { buildSwapIo } from '@raylac/shared/out/utils';
+import { SwapInput, SwapOutput } from '@raylac/shared/out/types';
 
 const useGetSwapQuote = () => {
   const { data: userAccount } = useUserAccount();
@@ -53,7 +54,8 @@ const useGetSwapQuote = () => {
           ? false
           : hexToBigInt(inputTokenBalance.balance) >= amount;
 
-      let inputs, output;
+      let inputs: SwapInput[];
+      let output: SwapOutput;
       if (hasEnoughBalance) {
         const swapIo = buildSwapIo({
           inputToken,
@@ -67,7 +69,7 @@ const useGetSwapQuote = () => {
       } else {
         inputs = [
           {
-            tokenAddress: inputToken.addresses[0].address,
+            token: inputToken,
             amount,
             chainId: inputToken.addresses[0].chainId,
           },
@@ -75,7 +77,7 @@ const useGetSwapQuote = () => {
 
         // TODO: Choose the best output token
         output = {
-          tokenAddress: outputToken.addresses[0].address,
+          token: outputToken,
           chainId: outputToken.addresses[0].chainId,
         };
       }

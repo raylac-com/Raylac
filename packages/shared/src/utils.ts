@@ -14,7 +14,13 @@ import {
   hexToBigInt,
   parseAbiParameters,
 } from 'viem';
-import { ChainGasInfo, UserOperation } from './types';
+import {
+  ChainGasInfo,
+  SwapInput,
+  SwapOutput,
+  Token,
+  UserOperation,
+} from './types';
 import RaylacAccountV2Abi from './abi/RaylacAccountV2Abi';
 import * as chains from 'viem/chains';
 import { getAlchemyRpcUrl, getPublicClient } from './ethRpc';
@@ -23,7 +29,7 @@ import { ACCOUNT_FACTORY_V2_ADDRESS, ENTRY_POINT_ADDRESS } from './addresses';
 import { ACCOUNT_IMPL_V2_ADDRESS } from './addresses';
 import RaylacAccountProxyBytecode from './bytecode/RaylacAccountProxyBytecode';
 import RaylacAccountProxyAbi from './abi/RaylacAccountProxyAbi';
-import { SupportedTokensReturnType, TokenBalancesReturnType } from './rpcTypes';
+import { TokenBalancesReturnType } from './rpcTypes';
 
 const VIEW_TAG_BYTES = 1;
 const CHAIN_ID_BYTES = 4;
@@ -295,18 +301,17 @@ export const buildSwapIo = ({
   amount,
   inputTokenBalance,
 }: {
-  inputToken: SupportedTokensReturnType[number];
-  outputToken: SupportedTokensReturnType[number];
+  inputToken: Token;
+  outputToken: Token;
   amount: bigint;
   inputTokenBalance: TokenBalancesReturnType[number];
-}) => {
+}): {
+  inputs: SwapInput[];
+  output: SwapOutput;
+} => {
   let remainingAmount = amount;
 
-  const inputs: {
-    tokenAddress: Hex;
-    amount: bigint;
-    chainId: number;
-  }[] = [];
+  const inputs: SwapInput[] = [];
 
   for (const breakdown of inputTokenBalance.breakdown ?? []) {
     const balance = hexToBigInt(breakdown.balance);
@@ -317,7 +322,7 @@ export const buildSwapIo = ({
 
     if (remainingAmount < balance) {
       inputs.push({
-        tokenAddress: breakdown.tokenAddress,
+        token: inputTokenBalance.token,
         amount: remainingAmount,
         chainId: breakdown.chainId,
       });
@@ -326,7 +331,7 @@ export const buildSwapIo = ({
       break;
     } else {
       inputs.push({
-        tokenAddress: breakdown.tokenAddress,
+        token: inputTokenBalance.token,
         amount: balance,
         chainId: breakdown.chainId,
       });
@@ -376,8 +381,25 @@ export const buildSwapIo = ({
   return {
     inputs,
     output: {
-      tokenAddress: output.address,
-      chainId: output.chainId,
+      token: outputToken,
+      chainId: outputChainId,
     },
   };
+};
+
+/**
+ * Find a token from an array of "Token"s by its address
+ */
+export const findTokenByAddress = ({
+  tokens,
+  tokenAddress,
+}: {
+  tokens: Token[];
+  tokenAddress: Hex;
+}) => {
+  return tokens.find(token =>
+    token.addresses.some(
+      address => getAddress(address.address) === getAddress(tokenAddress)
+    )
+  );
 };
