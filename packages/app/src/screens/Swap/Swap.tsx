@@ -2,13 +2,9 @@ import { useEffect, useState } from 'react';
 import SwapInputCard from './components/SwapInputCard/SwapInputCard';
 import SwapOutputCard from './components/SwapOutputCard/SwapOutputCard';
 import { trpc } from '@/lib/trpc';
-import { formatUnits, getAddress, parseUnits, zeroAddress } from 'viem';
+import { formatUnits, parseUnits, zeroAddress } from 'viem';
 import useUserAccount from '@/hooks/useUserAccount';
-import {
-  supportedChains,
-  SupportedTokensReturnType,
-  TRPCErrorMessage,
-} from '@raylac/shared';
+import { SupportedTokensReturnType, TRPCErrorMessage } from '@raylac/shared';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useGetSwapQuote from '@/hooks/useGetSwapQuote';
 import useSwap from '@/hooks/useSwap';
@@ -71,10 +67,6 @@ const Swap = () => {
     }
   );
 
-  const { data: supportedTokens } = trpc.getSupportedTokens.useQuery({
-    chainIds: supportedChains.map(chain => chain.id),
-  });
-
   // Mutations
 
   const {
@@ -91,36 +83,18 @@ const Swap = () => {
   //
 
   useEffect(() => {
-    if (supportedTokens) {
-      if (tokenBalances && tokenBalances.length > 0) {
-        const inputToken = supportedTokens?.find(token =>
-          token.addresses.some(
-            tokenAddress =>
-              getAddress(tokenAddress.address) ===
-              getAddress(tokenBalances[0].breakdown[0].tokenAddress)
-          )
-        );
-
-        if (inputToken) {
-          setInputToken(inputToken as Token);
-        }
+    if (tokenBalances) {
+      if (tokenBalances.length > 0) {
+        const _inputToken = tokenBalances[0];
+        setInputToken(_inputToken.token);
       }
 
-      if (tokenBalances && tokenBalances.length > 1) {
-        const outputToken = supportedTokens?.find(token =>
-          token.addresses.some(
-            tokenAddress =>
-              getAddress(tokenAddress.address) ===
-              getAddress(tokenBalances[1].breakdown[0].tokenAddress)
-          )
-        );
-
-        if (outputToken) {
-          setOutputToken(outputToken as Token);
-        }
+      if (tokenBalances.length > 1) {
+        const _outputToken = tokenBalances[1];
+        setOutputToken(_outputToken.token);
       }
     }
-  }, [tokenBalances, supportedTokens]);
+  }, [tokenBalances]);
 
   useEffect(() => {
     if (getSwapQuoteError) {
