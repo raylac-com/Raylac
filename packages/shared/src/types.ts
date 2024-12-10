@@ -350,6 +350,7 @@ export interface Token {
   name: string;
   decimals: number;
   logoURI: string;
+  verified: boolean;
   addresses: {
     chainId: number;
     address: Hex;

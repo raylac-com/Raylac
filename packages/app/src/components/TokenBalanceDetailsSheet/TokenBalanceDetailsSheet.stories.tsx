@@ -21,6 +21,7 @@ const meta = {
             address: zeroAddress,
           },
         ],
+        verified: true,
       },
       balance: toHex(parseUnits('100', 6)),
       usdValue: '100',

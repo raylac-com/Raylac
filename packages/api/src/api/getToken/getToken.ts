@@ -43,6 +43,7 @@ const getToken = async ({
     name: token.name,
     decimals: token.decimals,
     logoURI: token.metadata.logoURI,
+    verified: token.metadata.verified,
     addresses: [
       {
         chainId: token.chainId,

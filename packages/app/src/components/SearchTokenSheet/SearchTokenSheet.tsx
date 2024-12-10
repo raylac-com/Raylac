@@ -10,6 +10,7 @@ import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import TokenLogo from '../FastImage/TokenLogo';
 import useUserAccount from '@/hooks/useUserAccount';
 import { getAddress, hexToBigInt, zeroAddress } from 'viem';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 const TokenListItem = ({
   token,
@@ -21,6 +22,7 @@ const TokenListItem = ({
     symbol: string;
     decimals: number;
     logoURI: string;
+    verified: boolean;
   };
   balance: bigint;
   onPress: () => void;
@@ -39,7 +41,14 @@ const TokenListItem = ({
         style={{ width: 42, height: 42 }}
       />
       <View style={{ flexDirection: 'column', rowGap: 4 }}>
-        <StyledText>{token.name}</StyledText>
+        <View
+          style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+        >
+          <StyledText>{token.name}</StyledText>
+          {token.verified && (
+            <Ionicons name="shield-checkmark" size={18} color={colors.green} />
+          )}
+        </View>
         <StyledText style={{ color: colors.border }}>
           {formatAmount(balance.toString(), token.decimals)} {token.symbol}
         </StyledText>

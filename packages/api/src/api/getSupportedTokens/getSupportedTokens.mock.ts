@@ -10,6 +10,7 @@ const getSupportedTokens = (_args: {
     {
       symbol: 'ETH',
       name: 'Ethereum',
+      verified: true,
       addresses: [
         {
           chainId: base.id,
@@ -23,6 +24,7 @@ const getSupportedTokens = (_args: {
     {
       symbol: 'USDC',
       name: 'USD Coin',
+      verified: true,
       addresses: [
         {
           chainId: base.id,

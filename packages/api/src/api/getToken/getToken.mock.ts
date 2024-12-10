@@ -1,10 +1,12 @@
+import { Token } from '@raylac/shared';
 import { Hex, zeroAddress } from 'viem';
 import { base } from 'viem/op-stack';
 
-const getTokenMock = async (_args: { tokenAddress: Hex }) => {
+const getTokenMock = async (_args: { tokenAddress: Hex }): Promise<Token> => {
   return {
     symbol: 'ETH',
     name: 'Ethereum',
+    verified: true,
     addresses: [
       {
         chainId: base.id,

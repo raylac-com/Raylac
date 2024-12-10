@@ -7,6 +7,7 @@ export const KNOWN_TOKENS: SupportedTokensReturnType = [
     symbol: 'ETH',
     name: 'Ethereum',
     decimals: 18,
+    verified: true,
     logoURI:
       'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/eth.png',
     addresses: supportedChains.map(chain => ({
@@ -18,6 +19,7 @@ export const KNOWN_TOKENS: SupportedTokensReturnType = [
     symbol: 'USDC',
     name: 'USD Coin',
     decimals: 6,
+    verified: true,
     logoURI:
       'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389',
     addresses: [

@@ -236,6 +236,7 @@ const getMultiChainERC20Balances = async ({
               symbol: tokenMetadata.symbol,
               logoURI: tokenMetadata.metadata.logoURI,
               decimals: tokenMetadata.decimals,
+              verified: tokenMetadata.metadata.verified,
               addresses: [
                 {
                   chainId: chain.id,

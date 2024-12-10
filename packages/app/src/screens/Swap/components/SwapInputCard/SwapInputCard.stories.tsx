@@ -29,6 +29,7 @@ const meta = {
       name: 'USD Coin',
       symbol: 'USDC',
       decimals: 18,
+      verified: true,
       logoURI:
         'https://firebasestorage.googleapis.com/v0/b/raylac-72351.appspot.com/o/usdc.png?alt=media&token=4e91000d-a063-4f34-bbcb-599a44151ff9',
     },
