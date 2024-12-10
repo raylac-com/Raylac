@@ -22,21 +22,30 @@ const getToken = async ({
     return knownToken;
   }
 
-  const currencies = await relayApi.post<RelaySupportedCurrenciesResponseBody>(
-    'currencies/v1',
-    {
+  const internalSearchResult =
+    await relayApi.post<RelaySupportedCurrenciesResponseBody>('currencies/v1', {
+      chainIds: supportedChains.map(chain => chain.id),
+      address: tokenAddress,
+      limit: 1,
+      useExternalSearch: false,
+    });
+
+  const externalSearchResult =
+    await relayApi.post<RelaySupportedCurrenciesResponseBody>('currencies/v1', {
       chainIds: supportedChains.map(chain => chain.id),
       address: tokenAddress,
       limit: 1,
       useExternalSearch: true,
-    }
-  );
+    });
 
-  if (currencies.data[0] === undefined) {
+  const searchResult =
+    internalSearchResult.data[0] || externalSearchResult.data[0];
+
+  if (searchResult === undefined) {
     throw new Error('Token not found');
   }
 
-  const token = currencies.data[0][0];
+  const token = searchResult[0];
 
   return {
     symbol: token.symbol,

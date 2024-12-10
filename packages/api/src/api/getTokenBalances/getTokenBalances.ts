@@ -10,8 +10,8 @@ import { getPublicClient } from '../../utils';
 import {
   supportedChains,
   getERC20TokenBalance,
-  RelaySupportedCurrenciesResponseBody,
   TokenBalancesReturnType,
+  Token,
 } from '@raylac/shared';
 import {
   getAlchemyClient,
@@ -19,9 +19,9 @@ import {
   getTokenPriceBySymbol,
 } from '../../lib/alchemy';
 import { KNOWN_TOKENS } from '../../lib/knownTokes';
-import { relayApi } from '../../lib/relay';
 import BigNumber from 'bignumber.js';
 import { logger } from '@raylac/shared-backend';
+import getToken from '../getToken/getToken';
 
 const getETHBalance = async ({
   address,
@@ -157,18 +157,14 @@ const getMultiChainERC20Balances = async ({
           )
           // Get token metadata for each token
           .map(async tokenBalance => {
-            const result =
-              await relayApi.post<RelaySupportedCurrenciesResponseBody>(
-                'currencies/v1',
-                {
-                  chainIds: [chain.id],
-                  address: tokenBalance.contractAddress,
-                  useExternalSearch: true,
-                }
-              );
-
-            const tokenMetadata =
-              result.data.length > 0 ? result.data[0][0] : null;
+            let tokenMetadata: Token | null = null;
+            try {
+              tokenMetadata = await getToken({
+                tokenAddress: tokenBalance.contractAddress as Hex,
+              });
+            } catch (_error) {
+              logger.error(_error);
+            }
 
             if (!tokenMetadata) {
               logger.error(
@@ -234,9 +230,9 @@ const getMultiChainERC20Balances = async ({
             token: {
               name: tokenMetadata.name,
               symbol: tokenMetadata.symbol,
-              logoURI: tokenMetadata.metadata.logoURI,
+              logoURI: tokenMetadata.logoURI,
               decimals: tokenMetadata.decimals,
-              verified: tokenMetadata.metadata.verified,
+              verified: tokenMetadata.verified,
               addresses: [
                 {
                   chainId: chain.id,
