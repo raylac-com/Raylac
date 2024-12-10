@@ -61,6 +61,7 @@ const SearchInput = ({
       value={value}
       onChangeText={onChangeText}
       autoCapitalize="none"
+      autoFocus={false}
       style={{
         borderWidth: 1,
         borderColor: colors.border,
