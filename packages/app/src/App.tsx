@@ -141,13 +141,16 @@ const Screens = () => {
             name="SaveBackupPhrase"
             component={SaveBackupPhrase}
             options={{
-              headerBackVisible: false,
+              title: 'Save Backup Phrase',
+              headerBackVisible: true,
+              headerBackTitle: 'Back',
             }}
           ></RootStack.Screen>
           <RootStack.Screen
             name="ConfirmBackupPhrase"
             component={ConfirmBackupPhrase}
             options={{
+              title: 'Confirm Backup Phrase',
               headerBackVisible: true,
             }}
           ></RootStack.Screen>
@@ -155,6 +158,7 @@ const Screens = () => {
             name="ImportAccount"
             component={ImportAccount}
             options={{
+              title: 'Import Account',
               headerBackVisible: true,
             }}
           ></RootStack.Screen>

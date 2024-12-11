@@ -6,11 +6,13 @@ import { View } from 'react-native';
 import * as bip39 from 'bip39';
 import Toast from 'react-native-toast-message';
 import MultiLineInput from '@/components/MultiLineInput';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 /**
  * Sign in screen
  */
 const ImportAccount = () => {
+  const insets = useSafeAreaInsets();
   const [mnemonic, setMnemonic] = useState('');
   const [isMnemonicValid, setIsMnemonicValid] = useState(false);
   const {
@@ -53,6 +55,7 @@ const ImportAccount = () => {
         justifyContent: 'space-between',
         rowGap: 16,
         padding: 16,
+        paddingBottom: insets.bottom,
       }}
     >
       <MultiLineInput

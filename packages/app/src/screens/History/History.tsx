@@ -13,6 +13,7 @@ import colors from '@/lib/styles/colors';
 import SwapDetailsSheet from '@/sheets/SwapDetailsSheet/SwapDetailsSheet';
 import { useState } from 'react';
 import { GetSwapHistoryReturnType } from '@/types';
+import StyledText from '@/components/StyledText/StyledText';
 
 const History = () => {
   const { data: userAccount } = useUserAccount();
@@ -44,6 +45,21 @@ const History = () => {
         />
       )}
       <FlatList
+        ListEmptyComponent={() => (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <StyledText
+              style={{
+                color: colors.subbedText,
+              }}
+            >{`No activity yet`}</StyledText>
+          </View>
+        )}
         contentContainerStyle={{
           paddingVertical: 32,
           paddingHorizontal: 16,

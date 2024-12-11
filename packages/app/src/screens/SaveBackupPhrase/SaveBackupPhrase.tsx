@@ -9,9 +9,12 @@ import { copyToClipboard } from '@/lib/utils';
 import { Feather } from '@expo/vector-icons';
 import { useCallback, useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 
 const SaveBackupPhrase = () => {
+  const insets = useSafeAreaInsets();
+
   const navigation = useTypedNavigation();
 
   const [mnemonic, setMnemonic] = useState<string | null>(null);
@@ -46,7 +49,9 @@ const SaveBackupPhrase = () => {
       style={{
         flex: 1,
         justifyContent: 'space-between',
-        padding: 16,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        paddingHorizontal: 16,
       }}
     >
       <View

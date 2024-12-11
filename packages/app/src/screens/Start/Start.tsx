@@ -4,8 +4,12 @@ import useCreateAccount from '@/hooks/useCreateAccoun';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { sleep } from '@raylac/shared';
 import { useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Image } from 'expo-image';
 
 const Start = () => {
+  const insets = useSafeAreaInsets();
+
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const navigation = useTypedNavigation();
 
@@ -24,20 +28,38 @@ const Start = () => {
       style={{
         flex: 1,
         flexDirection: 'column',
-        justifyContent: 'flex-end',
-        padding: 16,
+        justifyContent: 'space-between',
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        paddingHorizontal: 16,
         rowGap: 8,
       }}
     >
-      <StyledButton
-        title="I already have an account"
-        onPress={() => navigation.navigate('ImportAccount')}
-      />
-      <StyledButton
-        title="Create Account"
-        isLoading={isCreatingAccount}
-        onPress={onCreateAccountPress}
-      />
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Image
+          // eslint-disable-next-line @typescript-eslint/no-require-imports
+          source={require('../../../assets/icon.png')}
+          style={{ width: 200, height: 200 }}
+        />
+      </View>
+      <View style={{ flexDirection: 'column', rowGap: 8 }}>
+        <StyledButton
+          title="I already have an account"
+          onPress={() => navigation.navigate('ImportAccount')}
+        />
+        <StyledButton
+          title="Create Account"
+          isLoading={isCreatingAccount}
+          onPress={onCreateAccountPress}
+        />
+      </View>
     </View>
   );
 };
