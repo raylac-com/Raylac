@@ -16,9 +16,11 @@ import useAccountUsdValue from '@/hooks/useAccountUsdValue';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import TokenBalanceDetailsSheet from '@/components/TokenBalanceDetailsSheet/TokenBalanceDetailsSheet';
 import { TokenBalancesReturnType } from '@raylac/shared';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const HomeScreen = () => {
   const navigation = useTypedNavigation();
+  const insets = useSafeAreaInsets();
 
   ///
   /// Local state
@@ -87,7 +89,13 @@ const HomeScreen = () => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View
+      style={{
+        flex: 1,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+      }}
+    >
       <ScrollView
         contentContainerStyle={{
           rowGap: 24,

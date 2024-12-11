@@ -1,6 +1,5 @@
 // 3. React Native needs crypto.getRandomValues polyfill and sha512
 import 'react-native-get-random-values';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import colors from './lib/styles/colors';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -63,7 +62,6 @@ const Tabs = () => {
         name="Swap"
         component={Swap}
         options={{
-          headerShown: false,
           tabBarLabel: () => null,
           tabBarIcon: ({ color }) => (
             <AntDesign name="swap" size={24} color={color} />
@@ -116,52 +114,53 @@ const Screens = () => {
   }, []);
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-        <GestureHandlerRootView>
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <RootStack.Navigator initialRouteName="Tabs">
-              <RootStack.Screen
-                name="Tabs"
-                component={Tabs}
-                options={{
-                  headerShown: false,
-                }}
-              ></RootStack.Screen>
-              <RootStack.Screen
-                name="Start"
-                component={Start}
-                options={{
-                  headerShown: false,
-                }}
-              ></RootStack.Screen>
-              <RootStack.Screen
-                name="SaveBackupPhrase"
-                component={SaveBackupPhrase}
-                options={{
-                  headerBackVisible: false,
-                }}
-              ></RootStack.Screen>
-              <RootStack.Screen
-                name="ConfirmBackupPhrase"
-                component={ConfirmBackupPhrase}
-                options={{
-                  headerBackVisible: true,
-                }}
-              ></RootStack.Screen>
-              <RootStack.Screen
-                name="ImportAccount"
-                component={ImportAccount}
-                options={{
-                  headerBackVisible: true,
-                }}
-              ></RootStack.Screen>
-            </RootStack.Navigator>
-          </TouchableWithoutFeedback>
-          <Toast></Toast>
-        </GestureHandlerRootView>
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <GestureHandlerRootView>
+      <TouchableWithoutFeedback
+        style={{ flex: 1, backgroundColor: 'blue' }}
+        onPress={() => {
+          Keyboard.dismiss();
+        }}
+      >
+        <RootStack.Navigator initialRouteName="Tabs">
+          <RootStack.Screen
+            name="Tabs"
+            component={Tabs}
+            options={{
+              headerShown: false,
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="Start"
+            component={Start}
+            options={{
+              headerShown: false,
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="SaveBackupPhrase"
+            component={SaveBackupPhrase}
+            options={{
+              headerBackVisible: false,
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="ConfirmBackupPhrase"
+            component={ConfirmBackupPhrase}
+            options={{
+              headerBackVisible: true,
+            }}
+          ></RootStack.Screen>
+          <RootStack.Screen
+            name="ImportAccount"
+            component={ImportAccount}
+            options={{
+              headerBackVisible: true,
+            }}
+          ></RootStack.Screen>
+        </RootStack.Navigator>
+      </TouchableWithoutFeedback>
+      <Toast></Toast>
+    </GestureHandlerRootView>
   );
 };
 
@@ -231,8 +230,10 @@ const App = () => {
           }}
         >
           <ThemeProvider value={NavigationTheme}>
-            <Screens></Screens>
-            <StatusBar style="dark" />
+            <SafeAreaProvider>
+              <Screens></Screens>
+              <StatusBar style="dark" />
+            </SafeAreaProvider>
           </ThemeProvider>
         </PersistQueryClientProvider>
       </trpc.Provider>

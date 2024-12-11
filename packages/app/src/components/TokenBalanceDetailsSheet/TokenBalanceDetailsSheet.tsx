@@ -13,6 +13,7 @@ import { hexToBigInt } from 'viem';
 import fontSizes from '@/lib/styles/fontSizes';
 import { getChainIcon } from '@/lib/utils';
 import BigNumber from 'bignumber.js';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ChainTokenBalance = ({
   chainId,
@@ -66,11 +67,15 @@ const TokenBalanceDetailsSheet = ({
   onClose,
 }: TokenBalanceDetailsSheetProps) => {
   const ref = useRef<BottomSheet>(null);
+  const insets = useSafeAreaInsets();
+
   return (
     <BottomSheet
       ref={ref}
       style={{
         flex: 1,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
       }}
       index={0}
       onClose={onClose}
