@@ -1,7 +1,7 @@
 import { getChainIcon } from '@/lib/utils';
 import { View } from 'react-native';
 import TokenLogo from '../FastImage/TokenLogo';
-import { Image } from 'react-native';
+import { Image } from 'expo-image';
 
 const TokenImageWithChain = ({
   logoURI,

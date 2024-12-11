@@ -6,7 +6,8 @@ import {
   TokenBalancesReturnType,
 } from '@raylac/shared';
 import StyledText from '../StyledText/StyledText';
-import { Image, View } from 'react-native';
+import { View } from 'react-native';
+import { Image } from 'expo-image';
 import TokenLogo from '../FastImage/TokenLogo';
 import colors from '@/lib/styles/colors';
 import { hexToBigInt } from 'viem';

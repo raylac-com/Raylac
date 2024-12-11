@@ -1,5 +1,4 @@
-// import { Image, ImageProps } from 'expo-image';
-import { Image, ImageProps } from 'react-native';
+import { Image, ImageProps } from 'expo-image';
 import { useState } from 'react';
 import { View } from 'react-native';
 
