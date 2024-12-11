@@ -114,13 +114,14 @@ const Screens = () => {
   }, []);
 
   return (
-    <GestureHandlerRootView>
-      <TouchableWithoutFeedback
-        style={{ flex: 1, backgroundColor: 'blue' }}
-        onPress={() => {
-          Keyboard.dismiss();
-        }}
-      >
+    <TouchableWithoutFeedback
+      accessible={false}
+      style={{ flex: 1, backgroundColor: 'blue' }}
+      onPress={() => {
+        Keyboard.dismiss();
+      }}
+    >
+      <GestureHandlerRootView style={{ flex: 1 }}>
         <RootStack.Navigator initialRouteName="Tabs">
           <RootStack.Screen
             name="Tabs"
@@ -158,9 +159,9 @@ const Screens = () => {
             }}
           ></RootStack.Screen>
         </RootStack.Navigator>
-      </TouchableWithoutFeedback>
-      <Toast></Toast>
-    </GestureHandlerRootView>
+        <Toast></Toast>
+      </GestureHandlerRootView>
+    </TouchableWithoutFeedback>
   );
 };
 
