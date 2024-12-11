@@ -22,7 +22,16 @@ const TokenLogo = (props: ImageProps) => {
     );
   }
 
-  return <Image {...props} onError={() => setIsError(true)} />;
+  return (
+    <Image
+      {...props}
+      onError={() => setIsError(true)}
+      style={{
+        ...(typeof props.style === 'object' ? props.style : {}),
+        borderRadius: 1000,
+      }}
+    />
+  );
 };
 
 export default TokenLogo;
