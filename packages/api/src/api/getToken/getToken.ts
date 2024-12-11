@@ -1,11 +1,10 @@
 import {
   findTokenByAddress,
-  RelaySupportedCurrenciesResponseBody,
   supportedChains,
   SupportedTokensReturnType,
 } from '@raylac/shared';
 import { getAddress, Hex } from 'viem';
-import { relayApi } from '../../lib/relay';
+import { relayGetCurrencies } from '../../lib/relay';
 import { KNOWN_TOKENS } from '../../lib/knownTokes';
 
 const getToken = async ({
@@ -22,24 +21,11 @@ const getToken = async ({
     return knownToken;
   }
 
-  const internalSearchResult =
-    await relayApi.post<RelaySupportedCurrenciesResponseBody>('currencies/v1', {
-      chainIds: supportedChains.map(chain => chain.id),
-      address: tokenAddress,
-      limit: 1,
-      useExternalSearch: false,
-    });
-
-  const externalSearchResult =
-    await relayApi.post<RelaySupportedCurrenciesResponseBody>('currencies/v1', {
-      chainIds: supportedChains.map(chain => chain.id),
-      address: tokenAddress,
-      limit: 1,
-      useExternalSearch: true,
-    });
-
-  const searchResult =
-    internalSearchResult.data[0] || externalSearchResult.data[0];
+  const searchResult = await relayGetCurrencies({
+    chainIds: supportedChains.map(chain => chain.id),
+    tokenAddress,
+    limit: 1,
+  });
 
   if (searchResult === undefined) {
     throw new Error('Token not found');

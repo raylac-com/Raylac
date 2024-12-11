@@ -1,32 +1,30 @@
 import Skeleton from '@/components/Skeleton/Skeleton';
 import StyledText from '@/components/StyledText/StyledText';
-import useDebounce from '@/hooks/useDebounce';
 import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import { formatAmount, supportedChains, Token } from '@raylac/shared';
 import { useRef, useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
-import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
+import { Image, Pressable, View } from 'react-native';
+import BottomSheet, {
+  BottomSheetFlatList,
+  BottomSheetTextInput,
+} from '@gorhom/bottom-sheet';
 import TokenLogo from '../FastImage/TokenLogo';
-import useUserAccount from '@/hooks/useUserAccount';
-import { getAddress, hexToBigInt, zeroAddress } from 'viem';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { getChainIcon } from '@/lib/utils';
+import useTokenBalances from '@/hooks/useTokenBalances';
 
 const TokenListItem = ({
   token,
   balance,
   onPress,
 }: {
-  token: {
-    name: string;
-    symbol: string;
-    decimals: number;
-    logoURI: string;
-    verified: boolean;
-  };
+  token: Token;
   balance: bigint;
   onPress: () => void;
 }) => {
+  const tokenChainIds = token.addresses.map(address => address.chainId);
+
   return (
     <Pressable
       onPress={onPress}
@@ -34,30 +32,53 @@ const TokenListItem = ({
         flexDirection: 'row',
         columnGap: 8,
         alignItems: 'center',
+        justifyContent: 'space-between',
       }}
     >
-      <TokenLogo
-        source={{ uri: token.logoURI }}
-        style={{ width: 42, height: 42 }}
-      />
-      <View style={{ flexDirection: 'column', rowGap: 4 }}>
-        <View
-          style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
-        >
-          <StyledText>{token.name}</StyledText>
-          {token.verified && (
-            <Ionicons name="shield-checkmark" size={18} color={colors.green} />
-          )}
+      <View
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
+      >
+        <TokenLogo
+          source={{ uri: token.logoURI }}
+          style={{ width: 42, height: 42 }}
+        />
+        <View style={{ flexDirection: 'column', rowGap: 4 }}>
+          <View
+            style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+          >
+            <StyledText>{token.name}</StyledText>
+            {token.verified && (
+              <Ionicons
+                name="shield-checkmark"
+                size={18}
+                color={colors.green}
+              />
+            )}
+          </View>
+          <StyledText style={{ color: colors.border }}>
+            {formatAmount(balance.toString(), token.decimals)} {token.symbol}
+          </StyledText>
         </View>
-        <StyledText style={{ color: colors.border }}>
-          {formatAmount(balance.toString(), token.decimals)} {token.symbol}
-        </StyledText>
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}
+      >
+        {tokenChainIds.map((chainId, i) => (
+          <Image
+            key={i}
+            source={getChainIcon(chainId)}
+            style={{ width: 18, height: 18, marginLeft: -9 }}
+          />
+        ))}
       </View>
     </Pressable>
   );
 };
 
-const SearchInput = ({
+export const SearchInput = ({
   value,
   onChangeText,
 }: {
@@ -65,12 +86,11 @@ const SearchInput = ({
   onChangeText: (text: string) => void;
 }) => {
   return (
-    <TextInput
+    <BottomSheetTextInput
       placeholder="Search for a token"
       value={value}
       onChangeText={onChangeText}
       autoCapitalize="none"
-      autoFocus={false}
       style={{
         borderWidth: 1,
         borderColor: colors.border,
@@ -89,28 +109,17 @@ const SearchTokenSheet = ({
   onSelectToken: (token: Token) => void;
   onClose: () => void;
 }) => {
-  const { data: userAccount } = useUserAccount();
   const ref = useRef<BottomSheet>(null);
   const [searchText, setSearchText] = useState('');
 
-  const { debouncedValue: debouncedSearchText, isPending: isDebouncing } =
-    useDebounce(searchText, 500);
-
   const { data: tokenBalances, isLoading: isLoadingTokenBalances } =
-    trpc.getTokenBalances.useQuery(
-      {
-        address: userAccount?.address ?? zeroAddress,
-      },
-      {
-        enabled: !!userAccount,
-      }
-    );
+    useTokenBalances();
 
   const { data: supportedTokens, isLoading: isLoadingSupportedTokens } =
     trpc.getSupportedTokens.useQuery(
       {
         chainIds: supportedChains.map(chain => chain.id),
-        searchTerm: debouncedSearchText,
+        searchTerm: searchText,
       },
       {
         enabled: !isLoadingTokenBalances,
@@ -118,24 +127,15 @@ const SearchTokenSheet = ({
     );
 
   const tokensWithBalances =
-    tokenBalances
-      ?.filter(
-        token =>
-          token.token.name
-            .toLowerCase()
-            .includes(debouncedSearchText.toLowerCase()) ||
-          token.token.symbol
-            .toLowerCase()
-            .includes(debouncedSearchText.toLowerCase())
-      )
-      .map(token => ({
-        token: token.token,
-        balance: hexToBigInt(token.balance),
-      })) ?? [];
+    tokenBalances?.filter(
+      token =>
+        token.token.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        token.token.symbol.toLowerCase().includes(searchText.toLowerCase())
+    ) ?? [];
 
   // Get the token addresses of the tokens with balances
   const tokenAddressesWithBalances = tokensWithBalances.flatMap(token =>
-    token.token.addresses.map(address => getAddress(address.address))
+    token.token.addresses.map(address => address.address)
   );
 
   // Get the tokens without balances
@@ -144,7 +144,7 @@ const SearchTokenSheet = ({
       ?.filter(
         token =>
           !token.addresses.some(address =>
-            tokenAddressesWithBalances.includes(getAddress(address.address))
+            tokenAddressesWithBalances.includes(address.address)
           )
       )
       .map(token => ({
@@ -171,7 +171,7 @@ const SearchTokenSheet = ({
       <SearchInput value={searchText} onChangeText={setSearchText} />
       <BottomSheetFlatList
         data={
-          isLoadingTokenBalances || isLoadingSupportedTokens || isDebouncing
+          isLoadingTokenBalances || isLoadingSupportedTokens
             ? new Array(3).fill(undefined)
             : tokenList
         }

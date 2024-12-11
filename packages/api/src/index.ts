@@ -17,7 +17,7 @@ import {
   SubmitUserOpsRequestBody,
 } from '@raylac/shared';
 import getSwapQuote from './api/getSwapQuote/getSwapQuote';
-import { logger } from '@raylac/shared-backend';
+import { ed, logger, st } from '@raylac/shared-backend';
 import getSwapQuoteMock from './api/getSwapQuote/getSwapQuote.mock';
 import buildSwapUserOpMock from './api/buildSwapUserOp/buildSwapUserOp.mock';
 import submitUserOpsMock from './api/submitUserOps/submitUserOps.mock';
@@ -120,15 +120,20 @@ export const appRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return MOCK_RESPONSE
-        ? getSupportedTokensMock({
+      const t = st('getSupportedTokens');
+      const response = MOCK_RESPONSE
+        ? await getSupportedTokensMock({
             chainIds: input.chainIds,
             searchTerm: input.searchTerm,
           })
-        : getSupportedTokens({
+        : await getSupportedTokens({
             chainIds: input.chainIds,
             searchTerm: input.searchTerm,
           });
+
+      ed(t);
+
+      return response;
     }),
 
   getTokenPrice: publicProcedure

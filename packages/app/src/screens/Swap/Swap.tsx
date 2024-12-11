@@ -137,6 +137,10 @@ const Swap = () => {
         swapQuote: swapQuote.quote,
       });
 
+      setInputToken(null);
+      setOutputToken(null);
+      setAmountInputText('');
+
       navigation.navigate('Tabs', {
         screen: 'History',
       });

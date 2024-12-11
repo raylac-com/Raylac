@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import SearchTokenSheet from './SearchTokenSheet';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 const meta = {
   title: 'SearchTokenSheet',
@@ -11,7 +12,11 @@ const meta = {
   },
   decorators: [
     Story => {
-      return <Story />;
+      return (
+        <BottomSheetModalProvider>
+          <Story />
+        </BottomSheetModalProvider>
+      );
     },
   ],
 } satisfies Meta<typeof SearchTokenSheet>;

@@ -1,6 +1,6 @@
 import { Hex } from 'viem';
 import * as Clipboard from 'expo-clipboard';
-import { base, optimism } from 'viem/chains';
+import { arbitrum, base, optimism } from 'viem/chains';
 
 export const shortenAddress = (address: Hex) => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -23,6 +23,9 @@ export const getChainIcon = (chainId: number) => {
     case base.id:
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       return require('../../assets/chains/base.png');
+    case arbitrum.id:
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      return require('../../assets/chains/arbitrum.png');
     default:
       return null;
   }

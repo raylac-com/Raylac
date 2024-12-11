@@ -1,8 +1,5 @@
-import {
-  RelaySupportedCurrenciesResponseBody,
-  SupportedTokensReturnType,
-} from '@raylac/shared';
-import { relayApi } from '../../lib/relay';
+import { SupportedTokensReturnType } from '@raylac/shared';
+import { relayGetCurrencies } from '../../lib/relay';
 import { getAddress } from 'viem';
 import { KNOWN_TOKENS } from '../../lib/knownTokes';
 
@@ -13,24 +10,18 @@ const getSupportedTokens = async ({
   chainIds: number[];
   searchTerm?: string;
 }): Promise<SupportedTokensReturnType> => {
-  const currencies = await relayApi.post<RelaySupportedCurrenciesResponseBody>(
-    'currencies/v1',
-    {
-      chainIds,
-      limit: 100,
-      term: searchTerm === '' ? undefined : searchTerm,
-      useExternalSearch: searchTerm !== '' && searchTerm !== undefined,
-    }
-  );
+  const currencies = await relayGetCurrencies({
+    chainIds,
+    searchTerm,
+    useExternalSearch:
+      searchTerm === '' || searchTerm === undefined ? false : undefined,
+  });
 
   const knownTokenAddresses = KNOWN_TOKENS.flatMap(token =>
     token.addresses.map(address => getAddress(address.address))
   );
 
-  const supportedTokens: SupportedTokensReturnType = currencies.data
-    .map(group => (group.length > 0 ? group[0] : null))
-    .filter(token => token !== null)
-    // Filter out known tokens
+  const supportedTokens: SupportedTokensReturnType = currencies
     .filter(token => !knownTokenAddresses.includes(getAddress(token.address)))
     // Sort by verified status
     .sort((a, b) => Number(b.metadata.verified) - Number(a.metadata.verified))
