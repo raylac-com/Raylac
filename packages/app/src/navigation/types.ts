@@ -11,6 +11,7 @@ export type RootTabsParamsList = {
 export type RootStackParamsList = {
   Tabs: { screen: keyof RootTabsParamsList; params?: any };
   Start: undefined;
+  StartWatch: undefined;
   CreateAccount: undefined;
   ImportAccount: undefined;
 

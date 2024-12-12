@@ -1,6 +1,6 @@
 import { getUserAddress } from '@/lib/key';
 import userKeys from '@/queryKeys/userKeys';
-import { getSenderAddressV2 } from '@raylac/shared';
+// import { getSenderAddressV2 } from '@raylac/shared';
 import { useQuery } from '@tanstack/react-query';
 
 const useUserAccount = () => {
@@ -13,12 +13,14 @@ const useUserAccount = () => {
         return null;
       }
 
+      /*
       const address = getSenderAddressV2({
         singerAddress,
       });
+      */
 
       return {
-        address,
+        address: singerAddress,
         singerAddress,
       };
     },

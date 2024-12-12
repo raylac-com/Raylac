@@ -51,13 +51,19 @@ const Start = () => {
       </View>
       <View style={{ flexDirection: 'column', rowGap: 8 }}>
         <StyledButton
-          title="I already have an account"
+          title="Watch address"
+          onPress={() => navigation.navigate('StartWatch')}
+        />
+        <StyledButton
+          title="Import account"
           onPress={() => navigation.navigate('ImportAccount')}
+          disabled
         />
         <StyledButton
           title="Create Account"
           isLoading={isCreatingAccount}
           onPress={onCreateAccountPress}
+          disabled
         />
       </View>
     </View>
