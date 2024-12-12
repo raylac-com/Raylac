@@ -265,7 +265,14 @@ const getTokenBalances = async ({ address }: { address: Hex }) => {
   const knownTokenBalances = await getKnownTokenBalances({ address });
   const tokenBalances = await getMultiChainERC20Balances({ address });
 
-  return [...knownTokenBalances, ...tokenBalances];
+  const response: TokenBalancesReturnType = [
+    ...knownTokenBalances,
+    ...tokenBalances,
+  ];
+
+  return response.sort((a, b) =>
+    new BigNumber(a.usdValue).gt(b.usdValue) ? -1 : 1
+  );
 };
 
 export default getTokenBalances;

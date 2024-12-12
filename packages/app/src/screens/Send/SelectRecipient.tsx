@@ -83,7 +83,7 @@ const SelectRecipient = ({ navigation }: Props) => {
         testID="search-ethereum-address"
         style={{
           width: '100%',
-          height: 46,
+          height: 56,
           borderWidth: 1,
           borderColor: colors.border,
           borderRadius: 16,
