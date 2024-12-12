@@ -38,6 +38,7 @@ const SwapDetailsSheet = ({ swap, onClose }: SwapDetailsSheetProps) => {
       index={0}
       onClose={onClose}
       enablePanDownToClose
+      enableDynamicSizing={false}
       snapPoints={['100%']}
     >
       <BottomSheetView
