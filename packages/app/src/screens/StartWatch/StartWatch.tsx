@@ -8,6 +8,7 @@ import { useState } from 'react';
 import useStartWatch from '@/hooks/useStartWatch';
 import { isAddress, Hex } from 'viem';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
+import useEnsAddress from '@/hooks/useEnsAddress';
 
 const StartWatch = () => {
   const insets = useSafeAreaInsets();
@@ -16,9 +17,16 @@ const StartWatch = () => {
 
   const navigation = useTypedNavigation();
 
+  const { data: ensAddress } = useEnsAddress(address);
+
   const onStartPress = async () => {
     if (isAddress(address)) {
       await startWatch({ address: address as Hex });
+      navigation.navigate('Tabs', {
+        screen: 'Home',
+      });
+    } else if (ensAddress) {
+      await startWatch({ address: ensAddress as Hex });
       navigation.navigate('Tabs', {
         screen: 'Home',
       });
@@ -26,6 +34,8 @@ const StartWatch = () => {
       Alert.alert('Invalid address');
     }
   };
+
+  const canStart = isAddress(address) || ensAddress;
 
   return (
     <View
@@ -43,7 +53,7 @@ const StartWatch = () => {
             fontSize: fontSizes.base,
           }}
         >
-          {`Use Raylac in watch mode`}
+          {`Use Raylac wallet in watch mode`}
         </StyledText>
         <TextInput
           style={{
@@ -58,10 +68,14 @@ const StartWatch = () => {
           value={address}
           onChangeText={setAddress}
           autoFocus
+          autoCapitalize="none"
           placeholder="Your Ethereum address"
         />
+        <StyledText style={{ color: colors.border }}>
+          {ensAddress ? `${ensAddress}` : ''}
+        </StyledText>
       </View>
-      <StyledButton title="Start" onPress={onStartPress} />
+      <StyledButton title="Start" onPress={onStartPress} disabled={!canStart} />
     </View>
   );
 };

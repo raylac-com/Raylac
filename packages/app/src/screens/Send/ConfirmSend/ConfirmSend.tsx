@@ -63,7 +63,7 @@ const ConfirmSend = ({ route }: Props) => {
             style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
           >
             <TokenLogo
-              source={token.logoURI}
+              source={{ uri: token.logoURI }}
               style={{ width: 24, height: 24 }}
             />
             <StyledText>{`${amount} ${token.symbol}`}</StyledText>

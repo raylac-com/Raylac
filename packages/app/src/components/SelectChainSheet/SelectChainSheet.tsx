@@ -40,6 +40,7 @@ const SelectChainSheet = ({
       }}
       onClose={onClose}
       enablePanDownToClose
+      enableDynamicSizing={false}
       snapPoints={['100%']}
     >
       <BottomSheetFlatList

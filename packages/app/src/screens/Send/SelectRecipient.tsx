@@ -7,6 +7,7 @@ import fontSizes from '@/lib/styles/fontSizes';
 import Blockie from '@/components/Blockie/Blockie';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamsList } from '@/navigation/types';
+import useEnsAddress from '@/hooks/useEnsAddress';
 
 interface AddressListItemProps {
   address: Hex;
@@ -56,15 +57,17 @@ const SelectRecipient = ({ navigation }: Props) => {
 
   const [inputAddress, setInputAddress] = useState<Hex | null>(null);
 
-  // Search user and generate a new stealth address for them
+  const { data: ensAddress } = useEnsAddress(searchInput);
 
   useEffect(() => {
     if (isAddress(searchInput)) {
       setInputAddress(searchInput);
+    } else if (ensAddress) {
+      setInputAddress(ensAddress);
     } else {
       setInputAddress(null);
     }
-  }, [searchInput]);
+  }, [searchInput, ensAddress]);
 
   return (
     <View

@@ -172,7 +172,10 @@ const SelectAmount = ({ route }: Props) => {
       </View>
       {isSelectChainSheetOpen && (
         <SelectChainSheet
-          onSelect={setSelectedChain}
+          onSelect={chain => {
+            setSelectedChain(chain);
+            setIsSelectChainSheetOpen(false);
+          }}
           onClose={() => setIsSelectChainSheetOpen(false)}
         />
       )}
