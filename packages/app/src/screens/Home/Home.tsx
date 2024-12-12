@@ -88,6 +88,10 @@ const HomeScreen = () => {
     });
   };
 
+  const onSendPress = () => {
+    navigation.navigate('SelectRecipient');
+  };
+
   return (
     <View
       style={{
@@ -140,6 +144,14 @@ const HomeScreen = () => {
             title="Swap"
             testID="swap"
             onPress={onSwapPress}
+          />
+          <MenuItem
+            icon={
+              <AntDesign name="arrowup" size={24} color={colors.background} />
+            }
+            title="Send"
+            testID="send"
+            onPress={onSendPress}
           />
         </View>
         {tokenBalances?.map((tokenBalance, index) => (

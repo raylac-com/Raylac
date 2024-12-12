@@ -34,6 +34,11 @@ import Settings from './screens/Settings/Settings';
 import { Keyboard } from 'react-native';
 import { TouchableWithoutFeedback } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import SelectRecipient from './screens/Send/SelectRecipient';
+import ConfirmSend from './screens/Send/ConfirmSend';
+import SelectAmount from './screens/Send/SelectAmount';
+import SelectToken from './screens/Send/SelectToken';
+import SelectChain from './screens/Send/SelectChain';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -162,6 +167,56 @@ const Screens = () => {
               headerBackVisible: true,
             }}
           ></RootStack.Screen>
+          <RootStack.Group
+            screenOptions={{
+              headerBackTitle: 'Back',
+            }}
+          >
+            <RootStack.Screen
+              name="SelectRecipient"
+              component={SelectRecipient}
+              options={{
+                title: 'Select Recipient',
+                headerBackVisible: true,
+              }}
+            ></RootStack.Screen>
+            <RootStack.Screen
+              name="SelectToken"
+              component={SelectToken}
+              options={{
+                title: 'Select Token',
+                headerBackVisible: true,
+                headerBackTitle: 'Back',
+              }}
+            ></RootStack.Screen>
+            <RootStack.Screen
+              name="SelectAmount"
+              component={SelectAmount}
+              options={{
+                title: 'Select Amount',
+                headerBackVisible: true,
+                headerBackTitle: 'Back',
+              }}
+            ></RootStack.Screen>
+            <RootStack.Screen
+              name="SelectChain"
+              component={SelectChain}
+              options={{
+                title: 'Select Chain',
+                headerBackVisible: true,
+                headerBackTitle: 'Back',
+              }}
+            ></RootStack.Screen>
+            <RootStack.Screen
+              name="ConfirmSend"
+              component={ConfirmSend}
+              options={{
+                title: 'Confirm Send',
+                headerBackVisible: true,
+                headerBackTitle: 'Back',
+              }}
+            ></RootStack.Screen>
+          </RootStack.Group>
         </RootStack.Navigator>
         <Toast></Toast>
       </GestureHandlerRootView>

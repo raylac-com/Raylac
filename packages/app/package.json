@@ -13,6 +13,7 @@
     "storybook-generate": "sb-rn-get-stories"
   },
   "dependencies": {
+    "ethereum-blockies-base64": "^1.0.2",
     "@expo/config": "~10.0.5",
     "@gorhom/bottom-sheet": "^5.0.6",
     "@raylac/api": "workspace:*",

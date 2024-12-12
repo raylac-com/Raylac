@@ -184,6 +184,9 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
+      ethereum-blockies-base64:
+        specifier: ^1.0.2
+        version: 1.0.2
       expo:
         specifier: ~52.0.18
         version: 52.0.18(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(babel-plugin-react-compiler@0.0.0-experimental-6067d4e-20240919)(bufferutil@4.0.8)(graphql@15.8.0)(react-native@0.76.5(@babel/core@7.25.2)(@babel/preset-env@7.25.7(@babel/core@7.25.2))(@react-native-community/cli-server-api@13.6.9(bufferutil@4.0.8)(utf-8-validate@6.0.4))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@6.0.4))(react@18.3.1)(utf-8-validate@6.0.4)
@@ -3577,6 +3580,9 @@ packages:
     resolution: {integrity: sha512-aIL5Fx7mawVa300al2BnEE4iNvo1qETxLrPI/o05L7z6go7fCw1J6EQmbK4FmJ2AS7kgVF/KEZWufBfdClMcPg==}
     engines: {node: '>= 0.6'}
 
+  ethereum-blockies-base64@1.0.2:
+    resolution: {integrity: sha512-Vg2HTm7slcWNKaRhCUl/L3b4KrB8ohQXdd5Pu3OI897EcR6tVRvUqdTwAyx+dnmoDzj8e2bwBLDQ50ByFmcz6w==}
+
   event-emitter@0.3.5:
     resolution: {integrity: sha512-D9rRn9y7kLPnJ+hMq7S/nhvoKwwvVJahBi2BPmx3bvbsEdK3W9ii8cBSGjP+72/LnM4n6fo3+dkCX5FeTQruXA==}
 
@@ -5381,6 +5387,9 @@ packages:
   pngjs@3.4.0:
     resolution: {integrity: sha512-NCrCHhWmnQklfH4MtJMRjZ2a8c80qXeMlQMv2uVp9ISJMTt562SbGd6n2oq0PaPgKm7Z6pL9E2UlLIhC+SHL3w==}
     engines: {node: '>=4.0.0'}
+
+  pnglib@0.0.1:
+    resolution: {integrity: sha512-95ChzOoYLOPIyVmL+Y6X+abKGXUJlvOVLkB1QQkyXl7Uczc6FElUy/x01NS7r2GX6GRezloO/ecCX9h4U9KadA==}
 
   polished@4.3.1:
     resolution: {integrity: sha512-OBatVyC/N7SCW/FaDHrSd+vn0o5cS855TOmYi4OkdWUMSJCET/xip//ch8xGUvtr3i44X9LVyWwQlRMTN3pwSA==}
@@ -11180,6 +11189,10 @@ snapshots:
 
   etag@1.8.1: {}
 
+  ethereum-blockies-base64@1.0.2:
+    dependencies:
+      pnglib: 0.0.1
+
   event-emitter@0.3.5:
     dependencies:
       d: 1.0.2
@@ -13239,6 +13252,8 @@ snapshots:
       xmlbuilder: 15.1.1
 
   pngjs@3.4.0: {}
+
+  pnglib@0.0.1: {}
 
   polished@4.3.1:
     dependencies:

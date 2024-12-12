@@ -1,3 +1,6 @@
+import { Token } from '@raylac/shared';
+import { Hex } from 'viem';
+
 export type RootTabsParamsList = {
   Home: undefined;
   Swap: undefined;
@@ -28,6 +31,27 @@ export type RootStackParamsList = {
   Advanced: undefined;
   SelectLanguage: undefined;
   SendSuccess: undefined;
+
+  // Send stack
+  SelectRecipient: undefined;
+  SelectToken: {
+    address: Hex;
+  };
+  SelectAmount: {
+    address: Hex;
+    token: Token;
+  };
+  SelectChain: {
+    address: Hex;
+    amount: string;
+    token: Token;
+  };
+  ConfirmSend: {
+    address: Hex;
+    token: Token;
+    amount: string;
+    outputChainId: number;
+  };
 
   SaveBackupPhrase: undefined;
   ConfirmBackupPhrase: undefined;
