@@ -15,7 +15,7 @@ const Blockie = (props: BlockieProps) => {
       style={{
         width: size,
         height: size,
-        borderRadius: 50,
+        borderRadius: 1000,
       }}
       source={{
         uri: makeBlockie(address),

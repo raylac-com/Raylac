@@ -1,10 +1,4 @@
-import {
-  ScrollView,
-  RefreshControl,
-  View,
-  Pressable,
-  FlatList,
-} from 'react-native';
+import { ScrollView, RefreshControl, View, Pressable } from 'react-native';
 import colors from '@/lib/styles/colors';
 import useUserAccount from '@/hooks/useUserAccount';
 import { trpc } from '@/lib/trpc';
@@ -160,11 +154,17 @@ const HomeScreen = () => {
             onPress={onSendPress}
           />
         </View>
-        <FlatList
-          data={tokenBalances}
-          contentContainerStyle={{ rowGap: 8 }}
-          renderItem={({ item }) => (
-            <Pressable onPress={() => setShowTokenBalanceDetailsSheet(item)}>
+        <View
+          style={{
+            flexDirection: 'column',
+            rowGap: 8,
+          }}
+        >
+          {tokenBalances?.map((item, index) => (
+            <Pressable
+              key={index}
+              onPress={() => setShowTokenBalanceDetailsSheet(item)}
+            >
               <TokenBalanceCard
                 balance={hexToBigInt(item.balance)}
                 tokenDecimals={item.token.decimals}
@@ -174,8 +174,8 @@ const HomeScreen = () => {
                 logoUrl={item.token.logoURI}
               />
             </Pressable>
-          )}
-        />
+          ))}
+        </View>
       </ScrollView>
       {showTokenBalanceDetailsSheet && (
         <TokenBalanceDetailsSheet

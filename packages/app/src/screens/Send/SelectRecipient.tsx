@@ -22,7 +22,7 @@ const AddressListItem = (props: AddressListItemProps) => {
       style={{
         flexDirection: 'row',
         alignItems: 'center',
-        columnGap: 12,
+        columnGap: 8,
         marginBottom: 16,
       }}
     >
@@ -77,6 +77,8 @@ const SelectRecipient = ({ navigation }: Props) => {
     >
       <TextInput
         autoFocus
+        autoCapitalize="none"
+        autoCorrect={false}
         value={searchInput}
         placeholder="Ethereum address"
         onChangeText={setSearchInput}
