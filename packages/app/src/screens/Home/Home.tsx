@@ -1,4 +1,10 @@
-import { ScrollView, RefreshControl, View, Pressable } from 'react-native';
+import {
+  ScrollView,
+  RefreshControl,
+  View,
+  Pressable,
+  FlatList,
+} from 'react-native';
 import colors from '@/lib/styles/colors';
 import useUserAccount from '@/hooks/useUserAccount';
 import { trpc } from '@/lib/trpc';
@@ -154,21 +160,22 @@ const HomeScreen = () => {
             onPress={onSendPress}
           />
         </View>
-        {tokenBalances?.map((tokenBalance, index) => (
-          <Pressable
-            key={index}
-            onPress={() => setShowTokenBalanceDetailsSheet(tokenBalance)}
-          >
-            <TokenBalanceCard
-              balance={hexToBigInt(tokenBalance.balance)}
-              tokenDecimals={tokenBalance.token.decimals}
-              symbol={tokenBalance.token.symbol}
-              name={tokenBalance.token.name}
-              usdValue={tokenBalance.usdValue}
-              logoUrl={tokenBalance.token.logoURI}
-            />
-          </Pressable>
-        ))}
+        <FlatList
+          data={tokenBalances}
+          contentContainerStyle={{ rowGap: 8 }}
+          renderItem={({ item }) => (
+            <Pressable onPress={() => setShowTokenBalanceDetailsSheet(item)}>
+              <TokenBalanceCard
+                balance={hexToBigInt(item.balance)}
+                tokenDecimals={item.token.decimals}
+                symbol={item.token.symbol}
+                name={item.token.name}
+                usdValue={item.usdValue}
+                logoUrl={item.token.logoURI}
+              />
+            </Pressable>
+          )}
+        />
       </ScrollView>
       {showTokenBalanceDetailsSheet && (
         <TokenBalanceDetailsSheet
