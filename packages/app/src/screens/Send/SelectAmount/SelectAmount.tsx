@@ -66,18 +66,67 @@ const SelectAmount = ({ route }: Props) => {
   const address = route.params.address;
   const token = route.params.token;
 
-  const [tokenAmount, setTokenAmount] = useState<string>('');
-  const [usdAmount, setUsdAmount] = useState<string>('');
-
+  ///
+  /// Local state
+  ///
+  const [tokenAmountInputText, setTokenAmountInputText] = useState<string>('');
+  const [usdAmountInputText, setUsdAmountInputText] = useState<string>('');
   const [selectedChain, setSelectedChain] = useState<Chain>(
     getChainFromId(token.addresses[0].chainId)
   );
-
   const [isSelectChainSheetOpen, setIsSelectChainSheetOpen] =
     useState<boolean>(false);
 
+  ///
+  /// Queries
+  ///
+
   const { data: tokenBalance } = useTokenBalance(token);
   const { data: tokenPriceUsd } = useTokenPriceUsd(token);
+
+  ///
+  /// Handlers
+  ///
+
+  const handleTokenAmountInputTextChange = (amountText: string) => {
+    setTokenAmountInputText(amountText);
+
+    if (amountText === '') {
+      setUsdAmountInputText('');
+      return;
+    }
+
+    if (tokenPriceUsd !== undefined) {
+      const usdAmount = new BigNumber(amountText)
+        .multipliedBy(tokenPriceUsd)
+        .toFixed(2);
+
+      setUsdAmountInputText(usdAmount);
+    }
+  };
+
+  const handleUsdAmountInputTextChange = (amountText: string) => {
+    setUsdAmountInputText(amountText);
+
+    if (amountText === '') {
+      setTokenAmountInputText('');
+      return;
+    }
+
+    if (tokenPriceUsd !== undefined) {
+      const tokenAmount = new BigNumber(amountText).dividedBy(tokenPriceUsd);
+
+      setTokenAmountInputText(tokenAmount.toString());
+    }
+  };
+
+  ///
+  /// Effects
+  ///
+
+  ///
+  /// Derived state
+  ///
 
   const formattedTokenBalance = tokenBalance
     ? formatUnits(tokenBalance, token.decimals)
@@ -94,8 +143,8 @@ const SelectAmount = ({ route }: Props) => {
     <View style={{ flex: 1 }}>
       <View style={{ flex: 1, padding: 16, rowGap: 20 }}>
         <AmountInput
-          amount={tokenAmount}
-          setAmount={setTokenAmount}
+          amount={tokenAmountInputText}
+          setAmount={handleTokenAmountInputTextChange}
           postfix={token.symbol}
         />
         <View
@@ -106,8 +155,8 @@ const SelectAmount = ({ route }: Props) => {
           }}
         >
           <AmountInput
-            amount={usdAmount}
-            setAmount={setUsdAmount}
+            amount={usdAmountInputText}
+            setAmount={handleUsdAmountInputTextChange}
             postfix={'USD'}
           />
           <StyledText
@@ -163,7 +212,7 @@ const SelectAmount = ({ route }: Props) => {
           onPress={() => {
             navigation.navigate('ConfirmSend', {
               address,
-              amount: tokenAmount,
+              amount: tokenAmountInputText,
               token,
               outputChainId: selectedChain.id,
             });
