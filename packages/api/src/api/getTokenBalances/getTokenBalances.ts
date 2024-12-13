@@ -12,6 +12,7 @@ import {
   getERC20TokenBalance,
   TokenBalancesReturnType,
   getChainName,
+  RelaySupportedCurrenciesResponseBody,
 } from '@raylac/shared';
 import {
   getAlchemyClient,
@@ -22,6 +23,7 @@ import { KNOWN_TOKENS } from '../../lib/knownTokes';
 import BigNumber from 'bignumber.js';
 import { logger } from '@raylac/shared-backend';
 import { relayGetCurrencies } from '../../lib/relay';
+import NodeCache from 'node-cache';
 
 const getETHBalance = async ({
   address,
@@ -118,6 +120,10 @@ const getKnownTokenBalances = async ({
   return balances.filter(balance => balance !== null);
 };
 
+const metadataCache = new NodeCache({
+  stdTTL: 60 * 60 * 24, // 24 hours
+});
+
 /**
  * Get the balance of ERC20 tokens across all chains for a given address
  */
@@ -154,37 +160,44 @@ const getMultiChainERC20Balances = async ({
             hexToBigInt(tokenBalance.tokenBalance as Hex) !== BigInt(0)
         );
 
-      const withMetadata = [];
+      const withMetadata = await Promise.all(
+        tokensWithNonZeroBalances.map(async tokenBalance => {
+          const tokenAddress = getAddress(tokenBalance.contractAddress);
 
-      // Get metadata in batches of 100
-      for (let i = 0; i < tokensWithNonZeroBalances.length; i += 100) {
-        const batch = tokensWithNonZeroBalances.slice(i, i + 100);
+          // Check if the metadata is cached
+          const cachedMetadata = metadataCache.get<
+            RelaySupportedCurrenciesResponseBody[number][number]
+          >(`relay-token-${tokenAddress}`);
 
-        const searchResult = await relayGetCurrencies({
-          chainIds: [chain.id],
-          tokenAddresses: batch.map(
-            tokenBalance =>
-              `${chain.id}:${tokenBalance.contractAddress.toLowerCase()}` as Hex
-          ),
-          limit: 100,
-        });
-
-        for (const balance of batch) {
-          const tokenMetadata = searchResult.find(
-            token =>
-              getAddress(token.address) === getAddress(balance.contractAddress)
-          );
-
-          if (!tokenMetadata) {
-            logger.error(
-              `No token metadata found for ${balance.contractAddress} on ${getChainName(chain.id)}`
-            );
-            continue;
+          if (cachedMetadata) {
+            logger.info(`Cache hit for ${cachedMetadata.name} ${tokenAddress}`);
+            return { tokenBalance, tokenMetadata: cachedMetadata };
           }
 
-          withMetadata.push({ tokenBalance: balance, tokenMetadata });
-        }
-      }
+          const result = await relayGetCurrencies({
+            chainIds: [chain.id],
+            tokenAddress,
+          });
+
+          const metadata = result.find(
+            token =>
+              getAddress(token.address) ===
+              getAddress(tokenBalance.contractAddress)
+          );
+
+          if (!metadata) {
+            logger.error(
+              `No token metadata found for ${tokenBalance.contractAddress} on ${getChainName(chain.id)}`
+            );
+            return null;
+          }
+
+          // Cache the metadata
+          metadataCache.set(`relay-token-${tokenAddress}`, metadata);
+
+          return { tokenBalance, tokenMetadata: metadata };
+        })
+      );
 
       const withUsdValue = await Promise.all(
         withMetadata
