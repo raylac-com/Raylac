@@ -22,7 +22,7 @@ switch (APP_VARIANT) {
     break;
   case 'production':
     name = 'Raylac';
-    bundleIdentifier = 'com.raylac';
+    bundleIdentifier = 'com.raylac.app';
     icon = './assets/icon.png';
     adaptiveIcon = './assets/adaptive-icon.png';
     break;
