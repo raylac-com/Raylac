@@ -24,6 +24,7 @@ import BigNumber from 'bignumber.js';
 import { logger } from '@raylac/shared-backend';
 import { relayGetCurrencies } from '../../lib/relay';
 import NodeCache from 'node-cache';
+import getTokenPrice from '../getTokenPrice/getTokenPrice';
 
 const getETHBalance = async ({
   address,
@@ -204,9 +205,9 @@ const getMultiChainERC20Balances = async ({
           .filter(token => token !== null)
           .map(async ({ tokenBalance, tokenMetadata }) => {
             // Get token price for the token
-            const tokenPrice = await getTokenPriceByAddress({
+            const tokenPrice = await getTokenPrice({
+              tokenAddress: tokenBalance.contractAddress as Hex,
               chainId: chain.id,
-              address: tokenBalance.contractAddress as Hex,
             });
 
             const usdPrice = tokenPrice.prices.find(
