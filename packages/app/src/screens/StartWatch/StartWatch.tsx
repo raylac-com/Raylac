@@ -2,7 +2,6 @@ import StyledText from '@/components/StyledText/StyledText';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import { Alert, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import fontSizes from '@/lib/styles/fontSizes';
 import colors from '@/lib/styles/colors';
 import { useState } from 'react';
 import useStartWatch from '@/hooks/useStartWatch';
@@ -48,13 +47,6 @@ const StartWatch = () => {
       }}
     >
       <View style={{ flexDirection: 'column', rowGap: 16 }}>
-        <StyledText
-          style={{
-            fontSize: fontSizes.base,
-          }}
-        >
-          {`Use Raylac wallet in watch mode`}
-        </StyledText>
         <TextInput
           style={{
             borderWidth: 1,
@@ -69,6 +61,8 @@ const StartWatch = () => {
           onChangeText={setAddress}
           autoFocus
           autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="off"
           placeholder="Your Ethereum address"
         />
         <StyledText style={{ color: colors.border }}>

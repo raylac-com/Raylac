@@ -48,18 +48,20 @@ export const relayGetCurrencies = async ({
     logger.info('Using combined search');
     const promises = [
       relayApi.post<RelaySupportedCurrenciesResponseBody>('currencies/v1', {
+        chainIds,
         address: tokenAddress,
         tokens: tokenAddresses,
         term: searchTerm,
         useExternalSearch: false,
-        limit,
+        limit: limit ?? 10,
       }),
       relayApi.post<RelaySupportedCurrenciesResponseBody>('currencies/v1', {
+        chainIds,
         address: tokenAddress,
         tokens: tokenAddresses,
         term: searchTerm,
         useExternalSearch: true,
-        limit,
+        limit: limit ?? 10,
       }),
     ];
 

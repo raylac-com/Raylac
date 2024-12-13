@@ -163,7 +163,8 @@ const getMultiChainERC20Balances = async ({
         const searchResult = await relayGetCurrencies({
           chainIds: [chain.id],
           tokenAddresses: batch.map(
-            tokenBalance => `${chain.id}:${tokenBalance.contractAddress}` as Hex
+            tokenBalance =>
+              `${chain.id}:${tokenBalance.contractAddress.toLowerCase()}` as Hex
           ),
           limit: 100,
         });
