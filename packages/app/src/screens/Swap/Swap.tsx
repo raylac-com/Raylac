@@ -155,6 +155,8 @@ const Swap = () => {
   const isAmountTooSmall =
     getSwapQuoteError?.message === TRPCErrorMessage.SWAP_AMOUNT_TOO_SMALL;
 
+  const isWatchMode = true;
+
   return (
     <SearchOutputTokenSheetProvider>
       <SearchTokenSheetProvider>
@@ -205,7 +207,8 @@ const Swap = () => {
               isAmountTooSmall ||
               hasEnoughBalance === false ||
               isSwapping ||
-              !swapQuote
+              !swapQuote ||
+              isWatchMode
             }
             isLoading={isSwapping}
             title={
