@@ -1,6 +1,4 @@
-import borderRadius from '@/lib/styles/borderRadius';
 import colors from '@/lib/styles/colors';
-import spacing from '@/lib/styles/spacing';
 import { formatAmount, formatUsdValue } from '@raylac/shared';
 import { View } from 'react-native';
 import StyledText from './StyledText/StyledText';
@@ -23,45 +21,50 @@ const TokenBalanceCard = (props: {
   return (
     <View
       style={{
+        width: '100%',
         flexDirection: 'row',
-        padding: spacing.default,
-        borderRadius: borderRadius.base,
+        padding: 16,
+        borderRadius: 16,
         borderColor: colors.border,
         borderWidth: 1,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        shadowColor: colors.border,
-        shadowRadius: 4,
-        shadowOffset: { width: 0, height: 2 },
+        columnGap: 8,
       }}
     >
+      <TokenLogo
+        source={{ uri: props.logoUrl }}
+        style={{ width: 42, height: 42 }}
+      />
       <View
         style={{
+          flex: 1,
           flexDirection: 'row',
           alignItems: 'center',
           columnGap: 8,
         }}
       >
-        <TokenLogo
-          source={{ uri: props.logoUrl }}
-          style={{ width: 42, height: 42 }}
-        />
         <View
           style={{
+            flex: 1,
             flexDirection: 'column',
-            justifyContent: 'space-between',
-            rowGap: 4,
           }}
         >
-          <StyledText>{props.name}</StyledText>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}
+          >
+            <StyledText>{props.name}</StyledText>
+            <StyledText
+              style={{ fontWeight: 'bold' }}
+            >{`$${formatUsdValue(new BigNumber(props.usdValue))}`}</StyledText>
+          </View>
           <StyledText style={{ color: colors.border }}>
             {formattedBalance} {props.symbol}
           </StyledText>
         </View>
       </View>
-      <StyledText
-        style={{ fontWeight: 'bold' }}
-      >{`$${formatUsdValue(new BigNumber(props.usdValue))}`}</StyledText>
     </View>
   );
 };

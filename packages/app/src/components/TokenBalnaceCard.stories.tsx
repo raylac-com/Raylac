@@ -19,7 +19,7 @@ const meta = {
     usdValue: '100',
     logoUrl:
       'https://firebasestorage.googleapis.com/v0/b/raylac-72351.appspot.com/o/usdc.png?alt=media&token=4e91000d-a063-4f34-bbcb-599a44151ff9',
-    balance: parseUnits('1000', 6),
+    balance: parseUnits('100', 6),
     tokenDecimals: 6,
   },
   decorators: [
