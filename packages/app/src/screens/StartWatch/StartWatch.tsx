@@ -12,7 +12,7 @@ import useEnsAddress from '@/hooks/useEnsAddress';
 const StartWatch = () => {
   const insets = useSafeAreaInsets();
   const [address, setAddress] = useState('');
-  const { mutate: startWatch } = useStartWatch();
+  const { mutateAsync: startWatch } = useStartWatch();
 
   const navigation = useTypedNavigation();
 
@@ -21,13 +21,17 @@ const StartWatch = () => {
   const onStartPress = async () => {
     if (isAddress(address)) {
       await startWatch({ address: address as Hex });
-      navigation.navigate('Tabs', {
-        screen: 'Home',
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Tabs', params: { screen: 'Home' } }],
       });
     } else if (ensAddress) {
       await startWatch({ address: ensAddress as Hex });
-      navigation.navigate('Tabs', {
-        screen: 'Home',
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Tabs', params: { screen: 'Home' } }],
       });
     } else {
       Alert.alert('Invalid address');

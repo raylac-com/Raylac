@@ -1,9 +1,20 @@
 import StyledButton from '@/components/StyledButton/StyledButton';
+import { useSignOut } from '@/hooks/useSignOut';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { View } from 'react-native';
 
 const Settings = () => {
   const navigation = useTypedNavigation();
+
+  const { mutateAsync: signOut, isPending: isSigningOut } = useSignOut();
+
+  const onSignOutPress = async () => {
+    await signOut();
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Start' }],
+    });
+  };
 
   return (
     <View
@@ -16,8 +27,9 @@ const Settings = () => {
     >
       <StyledButton
         title="Sign out"
-        onPress={() => navigation.navigate('Start')}
-      ></StyledButton>
+        onPress={onSignOutPress}
+        isLoading={isSigningOut}
+      />
     </View>
   );
 };

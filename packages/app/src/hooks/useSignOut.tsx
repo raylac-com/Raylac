@@ -11,7 +11,7 @@ export const useSignOut = () => {
       await deleteMnemonicAndPrivKey();
       await deleteUserAddress();
 
-      await queryClient.resetQueries();
+      await queryClient.invalidateQueries();
     },
   });
 };

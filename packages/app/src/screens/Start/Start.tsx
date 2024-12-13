@@ -1,18 +1,19 @@
 import { View } from 'react-native';
 import StyledButton from '@/components/StyledButton/StyledButton';
-import useCreateAccount from '@/hooks/useCreateAccoun';
+//import useCreateAccount from '@/hooks/useCreateAccoun';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { sleep } from '@raylac/shared';
-import { useState } from 'react';
+//import { sleep } from '@raylac/shared';
+//import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 
 const Start = () => {
   const insets = useSafeAreaInsets();
 
-  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
+  //  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const navigation = useTypedNavigation();
 
+  /*
   const { mutateAsync: createAccount } = useCreateAccount();
 
   const onCreateAccountPress = async () => {
@@ -22,6 +23,7 @@ const Start = () => {
     setIsCreatingAccount(false);
     navigation.navigate('SaveBackupPhrase');
   };
+  */
 
   return (
     <View
@@ -54,6 +56,9 @@ const Start = () => {
           title="Watch address"
           onPress={() => navigation.navigate('StartWatch')}
         />
+        {/**
+           * 
+          
         <StyledButton
           title="Import account"
           onPress={() => navigation.navigate('ImportAccount')}
@@ -65,6 +70,7 @@ const Start = () => {
           onPress={onCreateAccountPress}
           disabled
         />
+         */}
       </View>
     </View>
   );

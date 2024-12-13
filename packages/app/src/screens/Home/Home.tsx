@@ -52,15 +52,17 @@ const HomeScreen = () => {
   ///
 
   useEffect(() => {
-    if (userAccount === null && !isLoadingAddress) {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Start' }],
-      });
-    } else {
-      // eslint-disable-next-line no-console
-      console.log('userAccount', userAccount);
-    }
+    const init = async () => {
+      if (userAccount === null && !isLoadingAddress) {
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Start' }],
+        });
+      }
+    };
+
+    // Only run after the cache is reset and we have a definitive userAccount value
+    init();
   }, [userAccount, isLoadingAddress]);
 
   ///

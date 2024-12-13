@@ -25,9 +25,6 @@ const useImportAccount = () => {
       await setBackupVerificationStatus('complete');
 
       await queryClient.invalidateQueries({
-        queryKey: userKeys.isSignedIn,
-      });
-      await queryClient.invalidateQueries({
         queryKey: userKeys.userAddress,
       });
     },
