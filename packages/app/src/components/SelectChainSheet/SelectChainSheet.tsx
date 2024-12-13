@@ -5,6 +5,8 @@ import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Chain } from 'viem';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
+import { useRef } from 'react';
+import colors from '@/lib/styles/colors';
 
 const ChainListItem = ({ chain }: { chain: Chain }) => {
   return (
@@ -31,18 +33,39 @@ const SelectChainSheet = ({
   onSelect: (chain: Chain) => void;
   onClose: () => void;
 }) => {
+  const ref = useRef<BottomSheet>(null);
+
   return (
     <BottomSheet
+      ref={ref}
       style={{
         flex: 1,
         padding: 16,
         rowGap: 16,
       }}
+      index={0}
       onClose={onClose}
       enablePanDownToClose
       enableDynamicSizing={false}
       snapPoints={['100%']}
     >
+      <View
+        style={{
+          width: '100%',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginBottom: 16,
+        }}
+      >
+        <StyledText
+          style={{
+            color: colors.subbedText,
+          }}
+        >
+          {`Select chain`}
+        </StyledText>
+      </View>
       <BottomSheetFlatList
         data={supportedChains}
         contentContainerStyle={{ rowGap: 16 }}
