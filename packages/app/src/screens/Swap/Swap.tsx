@@ -39,6 +39,7 @@ const Swap = () => {
 
   const { data: inputTokenBalance } = useTokenBalance(inputToken);
 
+  /*
   const { data: tokenBalances, isLoading: isLoadingTokenBalances } =
     trpc.getTokenBalances.useQuery(
       {
@@ -48,6 +49,7 @@ const Swap = () => {
         enabled: !!userAccount,
       }
     );
+  */
 
   const { data: inputTokenMetadata } = trpc.getToken.useQuery(
     {
@@ -81,20 +83,6 @@ const Swap = () => {
   //
   // Effects
   //
-
-  useEffect(() => {
-    if (tokenBalances) {
-      if (tokenBalances.length > 0) {
-        const _inputToken = tokenBalances[0];
-        setInputToken(_inputToken.token);
-      }
-
-      if (tokenBalances.length > 1) {
-        const _outputToken = tokenBalances[1];
-        setOutputToken(_outputToken.token);
-      }
-    }
-  }, [tokenBalances]);
 
   useEffect(() => {
     if (getSwapQuoteError) {
@@ -184,7 +172,8 @@ const Swap = () => {
             amount={amountInputText}
             setAmount={onInputAmountChange}
             balance={inputTokenBalance}
-            isLoadingBalance={isLoadingTokenBalances}
+            isLoadingBalance={false}
+            // isLoadingBalance={isLoadingTokenBalances}
           />
           {swapQuote && inputTokenMetadata && outputTokenMetadata && (
             <SwapPath
