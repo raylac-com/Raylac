@@ -11,7 +11,7 @@ import {
   supportedChains,
   getERC20TokenBalance,
   TokenBalancesReturnType,
-  Token,
+  getChainName,
 } from '@raylac/shared';
 import {
   getAlchemyClient,
@@ -21,7 +21,7 @@ import {
 import { KNOWN_TOKENS } from '../../lib/knownTokes';
 import BigNumber from 'bignumber.js';
 import { logger } from '@raylac/shared-backend';
-import getToken from '../getToken/getToken';
+import { relayGetCurrencies } from '../../lib/relay';
 
 const getETHBalance = async ({
   address,
@@ -139,47 +139,51 @@ const getMultiChainERC20Balances = async ({
       // Get token balances on chain
       const tokenBalances = await alchemyClient.core.getTokenBalances(address);
 
-      // Get token metadata for each balance
-      const withMetadata = await Promise.all(
-        tokenBalances.tokenBalances
-          // Filter out known tokens
-          .filter(
-            tokenBalance =>
-              !knownTokenAddresses.includes(
-                getAddress(tokenBalance.contractAddress as Hex)
-              )
-          )
-          // Filter out balances that are 0
-          .filter(
-            tokenBalance =>
-              tokenBalance !== null &&
-              hexToBigInt(tokenBalance.tokenBalance as Hex) !== BigInt(0)
-          )
-          // Get token metadata for each token
-          .map(async tokenBalance => {
-            let tokenMetadata: Token | null = null;
-            try {
-              tokenMetadata = await getToken({
-                tokenAddress: tokenBalance.contractAddress as Hex,
-              });
-            } catch (_error) {
-              logger.error(_error);
-            }
+      const tokensWithNonZeroBalances = tokenBalances.tokenBalances
+        // Filter out known tokens
+        .filter(
+          tokenBalance =>
+            !knownTokenAddresses.includes(
+              getAddress(tokenBalance.contractAddress as Hex)
+            )
+        )
+        // Filter out balances that are 0
+        .filter(
+          tokenBalance =>
+            tokenBalance !== null &&
+            hexToBigInt(tokenBalance.tokenBalance as Hex) !== BigInt(0)
+        );
 
-            if (!tokenMetadata) {
-              logger.error(
-                `No token metadata found for ${tokenBalance.contractAddress}`
-              );
-              return null;
-            }
+      const withMetadata = [];
 
-            return {
-              chainId: chain.id,
-              tokenBalance,
-              tokenMetadata,
-            };
-          })
-      );
+      // Get metadata in batches of 100
+      for (let i = 0; i < tokensWithNonZeroBalances.length; i += 100) {
+        const batch = tokensWithNonZeroBalances.slice(i, i + 100);
+
+        const searchResult = await relayGetCurrencies({
+          chainIds: [chain.id],
+          tokenAddresses: batch.map(
+            tokenBalance => `${chain.id}:${tokenBalance.contractAddress}` as Hex
+          ),
+          limit: 100,
+        });
+
+        for (const balance of batch) {
+          const tokenMetadata = searchResult.find(
+            token =>
+              getAddress(token.address) === getAddress(balance.contractAddress)
+          );
+
+          if (!tokenMetadata) {
+            logger.error(
+              `No token metadata found for ${balance.contractAddress} on ${getChainName(chain.id)}`
+            );
+            continue;
+          }
+
+          withMetadata.push({ tokenBalance: balance, tokenMetadata });
+        }
+      }
 
       const withUsdValue = await Promise.all(
         withMetadata
@@ -230,9 +234,9 @@ const getMultiChainERC20Balances = async ({
             token: {
               name: tokenMetadata.name,
               symbol: tokenMetadata.symbol,
-              logoURI: tokenMetadata.logoURI,
+              logoURI: tokenMetadata.metadata.logoURI,
               decimals: tokenMetadata.decimals,
-              verified: tokenMetadata.verified,
+              verified: tokenMetadata.metadata.verified,
               addresses: [
                 {
                   chainId: chain.id,

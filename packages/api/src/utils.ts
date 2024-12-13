@@ -193,6 +193,10 @@ export const toAlchemyNetwork = (chainId: number): Network => {
       return Network.ARB_MAINNET;
     case chains.optimism.id:
       return Network.OPT_MAINNET;
+    case chains.polygon.id:
+      return Network.MATIC_MAINNET;
+    case chains.zksync.id:
+      return Network.ZKSYNC_MAINNET;
     default:
       throw new Error(`toAlchemyNetwork: Unknown chain id: ${chainId}`);
   }

@@ -1,6 +1,6 @@
 import { Hex } from 'viem';
 import * as Clipboard from 'expo-clipboard';
-import { arbitrum, base, optimism } from 'viem/chains';
+import { arbitrum, base, optimism, polygon, zksync } from 'viem/chains';
 
 export const shortenAddress = (address: Hex) => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -26,6 +26,12 @@ export const getChainIcon = (chainId: number) => {
     case arbitrum.id:
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       return require('../../assets/chains/arbitrum.png');
+    case polygon.id:
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      return require('../../assets/chains/polygon.png');
+    case zksync.id:
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      return require('../../assets/chains/zksync.png');
     default:
       return null;
   }

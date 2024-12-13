@@ -131,6 +131,13 @@ export const appRouter = router({
             searchTerm: input.searchTerm,
           });
 
+      /*
+          const response = await relayGetCurrencies({
+        chainIds: [optimism.id],
+        tokenAddresses: ['10:0x4200000000000000000000000000000000000042'],
+      });
+      */
+
       ed(t);
 
       return response;

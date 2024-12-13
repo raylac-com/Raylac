@@ -1,6 +1,6 @@
 import { supportedChains, SupportedTokensReturnType } from '@raylac/shared';
 import { getAddress, zeroAddress } from 'viem';
-import { base, optimism } from 'viem/chains';
+import { base, optimism, polygon } from 'viem/chains';
 
 export const KNOWN_TOKENS: SupportedTokensReturnType = [
   {
@@ -10,10 +10,12 @@ export const KNOWN_TOKENS: SupportedTokensReturnType = [
     verified: true,
     logoURI:
       'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/eth.png',
-    addresses: supportedChains.map(chain => ({
-      chainId: chain.id,
-      address: zeroAddress,
-    })),
+    addresses: supportedChains
+      .filter(chain => chain.id !== polygon.id)
+      .map(chain => ({
+        chainId: chain.id,
+        address: zeroAddress,
+      })),
   },
   {
     symbol: 'USDC',

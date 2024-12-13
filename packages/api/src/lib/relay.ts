@@ -13,12 +13,14 @@ export const relayApi = axios.create({
 export const relayGetCurrencies = async ({
   chainIds,
   tokenAddress,
+  tokenAddresses,
   searchTerm,
   useExternalSearch,
   limit,
 }: {
   chainIds: number[];
   tokenAddress?: string;
+  tokenAddresses?: string[];
   searchTerm?: string;
   useExternalSearch?: boolean;
   limit?: number;
@@ -32,6 +34,7 @@ export const relayGetCurrencies = async ({
       {
         chainIds,
         address: tokenAddress,
+        tokens: tokenAddresses,
         term: searchTerm,
         useExternalSearch,
         limit: limit ?? 10,
@@ -45,15 +48,15 @@ export const relayGetCurrencies = async ({
     logger.info('Using combined search');
     const promises = [
       relayApi.post<RelaySupportedCurrenciesResponseBody>('currencies/v1', {
-        chainIds,
         address: tokenAddress,
+        tokens: tokenAddresses,
         term: searchTerm,
         useExternalSearch: false,
         limit,
       }),
       relayApi.post<RelaySupportedCurrenciesResponseBody>('currencies/v1', {
-        chainIds,
         address: tokenAddress,
+        tokens: tokenAddresses,
         term: searchTerm,
         useExternalSearch: true,
         limit,

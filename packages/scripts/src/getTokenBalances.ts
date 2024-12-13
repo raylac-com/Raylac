@@ -1,3 +1,4 @@
+import { optimism } from 'viem/chains';
 import { client } from './rpc';
 
 const getTokenBalances = async () => {
