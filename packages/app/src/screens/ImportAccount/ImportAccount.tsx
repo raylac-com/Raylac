@@ -1,51 +1,52 @@
 import StyledButton from '@/components/StyledButton/StyledButton';
-import useImportAccount from '@/hooks/useImportAccount';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
-import * as bip39 from 'bip39';
 import Toast from 'react-native-toast-message';
 import MultiLineInput from '@/components/MultiLineInput';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import useImportPrivKey from '@/hooks/useImportPrivKey';
+import { isHex } from 'viem';
 
 /**
  * Sign in screen
  */
 const ImportAccount = () => {
   const insets = useSafeAreaInsets();
-  const [mnemonic, setMnemonic] = useState('');
-  const [isMnemonicValid, setIsMnemonicValid] = useState(false);
+  const [privKey, setPrivKey] = useState('');
+  const [isPrivKeyValid, setIsPrivKeyValid] = useState(false);
+
   const {
-    mutateAsync: signIn,
-    isPending: isSigningIn,
-    error: signInError,
-  } = useImportAccount();
+    mutateAsync: importPrivKey,
+    isPending: isImportingPrivKey,
+    error: importPrivKeyError,
+  } = useImportPrivKey();
 
   const navigation = useTypedNavigation();
 
-  const onSignInPress = useCallback(async () => {
-    await signIn({ mnemonic });
-    navigation.navigate('Tabs', { screen: 'Home' });
-  }, [signIn, mnemonic]);
+  const onImportPrivKeyPress = useCallback(async () => {
+    if (isHex(privKey)) {
+      await importPrivKey({ privKey });
+      navigation.navigate('Tabs', { screen: 'Home' });
+    }
+  }, [importPrivKey, privKey]);
 
   useEffect(() => {
-    if (signInError) {
+    if (importPrivKeyError) {
       Toast.show({
         text1: 'Error',
-        text2: signInError.message,
+        text2: importPrivKeyError.message,
         type: 'error',
       });
     }
-  }, [signInError]);
+  }, [importPrivKeyError]);
 
   useEffect(() => {
-    try {
-      const _mnemonicValid = bip39.validateMnemonic(mnemonic);
-      setIsMnemonicValid(_mnemonicValid);
-    } catch (_e) {
-      setIsMnemonicValid(false);
+    if (privKey) {
+      const _isPrivKeyValid = isHex(privKey);
+      setIsPrivKeyValid(_isPrivKeyValid);
     }
-  }, [mnemonic]);
+  }, [privKey]);
 
   return (
     <View
@@ -63,15 +64,15 @@ const ImportAccount = () => {
         autoFocus
         autoCapitalize="none"
         multiline
-        placeholder={'Enter your mnemonic'}
-        value={mnemonic}
-        onChangeText={setMnemonic}
+        placeholder={'Enter your private key'}
+        value={privKey}
+        onChangeText={setPrivKey}
       ></MultiLineInput>
       <StyledButton
-        isLoading={isSigningIn}
+        isLoading={isImportingPrivKey}
         title={'Import account'}
-        onPress={onSignInPress}
-        disabled={!isMnemonicValid}
+        onPress={onImportPrivKeyPress}
+        disabled={!isPrivKeyValid}
       ></StyledButton>
     </View>
   );

@@ -56,15 +56,13 @@ const Start = () => {
           title="Watch address"
           onPress={() => navigation.navigate('StartWatch')}
         />
-        {/**
-           * 
-          
         <StyledButton
           title="Import account"
           onPress={() => navigation.navigate('ImportAccount')}
-          disabled
         />
-        <StyledButton
+        {/**
+           * 
+            <StyledButton
           title="Create Account"
           isLoading={isCreatingAccount}
           onPress={onCreateAccountPress}

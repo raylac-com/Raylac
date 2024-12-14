@@ -14,6 +14,7 @@ import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.
 import {
   BuildSwapUserOpRequestBody,
   GetSwapQuoteRequestBody,
+  SubmitSwapRequestBody,
   SubmitUserOpsRequestBody,
 } from '@raylac/shared';
 import getSwapQuote from './api/getSwapQuote/getSwapQuote';
@@ -27,6 +28,7 @@ import getSwapHistory from './api/getSwapHistory/getSwapHistory';
 import getSwapHistoryMock from './api/getSwapHistory/getSwapHistory.mock';
 import getToken from './api/getToken/getToken';
 import getTokenMock from './api/getToken/getToken.mock';
+import submitSwap from './api/submitSwap/submitSwap';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -81,6 +83,23 @@ export const appRouter = router({
       return MOCK_RESPONSE
         ? buildSwapUserOpMock(input as BuildSwapUserOpRequestBody)
         : buildSwapUserOp(input as BuildSwapUserOpRequestBody);
+    }),
+
+  submitSwap: publicProcedure
+    .input(
+      z.object({
+        swapQuote: z.any(),
+        signedTxs: z.array(
+          z.object({
+            chainId: z.number(),
+            signedTx: z.string(),
+            sender: z.string(),
+          })
+        ),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return submitSwap(input as SubmitSwapRequestBody);
     }),
 
   submitUserOps: publicProcedure

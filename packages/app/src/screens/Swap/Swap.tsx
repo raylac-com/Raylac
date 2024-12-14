@@ -7,7 +7,6 @@ import useUserAccount from '@/hooks/useUserAccount';
 import { SupportedTokensReturnType, TRPCErrorMessage } from '@raylac/shared';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useGetSwapQuote from '@/hooks/useGetSwapQuote';
-import useSwap from '@/hooks/useSwap';
 import useDebounce from '@/hooks/useDebounce';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import StyledText from '@/components/StyledText/StyledText';
@@ -17,6 +16,7 @@ import { View } from 'react-native';
 import { SearchTokenSheetProvider } from '@/contexts/SearchInputTokenSheetContext';
 import { SearchOutputTokenSheetProvider } from '@/contexts/SearchOutputTokenSheetContext';
 import SwapPath from './components/SwapPath/SwapPath';
+import useSwap from '@/hooks/useSwap';
 
 type Token = SupportedTokensReturnType[number];
 
@@ -120,8 +120,6 @@ const Swap = () => {
   const onSwapPress = async () => {
     if (swapQuote) {
       await swap({
-        inputs: swapQuote.inputs,
-        output: swapQuote.output,
         swapQuote: swapQuote.quote,
       });
 
@@ -154,8 +152,6 @@ const Swap = () => {
 
   const isAmountTooSmall =
     getSwapQuoteError?.message === TRPCErrorMessage.SWAP_AMOUNT_TOO_SMALL;
-
-  const isWatchMode = true;
 
   return (
     <SearchOutputTokenSheetProvider>
@@ -207,8 +203,7 @@ const Swap = () => {
               isAmountTooSmall ||
               hasEnoughBalance === false ||
               isSwapping ||
-              !swapQuote ||
-              isWatchMode
+              !swapQuote
             }
             isLoading={isSwapping}
             title={

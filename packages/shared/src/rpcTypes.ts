@@ -1,6 +1,7 @@
 import { Hex } from 'viem';
 import {
   AlchemyTokenPriceResponse,
+  RelayGasFee,
   RelayGetQuoteResponseBody,
   Token,
   UserOperation,
@@ -32,6 +33,67 @@ export interface BuildSwapUserOpRequestBody {
   quote: RelayGetQuoteResponseBody;
 }
 
+export interface GetBridgeQuoteRequestBody {
+  token: Token;
+  fromChainId: number;
+  toChainId: number;
+  amount: Hex;
+}
+
+export interface GetBridgeQuoteReturnType {
+  steps: [
+    {
+      id: string;
+      action: string;
+      description: string;
+      kind: string;
+      requestId: string;
+      items: {
+        status: 'incomplete';
+        data: {
+          from: Hex;
+          to: Hex;
+          data: Hex;
+          value: string;
+          maxFeePerGas: string;
+          maxPriorityFeePerGas: string;
+          chainId: number;
+        };
+        check: {
+          endpoint: string;
+          method: string;
+        };
+      }[];
+    },
+  ];
+  fees: {
+    gas: RelayGasFee;
+    relayer: RelayGasFee;
+    relayerGas: RelayGasFee;
+    relayerService: RelayGasFee;
+    app: RelayGasFee;
+  };
+  balances: {
+    userBalance: string;
+    requiredToSolve: string;
+  };
+  request: {
+    url: string;
+    method: string;
+    data: {
+      user: Hex;
+      destinationCurrency: Hex;
+      destinationChainId: number;
+      originCurrency: Hex;
+      originChainId: number;
+      amount: string;
+      recipient: Hex;
+      tradeType: 'EXACT_INPUT' | 'EXACT_OUTPUT';
+      referrer: string;
+    };
+  };
+}
+
 export interface GetSwapQuoteRequestBody {
   senderAddress: Hex;
   inputs: {
@@ -47,6 +109,15 @@ export interface GetSwapQuoteRequestBody {
 }
 
 export type GetSwapQuoteReturnType = RelayGetQuoteResponseBody;
+
+export interface SubmitSwapRequestBody {
+  swapQuote: GetSwapQuoteReturnType;
+  signedTxs: {
+    chainId: number;
+    signedTx: Hex;
+    sender: Hex;
+  }[];
+}
 
 export interface GetTokenPriceRequestBody {
   tokenAddress: Hex;

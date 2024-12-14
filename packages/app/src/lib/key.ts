@@ -10,6 +10,8 @@ import { Hex } from 'viem/_types/types/misc';
 globalThis.Buffer = Buffer;
 
 const MNEMONIC_AND_PRIV_KEY_STORAGE_KEY = 'raylac-mnemonicAndPrivKey';
+const PRIVATE_KEY_STORAGE_KEY = 'raylac-privateKey';
+
 const BACKUP_VERIFICATION_COMPLETE_STORAGE_KEY =
   'raylac-backupVerificationComplete';
 const USER_ADDRESS_STORAGE_KEY = 'userAddress';
@@ -70,6 +72,24 @@ export const saveMnemonicAndPrivKey = async ({
       requireAuthentication: REQUIRE_AUTHENTICATION,
     }
   );
+};
+
+export const savePrivateKey = async (privKey: Hex) => {
+  await SecureStore.setItem(PRIVATE_KEY_STORAGE_KEY, privKey, {
+    requireAuthentication: REQUIRE_AUTHENTICATION,
+  });
+};
+
+export const getPrivateKey = async (): Promise<Hex | null> => {
+  const item = await SecureStore.getItem(PRIVATE_KEY_STORAGE_KEY, {
+    requireAuthentication: REQUIRE_AUTHENTICATION,
+  });
+
+  if (!item) {
+    return null;
+  }
+
+  return item as Hex;
 };
 
 export const getMnemonicAndPrivKey = async (): Promise<{
