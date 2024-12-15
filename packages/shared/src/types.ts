@@ -68,7 +68,7 @@ export interface RelayExecutionStepItem {
   };
 }
 
-export interface ExecutionStep {
+export interface BridgeStep {
   tx: {
     to: Hex;
     data: Hex;
@@ -79,21 +79,45 @@ export interface ExecutionStep {
     chainId: number;
     gas: number;
   };
-  /*
-  decoded: {
+  bridgeDetails: {
+    to: Hex;
+    amountInFormatted: string;
+    amountOutFormatted: string;
+    bridgeFeeFormatted: string;
+    bridgeFeeUsd: string;
+    fromChainId: number;
+    toChainId: number;
+  };
+  serializedTx: Hex;
+}
+
+export interface TransferStep {
+  tx: {
+    to: Hex;
+    data: Hex;
+    value: string;
+    maxFeePerGas: string;
+    maxPriorityFeePerGas: string;
+    nonce: number;
+    chainId: number;
+    gas: number;
+  };
+  transferDetails: {
     to: Hex;
     amount: string;
     amountFormatted: string;
     amountUsd: string;
     chainId: number;
-    token: Token;
   };
-  */
   relayerFee?: RelayGasFee;
   serializedTx: Hex;
 }
 
-export type SignedExecutionStep = ExecutionStep & {
+export type SignedBridgeStep = BridgeStep & {
+  signature: Hex;
+};
+
+export type SignedTransferStep = TransferStep & {
   signature: Hex;
 };
 

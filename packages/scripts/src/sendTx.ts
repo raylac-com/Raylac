@@ -11,7 +11,7 @@ import { client } from './rpc';
 import {
   BuildMultiChainSendRequestBody,
   SendTransactionRequestBody,
-  SignedExecutionStep,
+  SignedBridgeStep,
   signEIP1159Tx,
   supportedChains,
 } from '@raylac/shared';
@@ -22,7 +22,6 @@ const sendTx = async () => {
     process.env.TEST_RELAY_PRIVATE_KEY as Hex
   );
 
-  /*
   const USDC = {
     symbol: 'USDC',
     name: 'USD Coin',
@@ -53,8 +52,8 @@ const sendTx = async () => {
       },
     ],
   };
-  */
 
+  /*
   const ETH = {
     symbol: 'ETH',
     name: 'Ethereum',
@@ -69,20 +68,23 @@ const sendTx = async () => {
         address: zeroAddress,
       })),
   };
+  */
 
-  const transferAmount = parseUnits('0.0002', ETH.decimals).toString();
+  const transferAmount = parseUnits('5', USDC.decimals).toString();
 
   const destinationChainId = optimism.id;
 
   const requestBody: BuildMultiChainSendRequestBody = {
-    token: ETH,
+    token: USDC,
     amount: transferAmount,
     destinationChainId: destinationChainId,
     sender: account.address,
-    to: account.address,
+    to: '0x400EA6522867456E988235675b9Cb5b1Cf5b79C8',
   };
 
   const multiChainSend = await client.buildMultiChainSend.mutate(requestBody);
+
+  console.log(JSON.stringify(multiChainSend, null, 2));
 
   /*
   const signedStepItems: SignedExecutionStep[] = [];

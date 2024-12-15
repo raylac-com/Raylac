@@ -16,11 +16,12 @@ import {
   PrivateKeyAccount,
 } from 'viem';
 import {
+  BridgeStep,
   ChainGasInfo,
-  ExecutionStep,
   SwapInput,
   SwapOutput,
   Token,
+  TransferStep,
   UserOperation,
 } from './types';
 import RaylacAccountV2Abi from './abi/RaylacAccountV2Abi';
@@ -125,7 +126,7 @@ export const formatAmount = (amount: string, decimals: number): string => {
   const formatted = Number(
     formatUnits(BigInt(amount), decimals)
   ).toLocaleString('en-US', {
-    maximumFractionDigits: 6,
+    maximumFractionDigits: 9,
   });
 
   if (formatted === '0' && amount !== '0') {
@@ -394,7 +395,7 @@ export const signEIP1159Tx = async ({
   tx,
   account,
 }: {
-  tx: ExecutionStep['tx'];
+  tx: BridgeStep['tx'] | TransferStep['tx'];
   account: PrivateKeyAccount;
 }) => {
   return await account.signTransaction({

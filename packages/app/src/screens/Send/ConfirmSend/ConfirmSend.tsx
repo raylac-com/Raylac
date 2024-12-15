@@ -1,4 +1,5 @@
 import Blockie from '@/components/Blockie/Blockie';
+import SendDetailsSheet from '@/components/SendDetailsSheet/SendDetailsSheet';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import StyledText from '@/components/StyledText/StyledText';
@@ -11,12 +12,13 @@ import { RootStackParamsList } from '@/navigation/types';
 import {
   BuildMultiChainSendRequestBody,
   SendTransactionRequestBody,
-  SignedExecutionStep,
+  SignedBridgeStep,
+  SignedTransferStep,
   signEIP1159Tx,
 } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { parseUnits } from 'viem';
@@ -32,6 +34,12 @@ const ConfirmSend = ({ route }: Props) => {
   const insets = useSafeAreaInsets();
 
   const { data: userAccount } = useUserAccount();
+
+  ///
+  /// Local state
+  ///
+
+  const [isSendDetailsSheetOpen, setIsSendDetailsSheetOpen] = useState(false);
 
   ///
   /// Queries
@@ -96,7 +104,7 @@ const ConfirmSend = ({ route }: Props) => {
 
     const privateKeyAccount = privateKeyToAccount(privateKey);
 
-    const signedBridgeSteps: SignedExecutionStep[] = [];
+    const signedBridgeSteps: SignedBridgeStep[] = [];
     for (const step of multiChainSend.bridgeSteps) {
       const signature = await signEIP1159Tx({
         tx: step.tx,
@@ -114,7 +122,7 @@ const ConfirmSend = ({ route }: Props) => {
       account: privateKeyAccount,
     });
 
-    const signedTransferStep: SignedExecutionStep = {
+    const signedTransferStep: SignedTransferStep = {
       ...multiChainSend.transferStep,
       signature,
     };
@@ -133,111 +141,134 @@ const ConfirmSend = ({ route }: Props) => {
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        paddingTop: 48,
-        paddingHorizontal: 16,
-        rowGap: 16,
-        paddingBottom: insets.bottom,
-      }}
-    >
-      <View style={{ flexDirection: 'column', rowGap: 74 }}>
-        <View style={{ flexDirection: 'column', rowGap: 24 }}>
-          {/* Send input details */}
-          <View
-            style={{
-              flexDirection: 'column',
-              rowGap: 12,
-              borderColor: colors.border,
-              borderWidth: 1,
-              padding: 16,
-              borderRadius: 16,
-            }}
-          >
-            <StyledText>{`You send`}</StyledText>
-            {multiChainSend === undefined ? (
-              <Skeleton style={{ width: 100, height: 24 }} />
-            ) : (
-              <StyledText>{`${multiChainSend.inputAmountFormatted} ${token.symbol}`}</StyledText>
-            )}
-          </View>
-          {/* Send output details */}
-          <View
-            style={{
-              flexDirection: 'column',
-              rowGap: 12,
-              borderColor: colors.border,
-              borderWidth: 1,
-              padding: 16,
-              borderRadius: 16,
-            }}
-          >
+    <View style={{ flex: 1 }}>
+      <View
+        style={{
+          flex: 1,
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          paddingTop: 48,
+          paddingHorizontal: 16,
+          rowGap: 16,
+          paddingBottom: insets.bottom,
+        }}
+      >
+        <View style={{ flexDirection: 'column', rowGap: 74 }}>
+          <View style={{ flexDirection: 'column', rowGap: 24 }}>
+            {/* Send input details */}
             <View
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                columnGap: 4,
+                flexDirection: 'column',
+                rowGap: 12,
+                borderColor: colors.border,
+                borderWidth: 1,
+                padding: 16,
+                borderRadius: 16,
               }}
             >
-              <Blockie address={to} size={24} />
-              <StyledText>{shortenAddress(to)}</StyledText>
+              <StyledText>{`You send`}</StyledText>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                {multiChainSend === undefined ? (
+                  <Skeleton style={{ width: 100, height: 24 }} />
+                ) : (
+                  <StyledText>{`${multiChainSend.inputAmountFormatted} ${token.symbol}`}</StyledText>
+                )}
+                <StyledText
+                  style={{ color: colors.subbedText }}
+                  onPress={() => setIsSendDetailsSheetOpen(true)}
+                >
+                  {`Details`}
+                </StyledText>
+              </View>
             </View>
+            {/* Send output details */}
+            <View
+              style={{
+                flexDirection: 'column',
+                rowGap: 12,
+                borderColor: colors.border,
+                borderWidth: 1,
+                padding: 16,
+                borderRadius: 16,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  columnGap: 4,
+                }}
+              >
+                <Blockie address={to} size={24} />
+                <StyledText>{shortenAddress(to)}</StyledText>
+              </View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  columnGap: 4,
+                }}
+              >
+                <StyledText>{`Receives `}</StyledText>
+                {multiChainSend === undefined ? (
+                  <Skeleton style={{ width: 100, height: 24 }} />
+                ) : (
+                  <StyledText>{`${multiChainSend.outputAmountFormatted} ${token.symbol}`}</StyledText>
+                )}
+              </View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  columnGap: 4,
+                }}
+              >
+                <StyledText>{`Network `}</StyledText>
+                <Image
+                  source={getChainIcon(outputChainId)}
+                  style={{ width: 24, height: 24 }}
+                />
+              </View>
+            </View>
+          </View>
+          <View style={{ flexDirection: 'column', rowGap: 12 }}>
             <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
+                justifyContent: 'space-between',
                 columnGap: 4,
               }}
             >
-              <StyledText>{`Receives `}</StyledText>
+              <StyledText>{`Bridge fee`}</StyledText>
               {multiChainSend === undefined ? (
                 <Skeleton style={{ width: 100, height: 24 }} />
               ) : (
-                <StyledText>{`${multiChainSend.outputAmountFormatted} ${token.symbol}`}</StyledText>
+                <StyledText>{`$${multiChainSend.bridgeFeeUsd}`}</StyledText>
               )}
             </View>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                columnGap: 4,
-              }}
-            >
-              <StyledText>{`Network `}</StyledText>
-              <Image
-                source={getChainIcon(outputChainId)}
-                style={{ width: 24, height: 24 }}
-              />
-            </View>
           </View>
         </View>
-        <View style={{ flexDirection: 'column', rowGap: 12 }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              columnGap: 4,
-            }}
-          >
-            <StyledText>{`Bridge fee`}</StyledText>
-            {multiChainSend === undefined ? (
-              <Skeleton style={{ width: 100, height: 24 }} />
-            ) : (
-              <StyledText>{`$${multiChainSend.bridgeFeeUsd}`}</StyledText>
-            )}
-          </View>
-        </View>
+        <StyledButton
+          title="Send"
+          onPress={onSendPress}
+          isLoading={isSendingTransaction || isBuildingMultiChainSend}
+          disabled={isSendingTransaction || isBuildingMultiChainSend}
+        />
       </View>
-      <StyledButton
-        title="Send"
-        onPress={onSendPress}
-        isLoading={isSendingTransaction || isBuildingMultiChainSend}
-        disabled={isSendingTransaction || isBuildingMultiChainSend}
-      />
+      {multiChainSend && isSendDetailsSheetOpen && (
+        <SendDetailsSheet
+          sendDetails={multiChainSend}
+          token={token}
+          onClose={() => setIsSendDetailsSheetOpen(false)}
+        />
+      )}
     </View>
   );
 };

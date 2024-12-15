@@ -3,12 +3,14 @@ import {
   getWalletClient,
   BuildMultiChainSendRequestBody,
   ERC20Abi,
-  ExecutionStep,
+  BridgeStep,
+  TransferStep,
   getERC20TokenBalance,
   getGasInfo,
   supportedChains,
   Token,
   BuildMultiChainSendReturnType,
+  formatAmount,
 } from '@raylac/shared';
 import { getETHBalance } from '../getTokenBalances/getTokenBalances';
 import { encodeFunctionData, formatUnits, Hex, zeroAddress } from 'viem';
@@ -133,7 +135,7 @@ const buildERC20TransferExecutionStep = ({
     args: [to, amount],
   });
 
-  const step: ExecutionStep = {
+  const step: TransferStep = {
     tx: {
       to: tokenAddress,
       data,
@@ -143,6 +145,13 @@ const buildERC20TransferExecutionStep = ({
       nonce,
       chainId,
       gas: 500_0000,
+    },
+    transferDetails: {
+      to: to,
+      amount: amount.toString(),
+      amountFormatted: formatUnits(amount, token.decimals),
+      amountUsd: '0',
+      chainId,
     },
     serializedTx: '0x',
   };
@@ -165,7 +174,14 @@ const buildETHTransferExecutionStep = ({
   chainId: number;
   nonce: number;
 }) => {
-  const step: ExecutionStep = {
+  const step: TransferStep = {
+    transferDetails: {
+      to: to,
+      amount: amount.toString(),
+      amountFormatted: formatUnits(amount, 18),
+      amountUsd: '0',
+      chainId,
+    },
     tx: {
       to: to,
       data: '0x',
@@ -277,25 +293,34 @@ const buildMultiChainSend = async ({
         throw new Error('relayerFee is undefined');
       }
 
-      if (!relayerFee.amount) {
+      if (relayerFee.amount === undefined) {
         throw new Error('relayerFee.amount is undefined');
       }
 
+      if (relayerFee.amountFormatted === undefined) {
+        throw new Error('relayerFee.amountFormatted is undefined');
+      }
+
+      if (relayerFee.amountUsd === undefined) {
+        throw new Error('relayerFee.amountUsd is undefined');
+      }
+
+      const bridgeFeeFormatted = relayerFee.amountFormatted;
+      const bridgeFeeUsd = relayerFee.amountUsd;
+
       inputAmountPlusFee += BigInt(relayerFee.amount);
 
-      const bridgeStep: ExecutionStep = {
-        relayerFee: {
-          currency: {
-            chainId: relayerFee?.currency?.chainId,
-            address: relayerFee?.currency?.address as Hex,
-            symbol: relayerFee?.currency?.symbol,
-            name: relayerFee?.currency?.name,
-            decimals: relayerFee?.currency?.decimals,
-          },
-          amount: relayerFee?.amount,
-          amountFormatted: relayerFee?.amountFormatted,
-          amountUsd: relayerFee?.amountUsd,
-        },
+      const amountIn = bridgeInput.amount + BigInt(relayerFee.amount);
+      const amountInFormatted = formatAmount(
+        amountIn.toString(),
+        token.decimals
+      );
+      const amountOutFormatted = formatAmount(
+        bridgeInput.amount.toString(),
+        token.decimals
+      );
+
+      const bridgeStep: BridgeStep = {
         tx: {
           to: bridgeStepItem.data.to,
           data: bridgeStepItem.data.data,
@@ -305,6 +330,15 @@ const buildMultiChainSend = async ({
           nonce,
           chainId: bridgeInput.chainId,
           gas: 500_0000,
+        },
+        bridgeDetails: {
+          to: sender,
+          amountInFormatted,
+          amountOutFormatted,
+          bridgeFeeFormatted,
+          bridgeFeeUsd,
+          fromChainId: bridgeInput.chainId,
+          toChainId: destinationChainId,
         },
         serializedTx: '0x',
       };
@@ -335,7 +369,7 @@ const buildMultiChainSend = async ({
     address: sender,
   });
 
-  const transferStep: ExecutionStep =
+  const transferStep: TransferStep =
     token.addresses[0].address === zeroAddress
       ? buildETHTransferExecutionStep({
           amount: BigInt(amount),
@@ -355,8 +389,14 @@ const buildMultiChainSend = async ({
           nonce,
         });
 
-  const inputAmountFormatted = formatUnits(inputAmountPlusFee, token.decimals);
-  const outputAmountFormatted = formatUnits(BigInt(amount), token.decimals);
+  const inputAmountFormatted = formatAmount(
+    inputAmountPlusFee.toString(),
+    token.decimals
+  );
+  const outputAmountFormatted = formatAmount(
+    BigInt(amount).toString(),
+    token.decimals
+  );
 
   const tokenPriceUsd = tokenPrice.prices.find(p => p.currency === 'usd');
 

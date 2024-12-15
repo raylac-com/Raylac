@@ -1,9 +1,11 @@
 import { Hex } from 'viem';
 import {
   AlchemyTokenPriceResponse,
-  ExecutionStep,
+  BridgeStep,
   RelayGetQuoteResponseBody,
-  SignedExecutionStep,
+  SignedBridgeStep,
+  SignedTransferStep,
+  TransferStep,
   Token,
   UserOperation,
 } from './types';
@@ -30,8 +32,8 @@ export type TokenBalancesReturnType = {
 }[];
 
 export interface SendTransactionRequestBody {
-  signedBridgeSteps: SignedExecutionStep[];
-  signedTransfer: SignedExecutionStep;
+  signedBridgeSteps: SignedBridgeStep[];
+  signedTransfer: SignedTransferStep;
   sender: Hex;
   token: Token;
   amount: string;
@@ -55,8 +57,8 @@ export interface BuildMultiChainSendReturnType {
   bridgeFeeFormatted: string;
   bridgeFeeUsd: string;
   outputAmountUsd: string;
-  bridgeSteps: ExecutionStep[];
-  transferStep: ExecutionStep;
+  bridgeSteps: BridgeStep[];
+  transferStep: TransferStep;
 }
 
 export interface BuildSwapUserOpRequestBody {
