@@ -68,6 +68,35 @@ export interface RelayExecutionStepItem {
   };
 }
 
+export interface ExecutionStep {
+  tx: {
+    to: Hex;
+    data: Hex;
+    value: string;
+    maxFeePerGas: string;
+    maxPriorityFeePerGas: string;
+    nonce: number;
+    chainId: number;
+    gas: number;
+  };
+  /*
+  decoded: {
+    to: Hex;
+    amount: string;
+    amountFormatted: string;
+    amountUsd: string;
+    chainId: number;
+    token: Token;
+  };
+  */
+  relayerFee?: RelayGasFee;
+  serializedTx: Hex;
+}
+
+export type SignedExecutionStep = ExecutionStep & {
+  signature: Hex;
+};
+
 export interface RelayExecutionStep {
   id: string;
   action: string;
@@ -78,16 +107,16 @@ export interface RelayExecutionStep {
 }
 
 export interface RelayGasFee {
-  currency: {
-    chainId: number;
-    address: Hex;
-    symbol: string;
-    name: string;
-    decimals: number;
+  currency?: {
+    chainId?: number;
+    address?: Hex;
+    symbol?: string;
+    name?: string;
+    decimals?: number;
   };
-  amount: string;
-  amountFormatted: string;
-  amountUsd: string;
+  amount?: string;
+  amountFormatted?: string;
+  amountUsd?: string;
 }
 
 export interface RelayGetQuoteResponseBody {
@@ -366,4 +395,10 @@ export interface SwapInput {
 export interface SwapOutput {
   chainId: number;
   token: Token;
+}
+
+export interface SendInput {
+  chainId: number;
+  token: Token;
+  amount: bigint;
 }

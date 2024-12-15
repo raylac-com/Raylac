@@ -17,7 +17,7 @@ const useTokenBalances = () => {
   return {
     ...result,
     data: result.data?.map(token => ({
-      token: token.token,
+      ...token,
       balance: hexToBigInt(token.balance),
     })),
   };

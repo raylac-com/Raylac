@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@reservoir0x/relay-sdk": "^1.4.7",
     "@raylac/db": "workspace:*",
     "@raylac/shared": "workspace:*",
     "@raylac/shared-backend": "workspace:*",

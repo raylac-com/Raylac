@@ -242,7 +242,7 @@ const queryClient = new QueryClient({
     queries: {
       throwOnError: process.env.NODE_ENV === 'development',
       // throwOnError: false,
-      retry: process.env.NODE_ENV === 'development' ? false : 3,
+      retry: 3,
       // retry: 3,
       gcTime: 1000 * 60 * 60 * 24,
     },

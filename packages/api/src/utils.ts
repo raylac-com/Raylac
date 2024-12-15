@@ -5,11 +5,12 @@ import {
   webSocket,
   WebSocketTransport,
   PublicClient,
+  Hex,
 } from 'viem';
 import * as chains from 'viem/chains';
 import { ALCHEMY_API_KEY } from './lib/envVars';
 import { Network } from 'alchemy-sdk';
-import { getChainFromId } from '@raylac/shared';
+import { getChainFromId, Token } from '@raylac/shared';
 
 export const getWebsocketClient = ({ chainId }: { chainId: number }) => {
   const chain = getChainFromId(chainId);
@@ -200,4 +201,18 @@ export const toAlchemyNetwork = (chainId: number): Network => {
     default:
       throw new Error(`toAlchemyNetwork: Unknown chain id: ${chainId}`);
   }
+};
+
+export const getTokenAddressOnChain = (token: Token, chainId: number): Hex => {
+  const address = token.addresses.find(
+    (address: { chainId: number }) => address.chainId === chainId
+  )?.address;
+
+  if (!address) {
+    throw new Error(
+      `Token ${token.symbol} address not found for chainId ${chainId}`
+    );
+  }
+
+  return address;
 };

@@ -1,8 +1,9 @@
 import { Hex } from 'viem';
 import {
   AlchemyTokenPriceResponse,
-  RelayGasFee,
+  ExecutionStep,
   RelayGetQuoteResponseBody,
+  SignedExecutionStep,
   Token,
   UserOperation,
 } from './types';
@@ -28,70 +29,39 @@ export type TokenBalancesReturnType = {
   }[];
 }[];
 
+export interface SendTransactionRequestBody {
+  signedBridgeSteps: SignedExecutionStep[];
+  signedTransfer: SignedExecutionStep;
+  sender: Hex;
+  token: Token;
+  amount: string;
+}
+
+export interface BuildMultiChainSendRequestBody {
+  amount: string;
+  token: Token;
+  sender: Hex;
+  to: Hex;
+  destinationChainId: number;
+}
+
+export interface BuildMultiChainSendReturnType {
+  inputAmount: string;
+  inputAmountFormatted: string;
+  inputAmountUsd: string;
+  outputAmount: string;
+  outputAmountFormatted: string;
+  bridgeFee: string;
+  bridgeFeeFormatted: string;
+  bridgeFeeUsd: string;
+  outputAmountUsd: string;
+  bridgeSteps: ExecutionStep[];
+  transferStep: ExecutionStep;
+}
+
 export interface BuildSwapUserOpRequestBody {
   singerAddress: Hex;
   quote: RelayGetQuoteResponseBody;
-}
-
-export interface GetBridgeQuoteRequestBody {
-  token: Token;
-  fromChainId: number;
-  toChainId: number;
-  amount: Hex;
-}
-
-export interface GetBridgeQuoteReturnType {
-  steps: [
-    {
-      id: string;
-      action: string;
-      description: string;
-      kind: string;
-      requestId: string;
-      items: {
-        status: 'incomplete';
-        data: {
-          from: Hex;
-          to: Hex;
-          data: Hex;
-          value: string;
-          maxFeePerGas: string;
-          maxPriorityFeePerGas: string;
-          chainId: number;
-        };
-        check: {
-          endpoint: string;
-          method: string;
-        };
-      }[];
-    },
-  ];
-  fees: {
-    gas: RelayGasFee;
-    relayer: RelayGasFee;
-    relayerGas: RelayGasFee;
-    relayerService: RelayGasFee;
-    app: RelayGasFee;
-  };
-  balances: {
-    userBalance: string;
-    requiredToSolve: string;
-  };
-  request: {
-    url: string;
-    method: string;
-    data: {
-      user: Hex;
-      destinationCurrency: Hex;
-      destinationChainId: number;
-      originCurrency: Hex;
-      originChainId: number;
-      amount: string;
-      recipient: Hex;
-      tradeType: 'EXACT_INPUT' | 'EXACT_OUTPUT';
-      referrer: string;
-    };
-  };
 }
 
 export interface GetSwapQuoteRequestBody {

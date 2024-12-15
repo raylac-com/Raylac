@@ -13,9 +13,11 @@ import {
   keccak256,
   hexToBigInt,
   parseAbiParameters,
+  PrivateKeyAccount,
 } from 'viem';
 import {
   ChainGasInfo,
+  ExecutionStep,
   SwapInput,
   SwapOutput,
   Token,
@@ -386,6 +388,25 @@ export const buildSwapIo = ({
       chainId: outputChainId,
     },
   };
+};
+
+export const signEIP1159Tx = async ({
+  tx,
+  account,
+}: {
+  tx: ExecutionStep['tx'];
+  account: PrivateKeyAccount;
+}) => {
+  return await account.signTransaction({
+    to: tx.to,
+    value: BigInt(tx.value),
+    data: tx.data,
+    gas: BigInt(tx.gas),
+    maxFeePerGas: BigInt(tx.maxFeePerGas),
+    maxPriorityFeePerGas: BigInt(tx.maxPriorityFeePerGas),
+    nonce: tx.nonce,
+    chainId: tx.chainId,
+  });
 };
 
 /**

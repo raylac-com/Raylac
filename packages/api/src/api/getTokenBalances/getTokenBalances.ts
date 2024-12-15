@@ -26,7 +26,7 @@ import { relayGetCurrencies } from '../../lib/relay';
 import NodeCache from 'node-cache';
 import getTokenPrice from '../getTokenPrice/getTokenPrice';
 
-const getETHBalance = async ({
+export const getETHBalance = async ({
   address,
   chainId,
 }: {
@@ -39,7 +39,7 @@ const getETHBalance = async ({
   return balance;
 };
 
-const getKnownTokenBalances = async ({
+export const getKnownTokenBalances = async ({
   address,
 }: {
   address: Hex;

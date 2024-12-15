@@ -63,6 +63,9 @@ importers:
       '@raylac/shared-backend':
         specifier: workspace:*
         version: link:../shared-backend
+      '@reservoir0x/relay-sdk':
+        specifier: ^1.4.7
+        version: 1.4.8(viem@2.21.10(bufferutil@4.0.8)(typescript@5.6.2)(utf-8-validate@6.0.4)(zod@3.23.8))
       '@trpc/server':
         specifier: ^11.0.0-rc.439
         version: 11.0.0-rc.439
@@ -1968,6 +1971,11 @@ packages:
 
   '@react-navigation/routers@6.1.9':
     resolution: {integrity: sha512-lTM8gSFHSfkJvQkxacGM6VJtBt61ip2XO54aNfswD+KMw6eeZ4oehl7m0me3CR9hnDE4+60iAZR8sAhvCiI3NA==}
+
+  '@reservoir0x/relay-sdk@1.4.8':
+    resolution: {integrity: sha512-lutM6cz+TzaXsldHPahs9EeLsvvc5qbwbPkahoeqo0qOzCCUEzyzPOovc88o5Rmz5wPuX8pK1m2AGd+bgQHGSA==}
+    peerDependencies:
+      viem: ^2.9.31
 
   '@scure/base@1.1.9':
     resolution: {integrity: sha512-8YKhl8GHiNI/pU2VMaofa2Tor7PJRAjwQLBBuilkJ9L5+13yVbC7JO/wS7piioAvPSwR3JKM1IJ/u4xQzbcXKg==}
@@ -9147,6 +9155,13 @@ snapshots:
   '@react-navigation/routers@6.1.9':
     dependencies:
       nanoid: 3.3.7
+
+  '@reservoir0x/relay-sdk@1.4.8(viem@2.21.10(bufferutil@4.0.8)(typescript@5.6.2)(utf-8-validate@6.0.4)(zod@3.23.8))':
+    dependencies:
+      axios: 1.7.7
+      viem: 2.21.10(bufferutil@4.0.8)(typescript@5.6.2)(utf-8-validate@6.0.4)(zod@3.23.8)
+    transitivePeerDependencies:
+      - debug
 
   '@scure/base@1.1.9': {}
 

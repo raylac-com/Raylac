@@ -77,8 +77,11 @@ const submitUserOps = async ({
   const relayerServiceFeeAmount = swapQuote.fees.relayerService.amount;
   const relayerServiceFeeUsd = swapQuote.fees.relayerService.amountUsd;
   const relayerServiceFeeTokenAddress =
+    // @ts-ignore
     swapQuote.fees.relayerService.currency.address;
+  // @ts-ignore
   const relayerServiceFeeChainId =
+    // @ts-ignore
     swapQuote.fees.relayerService.currency.chainId;
 
   const address = userOps[0].sender;
@@ -92,9 +95,13 @@ const submitUserOps = async ({
       amountOut: amountOut.toString(),
       usdAmountIn: swapQuote.details.currencyIn.amountUsd,
       usdAmountOut: swapQuote.details.currencyOut.amountUsd,
+      // @ts-ignore
       relayerServiceFeeAmount,
+      // @ts-ignore
       relayerServiceFeeUsd,
+      // @ts-ignore
       relayerServiceFeeTokenAddress,
+      // @ts-ignore
       relayerServiceFeeChainId,
       transactions: {
         createMany: {

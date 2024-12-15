@@ -12,8 +12,10 @@ import submitUserOps from './api/submitUserOps/submitUserOps';
 import getSupportedTokens from './api/getSupportedTokens/getSupportedTokens';
 import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.mock';
 import {
+  BuildMultiChainSendRequestBody,
   BuildSwapUserOpRequestBody,
   GetSwapQuoteRequestBody,
+  SendTransactionRequestBody,
   SubmitSwapRequestBody,
   SubmitUserOpsRequestBody,
 } from '@raylac/shared';
@@ -29,6 +31,8 @@ import getSwapHistoryMock from './api/getSwapHistory/getSwapHistory.mock';
 import getToken from './api/getToken/getToken';
 import getTokenMock from './api/getToken/getToken.mock';
 import submitSwap from './api/submitSwap/submitSwap';
+import sendTransaction from './api/sendTransaction/sendTransaction';
+import buildMultiChainSend from './api/buildMultichainSend/buildMultichainSend';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -115,6 +119,18 @@ export const appRouter = router({
       return MOCK_RESPONSE
         ? submitUserOpsMock(input as SubmitUserOpsRequestBody)
         : submitUserOps(input as SubmitUserOpsRequestBody);
+    }),
+
+  sendTransaction: publicProcedure
+    .input(z.any())
+    .mutation(async ({ input }) => {
+      return sendTransaction(input as SendTransactionRequestBody);
+    }),
+
+  buildMultiChainSend: publicProcedure
+    .input(z.any())
+    .mutation(async ({ input }) => {
+      return buildMultiChainSend(input as BuildMultiChainSendRequestBody);
     }),
 
   getSwapQuote: publicProcedure.input(z.any()).mutation(async ({ input }) => {
