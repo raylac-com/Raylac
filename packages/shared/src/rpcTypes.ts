@@ -111,3 +111,44 @@ export interface SubmitUserOpsRequestBody {
     token: Token;
   };
 }
+
+export interface GetHistoryRequestBody {
+  address: Hex;
+}
+
+export type TransferHistoryItem = {
+  txHash: Hex;
+  from: Hex;
+  to: Hex;
+  amount: string;
+  amountUsd: string;
+  bridges: {
+    txHash: Hex;
+    toChainId: number;
+    fromChainId: number;
+    amountIn: string;
+    amountOut: string;
+    bridgeFeeAmount: string;
+    bridgeFeeUsd: string;
+  }[];
+  token: Token;
+};
+
+export type SwapHistoryItem = {
+  transactions: {
+    hash: Hex;
+  }[];
+  address: Hex;
+  amountIn: string;
+  amountOut: string;
+  amountInUsd: string;
+  amountOutUsd: string;
+  tokenIn: Token;
+  tokenOut: Token;
+  amountInFormatted: string;
+  amountOutFormatted: string;
+};
+
+export type HistoryItem = TransferHistoryItem | SwapHistoryItem;
+
+export type GetHistoryReturnType = HistoryItem[];

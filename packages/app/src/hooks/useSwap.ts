@@ -93,7 +93,7 @@ const useSwap = () => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.getSwapHistory),
+        queryKey: getQueryKey(trpc.getHistory),
       });
     },
   });

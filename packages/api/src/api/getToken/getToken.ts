@@ -1,17 +1,18 @@
-import {
-  findTokenByAddress,
-  supportedChains,
-  SupportedTokensReturnType,
-} from '@raylac/shared';
+import { findTokenByAddress, supportedChains, Token } from '@raylac/shared';
 import { getAddress, Hex } from 'viem';
 import { relayGetCurrencies } from '../../lib/relay';
 import { KNOWN_TOKENS } from '../../lib/knownTokes';
+import NodeCache from 'node-cache';
+
+const cache = new NodeCache({
+  stdTTL: 60 * 60 * 24,
+});
 
 const getToken = async ({
   tokenAddress,
 }: {
   tokenAddress: Hex;
-}): Promise<SupportedTokensReturnType[number]> => {
+}): Promise<Token> => {
   const knownToken = findTokenByAddress({
     tokens: KNOWN_TOKENS,
     tokenAddress,
@@ -19,6 +20,12 @@ const getToken = async ({
 
   if (knownToken) {
     return knownToken;
+  }
+
+  const cachedToken = cache.get<Token>(tokenAddress);
+
+  if (cachedToken) {
+    return cachedToken;
   }
 
   const searchResult = await relayGetCurrencies({
@@ -32,6 +39,8 @@ const getToken = async ({
   }
 
   const token = searchResult[0];
+
+  cache.set(tokenAddress, token);
 
   return {
     symbol: token.symbol,

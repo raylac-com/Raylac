@@ -14,6 +14,7 @@ import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.
 import {
   BuildMultiChainSendRequestBody,
   BuildSwapUserOpRequestBody,
+  GetHistoryRequestBody,
   GetSwapQuoteRequestBody,
   SendTransactionRequestBody,
   SubmitSwapRequestBody,
@@ -26,13 +27,12 @@ import buildSwapUserOpMock from './api/buildSwapUserOp/buildSwapUserOp.mock';
 import submitUserOpsMock from './api/submitUserOps/submitUserOps.mock';
 import getTokenPrice from './api/getTokenPrice/getTokenPrice';
 import { getTokenPriceMock } from './api/getTokenPrice/getTokenPrice.mock';
-import getSwapHistory from './api/getSwapHistory/getSwapHistory';
-import getSwapHistoryMock from './api/getSwapHistory/getSwapHistory.mock';
 import getToken from './api/getToken/getToken';
 import getTokenMock from './api/getToken/getToken.mock';
 import submitSwap from './api/submitSwap/submitSwap';
 import sendTransaction from './api/sendTransaction/sendTransaction';
 import buildMultiChainSend from './api/buildMultichainSend/buildMultichainSend';
+import getHistory from './api/getHistory/getHistory';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -139,12 +139,14 @@ export const appRouter = router({
       : getSwapQuote(input as GetSwapQuoteRequestBody);
   }),
 
-  getSwapHistory: publicProcedure
-    .input(z.object({ address: z.string() }))
+  getHistory: publicProcedure
+    .input(
+      z.object({
+        address: z.string(),
+      })
+    )
     .query(async ({ input }) => {
-      return MOCK_RESPONSE
-        ? getSwapHistoryMock()
-        : getSwapHistory({ address: input.address as Hex });
+      return getHistory(input as GetHistoryRequestBody);
     }),
 
   getSupportedTokens: publicProcedure

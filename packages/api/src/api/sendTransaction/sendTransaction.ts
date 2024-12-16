@@ -129,27 +129,36 @@ const sendTransaction = async ({
     throw new Error('Final transfer failed');
   }
 
-  await prisma.transfer.create({
+  await prisma.history.create({
     data: {
-      txHash: finalTransferTxHash,
-      from: sender,
-      to: signedTransfer.transferDetails.to,
-      destinationChainId: signedTransfer.tx.chainId,
-      amount: amount,
-      tokenAddress: token.addresses[0].address,
-      bridges: {
-        createMany: {
-          data: bridgeTxs.map(bridgeTx => ({
-            transactionHash: bridgeTx.txHash,
-            fromChainId: bridgeTx.signedBridgeStep.bridgeDetails.fromChainId,
-            toChainId: bridgeTx.signedBridgeStep.bridgeDetails.toChainId,
-            address: sender,
-            amountIn: bridgeTx.signedBridgeStep.bridgeDetails.amountIn,
-            amountOut: bridgeTx.signedBridgeStep.bridgeDetails.amountOut,
-            tokenAddress: token.addresses[0].address,
-            bridgeFeeAmount: bridgeTx.signedBridgeStep.bridgeDetails.bridgeFee,
-            bridgeFeeUsd: bridgeTx.signedBridgeStep.bridgeDetails.bridgeFeeUsd,
-          })),
+      Transfer: {
+        create: {
+          txHash: finalTransferTxHash,
+          from: sender,
+          to: signedTransfer.transferDetails.to,
+          destinationChainId: signedTransfer.tx.chainId,
+          amount: amount,
+          amountUsd: signedTransfer.transferDetails.amountUsd,
+          tokenPrice: '0', // TODO: Store token price
+          tokenAddress: token.addresses[0].address,
+          bridges: {
+            createMany: {
+              data: bridgeTxs.map(bridgeTx => ({
+                txHash: bridgeTx.txHash,
+                fromChainId:
+                  bridgeTx.signedBridgeStep.bridgeDetails.fromChainId,
+                toChainId: bridgeTx.signedBridgeStep.bridgeDetails.toChainId,
+                address: sender,
+                amountIn: bridgeTx.signedBridgeStep.bridgeDetails.amountIn,
+                amountOut: bridgeTx.signedBridgeStep.bridgeDetails.amountOut,
+                tokenAddress: token.addresses[0].address,
+                bridgeFeeAmount:
+                  bridgeTx.signedBridgeStep.bridgeDetails.bridgeFee,
+                bridgeFeeUsd:
+                  bridgeTx.signedBridgeStep.bridgeDetails.bridgeFeeUsd,
+              })),
+            },
+          },
         },
       },
     },

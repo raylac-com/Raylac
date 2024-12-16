@@ -1,27 +1,44 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import SwapDetailsSheet from './SwapDetailsSheet';
-import { base, optimism } from 'viem/chains';
+import { zeroAddress } from 'viem';
 
 const meta = {
   title: 'SwapDetailsSheet',
   component: SwapDetailsSheet,
   args: {
     swap: {
+      address: zeroAddress,
       amountOut: '1000000000000000000',
       amountIn: '1000000000000000000',
-      usdAmountOut: '1000',
-      usdAmountIn: '1000',
-      tokenAddressIn: '0x0000000000000000000000000000000000000000',
-      tokenAddressOut: '0x0000000000000000000000000000000000000000',
+      amountOutFormatted: '1000',
+      amountInFormatted: '1000',
+      amountOutUsd: '1000',
+      amountInUsd: '1000',
+      tokenIn: {
+        symbol: 'USDC',
+        name: 'USD Coin',
+        decimals: 6,
+        verified: true,
+        logoURI:
+          'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389',
+        addresses: [],
+      },
+      tokenOut: {
+        symbol: 'USDC',
+        name: 'USD Coin',
+        decimals: 6,
+        verified: true,
+        logoURI:
+          'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389',
+        addresses: [],
+      },
       transactions: [
         {
           hash: '0x123',
-          chainId: base.id,
         },
         {
           hash: '0x123',
-          chainId: optimism.id,
         },
       ],
     },

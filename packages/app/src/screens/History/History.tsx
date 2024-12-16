@@ -12,21 +12,24 @@ import { zeroAddress } from 'viem';
 import colors from '@/lib/styles/colors';
 import SwapDetailsSheet from '@/sheets/SwapDetailsSheet/SwapDetailsSheet';
 import { useState } from 'react';
-import { GetSwapHistoryReturnType } from '@/types';
 import StyledText from '@/components/StyledText/StyledText';
+import {
+  HistoryItem,
+  SwapHistoryItem,
+  TransferHistoryItem,
+} from '@raylac/shared';
+import SendHistoryListItem from '@/components/SendHistoryListItem/SendHistoryListItem';
 
 const History = () => {
   const { data: userAccount } = useUserAccount();
-  const [selectedSwap, setSelectedSwap] = useState<
-    GetSwapHistoryReturnType[number] | null
-  >(null);
+  const [selectedSwap, setSelectedSwap] = useState<HistoryItem | null>(null);
 
   const {
     data: swapHistory,
     isLoading,
     isRefetching,
     refetch,
-  } = trpc.getSwapHistory.useQuery(
+  } = trpc.getHistory.useQuery(
     {
       address: userAccount?.address ?? zeroAddress,
     },
@@ -65,11 +68,21 @@ const History = () => {
           paddingHorizontal: 16,
         }}
         data={swapHistory ?? []}
-        renderItem={({ item }) => (
-          <Pressable onPress={() => setSelectedSwap(item)}>
-            <SwapHistoryListItem swap={item} />
-          </Pressable>
-        )}
+        renderItem={({ item }) => {
+          if ('tokenAddress' in item) {
+            return (
+              <Pressable onPress={() => {}}>
+                <SendHistoryListItem transfer={item as TransferHistoryItem} />
+              </Pressable>
+            );
+          }
+
+          return (
+            <Pressable onPress={() => setSelectedSwap(item)}>
+              <SwapHistoryListItem swap={item as SwapHistoryItem} />
+            </Pressable>
+          );
+        }}
         refreshControl={
           <RefreshControl
             tintColor={colors.primary}
@@ -82,7 +95,7 @@ const History = () => {
       />
       {selectedSwap && (
         <SwapDetailsSheet
-          swap={selectedSwap}
+          swap={selectedSwap as SwapHistoryItem}
           onClose={() => {
             setSelectedSwap(null);
           }}

@@ -13,12 +13,31 @@ const meta = {
   },
   args: {
     swap: {
+      address: zeroAddress,
       amountOut: '100',
       amountIn: '100',
-      usdAmountIn: '100',
-      usdAmountOut: '100',
-      tokenAddressIn: '0x4ed4e862860bed51a9570b96d89af5e1b0efefed',
-      tokenAddressOut: zeroAddress,
+      amountInUsd: '100',
+      amountOutUsd: '100',
+      amountInFormatted: '100',
+      amountOutFormatted: '100',
+      tokenIn: {
+        symbol: 'USDC',
+        name: 'USD Coin',
+        decimals: 6,
+        verified: true,
+        logoURI:
+          'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389',
+        addresses: [],
+      },
+      tokenOut: {
+        symbol: 'USDC',
+        name: 'USD Coin',
+        decimals: 6,
+        verified: true,
+        logoURI:
+          'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389',
+        addresses: [],
+      },
       transactions: [],
     },
   },

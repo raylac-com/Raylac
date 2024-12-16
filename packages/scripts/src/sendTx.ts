@@ -71,9 +71,9 @@ const sendTx = async () => {
   };
   */
 
-  const transferAmount = parseUnits('3', USDC.decimals).toString();
+  const transferAmount = parseUnits('1', USDC.decimals).toString();
 
-  const destinationChainId = optimism.id;
+  const destinationChainId = arbitrum.id;
 
   const requestBody: BuildMultiChainSendRequestBody = {
     token: USDC,

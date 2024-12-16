@@ -1,33 +1,33 @@
+/*
 import StyledText from '@/components/StyledText/StyledText';
 import { View } from 'react-native';
 import SwapIOCard from './components/SwapIOCard';
-import useTokenMeta from '@/hooks/useTokenMeta';
-import { Hex } from 'viem';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import colors from '@/lib/styles/colors';
 import TokenImageWithChain from '@/components/TokenImageWithChain/TokenImageWithChain';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import { GetSwapHistoryReturnType } from '@/types';
-import { useRef } from 'react';
+import { base } from 'viem/chains';
+ import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+ import { useRef } from 'react';
+*/
+import { SwapHistoryItem } from '@raylac/shared';
 
 export interface SwapDetailsSheetProps {
-  swap: GetSwapHistoryReturnType[number];
+  swap: SwapHistoryItem;
   onClose: () => void;
 }
 
-const SwapDetailsSheet = ({ swap, onClose }: SwapDetailsSheetProps) => {
-  const ref = useRef<BottomSheet>(null);
-  const { data: tokenMetaIn } = useTokenMeta(swap.tokenAddressIn as Hex);
-  const { data: tokenMetaOut } = useTokenMeta(swap.tokenAddressOut as Hex);
+const SwapDetailsSheet = ({ swap }: SwapDetailsSheetProps) => {
+  //  const ref = useRef<BottomSheet>(null);
 
   if (!swap) {
     throw new Error('Swap details sheet requires a swap');
   }
 
-  if (!tokenMetaIn || !tokenMetaOut) return null;
+  return null;
 
-  const inputChains = swap.transactions.map(t => t.chainId);
-  const outputChain = swap.transactions[0].chainId;
+  /*
+  const inputChains = [];
+  const outputChain = [];
 
   return (
     <BottomSheet
@@ -61,37 +61,35 @@ const SwapDetailsSheet = ({ swap, onClose }: SwapDetailsSheetProps) => {
           }}
         >
           <SwapIOCard
-            token={tokenMetaIn}
+            token={swap.tokenIn}
             amount={BigInt(swap.amountIn)}
-            usdAmount={Number(swap.usdAmountIn)}
+            usdAmount={Number(swap.amountInUsd)}
           />
           <AntDesign name="arrowright" size={24} color={colors.subbedText} />
           <SwapIOCard
-            token={tokenMetaOut}
+            token={swap.tokenOut}
             amount={BigInt(swap.amountOut)}
-            usdAmount={Number(swap.usdAmountOut)}
+            usdAmount={Number(swap.amountOutUsd)}
           />
         </View>
-        <StyledText>{`Gas fee covered by Raylac`}</StyledText>
         <View style={{ flexDirection: 'row', columnGap: 8 }}>
-          {/* Input tokens */}
           {inputChains.map((chainId, i) => (
             <TokenImageWithChain
               key={i}
-              logoURI={tokenMetaIn.logoURI}
-              chainId={chainId}
+              logoURI={swap.tokenIn.logoURI}
+              chainId={swap.tokenIn.chainId}
             />
           ))}
           <AntDesign name="arrowright" size={24} color={colors.subbedText} />
-          {/* Output token */}
           <TokenImageWithChain
-            logoURI={tokenMetaOut.logoURI}
-            chainId={outputChain}
+            logoURI={swap.tokenOut.logoURI}
+            chainId={base.id}
           />
         </View>
       </BottomSheetView>
     </BottomSheet>
   );
+  */
 };
 
 export default SwapDetailsSheet;

@@ -11,7 +11,7 @@ datasource db {
 }
 
 model Swap {
-  id String @id @default(cuid())
+  id Int @id @default(autoincrement())
 
   address         String
   tokenAddressIn  String
@@ -19,19 +19,21 @@ model Swap {
 
   transactions Transaction[]
 
-  amountIn  String
-  amountOut String
+  amountIn  Decimal
+  amountOut Decimal
 
-  usdAmountIn  String
-  usdAmountOut String
+  usdAmountIn  Decimal
+  usdAmountOut Decimal
 
-  relayerServiceFeeAmount       String
-  relayerServiceFeeUsd          String
+  relayerServiceFeeAmount       Decimal
+  relayerServiceFeeUsd          Decimal
   relayerServiceFeeTokenAddress String
   relayerServiceFeeChainId      Int
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  History History[]
 }
 
 model Transfer {
@@ -47,13 +49,16 @@ model Transfer {
 
   tokenAddress String
   amount       Decimal
+  amountUsd    Decimal
+  tokenPrice   Decimal
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  History   History[]
 }
 
 model Bridge {
-  id String @id @default(cuid())
+  id Int @id @default(autoincrement())
 
   fromChainId Int
   toChainId   Int
@@ -67,7 +72,7 @@ model Bridge {
 
   tokenAddress String
 
-  transactionHash String
+  txHash String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -84,29 +89,22 @@ model Transaction {
 
   chainId Int
 
-  userOps UserOperation[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  Swap   Swap?   @relation(fields: [swapId], references: [id])
-  swapId String?
+  Swap   Swap? @relation(fields: [swapId], references: [id])
+  swapId Int?
 }
 
-model UserOperation {
-  hash String @id
+model History {
+  id Int @id @default(autoincrement())
 
-  sender        String
-  paymaster     String
-  nonce         Int
-  success       Boolean
-  actualGasCost BigInt
-  actualGasUsed BigInt
-  chainId       Int
+  Transfer   Transfer? @relation(fields: [transferId], references: [id])
+  transferId Int?
 
-  Transaction     Transaction? @relation(fields: [transactionHash], references: [hash])
-  transactionHash String?
+  Swap   Swap? @relation(fields: [swapId], references: [id])
+  swapId Int?
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  updatedAt DateTime @updatedAt
 }

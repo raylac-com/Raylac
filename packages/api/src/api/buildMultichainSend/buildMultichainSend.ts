@@ -275,6 +275,7 @@ const buildERC20TransferExecutionStep = ({
   maxFeePerGas,
   maxPriorityFeePerGas,
   nonce,
+  tokenPriceUsd,
 }: {
   token: Token;
   amount: bigint;
@@ -283,6 +284,7 @@ const buildERC20TransferExecutionStep = ({
   maxFeePerGas: bigint;
   maxPriorityFeePerGas: bigint;
   nonce: number;
+  tokenPriceUsd: string;
 }) => {
   const tokenAddress = getTokenAddressOnChain(token, chainId);
 
@@ -291,6 +293,10 @@ const buildERC20TransferExecutionStep = ({
     functionName: 'transfer',
     args: [to, amount],
   });
+
+  const amountUsd = new BigNumber(
+    formatUnits(amount, token.decimals)
+  ).multipliedBy(new BigNumber(tokenPriceUsd));
 
   const step: TransferStep = {
     tx: {
@@ -307,7 +313,7 @@ const buildERC20TransferExecutionStep = ({
       to: to,
       amount: amount.toString(),
       amountFormatted: formatUnits(amount, token.decimals),
-      amountUsd: '0',
+      amountUsd: amountUsd.toString(),
       chainId,
     },
     serializedTx: '0x',
@@ -323,6 +329,7 @@ const buildETHTransferExecutionStep = ({
   maxPriorityFeePerGas,
   nonce,
   chainId,
+  tokenPriceUsd,
 }: {
   amount: bigint;
   to: Hex;
@@ -330,13 +337,18 @@ const buildETHTransferExecutionStep = ({
   maxPriorityFeePerGas: bigint;
   chainId: number;
   nonce: number;
+  tokenPriceUsd: string;
 }) => {
+  const amountUsd = new BigNumber(formatUnits(amount, 18)).multipliedBy(
+    new BigNumber(tokenPriceUsd)
+  );
+
   const step: TransferStep = {
     transferDetails: {
       to: to,
       amount: amount.toString(),
       amountFormatted: formatUnits(amount, 18),
-      amountUsd: '0',
+      amountUsd: amountUsd.toString(),
       chainId,
     },
     tx: {
@@ -394,6 +406,14 @@ const buildMultiChainSend = async ({
     chainId: token.addresses[0].chainId,
   });
 
+  const tokenPriceUsd = tokenPrice.prices.find(
+    p => p.currency === 'usd'
+  )?.value;
+
+  if (tokenPriceUsd === undefined) {
+    throw new Error(`Token price not found for ${token.symbol}`);
+  }
+
   // Build the transfer step
 
   const gasInfos = await getGasInfo({
@@ -425,6 +445,7 @@ const buildMultiChainSend = async ({
           maxPriorityFeePerGas,
           nonce,
           chainId: destinationChainId,
+          tokenPriceUsd,
         })
       : buildERC20TransferExecutionStep({
           token,
@@ -434,6 +455,7 @@ const buildMultiChainSend = async ({
           maxFeePerGas,
           maxPriorityFeePerGas,
           nonce,
+          tokenPriceUsd,
         });
 
   const totalInputAmount = bridgeSteps.reduce(
@@ -451,23 +473,17 @@ const buildMultiChainSend = async ({
     token.decimals
   );
 
-  const tokenPriceUsd = tokenPrice.prices.find(p => p.currency === 'usd');
-
-  if (!tokenPriceUsd) {
-    throw new Error(`Token price not found for ${token.symbol}`);
-  }
-
   const inputAmountUsd = new BigNumber(inputAmountFormatted).multipliedBy(
-    new BigNumber(tokenPriceUsd.value)
+    new BigNumber(tokenPriceUsd)
   );
   const outputAmountUsd = new BigNumber(outputAmountFormatted).multipliedBy(
-    new BigNumber(tokenPriceUsd.value)
+    new BigNumber(tokenPriceUsd)
   );
 
   const bridgeFee = totalInputAmount - BigInt(amount);
   const bridgeFeeFormatted = formatUnits(bridgeFee, token.decimals);
   const bridgeFeeUsd = new BigNumber(bridgeFeeFormatted).multipliedBy(
-    new BigNumber(tokenPriceUsd.value)
+    new BigNumber(tokenPriceUsd)
   );
 
   const response: BuildMultiChainSendReturnType = {
