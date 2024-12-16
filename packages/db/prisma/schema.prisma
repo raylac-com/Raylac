@@ -10,6 +10,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model SwapLineItem {
+  id Int @id @default(autoincrement())
+
+  swapId Int
+  swap   Swap @relation(fields: [swapId], references: [id])
+
+  fromChainId Int
+  toChainId   Int
+
+  txHash String
+}
+
 model Swap {
   id Int @id @default(autoincrement())
 
@@ -17,23 +29,22 @@ model Swap {
   tokenAddressIn  String
   tokenAddressOut String
 
-  transactions Transaction[]
-
   amountIn  Decimal
   amountOut Decimal
 
-  usdAmountIn  Decimal
-  usdAmountOut Decimal
+  amountInUsd  Decimal
+  amountOutUsd Decimal
 
-  relayerServiceFeeAmount       Decimal
-  relayerServiceFeeUsd          Decimal
-  relayerServiceFeeTokenAddress String
-  relayerServiceFeeChainId      Int
+  relayerServiceFeeAmount Decimal
+  relayerServiceFeeUsd    Decimal
+
+  lineItems SwapLineItem[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  History History[]
+  History     History[]
+  Transaction Transaction[]
 }
 
 model Transfer {

@@ -21,6 +21,7 @@ const getHistory = async ({
           amount: true,
           tokenAddress: true,
           amountUsd: true,
+          destinationChainId: true,
           bridges: {
             select: {
               txHash: true,
@@ -36,17 +37,18 @@ const getHistory = async ({
       },
       Swap: {
         select: {
-          transactions: {
+          lineItems: {
             select: {
-              hash: true,
-              chainId: true,
+              fromChainId: true,
+              toChainId: true,
+              txHash: true,
             },
           },
           address: true,
           amountIn: true,
           amountOut: true,
-          usdAmountIn: true,
-          usdAmountOut: true,
+          amountInUsd: true,
+          amountOutUsd: true,
           tokenAddressIn: true,
           tokenAddressOut: true,
         },
@@ -91,6 +93,7 @@ const getHistory = async ({
             txHash: item.txHash as Hex,
             from: item.from as Hex,
             to: item.to as Hex,
+            destinationChainId: item.destinationChainId,
             amount,
             amountUsd,
             bridges: item.bridges.map(bridge => ({
@@ -129,12 +132,14 @@ const getHistory = async ({
             tokenOut.decimals
           );
 
-          const amountInUsd = item.usdAmountIn.toString();
-          const amountOutUsd = item.usdAmountOut.toString();
+          const amountInUsd = item.amountInUsd.toString();
+          const amountOutUsd = item.amountOutUsd.toString();
 
           const swapHistoryItem: SwapHistoryItem = {
-            transactions: item.transactions.map(transaction => ({
-              hash: transaction.hash as Hex,
+            lineItems: item.lineItems.map(lineItem => ({
+              txHash: lineItem.txHash as Hex,
+              fromChainId: lineItem.fromChainId,
+              toChainId: lineItem.toChainId,
             })),
             address: item.address as Hex,
             amountIn,

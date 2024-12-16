@@ -2,12 +2,14 @@ import { Hex } from 'viem';
 import {
   AlchemyTokenPriceResponse,
   BridgeStep,
-  RelayGetQuoteResponseBody,
   SignedBridgeStep,
   SignedTransferStep,
   TransferStep,
   Token,
-  UserOperation,
+  SignedCrossChainSwapStep,
+  SwapOutput,
+  SwapInput,
+  CrossChainSwapStep,
 } from './types';
 
 export enum TRPCErrorMessage {
@@ -61,34 +63,38 @@ export interface BuildMultiChainSendReturnType {
   transferStep: TransferStep;
 }
 
-export interface BuildSwapUserOpRequestBody {
-  singerAddress: Hex;
-  quote: RelayGetQuoteResponseBody;
-}
-
 export interface GetSwapQuoteRequestBody {
-  senderAddress: Hex;
-  inputs: {
-    chainId: number;
-    token: Token;
-    amount: Hex;
-  }[];
-  output: {
-    chainId: number;
-    token: Token;
-  };
-  tradeType: 'EXACT_INPUT' | 'EXACT_OUTPUT';
+  sender: Hex;
+  amount: string;
+  inputToken: Token;
+  outputToken: Token;
 }
 
-export type GetSwapQuoteReturnType = RelayGetQuoteResponseBody;
+export type GetSwapQuoteReturnType = {
+  inputs: SwapInput[];
+  output: SwapOutput;
+  swapSteps: CrossChainSwapStep[];
+  relayerServiceFeeAmount: string;
+  relayerServiceFeeUsd: string;
+  amountIn: string;
+  amountOut: string;
+  amountInFormatted: string;
+  amountOutFormatted: string;
+  amountInUsd: string;
+  amountOutUsd: string;
+};
 
 export interface SubmitSwapRequestBody {
-  swapQuote: GetSwapQuoteReturnType;
-  signedTxs: {
-    chainId: number;
-    signedTx: Hex;
-    sender: Hex;
-  }[];
+  sender: Hex;
+  signedSwapSteps: SignedCrossChainSwapStep[];
+  amountIn: string;
+  amountOut: string;
+  amountInUsd: string;
+  amountOutUsd: string;
+  tokenIn: Token;
+  tokenOut: Token;
+  relayerServiceFeeAmount: string;
+  relayerServiceFeeUsd: string;
 }
 
 export interface GetTokenPriceRequestBody {
@@ -98,20 +104,6 @@ export interface GetTokenPriceRequestBody {
 
 export type GetTokenPriceReturnType = AlchemyTokenPriceResponse;
 
-export interface SubmitUserOpsRequestBody {
-  userOps: UserOperation[];
-  swapQuote: GetSwapQuoteReturnType;
-  inputs: {
-    chainId: number;
-    token: Token;
-    amount: Hex;
-  }[];
-  output: {
-    chainId: number;
-    token: Token;
-  };
-}
-
 export interface GetHistoryRequestBody {
   address: Hex;
 }
@@ -120,6 +112,7 @@ export type TransferHistoryItem = {
   txHash: Hex;
   from: Hex;
   to: Hex;
+  destinationChainId: number;
   amount: string;
   amountUsd: string;
   bridges: {
@@ -135,8 +128,10 @@ export type TransferHistoryItem = {
 };
 
 export type SwapHistoryItem = {
-  transactions: {
-    hash: Hex;
+  lineItems: {
+    txHash: Hex;
+    fromChainId: number;
+    toChainId: number;
   }[];
   address: Hex;
   amountIn: string;

@@ -2,6 +2,7 @@ import { getPublicClient } from '@raylac/shared';
 
 import { ChainGasInfo } from '@raylac/shared';
 import { getMaxPriorityFeePerGas } from './erc4337';
+import { Hex } from 'viem';
 
 /**
  * Get the gas info for all supported chains
@@ -29,4 +30,20 @@ export const getGasInfo = async ({
   }
 
   return gasInfo;
+};
+
+export const getNonce = async ({
+  chainId,
+  address,
+}: {
+  chainId: number;
+  address: Hex;
+}) => {
+  const publicClient = getPublicClient({
+    chainId,
+  });
+
+  return await publicClient.getTransactionCount({
+    address,
+  });
 };

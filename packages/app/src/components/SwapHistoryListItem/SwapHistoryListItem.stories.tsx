@@ -4,6 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import SwapHistoryListItem from './SwapHistoryListItem';
 import spacing from '@/lib/styles/spacing';
 import { zeroAddress } from 'viem';
+import { base, optimism } from 'viem/chains';
 
 const meta = {
   title: 'SwapHistoryListItem',
@@ -38,7 +39,13 @@ const meta = {
           'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389',
         addresses: [],
       },
-      transactions: [],
+      lineItems: [
+        {
+          fromChainId: base.id,
+          toChainId: optimism.id,
+          txHash: '0x123',
+        },
+      ],
     },
   },
   decorators: [

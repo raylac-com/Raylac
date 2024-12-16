@@ -120,7 +120,7 @@ const Swap = () => {
   const onSwapPress = async () => {
     if (swapQuote) {
       await swap({
-        swapQuote: swapQuote.quote,
+        swapQuote: swapQuote,
       });
 
       setInputToken(null);
@@ -142,8 +142,8 @@ const Swap = () => {
       ? inputTokenBalance >= parsedInputAmount
       : undefined;
 
-  const outputAmount = swapQuote?.quote?.details?.currencyOut?.amount;
-  const outputAmountUsd = swapQuote?.quote?.details?.currencyOut?.amountUsd;
+  const outputAmount = swapQuote?.amountOut;
+  const outputAmountUsd = swapQuote?.amountOutUsd;
 
   const outputAmountFormatted =
     outputAmount && outputToken
@@ -194,9 +194,7 @@ const Swap = () => {
             usdAmount={outputAmountUsd ? Number(outputAmountUsd) : 0}
           />
           <StyledText style={{ color: colors.border }}>
-            {swapQuote
-              ? `Total fee $${swapQuote.quote.fees.relayer.amountUsd}`
-              : ''}
+            {swapQuote ? `Total fee $${swapQuote.relayerServiceFeeUsd}` : ''}
           </StyledText>
           <StyledButton
             disabled={

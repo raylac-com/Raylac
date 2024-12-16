@@ -69,7 +69,7 @@ const History = () => {
         }}
         data={swapHistory ?? []}
         renderItem={({ item }) => {
-          if ('tokenAddress' in item) {
+          if ('token' in item) {
             return (
               <Pressable onPress={() => {}}>
                 <SendHistoryListItem transfer={item as TransferHistoryItem} />

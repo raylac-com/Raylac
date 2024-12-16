@@ -116,11 +116,41 @@ export interface TransferStep {
   serializedTx: Hex;
 }
 
+export interface CrossChainSwapStep {
+  originChainId: number;
+  destinationChainId: number;
+  id: 'swap' | 'approve';
+  tx: {
+    to: Hex;
+    data: Hex;
+    value: string;
+    maxFeePerGas: string;
+    maxPriorityFeePerGas: string;
+    nonce: number;
+    chainId: number;
+    gas: number;
+  };
+  /*
+  swapDetails: {
+    tokenIn: Token;
+    tokenOut: Token;
+    amountIn: string;
+    amountOut: string;
+    amountInUsd: string;
+    amountOutUsd: string;
+  };
+  */
+}
+
 export type SignedBridgeStep = BridgeStep & {
   signature: Hex;
 };
 
 export type SignedTransferStep = TransferStep & {
+  signature: Hex;
+};
+
+export type SignedCrossChainSwapStep = CrossChainSwapStep & {
   signature: Hex;
 };
 

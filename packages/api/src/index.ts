@@ -7,24 +7,17 @@ import getTokenBalances from './api/getTokenBalances/getTokenBalances';
 import getTokenBalancesMock from './api/getTokenBalances/getTokenBalances.mock';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { Hex } from 'viem';
-import buildSwapUserOp from './api/buildSwapUserOp/buildSwapUserOp';
-import submitUserOps from './api/submitUserOps/submitUserOps';
 import getSupportedTokens from './api/getSupportedTokens/getSupportedTokens';
 import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.mock';
 import {
   BuildMultiChainSendRequestBody,
-  BuildSwapUserOpRequestBody,
   GetHistoryRequestBody,
   GetSwapQuoteRequestBody,
   SendTransactionRequestBody,
   SubmitSwapRequestBody,
-  SubmitUserOpsRequestBody,
 } from '@raylac/shared';
 import getSwapQuote from './api/getSwapQuote/getSwapQuote';
 import { ed, logger, st } from '@raylac/shared-backend';
-import getSwapQuoteMock from './api/getSwapQuote/getSwapQuote.mock';
-import buildSwapUserOpMock from './api/buildSwapUserOp/buildSwapUserOp.mock';
-import submitUserOpsMock from './api/submitUserOps/submitUserOps.mock';
 import getTokenPrice from './api/getTokenPrice/getTokenPrice';
 import { getTokenPriceMock } from './api/getTokenPrice/getTokenPrice.mock';
 import getToken from './api/getToken/getToken';
@@ -76,50 +69,9 @@ export const appRouter = router({
           });
     }),
 
-  buildSwapUserOp: publicProcedure
-    .input(
-      z.object({
-        singerAddress: z.string(),
-        quote: z.any(),
-      })
-    )
-    .mutation(async ({ input }) => {
-      return MOCK_RESPONSE
-        ? buildSwapUserOpMock(input as BuildSwapUserOpRequestBody)
-        : buildSwapUserOp(input as BuildSwapUserOpRequestBody);
-    }),
-
-  submitSwap: publicProcedure
-    .input(
-      z.object({
-        swapQuote: z.any(),
-        signedTxs: z.array(
-          z.object({
-            chainId: z.number(),
-            signedTx: z.string(),
-            sender: z.string(),
-          })
-        ),
-      })
-    )
-    .mutation(async ({ input }) => {
-      return submitSwap(input as SubmitSwapRequestBody);
-    }),
-
-  submitUserOps: publicProcedure
-    .input(
-      z.object({
-        userOps: z.array(z.any()),
-        swapQuote: z.any(),
-        inputs: z.array(z.any()),
-        output: z.any(),
-      })
-    )
-    .mutation(async ({ input }) => {
-      return MOCK_RESPONSE
-        ? submitUserOpsMock(input as SubmitUserOpsRequestBody)
-        : submitUserOps(input as SubmitUserOpsRequestBody);
-    }),
+  submitSwap: publicProcedure.input(z.any()).mutation(async ({ input }) => {
+    return submitSwap(input as SubmitSwapRequestBody);
+  }),
 
   sendTransaction: publicProcedure
     .input(z.any())
@@ -134,9 +86,7 @@ export const appRouter = router({
     }),
 
   getSwapQuote: publicProcedure.input(z.any()).mutation(async ({ input }) => {
-    return MOCK_RESPONSE
-      ? getSwapQuoteMock(input as GetSwapQuoteRequestBody)
-      : getSwapQuote(input as GetSwapQuoteRequestBody);
+    return getSwapQuote(input as GetSwapQuoteRequestBody);
   }),
 
   getHistory: publicProcedure

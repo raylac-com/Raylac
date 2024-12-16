@@ -2,6 +2,7 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import SwapDetailsSheet from './SwapDetailsSheet';
 import { zeroAddress } from 'viem';
+import { arbitrum, base, optimism } from 'viem/chains';
 
 const meta = {
   title: 'SwapDetailsSheet',
@@ -33,12 +34,16 @@ const meta = {
           'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389',
         addresses: [],
       },
-      transactions: [
+      lineItems: [
         {
-          hash: '0x123',
+          txHash: '0x123',
+          fromChainId: base.id,
+          toChainId: optimism.id,
         },
         {
-          hash: '0x123',
+          txHash: '0x123',
+          fromChainId: arbitrum.id,
+          toChainId: optimism.id,
         },
       ],
     },

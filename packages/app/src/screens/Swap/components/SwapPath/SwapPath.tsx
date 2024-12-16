@@ -2,7 +2,12 @@ import StyledText from '@/components/StyledText/StyledText';
 import TokenImageWithChain from '@/components/TokenImageWithChain/TokenImageWithChain';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import colors from '@/lib/styles/colors';
-import { formatAmount, SupportedTokensReturnType } from '@raylac/shared';
+import {
+  formatAmount,
+  SupportedTokensReturnType,
+  SwapOutput,
+  SwapInput,
+} from '@raylac/shared';
 import { View } from 'react-native';
 
 const SwapPathListItem = ({
@@ -51,15 +56,8 @@ const SwapPathListItem = ({
 };
 
 interface SwapPathProps {
-  inputs: {
-    chainId: number;
-    amount: bigint;
-    token: SupportedTokensReturnType[number];
-  }[];
-  output: {
-    chainId: number;
-    token: SupportedTokensReturnType[number];
-  };
+  inputs: SwapInput[];
+  output: SwapOutput;
 }
 
 const SwapPath = ({ inputs, output }: SwapPathProps) => {

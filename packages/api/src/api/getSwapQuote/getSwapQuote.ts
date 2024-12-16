@@ -3,61 +3,176 @@ import {
   RelayGetQuoteResponseBody,
   GetSwapQuoteRequestBody,
   TRPCErrorMessage,
+  getERC20TokenBalance,
+  SwapOutput,
+  SwapInput,
+  Token,
+  CrossChainSwapStep,
+  GetSwapQuoteReturnType,
 } from '@raylac/shared';
 import { ed, logger, st } from '@raylac/shared-backend';
 import { relayApi } from '../../lib/relay';
-import { hexToBigInt } from 'viem';
+import { formatUnits, zeroAddress } from 'viem';
 import axios from 'axios';
+import { getETHBalance } from '../getTokenBalances/getTokenBalances';
 import { TRPCError } from '@trpc/server';
+import { getTokenAddressOnChain } from '../../utils';
+import { getNonce } from '../../lib/utils';
 
-const getSwapQuote = async ({
-  senderAddress,
-  inputs,
-  output,
-  tradeType,
-}: GetSwapQuoteRequestBody) => {
-  const destinationChainId = output.chainId;
+/**
+ * Builds the swap inputs and outputs
+ */
+const buildSwapIo = ({
+  inputToken,
+  outputToken,
+  amount,
+  inputTokenBalance,
+}: {
+  inputToken: Token;
+  outputToken: Token;
+  amount: bigint;
+  inputTokenBalance: {
+    chainId: number;
+    balance: bigint;
+  }[];
+}): {
+  inputs: SwapInput[];
+  output: SwapOutput;
+} => {
+  let remainingAmount = amount;
 
-  // Convert GetSwapQuoteRequestBody["inputs"] to RelaySwapMultiInputRequestBody["origins"]
-  const origins = inputs.map(input => {
-    const chainTokenAddress = input.token.addresses.find(
-      address => address.chainId === input.chainId
-    )?.address;
+  const inputs: SwapInput[] = [];
 
-    if (!chainTokenAddress) {
-      throw new Error(
-        `getSwapQuote: chainTokenAddress not found for ${input.token.name} on chain ${input.chainId}`
-      );
+  for (const breakdown of inputTokenBalance) {
+    const balance = breakdown.balance;
+
+    if (balance === BigInt(0)) {
+      continue;
     }
 
-    return {
-      chainId: input.chainId,
-      currency: chainTokenAddress,
-      amount: hexToBigInt(input.amount).toString(),
-    };
-  });
+    if (remainingAmount < balance) {
+      inputs.push({
+        token: inputToken,
+        amount: remainingAmount,
+        chainId: breakdown.chainId,
+      });
 
-  // Convert GetSwapQuoteRequestBody["output"] to RelaySwapMultiInputRequestBody["destinationCurrency"]
-  const outputTokenAddress = output.token.addresses.find(
-    address => address.chainId === output.chainId
-  )?.address;
+      remainingAmount = 0n;
+      break;
+    } else {
+      inputs.push({
+        token: inputToken,
+        amount: balance,
+        chainId: breakdown.chainId,
+      });
 
-  if (!outputTokenAddress) {
+      remainingAmount = remainingAmount - balance;
+    }
+  }
+
+  if (remainingAmount > 0n) {
     throw new Error(
-      `getSwapQuote: outputTokenAddress not found for ${output.token.name} on chain ${output.chainId}`
+      `Not enough balance for ${inputToken.symbol}, required ${amount}, remaining ${remainingAmount}`
     );
   }
+
+  if (inputs.length === 0) {
+    throw new Error('Could not create inputs');
+  }
+
+  // The output chain should be the chain with the largest input amount
+  const bestOutputChain = inputs.sort((a, b) =>
+    a.amount < b.amount ? 1 : -1
+  )[0].chainId;
+
+  if (!bestOutputChain) {
+    throw new Error('Could not determine output chain');
+  }
+
+  const possibleOutputChainIds = outputToken.addresses.map(
+    address => address.chainId
+  );
+
+  const outputChainId = possibleOutputChainIds.find(
+    chainId => chainId === bestOutputChain
+  )
+    ? bestOutputChain
+    : // If the output token doesn't exist on the input chains, just use the first one
+      possibleOutputChainIds[0];
+
+  const output = outputToken.addresses.find(
+    address => address.chainId === outputChainId
+  );
+
+  if (!output) {
+    throw new Error('Could not determine output');
+  }
+
+  return {
+    inputs,
+    output: {
+      token: outputToken,
+      chainId: outputChainId,
+    },
+  };
+};
+
+const getSwapQuote = async ({
+  sender,
+  amount,
+  inputToken,
+  outputToken,
+}: GetSwapQuoteRequestBody): Promise<GetSwapQuoteReturnType> => {
+  const balances = await Promise.all(
+    inputToken.addresses.map(async ({ chainId, address }) => {
+      const balance =
+        address === zeroAddress
+          ? await getETHBalance({ address: sender, chainId })
+          : await getERC20TokenBalance({
+              address: sender,
+              contractAddress: address,
+              chainId,
+            });
+
+      return {
+        chainId,
+        balance,
+      };
+    })
+  );
+
+  const swapIo = buildSwapIo({
+    inputToken,
+    outputToken,
+    amount: BigInt(amount),
+    inputTokenBalance: balances,
+  });
+
+  const { inputs, output } = swapIo;
+
+  const origins: RelaySwapMultiInputRequestBody['origins'] = inputs.map(
+    input => ({
+      chainId: input.chainId,
+      currency: getTokenAddressOnChain(input.token, input.chainId),
+      amount: input.amount.toString(),
+    })
+  );
+
+  const destinationCurrency = getTokenAddressOnChain(
+    outputToken,
+    output.chainId
+  );
 
   // Get quote from Relay
   // Get quote from Relay
   const requestBody: RelaySwapMultiInputRequestBody = {
-    user: senderAddress,
-    recipient: senderAddress,
+    user: sender,
+    recipient: sender,
     origins,
-    destinationCurrency: outputTokenAddress,
-    destinationChainId,
-    partial: true,
-    tradeType,
+    destinationCurrency,
+    destinationChainId: output.chainId,
+    partial: false,
+    tradeType: 'EXACT_INPUT',
     useUserOperation: false,
   };
 
@@ -111,7 +226,83 @@ const getSwapQuote = async ({
 
   ed(qt);
 
-  return quote;
+  const nonces: Record<number, number> = {};
+
+  const chains = [
+    ...new Set([...inputs.map(input => input.chainId), output.chainId]),
+  ];
+
+  for (const chainId of chains) {
+    nonces[chainId] = await getNonce({
+      chainId,
+      address: sender,
+    });
+  }
+
+  const swapSteps: CrossChainSwapStep[] = quote.steps.map(step => {
+    if (step.items.length !== 1) {
+      throw new Error('Expected 1 step item, got ' + step.items.length);
+    }
+
+    const item = step.items[0];
+
+    const crossChainSwapStep: CrossChainSwapStep = {
+      originChainId: item.data.chainId,
+      destinationChainId: item.data.chainId,
+      id: step.id as 'swap' | 'approve',
+      tx: {
+        data: item.data.data,
+        to: item.data.to,
+        value: item.data.value,
+        maxFeePerGas: item.data.maxFeePerGas,
+        maxPriorityFeePerGas: item.data.maxPriorityFeePerGas,
+        chainId: item.data.chainId,
+        gas: item.data.gas,
+        nonce: nonces[item.data.chainId],
+      },
+    };
+
+    nonces[item.data.chainId]++;
+
+    return crossChainSwapStep;
+  });
+
+  const amountIn = amount;
+  const amountOut = quote.details.currencyOut.amount;
+
+  const amountInFormatted = formatUnits(BigInt(amountIn), inputToken.decimals);
+  const amountOutFormatted = formatUnits(
+    BigInt(amountOut),
+    outputToken.decimals
+  );
+
+  const amountInUsd = quote.details.currencyIn.amountUsd;
+  const amountOutUsd = quote.details.currencyOut.amountUsd;
+
+  const relayerServiceFeeAmount = quote.fees.relayerService.amount;
+  const relayerServiceFeeUsd = quote.fees.relayerService.amountUsd;
+
+  if (relayerServiceFeeAmount === undefined) {
+    throw new Error('relayerServiceFeeAmount ');
+  }
+
+  if (relayerServiceFeeUsd === undefined) {
+    throw new Error('relayerServiceFeeUsd is undefined');
+  }
+
+  return {
+    inputs,
+    output,
+    swapSteps,
+    relayerServiceFeeAmount: relayerServiceFeeAmount.toString(),
+    relayerServiceFeeUsd: relayerServiceFeeUsd.toString(),
+    amountIn,
+    amountOut,
+    amountInFormatted,
+    amountOutFormatted,
+    amountInUsd,
+    amountOutUsd,
+  };
 };
 
 export default getSwapQuote;

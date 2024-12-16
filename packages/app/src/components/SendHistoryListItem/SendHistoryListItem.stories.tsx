@@ -12,6 +12,7 @@ const meta = {
   component: SendHistoryListItem,
   args: {
     transfer: {
+      destinationChainId: base.id,
       token: {
         symbol: 'USDC',
         name: 'USD Coin',

@@ -1,5 +1,4 @@
 import {
-  getPublicClient,
   getWalletClient,
   BuildMultiChainSendRequestBody,
   ERC20Abi,
@@ -24,28 +23,13 @@ import { getTokenAddressOnChain } from '../../utils';
 import getTokenPrice from '../getTokenPrice/getTokenPrice';
 import BigNumber from 'bignumber.js';
 import { logger } from '@raylac/shared-backend';
+import { getNonce } from '../../lib/utils';
 
 createClient({
   baseApiUrl: MAINNET_RELAY_API,
   source: 'raylac.com',
   chains: supportedChains.map(convertViemChainToRelayChain),
 });
-
-const getNonce = async ({
-  chainId,
-  address,
-}: {
-  chainId: number;
-  address: Hex;
-}) => {
-  const publicClient = getPublicClient({
-    chainId,
-  });
-
-  return await publicClient.getTransactionCount({
-    address,
-  });
-};
 
 const chooseBridgeInputs = async ({
   sender,

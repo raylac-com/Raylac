@@ -1,11 +1,9 @@
 import { trpc } from '@/lib/trpc';
 import { GetSwapQuoteReturnType } from '@raylac/shared/out/rpcTypes';
-import { sleep } from '@raylac/shared/out/utils';
+import { SignedCrossChainSwapStep, signEIP1159Tx, sleep } from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getPublicClient } from '@raylac/shared';
 import { getQueryKey } from '@trpc/react-query';
 import useUserAccount from './useUserAccount';
-import { Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { getPrivateKey } from '@/lib/key';
 
@@ -27,12 +25,6 @@ const useSwap = () => {
         throw new Error('User account not loaded');
       }
 
-      const chains = new Set(
-        swapQuote.steps.flatMap(step =>
-          step.items.flatMap(item => item.data.chainId)
-        )
-      );
-
       const privKey = await getPrivateKey();
 
       if (!privKey) {
@@ -41,51 +33,23 @@ const useSwap = () => {
 
       const account = privateKeyToAccount(privKey);
 
-      // Get nonces for all chains
-      const nonces: Record<number, number> = {};
+      const signedCrossChainSwapSteps: SignedCrossChainSwapStep[] = [];
 
-      for (const chainId of chains) {
-        const publicClient = getPublicClient({ chainId });
-        // eslint-disable-next-line security/detect-object-injection
-        nonces[chainId] = await publicClient.getTransactionCount({
-          address: account.address,
+      for (const step of swapQuote.swapSteps) {
+        const signedTx = await signEIP1159Tx({
+          tx: step.tx,
+          account,
         });
-      }
 
-      const singedTxs: {
-        chainId: number;
-        signedTx: Hex;
-        sender: Hex;
-      }[] = [];
-
-      for (const step of swapQuote.steps) {
-        for (const item of step.items) {
-          const gas = item.data.gas ? BigInt(item.data.gas) : BigInt(500_000);
-
-          const signedTx = await account.signTransaction({
-            chainId: item.data.chainId,
-            maxFeePerGas: BigInt(item.data.maxFeePerGas),
-            maxPriorityFeePerGas: BigInt(item.data.maxPriorityFeePerGas),
-            gas,
-            to: item.data.to,
-            value: BigInt(item.data.value),
-            data: item.data.data,
-            nonce: nonces[item.data.chainId],
-          });
-
-          nonces[item.data.chainId]++;
-
-          singedTxs.push({
-            chainId: item.data.chainId,
-            signedTx,
-            sender: account.address,
-          });
-        }
+        signedCrossChainSwapSteps.push({
+          ...step,
+          signature: signedTx,
+        });
       }
 
       await submitSwap({
         swapQuote,
-        signedTxs: singedTxs,
+        signedCrossChainSwapSteps,
       });
 
       await queryClient.invalidateQueries({
