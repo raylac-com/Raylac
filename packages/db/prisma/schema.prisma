@@ -34,22 +34,46 @@ model Swap {
   updatedAt DateTime @updatedAt
 }
 
-model Send {
-  id String @id @default(cuid())
+model Transfer {
+  id Int @id @default(autoincrement())
 
-  transactions Transaction[]
+  bridges Bridge[]
+
+  txHash String @unique
+
+  from               String
+  to                 String
+  destinationChainId Int
+
+  tokenAddress String
+  amount       Decimal
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Receive {
+model Bridge {
   id String @id @default(cuid())
 
-  transactions Transaction[]
+  fromChainId Int
+  toChainId   Int
+
+  address   String
+  amountIn  Decimal
+  amountOut Decimal
+
+  bridgeFeeAmount Decimal
+  bridgeFeeUsd    Decimal
+
+  tokenAddress String
+
+  transactionHash String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  Transfer   Transfer? @relation(fields: [transferId], references: [id])
+  transferId Int?
 }
 
 model Transaction {
@@ -67,12 +91,6 @@ model Transaction {
 
   Swap   Swap?   @relation(fields: [swapId], references: [id])
   swapId String?
-
-  Send   Send?   @relation(fields: [sendId], references: [id])
-  sendId String?
-
-  Receive   Receive? @relation(fields: [receiveId], references: [id])
-  receiveId String?
 }
 
 model UserOperation {

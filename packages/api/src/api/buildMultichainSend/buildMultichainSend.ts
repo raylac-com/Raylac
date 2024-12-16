@@ -16,12 +16,14 @@ import { getETHBalance } from '../getTokenBalances/getTokenBalances';
 import { encodeFunctionData, formatUnits, Hex, zeroAddress } from 'viem';
 import {
   convertViemChainToRelayChain,
+  Execute,
   getClient,
 } from '@reservoir0x/relay-sdk';
 import { createClient, MAINNET_RELAY_API } from '@reservoir0x/relay-sdk';
 import { getTokenAddressOnChain } from '../../utils';
 import getTokenPrice from '../getTokenPrice/getTokenPrice';
 import BigNumber from 'bignumber.js';
+import { logger } from '@raylac/shared-backend';
 
 createClient({
   baseApiUrl: MAINNET_RELAY_API,
@@ -45,11 +47,15 @@ const getNonce = async ({
   });
 };
 
-export const chooseBridgeInputs = ({
+const chooseBridgeInputs = async ({
+  sender,
+  token,
   tokenBalance,
   amount,
   destinationChainId,
 }: {
+  sender: Hex;
+  token: Token;
   tokenBalance: {
     balance: bigint;
     chainId: number;
@@ -57,6 +63,8 @@ export const chooseBridgeInputs = ({
   amount: bigint;
   destinationChainId: number;
 }) => {
+  const relayClient = await getClient();
+
   const balanceOnDestinationChain =
     tokenBalance.find(b => b.chainId === destinationChainId)?.balance || 0n;
 
@@ -65,10 +73,7 @@ export const chooseBridgeInputs = ({
     return [];
   }
 
-  const bridgeInputs: {
-    chainId: number;
-    amount: bigint;
-  }[] = [];
+  const bridgeSteps: BridgeStep[] = [];
 
   let remainingAmount = amount - balanceOnDestinationChain;
 
@@ -83,21 +88,173 @@ export const chooseBridgeInputs = ({
       continue;
     }
 
+    const walletClient = await getWalletClient({
+      chainId: chainBalance.chainId,
+    });
+
+    const fromTokenAddress = getTokenAddressOnChain(
+      token,
+      chainBalance.chainId
+    );
+    const toTokenAddress = getTokenAddressOnChain(token, destinationChainId);
+
+    let bridgeQuote: Execute;
+
     if (remainingAmount < chainBalance.balance) {
-      bridgeInputs.push({
+      bridgeQuote = await relayClient.actions.getQuote({
         chainId: chainBalance.chainId,
-        amount: remainingAmount,
+        toChainId: destinationChainId,
+        currency: fromTokenAddress,
+        toCurrency: toTokenAddress,
+        amount: remainingAmount.toString(),
+        recipient: sender,
+        // @ts-expect-error
+        wallet: walletClient,
+        tradeType: 'EXACT_OUTPUT',
       });
 
-      remainingAmount = 0n;
-      break;
+      const amountInput = bridgeQuote.details?.currencyIn?.amount;
+
+      if (!amountInput) {
+        throw new Error('No amount input found');
+      }
+
+      if (BigInt(amountInput) > chainBalance.balance) {
+        logger.info(
+          `Fee exceeds balance ${chainBalance.balance}, input + fee ${amountInput}`
+        );
+        // There is not enough balance to pay for the bridge quote
+        // We need to bridge the entire balance from this chain and bridge from another chain
+        // to cover the remaining amount
+
+        bridgeQuote = await relayClient.actions.getQuote({
+          chainId: chainBalance.chainId,
+          toChainId: destinationChainId,
+          currency: fromTokenAddress,
+          toCurrency: toTokenAddress,
+          amount: chainBalance.balance.toString(),
+          recipient: sender,
+          // @ts-expect-error
+          wallet: walletClient,
+          tradeType: 'EXACT_INPUT',
+        });
+      }
     } else {
-      bridgeInputs.push({
+      bridgeQuote = await relayClient.actions.getQuote({
         chainId: chainBalance.chainId,
-        amount: chainBalance.balance,
+        toChainId: destinationChainId,
+        currency: fromTokenAddress,
+        toCurrency: toTokenAddress,
+        amount: chainBalance.balance.toString(),
+        recipient: sender,
+        // @ts-expect-error
+        wallet: walletClient,
+        tradeType: 'EXACT_INPUT',
       });
+    }
 
-      remainingAmount = remainingAmount - chainBalance.balance;
+    if (bridgeQuote.steps.length !== 1) {
+      throw new Error(
+        `Expected 1 bridge step, got ${bridgeQuote.steps.length}`
+      );
+    }
+
+    if (bridgeQuote.steps[0]?.items?.length !== 1) {
+      throw new Error(
+        `Expected 1 bridge step item, got ${bridgeQuote.steps[0]?.items?.length}`
+      );
+    }
+
+    const bridgeStepItem = bridgeQuote.steps[0]?.items[0];
+
+    if (!bridgeStepItem) {
+      throw new Error('No bridge step item found');
+    }
+
+    const nonce = await getNonce({
+      chainId: chainBalance.chainId,
+      address: sender,
+    });
+
+    const relayerFee = bridgeQuote.fees?.relayer;
+
+    if (!relayerFee) {
+      throw new Error('relayerFee is undefined');
+    }
+
+    if (relayerFee.amount === undefined) {
+      throw new Error('relayerFee.amount is undefined');
+    }
+
+    if (relayerFee.amountFormatted === undefined) {
+      throw new Error('relayerFee.amountFormatted is undefined');
+    }
+
+    if (relayerFee.amountUsd === undefined) {
+      throw new Error('relayerFee.amountUsd is undefined');
+    }
+
+    const bridgeFee = relayerFee.amount;
+    const bridgeFeeFormatted = relayerFee.amountFormatted;
+    const bridgeFeeUsd = relayerFee.amountUsd;
+
+    const amountIn = bridgeQuote.details?.currencyIn?.amount;
+
+    if (!amountIn) {
+      throw new Error('amountIn is undefined');
+    }
+
+    const amountInFormatted = formatAmount(amountIn.toString(), token.decimals);
+
+    const amountOut = bridgeQuote.details?.currencyOut?.amount;
+
+    if (!amountOut) {
+      throw new Error('amountOut is undefined');
+    }
+
+    const amountOutFormatted = formatAmount(
+      amountOut.toString(),
+      token.decimals
+    );
+
+    const bridgeStep: BridgeStep = {
+      tx: {
+        to: bridgeStepItem.data.to,
+        data: bridgeStepItem.data.data,
+        value: bridgeStepItem.data.value,
+        maxFeePerGas: bridgeStepItem.data.maxFeePerGas,
+        maxPriorityFeePerGas: bridgeStepItem.data.maxPriorityFeePerGas,
+        nonce,
+        chainId: chainBalance.chainId,
+        gas: 500_0000,
+      },
+      bridgeDetails: {
+        to: sender,
+        amountIn: amountIn.toString(),
+        amountOut: amountOut.toString(),
+        amountInFormatted,
+        amountOutFormatted,
+        bridgeFee,
+        bridgeFeeFormatted,
+        bridgeFeeUsd,
+        fromChainId: chainBalance.chainId,
+        toChainId: destinationChainId,
+      },
+      serializedTx: '0x',
+    };
+
+    bridgeSteps.push(bridgeStep);
+
+    remainingAmount -= BigInt(amountOut);
+
+    if (remainingAmount === 0n) {
+      break;
+    }
+
+    if (remainingAmount < 0n) {
+      throw new Error(
+        `Remaining amount is negative, required ${amount}, remaining ${remainingAmount}`
+      );
     }
   }
 
@@ -107,7 +264,7 @@ export const chooseBridgeInputs = ({
     );
   }
 
-  return bridgeInputs;
+  return bridgeSteps;
 };
 
 const buildERC20TransferExecutionStep = ({
@@ -224,128 +381,18 @@ const buildMultiChainSend = async ({
     })
   );
 
-  const bridgeInputs = chooseBridgeInputs({
+  const bridgeSteps = await chooseBridgeInputs({
+    sender,
+    token,
     tokenBalance: balances,
     amount: BigInt(amount),
     destinationChainId,
   });
 
-  const relayClient = await getClient();
-
-  let inputAmountPlusFee = BigInt(amount);
-
   const tokenPrice = await getTokenPrice({
     tokenAddress: token.addresses[0].address,
     chainId: token.addresses[0].chainId,
   });
-
-  // Build the bridge steps
-  const bridgeSteps = await Promise.all(
-    bridgeInputs.map(async bridgeInput => {
-      const walletClient = await getWalletClient({
-        chainId: bridgeInput.chainId,
-      });
-
-      const fromTokenAddress = getTokenAddressOnChain(
-        token,
-        bridgeInput.chainId
-      );
-      const toTokenAddress = getTokenAddressOnChain(token, destinationChainId);
-
-      const bridgeQuote = await relayClient.actions.getQuote({
-        recipient: sender,
-        chainId: bridgeInput.chainId,
-        toChainId: destinationChainId,
-        currency: fromTokenAddress,
-        toCurrency: toTokenAddress,
-        amount: bridgeInput.amount.toString(),
-        // @ts-expect-error
-        wallet: walletClient,
-        tradeType: 'EXACT_OUTPUT',
-      });
-
-      if (bridgeQuote.steps.length !== 1) {
-        throw new Error(
-          `Expected 1 bridge step, got ${bridgeQuote.steps.length}`
-        );
-      }
-
-      if (bridgeQuote.steps[0]?.items?.length !== 1) {
-        throw new Error(
-          `Expected 1 bridge step item, got ${bridgeQuote.steps[0]?.items?.length}`
-        );
-      }
-
-      const bridgeStepItem = bridgeQuote.steps[0]?.items[0];
-
-      if (!bridgeStepItem) {
-        throw new Error('No bridge step item found');
-      }
-
-      const nonce = await getNonce({
-        chainId: bridgeInput.chainId,
-        address: sender,
-      });
-
-      const relayerFee = bridgeQuote.fees?.relayer;
-
-      if (!relayerFee) {
-        throw new Error('relayerFee is undefined');
-      }
-
-      if (relayerFee.amount === undefined) {
-        throw new Error('relayerFee.amount is undefined');
-      }
-
-      if (relayerFee.amountFormatted === undefined) {
-        throw new Error('relayerFee.amountFormatted is undefined');
-      }
-
-      if (relayerFee.amountUsd === undefined) {
-        throw new Error('relayerFee.amountUsd is undefined');
-      }
-
-      const bridgeFeeFormatted = relayerFee.amountFormatted;
-      const bridgeFeeUsd = relayerFee.amountUsd;
-
-      inputAmountPlusFee += BigInt(relayerFee.amount);
-
-      const amountIn = bridgeInput.amount + BigInt(relayerFee.amount);
-      const amountInFormatted = formatAmount(
-        amountIn.toString(),
-        token.decimals
-      );
-      const amountOutFormatted = formatAmount(
-        bridgeInput.amount.toString(),
-        token.decimals
-      );
-
-      const bridgeStep: BridgeStep = {
-        tx: {
-          to: bridgeStepItem.data.to,
-          data: bridgeStepItem.data.data,
-          value: bridgeStepItem.data.value,
-          maxFeePerGas: bridgeStepItem.data.maxFeePerGas,
-          maxPriorityFeePerGas: bridgeStepItem.data.maxPriorityFeePerGas,
-          nonce,
-          chainId: bridgeInput.chainId,
-          gas: 500_0000,
-        },
-        bridgeDetails: {
-          to: sender,
-          amountInFormatted,
-          amountOutFormatted,
-          bridgeFeeFormatted,
-          bridgeFeeUsd,
-          fromChainId: bridgeInput.chainId,
-          toChainId: destinationChainId,
-        },
-        serializedTx: '0x',
-      };
-
-      return bridgeStep;
-    })
-  );
 
   // Build the transfer step
 
@@ -389,10 +436,16 @@ const buildMultiChainSend = async ({
           nonce,
         });
 
+  const totalInputAmount = bridgeSteps.reduce(
+    (acc, step) => acc + BigInt(step.bridgeDetails.amountIn),
+    0n
+  );
+
   const inputAmountFormatted = formatAmount(
-    inputAmountPlusFee.toString(),
+    totalInputAmount.toString(),
     token.decimals
   );
+
   const outputAmountFormatted = formatAmount(
     BigInt(amount).toString(),
     token.decimals
@@ -411,14 +464,14 @@ const buildMultiChainSend = async ({
     new BigNumber(tokenPriceUsd.value)
   );
 
-  const bridgeFee = inputAmountPlusFee - BigInt(amount);
+  const bridgeFee = totalInputAmount - BigInt(amount);
   const bridgeFeeFormatted = formatUnits(bridgeFee, token.decimals);
   const bridgeFeeUsd = new BigNumber(bridgeFeeFormatted).multipliedBy(
     new BigNumber(tokenPriceUsd.value)
   );
 
   const response: BuildMultiChainSendReturnType = {
-    inputAmount: inputAmountPlusFee.toString(),
+    inputAmount: totalInputAmount.toString(),
     inputAmountFormatted,
     inputAmountUsd: inputAmountUsd.toString(),
     outputAmount: amount,

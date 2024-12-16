@@ -12,6 +12,7 @@ import {
   BuildMultiChainSendRequestBody,
   SendTransactionRequestBody,
   SignedBridgeStep,
+  SignedTransferStep,
   signEIP1159Tx,
   supportedChains,
 } from '@raylac/shared';
@@ -70,7 +71,7 @@ const sendTx = async () => {
   };
   */
 
-  const transferAmount = parseUnits('5', USDC.decimals).toString();
+  const transferAmount = parseUnits('3', USDC.decimals).toString();
 
   const destinationChainId = optimism.id;
 
@@ -79,15 +80,12 @@ const sendTx = async () => {
     amount: transferAmount,
     destinationChainId: destinationChainId,
     sender: account.address,
-    to: '0x400EA6522867456E988235675b9Cb5b1Cf5b79C8',
+    to: '0x28341dF2CCabe2Cc4A3c6e7ef2fe9E706680C196',
   };
 
   const multiChainSend = await client.buildMultiChainSend.mutate(requestBody);
 
-  console.log(JSON.stringify(multiChainSend, null, 2));
-
-  /*
-  const signedStepItems: SignedExecutionStep[] = [];
+  const signedStepItems: SignedBridgeStep[] = [];
 
   for (const step of multiChainSend.bridgeSteps) {
     const signature = await signEIP1159Tx({
@@ -106,7 +104,7 @@ const sendTx = async () => {
     account,
   });
 
-  const signedTransfer: SignedExecutionStep = {
+  const signedTransfer: SignedTransferStep = {
     ...multiChainSend.transferStep,
     signature: transferSig,
   };
@@ -122,7 +120,6 @@ const sendTx = async () => {
   const response = await client.sendTransaction.mutate(sendTxRequestBody);
 
   console.log(response);
-  */
 };
 
 sendTx();

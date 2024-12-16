@@ -81,8 +81,11 @@ export interface BridgeStep {
   };
   bridgeDetails: {
     to: Hex;
+    amountIn: string;
+    amountOut: string;
     amountInFormatted: string;
     amountOutFormatted: string;
+    bridgeFee: string;
     bridgeFeeFormatted: string;
     bridgeFeeUsd: string;
     fromChainId: number;

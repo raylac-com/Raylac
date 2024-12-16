@@ -3,13 +3,14 @@ import {
   getPublicClient,
   getWalletClient,
   SendTransactionRequestBody,
+  SignedBridgeStep,
   sleep,
   Token,
 } from '@raylac/shared';
-import { bundlerAccount } from '../../lib/bundler';
 import { logger } from '@raylac/shared-backend';
 import { Hex, zeroAddress } from 'viem';
 import { getTokenAddressOnChain } from '../../utils';
+import prisma from '../../lib/prisma';
 
 const getTokenBalance = async ({
   chainId,
@@ -77,39 +78,23 @@ const sendTransaction = async ({
   token,
   amount,
 }: SendTransactionRequestBody) => {
+  const bridgeTxs: {
+    signedBridgeStep: SignedBridgeStep;
+    txHash: Hex;
+  }[] = [];
+
   for (const signedBridgeStep of signedBridgeSteps) {
-    const publicClient = getPublicClient({
-      chainId: signedBridgeStep.tx.chainId,
-    });
     const walletClient = getWalletClient({
       chainId: signedBridgeStep.tx.chainId,
     });
 
-    const gas = BigInt(signedBridgeStep.tx.gas);
-    const maxFeePerGas = BigInt(signedBridgeStep.tx.maxFeePerGas);
-
-    const fundAmount = gas * maxFeePerGas * BigInt(2);
-
-    logger.info(
-      `Funding ${fundAmount} on chain ${signedBridgeStep.tx.chainId} to ${sender}`
-    );
-
-    const fundingTx = await walletClient.sendTransaction({
-      account: bundlerAccount,
-      to: sender,
-      value: fundAmount,
-    });
-
-    const receipt = await publicClient.waitForTransactionReceipt({
-      hash: fundingTx,
-    });
-
-    if (receipt.status !== 'success') {
-      throw new Error('Funding transaction failed');
-    }
-
-    await walletClient.sendRawTransaction({
+    const txHash = await walletClient.sendRawTransaction({
       serializedTransaction: signedBridgeStep.signature,
+    });
+
+    bridgeTxs.push({
+      signedBridgeStep,
+      txHash,
     });
   }
 
@@ -120,30 +105,6 @@ const sendTransaction = async ({
   const walletClient = getWalletClient({
     chainId: signedTransfer.tx.chainId,
   });
-
-  const finalTransferGasCost =
-    BigInt(signedTransfer.tx.gas) *
-    BigInt(signedTransfer.tx.maxFeePerGas) *
-    BigInt(2);
-
-  // Fund the final transfer
-  const fundingTx = await walletClient.sendTransaction({
-    account: bundlerAccount,
-    to: sender,
-    value: finalTransferGasCost,
-  });
-
-  logger.info(
-    `Funding ${finalTransferGasCost} on chain ${signedTransfer.tx.chainId} to ${sender} ${fundingTx}`
-  );
-
-  const fundingReceipt = await publicClient.waitForTransactionReceipt({
-    hash: fundingTx,
-  });
-
-  if (fundingReceipt.status !== 'success') {
-    throw new Error('Funding transaction on final chain failed');
-  }
 
   await waitForBalance({
     chainId: signedTransfer.tx.chainId,
@@ -167,6 +128,32 @@ const sendTransaction = async ({
   if (finalTransferReceipt.status !== 'success') {
     throw new Error('Final transfer failed');
   }
+
+  await prisma.transfer.create({
+    data: {
+      txHash: finalTransferTxHash,
+      from: sender,
+      to: signedTransfer.transferDetails.to,
+      destinationChainId: signedTransfer.tx.chainId,
+      amount: amount,
+      tokenAddress: token.addresses[0].address,
+      bridges: {
+        createMany: {
+          data: bridgeTxs.map(bridgeTx => ({
+            transactionHash: bridgeTx.txHash,
+            fromChainId: bridgeTx.signedBridgeStep.bridgeDetails.fromChainId,
+            toChainId: bridgeTx.signedBridgeStep.bridgeDetails.toChainId,
+            address: sender,
+            amountIn: bridgeTx.signedBridgeStep.bridgeDetails.amountIn,
+            amountOut: bridgeTx.signedBridgeStep.bridgeDetails.amountOut,
+            tokenAddress: token.addresses[0].address,
+            bridgeFeeAmount: bridgeTx.signedBridgeStep.bridgeDetails.bridgeFee,
+            bridgeFeeUsd: bridgeTx.signedBridgeStep.bridgeDetails.bridgeFeeUsd,
+          })),
+        },
+      },
+    },
+  });
 
   return finalTransferReceipt;
 };
