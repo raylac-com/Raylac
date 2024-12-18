@@ -60,7 +60,7 @@ export interface RelayExecutionStepItem {
     maxFeePerGas: string;
     maxPriorityFeePerGas: string;
     chainId: number;
-    gas: number;
+    gas?: number;
   };
   check: {
     endpoint: string;

@@ -26,6 +26,8 @@ import submitSwap from './api/submitSwap/submitSwap';
 import sendTransaction from './api/sendTransaction/sendTransaction';
 import buildMultiChainSend from './api/buildMultichainSend/buildMultichainSend';
 import getHistory from './api/getHistory/getHistory';
+import getStakedBalance from './api/getStakedBalance/getStakedBalance';
+import getETHBalance from './api/getETHBalance/getETHBalance';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -67,6 +69,18 @@ export const appRouter = router({
         : getToken({
             tokenAddress: input.tokenAddress as Hex,
           });
+    }),
+
+  getStakedBalance: publicProcedure
+    .input(z.object({ address: z.string() }))
+    .query(async ({ input }) => {
+      return getStakedBalance({ address: input.address as Hex });
+    }),
+
+  getETHBalance: publicProcedure
+    .input(z.object({ address: z.string() }))
+    .query(async ({ input }) => {
+      return getETHBalance({ address: input.address as Hex });
     }),
 
   submitSwap: publicProcedure.input(z.any()).mutation(async ({ input }) => {

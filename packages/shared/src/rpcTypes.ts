@@ -68,6 +68,7 @@ export interface GetSwapQuoteRequestBody {
   amount: string;
   inputToken: Token;
   outputToken: Token;
+  chainId?: number;
 }
 
 export type GetSwapQuoteReturnType = {
