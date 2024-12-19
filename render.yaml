@@ -24,6 +24,23 @@ services:
           name: anvil
           type: web
           envVarKey: RENDER_EXTERNAL_URL
+  - type: web
+    name: raylac-web
+    plan: standard
+    previewPlan: starter
+    runtime: node
+    region: oregon
+    buildCommand: rm -rf ./packages/{app,contracts,scripts} && pnpm i --ignore-scripts && pnpm build
+    startCommand: NODE_ENV=production pnpm -F web start
+    autoDeploy: true
+    envVars:
+      - fromGroup: raylac
+      - key: NODE_VERSION
+        value: 18.17.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: raylac
+          property: connectionString
 
 databases:
   - name: raylac

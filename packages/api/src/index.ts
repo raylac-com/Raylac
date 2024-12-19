@@ -171,6 +171,23 @@ const server = createHTTPServer({
   router: appRouter,
   // @ts-ignore
   createContext,
+
+  // We need this to accept requests from the web app
+  middleware: (req, res, next) => {
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Request-Method', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+
+    // Handle OPTIONS request
+    if (req.method === 'OPTIONS') {
+      res.writeHead(200);
+      return res.end();
+    }
+
+    return next();
+  },
 });
 
 server.listen(3000);

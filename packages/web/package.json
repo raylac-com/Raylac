@@ -1,0 +1,45 @@
+{
+  "name": "@raylac/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack --port 4000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint && tsc --noEmit"
+  },
+  "dependencies": {
+    "@radix-ui/react-toast": "^1.2.4",
+    "@rainbow-me/rainbowkit": "^2.2.0",
+    "@raylac/api": "workspace:*",
+    "@raylac/shared": "workspace:*",
+    "@tanstack/react-query": "^5.48.0",
+    "@trpc/client": "11.0.0-rc.439",
+    "@trpc/react-query": "11.0.0-rc.439",
+    "@trpc/server": "11.0.0-rc.439",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.468.0",
+    "mixpanel-browser": "^2.56.0",
+    "motion": "12.0.0-alpha.2",
+    "next": "15.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^2.5.5",
+    "tailwindcss-animate": "^1.0.7",
+    "viem": "2.x",
+    "wagmi": "^2.13.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@types/mixpanel-browser": "^2.50.2",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.1.0",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
