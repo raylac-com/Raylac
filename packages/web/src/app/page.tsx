@@ -1,4 +1,6 @@
 'use client';
+import ETHBalanceCard from '@/components/ETHBalanceCard/ETHBalanceCard';
+import StakedETHCard from '@/components/StakedETHCard/StakedETHCard';
 import { trpc } from '@/lib/trpc';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
@@ -29,13 +31,9 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <div className="text-2xl font-bold">Staked ETH</div>
-      <div className="text-lg">
-        <div>
-          <div>Staked</div>
-        </div>
-      </div>
+    <div className="flex flex-col items-center mt-[88px] min-h-screen gap-y-[52px]">
+      <StakedETHCard stakedBalance={BigInt(1000000000000000000)} />
+      <ETHBalanceCard balance={BigInt(1000000000000000000)} />
     </div>
   );
 }

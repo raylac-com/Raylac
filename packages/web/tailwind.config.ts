@@ -12,6 +12,8 @@ export default {
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        bg2: 'hsl(var(--bg-2))',
+        tertiary: 'hsl(var(--tertiary))',
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
@@ -55,6 +57,12 @@ export default {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+      },
+      fontSize: {
+        md: '16px',
+        lg: '20px',
+        '2lg': '26px',
+        xl: '32px',
       },
     },
   },
