@@ -45,8 +45,8 @@ const MenuBar = () => {
       <MenuItem icon={<Home />} href="/" isCurrent={pathname === '/'} />
       <MenuItem
         icon={<ArrowLeftRight />}
-        href="/stake"
-        isCurrent={pathname === '/stake'}
+        href="/swap"
+        isCurrent={pathname === '/swap'}
       />
     </div>
   );

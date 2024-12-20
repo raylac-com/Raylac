@@ -32,7 +32,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col items-center">
-      <PageTitle title="Home" />
+      <PageTitle>Home</PageTitle>
       <StakedETHCard
         stakedBalance={BigInt(1000000000000000000)}
         isLoading={isLoading}

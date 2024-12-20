@@ -22,7 +22,7 @@ const ETHBalanceCard = ({ balance }: ETHBalanceCardProps) => {
           <DropletIcon className="w-[15px] h-[15px] text-tertiary" />
           <div
             className="text-tertiary font-bold cursor-pointer"
-            onClick={() => router.push('/stake')}
+            onClick={() => router.push('/swap')}
           >
             Earn yield
           </div>
