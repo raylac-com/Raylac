@@ -36,15 +36,34 @@ const getETHBalance = async ({ address }: { address: Hex }) => {
       );
 
       return {
-        balance: balance.toString(),
+        balance,
         balanceFormatted,
-        balanceUsd: formatUsdValue(balanceUsd),
+        balanceUsd,
         chain: chainId,
       };
     })
   );
 
-  return balances;
+  const totalBalance = balances.reduce((acc, balance) => {
+    return acc + balance.balance;
+  }, BigInt(0));
+
+  const formattedTotalBalance = formatAmount(totalBalance.toString(), 18);
+
+  const totalBalanceUsd = balances.reduce((acc, balance) => {
+    return acc.plus(balance.balanceUsd);
+  }, new BigNumber(0));
+
+  return {
+    balances: balances.map(balance => ({
+      balance: balance.balance.toString(),
+      balanceFormatted: balance.balanceFormatted,
+      balanceUsd: formatUsdValue(balance.balanceUsd),
+      chain: balance.chain,
+    })),
+    formattedTotalBalance,
+    totalBalanceUsd: formatUsdValue(totalBalanceUsd),
+  };
 };
 
 export default getETHBalance;

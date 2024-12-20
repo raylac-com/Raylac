@@ -5,10 +5,10 @@ import {
   CrossChainSwapStep,
   GetSingleChainSwapQuoteReturnType,
   GetSingleChainSwapQuoteRequestBody,
+  formatAmount,
 } from '@raylac/shared';
 import { ed, logger, st } from '@raylac/shared-backend';
 import { relayApi } from '../../lib/relay';
-import { formatUnits } from 'viem';
 import axios from 'axios';
 import { TRPCError } from '@trpc/server';
 import { getTokenAddressOnChain } from '../../utils';
@@ -131,11 +131,8 @@ const getSingleChainSwapQuote = async ({
   const amountIn = amount;
   const amountOut = quote.details.currencyOut.amount;
 
-  const amountInFormatted = formatUnits(BigInt(amountIn), inputToken.decimals);
-  const amountOutFormatted = formatUnits(
-    BigInt(amountOut),
-    outputToken.decimals
-  );
+  const amountInFormatted = formatAmount(amountIn, inputToken.decimals);
+  const amountOutFormatted = formatAmount(amountOut, outputToken.decimals);
 
   const amountInUsd = quote.details.currencyIn.amountUsd;
   const amountOutUsd = quote.details.currencyOut.amountUsd;
