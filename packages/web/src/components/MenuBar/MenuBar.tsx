@@ -1,24 +1,27 @@
+'use client';
 import { ArrowLeftRight, Home } from 'lucide-react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const MenuItem = ({ icon, href }: { icon: React.ReactNode; href: string }) => {
   return (
     <Link href={href}>
-      <div className="cursor-pointer w-[24px] h-[24px] text-border hover:text-muted-foreground">
-        {icon}
-      </div>
+      <div className="cursor-pointer w-[24px] h-[24px] text-border">{icon}</div>
     </Link>
   );
 };
 
 const MenuBar = () => {
+  const pathname = usePathname();
+
+  if (pathname === '/start' || pathname === '/watch-mode') {
+    return null;
+  }
+
   return (
-    <div className="fixed bottom-[0px] left-1/2 -translate-x-1/2 w-[520px] flex flex-col">
-      <div className="h-[51px] px-[120px] flex flex-row items-center justify-between bg-bg2 p-2 gap-2 rounded-[16px] w-full">
-        <MenuItem icon={<Home />} href="/" />
-        <MenuItem icon={<ArrowLeftRight />} href="/stake" />
-      </div>
-      <div className="bg-background flex flex-row h-[42px] w-full"></div>
+    <div className="fixed left-[20vw] w-[60px] h-[460px] py-[120px] top-1/2 -translate-y-1/2 flex flex-col items-center justify-between bg-bg2 rounded-[8px]">
+      <MenuItem icon={<Home />} href="/" />
+      <MenuItem icon={<ArrowLeftRight />} href="/stake" />
     </div>
   );
 };

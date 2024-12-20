@@ -3,17 +3,20 @@ import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useAccount } from 'wagmi';
+import { motion } from 'framer-motion';
 
 const WatchModeButton = () => {
   const router = useRouter();
 
   return (
-    <div
-      className="cursor-pointer bg-background rounded-[16px] px-[16px] py-[12px] border border-tertiary"
+    <motion.div
+      className="flex items-center justify-center cursor-pointer bg-background rounded-[12px] h-[40px] w-[145px] border border-tertiary text-foreground font-bold "
       onClick={() => router.push('/watch-mode')}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
     >
-      <div className="text-foreground font-bold">Watch Mode</div>
-    </div>
+      Watch Mode
+    </motion.div>
   );
 };
 
