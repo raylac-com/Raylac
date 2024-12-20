@@ -6,6 +6,7 @@ import {
   GetSingleChainSwapQuoteReturnType,
   GetSingleChainSwapQuoteRequestBody,
   formatAmount,
+  formatUsdValue,
 } from '@raylac/shared';
 import { ed, logger, st } from '@raylac/shared-backend';
 import { relayApi } from '../../lib/relay';
@@ -13,6 +14,7 @@ import axios from 'axios';
 import { TRPCError } from '@trpc/server';
 import { getTokenAddressOnChain } from '../../utils';
 import { getNonce } from '../../lib/utils';
+import BigNumber from 'bignumber.js';
 
 const getSingleChainSwapQuote = async ({
   sender,
@@ -134,8 +136,12 @@ const getSingleChainSwapQuote = async ({
   const amountInFormatted = formatAmount(amountIn, inputToken.decimals);
   const amountOutFormatted = formatAmount(amountOut, outputToken.decimals);
 
-  const amountInUsd = quote.details.currencyIn.amountUsd;
-  const amountOutUsd = quote.details.currencyOut.amountUsd;
+  const amountInUsd = formatUsdValue(
+    new BigNumber(quote.details.currencyIn.amountUsd)
+  );
+  const amountOutUsd = formatUsdValue(
+    new BigNumber(quote.details.currencyOut.amountUsd)
+  );
 
   const relayerServiceFeeAmount = quote.fees.relayerService.amount;
   const relayerServiceFeeUsd = quote.fees.relayerService.amountUsd;

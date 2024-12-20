@@ -1,5 +1,5 @@
 'use client';
-import BackButton from '@/components/BackButton/BackButton';
+import PageTitle from '@/components/PageTitle/PageTitle';
 import StakeCard from '@/components/StakeCard/StakeCard';
 import { trpc } from '@/lib/trpc';
 import { zeroAddress } from 'viem';
@@ -22,12 +22,12 @@ const StakePage = () => {
   );
 
   if (!ethMultiChainBalance) {
-    return <div>Loading...</div>;
+    return <div></div>;
   }
 
   return (
-    <div className="flex flex-col w-full items-center">
-      <BackButton />
+    <div className="flex flex-col items-center">
+      <PageTitle title="Swap" />
       <div className="flex flex-col gap-y-[100px] items-center justify-center overflow-scroll">
         {ethMultiChainBalance.balances.map((balance, i) => (
           <StakeCard

@@ -95,7 +95,7 @@ export const getTokenLogoURI = (token: Token) => {
     case 'ETH':
       return '/eth.png';
     case 'wstETH':
-      return '/wsteth.png';
+      return '/wsteth.svg';
     default:
       throw new Error(`getTokenLogoURI: Unknown token: ${token.symbol}`);
   }
@@ -103,4 +103,23 @@ export const getTokenLogoURI = (token: Token) => {
 
 export const shortenAddress = (address: Hex) => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
+};
+
+export const getChainColor = (chainId: number) => {
+  switch (chainId) {
+    case chains.optimism.id:
+      return '#FF0420';
+    case chains.zksync.id:
+      return '#5A4BEB';
+    case chains.base.id:
+      return '#0052FF';
+    case chains.scroll.id:
+      return '#F2C857';
+    case chains.mainnet.id:
+      return '#627EEA';
+    case chains.arbitrum.id:
+      return '#2D3748';
+    default:
+      throw new Error(`getChainColor: Unknown chain id: ${chainId}`);
+  }
 };

@@ -16,6 +16,7 @@ import { parseEther } from 'viem';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import { Skeleton } from '../ui/skeleton';
+import Image from 'next/image';
 
 const WalletBalance = ({
   balanceFormatted,
@@ -38,7 +39,6 @@ const WalletBalance = ({
 const SwapButton = ({
   chainId,
   onClick,
-  inputToken,
   outputToken,
 }: {
   chainId: number;
@@ -67,8 +67,15 @@ const SwapButton = ({
         onClick();
       }}
     >
-      <div className="text-bg2 font-bold">
-        {outputToken.symbol} {`>>`} {inputToken.symbol}
+      <div className="flex flex-row items-center gap-x-[8px]">
+        <div className="text-bg2 font-bold">Swap to {outputToken.symbol}</div>
+        <Image
+          src={getTokenLogoURI(outputToken)}
+          alt="output-token-logo"
+          width={20}
+          height={20}
+          className="w-[20px] h-[20px]"
+        />
       </div>
     </motion.div>
   );
@@ -95,7 +102,7 @@ const StakeCard = ({ chainId, balanceFormatted }: StakeCardProps) => {
   const [inputToken, setInputToken] = useState<Token>(ETH);
   const [outputToken, setOutputToken] = useState<Token>(WST_ETH);
 
-  const [amountInputText, setAmountInputText] = useState('0');
+  const [amountInputText, setAmountInputText] = useState('');
   const { address } = useAccount();
 
   const {
@@ -193,7 +200,7 @@ const StakeCard = ({ chainId, balanceFormatted }: StakeCardProps) => {
                 onClick={onWalletBalanceClick}
               />
             </div>
-            <div className="flex flex-row items-center h-[45px] w-[257px] text-2lg border-[1px] border-border bg-bg2 rounded-[8px] px-[16px] text-foreground gap-x-[4px]">
+            <div className="flex flex-row items-center h-[45px] w-[257px] text-2lg border-[1px] border-border bg-bg2 rounded-[8px] px-[16px] text-foreground gap-x-[10px]">
               <input
                 className="font-inter flex bg-transparent w-full h-full outline-none text-right"
                 value={amountInputText}
@@ -207,7 +214,7 @@ const StakeCard = ({ chainId, balanceFormatted }: StakeCardProps) => {
                 {isGettingQuote ? (
                   <Skeleton className="w-[100px] h-full bg-background" />
                 ) : (
-                  `$${amountInUsd}`
+                  `~$${amountInUsd}`
                 )}
               </div>
             </div>
