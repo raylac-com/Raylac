@@ -5,6 +5,13 @@ import StyledText from './StyledText/StyledText';
 import TokenLogo from './FastImage/TokenLogo';
 import BigNumber from 'bignumber.js';
 
+const shortenName = (name: string) => {
+  if (name.length > 20) {
+    return name.slice(0, 20) + '...';
+  }
+  return name;
+};
+
 const TokenBalanceCard = (props: {
   name: string;
   symbol: string;
@@ -55,7 +62,7 @@ const TokenBalanceCard = (props: {
               justifyContent: 'space-between',
             }}
           >
-            <StyledText>{props.name}</StyledText>
+            <StyledText>{shortenName(props.name)}</StyledText>
             <StyledText
               style={{ fontWeight: 'bold' }}
             >{`$${formatUsdValue(new BigNumber(props.usdValue))}`}</StyledText>
