@@ -91,14 +91,14 @@ const CardHeader = ({ chainId }: { chainId: number }) => {
   );
 };
 
-interface StakeCardProps {
+interface SwapCardProps {
   chainId: number;
   balance: bigint;
   balanceFormatted: string;
   balanceUsd: string;
 }
 
-const StakeCard = ({ chainId, balanceFormatted }: StakeCardProps) => {
+const SwapCard = ({ chainId, balanceFormatted }: SwapCardProps) => {
   const [inputToken, setInputToken] = useState<Token>(ETH);
   const [outputToken, setOutputToken] = useState<Token>(WST_ETH);
 
@@ -292,4 +292,4 @@ const StakeCard = ({ chainId, balanceFormatted }: StakeCardProps) => {
   );
 };
 
-export default StakeCard;
+export default SwapCard;

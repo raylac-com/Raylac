@@ -1,13 +1,13 @@
 'use client';
 import PageTitle from '@/components/PageTitle/PageTitle';
-import StakeCard from '@/components/StakeCard/StakeCard';
+import SwapCard from '@/components/SwapCard/SwapCard';
 import { trpc } from '@/lib/trpc';
 import { ArrowLeftRight } from 'lucide-react';
 import Image from 'next/image';
 import { zeroAddress } from 'viem';
 import { useAccount } from 'wagmi';
 
-const StakePage = () => {
+const SwapPage = () => {
   const { address } = useAccount();
 
   const { data: _stakedBalance } = trpc.getStakedBalance.useQuery({
@@ -49,7 +49,7 @@ const StakePage = () => {
       </PageTitle>
       <div className="flex flex-col gap-y-[100px] items-center justify-center overflow-scroll">
         {ethMultiChainBalance.balances.map((balance, i) => (
-          <StakeCard
+          <SwapCard
             chainId={balance.chain}
             key={i}
             balance={BigInt(balance.balance)}
@@ -62,4 +62,4 @@ const StakePage = () => {
   );
 };
 
-export default StakePage;
+export default SwapPage;
