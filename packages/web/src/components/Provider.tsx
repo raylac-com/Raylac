@@ -13,6 +13,7 @@ import { getAlchemyHttpTransport } from '@/lib/utils';
 import { MixpanelProvider } from '@/context/MixpanelContext';
 import { trpc } from '@/lib/trpc';
 import { httpBatchLink } from '@trpc/client';
+import Header from './Header/Header';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -90,6 +91,7 @@ const Provider = ({ children }: { children: React.ReactNode }) => {
           >
             <MixpanelProvider>
               <div className="max-w-[1440px] flex flex-col items-center mx-auto">
+                <Header />
                 {children}
               </div>
             </MixpanelProvider>

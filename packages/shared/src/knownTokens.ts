@@ -1,6 +1,13 @@
-import { supportedChains, Token } from '.';
+import { Token } from '.';
 import { getAddress, zeroAddress } from 'viem';
-import { arbitrum, base, optimism, polygon, zksync } from 'viem/chains';
+import {
+  arbitrum,
+  base,
+  mainnet,
+  optimism,
+  polygon,
+  zksync,
+} from 'viem/chains';
 
 export const ETH = {
   symbol: 'ETH',
@@ -9,7 +16,7 @@ export const ETH = {
   verified: true,
   logoURI:
     'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/eth.png',
-  addresses: supportedChains
+  addresses: [mainnet, arbitrum, optimism, base, polygon, zksync]
     .filter(chain => chain.id !== polygon.id)
     .map(chain => ({
       chainId: chain.id,
@@ -55,6 +62,10 @@ export const WST_ETH = {
   verified: true,
   logoURI: 'https://arbiscan.io/token/images/lido_32.png',
   addresses: [
+    {
+      chainId: mainnet.id,
+      address: getAddress('0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0'),
+    },
     {
       chainId: arbitrum.id,
       address: getAddress('0x5979D7b546E38E414F7E9822514be443A4800529'),

@@ -12,8 +12,10 @@ import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.
 import {
   BuildMultiChainSendRequestBody,
   GetHistoryRequestBody,
+  GetSingleChainSwapQuoteRequestBody,
   GetSwapQuoteRequestBody,
   SendTransactionRequestBody,
+  SubmitSingleChainSwapRequestBody,
   SubmitSwapRequestBody,
 } from '@raylac/shared';
 import getSwapQuote from './api/getSwapQuote/getSwapQuote';
@@ -28,6 +30,8 @@ import buildMultiChainSend from './api/buildMultichainSend/buildMultichainSend';
 import getHistory from './api/getHistory/getHistory';
 import getStakedBalance from './api/getStakedBalance/getStakedBalance';
 import getETHBalance from './api/getETHBalance/getETHBalance';
+import getSingleChainSwapQuote from './api/getSingleChainSwapQuote/getSingleChainSwapQuote';
+import submitSingleChainSwap from './api/submitSingleChainSwap/submitSingleChainSwap';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -87,6 +91,12 @@ export const appRouter = router({
     return submitSwap(input as SubmitSwapRequestBody);
   }),
 
+  submitSingleChainSwap: publicProcedure
+    .input(z.any())
+    .mutation(async ({ input }) => {
+      return submitSingleChainSwap(input as SubmitSingleChainSwapRequestBody);
+    }),
+
   sendTransaction: publicProcedure
     .input(z.any())
     .mutation(async ({ input }) => {
@@ -102,6 +112,14 @@ export const appRouter = router({
   getSwapQuote: publicProcedure.input(z.any()).mutation(async ({ input }) => {
     return getSwapQuote(input as GetSwapQuoteRequestBody);
   }),
+
+  getSingleChainSwapQuote: publicProcedure
+    .input(z.any())
+    .mutation(async ({ input }) => {
+      return getSingleChainSwapQuote(
+        input as GetSingleChainSwapQuoteRequestBody
+      );
+    }),
 
   getHistory: publicProcedure
     .input(
