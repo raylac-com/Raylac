@@ -26,20 +26,29 @@ const getStakedBalance = async ({ address }: { address: Hex }) => {
     throw new Error('wstETH price not found');
   }
 
-  const balances = await Promise.all(
-    wstToken.addresses.map(async contractAddress => {
-      const stakedBalance = await getERC20TokenBalance({
-        address,
-        contractAddress: contractAddress.address,
-        chainId: contractAddress.chainId,
-      });
+  const balances = (
+    await Promise.all(
+      wstToken.addresses.map(async contractAddress => {
+        const stakedBalance = await getERC20TokenBalance({
+          address,
+          contractAddress: contractAddress.address,
+          chainId: contractAddress.chainId,
+        });
 
-      return {
-        balance: stakedBalance.toString(),
-        chain: contractAddress.chainId,
-      };
-    })
-  );
+        const balanceFormatted = formatAmount(stakedBalance.toString(), 18);
+        const balanceUsd = new BigNumber(
+          formatEther(stakedBalance)
+        ).multipliedBy(new BigNumber(wstPriceUsd.value));
+
+        return {
+          balance: stakedBalance.toString(),
+          chain: contractAddress.chainId,
+          balanceFormatted,
+          balanceUsd: formatUsdValue(balanceUsd),
+        };
+      })
+    )
+  ).filter(balance => BigInt(balance.balance) > BigInt(0));
 
   const totalBalance = balances.reduce(
     (acc, curr) => acc + BigInt(curr.balance),

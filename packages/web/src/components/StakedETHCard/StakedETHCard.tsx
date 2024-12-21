@@ -14,7 +14,7 @@ const StakedETHCard = ({
   const router = useRouter();
 
   const onCardClick = () => {
-    router.push(`/steth/balance`);
+    router.push(`/wsteth/balance`);
   };
 
   return (
