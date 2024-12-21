@@ -48,7 +48,7 @@ const getETHBalance = async ({ address }: { address: Hex }) => {
     return acc + balance.balance;
   }, BigInt(0));
 
-  const formattedTotalBalance = formatAmount(totalBalance.toString(), 18);
+  const totalBalanceFormatted = formatAmount(totalBalance.toString(), 18);
 
   const totalBalanceUsd = balances.reduce((acc, balance) => {
     return acc.plus(balance.balanceUsd);
@@ -61,7 +61,7 @@ const getETHBalance = async ({ address }: { address: Hex }) => {
       balanceUsd: formatUsdValue(balance.balanceUsd),
       chain: balance.chain,
     })),
-    formattedTotalBalance,
+    totalBalanceFormatted,
     totalBalanceUsd: formatUsdValue(totalBalanceUsd),
   };
 };

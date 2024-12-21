@@ -12,15 +12,23 @@ export default function Home() {
   const router = useRouter();
   const { isConnecting, address } = useAccount();
 
-  const { data: _stakedBalance, isPending: isLoadingStakedBalance } =
-    trpc.getStakedBalance.useQuery(
-      {
-        address: address || zeroAddress,
-      },
-      {
-        enabled: !!address,
-      }
-    );
+  const { data: stakedBalance } = trpc.getStakedBalance.useQuery(
+    {
+      address: address || zeroAddress,
+    },
+    {
+      enabled: !!address,
+    }
+  );
+
+  const { data: ethMultiChainBalance } = trpc.getETHBalance.useQuery(
+    {
+      address: address || zeroAddress,
+    },
+    {
+      enabled: !!address,
+    }
+  );
 
   useEffect(() => {
     if (isConnecting === false && !address) {
@@ -28,17 +36,18 @@ export default function Home() {
     }
   }, [isConnecting, router, address]);
 
-  const isLoading = isLoadingStakedBalance || isConnecting;
-
   return (
     <div className="flex flex-col items-center">
       <PageTitle>Home</PageTitle>
       <StakedETHCard
-        stakedBalance={BigInt(1000000000000000000)}
-        isLoading={isLoading}
+        balanceFormatted={stakedBalance?.totalBalanceFormatted}
+        balanceUsdFormatted={stakedBalance?.totalBalanceUsd}
       />
       <div className="mt-[80px]">
-        <ETHBalanceCard balance={BigInt(1000000000000000000)} />
+        <ETHBalanceCard
+          balanceFormatted={ethMultiChainBalance?.totalBalanceFormatted}
+          balanceUsdFormatted={ethMultiChainBalance?.totalBalanceUsd}
+        />
       </div>
     </div>
   );

@@ -1,14 +1,16 @@
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { formatEther } from 'viem';
 import { Skeleton } from '../ui/skeleton';
 
 interface StakedETHCardProps {
-  stakedBalance: bigint;
-  isLoading: boolean;
+  balanceFormatted?: string;
+  balanceUsdFormatted?: string;
 }
 
-const StakedETHCard = ({ stakedBalance, isLoading }: StakedETHCardProps) => {
+const StakedETHCard = ({
+  balanceFormatted,
+  balanceUsdFormatted,
+}: StakedETHCardProps) => {
   const router = useRouter();
 
   const onCardClick = () => {
@@ -22,13 +24,19 @@ const StakedETHCard = ({ stakedBalance, isLoading }: StakedETHCardProps) => {
     >
       <div className="flex flex-col gap-y-[4px]">
         <div className="text-xl">
-          {isLoading ? (
+          {balanceFormatted === undefined ? (
             <Skeleton className="h-[48px] w-full rounded-[8px]" />
           ) : (
-            `${formatEther(stakedBalance)} wstETH`
+            `${balanceFormatted} wstETH`
           )}
         </div>
-        <div className="text-base text-muted-foreground">$123.45</div>
+        <div className="text-base text-muted-foreground">
+          {balanceUsdFormatted === undefined ? (
+            <Skeleton className="h-[24px] w-[100px] rounded-[8px]" />
+          ) : (
+            `$${balanceUsdFormatted}`
+          )}
+        </div>
       </div>
       <div className="flex flex-row justify-between">
         <div className="flex flex-row gap-x-[6px] items-center">

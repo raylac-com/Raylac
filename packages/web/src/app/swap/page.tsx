@@ -47,7 +47,7 @@ const SwapPage = () => {
           />
         </div>
       </PageTitle>
-      <div className="flex flex-col gap-y-[100px] items-center justify-center overflow-scroll">
+      <div className="flex flex-col gap-y-[16px] items-center justify-center overflow-scroll px-[16px]">
         {ethMultiChainBalance.balances.map((balance, i) => (
           <SwapCard
             chainId={balance.chain}

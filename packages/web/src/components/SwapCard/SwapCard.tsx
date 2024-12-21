@@ -1,7 +1,8 @@
 'use client';
 import useSignAndSubmitSwap from '@/hooks/useSignAndSubmitSwap';
 import { trpc } from '@/lib/trpc';
-import { cn, getTokenLogoURI } from '@/lib/utils';
+import { cn, getChainIcon, getTokenLogoURI } from '@/lib/utils';
+import { AnimatePresence } from 'motion/react';
 import {
   ETH,
   getChainFromId,
@@ -9,7 +10,7 @@ import {
   Token,
   WST_ETH,
 } from '@raylac/shared';
-import { ArrowUpDown, Wallet } from 'lucide-react';
+import { ArrowUpDown, ChevronDownIcon, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useState } from 'react';
 import { parseEther } from 'viem';
@@ -17,24 +18,6 @@ import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import { Skeleton } from '../ui/skeleton';
 import Image from 'next/image';
-
-const WalletBalance = ({
-  balanceFormatted,
-  onClick,
-}: {
-  balanceFormatted: string;
-  onClick: () => void;
-}) => {
-  return (
-    <div
-      className="flex flex-row items-center text-muted-foreground gap-x-[4px] cursor-pointer"
-      onClick={onClick}
-    >
-      <Wallet className="w-[17px] h-[17px]" />
-      <div>{balanceFormatted} ETH</div>
-    </div>
-  );
-};
 
 const SwapButton = ({
   chainId,
@@ -81,11 +64,56 @@ const SwapButton = ({
   );
 };
 
-const CardHeader = ({ chainId }: { chainId: number }) => {
+const CardHeader = ({
+  chainId,
+  isOpen,
+  balanceFormatted,
+  onOpenChange,
+  onBalanceClick,
+}: {
+  chainId: number;
+  isOpen: boolean;
+  balanceFormatted: string;
+  onOpenChange: (isOpen: boolean) => void;
+  onBalanceClick: () => void;
+}) => {
   return (
-    <div className="flex flex-row items-center gap-x-[12px]">
-      <div className="text-foreground font-bold">
+    <div
+      className="flex flex-row items-center justify-between gap-x-[12px] cursor-pointer"
+      onClick={() => onOpenChange(!isOpen)}
+    >
+      <div className="text-muted-foreground flex flex-row items-center gap-x-[6px]">
+        <Image
+          src={getChainIcon(chainId)}
+          alt="chain-logo"
+          width={24}
+          height={24}
+          className="w-[24px] h-[24px]"
+        />
         {getChainFromId(chainId).name}
+      </div>
+      <div className="flex flex-row items-center gap-x-[16px]">
+        <div
+          className="flex flex-row items-center gap-x-[6px] cursor-pointer"
+          onClick={e => {
+            e.stopPropagation();
+
+            if (isOpen) {
+              onBalanceClick();
+            } else {
+              onOpenChange(true);
+            }
+          }}
+        >
+          <div className="text-muted-foreground">{balanceFormatted} ETH</div>
+          <Wallet className="w-[17px] h-[17px] text-muted-foreground" />
+        </div>
+        <ChevronDownIcon
+          className={cn(
+            'w-[24px] h-[24px] text-muted-foreground cursor-pointer',
+            isOpen ? 'rotate-180' : ''
+          )}
+        />
       </div>
     </div>
   );
@@ -99,6 +127,8 @@ interface SwapCardProps {
 }
 
 const SwapCard = ({ chainId, balanceFormatted }: SwapCardProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   const [inputToken, setInputToken] = useState<Token>(ETH);
   const [outputToken, setOutputToken] = useState<Token>(WST_ETH);
 
@@ -173,121 +203,88 @@ const SwapCard = ({ chainId, balanceFormatted }: SwapCardProps) => {
   const amountOutFormatted = quote?.amountOutFormatted || '0';
 
   return (
-    <div className="flex flex-col px-[22px] py-[16px] bg-bg2 rounded-[16px] gap-y-[54px]">
-      <CardHeader chainId={chainId} />
-      <div className="flex flex-row gap-x-[12px] justify-between">
-        <div className="flex flex-col mt-[26px] gap-y-[12px] items-center">
-          <TokenLogoWithChain
-            logoURI={getTokenLogoURI(inputToken)}
-            chainId={chainId}
-            size={45}
-          />
-          <ArrowUpDown
-            className="mr-[12px] w-[24px] h-[24px] cursor-pointer text-muted-foreground hover:text-foreground"
-            onClick={onChangeDirectionClick}
-          />
-          <TokenLogoWithChain
-            logoURI={getTokenLogoURI(outputToken)}
-            chainId={chainId}
-            size={45}
-          />
-        </div>
-        <div className="flex flex-col gap-y-[25px]">
-          <div className="flex flex-col gap-y-[4px]">
-            <div className="flex flex-row justify-end">
-              <WalletBalance
-                balanceFormatted={balanceFormatted}
-                onClick={onWalletBalanceClick}
-              />
-            </div>
-            <div className="flex flex-row items-center h-[45px] w-[257px] text-2lg border-[1px] border-border bg-bg2 rounded-[8px] px-[16px] text-foreground gap-x-[10px]">
-              <input
-                className="font-inter flex bg-transparent w-full h-full outline-none text-right"
-                value={amountInputText}
-                onChange={e => setAmountInputText(e.target.value)}
-                spellCheck={false}
-              />
-              <div className="text-border">{inputToken.symbol}</div>
-            </div>
-            <div className="flex flex-row justify-end">
-              <div className="text-muted-foreground  h-[18px]">
-                {isGettingQuote ? (
-                  <Skeleton className="w-[100px] h-full bg-background" />
-                ) : (
-                  `~$${amountInUsd}`
-                )}
+    <div className="flex flex-col gap-y-[48px] px-[22px] py-[16px] bg-bg2 rounded-[16px] w-[420px] hover:bg-bg3">
+      <CardHeader
+        chainId={chainId}
+        isOpen={isOpen}
+        onOpenChange={setIsOpen}
+        balanceFormatted={balanceFormatted}
+        onBalanceClick={onWalletBalanceClick}
+      />
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="flex flex-col gap-y-[54px]"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="flex flex-row gap-x-[12px] justify-between">
+              <div className="flex flex-col gap-y-[12px] items-center">
+                <TokenLogoWithChain
+                  logoURI={getTokenLogoURI(inputToken)}
+                  chainId={chainId}
+                  size={45}
+                />
+                <ArrowUpDown
+                  className="mr-[12px] w-[24px] h-[24px] cursor-pointer text-muted-foreground hover:text-foreground"
+                  onClick={onChangeDirectionClick}
+                />
+                <TokenLogoWithChain
+                  logoURI={getTokenLogoURI(outputToken)}
+                  chainId={chainId}
+                  size={45}
+                />
+              </div>
+              <div className="flex flex-col gap-y-[25px]">
+                <div className="flex flex-col gap-y-[4px]">
+                  <div className="flex flex-row items-center h-[45px] w-[305px] text-2lg border-[1px] border-border bg-bg2 rounded-[8px] px-[16px] text-foreground gap-x-[10px]">
+                    <input
+                      className="flex bg-transparent w-full h-full outline-none text-right"
+                      value={amountInputText}
+                      onChange={e => setAmountInputText(e.target.value)}
+                      spellCheck={false}
+                    />
+                    <div className="text-border">{inputToken.symbol}</div>
+                  </div>
+                  <div className="flex flex-row justify-end">
+                    <div className="text-muted-foreground  h-[18px]">
+                      {isGettingQuote ? (
+                        <Skeleton className="w-[100px] h-full bg-background" />
+                      ) : (
+                        `~$${amountInUsd}`
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-y-[4px]">
+                  <div className="text-foreground h-[18px] font-bold">
+                    {isGettingQuote ? (
+                      <Skeleton className="w-[100px] h-full bg-background" />
+                    ) : (
+                      `${amountOutFormatted} ${outputToken.symbol}`
+                    )}
+                  </div>
+                  <div className="text-muted-foreground h-[18px]">
+                    {isGettingQuote ? (
+                      <Skeleton className="w-[100px] h-full bg-background" />
+                    ) : (
+                      `$${amountOutUsd}`
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex flex-col gap-y-[4px]">
-            <div className="text-foreground h-[18px] font-bold">
-              {isGettingQuote ? (
-                <Skeleton className="w-[100px] h-full bg-background" />
-              ) : (
-                `${amountOutFormatted} ${outputToken.symbol}`
-              )}
-            </div>
-            <div className="text-muted-foreground h-[18px]">
-              {isGettingQuote ? (
-                <Skeleton className="w-[100px] h-full bg-background" />
-              ) : (
-                `$${amountOutUsd}`
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-      <SwapButton
-        chainId={chainId}
-        onClick={onConvertClick}
-        inputToken={inputToken}
-        outputToken={outputToken}
-      />
-
-      {/**
-      <div className="flex flex-col items-end">
-        <div className="flex flex-row items-center gap-x-[9px]">
-          <TokenLogoWithChain
-            logoURI={getTokenLogoURI(inputToken)}
-            chainId={chainId}
-            size={42}
-          />
-          <input
-            className="h-[47px] w-[200px] text-2lg border-[1px] border-border bg-bg2 rounded-[8px] px-[16px] py-[12px] text-foreground"
-            value={amountInputText}
-            onChange={e => setAmountInputText(e.target.value)}
-          />
-          <div className="text-foreground text-2lg">{inputToken.symbol}</div>
-        </div>
-        <div className="text-muted-foreground">${quote?.amountInUsd}</div>
-      </div>
-      <div className="flex flex-row items-center">
-        <ArrowUpDown
-          className="w-[24px] h-[24px] cursor-pointer text-muted-foreground hover:text-foreground"
-          onClick={onChangeDirectionClick}
-        />
-      </div>
-      <div className="flex flex-row items-center gap-x-[12px]">
-        <TokenLogoWithChain
-          logoURI={getTokenLogoURI(outputToken)}
-          chainId={chainId}
-          size={42}
-        />
-        <div className="flex flex-col gap-y-[4px]">
-          <div>
-            {quote?.amountOutFormatted} {outputToken.symbol}
-          </div>
-          <div className="text-muted-foreground">
-            {isGettingQuote ? (
-              <Skeleton className="w-[100px] h-[16px] bg-background" />
-            ) : (
-              `$${amountOutUsd}`
-            )}
-          </div>
-        </div>
-      </div>
-      * 
-       */}
+            <SwapButton
+              chainId={chainId}
+              onClick={onConvertClick}
+              inputToken={inputToken}
+              outputToken={outputToken}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
