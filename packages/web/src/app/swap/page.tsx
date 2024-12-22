@@ -2,6 +2,8 @@
 import PageTitle from '@/components/PageTitle/PageTitle';
 import SwapCard from '@/components/SwapCard/SwapCard';
 import { trpc } from '@/lib/trpc';
+import { ETH } from '@raylac/shared';
+import { WST_ETH } from '@raylac/shared';
 import { ArrowLeftRight } from 'lucide-react';
 import Image from 'next/image';
 import { zeroAddress } from 'viem';
@@ -52,9 +54,8 @@ const SwapPage = () => {
           <SwapCard
             chainId={balance.chain}
             key={i}
-            balance={BigInt(balance.balance)}
-            balanceFormatted={balance.balanceFormatted}
-            balanceUsd={balance.balanceUsd}
+            fromToken={ETH}
+            toToken={WST_ETH}
           />
         ))}
       </div>

@@ -8,8 +8,6 @@ export const supportedChains: Chain[] = [
   chains.base,
   chains.optimism,
   chains.arbitrum,
-  chains.polygon,
-  chains.zksync,
   //  chains.scroll,
   //  chains.arbitrum,
   // chains.arbitrum,

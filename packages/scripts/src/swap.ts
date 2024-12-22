@@ -51,9 +51,6 @@ const swap = async () => {
 
   const quote = await client.getSwapQuote.mutate(requestBody);
 
-  console.log('quote');
-  console.log(JSON.stringify(quote, null, 2));
-
   const signedCrossChainSwapSteps: SignedCrossChainSwapStep[] = [];
 
   for (const step of quote.swapSteps) {

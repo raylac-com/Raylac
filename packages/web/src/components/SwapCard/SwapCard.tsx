@@ -18,6 +18,7 @@ import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import { Skeleton } from '../ui/skeleton';
 import Image from 'next/image';
+import useChainBalance from '@/hooks/useChainBalance';
 
 const SwapButton = ({
   chainId,
@@ -67,16 +68,21 @@ const SwapButton = ({
 const CardHeader = ({
   chainId,
   isOpen,
-  balanceFormatted,
   onOpenChange,
   onBalanceClick,
+  inputToken,
 }: {
   chainId: number;
   isOpen: boolean;
-  balanceFormatted: string;
   onOpenChange: (isOpen: boolean) => void;
   onBalanceClick: () => void;
+  inputToken: Token;
 }) => {
+  const { balanceFormatted } = useChainBalance({
+    tokenId: inputToken.symbol,
+    chainId,
+  });
+
   return (
     <div
       className="flex flex-row items-center justify-between gap-x-[12px] cursor-pointer"
@@ -105,7 +111,9 @@ const CardHeader = ({
             }
           }}
         >
-          <div className="text-muted-foreground">{balanceFormatted} ETH</div>
+          <div className="text-muted-foreground">
+            {balanceFormatted} {inputToken.symbol}
+          </div>
           <Wallet className="w-[17px] h-[17px] text-muted-foreground" />
         </div>
         <ChevronDownIcon
@@ -121,12 +129,11 @@ const CardHeader = ({
 
 interface SwapCardProps {
   chainId: number;
-  balance: bigint;
-  balanceFormatted: string;
-  balanceUsd: string;
+  fromToken: Token;
+  toToken: Token;
 }
 
-const SwapCard = ({ chainId, balanceFormatted }: SwapCardProps) => {
+const SwapCard = ({ chainId }: SwapCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const [inputToken, setInputToken] = useState<Token>(ETH);
@@ -134,6 +141,11 @@ const SwapCard = ({ chainId, balanceFormatted }: SwapCardProps) => {
 
   const [amountInputText, setAmountInputText] = useState('');
   const { address } = useAccount();
+
+  const { balanceFormatted } = useChainBalance({
+    tokenId: inputToken.symbol,
+    chainId,
+  });
 
   const {
     mutateAsync: getSingleChainSwapQuote,
@@ -155,15 +167,15 @@ const SwapCard = ({ chainId, balanceFormatted }: SwapCardProps) => {
 
       const getSwapQuoteRequestBody: GetSwapQuoteRequestBody = {
         amount: amount.toString(),
-        inputToken: ETH,
-        outputToken: WST_ETH,
+        inputToken: inputToken,
+        outputToken: outputToken,
         sender: address,
         chainId: chainId,
       };
 
       getSingleChainSwapQuote(getSwapQuoteRequestBody);
     }
-  }, [amountInputText, address, chainId]);
+  }, [amountInputText, address, chainId, inputToken, outputToken]);
 
   const onConvertClick = useCallback(async () => {
     if (quote) {
@@ -195,7 +207,9 @@ const SwapCard = ({ chainId, balanceFormatted }: SwapCardProps) => {
   };
 
   const onWalletBalanceClick = () => {
-    setAmountInputText(balanceFormatted);
+    if (balanceFormatted !== undefined) {
+      setAmountInputText(balanceFormatted);
+    }
   };
 
   const amountInUsd = quote?.amountInUsd || '0';
@@ -208,8 +222,8 @@ const SwapCard = ({ chainId, balanceFormatted }: SwapCardProps) => {
         chainId={chainId}
         isOpen={isOpen}
         onOpenChange={setIsOpen}
-        balanceFormatted={balanceFormatted}
         onBalanceClick={onWalletBalanceClick}
+        inputToken={inputToken}
       />
       <AnimatePresence>
         {isOpen && (

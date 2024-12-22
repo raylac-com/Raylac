@@ -1,20 +1,16 @@
 import {
-  RelaySwapMultiInputRequestBody,
-  RelayGetQuoteResponseBody,
-  TRPCErrorMessage,
   CrossChainSwapStep,
   GetSingleChainSwapQuoteReturnType,
   GetSingleChainSwapQuoteRequestBody,
   formatAmount,
   formatUsdValue,
 } from '@raylac/shared';
-import { ed, logger, st } from '@raylac/shared-backend';
-import { relayApi } from '../../lib/relay';
-import axios from 'axios';
-import { TRPCError } from '@trpc/server';
-import { getTokenAddressOnChain } from '../../utils';
-import { getNonce } from '../../lib/utils';
+import { ed, st } from '@raylac/shared-backend';
+import '../../lib/lifi';
 import BigNumber from 'bignumber.js';
+import { getQuote } from '@lifi/sdk';
+import { Hex, hexToBigInt, hexToNumber } from 'viem';
+import { getTokenAddressOnChain } from '../../utils';
 
 const getSingleChainSwapQuote = async ({
   sender,
@@ -26,138 +22,68 @@ const getSingleChainSwapQuote = async ({
   const inputTokenAddress = getTokenAddressOnChain(inputToken, chainId);
   const outputTokenAddress = getTokenAddressOnChain(outputToken, chainId);
 
-  const origins: RelaySwapMultiInputRequestBody['origins'] = [
-    {
-      chainId,
-      currency: inputTokenAddress,
-      amount,
-    },
-  ];
-
-  // Get quote from Relay
-  // Get quote from Relay
-  const requestBody: RelaySwapMultiInputRequestBody = {
-    user: sender,
-    recipient: sender,
-    origins,
-    destinationCurrency: outputTokenAddress,
-    destinationChainId: chainId,
-    partial: false,
-    tradeType: 'EXACT_INPUT',
-    useUserOperation: false,
-  };
-
   const qt = st('Get quote');
-
-  let quote;
-  try {
-    const { data } = await relayApi.post<RelayGetQuoteResponseBody>(
-      '/execute/swap/multi-input',
-      requestBody
-    );
-    quote = data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response?.data?.message?.includes('amount is too small')) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: TRPCErrorMessage.SWAP_AMOUNT_TOO_SMALL,
-          cause: error,
-        });
-      }
-
-      if (
-        error.response?.data?.message?.includes(
-          'No routes found for the requested swap'
-        )
-      ) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: TRPCErrorMessage.SWAP_NO_ROUTES_FOUND,
-          cause: error,
-        });
-      }
-
-      if (
-        error.response?.data?.message?.includes(
-          'Solver has insufficient liquidity for this swap'
-        )
-      ) {
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message: TRPCErrorMessage.SWAP_INSUFFICIENT_LIQUIDITY,
-          cause: error,
-        });
-      }
-
-      logger.error('Relay API error:', error.response?.data || error.message);
-    }
-    throw error;
-  }
+  const quote = await getQuote({
+    fromAddress: sender,
+    fromChain: chainId,
+    toChain: chainId,
+    fromToken: inputTokenAddress,
+    toToken: outputTokenAddress,
+    fromAmount: amount,
+  });
 
   ed(qt);
 
-  let nonce = await getNonce({
-    chainId,
-    address: sender,
-  });
+  const data = quote.transactionRequest?.data;
+  const to = quote.transactionRequest?.to;
+  const value = quote.transactionRequest?.value;
+  const gas = quote.transactionRequest?.gasLimit;
 
-  const swapSteps: CrossChainSwapStep[] = quote.steps.map(step => {
-    if (step.items.length !== 1) {
-      throw new Error('Expected 1 step item, got ' + step.items.length);
-    }
+  if (!data || !to || value === undefined || !gas) {
+    throw new Error('transactionRequest is undefined');
+  }
 
-    const item = step.items[0];
-
-    const crossChainSwapStep: CrossChainSwapStep = {
-      originChainId: item.data.chainId,
-      destinationChainId: item.data.chainId,
-      id: step.id as 'swap' | 'approve',
-      tx: {
-        data: item.data.data,
-        to: item.data.to,
-        value: item.data.value,
-        maxFeePerGas: item.data.maxFeePerGas,
-        maxPriorityFeePerGas: item.data.maxPriorityFeePerGas,
-        chainId: item.data.chainId,
-        gas: item.data.gas ?? 300_000,
-        nonce,
-      },
-    };
-
-    nonce++;
-
-    return crossChainSwapStep;
-  });
+  const swapStep: CrossChainSwapStep = {
+    originChainId: chainId,
+    destinationChainId: chainId,
+    id: 'swap',
+    tx: {
+      data: data as Hex,
+      to: to as Hex,
+      value: hexToBigInt(value as Hex).toString(),
+      maxFeePerGas: '',
+      maxPriorityFeePerGas: '',
+      chainId: chainId,
+      gas: hexToNumber(gas as Hex),
+      nonce: 0,
+    },
+  };
 
   const amountIn = amount;
-  const amountOut = quote.details.currencyOut.amount;
+  const amountOut = quote.estimate.toAmount;
 
   const amountInFormatted = formatAmount(amountIn, inputToken.decimals);
   const amountOutFormatted = formatAmount(amountOut, outputToken.decimals);
 
+  if (!quote.estimate.fromAmountUSD) {
+    throw new Error('fromAmountUSD is undefined');
+  }
+
+  if (!quote.estimate.toAmountUSD) {
+    throw new Error('toAmountUSD is undefined');
+  }
+
   const amountInUsd = formatUsdValue(
-    new BigNumber(quote.details.currencyIn.amountUsd)
+    new BigNumber(quote.estimate.fromAmountUSD)
   );
   const amountOutUsd = formatUsdValue(
-    new BigNumber(quote.details.currencyOut.amountUsd)
+    new BigNumber(quote.estimate.toAmountUSD)
   );
 
-  const relayerServiceFeeAmount = quote.fees.relayerService.amount;
-  const relayerServiceFeeUsd = quote.fees.relayerService.amountUsd;
-
-  if (relayerServiceFeeAmount === undefined) {
-    throw new Error('relayerServiceFeeAmount ');
-  }
-
-  if (relayerServiceFeeUsd === undefined) {
-    throw new Error('relayerServiceFeeUsd is undefined');
-  }
-
   return {
-    swapSteps,
-    relayerServiceFeeAmount: relayerServiceFeeAmount.toString(),
-    relayerServiceFeeUsd: relayerServiceFeeUsd.toString(),
+    swapSteps: [swapStep],
+    relayerServiceFeeAmount: '0',
+    relayerServiceFeeUsd: '0',
     amountIn,
     amountOut,
     amountInFormatted,
