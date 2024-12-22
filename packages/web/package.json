@@ -13,6 +13,7 @@
     "@rainbow-me/rainbowkit": "^2.2.0",
     "@raylac/api": "workspace:*",
     "@raylac/shared": "workspace:*",
+    "@sentry/nextjs": "^8",
     "@tanstack/react-query": "^5.48.0",
     "@trpc/client": "11.0.0-rc.439",
     "@trpc/react-query": "11.0.0-rc.439",
