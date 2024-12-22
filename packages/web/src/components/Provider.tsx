@@ -66,7 +66,7 @@ const Provider = ({ children }: { children: React.ReactNode }) => {
   const trpcClient = trpc.createClient({
     links: [
       httpBatchLink({
-        url: 'https://raylac.ngrok.app',
+        url: process.env.NEXT_PUBLIC_API_URL as string,
         // You can pass any HTTP headers you wish here
         async headers() {
           return {
