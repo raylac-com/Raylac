@@ -1,7 +1,7 @@
 import { findTokenByAddress, supportedChains, Token } from '@raylac/shared';
 import { getAddress, Hex } from 'viem';
 import { relayGetCurrencies } from '../../lib/relay';
-import { KNOWN_TOKENS } from '../../lib/knownTokes';
+import { KNOWN_TOKENS } from '@raylac/shared';
 import NodeCache from 'node-cache';
 
 const cache = new NodeCache({

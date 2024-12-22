@@ -19,7 +19,7 @@ import {
   getTokenPriceByAddress,
   getTokenPriceBySymbol,
 } from '../../lib/alchemy';
-import { KNOWN_TOKENS } from '../../lib/knownTokes';
+import { KNOWN_TOKENS } from '@raylac/shared';
 import BigNumber from 'bignumber.js';
 import { logger } from '@raylac/shared-backend';
 import { relayGetCurrencies } from '../../lib/relay';

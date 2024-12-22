@@ -1,7 +1,7 @@
 import { SupportedTokensReturnType } from '@raylac/shared';
 import { relayGetCurrencies } from '../../lib/relay';
 import { getAddress } from 'viem';
-import { KNOWN_TOKENS } from '../../lib/knownTokes';
+import { KNOWN_TOKENS } from '@raylac/shared';
 
 const getSupportedTokens = async ({
   chainIds,

@@ -4,7 +4,7 @@ import {
   getERC20TokenBalance,
 } from '@raylac/shared';
 import { formatEther, Hex } from 'viem';
-import { KNOWN_TOKENS } from '../../lib/knownTokes';
+import { KNOWN_TOKENS } from '@raylac/shared';
 import getTokenPrice from '../getTokenPrice/getTokenPrice';
 import BigNumber from 'bignumber.js';
 

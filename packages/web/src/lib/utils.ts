@@ -75,6 +75,8 @@ export const getAlchemyHttpTransport = ({
 
 export const getChainIcon = (chainId: number) => {
   switch (chainId) {
+    case chains.mainnet.id:
+      return '/chains/ethereum.png';
     case chains.optimism.id:
       return '/chains/op.png';
     case chains.base.id:
