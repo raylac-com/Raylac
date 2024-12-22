@@ -10,7 +10,7 @@ import {
   Token,
   WST_ETH,
 } from '@raylac/shared';
-import { ArrowUpDown, ChevronDownIcon, Wallet } from 'lucide-react';
+import { ArrowUpDown, ChevronDownIcon, Loader2, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useState } from 'react';
 import { parseEther } from 'viem';
@@ -19,16 +19,19 @@ import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import { Skeleton } from '../ui/skeleton';
 import Image from 'next/image';
 import useChainBalance from '@/hooks/useChainBalance';
+import { toast } from '@/hooks/use-toast';
 
 const SwapButton = ({
   chainId,
   onClick,
   outputToken,
+  isSwapping,
 }: {
   chainId: number;
   onClick: () => void;
   inputToken: Token;
   outputToken: Token;
+  isSwapping: boolean;
 }) => {
   const connectedChainId = useChainId();
 
@@ -51,16 +54,22 @@ const SwapButton = ({
         onClick();
       }}
     >
-      <div className="flex flex-row items-center gap-x-[8px]">
-        <div className="text-bg2 font-bold">Swap to {outputToken.symbol}</div>
-        <Image
-          src={getTokenLogoURI(outputToken)}
-          alt="output-token-logo"
-          width={20}
-          height={20}
-          className="w-[20px] h-[20px]"
-        />
-      </div>
+      {isSwapping ? (
+        <div className="flex flex-row items-center gap-x-[8px]">
+          <Loader2 className="w-[20px] h-[20px] text-bg2 animate-spin" />
+        </div>
+      ) : (
+        <div className="flex flex-row items-center gap-x-[8px]">
+          <div className="text-bg2 font-bold">Swap to {outputToken.symbol}</div>
+          <Image
+            src={getTokenLogoURI(outputToken)}
+            alt="output-token-logo"
+            width={20}
+            height={20}
+            className="w-[20px] h-[20px]"
+          />
+        </div>
+      )}
     </motion.div>
   );
 };
@@ -127,6 +136,10 @@ const CardHeader = ({
   );
 };
 
+const containsNonNumericCharacters = (text: string) => {
+  return /[^0-9.]/.test(text);
+};
+
 interface SwapCardProps {
   chainId: number;
   fromToken: Token;
@@ -151,14 +164,19 @@ const SwapCard = ({ chainId }: SwapCardProps) => {
     mutateAsync: getSingleChainSwapQuote,
     data: quote,
     isPending: isGettingQuote,
+    reset: resetQuote,
   } = trpc.getSingleChainSwapQuote.useMutation({
     throwOnError: false,
   });
 
-  const { mutateAsync: signAndSubmitSwap } = useSwap();
+  const { mutateAsync: signAndSubmitSwap, isPending: isSwapping } = useSwap();
 
   useEffect(() => {
-    if (amountInputText && address) {
+    if (
+      amountInputText &&
+      address &&
+      !containsNonNumericCharacters(amountInputText)
+    ) {
       const amount = parseEther(amountInputText);
 
       if (amount === BigInt(0)) {
@@ -181,6 +199,13 @@ const SwapCard = ({ chainId }: SwapCardProps) => {
     if (quote) {
       await signAndSubmitSwap({
         swapSteps: quote.swapSteps,
+      });
+
+      setAmountInputText('');
+      resetQuote();
+
+      toast({
+        title: 'Swap successful',
       });
     }
   }, [quote, signAndSubmitSwap]);
@@ -217,7 +242,7 @@ const SwapCard = ({ chainId }: SwapCardProps) => {
   const amountOutFormatted = quote?.amountOutFormatted || '0';
 
   return (
-    <div className="flex flex-col gap-y-[48px] px-[22px] py-[16px] bg-bg2 rounded-[16px] w-[420px] hover:bg-bg3">
+    <div className="flex flex-col gap-y-[48px] px-[22px] py-[16px] bg-bg2 rounded-[16px] w-full hover:bg-bg3">
       <CardHeader
         chainId={chainId}
         isOpen={isOpen}
@@ -295,6 +320,7 @@ const SwapCard = ({ chainId }: SwapCardProps) => {
               onClick={onConvertClick}
               inputToken={inputToken}
               outputToken={outputToken}
+              isSwapping={isSwapping}
             />
           </motion.div>
         )}

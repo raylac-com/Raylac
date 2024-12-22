@@ -26,7 +26,7 @@ const ConnectWalletPage = () => {
 
   useEffect(() => {
     if (isConnected) {
-      router.push('/');
+      router.push('/swap');
     }
   }, [isConnected, router]);
 

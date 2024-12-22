@@ -459,3 +459,15 @@ export interface SendInput {
   token: Token;
   amount: bigint;
 }
+
+export interface LidoApyResponse {
+  data: {
+    timeUnix: number;
+    apr: number;
+  };
+  meta: {
+    symbol: string;
+    address: string;
+    chainId: number;
+  };
+}

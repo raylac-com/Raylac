@@ -57,7 +57,7 @@ export const USDC = {
 
 export const WST_ETH = {
   symbol: 'wstETH',
-  name: 'Wrapped Lido Staked ETH',
+  name: 'Staked ETH',
   decimals: 18,
   verified: true,
   logoURI: 'https://arbiscan.io/token/images/lido_32.png',

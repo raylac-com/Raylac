@@ -32,6 +32,7 @@ import getStakedBalance from './api/getStakedBalance/getStakedBalance';
 import getETHBalance from './api/getETHBalance/getETHBalance';
 import getSingleChainSwapQuote from './api/getSingleChainSwapQuote/getSingleChainSwapQuote';
 import submitSingleChainSwap from './api/submitSingleChainSwap/submitSingleChainSwap';
+import getLidoApy from './api/getLidoApy/getLidoApy';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -86,6 +87,10 @@ export const appRouter = router({
     .query(async ({ input }) => {
       return getETHBalance({ address: input.address as Hex });
     }),
+
+  getLidoApy: publicProcedure.query(async () => {
+    return getLidoApy();
+  }),
 
   submitSwap: publicProcedure.input(z.any()).mutation(async ({ input }) => {
     return submitSwap(input as SubmitSwapRequestBody);
