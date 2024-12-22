@@ -4,12 +4,13 @@ import {
   GetSingleChainSwapQuoteRequestBody,
   formatAmount,
   formatUsdValue,
+  ERC20Abi,
 } from '@raylac/shared';
 import { ed, st } from '@raylac/shared-backend';
 import '../../lib/lifi';
 import BigNumber from 'bignumber.js';
 import { getQuote } from '@lifi/sdk';
-import { Hex, hexToBigInt, hexToNumber } from 'viem';
+import { encodeFunctionData, Hex, hexToBigInt, hexToNumber } from 'viem';
 import { getTokenAddressOnChain } from '../../utils';
 
 const getSingleChainSwapQuote = async ({
@@ -42,6 +43,31 @@ const getSingleChainSwapQuote = async ({
   if (!data || !to || value === undefined || !gas) {
     throw new Error('transactionRequest is undefined');
   }
+
+  const approveTx = encodeFunctionData({
+    abi: ERC20Abi,
+    functionName: 'approve',
+    args: [to as Hex, BigInt(amount)],
+  });
+
+  const approveStep: CrossChainSwapStep | null =
+    inputToken.symbol === 'wstETH'
+      ? {
+          originChainId: chainId,
+          destinationChainId: chainId,
+          id: 'approve',
+          tx: {
+            data: approveTx,
+            to: inputTokenAddress as Hex,
+            value: BigInt(0).toString(),
+            maxFeePerGas: '',
+            maxPriorityFeePerGas: '',
+            chainId: chainId,
+            gas: hexToNumber(gas as Hex),
+            nonce: 0,
+          },
+        }
+      : null;
 
   const swapStep: CrossChainSwapStep = {
     originChainId: chainId,
@@ -80,8 +106,10 @@ const getSingleChainSwapQuote = async ({
     new BigNumber(quote.estimate.toAmountUSD)
   );
 
+  const swapSteps = approveStep ? [approveStep, swapStep] : [swapStep];
+
   return {
-    swapSteps: [swapStep],
+    swapSteps,
     relayerServiceFeeAmount: '0',
     relayerServiceFeeUsd: '0',
     amountIn,

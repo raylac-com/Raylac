@@ -40,22 +40,6 @@ const swap = async () => {
 
   console.log('quote');
   console.log(JSON.stringify(quote, null, 2));
-
-  const walletClient = await getWalletClient({
-    chainId: base.id,
-  });
-
-  const publicClient = await getPublicClient({
-    chainId: base.id,
-  });
-
-  const swapStep = quote.swapSteps[0];
-
-  const tx = await publicClient.simulateContract({
-    address: swapStep.tx.to,
-    data: swapStep.tx.data,
-    gas: BigInt(swapStep.tx.gas),
-  });
 };
 
 swap();

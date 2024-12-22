@@ -1,5 +1,5 @@
 'use client';
-import useSignAndSubmitSwap from '@/hooks/useSignAndSubmitSwap';
+import useSwap from '@/hooks/useSwap';
 import { trpc } from '@/lib/trpc';
 import { cn, getChainIcon, getTokenLogoURI } from '@/lib/utils';
 import { AnimatePresence } from 'motion/react';
@@ -155,7 +155,7 @@ const SwapCard = ({ chainId }: SwapCardProps) => {
     throwOnError: false,
   });
 
-  const { mutateAsync: signAndSubmitSwap } = useSignAndSubmitSwap();
+  const { mutateAsync: signAndSubmitSwap } = useSwap();
 
   useEffect(() => {
     if (amountInputText && address) {
