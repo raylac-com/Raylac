@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { motion } from 'framer-motion';
 
-const WatchModeButton = () => {
+const _WatchModeButton = () => {
   const router = useRouter();
 
   return (
@@ -33,7 +33,9 @@ const ConnectWalletPage = () => {
   return (
     <div className="flex flex-col items-center justify-center h-[80vh] gap-y-[16px]">
       <ConnectWalletButton />
+      {/*
       <WatchModeButton />
+      */}
     </div>
   );
 };
