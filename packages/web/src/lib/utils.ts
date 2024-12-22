@@ -97,7 +97,7 @@ export const getTokenLogoURI = (token: Token) => {
     case 'ETH':
       return '/eth.png';
     case 'wstETH':
-      return '/wsteth.svg';
+      return '/wsteth.png';
     default:
       throw new Error(`getTokenLogoURI: Unknown token: ${token.symbol}`);
   }

@@ -41,7 +41,7 @@ const StakedETHCard = ({
       <div className="flex flex-row justify-between">
         <div className="flex flex-row gap-x-[6px] items-center">
           <Image
-            src="/wsteth.svg"
+            src="/wsteth.png"
             alt="wsteth-logo"
             width={24}
             height={24}

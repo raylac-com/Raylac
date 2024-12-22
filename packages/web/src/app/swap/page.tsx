@@ -34,7 +34,7 @@ const BalanceCard = ({
           />
           <div>{token.symbol === 'ETH' ? 'ETH' : 'Staked ETH'}</div>
         </div>
-        <div className="text-border">APR {apy ? `${apy}%` : ''}</div>
+        <div className="text-border">{apy ? `APR ${apy}%` : ''}</div>
       </div>
       <div className="flex flex-col items-end gap-y-[2px]">
         <div className="text-lg">
@@ -80,7 +80,7 @@ const SwapPage = () => {
             height={24}
           />
           <Image
-            src="/wsteth.svg"
+            src="/wsteth.png"
             alt="wsteth-logo"
             className="w-[24px] h-[24px]"
             width={24}
