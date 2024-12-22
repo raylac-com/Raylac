@@ -36,7 +36,7 @@ services:
     envVars:
       - fromGroup: raylac
       - key: NODE_VERSION
-        value: 18.17.0
+        value: 18.18.0
       - key: DATABASE_URL
         fromDatabase:
           name: raylac
