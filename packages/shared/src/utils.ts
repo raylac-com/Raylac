@@ -126,7 +126,7 @@ export const formatAmount = (amount: string, decimals: number): string => {
   const formatted = Number(
     formatUnits(BigInt(amount), decimals)
   ).toLocaleString('en-US', {
-    maximumFractionDigits: 9,
+    maximumFractionDigits: 6,
   });
 
   if (formatted === '0' && amount !== '0') {

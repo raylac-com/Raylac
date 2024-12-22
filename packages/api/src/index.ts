@@ -12,8 +12,10 @@ import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.
 import {
   BuildMultiChainSendRequestBody,
   GetHistoryRequestBody,
+  GetSingleChainSwapQuoteRequestBody,
   GetSwapQuoteRequestBody,
   SendTransactionRequestBody,
+  SubmitSingleChainSwapRequestBody,
   SubmitSwapRequestBody,
 } from '@raylac/shared';
 import getSwapQuote from './api/getSwapQuote/getSwapQuote';
@@ -26,6 +28,10 @@ import submitSwap from './api/submitSwap/submitSwap';
 import sendTransaction from './api/sendTransaction/sendTransaction';
 import buildMultiChainSend from './api/buildMultichainSend/buildMultichainSend';
 import getHistory from './api/getHistory/getHistory';
+import getStakedBalance from './api/getStakedBalance/getStakedBalance';
+import getETHBalance from './api/getETHBalance/getETHBalance';
+import getSingleChainSwapQuote from './api/getSingleChainSwapQuote/getSingleChainSwapQuote';
+import submitSingleChainSwap from './api/submitSingleChainSwap/submitSingleChainSwap';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -69,9 +75,27 @@ export const appRouter = router({
           });
     }),
 
+  getStakedBalance: publicProcedure
+    .input(z.object({ address: z.string() }))
+    .query(async ({ input }) => {
+      return getStakedBalance({ address: input.address as Hex });
+    }),
+
+  getETHBalance: publicProcedure
+    .input(z.object({ address: z.string() }))
+    .query(async ({ input }) => {
+      return getETHBalance({ address: input.address as Hex });
+    }),
+
   submitSwap: publicProcedure.input(z.any()).mutation(async ({ input }) => {
     return submitSwap(input as SubmitSwapRequestBody);
   }),
+
+  submitSingleChainSwap: publicProcedure
+    .input(z.any())
+    .mutation(async ({ input }) => {
+      return submitSingleChainSwap(input as SubmitSingleChainSwapRequestBody);
+    }),
 
   sendTransaction: publicProcedure
     .input(z.any())
@@ -88,6 +112,14 @@ export const appRouter = router({
   getSwapQuote: publicProcedure.input(z.any()).mutation(async ({ input }) => {
     return getSwapQuote(input as GetSwapQuoteRequestBody);
   }),
+
+  getSingleChainSwapQuote: publicProcedure
+    .input(z.any())
+    .mutation(async ({ input }) => {
+      return getSingleChainSwapQuote(
+        input as GetSingleChainSwapQuoteRequestBody
+      );
+    }),
 
   getHistory: publicProcedure
     .input(
@@ -157,6 +189,23 @@ const server = createHTTPServer({
   router: appRouter,
   // @ts-ignore
   createContext,
+
+  // We need this to accept requests from the web app
+  middleware: (req, res, next) => {
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Request-Method', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+
+    // Handle OPTIONS request
+    if (req.method === 'OPTIONS') {
+      res.writeHead(200);
+      return res.end();
+    }
+
+    return next();
+  },
 });
 
 server.listen(3000);

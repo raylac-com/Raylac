@@ -68,11 +68,32 @@ export interface GetSwapQuoteRequestBody {
   amount: string;
   inputToken: Token;
   outputToken: Token;
+  chainId?: number;
 }
 
 export type GetSwapQuoteReturnType = {
   inputs: SwapInput[];
   output: SwapOutput;
+  swapSteps: CrossChainSwapStep[];
+  relayerServiceFeeAmount: string;
+  relayerServiceFeeUsd: string;
+  amountIn: string;
+  amountOut: string;
+  amountInFormatted: string;
+  amountOutFormatted: string;
+  amountInUsd: string;
+  amountOutUsd: string;
+};
+
+export interface GetSingleChainSwapQuoteRequestBody {
+  sender: Hex;
+  amount: string;
+  inputToken: Token;
+  outputToken: Token;
+  chainId: number;
+}
+
+export type GetSingleChainSwapQuoteReturnType = {
   swapSteps: CrossChainSwapStep[];
   relayerServiceFeeAmount: string;
   relayerServiceFeeUsd: string;
@@ -95,6 +116,10 @@ export interface SubmitSwapRequestBody {
   tokenOut: Token;
   relayerServiceFeeAmount: string;
   relayerServiceFeeUsd: string;
+}
+
+export interface SubmitSingleChainSwapRequestBody {
+  signedSwapSteps: SignedCrossChainSwapStep[];
 }
 
 export interface GetTokenPriceRequestBody {

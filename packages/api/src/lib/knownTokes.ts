@@ -47,4 +47,25 @@ export const KNOWN_TOKENS: SupportedTokensReturnType = [
       },
     ],
   },
+  {
+    symbol: 'wstETH',
+    name: 'Wrapped Lido Staked ETH',
+    decimals: 18,
+    verified: true,
+    logoURI: 'https://arbiscan.io/token/images/lido_32.png',
+    addresses: [
+      {
+        chainId: arbitrum.id,
+        address: '0x5979D7b546E38E414F7E9822514be443A4800529',
+      },
+      {
+        chainId: optimism.id,
+        address: '0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb',
+      },
+      {
+        chainId: base.id,
+        address: '0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452',
+      },
+    ],
+  },
 ];
