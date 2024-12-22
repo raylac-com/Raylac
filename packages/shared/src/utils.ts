@@ -331,7 +331,7 @@ export const buildSwapIo = ({
         chainId: breakdown.chainId,
       });
 
-      remainingAmount = 0n;
+      remainingAmount = BigInt(0);
       break;
     } else {
       inputs.push({
@@ -344,7 +344,7 @@ export const buildSwapIo = ({
     }
   }
 
-  if (remainingAmount > 0n) {
+  if (remainingAmount > BigInt(0)) {
     throw new Error(
       `Not enough balance for ${inputToken.symbol}, required ${amount}, remaining ${remainingAmount}`
     );

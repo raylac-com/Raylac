@@ -41,6 +41,11 @@ services:
         fromDatabase:
           name: raylac
           property: connectionString
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          name: raylac-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
 
 databases:
   - name: raylac
