@@ -11,7 +11,7 @@ const PageTitle = ({
   return (
     <div
       className={cn(
-        'w-full text-left text-foreground text-md font-bold py-[16px]',
+        'w-full text-left text-border text-base font-bold py-[16px]',
         className
       )}
     >

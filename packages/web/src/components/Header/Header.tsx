@@ -5,6 +5,10 @@ const Header = () => {
       <Link href="/swap">
         <div className="text-border cursor-pointer">Raylac</div>
       </Link>
+      <div className="text-border">
+        <span className="font-bold cursor-pointer">Sign up </span>
+        to get updates
+      </div>
     </div>
   );
 };
