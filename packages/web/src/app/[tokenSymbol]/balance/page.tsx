@@ -6,6 +6,7 @@ import { use } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { KNOWN_TOKENS, Token } from '@raylac/shared';
 import useTokenBalance from '@/hooks/useTokenBalance';
+import { trpc } from '@/lib/trpc';
 
 interface ChainBalanceListItemProps {
   chainId: number;
@@ -55,33 +56,43 @@ const TotalBalanceCard = ({
   totalBalanceUsd,
   token,
 }: TotalBalanceCardProps) => {
+  const { data: apr } = trpc.getLidoApy.useQuery();
+
   return (
-    <div className="flex flex-col w-full bg-bg2 rounded-[16px] px-[28px] pt-[26px] pb-[22px] gap-y-[55px]">
-      <div className="flex flex-col gap-y-[6px]">
-        <div className="text-2lg">
-          {totalBalanceFormatted ? (
-            `${totalBalanceFormatted} ${token.symbol}`
-          ) : (
-            <Skeleton className="h-[39px] w-[200px] rounded-[8px]" />
-          )}
-        </div>
-        <div className="text-border">
-          {totalBalanceUsd ? (
-            `$${totalBalanceUsd}`
-          ) : (
-            <Skeleton className="h-[24px] w-[100px] rounded-[8px]" />
-          )}
-        </div>
+    <div className="flex flex-col w-full gap-y-[12px]">
+      <div className="flex flex-row gap-x-[6px] items-center px-[9px]">
+        <Image
+          src={getTokenLogoURI(token)}
+          alt={token.symbol}
+          width={24}
+          height={24}
+        />
+        <div className="text-border">{token.name}</div>
       </div>
-      <div className="flex flex-row justify-between">
-        <div className="flex flex-row gap-x-[6px] items-center">
-          <Image
-            src={getTokenLogoURI(token)}
-            alt={token.symbol}
-            width={24}
-            height={24}
-          />
-          <div className="text-border">{token.name}</div>
+      <div className="flex flex-col w-full bg-bg2 rounded-[32px] px-[28px] pt-[26px] pb-[22px] gap-y-[55px]">
+        <div className="flex flex-col gap-y-[6px]">
+          <div className="text-2lg">
+            {totalBalanceUsd ? (
+              `$${totalBalanceUsd}`
+            ) : (
+              <Skeleton className="h-[39px] w-[200px] rounded-[8px]" />
+            )}
+          </div>
+          <div className="text-border">
+            {totalBalanceFormatted ? (
+              `${totalBalanceFormatted} ${token.symbol}`
+            ) : (
+              <Skeleton className="h-[24px] w-[100px] rounded-[8px]" />
+            )}
+          </div>
+        </div>
+        <div className="flex flex-col gap-y-[8px] w-full">
+          <div className="flex flex-row justify-between"></div>
+          {(token.symbol === 'wstETH' || token.symbol === 'stETH') && (
+            <div className="flex flex-row justify-between">
+              <div className="text-[#A3F5C2]">{apr ? `${apr}% APR` : ''}</div>
+            </div>
+          )}
         </div>
       </div>
     </div>
