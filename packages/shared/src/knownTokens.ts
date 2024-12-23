@@ -59,7 +59,7 @@ export const USDC: Token = {
 
 export const WST_ETH: Token = {
   symbol: 'wstETH',
-  name: 'Staked ETH',
+  name: 'Wrapped staked ETH',
   decimals: 18,
   verified: true,
   logoURI: 'https://arbiscan.io/token/images/lido_32.png',
@@ -84,4 +84,19 @@ export const WST_ETH: Token = {
   ],
 };
 
-export const KNOWN_TOKENS: Token[] = [ETH, USDC, WST_ETH];
+export const ST_ETH: Token = {
+  symbol: 'stETH',
+  name: 'Staked ETH',
+  decimals: 18,
+  verified: true,
+  logoURI: 'https://arbiscan.io/token/images/lido_32.png',
+  color: '#00A3FF',
+  addresses: [
+    {
+      chainId: mainnet.id,
+      address: getAddress('0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84'),
+    },
+  ],
+};
+
+export const KNOWN_TOKENS: Token[] = [ETH, USDC, WST_ETH, ST_ETH];

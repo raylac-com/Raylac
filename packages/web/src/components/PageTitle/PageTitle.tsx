@@ -11,11 +11,11 @@ const PageTitle = ({
   return (
     <div
       className={cn(
-        'w-full text-left text-foreground text-lg font-bold pb-[32px]',
+        'w-full text-left text-foreground text-md font-bold py-[16px]',
         className
       )}
     >
-      {children as React.ReactNode}
+      <div className="w-[350px]">{children as React.ReactNode}</div>
     </div>
   );
 };

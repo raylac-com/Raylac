@@ -1,44 +1,43 @@
 'use client';
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import useAddresses from '@/hooks/useAddresses';
 import { isAddress } from 'viem';
-
-const _WatchModeButton = () => {
-  const router = useRouter();
-
-  return (
-    <motion.div
-      className="flex items-center justify-center cursor-pointer bg-background rounded-[12px] h-[40px] w-[145px] border border-tertiary text-foreground font-bold "
-      onClick={() => router.push('/watch-mode')}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-    >
-      Watch Mode
-    </motion.div>
-  );
-};
+import { useAccount } from 'wagmi';
+import { SquareArrowRight } from 'lucide-react';
+import { saveAddress } from '@/lib/utils';
+import useEnsAddress from '@/hooks/useEnsAddress';
 
 const ConnectWalletPage = () => {
   const router = useRouter();
   const [showAddressInput, setShowAddressInput] = useState(false);
   const [inputText, setInputText] = useState('');
+  const { address } = useAccount();
+  const arrowRef = useRef<HTMLDivElement>(null);
 
-  const { data: addresses } = useAddresses();
+  const { data: ensAddress } = useEnsAddress(inputText);
 
   useEffect(() => {
-    if (addresses !== undefined && addresses.length > 0) {
+    if (address) {
+      saveAddress(address);
       router.push('/');
     }
-  }, [addresses]);
+  }, [router, address]);
 
-  useEffect(() => {
-    if (inputText && isAddress(inputText)) {
-      setShowAddressInput(false);
+  const onNextClick = () => {
+    if (isAddress(inputText)) {
+      saveAddress(inputText);
+      router.push('/');
     }
-  }, [inputText, router]);
+
+    if (ensAddress) {
+      saveAddress(ensAddress);
+      router.push('/');
+    }
+  };
+
+  const canGoNext = isAddress(inputText) || ensAddress;
 
   return (
     <div className="h-[80vh] flex flex-col items-center justify-center pb-[48px] gap-y-[80px]">
@@ -58,11 +57,29 @@ const ConnectWalletPage = () => {
               Enter your ETH address
             </div>
           ) : (
-            <input
-              className="w-[290px] text-left px-[23px] bg-background text-foreground cursor-pointer h-[46px] rounded-[8px] border border-border"
-              placeholder="ENS or address"
-              onChange={e => setInputText(e.target.value)}
-            ></input>
+            <div className="flex items-center justify-center gap-x-[5px]">
+              <div className="w-[35px] h-[35px]"></div>
+              <input
+                className="w-[290px] text-left px-[23px] bg-background text-foreground cursor-pointer h-[46px] rounded-[8px] border border-border"
+                placeholder="ENS or address"
+                onChange={e => setInputText(e.target.value)}
+              ></input>
+              {canGoNext ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                  ref={arrowRef}
+                >
+                  <SquareArrowRight
+                    className="w-[35px] h-[35px] text-border stroke-[1px] cursor-pointer"
+                    onClick={onNextClick}
+                  />
+                </motion.div>
+              ) : (
+                <div className="w-[35px] h-[35px]"></div>
+              )}
+            </div>
           )}
         </div>{' '}
       </div>

@@ -30,12 +30,12 @@ const BalanceChart = ({
   }));
 
   return (
-    <PieChart width={450} height={280}>
+    <PieChart width={450} height={300}>
       <Pie
         isAnimationActive={false}
         data={data}
-        innerRadius={70}
-        outerRadius={90}
+        innerRadius={100}
+        outerRadius={120}
         fill="#8884d8"
         paddingAngle={3}
         dataKey="value"
@@ -49,12 +49,12 @@ const BalanceChart = ({
           position="center"
           fontSize={16}
           fill="white"
-          className="text-lg font-bold"
+          className="text-2lg font-bold"
         />
       </Pie>
-      <text x={210} y={270} textAnchor="middle" fill="white">
+      <text x={210} y={300} textAnchor="middle" fill="white">
         {data.map((entry, index) => (
-          <tspan key={index} x={160 + index * 85} y={270}>
+          <tspan key={index} x={160 + index * 85} y={300}>
             <tspan fill={entry.color}>■</tspan>
             <tspan fill="white">{` ${entry.name}`}</tspan>
           </tspan>

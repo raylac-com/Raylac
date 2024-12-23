@@ -98,6 +98,8 @@ export const getTokenLogoURI = (token: Token) => {
       return '/eth.png';
     case 'wstETH':
       return '/wsteth.png';
+    case 'stETH':
+      return '/steth.png';
     default:
       throw new Error(`getTokenLogoURI: Unknown token: ${token.symbol}`);
   }
@@ -131,8 +133,8 @@ const addressesKey = 'addresses';
 export const saveAddress = (address: Hex) => {
   const addresses = getAddresses();
   if (addresses) {
-    addresses.push(address);
-    window.localStorage.setItem(addressesKey, JSON.stringify(addresses));
+    const newAddresses = Array.from(new Set([...addresses, address]));
+    window.localStorage.setItem(addressesKey, JSON.stringify(newAddresses));
   } else {
     window.localStorage.setItem(addressesKey, JSON.stringify([address]));
   }
@@ -144,4 +146,10 @@ export const getAddresses = (): Hex[] => {
     return Array.from(new Set(JSON.parse(addresses)));
   }
   return [];
+};
+
+export const deleteAddress = (address: Hex) => {
+  const addresses = getAddresses();
+  const newAddresses = addresses.filter(a => a !== address);
+  window.localStorage.setItem(addressesKey, JSON.stringify(newAddresses));
 };

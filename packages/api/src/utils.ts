@@ -10,7 +10,15 @@ import {
 import * as chains from 'viem/chains';
 import { ALCHEMY_API_KEY } from './lib/envVars';
 import { Network } from 'alchemy-sdk';
-import { ETH, getChainFromId, Token, TokenSet, WST_ETH } from '@raylac/shared';
+import {
+  ETH,
+  getChainFromId,
+  ST_ETH,
+  Token,
+  TokenSet,
+  WST_ETH,
+} from '@raylac/shared';
+import BigNumber from 'bignumber.js';
 
 export const getWebsocketClient = ({ chainId }: { chainId: number }) => {
   const chain = getChainFromId(chainId);
@@ -220,8 +228,28 @@ export const getTokenAddressOnChain = (token: Token, chainId: number): Hex => {
 export const getTokensInSet = (set: TokenSet) => {
   switch (set) {
     case TokenSet.ETH:
-      return [ETH, WST_ETH];
+      return [ETH, WST_ETH, ST_ETH];
     default:
       throw new Error(`Unknown token set: ${set}`);
+  }
+};
+
+export const shortenUsdValue = (bn: BigNumber): string => {
+  // If the number is 1 billion or larger
+  if (bn.gte(1e9)) {
+    // Divide by 1e9, keep 2 decimals, append "B"
+    return `${bn.div(1e9).toFixed(2)}B`;
+  }
+  // If it's at least 1 million
+  else if (bn.gte(1e6)) {
+    return `${bn.div(1e6).toFixed(2)}M`;
+  }
+  // If it's at least 1 thousand
+  else if (bn.gte(1e3)) {
+    return `${bn.div(1e3).toFixed(2)}K`;
+  }
+  // Otherwise, just return the number with 2 decimals
+  else {
+    return bn.toFixed(2);
   }
 };
