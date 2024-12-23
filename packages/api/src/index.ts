@@ -35,6 +35,7 @@ import getSingleChainSwapQuote from './api/getSingleChainSwapQuote/getSingleChai
 import submitSingleChainSwap from './api/submitSingleChainSwap/submitSingleChainSwap';
 import getLidoApy from './api/getLidoApy/getLidoApy';
 import getSetBalances from './api/getSetBalances/getSetBalances';
+import getSet from './api/getSet/getSet';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -94,6 +95,12 @@ export const appRouter = router({
         set: input.set as TokenSet,
         address: input.address as Hex,
       });
+    }),
+
+  getSet: publicProcedure
+    .input(z.object({ set: z.nativeEnum(TokenSet) }))
+    .query(async ({ input }) => {
+      return getSet(input.set as TokenSet);
     }),
 
   getLidoApy: publicProcedure.query(async () => {

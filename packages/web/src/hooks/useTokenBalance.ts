@@ -3,7 +3,7 @@ import { trpc } from '@/lib/trpc';
 import { useAccount } from 'wagmi';
 import { Token, TokenSet } from '@raylac/shared';
 
-const useTokenBalance = ({ token }: { token: Token }) => {
+const useTokenBalance = ({ token }: { token?: Token }) => {
   const { address } = useAccount();
 
   const { data: setBalances } = trpc.getSetBalances.useQuery({
@@ -11,9 +11,12 @@ const useTokenBalance = ({ token }: { token: Token }) => {
     set: TokenSet.ETH,
   });
 
-  const balances = setBalances?.balances.find(
-    balance => balance.token.symbol === token.symbol
-  );
+  const balances =
+    token && setBalances
+      ? setBalances.balances.find(
+          balance => balance.token.symbol === token.symbol
+        )
+      : undefined;
 
   return balances;
 };

@@ -125,3 +125,23 @@ export const getChainColor = (chainId: number) => {
       throw new Error(`getChainColor: Unknown chain id: ${chainId}`);
   }
 };
+
+const addressesKey = 'addresses';
+
+export const saveAddress = (address: Hex) => {
+  const addresses = getAddresses();
+  if (addresses) {
+    addresses.push(address);
+    window.localStorage.setItem(addressesKey, JSON.stringify(addresses));
+  } else {
+    window.localStorage.setItem(addressesKey, JSON.stringify([address]));
+  }
+};
+
+export const getAddresses = (): Hex[] => {
+  const addresses = window.localStorage.getItem(addressesKey);
+  if (addresses) {
+    return JSON.parse(addresses);
+  }
+  return [];
+};

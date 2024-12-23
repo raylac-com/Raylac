@@ -2,10 +2,9 @@
 import { getChainIcon, getTokenLogoURI } from '@/lib/utils';
 import Image from 'next/image';
 import BackButton from '@/components/BackButton/BackButton';
-import { useEffect } from 'react';
 import { use } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ETH, Token, WST_ETH } from '@raylac/shared';
+import { KNOWN_TOKENS, Token } from '@raylac/shared';
 import useTokenBalance from '@/hooks/useTokenBalance';
 
 interface ChainBalanceListItemProps {
@@ -88,30 +87,30 @@ const TotalBalanceCard = ({
 const BalanceDetailsPage = ({
   params: paramsPromise,
 }: {
-  params: Promise<{ tokenId: string }>;
+  params: Promise<{ tokenSymbol: string }>;
 }) => {
   const params = use(paramsPromise);
-  const tokenId = params.tokenId;
+  const tokenSymbol = params.tokenSymbol;
 
-  useEffect(() => {
-    if (tokenId !== 'eth' && tokenId !== 'wsteth') {
-      throw new Error(`Unknown tokenId: ${tokenId}`);
-    }
-  }, [tokenId]);
+  const token = KNOWN_TOKENS.find(t => t.symbol === tokenSymbol);
 
   const balances = useTokenBalance({
-    token: tokenId === 'eth' ? ETH : WST_ETH,
+    token: token,
   });
+
+  if (!token) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center w-[350px] gap-y-[55px]">
       <BackButton />
       <TotalBalanceCard
         totalBalanceFormatted={balances?.totalBalanceFormatted ?? ''}
-        totalBalanceUsd={balances?.totalBalanceUsd ?? ''}
-        token={tokenId === 'wsteth' ? WST_ETH : ETH}
+        totalBalanceUsd={balances?.totalBalanceUsdFormatted ?? ''}
+        token={token}
       />
-      <div className="flex flex-col items-center justify-center border-[1px] border-border rounded-[16px] p-[16px] w-full">
+      <div className="flex flex-col items-center justify-center border-[1px] border-border rounded-[16px] px-[16px] w-full">
         {balances?.balances.map((balance, i) => (
           <ChainBalanceListItem
             chainId={balance.chain}

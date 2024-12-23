@@ -87,7 +87,7 @@ const CardHeader = ({
   onBalanceClick: () => void;
   inputToken: Token;
 }) => {
-  const { balanceFormatted } = useChainBalance({
+  const { balance } = useChainBalance({
     token: inputToken,
     chainId,
   });
@@ -120,9 +120,7 @@ const CardHeader = ({
             }
           }}
         >
-          <div className="text-muted-foreground">
-            {balanceFormatted} {inputToken.symbol}
-          </div>
+          <div className="text-muted-foreground">${balance?.balanceUsd}</div>
           <Wallet className="w-[17px] h-[17px] text-muted-foreground" />
         </div>
         <ChevronDownIcon
@@ -155,7 +153,7 @@ const SwapCard = ({ chainId }: SwapCardProps) => {
   const [amountInputText, setAmountInputText] = useState('');
   const { address } = useAccount();
 
-  const { balanceFormatted } = useChainBalance({
+  const { balance } = useChainBalance({
     token: inputToken,
     chainId,
   });
@@ -232,8 +230,8 @@ const SwapCard = ({ chainId }: SwapCardProps) => {
   };
 
   const onWalletBalanceClick = () => {
-    if (balanceFormatted !== undefined) {
-      setAmountInputText(balanceFormatted);
+    if (balance !== undefined) {
+      setAmountInputText(balance.balanceFormatted);
     }
   };
 

@@ -16,12 +16,12 @@ const useChainBalance = ({
     address: address || zeroAddress,
     set: TokenSet.ETH,
   });
-  const balanceFormatted = setBalances?.balances
+  const balance = setBalances?.balances
     .find(balance => balance.token.symbol === token.symbol)
-    ?.balances.find(balance => balance.chain === chainId)?.balanceFormatted;
+    ?.balances.find(balance => balance.chain === chainId);
 
   return {
-    balanceFormatted,
+    balance,
   };
 };
 

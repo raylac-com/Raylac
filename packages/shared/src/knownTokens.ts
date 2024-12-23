@@ -63,7 +63,7 @@ export const WST_ETH: Token = {
   decimals: 18,
   verified: true,
   logoURI: 'https://arbiscan.io/token/images/lido_32.png',
-  color: '#818384',
+  color: '#B2D7E5',
   addresses: [
     {
       chainId: mainnet.id,
