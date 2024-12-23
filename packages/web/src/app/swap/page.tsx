@@ -136,7 +136,7 @@ const SwapPage = () => {
         </div>
       </div>
       <div className="flex flex-row mt-[32px] items-center justify-center w-full">
-        <AddAddressButton onClick={() => {}} />
+        <AddAddressButton />
       </div>
     </div>
   );
