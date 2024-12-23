@@ -1,37 +1,24 @@
 import { zeroAddress } from 'viem';
 import { trpc } from '@/lib/trpc';
 import { useAccount } from 'wagmi';
-import { ETH } from '@raylac/shared';
+import { Token, TokenSet } from '@raylac/shared';
 
 const useChainBalance = ({
-  tokenId,
+  token,
   chainId,
 }: {
-  tokenId: string;
+  token: Token;
   chainId: number;
 }) => {
   const { address } = useAccount();
 
-  const { data: stakedBalance } = trpc.getStakedBalance.useQuery({
+  const { data: setBalances } = trpc.getSetBalances.useQuery({
     address: address || zeroAddress,
+    set: TokenSet.ETH,
   });
-
-  const { data: ethMultiChainBalance } = trpc.getETHBalance.useQuery(
-    {
-      address: address || zeroAddress,
-    },
-    {
-      enabled: !!address,
-    }
-  );
-
-  const balanceFormatted =
-    tokenId === ETH.symbol
-      ? ethMultiChainBalance?.balances.find(
-          balance => balance.chain === chainId
-        )?.balanceFormatted
-      : stakedBalance?.balances.find(balance => balance.chain === chainId)
-          ?.balanceFormatted;
+  const balanceFormatted = setBalances?.balances
+    .find(balance => balance.token.symbol === token.symbol)
+    ?.balances.find(balance => balance.chain === chainId)?.balanceFormatted;
 
   return {
     balanceFormatted,

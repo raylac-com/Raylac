@@ -88,7 +88,7 @@ const CardHeader = ({
   inputToken: Token;
 }) => {
   const { balanceFormatted } = useChainBalance({
-    tokenId: inputToken.symbol,
+    token: inputToken,
     chainId,
   });
 
@@ -156,7 +156,7 @@ const SwapCard = ({ chainId }: SwapCardProps) => {
   const { address } = useAccount();
 
   const { balanceFormatted } = useChainBalance({
-    tokenId: inputToken.symbol,
+    token: inputToken,
     chainId,
   });
 

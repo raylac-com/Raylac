@@ -437,6 +437,7 @@ export interface Token {
   decimals: number;
   logoURI: string;
   verified: boolean;
+  color?: string;
   addresses: {
     chainId: number;
     address: Hex;
@@ -470,4 +471,8 @@ export interface LidoApyResponse {
     address: string;
     chainId: number;
   };
+}
+
+export enum TokenSet {
+  ETH = 'eth',
 }

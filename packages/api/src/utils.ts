@@ -10,7 +10,7 @@ import {
 import * as chains from 'viem/chains';
 import { ALCHEMY_API_KEY } from './lib/envVars';
 import { Network } from 'alchemy-sdk';
-import { getChainFromId, Token } from '@raylac/shared';
+import { ETH, getChainFromId, Token, TokenSet, WST_ETH } from '@raylac/shared';
 
 export const getWebsocketClient = ({ chainId }: { chainId: number }) => {
   const chain = getChainFromId(chainId);
@@ -215,4 +215,13 @@ export const getTokenAddressOnChain = (token: Token, chainId: number): Hex => {
   }
 
   return address;
+};
+
+export const getTokensInSet = (set: TokenSet) => {
+  switch (set) {
+    case TokenSet.ETH:
+      return [ETH, WST_ETH];
+    default:
+      throw new Error(`Unknown token set: ${set}`);
+  }
 };

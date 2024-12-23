@@ -53,11 +53,7 @@ const useSwap = () => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.getStakedBalance),
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.getETHBalance),
+        queryKey: getQueryKey(trpc.getSetBalances),
       });
     },
   });

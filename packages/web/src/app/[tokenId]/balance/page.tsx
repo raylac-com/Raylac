@@ -1,14 +1,12 @@
 'use client';
-import { trpc } from '@/lib/trpc';
 import { getChainIcon, getTokenLogoURI } from '@/lib/utils';
 import Image from 'next/image';
-import { Hex } from 'viem';
-import { useAccount } from 'wagmi';
 import BackButton from '@/components/BackButton/BackButton';
 import { useEffect } from 'react';
 import { use } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ETH, Token, WST_ETH } from '@raylac/shared';
+import useTokenBalance from '@/hooks/useTokenBalance';
 
 interface ChainBalanceListItemProps {
   chainId: number;
@@ -92,26 +90,6 @@ const BalanceDetailsPage = ({
 }: {
   params: Promise<{ tokenId: string }>;
 }) => {
-  const { address } = useAccount();
-
-  const { data: ethBalance } = trpc.getETHBalance.useQuery(
-    {
-      address: address as Hex,
-    },
-    {
-      enabled: !!address,
-    }
-  );
-
-  const { data: stakedEthBalance } = trpc.getStakedBalance.useQuery(
-    {
-      address: address as Hex,
-    },
-    {
-      enabled: !!address,
-    }
-  );
-
   const params = use(paramsPromise);
   const tokenId = params.tokenId;
 
@@ -121,25 +99,26 @@ const BalanceDetailsPage = ({
     }
   }, [tokenId]);
 
-  const balances =
-    tokenId === 'eth' ? ethBalance?.balances : stakedEthBalance?.balances;
+  const balances = useTokenBalance({
+    token: tokenId === 'eth' ? ETH : WST_ETH,
+  });
 
   return (
     <div className="flex flex-col items-center justify-center w-[350px] gap-y-[55px]">
       <BackButton />
       <TotalBalanceCard
-        totalBalanceFormatted={stakedEthBalance?.totalBalanceFormatted ?? ''}
-        totalBalanceUsd={stakedEthBalance?.totalBalanceUsd ?? ''}
+        totalBalanceFormatted={balances?.totalBalanceFormatted ?? ''}
+        totalBalanceUsd={balances?.totalBalanceUsd ?? ''}
         token={tokenId === 'wsteth' ? WST_ETH : ETH}
       />
       <div className="flex flex-col items-center justify-center border-[1px] border-border rounded-[16px] p-[16px] w-full">
-        {balances?.map((balance, i) => (
+        {balances?.balances.map((balance, i) => (
           <ChainBalanceListItem
             chainId={balance.chain}
             balanceFormatted={balance.balanceFormatted}
             balanceUsd={balance.balanceUsd}
             key={i}
-            isLast={i === balances.length - 1}
+            isLast={i === balances.balances.length - 1}
           />
         ))}
       </div>

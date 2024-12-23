@@ -9,13 +9,14 @@ import {
   zksync,
 } from 'viem/chains';
 
-export const ETH = {
+export const ETH: Token = {
   symbol: 'ETH',
   name: 'Ethereum',
   decimals: 18,
   verified: true,
   logoURI:
     'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/128/color/eth.png',
+  color: '#627EEA',
   addresses: supportedChains
     .filter(chain => chain.id !== polygon.id)
     .map(chain => ({
@@ -24,11 +25,12 @@ export const ETH = {
     })),
 };
 
-export const USDC = {
+export const USDC: Token = {
   symbol: 'USDC',
   name: 'USD Coin',
   decimals: 6,
   verified: true,
+  color: '#627EEA',
   logoURI:
     'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389',
   addresses: [
@@ -55,12 +57,13 @@ export const USDC = {
   ],
 };
 
-export const WST_ETH = {
+export const WST_ETH: Token = {
   symbol: 'wstETH',
   name: 'Staked ETH',
   decimals: 18,
   verified: true,
   logoURI: 'https://arbiscan.io/token/images/lido_32.png',
+  color: '#818384',
   addresses: [
     {
       chainId: mainnet.id,

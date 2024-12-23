@@ -1,62 +1,81 @@
 'use client';
 import PageTitle from '@/components/PageTitle/PageTitle';
-import Separator from '@/components/Separator';
 import SwapCard from '@/components/SwapCard/SwapCard';
 import { trpc } from '@/lib/trpc';
-import { getTokenLogoURI } from '@/lib/utils';
-import { ETH, Token } from '@raylac/shared';
+import { ETH, Token, TokenSet } from '@raylac/shared';
 import { WST_ETH } from '@raylac/shared';
 import { ArrowLeftRight, Wallet } from 'lucide-react';
 import Image from 'next/image';
 import { zeroAddress } from 'viem';
 import { useAccount } from 'wagmi';
+import { PieChart, Pie, Cell, Label } from 'recharts';
 
-const BalanceCard = ({
-  token,
-  balanceFormatted,
-  balanceUsd,
-  apy,
+const BalanceChart = ({
+  setBalances,
 }: {
-  token: Token;
-  balanceFormatted: string | undefined;
-  balanceUsd: string | undefined;
-  apy?: number;
+  setBalances: {
+    totalBalanceUsd: number;
+    totalBalanceUsdFormatted: string;
+    balances: {
+      totalBalanceUsd: string;
+      totalBalanceUsdFormatted: string;
+      token: Token;
+      balances: {
+        balance: string;
+        balanceFormatted: string;
+        balanceUsd: string;
+        chain: number;
+      }[];
+    }[];
+  };
 }) => {
+  const data = setBalances.balances.map(balance => ({
+    name: balance.token.symbol,
+    value: Number(balance.totalBalanceUsd),
+    color: balance.token.color,
+  }));
+
   return (
-    <div className="flex flex-row items-center justify-between w-full p-[16px]">
-      <div className="flex flex-col gap-y-[6px]">
-        <div className="flex flex-row items-center gap-x-[6px]">
-          <Image
-            src={getTokenLogoURI(token)}
-            alt={token.name}
-            width={24}
-            height={24}
-          />
-          <div>{token.symbol === 'ETH' ? 'ETH' : 'Staked ETH'}</div>
-        </div>
-        <div className="text-border">{apy ? `APR ${apy}%` : ''}</div>
-      </div>
-      <div className="flex flex-col items-end gap-y-[2px]">
-        <div className="text-lg">
-          {balanceFormatted} {token.symbol}
-        </div>
-        <div className="text-border">${balanceUsd}</div>
-      </div>
-    </div>
+    <PieChart width={420} height={300}>
+      <Pie
+        data={data}
+        innerRadius={60}
+        outerRadius={80}
+        fill="#8884d8"
+        paddingAngle={3}
+        dataKey="value"
+      >
+        {data.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={entry.color} />
+        ))}
+        <Label
+          value={`$${setBalances.totalBalanceUsdFormatted}`}
+          position="center"
+          fontSize={16}
+          fill="white"
+          className="text-lg font-bold"
+        />
+      </Pie>
+      <text x={210} y={270} textAnchor="middle" fill="white">
+        {data.map((entry, index) => (
+          <tspan key={index} x={160 + index * 85} y={270}>
+            <tspan fill={entry.color}>■</tspan>
+            <tspan fill="white">{` ${entry.name}`}</tspan>
+          </tspan>
+        ))}
+      </text>
+    </PieChart>
   );
 };
 
 const SwapPage = () => {
   const { address } = useAccount();
 
-  const { data: lidoApy } = trpc.getLidoApy.useQuery();
+  //  const { data: lidoApy } = trpc.getLidoApy.useQuery();
 
-  const { data: stakedBalance } = trpc.getStakedBalance.useQuery({
-    address: address || zeroAddress,
-  });
-
-  const { data: ethMultiChainBalance } = trpc.getETHBalance.useQuery(
+  const { data: setBalances } = trpc.getSetBalances.useQuery(
     {
+      set: TokenSet.ETH,
       address: address || zeroAddress,
     },
     {
@@ -64,9 +83,13 @@ const SwapPage = () => {
     }
   );
 
-  if (!ethMultiChainBalance) {
+  if (!setBalances) {
     return <div></div>;
   }
+
+  const ethMultiChainBalance = setBalances.balances.find(
+    balance => balance.token.symbol === 'ETH'
+  );
 
   return (
     <div className="flex flex-col items-center w-[420px] pb-[220px]">
@@ -93,20 +116,7 @@ const SwapPage = () => {
           <Wallet className="w-[20px] h-[20px] text-border" />
           <div className="text-border">Balance</div>
         </div>
-        <div className="w-full flex flex-col border-[1px] border-border rounded-[16px]">
-          <BalanceCard
-            token={WST_ETH}
-            balanceFormatted={stakedBalance?.totalBalanceFormatted}
-            balanceUsd={stakedBalance?.totalBalanceUsd}
-            apy={lidoApy}
-          />
-          <Separator />
-          <BalanceCard
-            token={ETH}
-            balanceFormatted={ethMultiChainBalance?.totalBalanceFormatted}
-            balanceUsd={ethMultiChainBalance?.totalBalanceUsd}
-          />
-        </div>
+        <BalanceChart setBalances={setBalances} />
       </div>
       <div className="mt-[32px] flex flex-col gap-y-[8px] items-center justify-center w-full">
         <div className="flex flex-row gap-x-[6px] items-center w-full">
@@ -114,7 +124,7 @@ const SwapPage = () => {
           <div className="text-border">Swap</div>
         </div>
         <div className="flex flex-col gap-y-[16px] items-center justify-center w-full">
-          {ethMultiChainBalance.balances.map((balance, i) => (
+          {ethMultiChainBalance?.balances.map((balance, i) => (
             <SwapCard
               chainId={balance.chain}
               key={i}

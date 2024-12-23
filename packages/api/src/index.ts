@@ -3,7 +3,9 @@ import { z } from 'zod';
 import { publicProcedure, router, createCallerFactory } from './trpc';
 import { createContext } from './context';
 import { webcrypto } from 'node:crypto';
-import getTokenBalances from './api/getTokenBalances/getTokenBalances';
+import getTokenBalances, {
+  getETHBalance,
+} from './api/getTokenBalances/getTokenBalances';
 import getTokenBalancesMock from './api/getTokenBalances/getTokenBalances.mock';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { Hex } from 'viem';
@@ -17,6 +19,7 @@ import {
   SendTransactionRequestBody,
   SubmitSingleChainSwapRequestBody,
   SubmitSwapRequestBody,
+  TokenSet,
 } from '@raylac/shared';
 import getSwapQuote from './api/getSwapQuote/getSwapQuote';
 import { ed, logger, st } from '@raylac/shared-backend';
@@ -28,11 +31,10 @@ import submitSwap from './api/submitSwap/submitSwap';
 import sendTransaction from './api/sendTransaction/sendTransaction';
 import buildMultiChainSend from './api/buildMultichainSend/buildMultichainSend';
 import getHistory from './api/getHistory/getHistory';
-import getStakedBalance from './api/getStakedBalance/getStakedBalance';
-import getETHBalance from './api/getETHBalance/getETHBalance';
 import getSingleChainSwapQuote from './api/getSingleChainSwapQuote/getSingleChainSwapQuote';
 import submitSingleChainSwap from './api/submitSingleChainSwap/submitSingleChainSwap';
 import getLidoApy from './api/getLidoApy/getLidoApy';
+import getSetBalances from './api/getSetBalances/getSetBalances';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -76,16 +78,22 @@ export const appRouter = router({
           });
     }),
 
-  getStakedBalance: publicProcedure
-    .input(z.object({ address: z.string() }))
+  getETHBalance: publicProcedure
+    .input(z.object({ address: z.string(), chainId: z.number() }))
     .query(async ({ input }) => {
-      return getStakedBalance({ address: input.address as Hex });
+      return getETHBalance({
+        address: input.address as Hex,
+        chainId: input.chainId,
+      });
     }),
 
-  getETHBalance: publicProcedure
-    .input(z.object({ address: z.string() }))
+  getSetBalances: publicProcedure
+    .input(z.object({ set: z.nativeEnum(TokenSet), address: z.string() }))
     .query(async ({ input }) => {
-      return getETHBalance({ address: input.address as Hex });
+      return getSetBalances({
+        set: input.set as TokenSet,
+        address: input.address as Hex,
+      });
     }),
 
   getLidoApy: publicProcedure.query(async () => {
