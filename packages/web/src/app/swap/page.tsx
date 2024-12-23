@@ -1,4 +1,5 @@
 'use client';
+import AddAddressButton from '@/components/AddAddressButton/AddAddressButton';
 import SwapCard from '@/components/SwapCard/SwapCard';
 import useTokenBalance from '@/hooks/useTokenBalance';
 import { trpc } from '@/lib/trpc';
@@ -133,6 +134,9 @@ const SwapPage = () => {
             </div>
           ))}
         </div>
+      </div>
+      <div className="flex flex-row mt-[32px] items-center justify-center w-full">
+        <AddAddressButton onClick={() => {}} />
       </div>
     </div>
   );

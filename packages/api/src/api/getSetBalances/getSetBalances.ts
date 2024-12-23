@@ -109,11 +109,15 @@ const getSetBalances = async ({
     new BigNumber(0)
   );
 
+  const totalStakedBalanceUsd = tokenBalances
+    .filter(tb => tb.token.symbol === 'stETH' || tb.token.symbol === 'wstETH')
+    .reduce((acc, curr) => acc.plus(curr.totalBalanceUsd), new BigNumber(0));
+
   const totalBalanceUsdFormatted = formatUsdValue(totalBalanceUsd);
   const totalBalanceUsdShortened = shortenUsdValue(totalBalanceUsd);
 
   const lidoApr = await getLidoApy();
-  const apr = totalBalanceUsd.times(new BigNumber(lidoApr).div(100));
+  const apr = totalStakedBalanceUsd.times(new BigNumber(lidoApr).div(100));
 
   return {
     aprUsdFormatted: formatUsdValue(apr),
