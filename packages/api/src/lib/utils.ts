@@ -85,7 +85,7 @@ export const getTokenMultiChainBalance = async ({
     throw new Error(`${token.symbol} price not found`);
   }
 
-  const balances = (
+  const chainBalances = (
     await Promise.all(
       token.addresses.map(async contractAddress => {
         const balance =
@@ -116,9 +116,11 @@ export const getTokenMultiChainBalance = async ({
         };
       })
     )
-  ).filter(balance => BigInt(balance.balance) > BigInt(0));
+  )
+    .filter(balance => BigInt(balance.balance) > BigInt(0))
+    .sort((a, b) => (BigInt(b.balance) > BigInt(a.balance) ? 1 : -1));
 
-  const totalBalance = balances.reduce(
+  const totalBalance = chainBalances.reduce(
     (acc, curr) => acc + BigInt(curr.balance),
     BigInt(0)
   );
@@ -135,7 +137,8 @@ export const getTokenMultiChainBalance = async ({
   const totalBalanceUsdFormatted = formatUsdValue(totalBalanceUsd);
 
   return {
-    balances,
+    chainBalances,
+    totalBalance,
     totalBalanceFormatted,
     totalBalanceUsd: totalBalanceUsd,
     totalBalanceUsdFormatted,

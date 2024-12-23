@@ -14,7 +14,6 @@ import { MixpanelProvider } from '@/context/MixpanelContext';
 import { trpc } from '@/lib/trpc';
 import { httpBatchLink } from '@trpc/client';
 import Header from './Header/Header';
-import { useIsMobile } from '@/hooks/useIsMobile';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -76,17 +75,6 @@ const Provider = ({ children }: { children: React.ReactNode }) => {
       }),
     ],
   });
-
-  const isMobile = useIsMobile();
-
-  if (isMobile) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen font-bold">
-        <p>Please use a desktop browser</p>
-        <p>to access this app</p>
-      </div>
-    );
-  }
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>

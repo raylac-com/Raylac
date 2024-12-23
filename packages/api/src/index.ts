@@ -89,11 +89,13 @@ export const appRouter = router({
     }),
 
   getSetBalances: publicProcedure
-    .input(z.object({ set: z.nativeEnum(TokenSet), address: z.string() }))
+    .input(
+      z.object({ set: z.nativeEnum(TokenSet), addresses: z.array(z.string()) })
+    )
     .query(async ({ input }) => {
       return getSetBalances({
         set: input.set as TokenSet,
-        address: input.address as Hex,
+        addresses: input.addresses as Hex[],
       });
     }),
 

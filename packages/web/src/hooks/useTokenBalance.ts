@@ -1,19 +1,23 @@
-import { zeroAddress } from 'viem';
 import { trpc } from '@/lib/trpc';
-import { useAccount } from 'wagmi';
 import { Token, TokenSet } from '@raylac/shared';
+import useAddresses from './useAddresses';
 
 const useTokenBalance = ({ token }: { token?: Token }) => {
-  const { address } = useAccount();
+  const { data: addresses } = useAddresses();
 
-  const { data: setBalances } = trpc.getSetBalances.useQuery({
-    address: address || zeroAddress,
-    set: TokenSet.ETH,
-  });
+  const { data: setBalances } = trpc.getSetBalances.useQuery(
+    {
+      addresses: addresses ?? [],
+      set: TokenSet.ETH,
+    },
+    {
+      enabled: addresses !== undefined && addresses.length > 0,
+    }
+  );
 
   const balances =
     token && setBalances
-      ? setBalances.balances.find(
+      ? setBalances.tokenBalances.find(
           balance => balance.token.symbol === token.symbol
         )
       : undefined;

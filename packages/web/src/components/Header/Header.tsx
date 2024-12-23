@@ -1,4 +1,3 @@
-import ConnectWalletButton from '../ConnectWalletButton';
 import Link from 'next/link';
 const Header = () => {
   return (
@@ -6,9 +5,6 @@ const Header = () => {
       <Link href="/swap">
         <div className="text-border cursor-pointer">Raylac</div>
       </Link>
-      <div>
-        <ConnectWalletButton />
-      </div>
     </div>
   );
 };

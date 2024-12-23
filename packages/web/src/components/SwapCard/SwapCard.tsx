@@ -1,24 +1,17 @@
 'use client';
 import useSwap from '@/hooks/useSwap';
 import { trpc } from '@/lib/trpc';
-import { cn, getChainIcon, getTokenLogoURI } from '@/lib/utils';
+import { cn, getChainIcon, getTokenLogoURI, shortenAddress } from '@/lib/utils';
 import { AnimatePresence } from 'motion/react';
-import {
-  ETH,
-  getChainFromId,
-  GetSwapQuoteRequestBody,
-  Token,
-  WST_ETH,
-} from '@raylac/shared';
+import { getChainFromId, GetSwapQuoteRequestBody, Token } from '@raylac/shared';
 import { ArrowUpDown, ChevronDownIcon, Loader2, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useState } from 'react';
-import { parseEther } from 'viem';
+import { getAddress, Hex, parseEther, zeroAddress } from 'viem';
 import { useAccount, useChainId, useSwitchChain } from 'wagmi';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import { Skeleton } from '../ui/skeleton';
 import Image from 'next/image';
-import useChainBalance from '@/hooks/useChainBalance';
 import { toast } from '@/hooks/use-toast';
 
 const SwapButton = ({
@@ -26,11 +19,13 @@ const SwapButton = ({
   onClick,
   outputToken,
   isSwapping,
+  needsSwitchToAddress,
 }: {
   chainId: number;
   onClick: () => void;
   inputToken: Token;
   outputToken: Token;
+  needsSwitchToAddress: Hex | null;
   isSwapping: boolean;
 }) => {
   const connectedChainId = useChainId();
@@ -41,12 +36,17 @@ const SwapButton = ({
 
   return (
     <motion.div
-      whileHover={{ scale: 1.025 }}
-      whileTap={{ scale: 0.975 }}
+      whileHover={{ scale: needsSwitchToAddress ? 1 : 1.025 }}
+      whileTap={{ scale: needsSwitchToAddress ? 1 : 0.975 }}
       className={cn(
-        'bg-foreground rounded-[32px] h-[46px] flex flex-row items-center justify-center cursor-pointer'
+        'bg-foreground rounded-[32px] h-[46px] flex flex-row items-center justify-center cursor-pointer',
+        needsSwitchToAddress ? 'opacity-50' : ''
       )}
       onClick={async () => {
+        if (needsSwitchToAddress) {
+          return;
+        }
+
         if (needsSwitchChain) {
           await switchChainAsync({ chainId });
         }
@@ -57,6 +57,13 @@ const SwapButton = ({
       {isSwapping ? (
         <div className="flex flex-row items-center gap-x-[8px]">
           <Loader2 className="w-[20px] h-[20px] text-bg2 animate-spin" />
+        </div>
+      ) : needsSwitchToAddress ? (
+        <div className="flex flex-row items-center gap-x-[8px]">
+          <div className="text-bg2 font-bold">Switch to</div>
+          <div className="text-bg2 font-bold">
+            {shortenAddress(needsSwitchToAddress)}
+          </div>
         </div>
       ) : (
         <div className="flex flex-row items-center gap-x-[8px]">
@@ -79,19 +86,17 @@ const CardHeader = ({
   isOpen,
   onOpenChange,
   onBalanceClick,
-  inputToken,
+  fromTokenBalance,
 }: {
   chainId: number;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onBalanceClick: () => void;
-  inputToken: Token;
+  fromTokenBalance: {
+    balanceFormatted: string;
+    balanceUsd: string;
+  };
 }) => {
-  const { balance } = useChainBalance({
-    token: inputToken,
-    chainId,
-  });
-
   return (
     <div
       className="flex flex-row items-center justify-between gap-x-[12px] cursor-pointer"
@@ -120,7 +125,9 @@ const CardHeader = ({
             }
           }}
         >
-          <div className="text-muted-foreground">${balance?.balanceUsd}</div>
+          <div className="text-muted-foreground">
+            ${fromTokenBalance?.balanceUsd}
+          </div>
           <Wallet className="w-[17px] h-[17px] text-muted-foreground" />
         </div>
         <ChevronDownIcon
@@ -142,21 +149,28 @@ interface SwapCardProps {
   chainId: number;
   fromToken: Token;
   toToken: Token;
+  fromTokenBalance: {
+    balanceFormatted: string;
+    balanceUsd: string;
+  };
+  address: Hex;
 }
 
-const SwapCard = ({ chainId }: SwapCardProps) => {
+const SwapCard = ({
+  chainId,
+  fromToken,
+  toToken,
+  fromTokenBalance,
+  address,
+}: SwapCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const [inputToken, setInputToken] = useState<Token>(ETH);
-  const [outputToken, setOutputToken] = useState<Token>(WST_ETH);
+  const [inputToken, setInputToken] = useState<Token>(fromToken);
+  const [outputToken, setOutputToken] = useState<Token>(toToken);
 
   const [amountInputText, setAmountInputText] = useState('');
-  const { address } = useAccount();
 
-  const { balance } = useChainBalance({
-    token: inputToken,
-    chainId,
-  });
+  const account = useAccount();
 
   const {
     mutateAsync: getSingleChainSwapQuote,
@@ -170,11 +184,7 @@ const SwapCard = ({ chainId }: SwapCardProps) => {
   const { mutateAsync: signAndSubmitSwap, isPending: isSwapping } = useSwap();
 
   useEffect(() => {
-    if (
-      amountInputText &&
-      address &&
-      !containsNonNumericCharacters(amountInputText)
-    ) {
+    if (amountInputText && !containsNonNumericCharacters(amountInputText)) {
       const amount = parseEther(amountInputText);
 
       if (amount === BigInt(0)) {
@@ -191,10 +201,13 @@ const SwapCard = ({ chainId }: SwapCardProps) => {
 
       getSingleChainSwapQuote(getSwapQuoteRequestBody);
     }
-  }, [amountInputText, address, chainId, inputToken, outputToken]);
+  }, [amountInputText, chainId, inputToken, outputToken]);
 
   const onConvertClick = useCallback(async () => {
-    if (quote) {
+    if (
+      quote &&
+      getAddress(account.address ?? zeroAddress) === getAddress(address)
+    ) {
       await signAndSubmitSwap({
         swapSteps: quote.swapSteps,
       });
@@ -206,7 +219,7 @@ const SwapCard = ({ chainId }: SwapCardProps) => {
         title: 'Swap successful',
       });
     }
-  }, [quote, signAndSubmitSwap]);
+  }, [quote, signAndSubmitSwap, account]);
 
   const onChangeDirectionClick = () => {
     if (amountInputText && address) {
@@ -230,14 +243,19 @@ const SwapCard = ({ chainId }: SwapCardProps) => {
   };
 
   const onWalletBalanceClick = () => {
-    if (balance !== undefined) {
-      setAmountInputText(balance.balanceFormatted);
+    if (fromTokenBalance !== undefined) {
+      setAmountInputText(fromTokenBalance.balanceFormatted);
     }
   };
 
   const amountInUsd = quote?.amountInUsd || '0';
   const amountOutUsd = quote?.amountOutUsd || '0';
   const amountOutFormatted = quote?.amountOutFormatted || '0';
+
+  const needsSwitchToAddress =
+    getAddress(account.address ?? zeroAddress) !== getAddress(address)
+      ? getAddress(address)
+      : null;
 
   return (
     <div className="flex flex-col gap-y-[48px] px-[22px] py-[16px] bg-bg2 rounded-[16px] w-full hover:bg-bg3">
@@ -246,7 +264,7 @@ const SwapCard = ({ chainId }: SwapCardProps) => {
         isOpen={isOpen}
         onOpenChange={setIsOpen}
         onBalanceClick={onWalletBalanceClick}
-        inputToken={inputToken}
+        fromTokenBalance={fromTokenBalance}
       />
       <AnimatePresence>
         {isOpen && (
@@ -319,6 +337,7 @@ const SwapCard = ({ chainId }: SwapCardProps) => {
               inputToken={inputToken}
               outputToken={outputToken}
               isSwapping={isSwapping}
+              needsSwitchToAddress={needsSwitchToAddress}
             />
           </motion.div>
         )}

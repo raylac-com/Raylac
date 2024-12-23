@@ -1,5 +1,5 @@
 'use client';
-import { getChainIcon, getTokenLogoURI } from '@/lib/utils';
+import { getChainIcon, getTokenLogoURI, shortenAddress } from '@/lib/utils';
 import Image from 'next/image';
 import BackButton from '@/components/BackButton/BackButton';
 import { use } from 'react';
@@ -12,6 +12,7 @@ interface ChainBalanceListItemProps {
   balanceFormatted: string;
   balanceUsd: string;
   isLast: boolean;
+  token: Token;
 }
 
 const ChainBalanceListItem = ({
@@ -19,6 +20,7 @@ const ChainBalanceListItem = ({
   balanceFormatted,
   balanceUsd,
   isLast,
+  token,
 }: ChainBalanceListItemProps) => {
   return (
     <div
@@ -33,7 +35,9 @@ const ChainBalanceListItem = ({
           width={24}
           height={24}
         />
-        <div className="text-border">{balanceFormatted} ETH</div>
+        <div className="text-border">
+          {balanceFormatted} {token.symbol}
+        </div>
       </div>
       <div>${balanceUsd}</div>
     </div>
@@ -94,7 +98,7 @@ const BalanceDetailsPage = ({
 
   const token = KNOWN_TOKENS.find(t => t.symbol === tokenSymbol);
 
-  const balances = useTokenBalance({
+  const tokenBalance = useTokenBalance({
     token: token,
   });
 
@@ -106,21 +110,33 @@ const BalanceDetailsPage = ({
     <div className="flex flex-col items-center justify-center w-[350px] gap-y-[55px]">
       <BackButton />
       <TotalBalanceCard
-        totalBalanceFormatted={balances?.totalBalanceFormatted ?? ''}
-        totalBalanceUsd={balances?.totalBalanceUsdFormatted ?? ''}
+        totalBalanceFormatted={tokenBalance?.totalBalanceFormatted ?? ''}
+        totalBalanceUsd={tokenBalance?.totalBalanceUsdFormatted ?? ''}
         token={token}
       />
-      <div className="flex flex-col items-center justify-center border-[1px] border-border rounded-[16px] px-[16px] w-full">
-        {balances?.balances.map((balance, i) => (
-          <ChainBalanceListItem
-            chainId={balance.chain}
-            balanceFormatted={balance.balanceFormatted}
-            balanceUsd={balance.balanceUsd}
-            key={i}
-            isLast={i === balances.balances.length - 1}
-          />
-        ))}
-      </div>
+      {tokenBalance?.addressBalances.map((balance, index) => (
+        <div className="flex flex-col gap-y-[8px] w-full" key={index}>
+          {balance.chainBalances?.length ? (
+            <div className="text-border">{shortenAddress(balance.address)}</div>
+          ) : (
+            <></>
+          )}
+          {balance.chainBalances && balance.chainBalances.length > 0 && (
+            <div className="flex flex-col items-center justify-center border-[1px] border-border rounded-[16px] px-[16px] w-full">
+              {balance.chainBalances.map((chainBalance, index) => (
+                <ChainBalanceListItem
+                  key={index}
+                  chainId={chainBalance.chain}
+                  balanceFormatted={chainBalance.balanceFormatted}
+                  balanceUsd={chainBalance.balanceUsd}
+                  isLast={index === (balance.chainBalances?.length ?? 0) - 1}
+                  token={token}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 };

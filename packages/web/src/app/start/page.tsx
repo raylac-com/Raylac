@@ -2,10 +2,9 @@
 import ConnectWalletButton from '@/components/ConnectWalletButton';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useAccount } from 'wagmi';
 import { motion } from 'framer-motion';
-import { Hex, isAddress } from 'viem';
-import { saveAddress } from '@/lib/utils';
+import useAddresses from '@/hooks/useAddresses';
+import { isAddress } from 'viem';
 
 const _WatchModeButton = () => {
   const router = useRouter();
@@ -24,16 +23,16 @@ const _WatchModeButton = () => {
 
 const ConnectWalletPage = () => {
   const router = useRouter();
-  const { isConnected, address } = useAccount();
   const [showAddressInput, setShowAddressInput] = useState(false);
   const [inputText, setInputText] = useState('');
 
+  const { data: addresses } = useAddresses();
+
   useEffect(() => {
-    if (isConnected && address) {
-      saveAddress(address as Hex);
+    if (addresses !== undefined && addresses.length > 0) {
       router.push('/');
     }
-  }, [isConnected, router, address]);
+  }, [addresses]);
 
   useEffect(() => {
     if (inputText && isAddress(inputText)) {

@@ -141,7 +141,7 @@ export const saveAddress = (address: Hex) => {
 export const getAddresses = (): Hex[] => {
   const addresses = window.localStorage.getItem(addressesKey);
   if (addresses) {
-    return JSON.parse(addresses);
+    return Array.from(new Set(JSON.parse(addresses)));
   }
   return [];
 };

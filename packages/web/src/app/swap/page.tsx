@@ -1,14 +1,13 @@
 'use client';
 import SwapCard from '@/components/SwapCard/SwapCard';
+import useTokenBalance from '@/hooks/useTokenBalance';
 import { trpc } from '@/lib/trpc';
-import { getTokenLogoURI } from '@/lib/utils';
+import { getTokenLogoURI, shortenAddress } from '@/lib/utils';
 import { ETH, Token, TokenSet } from '@raylac/shared';
 import { WST_ETH } from '@raylac/shared';
 import { ArrowLeftRight, ArrowRightLeft } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
-import { zeroAddress } from 'viem';
-import { useAccount } from 'wagmi';
 
 const SelectableToken = ({
   token,
@@ -80,33 +79,17 @@ const SwapToken = ({
 };
 
 const SwapPage = () => {
-  const { address } = useAccount();
-
   const [inputToken, setInputToken] = useState<Token>(ETH);
   const [outputToken, setOutputToken] = useState<Token>(WST_ETH);
 
-  const { data: setBalances } = trpc.getSetBalances.useQuery(
-    {
-      set: TokenSet.ETH,
-      address: address || zeroAddress,
-    },
-    {
-      enabled: !!address,
-    }
-  );
-
-  if (!setBalances) {
-    return <div></div>;
-  }
+  const inputTokenBalances = useTokenBalance({
+    token: inputToken,
+  });
 
   const onChangeDirectionClick = () => {
     setInputToken(outputToken);
     setOutputToken(inputToken);
   };
-
-  const ethMultiChainBalance = setBalances.balances.find(
-    balance => balance.token.symbol === 'ETH'
-  );
 
   return (
     <div className="flex flex-col items-center w-[420px] pb-[220px]">
@@ -123,14 +106,31 @@ const SwapPage = () => {
           />
           <SwapToken token={outputToken} setToken={setOutputToken} />
         </div>
-        <div className="flex flex-col gap-y-[16px] items-center justify-center w-full">
-          {ethMultiChainBalance?.balances.map((balance, i) => (
-            <SwapCard
-              chainId={balance.chain}
-              key={i}
-              fromToken={ETH}
-              toToken={WST_ETH}
-            />
+        <div className="flex flex-col gap-y-[48px] items-center justify-center w-full">
+          {inputTokenBalances?.addressBalances.map(balance => (
+            <div
+              className="flex flex-col gap-y-[8px] w-full"
+              key={balance.address}
+            >
+              <div className="text-border">
+                {shortenAddress(balance.address)}
+              </div>
+              <div className="flex flex-col gap-y-[12px] w-full">
+                {balance.chainBalances?.map((chainBalance, index) => (
+                  <SwapCard
+                    key={`${balance.address}-${index}`}
+                    address={balance.address}
+                    fromToken={inputToken}
+                    toToken={outputToken}
+                    chainId={chainBalance.chain}
+                    fromTokenBalance={{
+                      balanceFormatted: chainBalance.balanceFormatted,
+                      balanceUsd: chainBalance.balanceUsd,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </div>

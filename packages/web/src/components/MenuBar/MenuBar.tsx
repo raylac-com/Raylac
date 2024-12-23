@@ -1,7 +1,7 @@
 'use client';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { cn } from '@/lib/utils';
-import { ArrowLeftRight, Home } from 'lucide-react';
+import { ArrowLeftRight, Home, List } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -41,12 +41,17 @@ const MenuBar = () => {
   }
 
   return (
-    <div className="fixed left-[20vw] w-[60px] h-[460px] py-[172px] top-[152px] flex flex-col items-center justify-between bg-bg2  rounded-[8px]">
+    <div className="fixed left-[20vw] w-[60px] h-[460px] py-[137px] top-[152px] flex flex-col items-center justify-between bg-bg2  rounded-[8px]">
       <MenuItem icon={<Home />} href="/" isCurrent={pathname === '/'} />
       <MenuItem
         icon={<ArrowLeftRight />}
         href="/swap"
         isCurrent={pathname === '/swap'}
+      />
+      <MenuItem
+        icon={<List />}
+        href="/addresses"
+        isCurrent={pathname === '/addresses'}
       />
     </div>
   );

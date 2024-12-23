@@ -5,34 +5,25 @@ import { Token } from '@raylac/shared';
 import { Wallet } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { zeroAddress } from 'viem';
-import { useAccount } from 'wagmi';
 import { PieChart, Pie, Cell, Label } from 'recharts';
 import Image from 'next/image';
 import { getTokenLogoURI } from '@/lib/utils';
 import Separator from '@/components/Separator';
 import { useState } from 'react';
+import useAddresses from '@/hooks/useAddresses';
 
 const BalanceChart = ({
-  setBalances,
+  tokenBalances,
+  totalBalanceUsdFormatted,
 }: {
-  setBalances: {
-    totalBalanceUsd: number;
+  tokenBalances: {
+    totalBalanceUsd: string;
     totalBalanceUsdFormatted: string;
-    balances: {
-      totalBalanceUsd: string;
-      totalBalanceUsdFormatted: string;
-      token: Token;
-      balances: {
-        balance: string;
-        balanceFormatted: string;
-        balanceUsd: string;
-        chain: number;
-      }[];
-    }[];
-  };
+    token: Token;
+  }[];
+  totalBalanceUsdFormatted: string;
 }) => {
-  const data = setBalances.balances.map(balance => ({
+  const data = tokenBalances.map(balance => ({
     name: balance.token.symbol,
     value: Number(balance.totalBalanceUsd),
     color: balance.token.color,
@@ -41,8 +32,7 @@ const BalanceChart = ({
   return (
     <PieChart width={450} height={280}>
       <Pie
-        isAnimationActive
-        animationDuration={1000}
+        isAnimationActive={false}
         data={data}
         innerRadius={70}
         outerRadius={90}
@@ -55,7 +45,7 @@ const BalanceChart = ({
           <Cell key={`cell-${index}`} fill={entry.color} />
         ))}
         <Label
-          value={`$${setBalances.totalBalanceUsdFormatted}`}
+          value={`$${totalBalanceUsdFormatted}`}
           position="center"
           fontSize={16}
           fill="white"
@@ -115,21 +105,21 @@ const BalanceListItem = ({
 
 export default function Home() {
   const router = useRouter();
-  const { isConnecting, address } = useAccount();
+  const { data: addresses } = useAddresses();
 
   useEffect(() => {
-    if (isConnecting === false && !address) {
+    if (addresses !== undefined && addresses.length === 0) {
       router.push('/start');
     }
-  }, [isConnecting, router, address]);
+  }, [addresses]);
 
   const { data: setBalances } = trpc.getSetBalances.useQuery(
     {
       set: TokenSet.ETH,
-      address: address || zeroAddress,
+      addresses: addresses ?? [],
     },
     {
-      enabled: !!address,
+      enabled: addresses !== undefined && addresses.length > 0,
     }
   );
 
@@ -144,23 +134,26 @@ export default function Home() {
           <Wallet className="w-[20px] h-[20px] text-border" />
           <div className="text-border">Balance</div>
         </div>
-        <BalanceChart setBalances={setBalances} />
+        <BalanceChart
+          tokenBalances={setBalances.tokenBalances}
+          totalBalanceUsdFormatted={setBalances.totalBalanceUsdFormatted}
+        />
       </div>
       <div className="flex flex-col items-center justify-center border-[1px] border-border gap-y-[12px] rounded-[16px] p-[16px] w-full">
-        {setBalances.balances.map((balance, index) => (
+        {setBalances.tokenBalances.map((balance, index) => (
           <div
             className="flex flex-col items-center justify-center w-full gap-y-[12px]"
             key={index}
           >
             <BalanceListItem
               token={balance.token}
-              balanceFormatted={balance.totalBalanceFormatted}
+              balanceFormatted={balance.totalBalanceUsdFormatted}
               balanceUsd={balance.totalBalanceUsdFormatted}
               onClick={() => {
                 router.push(`/${balance.token.symbol}/balance`);
               }}
             />
-            {index !== setBalances.balances.length - 1 && <Separator />}
+            {index !== setBalances.tokenBalances.length - 1 && <Separator />}
           </div>
         ))}
       </div>
