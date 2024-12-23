@@ -1,5 +1,5 @@
 'use client';
-import { getChainIcon, getTokenLogoURI, shortenAddress } from '@/lib/utils';
+import { getTokenLogoURI, shortenAddress } from '@/lib/utils';
 import Image from 'next/image';
 import BackButton from '@/components/BackButton/BackButton';
 import { use } from 'react';
@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { KNOWN_TOKENS, Token } from '@raylac/shared';
 import useTokenBalance from '@/hooks/useTokenBalance';
 import { trpc } from '@/lib/trpc';
+import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 
 interface ChainBalanceListItemProps {
   chainId: number;
@@ -29,12 +30,11 @@ const ChainBalanceListItem = ({
         !isLast ? 'border-b-[1px]' : ''
       }`}
     >
-      <div className="flex flex-row items-center justify-center gap-x-[4px]">
-        <Image
-          src={getChainIcon(chainId)}
-          alt={chainId.toString()}
-          width={24}
-          height={24}
+      <div className="flex flex-row items-center justify-center gap-x-[6px]">
+        <TokenLogoWithChain
+          chainId={chainId}
+          logoURI={getTokenLogoURI(token)}
+          size={36}
         />
         <div className="text-border">
           {balanceFormatted} {token.symbol}
