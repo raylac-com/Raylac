@@ -1,7 +1,7 @@
 'use client';
 import useSwap from '@/hooks/useSwap';
 import { trpc } from '@/lib/trpc';
-import { cn, getChainIcon, getTokenLogoURI, shortenAddress } from '@/lib/utils';
+import { cn, getTokenLogoURI, shortenAddress } from '@/lib/utils';
 import { AnimatePresence } from 'motion/react';
 import { getChainFromId, GetSwapQuoteRequestBody, Token } from '@raylac/shared';
 import { ArrowUpDown, ChevronDownIcon, Loader2, Wallet } from 'lucide-react';
@@ -86,12 +86,14 @@ const CardHeader = ({
   isOpen,
   onOpenChange,
   onBalanceClick,
+  fromToken,
   fromTokenBalance,
 }: {
   chainId: number;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   onBalanceClick: () => void;
+  fromToken: Token;
   fromTokenBalance: {
     balanceFormatted: string;
     balanceUsd: string;
@@ -103,12 +105,10 @@ const CardHeader = ({
       onClick={() => onOpenChange(!isOpen)}
     >
       <div className="text-muted-foreground flex flex-row items-center gap-x-[6px]">
-        <Image
-          src={getChainIcon(chainId)}
-          alt="chain-logo"
-          width={24}
-          height={24}
-          className="w-[24px] h-[24px]"
+        <TokenLogoWithChain
+          logoURI={getTokenLogoURI(fromToken)}
+          chainId={chainId}
+          size={36}
         />
         {getChainFromId(chainId).name}
       </div>
@@ -264,6 +264,7 @@ const SwapCard = ({
         isOpen={isOpen}
         onOpenChange={setIsOpen}
         onBalanceClick={onWalletBalanceClick}
+        fromToken={fromToken}
         fromTokenBalance={fromTokenBalance}
       />
       <AnimatePresence>
