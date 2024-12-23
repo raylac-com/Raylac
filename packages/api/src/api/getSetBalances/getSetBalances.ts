@@ -3,6 +3,7 @@ import { Hex } from 'viem';
 import { getTokensInSet, shortenUsdValue } from '../../utils';
 import { getTokenMultiChainBalance } from '../../lib/utils';
 import BigNumber from 'bignumber.js';
+import getLidoApy from '../getLidoApy/getLidoApy';
 
 const getAddressBalances = async ({
   set,
@@ -111,7 +112,11 @@ const getSetBalances = async ({
   const totalBalanceUsdFormatted = formatUsdValue(totalBalanceUsd);
   const totalBalanceUsdShortened = shortenUsdValue(totalBalanceUsd);
 
+  const lidoApr = await getLidoApy();
+  const apr = totalBalanceUsd.times(new BigNumber(lidoApr).div(100));
+
   return {
+    aprUsdFormatted: formatUsdValue(apr),
     tokenBalances,
     totalBalanceUsd: totalBalanceUsd.toNumber(),
     totalBalanceUsdFormatted,

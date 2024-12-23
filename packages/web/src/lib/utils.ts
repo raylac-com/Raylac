@@ -87,6 +87,8 @@ export const getChainIcon = (chainId: number) => {
       return '/chains/polygon.png';
     case chains.zksync.id:
       return '/chains/zksync.png';
+    case chains.scroll.id:
+      return '/chains/scroll.png';
     default:
       throw new Error(`getChainIcon: Unknown chain id: ${chainId}`);
   }

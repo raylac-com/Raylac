@@ -15,6 +15,7 @@ import useAddresses from '@/hooks/useAddresses';
 const BalanceChart = ({
   tokenBalances,
   totalBalanceUsdFormatted,
+  aprUsdFormatted,
 }: {
   tokenBalances: {
     totalBalanceUsd: string;
@@ -22,6 +23,7 @@ const BalanceChart = ({
     token: Token;
   }[];
   totalBalanceUsdFormatted: string;
+  aprUsdFormatted: string;
 }) => {
   const data = tokenBalances.map(balance => ({
     name: balance.token.symbol,
@@ -47,9 +49,16 @@ const BalanceChart = ({
         <Label
           value={`$${totalBalanceUsdFormatted}`}
           position="center"
-          fontSize={16}
-          fill="white"
+          fill="#FAFAFA"
           className="text-2lg font-bold"
+        />
+        <Label
+          value={`APR $${aprUsdFormatted}`}
+          position="center"
+          dy={35} // Move down from center
+          fontSize={16}
+          fill="#B8ACAC"
+          className="text-base"
         />
       </Pie>
       <text x={210} y={300} textAnchor="middle" fill="white">
@@ -137,6 +146,7 @@ export default function Home() {
         <BalanceChart
           tokenBalances={setBalances.tokenBalances}
           totalBalanceUsdFormatted={setBalances.totalBalanceUsdFormatted}
+          aprUsdFormatted={setBalances.aprUsdFormatted}
         />
       </div>
       <div className="flex flex-col items-center justify-center border-[1px] border-border gap-y-[12px] rounded-[16px] p-[16px] w-full">

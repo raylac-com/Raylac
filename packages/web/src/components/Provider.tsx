@@ -6,7 +6,14 @@ import {
   RainbowKitProvider,
 } from '@rainbow-me/rainbowkit';
 import { WagmiProvider } from 'wagmi';
-import { mainnet, polygon, optimism, arbitrum, base } from 'wagmi/chains';
+import {
+  mainnet,
+  polygon,
+  optimism,
+  arbitrum,
+  base,
+  scroll,
+} from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { getAlchemyHttpTransport } from '@/lib/utils';
@@ -35,7 +42,7 @@ const alchemyApiKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY as string;
 const config = getDefaultConfig({
   appName: 'Raylac Funding',
   projectId: '55245de0fa3490c5cabb54e076b8f855',
-  chains: [mainnet, base, arbitrum, optimism, polygon],
+  chains: [mainnet, base, arbitrum, optimism, scroll],
   transports: {
     [mainnet.id]: getAlchemyHttpTransport({
       chainId: mainnet.id,
@@ -55,6 +62,10 @@ const config = getDefaultConfig({
     }),
     [polygon.id]: getAlchemyHttpTransport({
       chainId: polygon.id,
+      apiKey: alchemyApiKey,
+    }),
+    [scroll.id]: getAlchemyHttpTransport({
+      chainId: scroll.id,
       apiKey: alchemyApiKey,
     }),
   },

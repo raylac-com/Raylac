@@ -6,6 +6,7 @@ import {
   mainnet,
   optimism,
   polygon,
+  scroll,
   zksync,
 } from 'viem/chains';
 
@@ -80,6 +81,10 @@ export const WST_ETH: Token = {
     {
       chainId: base.id,
       address: getAddress('0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452'),
+    },
+    {
+      chainId: scroll.id,
+      address: getAddress('0xf610A9dfB7C89644979b4A0f27063E9e7d7Cda32'),
     },
   ],
 };
