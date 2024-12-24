@@ -9,7 +9,7 @@ import { ETH, Token } from '@raylac/shared';
 import { WST_ETH } from '@raylac/shared';
 import { ArrowRight, ChevronsUpDown, Wallet } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 const SwapToken = ({
   token,
@@ -56,6 +56,20 @@ const SwapPage = () => {
     setOutputToken(inputToken);
   };
 
+  const outputTokenAvailableChainIds = outputToken.addresses.map(
+    address => address.chainId
+  );
+
+  // Boolean indicating if there are any swaps available
+  // If this is false, we show "No available swaps"
+  const swapsAvailable = useMemo(() => {
+    return inputTokenBalances?.addressBalances.some(balance =>
+      balance.chainBalances?.some(chainBalance =>
+        outputTokenAvailableChainIds.includes(chainBalance.chain)
+      )
+    );
+  }, [inputTokenBalances, outputTokenAvailableChainIds]);
+
   return (
     <>
       <div className="flex flex-col items-center w-[400px] pb-[220px]">
@@ -84,31 +98,45 @@ const SwapPage = () => {
             </div>
           </div>
           <div className="flex flex-col gap-y-[48px] items-center justify-center w-full mt-[34px]">
-            {inputTokenBalances?.addressBalances.map(balance => (
-              <div
-                className="flex flex-col gap-y-[8px] w-full"
-                key={balance.address}
-              >
-                <div className="text-border">
-                  {shortenAddress(balance.address)}
+            {inputTokenBalances?.addressBalances.map(balance => {
+              const swappableChainBalances = balance.chainBalances?.filter(
+                chainBalance =>
+                  outputTokenAvailableChainIds.includes(chainBalance.chain)
+              );
+
+              if (swappableChainBalances?.length === 0) {
+                return null;
+              }
+
+              return (
+                <div
+                  className="flex flex-col gap-y-[8px] w-full"
+                  key={balance.address}
+                >
+                  <div className="text-border">
+                    {shortenAddress(balance.address)}
+                  </div>
+                  <div className="flex flex-col gap-y-[12px] w-full">
+                    {swappableChainBalances?.map((chainBalance, index) => (
+                      <SwapCard
+                        key={`${balance.address}-${index}`}
+                        address={balance.address}
+                        fromToken={inputToken}
+                        toToken={outputToken}
+                        chainId={chainBalance.chain}
+                        fromTokenBalance={{
+                          balanceFormatted: chainBalance.balanceFormatted,
+                          balanceUsd: chainBalance.balanceUsd,
+                        }}
+                      />
+                    ))}
+                  </div>
                 </div>
-                <div className="flex flex-col gap-y-[12px] w-full">
-                  {balance.chainBalances?.map((chainBalance, index) => (
-                    <SwapCard
-                      key={`${balance.address}-${index}`}
-                      address={balance.address}
-                      fromToken={inputToken}
-                      toToken={outputToken}
-                      chainId={chainBalance.chain}
-                      fromTokenBalance={{
-                        balanceFormatted: chainBalance.balanceFormatted,
-                        balanceUsd: chainBalance.balanceUsd,
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
+              );
+            })}
+            {!swapsAvailable && (
+              <div className="text-border">No available swaps</div>
+            )}
           </div>
         </div>
         <div className="flex flex-row mt-[32px] items-center justify-center w-full">
