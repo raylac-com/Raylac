@@ -117,9 +117,9 @@ const SwapPage = () => {
                     {shortenAddress(balance.address)}
                   </div>
                   <div className="flex flex-col gap-y-[12px] w-full">
-                    {swappableChainBalances?.map((chainBalance, index) => (
+                    {swappableChainBalances?.map(chainBalance => (
                       <SwapCard
-                        key={`${balance.address}-${index}`}
+                        key={`${balance.address}-${chainBalance.chain}`}
                         address={balance.address}
                         fromToken={inputToken}
                         toToken={outputToken}

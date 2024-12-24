@@ -73,7 +73,7 @@ const SwapButton = ({
             alt="output-token-logo"
             width={20}
             height={20}
-            className="w-[20px] h-[20px]"
+            className="w-[20px] h-[20px] select-none"
           />
         </div>
       )}
@@ -85,51 +85,59 @@ const CardHeader = ({
   chainId,
   isOpen,
   onOpenChange,
-  onBalanceClick,
   fromToken,
   fromTokenBalance,
+  amountInputText,
+  setAmountInputText,
 }: {
   chainId: number;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  onBalanceClick: () => void;
   fromToken: Token;
   fromTokenBalance: {
-    balanceFormatted: string;
     balanceUsd: string;
   };
+  amountInputText: string;
+  setAmountInputText: (text: string) => void;
 }) => {
   return (
     <div
       className="flex flex-row items-center justify-between gap-x-[12px] cursor-pointer"
       onClick={() => onOpenChange(!isOpen)}
     >
-      <div className="text-muted-foreground flex flex-row items-center gap-x-[6px]">
+      <div className="flex flex-row items-center gap-x-[8px]">
         <TokenLogoWithChain
           logoURI={getTokenLogoURI(fromToken)}
           chainId={chainId}
           size={36}
         />
-        {getChainFromId(chainId).name}
+        {!isOpen && (
+          <div className="text-border">{getChainFromId(chainId).name}</div>
+        )}
       </div>
       <div className="flex flex-row items-center gap-x-[16px]">
-        <div
-          className="flex flex-row items-center gap-x-[6px] cursor-pointer"
-          onClick={e => {
-            e.stopPropagation();
-
-            if (isOpen) {
-              onBalanceClick();
-            } else {
-              onOpenChange(true);
-            }
-          }}
-        >
-          <div className="text-muted-foreground">
-            ${fromTokenBalance?.balanceUsd}
+        {isOpen ? (
+          <div
+            className="flex flex-row items-center gap-x-[4px] cursor-pointer"
+            onClick={e => e.stopPropagation()}
+          >
+            <input
+              className="w-full h-[38px] font-bold border-[1px] bg-transparent border-border rounded-[10px] px-[12px] text-foreground outline-none"
+              value={amountInputText}
+              onChange={e => setAmountInputText(e.target.value)}
+              spellCheck={false}
+              autoFocus={true}
+            />
+            <div className="text-muted-foreground">{fromToken.symbol}</div>
           </div>
-          <Wallet className="w-[17px] h-[17px] text-muted-foreground" />
-        </div>
+        ) : (
+          <div className="flex flex-row items-center gap-x-[6px] cursor-pointer">
+            <div className="text-muted-foreground">
+              ${fromTokenBalance?.balanceUsd}
+            </div>
+            <Wallet className="w-[17px] h-[17px] text-muted-foreground" />
+          </div>
+        )}
         <ChevronDownIcon
           className={cn(
             'w-[24px] h-[24px] text-muted-foreground cursor-pointer',
@@ -221,7 +229,7 @@ const SwapCard = ({
     }
   }, [quote, signAndSubmitSwap, account]);
 
-  const onChangeDirectionClick = () => {
+  const _onChangeDirectionClick = () => {
     if (amountInputText && address) {
       const amount = parseEther(amountInputText);
 
@@ -248,9 +256,8 @@ const SwapCard = ({
     }
   };
 
-  const amountInUsd = quote?.amountInUsd || '0';
-  const amountOutUsd = quote?.amountOutUsd || '0';
-  const amountOutFormatted = quote?.amountOutFormatted || '0';
+  const amountInUsd = quote?.amountInUsd;
+  const amountOutUsd = quote?.amountOutUsd;
 
   const needsSwitchToAddress =
     getAddress(account.address ?? zeroAddress) !== getAddress(address)
@@ -258,88 +265,82 @@ const SwapCard = ({
       : null;
 
   return (
-    <div className="flex flex-col gap-y-[48px] px-[22px] py-[16px] bg-bg2 rounded-[16px] w-full hover:bg-bg3">
+    <div className="flex flex-col px-[22px] py-[16px] bg-bg2 rounded-[16px] w-full hover:bg-bg3">
       <CardHeader
         chainId={chainId}
         isOpen={isOpen}
         onOpenChange={setIsOpen}
-        onBalanceClick={onWalletBalanceClick}
         fromToken={fromToken}
         fromTokenBalance={fromTokenBalance}
+        amountInputText={amountInputText}
+        setAmountInputText={setAmountInputText}
       />
       <AnimatePresence>
         {isOpen && (
+          <div className="flex flex-row items-center justify-between w-full mt-[8px]">
+            <div
+              className="flex flex-row items-center gap-x-[6px] cursor-pointer"
+              onClick={onWalletBalanceClick}
+            >
+              <div className="text-muted-foreground">
+                ${fromTokenBalance?.balanceUsd}
+              </div>
+              <Wallet className="w-[17px] h-[17px] text-muted-foreground" />
+            </div>
+            <div>
+              <div className="text-muted-foreground">
+                {isGettingQuote ? (
+                  <Skeleton className="w-[100px] h-[24px] bg-background" />
+                ) : amountInUsd ? (
+                  `~$${amountInUsd}`
+                ) : (
+                  ''
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        {isOpen && (
           <motion.div
-            className="flex flex-col gap-y-[54px]"
+            key={`swap-card-${chainId}-${inputToken.symbol}-${outputToken.symbol}`}
+            className="flex flex-col"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="flex flex-row gap-x-[12px] justify-between">
-              <div className="flex flex-col gap-y-[12px] items-center">
-                <TokenLogoWithChain
-                  logoURI={getTokenLogoURI(inputToken)}
-                  chainId={chainId}
-                  size={45}
-                />
-                <ArrowUpDown
-                  className="mr-[12px] w-[24px] h-[24px] cursor-pointer text-muted-foreground hover:text-foreground"
-                  onClick={onChangeDirectionClick}
-                />
+            <ArrowUpDown className="ml-[10px] my-[14px] mr-[12px] w-[24px] h-[24px] cursor-pointer text-muted-foreground hover:text-foreground" />
+            <div className="flex flex-row  items-center gap-x-[12px] justify-between">
+              <div className="flex flex-row items-center gap-x-[10px]">
+                {/** Output token logo */}
                 <TokenLogoWithChain
                   logoURI={getTokenLogoURI(outputToken)}
                   chainId={chainId}
-                  size={45}
+                  size={38}
                 />
-              </div>
-              <div className="flex flex-col gap-y-[25px]">
-                <div className="flex flex-col gap-y-[4px]">
-                  <div className="flex flex-row items-center h-[45px] w-[305px] text-2lg border-[1px] border-border bg-bg2 rounded-[8px] px-[16px] text-foreground gap-x-[10px]">
-                    <input
-                      className="flex bg-transparent w-full h-full outline-none text-right"
-                      value={amountInputText}
-                      onChange={e => setAmountInputText(e.target.value)}
-                      spellCheck={false}
-                    />
-                    <div className="text-border">{inputToken.symbol}</div>
-                  </div>
-                  <div className="flex flex-row justify-end">
-                    <div className="text-muted-foreground  h-[18px]">
-                      {isGettingQuote ? (
-                        <Skeleton className="w-[100px] h-full bg-background" />
-                      ) : (
-                        `~$${amountInUsd}`
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-y-[4px]">
-                  <div className="text-foreground h-[18px] font-bold">
-                    {isGettingQuote ? (
-                      <Skeleton className="w-[100px] h-full bg-background" />
-                    ) : (
-                      `${amountOutFormatted} ${outputToken.symbol}`
-                    )}
-                  </div>
-                  <div className="text-muted-foreground h-[18px]">
-                    {isGettingQuote ? (
-                      <Skeleton className="w-[100px] h-full bg-background" />
-                    ) : (
-                      `$${amountOutUsd}`
-                    )}
-                  </div>
+                {/** Output usd amount */}
+                <div className="font-bold text-foreground">
+                  {isGettingQuote ? (
+                    <Skeleton className="w-[100px] h-[24px] bg-background" />
+                  ) : amountOutUsd ? (
+                    `$${amountOutUsd}`
+                  ) : (
+                    ''
+                  )}
                 </div>
               </div>
+              {/** TODO: Output APY */}
             </div>
-            <SwapButton
-              chainId={chainId}
-              onClick={onConvertClick}
-              inputToken={inputToken}
-              outputToken={outputToken}
-              isSwapping={isSwapping}
-              needsSwitchToAddress={needsSwitchToAddress}
-            />
+            <div className="mt-[30px]">
+              <SwapButton
+                chainId={chainId}
+                onClick={onConvertClick}
+                inputToken={inputToken}
+                outputToken={outputToken}
+                isSwapping={isSwapping}
+                needsSwitchToAddress={needsSwitchToAddress}
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
