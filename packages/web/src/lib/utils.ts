@@ -134,6 +134,7 @@ const addressesKey = 'addresses';
 
 export const saveAddress = (address: Hex) => {
   const addresses = getAddresses();
+
   if (addresses) {
     const newAddresses = Array.from(new Set([...addresses, address]));
     window.localStorage.setItem(addressesKey, JSON.stringify(newAddresses));

@@ -3,13 +3,14 @@ import AddAddressButton from '@/components/AddAddressButton/AddAddressButton';
 import PageTitle from '@/components/PageTitle/PageTitle';
 import SelectTokenDialog from '@/components/SelectTokenDialog/SelectTokenDialog';
 import SwapCard from '@/components/SwapCard/SwapCard';
+import SwapCardsSkeleton from '@/components/SwapCardsSkeleton';
 import useTokenBalance from '@/hooks/useTokenBalance';
 import { getTokenLogoURI, shortenAddress } from '@/lib/utils';
 import { ETH, Token } from '@raylac/shared';
 import { WST_ETH } from '@raylac/shared';
 import { ArrowRight, ChevronsUpDown, Wallet } from 'lucide-react';
 import Image from 'next/image';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 const SwapToken = ({
   token,
@@ -62,14 +63,13 @@ const SwapPage = () => {
 
   // Boolean indicating if there are any swaps available
   // If this is false, we show "No available swaps"
-  const swapsAvailable = useMemo(() => {
-    return inputTokenBalances?.addressBalances.some(balance =>
+  const noSwapsAvailable =
+    inputTokenBalances !== undefined &&
+    !inputTokenBalances.addressBalances.some(balance =>
       balance.chainBalances?.some(chainBalance =>
         outputTokenAvailableChainIds.includes(chainBalance.chain)
       )
     );
-  }, [inputTokenBalances, outputTokenAvailableChainIds]);
-
   return (
     <>
       <div className="flex flex-col items-center w-[400px] pb-[220px]">
@@ -97,6 +97,11 @@ const SwapPage = () => {
               </div>
             </div>
           </div>
+          {inputTokenBalances === undefined && (
+            <div className="w-full mt-[34px]">
+              <SwapCardsSkeleton></SwapCardsSkeleton>
+            </div>
+          )}
           <div className="flex flex-col gap-y-[48px] items-center justify-center w-full mt-[34px]">
             {inputTokenBalances?.addressBalances.map(balance => {
               const swappableChainBalances = balance.chainBalances?.filter(
@@ -134,7 +139,7 @@ const SwapPage = () => {
                 </div>
               );
             })}
-            {!swapsAvailable && (
+            {noSwapsAvailable && (
               <div className="text-border">No available swaps</div>
             )}
           </div>
