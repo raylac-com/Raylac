@@ -19,20 +19,23 @@ const SwapButton = ({
   onClick,
   outputToken,
   isSwapping,
-  needsSwitchToAddress,
+  address,
 }: {
   chainId: number;
   onClick: () => void;
   inputToken: Token;
   outputToken: Token;
-  needsSwitchToAddress: Hex | null;
+  address: Hex;
   isSwapping: boolean;
 }) => {
   const connectedChainId = useChainId();
 
   const { switchChainAsync } = useSwitchChain();
+  const connectedAccount = useAccount();
 
   const needsSwitchChain = chainId !== connectedChainId;
+  const needsSwitchToAddress =
+    getAddress(connectedAccount.address ?? zeroAddress) !== getAddress(address);
 
   return (
     <motion.div
@@ -61,9 +64,7 @@ const SwapButton = ({
       ) : needsSwitchToAddress ? (
         <div className="flex flex-row items-center gap-x-[8px]">
           <div className="text-bg2 font-bold">Switch to</div>
-          <div className="text-bg2 font-bold">
-            {shortenAddress(needsSwitchToAddress)}
-          </div>
+          <div className="text-bg2 font-bold">{shortenAddress(address)}</div>
         </div>
       ) : (
         <div className="flex flex-row items-center gap-x-[8px]">
@@ -259,11 +260,6 @@ const SwapCard = ({
   const amountInUsd = quote?.amountInUsd;
   const amountOutUsd = quote?.amountOutUsd;
 
-  const needsSwitchToAddress =
-    getAddress(account.address ?? zeroAddress) !== getAddress(address)
-      ? getAddress(address)
-      : null;
-
   return (
     <div className="flex flex-col px-[22px] py-[16px] bg-bg2 rounded-[16px] w-full hover:bg-bg3">
       <CardHeader
@@ -338,7 +334,7 @@ const SwapCard = ({
                 inputToken={inputToken}
                 outputToken={outputToken}
                 isSwapping={isSwapping}
-                needsSwitchToAddress={needsSwitchToAddress}
+                address={address}
               />
             </div>
           </motion.div>
