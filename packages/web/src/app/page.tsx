@@ -4,8 +4,8 @@ import { TokenSet } from '@raylac/shared';
 import { Token } from '@raylac/shared';
 import { Wallet } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import { PieChart, Pie, Cell, Label } from 'recharts';
+import { useEffect, useState } from 'react';
+import { PieChart, Pie, Cell, Label, Legend, Tooltip } from 'recharts';
 import Image from 'next/image';
 import { getTokenLogoURI } from '@/lib/utils';
 import useAddresses from '@/hooks/useAddresses';
@@ -22,7 +22,7 @@ const APRChart = ({ aprUsdFormatted }: { aprUsdFormatted: string }) => {
   ];
 
   return (
-    <PieChart width={180} height={180}>
+    <PieChart width={180} height={300}>
       <Pie
         isAnimationActive={false}
         data={data}
@@ -50,6 +50,8 @@ const APRChart = ({ aprUsdFormatted }: { aprUsdFormatted: string }) => {
           className="text-2lg font-bold"
         />
       </Pie>
+      <Tooltip />
+      <Legend />
     </PieChart>
   );
 };
@@ -65,14 +67,19 @@ const BalanceChart = ({
   }[];
   totalBalanceUsdFormatted: string;
 }) => {
+  const [activeDataKey, setActiveDataKey] = useState('');
+
   const data = tokenBalances.map(balance => ({
     name: balance.token.symbol,
-    value: Number(balance.totalBalanceUsd),
+    value: Number(Number(balance.totalBalanceUsd).toFixed(2)),
     color: balance.token.color,
+    strokeColor:
+      activeDataKey === balance.token.symbol ? '#ffffff' : balance.token.color,
+    dataKey: balance.token.symbol,
   }));
 
   return (
-    <PieChart width={180} height={180}>
+    <PieChart width={180} height={300}>
       <Pie
         isAnimationActive={false}
         data={data}
@@ -81,10 +88,13 @@ const BalanceChart = ({
         fill="#8884d8"
         paddingAngle={3}
         dataKey="value"
-        activeIndex={0}
       >
-        {data.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={entry.color} stroke={entry.color} />
+        {data.map(entry => (
+          <Cell
+            key={entry.dataKey}
+            fill={entry.color}
+            stroke={entry.strokeColor}
+          />
         ))}
         <Label
           value="Balance"
@@ -100,6 +110,21 @@ const BalanceChart = ({
           className="text-2lg font-bold"
         />
       </Pie>
+      <Legend
+        verticalAlign="bottom"
+        layout="vertical"
+        onMouseEnter={o => {
+          setActiveDataKey(o.value as string);
+        }}
+        onMouseLeave={() => {
+          setActiveDataKey('');
+        }}
+      />
+      <Tooltip
+        formatter={value => {
+          return `$${Number(value).toLocaleString()}`;
+        }}
+      />
     </PieChart>
   );
 };
