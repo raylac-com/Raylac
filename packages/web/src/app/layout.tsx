@@ -3,6 +3,7 @@ import Provider from '@/components/Provider';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import MenuBar from '@/components/MenuBar/MenuBar';
+import MobileFooter from '@/components/MobileFooter/MobileFooter';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -24,6 +25,7 @@ export default function RootLayout({
       <body className={`${inter.className} antialiased`}>
         <Provider>{children}</Provider>
         <MenuBar />
+        <MobileFooter />
       </body>
     </html>
   );

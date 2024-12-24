@@ -85,7 +85,7 @@ const SelectTokenDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[425px] border-none rounded-[16px]">
+      <DialogContent className="max-w-[350px] md:max-w-[400px] border-none rounded-[16px]">
         <DialogHeader>
           <DialogTitle>
             Select {type === 'input' ? 'Input' : 'Output'} Token

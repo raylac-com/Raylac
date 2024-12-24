@@ -72,7 +72,7 @@ const SwapPage = () => {
     );
   return (
     <>
-      <div className="flex flex-col items-center w-[400px] pb-[220px]">
+      <div className="flex flex-col items-center w-[350px] md:w-[400px] pb-[220px]">
         <PageTitle>Swap</PageTitle>
         <div className="flex flex-col items-center justify-center w-full">
           <div className="flex flex-col gap-y-[10px] w-full rounded-[16px] bg-bg2 px-[20px] py-[24px] ">

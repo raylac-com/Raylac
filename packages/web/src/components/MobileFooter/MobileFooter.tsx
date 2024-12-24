@@ -1,5 +1,4 @@
 'use client';
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { cn } from '@/lib/utils';
 import { ArrowLeftRight, Home, List } from 'lucide-react';
 import Link from 'next/link';
@@ -30,18 +29,13 @@ const MenuItem = ({
 
 const MobileFooter = () => {
   const pathname = usePathname();
-  const isMobile = useIsMobile();
 
   if (pathname === '/start' || pathname === '/watch-mode') {
     return null;
   }
 
-  if (isMobile) {
-    return null;
-  }
-
   return (
-    <div className="fixed left-[20vw] w-[60px] h-[460px] py-[137px] top-[152px] flex flex-col items-center justify-between bg-bg2  rounded-[8px]">
+    <div className="fixed bottom-[16px] left-[50%] translate-x-[-50%] w-[350px] md:hidden h-[60px] flex flex-row justify-center items-center gap-x-[87px] bg-bg2 rounded-[38px]">
       <MenuItem icon={<Home />} href="/" isCurrent={pathname === '/'} />
       <MenuItem
         icon={<ArrowLeftRight />}

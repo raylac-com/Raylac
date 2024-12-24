@@ -81,7 +81,7 @@ const ConnectWalletPage = () => {
               )}
             </div>
           )}
-        </div>{' '}
+        </div>
       </div>
     </div>
   );

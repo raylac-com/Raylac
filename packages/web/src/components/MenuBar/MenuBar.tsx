@@ -41,7 +41,7 @@ const MenuBar = () => {
   }
 
   return (
-    <div className="fixed left-[20vw] w-[60px] h-[460px] py-[137px] top-[152px] flex flex-col items-center justify-between bg-bg2  rounded-[8px]">
+    <div className="hidden md:flex flex-col fixed left-[20vw] w-[60px] h-[460px] py-[137px] top-[152px]  items-center justify-between bg-bg2  rounded-[8px]">
       <MenuItem icon={<Home />} href="/" isCurrent={pathname === '/'} />
       <MenuItem
         icon={<ArrowLeftRight />}

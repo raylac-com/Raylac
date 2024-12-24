@@ -12,6 +12,19 @@ import useAddresses from '@/hooks/useAddresses';
 import AddAddressButton from '@/components/AddAddressButton/AddAddressButton';
 import Link from 'next/link';
 import PageTitle from '@/components/PageTitle/PageTitle';
+import { useIsMobile } from '@/hooks/useIsMobile';
+
+const useChartSize = () => {
+  const isMobile = useIsMobile();
+
+  const width = isMobile ? 240 : 180;
+  const height = isMobile ? 400 : 300;
+
+  const innerRadius = isMobile ? 100 : 78;
+  const outerRadius = isMobile ? 120 : 90;
+
+  return { width, height, innerRadius, outerRadius };
+};
 
 const APRChart = ({
   tokenBalances,
@@ -24,6 +37,7 @@ const APRChart = ({
   }[];
   aprUsdFormatted: string;
 }) => {
+  const { width, height, innerRadius, outerRadius } = useChartSize();
   const [activeDataKey, setActiveDataKey] = useState('');
 
   const stakedETHBalances = tokenBalances.filter(
@@ -40,12 +54,12 @@ const APRChart = ({
   }));
 
   return (
-    <PieChart width={180} height={300}>
+    <PieChart width={width} height={height}>
       <Pie
         isAnimationActive={false}
         data={data}
-        innerRadius={78}
-        outerRadius={90}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius}
         fill="#8884d8"
         paddingAngle={3}
         dataKey="value"
@@ -103,6 +117,7 @@ const BalanceChart = ({
   }[];
   totalBalanceUsdFormatted: string;
 }) => {
+  const { width, height, innerRadius, outerRadius } = useChartSize();
   const [activeDataKey, setActiveDataKey] = useState('');
 
   const data = tokenBalances.map(balance => ({
@@ -115,12 +130,12 @@ const BalanceChart = ({
   }));
 
   return (
-    <PieChart width={180} height={300}>
+    <PieChart width={width} height={height}>
       <Pie
         isAnimationActive={false}
         data={data}
-        innerRadius={78}
-        outerRadius={90}
+        innerRadius={innerRadius}
+        outerRadius={outerRadius}
         fill="#8884d8"
         paddingAngle={3}
         dataKey="value"
@@ -249,10 +264,10 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col items-center w-[400px] pb-[220px]">
+    <div className="flex flex-col items-center w-[350px] md:w-[400px] pb-[220px]">
       <PageTitle>Home</PageTitle>
       <div className="flex flex-col gap-y-[8px] items-center justify-center w-full">
-        <div className="flex flex-row justify-between items-center w-full">
+        <div className="flex flex-col md:flex-row justify-between items-center w-full">
           <BalanceChart
             tokenBalances={setBalances.tokenBalances}
             totalBalanceUsdFormatted={setBalances.totalBalanceUsdFormatted}

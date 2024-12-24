@@ -35,7 +35,7 @@ const Addresses = () => {
   const { data: addresses } = useAddresses();
 
   return (
-    <div className="flex flex-col w-[400px]">
+    <div className="flex flex-col w-[350px] md:w-[400px]">
       <PageTitle>Addresses</PageTitle>
       <div className="flex flex-col gap-y-[16px]">
         {addresses?.map((address, index) => (
