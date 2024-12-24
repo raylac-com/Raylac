@@ -16,7 +16,7 @@ import AddAddressButton from '@/components/AddAddressButton/AddAddressButton';
 const BalanceChart = ({
   tokenBalances,
   totalBalanceUsdFormatted,
-  aprUsdFormatted: _aprUsdFormatted,
+  aprUsdFormatted,
 }: {
   tokenBalances: {
     totalBalanceUsd: string;
@@ -53,8 +53,6 @@ const BalanceChart = ({
           fill="#FAFAFA"
           className="text-2lg font-bold"
         />
-        {/**
-           * 
         <Label
           value={`APR $${aprUsdFormatted}`}
           position="center"
@@ -63,7 +61,6 @@ const BalanceChart = ({
           fill="#B8ACAC"
           className="text-base"
         />
-          */}
       </Pie>
       <text x={210} y={300} textAnchor="middle" fill="white">
         {data.map((entry, index) => (
