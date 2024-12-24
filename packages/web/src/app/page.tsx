@@ -11,6 +11,7 @@ import { getTokenLogoURI } from '@/lib/utils';
 import useAddresses from '@/hooks/useAddresses';
 import AddAddressButton from '@/components/AddAddressButton/AddAddressButton';
 import Link from 'next/link';
+import PageTitle from '@/components/PageTitle/PageTitle';
 
 const APRChart = ({
   tokenBalances,
@@ -248,8 +249,9 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col items-center w-[400px] pb-[220px] gap-y-[52px]">
-      <div className="flex flex-col gap-y-[8px] items-center justify-center w-full mt-[16px]">
+    <div className="flex flex-col items-center w-[400px] pb-[220px]">
+      <PageTitle>Home</PageTitle>
+      <div className="flex flex-col gap-y-[8px] items-center justify-center w-full">
         <div className="flex flex-row justify-between items-center w-full">
           <BalanceChart
             tokenBalances={setBalances.tokenBalances}
@@ -261,7 +263,7 @@ export default function Home() {
           />
         </div>
       </div>
-      <div className="flex flex-col gap-y-[15px] w-full">
+      <div className="flex flex-col gap-y-[15px] w-full mt-[60px]">
         <WalletsLabel />
         <div className="flex flex-col items-center justify-center bg-bg2 rounded-[16px] w-full">
           {setBalances.tokenBalances.map((balance, index) => (
@@ -278,7 +280,9 @@ export default function Home() {
           ))}
         </div>
       </div>
-      <AddAddressButton />
+      <div className="mt-[32px]">
+        <AddAddressButton />
+      </div>
     </div>
   );
 }
