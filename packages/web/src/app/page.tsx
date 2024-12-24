@@ -13,10 +13,51 @@ import { useState } from 'react';
 import useAddresses from '@/hooks/useAddresses';
 import AddAddressButton from '@/components/AddAddressButton/AddAddressButton';
 
+const APRChart = ({ aprUsdFormatted }: { aprUsdFormatted: string }) => {
+  const data = [
+    {
+      name: 'APR',
+      value: Number(aprUsdFormatted),
+      color: '#8884d8',
+    },
+  ];
+
+  return (
+    <PieChart width={180} height={400}>
+      <Pie
+        isAnimationActive={false}
+        data={data}
+        innerRadius={78}
+        outerRadius={90}
+        fill="#8884d8"
+        paddingAngle={3}
+        dataKey="value"
+        activeIndex={0}
+      >
+        {data.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={entry.color} stroke={entry.color} />
+        ))}
+        <Label
+          value="APR"
+          position="center"
+          dy={-30} // Move down from center
+          fontSize={16}
+          fill="#B8ACAC"
+        />
+        <Label
+          value={`$${aprUsdFormatted}`}
+          position="center"
+          fill="#FAFAFA"
+          className="text-2lg font-bold"
+        />
+      </Pie>
+    </PieChart>
+  );
+};
+
 const BalanceChart = ({
   tokenBalances,
   totalBalanceUsdFormatted,
-  aprUsdFormatted,
 }: {
   tokenBalances: {
     totalBalanceUsd: string;
@@ -24,7 +65,6 @@ const BalanceChart = ({
     token: Token;
   }[];
   totalBalanceUsdFormatted: string;
-  aprUsdFormatted: string;
 }) => {
   const data = tokenBalances.map(balance => ({
     name: balance.token.symbol,
@@ -33,43 +73,34 @@ const BalanceChart = ({
   }));
 
   return (
-    <PieChart width={450} height={300}>
+    <PieChart width={180} height={300}>
       <Pie
         isAnimationActive={false}
         data={data}
-        innerRadius={100}
-        outerRadius={120}
+        innerRadius={78}
+        outerRadius={90}
         fill="#8884d8"
         paddingAngle={3}
         dataKey="value"
         activeIndex={0}
       >
         {data.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={entry.color} />
+          <Cell key={`cell-${index}`} fill={entry.color} stroke={entry.color} />
         ))}
+        <Label
+          value="Balance"
+          position="center"
+          dy={-30} // Move down from center
+          fontSize={16}
+          fill="#B8ACAC"
+        />
         <Label
           value={`$${totalBalanceUsdFormatted}`}
           position="center"
           fill="#FAFAFA"
           className="text-2lg font-bold"
         />
-        <Label
-          value={`APR $${aprUsdFormatted}`}
-          position="center"
-          dy={35} // Move down from center
-          fontSize={16}
-          fill="#B8ACAC"
-          className="text-base"
-        />
       </Pie>
-      <text x={210} y={300} textAnchor="middle" fill="white">
-        {data.map((entry, index) => (
-          <tspan key={index} x={160 + index * 85} y={300}>
-            <tspan fill={entry.color}>■</tspan>
-            <tspan fill="white">{` ${entry.name}`}</tspan>
-          </tspan>
-        ))}
-      </text>
     </PieChart>
   );
 };
@@ -138,17 +169,19 @@ export default function Home() {
   }
 
   return (
-    <div className="flex flex-col items-center w-[350px] pb-[220px] gap-y-[56px]">
+    <div className="flex flex-col items-center w-[400px] pb-[220px] gap-y-[56px]">
       <div className="flex flex-col gap-y-[8px] items-center justify-center w-full">
         <div className="flex flex-row gap-x-[6px] items-center w-full">
           <Wallet className="w-[20px] h-[20px] text-border" />
           <div className="text-border">Balance</div>
         </div>
-        <BalanceChart
-          tokenBalances={setBalances.tokenBalances}
-          totalBalanceUsdFormatted={setBalances.totalBalanceUsdFormatted}
-          aprUsdFormatted={setBalances.aprUsdFormatted}
-        />
+        <div className="flex flex-row justify-between items-center w-full">
+          <BalanceChart
+            tokenBalances={setBalances.tokenBalances}
+            totalBalanceUsdFormatted={setBalances.totalBalanceUsdFormatted}
+          />
+          <APRChart aprUsdFormatted={setBalances.aprUsdFormatted} />
+        </div>
       </div>
       <div className="flex flex-col items-center justify-center border-[1px] border-border gap-y-[12px] rounded-[16px] p-[16px] w-full">
         {setBalances.tokenBalances.map((balance, index) => (

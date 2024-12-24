@@ -437,5 +437,9 @@ export const formatUsdValue = (num: BigNumber): string => {
     return num.toPrecision(2).replace(/\.?0+$/, '');
   }
 
+  if (num.gte(new BigNumber('1000'))) {
+    return num.toFormat(0).replace(/\.?0+$/, '');
+  }
+
   return num.toFormat(2).replace(/\.?0+$/, '');
 };
