@@ -12,14 +12,31 @@ import useAddresses from '@/hooks/useAddresses';
 import AddAddressButton from '@/components/AddAddressButton/AddAddressButton';
 import Link from 'next/link';
 
-const APRChart = ({ aprUsdFormatted }: { aprUsdFormatted: string }) => {
-  const data = [
-    {
-      name: 'APR',
-      value: Number(aprUsdFormatted),
-      color: '#8884d8',
-    },
-  ];
+const APRChart = ({
+  tokenBalances,
+  aprUsdFormatted,
+}: {
+  tokenBalances: {
+    totalBalanceUsd: string;
+    totalBalanceUsdFormatted: string;
+    token: Token;
+  }[];
+  aprUsdFormatted: string;
+}) => {
+  const [activeDataKey, setActiveDataKey] = useState('');
+
+  const stakedETHBalances = tokenBalances.filter(
+    balance => balance.token.symbol !== 'ETH'
+  );
+
+  const data = stakedETHBalances.map(balance => ({
+    name: balance.token.symbol,
+    value: Number(balance.totalBalanceUsd),
+    color: balance.token.color,
+    strokeColor:
+      activeDataKey === balance.token.symbol ? '#ffffff' : balance.token.color,
+    dataKey: balance.token.symbol,
+  }));
 
   return (
     <PieChart width={180} height={300}>
@@ -33,8 +50,12 @@ const APRChart = ({ aprUsdFormatted }: { aprUsdFormatted: string }) => {
         dataKey="value"
         activeIndex={0}
       >
-        {data.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={entry.color} stroke={entry.color} />
+        {data.map(entry => (
+          <Cell
+            key={entry.dataKey}
+            fill={entry.color}
+            stroke={entry.strokeColor}
+          />
         ))}
         <Label
           value="APR"
@@ -50,8 +71,22 @@ const APRChart = ({ aprUsdFormatted }: { aprUsdFormatted: string }) => {
           className="text-2lg font-bold"
         />
       </Pie>
-      <Tooltip />
-      <Legend />
+      <Tooltip
+        formatter={value => {
+          return `$${Number(value).toLocaleString()}`;
+        }}
+      />
+      <Legend
+        height={80}
+        verticalAlign="bottom"
+        layout="vertical"
+        onMouseEnter={o => {
+          setActiveDataKey(o.value as string);
+        }}
+        onMouseLeave={() => {
+          setActiveDataKey('');
+        }}
+      />
     </PieChart>
   );
 };
@@ -111,6 +146,7 @@ const BalanceChart = ({
         />
       </Pie>
       <Legend
+        height={80}
         verticalAlign="bottom"
         layout="vertical"
         onMouseEnter={o => {
@@ -163,9 +199,9 @@ const BalanceListItem = ({
           </div>
         </div>
       </div>
-      <div className="flex flex-col justify-start">
+      <div className="flex flex-col justify-start items-end">
         <div className={`text-foreground font-bold`}>${balanceUsd}</div>
-        <div className={`text-border`}>{apr ? `${apr}%` : ''}</div>
+        <div className={`text-border`}>{apr ? `APR ${apr}%` : ''}</div>
       </div>
     </div>
   );
@@ -219,7 +255,10 @@ export default function Home() {
             tokenBalances={setBalances.tokenBalances}
             totalBalanceUsdFormatted={setBalances.totalBalanceUsdFormatted}
           />
-          <APRChart aprUsdFormatted={setBalances.aprUsdFormatted} />
+          <APRChart
+            tokenBalances={setBalances.tokenBalances}
+            aprUsdFormatted={setBalances.aprUsdFormatted}
+          />
         </div>
       </div>
       <div className="flex flex-col gap-y-[15px] w-full">
