@@ -9,6 +9,7 @@
     "lint": "next lint && tsc --noEmit"
   },
   "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.4",
     "@radix-ui/react-toast": "^1.2.4",
     "@rainbow-me/rainbowkit": "^2.2.0",
     "@raylac/api": "workspace:*",
@@ -18,7 +19,7 @@
     "@trpc/client": "11.0.0-rc.439",
     "@trpc/react-query": "11.0.0-rc.439",
     "@trpc/server": "11.0.0-rc.439",
-    "class-variance-authority": "^0.7.0",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.468.0",
     "mixpanel-browser": "^2.56.0",
