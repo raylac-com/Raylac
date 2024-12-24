@@ -8,10 +8,9 @@ import { useEffect } from 'react';
 import { PieChart, Pie, Cell, Label } from 'recharts';
 import Image from 'next/image';
 import { getTokenLogoURI } from '@/lib/utils';
-import Separator from '@/components/Separator';
-import { useState } from 'react';
 import useAddresses from '@/hooks/useAddresses';
 import AddAddressButton from '@/components/AddAddressButton/AddAddressButton';
+import Link from 'next/link';
 
 const APRChart = ({ aprUsdFormatted }: { aprUsdFormatted: string }) => {
   const data = [
@@ -23,7 +22,7 @@ const APRChart = ({ aprUsdFormatted }: { aprUsdFormatted: string }) => {
   ];
 
   return (
-    <PieChart width={180} height={400}>
+    <PieChart width={180} height={180}>
       <Pie
         isAnimationActive={false}
         data={data}
@@ -73,7 +72,7 @@ const BalanceChart = ({
   }));
 
   return (
-    <PieChart width={180} height={300}>
+    <PieChart width={180} height={180}>
       <Pie
         isAnimationActive={false}
         data={data}
@@ -107,40 +106,57 @@ const BalanceChart = ({
 
 interface BalanceListItemProps {
   token: Token;
-  balanceFormatted: string;
+  balanceFormatted?: string;
   balanceUsd: string;
+  apr?: number;
   onClick: () => void;
 }
 
 const BalanceListItem = ({
   token,
   balanceUsd,
+  balanceFormatted,
+  apr,
   onClick,
 }: BalanceListItemProps) => {
-  const [isHovered, setIsHovered] = useState(false);
-
   return (
     <div
-      className="flex flex-row items-center justify-between border-border w-full cursor-pointer"
+      className="py-[16px] pl-[16px] pr-[22px] flex flex-row items-start justify-between w-full cursor-pointer"
       onClick={onClick}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="flex flex-row items-center justify-center gap-x-[4px]">
+      <div className="flex flex-row items-center justify-center gap-x-[8px]">
         <Image
           src={getTokenLogoURI(token)}
           alt={token.symbol}
-          width={24}
-          height={24}
+          width={42}
+          height={42}
         />
-        <div className={`text-border ${isHovered ? 'text-foreground' : ''}`}>
-          {token.symbol}
+        <div className="flex flex-col gap-y-[1px]">
+          <div className={`text-foreground`}>{token.symbol}</div>
+          <div className={`text-border`}>
+            {balanceFormatted} {token.symbol}
+          </div>
         </div>
       </div>
-      <div className={`text-border ${isHovered ? 'text-foreground' : ''}`}>
-        ${balanceUsd}
+      <div className="flex flex-col justify-start">
+        <div className={`text-foreground font-bold`}>${balanceUsd}</div>
+        <div className={`text-border`}>{apr ? `${apr}%` : ''}</div>
       </div>
     </div>
+  );
+};
+
+const WalletsLabel = () => {
+  const { data: addresses } = useAddresses();
+
+  return (
+    <Link
+      href="/addresses"
+      className="flex flex-row items-center justify-start gap-x-[4px] cursor-pointer"
+    >
+      <Wallet className="w-[18px] h-[18px] text-border" />
+      <div className="text-border">{addresses?.length} addresses</div>
+    </Link>
   );
 };
 
@@ -164,17 +180,15 @@ export default function Home() {
     }
   );
 
+  const { data: lidoApr } = trpc.getLidoApy.useQuery();
+
   if (!setBalances) {
     return <div></div>;
   }
 
   return (
-    <div className="flex flex-col items-center w-[400px] pb-[220px] gap-y-[56px]">
-      <div className="flex flex-col gap-y-[8px] items-center justify-center w-full">
-        <div className="flex flex-row gap-x-[6px] items-center w-full">
-          <Wallet className="w-[20px] h-[20px] text-border" />
-          <div className="text-border">Balance</div>
-        </div>
+    <div className="flex flex-col items-center w-[400px] pb-[220px] gap-y-[52px]">
+      <div className="flex flex-col gap-y-[8px] items-center justify-center w-full mt-[16px]">
         <div className="flex flex-row justify-between items-center w-full">
           <BalanceChart
             tokenBalances={setBalances.tokenBalances}
@@ -183,23 +197,22 @@ export default function Home() {
           <APRChart aprUsdFormatted={setBalances.aprUsdFormatted} />
         </div>
       </div>
-      <div className="flex flex-col items-center justify-center border-[1px] border-border gap-y-[12px] rounded-[16px] p-[16px] w-full">
-        {setBalances.tokenBalances.map((balance, index) => (
-          <div
-            className="flex flex-col items-center justify-center w-full gap-y-[12px]"
-            key={index}
-          >
+      <div className="flex flex-col gap-y-[15px] w-full">
+        <WalletsLabel />
+        <div className="flex flex-col items-center justify-center bg-bg2 rounded-[16px] w-full">
+          {setBalances.tokenBalances.map((balance, index) => (
             <BalanceListItem
+              key={index}
               token={balance.token}
-              balanceFormatted={balance.totalBalanceUsdFormatted}
+              balanceFormatted={balance.totalBalanceFormatted}
               balanceUsd={balance.totalBalanceUsdFormatted}
+              apr={balance.token.symbol === 'ETH' ? undefined : lidoApr}
               onClick={() => {
                 router.push(`/${balance.token.symbol}/balance`);
               }}
             />
-            {index !== setBalances.tokenBalances.length - 1 && <Separator />}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
       <AddAddressButton />
     </div>
