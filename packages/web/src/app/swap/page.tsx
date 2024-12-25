@@ -5,7 +5,12 @@ import SelectTokenDialog from '@/components/SelectTokenDialog/SelectTokenDialog'
 import SwapCard from '@/components/SwapCard/SwapCard';
 import SwapCardsSkeleton from '@/components/SwapCardsSkeleton';
 import useTokenBalance from '@/hooks/useTokenBalance';
-import { getTokenLogoURI, shortenAddress } from '@/lib/utils';
+import {
+  getAddressConnectorId,
+  getTokenLogoURI,
+  getWalletIcon,
+  shortenAddress,
+} from '@/lib/utils';
 import { ETH, Token } from '@raylac/shared';
 import { WST_ETH } from '@raylac/shared';
 import { ArrowRight, ChevronsUpDown, Wallet } from 'lucide-react';
@@ -118,8 +123,18 @@ const SwapPage = () => {
                   className="flex flex-col gap-y-[8px] w-full"
                   key={balance.address}
                 >
-                  <div className="text-border">
-                    {shortenAddress(balance.address)}
+                  <div className="flex flex-row items-center gap-x-[4px]">
+                    <Image
+                      src={getWalletIcon(
+                        getAddressConnectorId(balance.address)
+                      )}
+                      alt={getAddressConnectorId(balance.address)}
+                      width={24}
+                      height={24}
+                    />
+                    <div className="text-border">
+                      {shortenAddress(balance.address)}
+                    </div>
                   </div>
                   <div className="flex flex-col gap-y-[12px] w-full">
                     {swappableChainBalances?.map(chainBalance => (

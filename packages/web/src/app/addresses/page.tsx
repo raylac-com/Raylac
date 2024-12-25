@@ -3,8 +3,9 @@ import AddAddressButton from '@/components/AddAddressButton/AddAddressButton';
 import PageTitle from '@/components/PageTitle/PageTitle';
 import useAddresses from '@/hooks/useAddresses';
 import useDeleteAddress from '@/hooks/useDeleteAddress';
-import { shortenAddress } from '@/lib/utils';
+import { getWalletIcon, shortenAddress } from '@/lib/utils';
 import { X } from 'lucide-react';
+import Image from 'next/image';
 import { Hex } from 'viem';
 
 interface AddressListItemProps {
@@ -12,7 +13,7 @@ interface AddressListItemProps {
   connectorId: string;
 }
 
-const AddressListItem = ({ address }: AddressListItemProps) => {
+const AddressListItem = ({ address, connectorId }: AddressListItemProps) => {
   const { mutate: deleteAddress } = useDeleteAddress();
 
   const onDeleteClick = () => {
@@ -23,7 +24,15 @@ const AddressListItem = ({ address }: AddressListItemProps) => {
 
   return (
     <div className="w-full flex flex-row items-center justify-between rounded-[16px] bg-bg2 py-[16px] px-[22px]">
-      <div className="text-border">{shortenAddress(address)}</div>
+      <div className="flex flex-row items-center gap-x-[6px]">
+        <Image
+          src={getWalletIcon(connectorId)}
+          alt={connectorId}
+          width={24}
+          height={24}
+        />
+        <div className="text-border">{shortenAddress(address)}</div>
+      </div>
       <X
         className="w-[20px] h-[20px] text-border cursor-pointer"
         onClick={onDeleteClick}

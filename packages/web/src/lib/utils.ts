@@ -3,6 +3,8 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { Hex, http } from 'viem';
 import * as chains from 'viem/chains';
+import { createConfig } from 'wagmi';
+import { injected, metaMask, walletConnect } from 'wagmi/connectors';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -184,3 +186,59 @@ export const getWalletIcon = (connectorId: string) => {
       throw new Error(`getWalletIcon: Unknown connector id: ${connectorId}`);
   }
 };
+
+export const getAddressConnectorId = (address: Hex) => {
+  const addresses = getAddresses();
+  const connectorId = addresses.find(a => a.address === address)?.connectorId;
+
+  if (!connectorId) {
+    throw new Error(
+      `getAddressConnectorId: No connector id found for address ${address}`
+    );
+  }
+
+  return connectorId;
+};
+
+const alchemyApiKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY as string;
+
+export const config = createConfig({
+  chains: [
+    chains.mainnet,
+    chains.base,
+    chains.arbitrum,
+    chains.optimism,
+    chains.scroll,
+  ],
+  connectors: [
+    injected(),
+    walletConnect({ projectId: '55245de0fa3490c5cabb54e076b8f855' }),
+    metaMask(),
+  ],
+  transports: {
+    [chains.mainnet.id]: getAlchemyHttpTransport({
+      chainId: chains.mainnet.id,
+      apiKey: alchemyApiKey,
+    }),
+    [chains.base.id]: getAlchemyHttpTransport({
+      chainId: chains.base.id,
+      apiKey: alchemyApiKey,
+    }),
+    [chains.arbitrum.id]: getAlchemyHttpTransport({
+      chainId: chains.arbitrum.id,
+      apiKey: alchemyApiKey,
+    }),
+    [chains.optimism.id]: getAlchemyHttpTransport({
+      chainId: chains.optimism.id,
+      apiKey: alchemyApiKey,
+    }),
+    [chains.polygon.id]: getAlchemyHttpTransport({
+      chainId: chains.polygon.id,
+      apiKey: alchemyApiKey,
+    }),
+    [chains.scroll.id]: getAlchemyHttpTransport({
+      chainId: chains.scroll.id,
+      apiKey: alchemyApiKey,
+    }),
+  },
+});

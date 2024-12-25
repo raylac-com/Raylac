@@ -1,6 +1,4 @@
-import useAddAddress from '@/hooks/useAddAddress';
 import { Plus } from 'lucide-react';
-import { Hex } from 'viem';
 import { useState } from 'react';
 import AddAddressDialog from '../AddAddressDialog/AddAddressDialog';
 
@@ -18,17 +16,6 @@ const AddButton = ({ onClick }: { onClick: () => void }) => {
 
 const AddAddressButton = () => {
   const [isAddAddressDialogOpen, setIsAddAddressDialogOpen] = useState(false);
-  const { mutate: addAddress } = useAddAddress();
-
-  const handleNewAddress = ({
-    address,
-    connectorId,
-  }: {
-    address: Hex;
-    connectorId: string;
-  }) => {
-    addAddress({ address, connectorId });
-  };
 
   return (
     <>
@@ -40,7 +27,6 @@ const AddAddressButton = () => {
       <AddAddressDialog
         open={isAddAddressDialogOpen}
         setOpen={setIsAddAddressDialogOpen}
-        onAddressConnect={handleNewAddress}
       />
     </>
   );

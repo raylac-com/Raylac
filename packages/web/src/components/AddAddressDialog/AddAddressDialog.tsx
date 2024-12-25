@@ -6,16 +6,12 @@ import {
   DialogTitle as DialogTitlePrimitive,
 } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
+import useAddAddress from '@/hooks/useAddAddress';
+import useAddresses from '@/hooks/useAddresses';
 import { getWalletIcon, shortenAddress } from '@/lib/utils';
 import Image from 'next/image';
-import { useCallback } from 'react';
-import { Hex } from 'viem';
-import {
-  useAccountEffect,
-  useConnect,
-  useConnectors,
-  useDisconnect,
-} from 'wagmi';
+import { useCallback, useEffect } from 'react';
+import { useAccount, useConnect, useConnectors, useDisconnect } from 'wagmi';
 
 // We need to do this to avoid some wired typescript warnings
 const Dialog = DialogPrimitive as any;
@@ -58,45 +54,47 @@ const WalletListItem = ({
 const AddAddressDialog = ({
   open,
   setOpen,
-  onAddressConnect,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
-  onAddressConnect: ({
-    address,
-    connectorId,
-  }: {
-    address: Hex;
-    connectorId: string;
-  }) => void;
 }) => {
   const { disconnectAsync } = useDisconnect();
   const { connect } = useConnect();
 
+  const { addresses: connectedAddresses, connector } = useAccount();
+
+  const { data: savedAddresses } = useAddresses();
   const connectors = useConnectors();
 
-  useAccountEffect({
-    onConnect(data) {
-      if (data.addresses.length === 1) {
+  const { mutate: addAddress } = useAddAddress();
+
+  useEffect(() => {
+    if (connector) {
+      const newConnectedAddresses =
+        connectedAddresses?.filter(
+          a => !savedAddresses?.some(sa => sa.address === a)
+        ) || [];
+
+      if (newConnectedAddresses.length === 1) {
         toast({
-          title: `Connected ${shortenAddress(data.address)} (${data.connector.name})`,
+          title: `Connected ${shortenAddress(newConnectedAddresses[0])} (${connector.name})`,
         });
-      } else {
+      } else if (newConnectedAddresses.length > 1) {
         toast({
-          title: `Connected ${data.addresses.length} addresses (${data.connector.name})`,
+          title: `Connected ${newConnectedAddresses.length} addresses (${connector.name})`,
         });
       }
 
-      for (const address of data.addresses) {
-        onAddressConnect({
+      for (const address of newConnectedAddresses) {
+        addAddress({
           address,
-          connectorId: data.connector.id,
+          connectorId: connector.id,
         });
       }
 
       setOpen(false);
-    },
-  });
+    }
+  }, [savedAddresses, connectedAddresses]);
 
   const onConnectClick = useCallback(
     async (connectorId: string) => {
