@@ -22,12 +22,14 @@ import { toast } from '@/hooks/use-toast';
 import useAddresses from '@/hooks/useAddresses';
 
 const SwapButton = ({
+  quoteLoaded,
   chainId,
   onClick,
   outputToken,
   isSwapping,
   address,
 }: {
+  quoteLoaded: boolean;
   chainId: number;
   onClick: () => void;
   inputToken: Token;
@@ -44,8 +46,6 @@ const SwapButton = ({
   const { disconnectAsync } = useDisconnect();
 
   const needsSwitchChain = chainId !== connectedChainId;
-  const needsSwitchToAddress =
-    getAddress(connectedAccount.address ?? zeroAddress) !== getAddress(address);
 
   const onSwitchAccountClick = async () => {
     if (!addresses) {
@@ -88,10 +88,17 @@ const SwapButton = ({
 
   return (
     <motion.div
-      whileHover={{ scale: needsSwitchToAddress ? 1 : 1.025 }}
-      whileTap={{ scale: needsSwitchToAddress ? 1 : 0.975 }}
-      className="bg-foreground rounded-[32px] h-[46px] flex flex-row items-center justify-center cursor-pointer"
+      whileHover={{ scale: quoteLoaded ? 1.025 : 1 }}
+      whileTap={{ scale: quoteLoaded ? 0.975 : 1 }}
+      className={cn(
+        'bg-foreground rounded-[32px] h-[46px] flex flex-row items-center justify-center cursor-pointer',
+        quoteLoaded ? 'opacity-100' : 'opacity-50'
+      )}
       onClick={async () => {
+        if (!quoteLoaded) {
+          return;
+        }
+
         if (needsSwitchChain) {
           await switchChainAsync({ chainId });
         }
@@ -371,6 +378,7 @@ const SwapCard = ({
               <SwapButton
                 chainId={chainId}
                 onClick={onConvertClick}
+                quoteLoaded={!!quote}
                 inputToken={inputToken}
                 outputToken={outputToken}
                 isSwapping={isSwapping}

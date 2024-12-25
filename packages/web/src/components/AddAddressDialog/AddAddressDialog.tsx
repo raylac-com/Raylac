@@ -79,11 +79,11 @@ const AddAddressDialog = ({
     onConnect(data) {
       if (data.addresses.length === 1) {
         toast({
-          title: `Added ${shortenAddress(data.address)} (${data.connector.name})`,
+          title: `Connected ${shortenAddress(data.address)} (${data.connector.name})`,
         });
       } else {
         toast({
-          title: `Added ${data.addresses.length} addresses (${data.connector.name})`,
+          title: `Connected ${data.addresses.length} addresses (${data.connector.name})`,
         });
       }
 
