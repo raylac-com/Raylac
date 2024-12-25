@@ -54,9 +54,11 @@ const WalletListItem = ({
 const AddAddressDialog = ({
   open,
   setOpen,
+  onAddressConnect,
 }: {
   open: boolean;
   setOpen: (open: boolean) => void;
+  onAddressConnect?: () => void;
 }) => {
   const { disconnectAsync } = useDisconnect();
   const { connect } = useConnect();
@@ -93,6 +95,7 @@ const AddAddressDialog = ({
       }
 
       setOpen(false);
+      onAddressConnect?.();
     }
   }, [savedAddresses, connectedAddresses]);
 
@@ -114,7 +117,7 @@ const AddAddressDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[425px] border-none rounded-[32px]">
+      <DialogContent className="max-w-[350px] md:max-w-[400px] border-none rounded-[32px]">
         <DialogHeader>
           <DialogTitle>Connect Wallet</DialogTitle>
         </DialogHeader>
