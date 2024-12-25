@@ -6,8 +6,14 @@ const useAddAddress = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (address: Hex) => {
-      saveAddress(address);
+    mutationFn: async ({
+      address,
+      connectorId,
+    }: {
+      address: Hex;
+      connectorId: string;
+    }) => {
+      saveAddress({ address, connectorId });
 
       queryClient.invalidateQueries({ queryKey: ['addresses'] });
     },

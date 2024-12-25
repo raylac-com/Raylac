@@ -9,6 +9,7 @@ import { Hex } from 'viem';
 
 interface AddressListItemProps {
   address: Hex;
+  connectorId: string;
 }
 
 const AddressListItem = ({ address }: AddressListItemProps) => {
@@ -38,8 +39,12 @@ const Addresses = () => {
     <div className="flex flex-col w-[350px] md:w-[400px]">
       <PageTitle>Addresses</PageTitle>
       <div className="flex flex-col gap-y-[16px]">
-        {addresses?.map((address, index) => (
-          <AddressListItem address={address} key={index} />
+        {addresses?.map(({ address, connectorId }, index) => (
+          <AddressListItem
+            address={address}
+            connectorId={connectorId}
+            key={index}
+          />
         ))}
       </div>
       <div className="mt-[16px]">

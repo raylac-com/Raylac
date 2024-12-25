@@ -8,11 +8,18 @@ import { ArrowUpDown, ChevronDownIcon, Loader2, Wallet } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useState } from 'react';
 import { getAddress, Hex, parseEther, zeroAddress } from 'viem';
-import { useAccount, useChainId, useSwitchChain } from 'wagmi';
+import {
+  useAccount,
+  useChainId,
+  useConnect,
+  useDisconnect,
+  useSwitchChain,
+} from 'wagmi';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import { Skeleton } from '../ui/skeleton';
 import Image from 'next/image';
 import { toast } from '@/hooks/use-toast';
+import useAddresses from '@/hooks/useAddresses';
 
 const SwapButton = ({
   chainId,
@@ -29,27 +36,62 @@ const SwapButton = ({
   isSwapping: boolean;
 }) => {
   const connectedChainId = useChainId();
+  const { data: addresses } = useAddresses();
 
   const { switchChainAsync } = useSwitchChain();
   const connectedAccount = useAccount();
+  const { connectors, connectAsync } = useConnect();
+  const { disconnectAsync } = useDisconnect();
 
   const needsSwitchChain = chainId !== connectedChainId;
   const needsSwitchToAddress =
     getAddress(connectedAccount.address ?? zeroAddress) !== getAddress(address);
 
+  const onSwitchAccountClick = async () => {
+    if (!addresses) {
+      throw new Error('Addresses not loaded');
+    }
+
+    const connectorId = addresses.find(a => a.address === address)?.connectorId;
+
+    if (!connectorId) {
+      throw new Error(`No connector id found for address ${address}`);
+    }
+
+    const connector = connectors.find(c => c.id === connectorId);
+
+    if (!connector) {
+      throw new Error(`No connector found for connector id ${connectorId}`);
+    }
+
+    await disconnectAsync();
+    await connectAsync({ connector });
+  };
+
+  if (
+    getAddress(connectedAccount.address ?? zeroAddress) !== getAddress(address)
+  ) {
+    return (
+      <motion.div
+        whileHover={{ scale: 1.025 }}
+        whileTap={{ scale: 0.975 }}
+        className="bg-foreground rounded-[32px] h-[46px] flex flex-row items-center justify-center cursor-pointer"
+        onClick={onSwitchAccountClick}
+      >
+        <div className="flex flex-row items-center gap-x-[8px]">
+          <div className="text-bg2 font-bold">Connect</div>
+          <div className="text-bg2 font-bold">{shortenAddress(address)}</div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       whileHover={{ scale: needsSwitchToAddress ? 1 : 1.025 }}
       whileTap={{ scale: needsSwitchToAddress ? 1 : 0.975 }}
-      className={cn(
-        'bg-foreground rounded-[32px] h-[46px] flex flex-row items-center justify-center cursor-pointer',
-        needsSwitchToAddress ? 'opacity-50' : ''
-      )}
+      className="bg-foreground rounded-[32px] h-[46px] flex flex-row items-center justify-center cursor-pointer"
       onClick={async () => {
-        if (needsSwitchToAddress) {
-          return;
-        }
-
         if (needsSwitchChain) {
           await switchChainAsync({ chainId });
         }
@@ -60,11 +102,6 @@ const SwapButton = ({
       {isSwapping ? (
         <div className="flex flex-row items-center gap-x-[8px]">
           <Loader2 className="w-[20px] h-[20px] text-bg2 animate-spin" />
-        </div>
-      ) : needsSwitchToAddress ? (
-        <div className="flex flex-row items-center gap-x-[8px]">
-          <div className="text-bg2 font-bold">Switch to</div>
-          <div className="text-bg2 font-bold">{shortenAddress(address)}</div>
         </div>
       ) : (
         <div className="flex flex-row items-center gap-x-[8px]">
@@ -213,21 +250,24 @@ const SwapCard = ({
   }, [amountInputText, chainId, inputToken, outputToken]);
 
   const onConvertClick = useCallback(async () => {
-    if (
-      quote &&
-      getAddress(account.address ?? zeroAddress) === getAddress(address)
-    ) {
-      await signAndSubmitSwap({
-        swapSteps: quote.swapSteps,
-      });
-
-      setAmountInputText('');
-      resetQuote();
-
-      toast({
-        title: 'Swap successful',
-      });
+    if (!quote) {
+      throw new Error('onConvertClick: No quote');
     }
+
+    if (getAddress(account.address ?? zeroAddress) !== getAddress(address)) {
+      throw new Error('onConvertClick: Account address does not match address');
+    }
+
+    await signAndSubmitSwap({
+      swapSteps: quote.swapSteps,
+    });
+
+    setAmountInputText('');
+    resetQuote();
+
+    toast({
+      title: 'Swap successful',
+    });
   }, [quote, signAndSubmitSwap, account]);
 
   const _onChangeDirectionClick = () => {

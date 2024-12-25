@@ -1,11 +1,5 @@
 'use client';
-import '@rainbow-me/rainbowkit/styles.css';
-import {
-  darkTheme,
-  getDefaultConfig,
-  RainbowKitProvider,
-} from '@rainbow-me/rainbowkit';
-import { WagmiProvider } from 'wagmi';
+import { createConfig, injected, WagmiProvider } from 'wagmi';
 import {
   mainnet,
   polygon,
@@ -21,6 +15,7 @@ import { MixpanelProvider } from '@/context/MixpanelContext';
 import { trpc } from '@/lib/trpc';
 import { httpBatchLink } from '@trpc/client';
 import Header from './Header/Header';
+import { metaMask, walletConnect } from 'wagmi/connectors';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,10 +34,13 @@ const queryClient = new QueryClient({
 
 const alchemyApiKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY as string;
 
-const config = getDefaultConfig({
-  appName: 'Raylac Funding',
-  projectId: '55245de0fa3490c5cabb54e076b8f855',
+const config = createConfig({
   chains: [mainnet, base, arbitrum, optimism, scroll],
+  connectors: [
+    injected(),
+    walletConnect({ projectId: '55245de0fa3490c5cabb54e076b8f855' }),
+    metaMask(),
+  ],
   transports: {
     [mainnet.id]: getAlchemyHttpTransport({
       chainId: mainnet.id,
@@ -69,7 +67,6 @@ const config = getDefaultConfig({
       apiKey: alchemyApiKey,
     }),
   },
-  ssr: true, // If your dApp uses server side rendering (SSR)
 });
 
 const Provider = ({ children }: { children: React.ReactNode }) => {
@@ -89,27 +86,17 @@ const Provider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
-      <QueryClientProvider client={queryClient}>
-        <WagmiProvider config={config}>
-          <RainbowKitProvider
-            theme={darkTheme({
-              accentColor: 'hsl(var(--primary))',
-              accentColorForeground: 'hsl(var(--primary-foreground))',
-              borderRadius: 'large',
-              fontStack: 'system',
-              overlayBlur: 'small',
-            })}
-          >
-            <MixpanelProvider>
-              <div className="max-w-[1440px] flex flex-col items-center mx-auto">
-                <Header />
-                {children}
-              </div>
-            </MixpanelProvider>
-            <Toaster />
-          </RainbowKitProvider>
-        </WagmiProvider>
-      </QueryClientProvider>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <MixpanelProvider>
+            <div className="max-w-[1440px] flex flex-col items-center mx-auto">
+              <Header />
+              {children}
+            </div>
+          </MixpanelProvider>
+          <Toaster />
+        </QueryClientProvider>
+      </WagmiProvider>
     </trpc.Provider>
   );
 };

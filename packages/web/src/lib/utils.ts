@@ -130,20 +130,37 @@ export const getChainColor = (chainId: number) => {
   }
 };
 
-const addressesKey = 'addresses';
+const addressesKey = 'userAddresses';
 
-export const saveAddress = (address: Hex) => {
+export const saveAddress = ({
+  address,
+  connectorId,
+}: {
+  address: Hex;
+  connectorId: string;
+}) => {
   const addresses = getAddresses();
 
   if (addresses) {
-    const newAddresses = Array.from(new Set([...addresses, address]));
+    if (addresses.some(a => a.address === address)) {
+      return;
+    }
+
+    const newAddresses = [...addresses, { address, connectorId }];
+
     window.localStorage.setItem(addressesKey, JSON.stringify(newAddresses));
   } else {
-    window.localStorage.setItem(addressesKey, JSON.stringify([address]));
+    window.localStorage.setItem(
+      addressesKey,
+      JSON.stringify([{ address, connectorId }])
+    );
   }
 };
 
-export const getAddresses = (): Hex[] => {
+export const getAddresses = (): {
+  address: Hex;
+  connectorId: string;
+}[] => {
   const addresses = window.localStorage.getItem(addressesKey);
   if (addresses) {
     return Array.from(new Set(JSON.parse(addresses)));
@@ -153,6 +170,17 @@ export const getAddresses = (): Hex[] => {
 
 export const deleteAddress = (address: Hex) => {
   const addresses = getAddresses();
-  const newAddresses = addresses.filter(a => a !== address);
+  const newAddresses = addresses.filter(a => a.address !== address);
   window.localStorage.setItem(addressesKey, JSON.stringify(newAddresses));
+};
+
+export const getWalletIcon = (connectorId: string) => {
+  switch (connectorId) {
+    case 'metaMaskSDK':
+      return '/wallets/metamask.svg';
+    case 'me.rainbow':
+      return '/wallets/rainbow.svg';
+    default:
+      throw new Error(`getWalletIcon: Unknown connector id: ${connectorId}`);
+  }
 };

@@ -250,7 +250,7 @@ export default function Home() {
   const { data: setBalances } = trpc.getSetBalances.useQuery(
     {
       set: TokenSet.ETH,
-      addresses: addresses ?? [],
+      addresses: addresses?.map(a => a.address) ?? [],
     },
     {
       enabled: addresses !== undefined && addresses.length > 0,

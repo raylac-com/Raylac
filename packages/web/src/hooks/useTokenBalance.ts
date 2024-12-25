@@ -7,7 +7,7 @@ const useTokenBalance = ({ token }: { token?: Token }) => {
 
   const { data: setBalances } = trpc.getSetBalances.useQuery(
     {
-      addresses: addresses ?? [],
+      addresses: addresses?.map(a => a.address) ?? [],
       set: TokenSet.ETH,
     },
     {

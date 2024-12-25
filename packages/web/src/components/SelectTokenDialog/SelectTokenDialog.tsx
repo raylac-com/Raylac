@@ -68,7 +68,7 @@ const SelectTokenDialog = ({
   const { data: tokenBalances } = trpc.getSetBalances.useQuery(
     {
       set: TokenSet.ETH,
-      addresses: addresses ?? [],
+      addresses: addresses?.map(a => a.address) ?? [],
     },
     {
       enabled: !!addresses,
