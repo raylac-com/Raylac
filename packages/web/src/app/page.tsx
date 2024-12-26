@@ -259,6 +259,10 @@ export default function Home() {
 
   const { data: lidoApr } = trpc.getLidoApy.useQuery();
 
+  const stakedETHBalances = setBalances?.tokenBalances
+    .filter(balance => balance.token.symbol !== 'ETH')
+    .filter(balance => balance.totalBalanceFormatted !== '0');
+
   if (!setBalances) {
     return <div></div>;
   }
@@ -267,15 +271,23 @@ export default function Home() {
     <div className="flex flex-col items-center w-[350px] md:w-[400px] pb-[220px]">
       <PageTitle>Home</PageTitle>
       <div className="flex flex-col gap-y-[8px] items-center justify-center w-full">
-        <div className="flex flex-col md:flex-row justify-between items-center w-full">
+        <div
+          className={`flex flex-col md:flex-row items-center w-full ${
+            stakedETHBalances && stakedETHBalances.length > 0
+              ? 'justify-between'
+              : 'justify-center'
+          }`}
+        >
           <BalanceChart
             tokenBalances={setBalances.tokenBalances}
             totalBalanceUsdFormatted={setBalances.totalBalanceUsdFormatted}
           />
-          <APRChart
-            tokenBalances={setBalances.tokenBalances}
-            aprUsdFormatted={setBalances.aprUsdFormatted}
-          />
+          {stakedETHBalances && stakedETHBalances.length > 0 && (
+            <APRChart
+              tokenBalances={stakedETHBalances}
+              aprUsdFormatted={setBalances.aprUsdFormatted}
+            />
+          )}
         </div>
       </div>
       <div className="flex flex-col gap-y-[15px] w-full mt-[60px]">
