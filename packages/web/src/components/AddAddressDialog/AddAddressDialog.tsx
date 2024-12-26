@@ -8,7 +8,11 @@ import {
 import { toast } from '@/hooks/use-toast';
 import useAddAddress from '@/hooks/useAddAddress';
 import useAddresses from '@/hooks/useAddresses';
-import { getWalletIcon, shortenAddress } from '@/lib/utils';
+import {
+  getWalletIcon,
+  shortenAddress,
+  supportedConnectors,
+} from '@/lib/utils';
 import Image from 'next/image';
 import { useCallback, useEffect } from 'react';
 import { useAccount, useConnect, useConnectors, useDisconnect } from 'wagmi';
@@ -122,18 +126,17 @@ const AddAddressDialog = ({
           <DialogTitle>Connect Wallet</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-y-[16px] mt-[42px]">
-          <WalletListItem
-            connectorId="metaMaskSDK"
-            onClick={() => {
-              onConnectClick('metaMaskSDK');
-            }}
-          />
-          <WalletListItem
-            connectorId="me.rainbow"
-            onClick={() => {
-              onConnectClick('me.rainbow');
-            }}
-          />
+          {connectors
+            .filter(connector => supportedConnectors.includes(connector.id))
+            .map(connector => (
+              <WalletListItem
+                key={connector.id}
+                connectorId={connector.id}
+                onClick={() => {
+                  onConnectClick(connector.id);
+                }}
+              />
+            ))}
         </div>
       </DialogContent>
     </Dialog>

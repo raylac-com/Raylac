@@ -7,6 +7,7 @@ import { getWalletIcon, shortenAddress } from '@/lib/utils';
 import { X } from 'lucide-react';
 import Image from 'next/image';
 import { Hex } from 'viem';
+import { useConnectors, useDisconnect } from 'wagmi';
 
 interface AddressListItemProps {
   address: Hex;
@@ -15,9 +16,22 @@ interface AddressListItemProps {
 
 const AddressListItem = ({ address, connectorId }: AddressListItemProps) => {
   const { mutate: deleteAddress } = useDeleteAddress();
+  const { disconnectAsync } = useDisconnect();
+  const connectors = useConnectors();
 
-  const onDeleteClick = () => {
+  const onDeleteClick = async () => {
     if (window.confirm(`Remove ${shortenAddress(address)}?`)) {
+      const connector = connectors.find(c => c.id === connectorId);
+
+      if (connector) {
+        await disconnectAsync({ connector });
+      } else {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `Connector ${connectorId} not found. Cannot disconnect account.`
+        );
+      }
+
       deleteAddress(address);
     }
   };

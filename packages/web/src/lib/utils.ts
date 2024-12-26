@@ -10,6 +10,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const supportedConnectors = ['metaMaskSDK', 'me.rainbow'];
+
 const getAlchemySubdomain = (chainId: number) => {
   let alchemySubdomain;
 

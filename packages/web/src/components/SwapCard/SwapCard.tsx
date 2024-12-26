@@ -60,12 +60,12 @@ const SwapButton = ({
 
     const connector = connectors.find(c => c.id === connectorId);
 
-    if (!connector) {
-      throw new Error(`No connector found for connector id ${connectorId}`);
+    if (connector) {
+      await disconnectAsync();
+      await connectAsync({ connector });
+    } else {
+      window.alert(`Wallet ${connectorId} not found`);
     }
-
-    await disconnectAsync();
-    await connectAsync({ connector });
   };
 
   if (
