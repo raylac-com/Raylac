@@ -65,13 +65,13 @@ jobs:
         run: pnpm build
 
       - name: Create a .env file
-        run: printf "EXPO_PUBLIC_RPC_URL=${{ env.RPC_URL }}\nEXPO_PUBLIC_ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}\n" > .env
+        run: printf "EXPO_PUBLIC_RPC_URL=${{ env.RPC_URL }}\nEXPO_PUBLIC_ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}\nAPP_VARIANT=preview" > .env
         working-directory: packages/app
 
       - name: Run eas update for the staging branch
         uses: expo/expo-github-action/preview@v8
         with:
-          command: eas update --auto --branch staging
+          command: APP_VARIANT=staging eas update --auto --branch staging
           working-directory: packages/app
 
 
