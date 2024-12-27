@@ -40,6 +40,7 @@ import SelectAmount from './screens/Send/SelectAmount/SelectAmount';
 import SelectToken from './screens/Send/SelectToken';
 import SelectChain from './screens/Send/SelectChain';
 import StartWatch from './screens/StartWatch/StartWatch';
+import AddAddress from './screens/AddAddress/AddAddress';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -225,6 +226,7 @@ const Screens = () => {
               }}
             ></RootStack.Screen>
           </RootStack.Group>
+          <RootStack.Screen name="AddAddress" component={AddAddress} />
         </RootStack.Navigator>
         <Toast></Toast>
       </GestureHandlerRootView>

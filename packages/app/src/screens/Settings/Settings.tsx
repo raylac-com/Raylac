@@ -1,12 +1,17 @@
 import StyledButton from '@/components/StyledButton/StyledButton';
+import StyledText from '@/components/StyledText/StyledText';
 import { useSignOut } from '@/hooks/useSignOut';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 const Settings = () => {
   const navigation = useTypedNavigation();
 
   const { mutateAsync: signOut, isPending: isSigningOut } = useSignOut();
+
+  const onAddAddressPress = () => {
+    navigation.navigate('AddAddress');
+  };
 
   const onSignOutPress = async () => {
     await signOut();
@@ -21,10 +26,13 @@ const Settings = () => {
       style={{
         flex: 1,
         flexDirection: 'column',
-        justifyContent: 'flex-end',
+        justifyContent: 'space-between',
         padding: 16,
       }}
     >
+      <Pressable onPress={onAddAddressPress}>
+        <StyledText>{`Add address`}</StyledText>
+      </Pressable>
       <StyledButton
         title="Sign out"
         onPress={onSignOutPress}
