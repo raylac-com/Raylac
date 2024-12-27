@@ -46,7 +46,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18.17.0
+          node-version: 18.18.0
           cache: pnpm
 
       - name: Setup EAS
@@ -56,7 +56,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Remove unnecessary packages
-        run: rm -rf ./packages/{tests,ci,scripts}
+        run: rm -rf ./packages/{tests,ci,web,scripts}
 
       - name: Install dependencies
         run: pnpm i --ignore-scripts
@@ -99,11 +99,11 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18.17.0
+          node-version: 18.18.0
           cache: pnpm
 
       - name: Remove unnecessary packages
-        run: rm -rf ./packages/{app,scripts}
+        run: rm -rf ./packages/{app,web,scripts}
 
       - name: Install dependencies
         run: pnpm i --ignore-scripts
