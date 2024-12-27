@@ -71,8 +71,10 @@ jobs:
       - name: Run eas update for the staging branch
         uses: expo/expo-github-action/preview@v8
         with:
-          command: APP_VARIANT=staging eas update --auto --branch staging
+          command: eas update --auto --branch staging
           working-directory: packages/app
+        env:
+          APP_VARIANT: staging
 
 
   integration-test:
