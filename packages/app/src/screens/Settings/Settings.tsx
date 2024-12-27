@@ -13,6 +13,10 @@ const Settings = () => {
     navigation.navigate('AddAddress');
   };
 
+  const onAdvancedPress = () => {
+    navigation.navigate('Advanced');
+  };
+
   const onSignOutPress = async () => {
     await signOut();
     navigation.reset({
@@ -30,9 +34,14 @@ const Settings = () => {
         padding: 16,
       }}
     >
-      <Pressable onPress={onAddAddressPress}>
-        <StyledText>{`Add address`}</StyledText>
-      </Pressable>
+      <View style={{ flexDirection: 'column', gap: 16 }}>
+        <Pressable onPress={onAddAddressPress}>
+          <StyledText>{`Add address`}</StyledText>
+        </Pressable>
+        <Pressable onPress={onAdvancedPress}>
+          <StyledText>{`Advanced`}</StyledText>
+        </Pressable>
+      </View>
       <StyledButton
         title="Sign out"
         onPress={onSignOutPress}
