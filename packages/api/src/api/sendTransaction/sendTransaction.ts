@@ -1,4 +1,5 @@
 import {
+  getChainName,
   getERC20TokenBalance,
   getPublicClient,
   getWalletClient,
@@ -78,11 +79,12 @@ const sendTransaction = async ({
   token,
   amount,
 }: SendTransactionRequestBody) => {
-  const bridgeTxs: {
+  const bridgeTxReceipts: {
     signedBridgeStep: SignedBridgeStep;
     txHash: Hex;
   }[] = [];
 
+  // Execute bridge steps
   for (const signedBridgeStep of signedBridgeSteps) {
     const walletClient = getWalletClient({
       chainId: signedBridgeStep.tx.chainId,
@@ -92,7 +94,13 @@ const sendTransaction = async ({
       serializedTransaction: signedBridgeStep.signature,
     });
 
-    bridgeTxs.push({
+    logger.info(
+      `Bridged ${amount} ${token.symbol} from ${getChainName(
+        signedBridgeStep.bridgeDetails.fromChainId
+      )} to ${getChainName(signedBridgeStep.bridgeDetails.toChainId)} ${txHash}`
+    );
+
+    bridgeTxReceipts.push({
       signedBridgeStep,
       txHash,
     });
@@ -106,6 +114,7 @@ const sendTransaction = async ({
     chainId: signedTransfer.tx.chainId,
   });
 
+  // Wait for balance on the destination chain to be greater than the amount
   await waitForBalance({
     chainId: signedTransfer.tx.chainId,
     address: sender,
@@ -143,19 +152,22 @@ const sendTransaction = async ({
           tokenAddress: token.addresses[0].address,
           bridges: {
             createMany: {
-              data: bridgeTxs.map(bridgeTx => ({
-                txHash: bridgeTx.txHash,
+              data: bridgeTxReceipts.map(bridgeTxReceipt => ({
+                txHash: bridgeTxReceipt.txHash,
                 fromChainId:
-                  bridgeTx.signedBridgeStep.bridgeDetails.fromChainId,
-                toChainId: bridgeTx.signedBridgeStep.bridgeDetails.toChainId,
+                  bridgeTxReceipt.signedBridgeStep.bridgeDetails.fromChainId,
+                toChainId:
+                  bridgeTxReceipt.signedBridgeStep.bridgeDetails.toChainId,
                 address: sender,
-                amountIn: bridgeTx.signedBridgeStep.bridgeDetails.amountIn,
-                amountOut: bridgeTx.signedBridgeStep.bridgeDetails.amountOut,
+                amountIn:
+                  bridgeTxReceipt.signedBridgeStep.bridgeDetails.amountIn,
+                amountOut:
+                  bridgeTxReceipt.signedBridgeStep.bridgeDetails.amountOut,
                 tokenAddress: token.addresses[0].address,
                 bridgeFeeAmount:
-                  bridgeTx.signedBridgeStep.bridgeDetails.bridgeFee,
+                  bridgeTxReceipt.signedBridgeStep.bridgeDetails.bridgeFee,
                 bridgeFeeUsd:
-                  bridgeTx.signedBridgeStep.bridgeDetails.bridgeFeeUsd,
+                  bridgeTxReceipt.signedBridgeStep.bridgeDetails.bridgeFeeUsd,
               })),
             },
           },
