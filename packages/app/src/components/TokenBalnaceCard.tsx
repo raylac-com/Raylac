@@ -30,10 +30,8 @@ const TokenBalanceCard = (props: {
       style={{
         width: '100%',
         flexDirection: 'row',
-        padding: 16,
+        paddingVertical: 10,
         borderRadius: 16,
-        borderColor: colors.border,
-        borderWidth: 1,
         columnGap: 8,
       }}
     >

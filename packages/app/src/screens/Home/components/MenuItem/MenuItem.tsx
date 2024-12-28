@@ -66,8 +66,9 @@ const MenuItem = (props: MenuItemProps) => {
             alignItems: 'center',
             width: 48,
             height: 48,
-            backgroundColor: color ?? colors.text,
             borderRadius: 100,
+            borderColor: colors.border,
+            borderWidth: 2,
           }}
         >
           {icon}

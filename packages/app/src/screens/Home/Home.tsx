@@ -106,7 +106,6 @@ const HomeScreen = () => {
         contentContainerStyle={{
           rowGap: 24,
           paddingVertical: 32,
-          paddingHorizontal: 16,
         }}
         refreshControl={
           <RefreshControl
@@ -121,36 +120,47 @@ const HomeScreen = () => {
         }
         testID="home"
       >
-        <StyledText style={{ fontSize: 36, color: colors.text }}>
-          {isLoadingAccountUsdValue ? (
-            <Skeleton style={{ width: 100, height: 24 }} />
-          ) : (
-            `$${accountUsdValue}`
-          )}
-        </StyledText>
-        <View style={{ flexDirection: 'row', columnGap: 20 }}>
+        <View
+          style={{
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: 184,
+          }}
+        >
+          <StyledText
+            style={{ fontSize: 36, fontWeight: 'bold', color: colors.text }}
+          >
+            {isLoadingAccountUsdValue ? (
+              <Skeleton style={{ width: 100, height: 24 }} />
+            ) : (
+              `$${accountUsdValue}`
+            )}
+          </StyledText>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            columnGap: 20,
+          }}
+        >
           <MenuItem
-            icon={<AntDesign name="plus" size={24} color={colors.background} />}
+            icon={<AntDesign name="plus" size={24} color={colors.text} />}
             title="Deposit"
             testID="deposit"
             onPress={onDepositPress}
           />
           <MenuItem
             icon={
-              <Ionicons
-                name="swap-horizontal"
-                size={24}
-                color={colors.background}
-              />
+              <Ionicons name="swap-horizontal" size={24} color={colors.text} />
             }
             title="Swap"
             testID="swap"
             onPress={onSwapPress}
           />
           <MenuItem
-            icon={
-              <AntDesign name="arrowup" size={24} color={colors.background} />
-            }
+            icon={<AntDesign name="arrowup" size={24} color={colors.text} />}
             title="Send"
             testID="send"
             onPress={onSendPress}
@@ -159,7 +169,11 @@ const HomeScreen = () => {
         <View
           style={{
             flexDirection: 'column',
-            rowGap: 8,
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 20,
+            borderBottomWidth: 0,
+            padding: 16,
           }}
         >
           {tokenBalances?.map((item, index) => (

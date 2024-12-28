@@ -9,7 +9,7 @@ const colors = {
   primary: '#333333',
   border: '#B8ACAC',
   background: '#FFFFFF',
-  text: '#333333',
+  text: '#1C1C1C',
   subbedText: '#B8ACAC',
   card: '#FFFFFF',
   notification: '#333333',

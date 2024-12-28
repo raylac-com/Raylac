@@ -11,8 +11,8 @@ import { NavigationContainer } from '@react-navigation/native';
 
 const Provider = ({ children }: { children: React.ReactNode }) => {
   const [loaded, _error] = useFonts({
-    'Lato-Regular': require('../assets/Lato-Regular.ttf'),
-    'Lato-Bold': require('../assets/Lato-Bold.ttf'),
+    'Nunito-Regular': require('../assets/Nunito-Regular.ttf'),
+    'Nunito-Bold': require('../assets/Nunito-Bold.ttf'),
   });
 
   if (!loaded) {

@@ -263,9 +263,9 @@ const asyncStoragePersister = createAsyncStoragePersister({
 const App = () => {
   const [loaded, error] = useFonts({
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    'Lato-Regular': require('../assets/Lato-Regular.ttf'),
+    'Nunito-Regular': require('../assets/Nunito-Regular.ttf'),
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    'Lato-Bold': require('../assets/Lato-Bold.ttf'),
+    'Nunito-Bold': require('../assets/Nunito-Bold.ttf'),
   });
 
   if (error) {
