@@ -84,7 +84,7 @@ const SelectRecipient = ({ navigation }: Props) => {
         autoCorrect={false}
         autoComplete="off"
         value={searchInput}
-        placeholder="Ethereum address"
+        placeholder="ENS or Ethereum address"
         onChangeText={setSearchInput}
         testID="search-ethereum-address"
         style={{
