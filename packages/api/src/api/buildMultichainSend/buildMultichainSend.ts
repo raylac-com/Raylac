@@ -442,10 +442,12 @@ const buildMultiChainSend = async ({
           tokenPriceUsd,
         });
 
-  const totalInputAmount = bridgeSteps.reduce(
-    (acc, step) => acc + BigInt(step.bridgeDetails.amountIn),
+  const totalBridgeFee = bridgeSteps.reduce(
+    (acc, step) => acc + BigInt(step.bridgeDetails.bridgeFee),
     0n
   );
+
+  const totalInputAmount = BigInt(amount) + totalBridgeFee;
 
   const inputAmountFormatted = formatAmount(
     totalInputAmount.toString(),
@@ -464,8 +466,7 @@ const buildMultiChainSend = async ({
     new BigNumber(tokenPriceUsd)
   );
 
-  const bridgeFee = totalInputAmount - BigInt(amount);
-  const bridgeFeeFormatted = formatUnits(bridgeFee, token.decimals);
+  const bridgeFeeFormatted = formatUnits(totalBridgeFee, token.decimals);
   const bridgeFeeUsd = new BigNumber(bridgeFeeFormatted).multipliedBy(
     new BigNumber(tokenPriceUsd)
   );
@@ -477,7 +478,7 @@ const buildMultiChainSend = async ({
     outputAmount: amount,
     outputAmountFormatted,
     outputAmountUsd: outputAmountUsd.toString(),
-    bridgeFee: bridgeFee.toString(),
+    bridgeFee: totalBridgeFee.toString(),
     bridgeFeeFormatted,
     bridgeFeeUsd: bridgeFeeUsd.toString(),
     bridgeSteps,

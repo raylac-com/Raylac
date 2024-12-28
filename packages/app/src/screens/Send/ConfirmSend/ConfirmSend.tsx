@@ -95,7 +95,6 @@ const ConfirmSend = ({ route }: Props) => {
       throw new Error('Multi chain send not built');
     }
 
-    // TODO: Sign and send
     const privateKey = await getPrivateKey();
 
     if (!privateKey) {
