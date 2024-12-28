@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import SwapInputCard from './components/SwapInputCard/SwapInputCard';
 import SwapOutputCard from './components/SwapOutputCard/SwapOutputCard';
-import { trpc } from '@/lib/trpc';
-import { formatUnits, parseUnits, zeroAddress } from 'viem';
+import { formatUnits, parseUnits } from 'viem';
 import useUserAccount from '@/hooks/useUserAccount';
 import { SupportedTokensReturnType, TRPCErrorMessage } from '@raylac/shared';
 import StyledButton from '@/components/StyledButton/StyledButton';
@@ -50,24 +49,6 @@ const Swap = () => {
       }
     );
   */
-
-  const { data: inputTokenMetadata } = trpc.getToken.useQuery(
-    {
-      tokenAddress: inputToken?.addresses[0].address ?? zeroAddress,
-    },
-    {
-      enabled: !!inputToken,
-    }
-  );
-
-  const { data: outputTokenMetadata } = trpc.getToken.useQuery(
-    {
-      tokenAddress: outputToken?.addresses[0].address ?? zeroAddress,
-    },
-    {
-      enabled: !!outputToken,
-    }
-  );
 
   // Mutations
 
@@ -118,19 +99,31 @@ const Swap = () => {
   };
 
   const onSwapPress = async () => {
-    if (swapQuote) {
-      await swap({
-        swapQuote: swapQuote,
-      });
-
-      setInputToken(null);
-      setOutputToken(null);
-      setAmountInputText('');
-
-      navigation.navigate('Tabs', {
-        screen: 'History',
-      });
+    if (!inputToken) {
+      throw new Error('Input token is null');
     }
+
+    if (!outputToken) {
+      throw new Error('Output token is null');
+    }
+
+    if (!swapQuote) {
+      throw new Error('Swap quote is null');
+    }
+
+    await swap({
+      swapQuote,
+      inputToken,
+      outputToken,
+    });
+
+    setInputToken(null);
+    setOutputToken(null);
+    setAmountInputText('');
+
+    navigation.navigate('Tabs', {
+      screen: 'History',
+    });
   };
 
   //
@@ -173,15 +166,15 @@ const Swap = () => {
             isLoadingBalance={false}
             // isLoadingBalance={isLoadingTokenBalances}
           />
-          {swapQuote && inputTokenMetadata && outputTokenMetadata && (
+          {swapQuote && inputToken && outputToken && (
             <SwapPath
               inputs={swapQuote.inputs.map(input => ({
                 ...input,
-                token: inputTokenMetadata,
+                token: inputToken,
               }))}
               output={{
                 chainId: swapQuote.output.chainId,
-                token: outputTokenMetadata,
+                token: outputToken,
               }}
             />
           )}

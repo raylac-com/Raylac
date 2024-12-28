@@ -122,30 +122,23 @@ const getSwapQuote = async ({
   amount,
   inputToken,
   outputToken,
-  chainId,
 }: GetSwapQuoteRequestBody): Promise<GetSwapQuoteReturnType> => {
   const balances = await Promise.all(
-    inputToken.addresses
-      .filter(
-        address =>
-          // If the chain id is provided, only include the balance for that chain
-          chainId && address.chainId === chainId
-      )
-      .map(async ({ chainId, address }) => {
-        const balance =
-          address === zeroAddress
-            ? await getETHBalance({ address: sender, chainId })
-            : await getERC20TokenBalance({
-                address: sender,
-                contractAddress: address,
-                chainId,
-              });
+    inputToken.addresses.map(async ({ chainId, address }) => {
+      const balance =
+        address === zeroAddress
+          ? await getETHBalance({ address: sender, chainId })
+          : await getERC20TokenBalance({
+              address: sender,
+              contractAddress: address,
+              chainId,
+            });
 
-        return {
-          chainId,
-          balance,
-        };
-      })
+      return {
+        chainId,
+        balance,
+      };
+    })
   );
 
   const swapIo = buildSwapIo({

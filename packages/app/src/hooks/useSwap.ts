@@ -1,6 +1,14 @@
 import { trpc } from '@/lib/trpc';
-import { GetSwapQuoteReturnType } from '@raylac/shared/out/rpcTypes';
-import { SignedCrossChainSwapStep, signEIP1159Tx, sleep } from '@raylac/shared';
+import {
+  GetSwapQuoteReturnType,
+  SubmitSwapRequestBody,
+} from '@raylac/shared/out/rpcTypes';
+import {
+  SignedCrossChainSwapStep,
+  signEIP1159Tx,
+  sleep,
+  Token,
+} from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
 import useUserAccount from './useUserAccount';
@@ -16,8 +24,12 @@ const useSwap = () => {
   return useMutation({
     mutationFn: async ({
       swapQuote,
+      inputToken,
+      outputToken,
     }: {
       swapQuote: GetSwapQuoteReturnType;
+      inputToken: Token;
+      outputToken: Token;
     }) => {
       await sleep(100);
 
@@ -47,10 +59,20 @@ const useSwap = () => {
         });
       }
 
-      await submitSwap({
-        swapQuote,
-        signedCrossChainSwapSteps,
-      });
+      const submitSwapRequestBody: SubmitSwapRequestBody = {
+        sender: userAccount.address,
+        signedSwapSteps: signedCrossChainSwapSteps,
+        amountIn: swapQuote.amountIn,
+        amountOut: swapQuote.amountOut,
+        amountInUsd: swapQuote.amountInUsd,
+        amountOutUsd: swapQuote.amountOutUsd,
+        tokenIn: inputToken,
+        tokenOut: outputToken,
+        relayerServiceFeeAmount: swapQuote.relayerServiceFeeAmount,
+        relayerServiceFeeUsd: swapQuote.relayerServiceFeeUsd,
+      };
+
+      await submitSwap(submitSwapRequestBody);
 
       await queryClient.invalidateQueries({
         queryKey: getQueryKey(trpc.getSetBalances),
