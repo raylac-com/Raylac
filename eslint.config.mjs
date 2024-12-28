@@ -49,7 +49,6 @@ export default tseslint.config(
   {
     ignores: [
       '**/node_modules/**',
-      'packages/contracts/dependencies',
       'packages/scripts/',
       '**/out/',
       '**/metro.config.js',

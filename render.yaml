@@ -7,7 +7,7 @@ services:
     previewPlan: starter
     runtime: node
     region: oregon
-    buildCommand: rm -rf ./packages/{app,contracts,scripts,web} && pnpm i --ignore-scripts && pnpm build
+    buildCommand: rm -rf ./packages/{app,scripts,web} && pnpm i --ignore-scripts && pnpm build
     startCommand: NODE_ENV=production pnpm -F api start
     preDeployCommand: pnpm -F db migrate:prod
     autoDeploy: true
@@ -30,7 +30,7 @@ services:
     previewPlan: starter
     runtime: node
     region: oregon
-    buildCommand: rm -rf ./packages/{app,contracts,scripts} && pnpm i --ignore-scripts && pnpm build
+    buildCommand: rm -rf ./packages/{app,scripts} && pnpm i --ignore-scripts && pnpm build
     startCommand: NODE_ENV=production pnpm -F web start
     autoDeploy: true
     envVars:
