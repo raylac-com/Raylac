@@ -153,59 +153,64 @@ const Swap = () => {
           style={{
             flexDirection: 'column',
             paddingVertical: 20,
+            flex: 1,
+            justifyContent: 'space-between',
             paddingHorizontal: 16,
-            rowGap: 16,
           }}
         >
-          <SwapInputCard
-            token={inputToken}
-            setToken={setInputToken}
-            amount={amountInputText}
-            setAmount={onInputAmountChange}
-            balance={inputTokenBalance}
-            isLoadingBalance={false}
-            // isLoadingBalance={isLoadingTokenBalances}
-          />
-          {swapQuote && inputToken && outputToken && (
-            <SwapPath
-              inputs={swapQuote.inputs.map(input => ({
-                ...input,
-                token: inputToken,
-              }))}
-              output={{
-                chainId: swapQuote.output.chainId,
-                token: outputToken,
-              }}
+          <View style={{ flex: 1, rowGap: 16 }}>
+            <SwapInputCard
+              token={inputToken}
+              setToken={setInputToken}
+              amount={amountInputText}
+              setAmount={onInputAmountChange}
+              balance={inputTokenBalance}
+              isLoadingBalance={false}
+              // isLoadingBalance={isLoadingTokenBalances}
             />
-          )}
-          <SwapOutputCard
-            token={outputToken}
-            setToken={setOutputToken}
-            amount={outputAmountFormatted}
-            setAmount={() => {}}
-            isLoadingAmount={isGettingSwapQuote}
-            usdAmount={outputAmountUsd ? Number(outputAmountUsd) : 0}
-          />
-          <StyledText style={{ color: colors.border }}>
-            {swapQuote ? `Total fee $${swapQuote.relayerServiceFeeUsd}` : ''}
-          </StyledText>
-          <StyledButton
-            disabled={
-              isAmountTooSmall ||
-              hasEnoughBalance === false ||
-              isSwapping ||
-              !swapQuote
-            }
-            isLoading={isSwapping}
-            title={
-              isAmountTooSmall
-                ? 'Amount too small'
-                : hasEnoughBalance === false
-                  ? 'Insufficient balance'
-                  : 'Swap'
-            }
-            onPress={onSwapPress}
-          />
+            {swapQuote && inputToken && outputToken && (
+              <SwapPath
+                inputs={swapQuote.inputs.map(input => ({
+                  ...input,
+                  token: inputToken,
+                }))}
+                output={{
+                  chainId: swapQuote.output.chainId,
+                  token: outputToken,
+                }}
+              />
+            )}
+            <SwapOutputCard
+              token={outputToken}
+              setToken={setOutputToken}
+              amount={outputAmountFormatted}
+              setAmount={() => {}}
+              isLoadingAmount={isGettingSwapQuote}
+              usdAmount={outputAmountUsd ? Number(outputAmountUsd) : 0}
+            />
+          </View>
+          <View style={{ rowGap: 16 }}>
+            <StyledText style={{ color: colors.border }}>
+              {swapQuote ? `Total fee $${swapQuote.relayerServiceFeeUsd}` : ''}
+            </StyledText>
+            <StyledButton
+              disabled={
+                isAmountTooSmall ||
+                hasEnoughBalance === false ||
+                isSwapping ||
+                !swapQuote
+              }
+              isLoading={isSwapping}
+              title={
+                isAmountTooSmall
+                  ? 'Amount too small'
+                  : hasEnoughBalance === false
+                    ? 'Insufficient balance'
+                    : 'Swap'
+              }
+              onPress={onSwapPress}
+            />
+          </View>
         </View>
       </SearchTokenSheetProvider>
     </SearchOutputTokenSheetProvider>
