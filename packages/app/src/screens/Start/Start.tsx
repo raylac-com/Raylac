@@ -6,24 +6,20 @@ import useTypedNavigation from '@/hooks/useTypedNavigation';
 //import { useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
+import useCreateAccount from '@/hooks/useCreateAccoun';
 
 const Start = () => {
   const insets = useSafeAreaInsets();
 
-  //  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
   const navigation = useTypedNavigation();
 
-  /*
-  const { mutateAsync: createAccount } = useCreateAccount();
+  const { mutateAsync: createAccount, isPending: isCreatingAccount } =
+    useCreateAccount();
 
   const onCreateAccountPress = async () => {
-    setIsCreatingAccount(true);
-    await sleep(300);
     await createAccount();
-    setIsCreatingAccount(false);
     navigation.navigate('SaveBackupPhrase');
   };
-  */
 
   return (
     <View
@@ -60,15 +56,11 @@ const Start = () => {
           title="Import account"
           onPress={() => navigation.navigate('ImportAccount')}
         />
-        {/**
-           * 
-            <StyledButton
-          title="Create Account"
+        <StyledButton
+          title="Create account"
           isLoading={isCreatingAccount}
           onPress={onCreateAccountPress}
-          disabled
         />
-         */}
       </View>
     </View>
   );

@@ -46,7 +46,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18.17.0
+          node-version: 18.18.0
           cache: pnpm
 
       - name: Setup EAS
@@ -56,7 +56,7 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Remove unnecessary packages
-        run: rm -rf ./packages/{tests,ci,scripts}
+        run: rm -rf ./packages/{tests,ci,web,scripts}
 
       - name: Install dependencies
         run: pnpm i --ignore-scripts
@@ -65,7 +65,7 @@ jobs:
         run: pnpm build
 
       - name: Create a .env file
-        run: printf "EXPO_PUBLIC_RPC_URL=${{ env.RPC_URL }}\nEXPO_PUBLIC_ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}\n" > .env
+        run: printf "EXPO_PUBLIC_RPC_URL=${{ env.RPC_URL }}\nEXPO_PUBLIC_ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}\nAPP_VARIANT=preview" > .env
         working-directory: packages/app
 
       - name: Run eas update for the staging branch
@@ -73,6 +73,8 @@ jobs:
         with:
           command: eas update --auto --branch staging
           working-directory: packages/app
+        env:
+          APP_VARIANT: staging
 
 
   integration-test:
@@ -99,11 +101,11 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18.17.0
+          node-version: 18.18.0
           cache: pnpm
 
       - name: Remove unnecessary packages
-        run: rm -rf ./packages/{app,scripts}
+        run: rm -rf ./packages/{app,web,scripts}
 
       - name: Install dependencies
         run: pnpm i --ignore-scripts

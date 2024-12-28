@@ -5,10 +5,12 @@ import {
   saveMnemonicAndPrivKey,
   setUserAddress,
 } from '@/lib/key';
+import { sleep } from '@raylac/shared';
 
 const useCreateAccount = () => {
   return useMutation({
     mutationFn: async () => {
+      await sleep(300);
       const mnemonic = bip39.generateMnemonic();
       const { account, privKey } = await getAccountFromMnemonic(mnemonic);
 
