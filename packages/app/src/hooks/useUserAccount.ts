@@ -19,9 +19,11 @@ const useUserAccount = () => {
         return;
       }
 
+      const singerAddress = singerAddresses[0].address;
+
       setUserAccount({
-        address: singerAddresses[0],
-        singerAddress: singerAddresses[0],
+        address: singerAddress,
+        singerAddress,
       });
       setIsLoading(false);
     };

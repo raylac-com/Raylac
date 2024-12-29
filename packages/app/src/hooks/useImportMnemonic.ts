@@ -1,22 +1,21 @@
-import { useMutation } from '@tanstack/react-query';
-import * as bip39 from 'bip39';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   getAccountFromMnemonic,
   saveMnemonic,
   savePrivateKey,
   saveUserAddress,
 } from '@/lib/key';
-import { sleep } from '@raylac/shared';
-import { useQueryClient } from '@tanstack/react-query';
 import { AddressType } from '@/types';
+import { sleep } from '@raylac/shared';
+import { useMutation } from '@tanstack/react-query';
 
-const useCreateAccount = () => {
+const useImportMnemonic = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({ mnemonic }: { mnemonic: string }) => {
       await sleep(300);
-      const mnemonic = bip39.generateMnemonic();
+
       const { account, privKey } = await getAccountFromMnemonic({
         mnemonic,
         accountIndex: 0,
@@ -37,4 +36,4 @@ const useCreateAccount = () => {
   });
 };
 
-export default useCreateAccount;
+export default useImportMnemonic;

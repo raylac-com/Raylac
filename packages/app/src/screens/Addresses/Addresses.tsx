@@ -53,7 +53,7 @@ const Addresses = () => {
     <SafeAreaView style={{ flex: 1, paddingHorizontal: 16 }}>
       <FlatList
         data={addresses}
-        renderItem={({ item }) => <AddressListItem address={item} />}
+        renderItem={({ item }) => <AddressListItem address={item.address} />}
         contentContainerStyle={{ rowGap: 10 }}
       />
       <StyledButton title="Add address" onPress={onAddAddressPress} />

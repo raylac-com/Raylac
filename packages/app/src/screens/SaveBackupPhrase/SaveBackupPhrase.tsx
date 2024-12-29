@@ -21,7 +21,7 @@ const SaveBackupPhrase = () => {
 
   const onRevealPress = useCallback(async () => {
     const addresses = await getUserAddresses();
-    const _mnemonic = await getMnemonic(addresses[0]);
+    const _mnemonic = await getMnemonic(addresses[0].address);
     if (_mnemonic) {
       setMnemonic(_mnemonic);
     } else {

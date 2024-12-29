@@ -6,11 +6,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as bip39 from 'bip39';
 import { Buffer } from 'buffer';
 import { Hex } from 'viem/_types/types/misc';
-import { getAddress } from 'viem';
+import { UserAddress } from '@/types';
 
 globalThis.Buffer = Buffer;
 
-const USER_ADDRESSES_STORAGE_KEY = 'raylac-userAddress';
+const USER_ADDRESSES_STORAGE_KEY = 'raylac-userAddresses';
 
 const REQUIRE_AUTHENTICATION = Device.isDevice;
 
@@ -65,13 +65,19 @@ const hdKeyToPrivateKey = (hdKey: HDKey): Hex => {
   return `0x${Buffer.from(hdKey.privateKey!).toString('hex')}`;
 };
 
-export const getAccountFromMnemonic = async (mnemonic: string) => {
+export const getAccountFromMnemonic = async ({
+  mnemonic,
+  accountIndex,
+}: {
+  mnemonic: string;
+  accountIndex: number;
+}) => {
   const seed = bip39.mnemonicToSeedSync(mnemonic);
 
   const hdKey = HDKey.fromMasterSeed(seed);
 
   const account = hdKeyToAccount(hdKey, {
-    accountIndex: 0,
+    accountIndex,
   });
 
   const privKey = hdKeyToPrivateKey(account.getHdKey());
@@ -79,26 +85,28 @@ export const getAccountFromMnemonic = async (mnemonic: string) => {
   return { account, privKey };
 };
 
-export const saveUserAddress = async (address: Hex) => {
+export const saveUserAddress = async (userAddress: UserAddress) => {
   // TODO: Check that the address is checksummed
 
-  const addresses = await AsyncStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
+  const addressesRaw = await AsyncStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
 
-  const addressesArray = addresses ? JSON.parse(addresses) : [];
+  const addresses = addressesRaw
+    ? (JSON.parse(addressesRaw) as UserAddress[])
+    : [];
 
-  if (addressesArray.includes(getAddress(address))) {
+  if (addresses.some(a => a.address === userAddress.address)) {
     return;
   }
 
-  addressesArray.push(getAddress(address));
+  addresses.push(userAddress);
 
   await AsyncStorage.setItem(
     USER_ADDRESSES_STORAGE_KEY,
-    JSON.stringify(addressesArray)
+    JSON.stringify(addresses)
   );
 };
 
-export const getUserAddresses = async () => {
+export const getUserAddresses = async (): Promise<UserAddress[]> => {
   const addresses = await AsyncStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
 
   return addresses ? JSON.parse(addresses) : [];

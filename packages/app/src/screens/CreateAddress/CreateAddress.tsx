@@ -1,8 +1,10 @@
 import StyledButton from '@/components/StyledButton/StyledButton';
 import StyledText from '@/components/StyledText/StyledText';
-import useCreateAccount from '@/hooks/useCreateAccoun';
+import useDeriveAddress from '@/hooks/useDeriveAddress';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
+import { getUserAddresses } from '@/lib/key';
 import colors from '@/lib/styles/colors';
+import { AddressType } from '@/types';
 import { useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,11 +13,25 @@ const CreateAddress = () => {
   const insets = useSafeAreaInsets();
   const [name, setName] = useState('');
   const navigation = useTypedNavigation();
-  const { mutate: createAccount, isPending: isCreatingAccount } =
-    useCreateAccount();
+  const { mutateAsync: deriveAddress, isPending: isDerivingAddress } =
+    useDeriveAddress();
 
-  const onCreatePress = () => {
-    createAccount();
+  const onCreatePress = async () => {
+    const addresses = await getUserAddresses();
+
+    // TODO Create a mnemonic group if there are no mnemonic addresses
+
+    const genesisAddress = addresses.find(
+      address =>
+        address.type === AddressType.Mnemonic && address.accountIndex === 0
+    );
+
+    if (!genesisAddress) {
+      throw new Error('No genesis address found');
+    }
+
+    await deriveAddress(genesisAddress);
+
     navigation.goBack();
   };
 
@@ -47,7 +63,7 @@ const CreateAddress = () => {
       <StyledButton
         title="Create"
         onPress={onCreatePress}
-        isLoading={isCreatingAccount}
+        isLoading={isDerivingAddress}
       />
     </View>
   );
