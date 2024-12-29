@@ -6,6 +6,9 @@ import { Hex } from 'viem';
 import colors from '@/lib/styles/colors';
 import { copyToClipboard, shortenAddress } from '@/lib/utils';
 import Toast from 'react-native-toast-message';
+import StyledButton from '@/components/StyledButton/StyledButton';
+import useTypedNavigation from '@/hooks/useTypedNavigation';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AddressListItem = ({ address }: { address: Hex }) => {
   const onCopyPress = () => {
@@ -20,7 +23,7 @@ const AddressListItem = ({ address }: { address: Hex }) => {
   };
 
   return (
-    <View style={{ flexDirection: 'row', padding: 10, columnGap: 8 }}>
+    <View style={{ flexDirection: 'row', columnGap: 8 }}>
       <Feather
         name="copy"
         size={20}
@@ -40,13 +43,21 @@ const AddressListItem = ({ address }: { address: Hex }) => {
 
 const Addresses = () => {
   const { data: addresses } = useUserAddresses();
+  const navigation = useTypedNavigation();
+
+  const onAddAddressPress = () => {
+    navigation.navigate('AddAddress');
+  };
 
   return (
-    <FlatList
-      data={addresses}
-      renderItem={({ item }) => <AddressListItem address={item} />}
-      contentContainerStyle={{ rowGap: 10 }}
-    />
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: 16 }}>
+      <FlatList
+        data={addresses}
+        renderItem={({ item }) => <AddressListItem address={item} />}
+        contentContainerStyle={{ rowGap: 10 }}
+      />
+      <StyledButton title="Add address" onPress={onAddAddressPress} />
+    </SafeAreaView>
   );
 };
 

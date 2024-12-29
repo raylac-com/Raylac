@@ -59,4 +59,5 @@ export type RootStackParamsList = {
 
   Addresses: undefined;
   AddAddress: undefined;
+  CreateAddress: undefined;
 };

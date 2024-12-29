@@ -9,7 +9,9 @@ const AddAddress = () => {
     navigation.navigate('ImportAccount');
   };
   const onWatchAddressPress = () => {};
-  const onCreateAddressPress = () => {};
+  const onCreateAddressPress = () => {
+    navigation.navigate('CreateAddress');
+  };
 
   return (
     <View

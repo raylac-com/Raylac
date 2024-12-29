@@ -7,8 +7,11 @@ import {
   saveUserAddress,
 } from '@/lib/key';
 import { sleep } from '@raylac/shared';
+import { useQueryClient } from '@tanstack/react-query';
 
 const useCreateAccount = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async () => {
       await sleep(300);
@@ -18,6 +21,8 @@ const useCreateAccount = () => {
       await saveMnemonic({ address: account.address, mnemonic });
       await savePrivateKey({ address: account.address, privKey });
       await saveUserAddress(account.address);
+
+      await queryClient.invalidateQueries({ queryKey: ['userAddresses'] });
     },
   });
 };
