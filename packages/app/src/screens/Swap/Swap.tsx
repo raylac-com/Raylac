@@ -10,11 +10,11 @@ import useDebounce from '@/hooks/useDebounce';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
-import useTokenBalance from '@/hooks/useTokenBalance';
 import { View } from 'react-native';
 import { SearchTokenSheetProvider } from '@/contexts/SearchInputTokenSheetContext';
 import { SearchOutputTokenSheetProvider } from '@/contexts/SearchOutputTokenSheetContext';
 import useSingleInputSwap from '@/hooks/useSingleInputSwap';
+import useChainTokenBalance from '@/hooks/useChainTokenBalance';
 
 type Token = SupportedTokensReturnType[number];
 
@@ -37,7 +37,10 @@ const Swap = () => {
   // Fetch data
   //
 
-  const { data: inputTokenBalance } = useTokenBalance(inputToken);
+  const { data: inputTokenBalance } = useChainTokenBalance({
+    chainId: inputChainId,
+    token: inputToken,
+  });
 
   /*
   const { data: tokenBalances, isLoading: isLoadingTokenBalances } =
