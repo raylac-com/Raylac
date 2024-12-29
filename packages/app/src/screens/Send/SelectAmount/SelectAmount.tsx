@@ -7,16 +7,41 @@ import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
 import { getChainIcon, shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
-import { getChainFromId } from '@raylac/shared';
+import {
+  BuildMultiChainSendRequestBody,
+  getChainFromId,
+  TRPCErrorMessage,
+} from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
-import { Chain, formatUnits } from 'viem';
+import { Chain, formatUnits, parseUnits } from 'viem';
 import Entypo from '@expo/vector-icons/Entypo';
 import useTokenBalance from '@/hooks/useTokenBalance';
 import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 import BigNumber from 'bignumber.js';
+import { trpc } from '@/lib/trpc';
+import useUserAccount from '@/hooks/useUserAccount';
+
+const ReviewButton = ({
+  onPress,
+  isLoading,
+  isBalanceSufficient,
+}: {
+  onPress: () => void;
+  isLoading: boolean;
+  isBalanceSufficient: boolean;
+}) => {
+  return (
+    <StyledButton
+      disabled={!isBalanceSufficient}
+      isLoading={isLoading}
+      title={isBalanceSufficient ? 'Next' : 'Insufficient balance'}
+      onPress={onPress}
+    />
+  );
+};
 
 const AmountInput = ({
   amount,
@@ -66,6 +91,8 @@ const SelectAmount = ({ route }: Props) => {
   const address = route.params.address;
   const token = route.params.token;
 
+  const { data: userAccount } = useUserAccount();
+
   ///
   /// Local state
   ///
@@ -74,8 +101,11 @@ const SelectAmount = ({ route }: Props) => {
   const [selectedChain, setSelectedChain] = useState<Chain>(
     getChainFromId(token.addresses[0].chainId)
   );
+
   const [isSelectChainSheetOpen, setIsSelectChainSheetOpen] =
     useState<boolean>(false);
+
+  const [isBalanceSufficient, setIsBalanceSufficient] = useState<boolean>(true);
 
   ///
   /// Queries
@@ -85,10 +115,58 @@ const SelectAmount = ({ route }: Props) => {
   const { data: tokenPriceUsd } = useTokenPriceUsd(token);
 
   ///
+  /// Mutations
+  ///
+
+  const {
+    data: _multiChainSend,
+    mutateAsync: buildMultiChainSend,
+    isPending: isBuildingMultiChainSend,
+    error: buildMultiChainSendError,
+  } = trpc.buildMultiChainSend.useMutation({
+    throwOnError: false,
+  });
+
+  ///
+  /// Effects
+  ///
+
+  useEffect(() => {
+    if (
+      buildMultiChainSendError?.message ===
+      TRPCErrorMessage.INSUFFICIENT_BALANCE
+    ) {
+      setIsBalanceSufficient(false);
+    }
+  }, [buildMultiChainSendError]);
+
+  useEffect(() => {
+    if (!userAccount) {
+      return;
+    }
+
+    const parsedAmount = parseUnits(tokenAmountInputText, token.decimals);
+
+    const buildMultiChainSendRequestBody: BuildMultiChainSendRequestBody = {
+      token,
+      amount: parsedAmount.toString(),
+      destinationChainId: selectedChain.id,
+      sender: userAccount.address,
+      to: address,
+    };
+
+    buildMultiChainSend(buildMultiChainSendRequestBody);
+  }, [userAccount, tokenAmountInputText, selectedChain, address]);
+
+  ///
   /// Handlers
   ///
 
   const handleTokenAmountInputTextChange = (amountText: string) => {
+    if (!userAccount) {
+      return;
+    }
+
     setTokenAmountInputText(amountText);
 
     if (amountText === '') {
@@ -118,6 +196,15 @@ const SelectAmount = ({ route }: Props) => {
 
       setTokenAmountInputText(tokenAmount.toString());
     }
+  };
+
+  const onReviewButtonPress = () => {
+    navigation.navigate('ConfirmSend', {
+      address,
+      amount: tokenAmountInputText,
+      token,
+      outputChainId: selectedChain.id,
+    });
   };
 
   ///
@@ -207,16 +294,10 @@ const SelectAmount = ({ route }: Props) => {
             </View>
           </Pressable>
         </View>
-        <StyledButton
-          title="Next"
-          onPress={() => {
-            navigation.navigate('ConfirmSend', {
-              address,
-              amount: tokenAmountInputText,
-              token,
-              outputChainId: selectedChain.id,
-            });
-          }}
+        <ReviewButton
+          onPress={onReviewButtonPress}
+          isLoading={isBuildingMultiChainSend}
+          isBalanceSufficient={isBalanceSufficient}
         />
       </View>
       {isSelectChainSheetOpen && (

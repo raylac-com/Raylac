@@ -16,6 +16,7 @@ export enum TRPCErrorMessage {
   SWAP_AMOUNT_TOO_SMALL = 'Swap output amount is too small to cover fees required to execute swap',
   SWAP_NO_ROUTES_FOUND = 'No routes found for the requested swap',
   SWAP_INSUFFICIENT_LIQUIDITY = 'Solver has insufficient liquidity for this swap',
+  INSUFFICIENT_BALANCE = 'Insufficient balance',
 }
 
 export type SupportedTokensReturnType = Token[];

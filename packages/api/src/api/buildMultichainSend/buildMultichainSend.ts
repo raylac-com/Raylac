@@ -10,6 +10,8 @@ import {
   Token,
   BuildMultiChainSendReturnType,
   formatAmount,
+  TRPCErrorMessage,
+  formatUsdValue,
 } from '@raylac/shared';
 import { getETHBalance } from '../getTokenBalances/getTokenBalances';
 import { encodeFunctionData, formatUnits, Hex, zeroAddress } from 'viem';
@@ -24,6 +26,7 @@ import getTokenPrice from '../getTokenPrice/getTokenPrice';
 import BigNumber from 'bignumber.js';
 import { logger } from '@raylac/shared-backend';
 import { getNonce } from '../../lib/utils';
+import { TRPCError } from '@trpc/server';
 
 createClient({
   baseApiUrl: MAINNET_RELAY_API,
@@ -160,27 +163,50 @@ const chooseBridgeInputs = async ({
       address: sender,
     });
 
-    const relayerFee = bridgeQuote.fees?.relayer;
+    const originChainGas = bridgeQuote.fees?.gas;
 
-    if (!relayerFee) {
-      throw new Error('relayerFee is undefined');
+    if (!originChainGas) {
+      throw new Error('originChainGas is undefined');
     }
 
-    if (relayerFee.amount === undefined) {
-      throw new Error('relayerFee.amount is undefined');
+    const originChainGasCurrency = originChainGas.currency!.symbol!;
+    const originChainGasFee = originChainGas.amount!;
+    const originChainGasFeeFormatted = originChainGas.amountFormatted!;
+    const originChainGasFeeUsd = originChainGas.amountUsd!;
+
+    const destinationChainGas = bridgeQuote.fees?.relayerGas;
+
+    if (!destinationChainGas) {
+      throw new Error('destinationChainGas is undefined');
     }
 
-    if (relayerFee.amountFormatted === undefined) {
-      throw new Error('relayerFee.amountFormatted is undefined');
+    const destinationChainGasCurrency = destinationChainGas.currency!.symbol!;
+    const destinationChainGasFee = destinationChainGas.amount!;
+    const destinationChainGasFeeFormatted =
+      destinationChainGas.amountFormatted!;
+    const destinationChainGasFeeUsd = destinationChainGas.amountUsd!;
+
+    const relayerServiceFee = bridgeQuote.fees?.relayerService;
+
+    if (!relayerServiceFee) {
+      throw new Error('relayerServiceFee is undefined');
     }
 
-    if (relayerFee.amountUsd === undefined) {
-      throw new Error('relayerFee.amountUsd is undefined');
+    if (relayerServiceFee.amount === undefined) {
+      throw new Error('relayerServiceFee.amount is undefined');
     }
 
-    const bridgeFee = relayerFee.amount;
-    const bridgeFeeFormatted = relayerFee.amountFormatted;
-    const bridgeFeeUsd = relayerFee.amountUsd;
+    if (relayerServiceFee.amountFormatted === undefined) {
+      throw new Error('relayerServiceFee.amountFormatted is undefined');
+    }
+
+    if (relayerServiceFee.amountUsd === undefined) {
+      throw new Error('relayerServiceFee.amountUsd is undefined');
+    }
+
+    const bridgeFee = relayerServiceFee.amount;
+    const bridgeFeeFormatted = relayerServiceFee.amountFormatted;
+    const bridgeFeeUsd = relayerServiceFee.amountUsd;
 
     const amountIn = bridgeQuote.details?.currencyIn?.amount;
 
@@ -218,6 +244,14 @@ const chooseBridgeInputs = async ({
         amountOut: amountOut.toString(),
         amountInFormatted,
         amountOutFormatted,
+        originChainGasCurrency,
+        originChainGasFee,
+        originChainGasFeeFormatted,
+        originChainGasFeeUsd,
+        destinationChainGasCurrency,
+        destinationChainGasFee,
+        destinationChainGasFeeFormatted,
+        destinationChainGasFeeUsd,
         bridgeFee,
         bridgeFeeFormatted,
         bridgeFeeUsd,
@@ -243,9 +277,13 @@ const chooseBridgeInputs = async ({
   }
 
   if (remainingAmount > 0n) {
-    throw new Error(
-      `Not enough balance, required ${amount}, remaining ${remainingAmount}`
-    );
+    throw new TRPCError({
+      code: 'BAD_REQUEST',
+      message: TRPCErrorMessage.INSUFFICIENT_BALANCE,
+      cause: {
+        remainingAmount: remainingAmount.toString(),
+      },
+    });
   }
 
   return bridgeSteps;
@@ -467,8 +505,8 @@ const buildMultiChainSend = async ({
   );
 
   const bridgeFeeFormatted = formatUnits(totalBridgeFee, token.decimals);
-  const bridgeFeeUsd = new BigNumber(bridgeFeeFormatted).multipliedBy(
-    new BigNumber(tokenPriceUsd)
+  const bridgeFeeUsd = formatUsdValue(
+    new BigNumber(bridgeFeeFormatted).multipliedBy(new BigNumber(tokenPriceUsd))
   );
 
   const response: BuildMultiChainSendReturnType = {
@@ -480,7 +518,7 @@ const buildMultiChainSend = async ({
     outputAmountUsd: outputAmountUsd.toString(),
     bridgeFee: totalBridgeFee.toString(),
     bridgeFeeFormatted,
-    bridgeFeeUsd: bridgeFeeUsd.toString(),
+    bridgeFeeUsd,
     bridgeSteps,
     transferStep,
   };

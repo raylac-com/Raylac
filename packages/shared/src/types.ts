@@ -85,6 +85,14 @@ export interface BridgeStep {
     amountOut: string;
     amountInFormatted: string;
     amountOutFormatted: string;
+    originChainGasCurrency: string;
+    originChainGasFee: string;
+    originChainGasFeeFormatted: string;
+    originChainGasFeeUsd: string;
+    destinationChainGasCurrency: string;
+    destinationChainGasFee: string;
+    destinationChainGasFeeFormatted: string;
+    destinationChainGasFeeUsd: string;
     bridgeFee: string;
     bridgeFeeFormatted: string;
     bridgeFeeUsd: string;

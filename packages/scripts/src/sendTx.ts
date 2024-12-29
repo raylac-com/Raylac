@@ -24,12 +24,12 @@ const sendTx = async () => {
     process.env.TEST_RELAY_PRIVATE_KEY as Hex
   );
 
-  const transferAmount = parseUnits('0.0001', ETH.decimals).toString();
+  const transferAmount = parseUnits('0.1', USDC.decimals).toString();
 
   const destinationChainId = arbitrum.id;
 
   const requestBody: BuildMultiChainSendRequestBody = {
-    token: ETH,
+    token: USDC,
     amount: transferAmount,
     destinationChainId: destinationChainId,
     sender: account.address,
