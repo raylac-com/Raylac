@@ -13,7 +13,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
 import useUserAccount from './useUserAccount';
 import { privateKeyToAccount } from 'viem/accounts';
-import { getPrivateKey } from '@/lib/key';
+import { getPrivateKey, getUserAddresses } from '@/lib/key';
 
 const useSwap = () => {
   const queryClient = useQueryClient();
@@ -37,7 +37,8 @@ const useSwap = () => {
         throw new Error('User account not loaded');
       }
 
-      const privKey = await getPrivateKey();
+      const addresses = await getUserAddresses();
+      const privKey = await getPrivateKey(addresses[0]);
 
       if (!privKey) {
         throw new Error('Private key not found');

@@ -43,6 +43,7 @@ import StartWatch from './screens/StartWatch/StartWatch';
 import AddAddress from './screens/AddAddress/AddAddress';
 import Advanced from './screens/Advanced/Advanced';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import Addresses from './screens/Addresses/Addresses';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -229,6 +230,7 @@ const Screens = () => {
                 }}
               ></RootStack.Screen>
             </RootStack.Group>
+            <RootStack.Screen name="Addresses" component={Addresses} />
             <RootStack.Screen name="AddAddress" component={AddAddress} />
             <RootStack.Screen name="Advanced" component={Advanced} />
           </RootStack.Navigator>

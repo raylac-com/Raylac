@@ -4,7 +4,7 @@ import Skeleton from '@/components/Skeleton/Skeleton';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import StyledText from '@/components/StyledText/StyledText';
 import useUserAccount from '@/hooks/useUserAccount';
-import { getPrivateKey } from '@/lib/key';
+import { getPrivateKey, getUserAddresses } from '@/lib/key';
 import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import { getChainIcon, shortenAddress } from '@/lib/utils';
@@ -95,7 +95,8 @@ const ConfirmSend = ({ route }: Props) => {
       throw new Error('Multi chain send not built');
     }
 
-    const privateKey = await getPrivateKey();
+    const addresses = await getUserAddresses();
+    const privateKey = await getPrivateKey(addresses[0]);
 
     if (!privateKey) {
       throw new Error('Private key not found');

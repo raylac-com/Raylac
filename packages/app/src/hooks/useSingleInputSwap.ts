@@ -29,7 +29,7 @@ const useSingleInputSwap = () => {
         throw new Error('User account not loaded');
       }
 
-      const privKey = await getPrivateKey();
+      const privKey = await getPrivateKey(userAccount.address);
 
       if (!privKey) {
         throw new Error('Private key not found');

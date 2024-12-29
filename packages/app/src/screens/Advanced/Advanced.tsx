@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import * as Updates from 'expo-updates';
 import { useEffect, useState } from 'react';
 import StyledButton from '@/components/StyledButton/StyledButton';
-import { getPrivateKey } from '@/lib/key';
+import { getPrivateKey, getUserAddresses } from '@/lib/key';
 
 const Advanced = () => {
   const EXPO_PUBLIC_RPC_URL = process.env.EXPO_PUBLIC_RPC_URL;
@@ -18,7 +18,8 @@ const Advanced = () => {
   }, []);
 
   const handleViewPrivateKeyPress = async () => {
-    const privateKey = await getPrivateKey();
+    const addresses = await getUserAddresses();
+    const privateKey = await getPrivateKey(addresses[0]);
     // eslint-disable-next-line no-console
     console.log(privateKey);
   };

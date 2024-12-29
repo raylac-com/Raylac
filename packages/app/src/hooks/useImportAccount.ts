@@ -1,8 +1,9 @@
 import {
   getAccountFromMnemonic,
-  saveMnemonicAndPrivKey,
+  saveMnemonic,
+  savePrivateKey,
+  saveUserAddress,
   setBackupVerificationStatus,
-  setUserAddress,
 } from '@/lib/key';
 import userKeys from '@/queryKeys/userKeys';
 import { sleep } from '@raylac/shared/out/utils';
@@ -16,13 +17,14 @@ const useImportAccount = () => {
       await sleep(300);
       const { account, privKey } = await getAccountFromMnemonic(mnemonic);
 
-      await saveMnemonicAndPrivKey({
-        mnemonic,
-        privKey,
-      });
-      await setUserAddress(account.address);
+      await saveMnemonic({ address: account.address, mnemonic });
+      await savePrivateKey({ address: account.address, privKey });
+      await saveUserAddress(account.address);
 
-      await setBackupVerificationStatus('complete');
+      await setBackupVerificationStatus({
+        address: account.address,
+        status: 'complete',
+      });
 
       await queryClient.invalidateQueries({
         queryKey: userKeys.userAddress,

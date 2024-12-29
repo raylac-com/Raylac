@@ -2,8 +2,9 @@ import { useMutation } from '@tanstack/react-query';
 import * as bip39 from 'bip39';
 import {
   getAccountFromMnemonic,
-  saveMnemonicAndPrivKey,
-  setUserAddress,
+  saveMnemonic,
+  savePrivateKey,
+  saveUserAddress,
 } from '@/lib/key';
 import { sleep } from '@raylac/shared';
 
@@ -14,8 +15,9 @@ const useCreateAccount = () => {
       const mnemonic = bip39.generateMnemonic();
       const { account, privKey } = await getAccountFromMnemonic(mnemonic);
 
-      await setUserAddress(account.address);
-      await saveMnemonicAndPrivKey({ mnemonic, privKey });
+      await saveMnemonic({ address: account.address, mnemonic });
+      await savePrivateKey({ address: account.address, privKey });
+      await saveUserAddress(account.address);
     },
   });
 };

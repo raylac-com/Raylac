@@ -1,7 +1,7 @@
 import {
   savePrivateKey,
   setBackupVerificationStatus,
-  setUserAddress,
+  saveUserAddress,
 } from '@/lib/key';
 import userKeys from '@/queryKeys/userKeys';
 import { sleep } from '@raylac/shared/out/utils';
@@ -17,10 +17,13 @@ const useImportPrivKey = () => {
       await sleep(300);
       const account = privateKeyToAccount(privKey);
 
-      await savePrivateKey(privKey);
-      await setUserAddress(account.address);
+      await savePrivateKey({ address: account.address, privKey });
+      await saveUserAddress(account.address);
 
-      await setBackupVerificationStatus('complete');
+      await setBackupVerificationStatus({
+        address: account.address,
+        status: 'complete',
+      });
 
       await queryClient.invalidateQueries({
         queryKey: userKeys.userAddress,

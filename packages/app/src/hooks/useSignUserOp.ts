@@ -4,9 +4,9 @@ import {
   getSenderAddressV2,
   UserOperation,
 } from '@raylac/shared';
-import { getMnemonicAndPrivKey } from '@/lib/key';
 import { Account } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
+import { getPrivateKey, getUserAddresses } from '@/lib/key';
 
 const signUserOps = async (userOps: UserOperation[], account: Account) => {
   const sender = getSenderAddressV2({
@@ -42,13 +42,15 @@ const signUserOps = async (userOps: UserOperation[], account: Account) => {
 const useSignUserOps = () => {
   return useMutation({
     mutationFn: async (userOps: UserOperation[]) => {
-      const mnemonicAndPrivKey = await getMnemonicAndPrivKey();
+      const addresses = await getUserAddresses();
 
-      if (!mnemonicAndPrivKey) {
-        throw new Error('Mnemonic and private key not found');
+      const privKey = await getPrivateKey(addresses[0]);
+
+      if (!privKey) {
+        throw new Error('Private key not found');
       }
 
-      const account = privateKeyToAccount(mnemonicAndPrivKey.privKey);
+      const account = privateKeyToAccount(privKey);
       const signedUserOps = await signUserOps(userOps, account);
       return signedUserOps;
     },

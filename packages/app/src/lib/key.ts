@@ -6,30 +6,54 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as bip39 from 'bip39';
 import { Buffer } from 'buffer';
 import { Hex } from 'viem/_types/types/misc';
+import { getAddress } from 'viem';
 
 globalThis.Buffer = Buffer;
 
-const MNEMONIC_AND_PRIV_KEY_STORAGE_KEY = 'raylac-mnemonicAndPrivKey';
-const PRIVATE_KEY_STORAGE_KEY = 'raylac-privateKey';
-
-const BACKUP_VERIFICATION_COMPLETE_STORAGE_KEY =
-  'raylac-backupVerificationComplete';
-const USER_ADDRESS_STORAGE_KEY = 'userAddress';
+const USER_ADDRESSES_STORAGE_KEY = 'raylac-userAddress';
 
 const REQUIRE_AUTHENTICATION = Device.isDevice;
 
-export const isBackupVerificationComplete = async (): Promise<boolean> => {
-  return (
-    (await SecureStore.getItem(BACKUP_VERIFICATION_COMPLETE_STORAGE_KEY)) ===
-    'true'
-  );
+/**
+ * Build a storage key for the mnemonic of an address.
+ */
+const buildMnemonicStorageKey = (address: Hex) => {
+  return `${address}-mnemonic`;
 };
 
-export const setBackupVerificationStatus = async (
-  status: 'complete' | 'incomplete'
-) => {
-  await SecureStore.setItem(
-    BACKUP_VERIFICATION_COMPLETE_STORAGE_KEY,
+/**
+ * Build a storage key for the private key of an address.
+ */
+const buildPrivateKeyStorageKey = (address: Hex) => {
+  return `${address}-private-key`;
+};
+
+/**
+ * Build a storage key for the backup verification status of an address.
+ */
+export const buildBackupVerificationStatusStorageKey = (address: Hex) => {
+  return `${address}-backup-verification-status`;
+};
+
+export const isBackupVerificationComplete = async (
+  address: Hex
+): Promise<boolean> => {
+  const item = await AsyncStorage.getItem(
+    buildBackupVerificationStatusStorageKey(address)
+  );
+
+  return item === 'true';
+};
+
+export const setBackupVerificationStatus = async ({
+  address,
+  status,
+}: {
+  address: Hex;
+  status: 'complete' | 'incomplete';
+}) => {
+  await AsyncStorage.setItem(
+    buildBackupVerificationStatusStorageKey(address),
     status === 'complete' ? 'true' : 'false'
   );
 };
@@ -55,33 +79,45 @@ export const getAccountFromMnemonic = async (mnemonic: string) => {
   return { account, privKey };
 };
 
-/**
- * Save the mnemonic and private key to secure storage.
- */
-export const saveMnemonicAndPrivKey = async ({
-  mnemonic,
-  privKey,
-}: {
-  mnemonic: string;
-  privKey: Hex;
-}) => {
-  await SecureStore.setItem(
-    MNEMONIC_AND_PRIV_KEY_STORAGE_KEY,
-    JSON.stringify({ mnemonic, privKey }),
-    {
-      requireAuthentication: REQUIRE_AUTHENTICATION,
-    }
+export const saveUserAddress = async (address: Hex) => {
+  // TODO: Check that the address is checksummed
+
+  const addresses = await AsyncStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
+
+  const addressesArray = addresses ? JSON.parse(addresses) : [];
+
+  if (addressesArray.includes(getAddress(address))) {
+    return;
+  }
+
+  addressesArray.push(getAddress(address));
+
+  await AsyncStorage.setItem(
+    USER_ADDRESSES_STORAGE_KEY,
+    JSON.stringify(addressesArray)
   );
 };
 
-export const savePrivateKey = async (privKey: Hex) => {
-  await SecureStore.setItem(PRIVATE_KEY_STORAGE_KEY, privKey, {
+export const getUserAddresses = async () => {
+  const addresses = await AsyncStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
+
+  return addresses ? JSON.parse(addresses) : [];
+};
+
+export const savePrivateKey = async ({
+  address,
+  privKey,
+}: {
+  address: Hex;
+  privKey: Hex;
+}) => {
+  await SecureStore.setItem(buildPrivateKeyStorageKey(address), privKey, {
     requireAuthentication: REQUIRE_AUTHENTICATION,
   });
 };
 
-export const getPrivateKey = async (): Promise<Hex | null> => {
-  const item = await SecureStore.getItem(PRIVATE_KEY_STORAGE_KEY, {
+export const getPrivateKey = async (address: Hex): Promise<Hex | null> => {
+  const item = await SecureStore.getItem(buildPrivateKeyStorageKey(address), {
     requireAuthentication: REQUIRE_AUTHENTICATION,
   });
 
@@ -92,37 +128,22 @@ export const getPrivateKey = async (): Promise<Hex | null> => {
   return item as Hex;
 };
 
-export const getMnemonicAndPrivKey = async (): Promise<{
+export const saveMnemonic = async ({
+  address,
+  mnemonic,
+}: {
+  address: Hex;
   mnemonic: string;
-  privKey: Hex;
-} | null> => {
-  const item = await SecureStore.getItem(MNEMONIC_AND_PRIV_KEY_STORAGE_KEY, {
-    requireAuthentication: REQUIRE_AUTHENTICATION,
-  });
-
-  return item ? JSON.parse(item) : null;
-};
-
-export const deleteMnemonicAndPrivKey = async () => {
-  await SecureStore.deleteItemAsync(MNEMONIC_AND_PRIV_KEY_STORAGE_KEY, {
+}) => {
+  await SecureStore.setItem(buildMnemonicStorageKey(address), mnemonic, {
     requireAuthentication: REQUIRE_AUTHENTICATION,
   });
 };
 
-export const getUserAddress = async () => {
-  const singerAddress = await AsyncStorage.getItem(USER_ADDRESS_STORAGE_KEY);
+export const getMnemonic = async (address: Hex): Promise<string | null> => {
+  const item = await SecureStore.getItem(buildMnemonicStorageKey(address), {
+    requireAuthentication: REQUIRE_AUTHENTICATION,
+  });
 
-  if (!singerAddress) {
-    return null;
-  }
-
-  return singerAddress as Hex;
-};
-
-export const setUserAddress = async (address: Hex) => {
-  await AsyncStorage.setItem(USER_ADDRESS_STORAGE_KEY, address);
-};
-
-export const deleteUserAddress = async () => {
-  await AsyncStorage.removeItem(USER_ADDRESS_STORAGE_KEY);
+  return item as string | null;
 };
