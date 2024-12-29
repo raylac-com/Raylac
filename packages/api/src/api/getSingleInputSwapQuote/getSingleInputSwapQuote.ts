@@ -165,6 +165,18 @@ const getSingleInputSwapQuote = async ({
     new BigNumber(quote.details.currencyOut.amountUsd)
   );
 
+  const originChainGasAmountFormatted = quote.fees.gas.amountFormatted;
+
+  if (originChainGasAmountFormatted === undefined) {
+    throw new Error('Origin chain gas amount is undefined');
+  }
+
+  const originChainGasUsd = quote.fees.gas.amountUsd;
+
+  if (originChainGasUsd === undefined) {
+    throw new Error('Origin chain gas usd is undefined');
+  }
+
   const relayerServiceFeeUsd = quote.fees.relayerService.amountUsd;
 
   if (relayerServiceFeeUsd === undefined) {
@@ -185,6 +197,8 @@ const getSingleInputSwapQuote = async ({
     amountInUsd,
     amountOutUsd,
     relayerServiceFeeUsd: relayerServiceFeeUsdFormatted,
+    originChainGasAmountFormatted,
+    originChainGasUsd: formatUsdValue(new BigNumber(originChainGasUsd)),
   };
 };
 
