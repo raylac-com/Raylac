@@ -10,6 +10,10 @@ import {
   SwapOutput,
   SwapInput,
   CrossChainSwapStep,
+  ApproveStep,
+  SwapStep,
+  SignedSingleInputSwapStep,
+  SignedApproveStep,
 } from './types';
 
 export enum TRPCErrorMessage {
@@ -106,6 +110,26 @@ export type GetSingleChainSwapQuoteReturnType = {
   amountOutUsd: string;
 };
 
+export interface GetSingleInputSwapQuoteRequestBody {
+  sender: Hex;
+  amount: string;
+  inputToken: Token;
+  outputToken: Token;
+  inputChainId: number;
+  outputChainId: number;
+}
+
+export type GetSingleInputSwapQuoteReturnType = {
+  approveStep: ApproveStep | null;
+  swapStep: SwapStep;
+  amountIn: string;
+  amountOut: string;
+  amountInFormatted: string;
+  amountOutFormatted: string;
+  amountInUsd: string;
+  amountOutUsd: string;
+};
+
 export interface SubmitSwapRequestBody {
   sender: Hex;
   signedSwapSteps: SignedCrossChainSwapStep[];
@@ -121,6 +145,11 @@ export interface SubmitSwapRequestBody {
 
 export interface SubmitSingleChainSwapRequestBody {
   signedSwapSteps: SignedCrossChainSwapStep[];
+}
+
+export interface SubmitSingleInputSwapRequestBody {
+  signedApproveStep: SignedApproveStep | null;
+  signedSwapStep: SignedSingleInputSwapStep;
 }
 
 export interface GetTokenPriceRequestBody {

@@ -150,6 +150,34 @@ export interface CrossChainSwapStep {
   */
 }
 
+export interface SwapStep {
+  originChainId: number;
+  destinationChainId: number;
+  tx: {
+    to: Hex;
+    data: Hex;
+    value: string;
+    maxFeePerGas: string;
+    maxPriorityFeePerGas: string;
+    nonce: number;
+    chainId: number;
+    gas: number;
+  };
+}
+
+export interface ApproveStep {
+  tx: {
+    to: Hex;
+    data: Hex;
+    value: string;
+    maxFeePerGas: string;
+    maxPriorityFeePerGas: string;
+    nonce: number;
+    chainId: number;
+    gas: number;
+  };
+}
+
 export type SignedBridgeStep = BridgeStep & {
   signature: Hex;
 };
@@ -159,6 +187,14 @@ export type SignedTransferStep = TransferStep & {
 };
 
 export type SignedCrossChainSwapStep = CrossChainSwapStep & {
+  signature: Hex;
+};
+
+export type SignedSingleInputSwapStep = SwapStep & {
+  signature: Hex;
+};
+
+export type SignedApproveStep = ApproveStep & {
   signature: Hex;
 };
 

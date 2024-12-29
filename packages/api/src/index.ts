@@ -15,9 +15,11 @@ import {
   BuildMultiChainSendRequestBody,
   GetHistoryRequestBody,
   GetSingleChainSwapQuoteRequestBody,
+  GetSingleInputSwapQuoteRequestBody,
   GetSwapQuoteRequestBody,
   SendTransactionRequestBody,
   SubmitSingleChainSwapRequestBody,
+  SubmitSingleInputSwapRequestBody,
   SubmitSwapRequestBody,
   TokenSet,
 } from '@raylac/shared';
@@ -36,6 +38,8 @@ import submitSingleChainSwap from './api/submitSingleChainSwap/submitSingleChain
 import getLidoApy from './api/getLidoApy/getLidoApy';
 import getSetBalances from './api/getSetBalances/getSetBalances';
 import getSet from './api/getSet/getSet';
+import getSingleInputSwapQuote from './api/getSingleInputSwapQuote/getSingleInputSwapQuote';
+import submitSingleInputSwap from './api/submitSingleInputSwap/submitSingleInputSwap';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -119,6 +123,12 @@ export const appRouter = router({
       return submitSingleChainSwap(input as SubmitSingleChainSwapRequestBody);
     }),
 
+  submitSingleInputSwap: publicProcedure
+    .input(z.any())
+    .mutation(async ({ input }) => {
+      return submitSingleInputSwap(input as SubmitSingleInputSwapRequestBody);
+    }),
+
   sendTransaction: publicProcedure
     .input(z.any())
     .mutation(async ({ input }) => {
@@ -140,6 +150,14 @@ export const appRouter = router({
     .mutation(async ({ input }) => {
       return getSingleChainSwapQuote(
         input as GetSingleChainSwapQuoteRequestBody
+      );
+    }),
+
+  getSingleInputSwapQuote: publicProcedure
+    .input(z.any())
+    .mutation(async ({ input }) => {
+      return getSingleInputSwapQuote(
+        input as GetSingleInputSwapQuoteRequestBody
       );
     }),
 
