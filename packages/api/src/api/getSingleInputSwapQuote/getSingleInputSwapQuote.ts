@@ -165,6 +165,16 @@ const getSingleInputSwapQuote = async ({
     new BigNumber(quote.details.currencyOut.amountUsd)
   );
 
+  const relayerServiceFeeUsd = quote.fees.relayerService.amountUsd;
+
+  if (relayerServiceFeeUsd === undefined) {
+    throw new Error('Relay service fee is undefined');
+  }
+
+  const relayerServiceFeeUsdFormatted = formatUsdValue(
+    new BigNumber(relayerServiceFeeUsd)
+  );
+
   return {
     approveStep,
     swapStep,
@@ -174,6 +184,7 @@ const getSingleInputSwapQuote = async ({
     amountOutFormatted,
     amountInUsd,
     amountOutUsd,
+    relayerServiceFeeUsd: relayerServiceFeeUsdFormatted,
   };
 };
 

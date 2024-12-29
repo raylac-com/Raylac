@@ -128,6 +128,7 @@ export type GetSingleInputSwapQuoteReturnType = {
   amountOutFormatted: string;
   amountInUsd: string;
   amountOutUsd: string;
+  relayerServiceFeeUsd: string;
 };
 
 export interface SubmitSwapRequestBody {

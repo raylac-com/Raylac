@@ -4,8 +4,8 @@ import { supportedChains } from '@raylac/shared';
 import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Chain } from 'viem';
-import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
-import { useRef } from 'react';
+import { BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet';
+import { useEffect, useRef } from 'react';
 import colors from '@/lib/styles/colors';
 
 const ChainListItem = ({ chain }: { chain: Chain }) => {
@@ -27,16 +27,24 @@ const ChainListItem = ({ chain }: { chain: Chain }) => {
 };
 
 const SelectChainSheet = ({
+  open,
   onSelect,
-  onClose,
 }: {
+  open: boolean;
   onSelect: (chain: Chain) => void;
-  onClose: () => void;
 }) => {
-  const ref = useRef<BottomSheet>(null);
+  const ref = useRef<BottomSheetModal>(null);
+
+  useEffect(() => {
+    if (open) {
+      ref.current?.present();
+    } else {
+      ref.current?.dismiss();
+    }
+  }, [open]);
 
   return (
-    <BottomSheet
+    <BottomSheetModal
       ref={ref}
       style={{
         flex: 1,
@@ -44,7 +52,6 @@ const SelectChainSheet = ({
         rowGap: 16,
       }}
       index={0}
-      onClose={onClose}
       enablePanDownToClose
       enableDynamicSizing={false}
       snapPoints={['100%']}
@@ -75,7 +82,7 @@ const SelectChainSheet = ({
           </Pressable>
         )}
       />
-    </BottomSheet>
+    </BottomSheetModal>
   );
 };
 

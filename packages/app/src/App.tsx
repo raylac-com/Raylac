@@ -42,6 +42,7 @@ import SelectChain from './screens/Send/SelectChain';
 import StartWatch from './screens/StartWatch/StartWatch';
 import AddAddress from './screens/AddAddress/AddAddress';
 import Advanced from './screens/Advanced/Advanced';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -130,106 +131,108 @@ const Screens = () => {
       }}
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <RootStack.Navigator initialRouteName="Tabs">
-          <RootStack.Screen
-            name="Tabs"
-            component={Tabs}
-            options={{
-              headerShown: false,
-            }}
-          ></RootStack.Screen>
-          <RootStack.Screen
-            name="Start"
-            component={Start}
-            options={{
-              headerShown: false,
-            }}
-          ></RootStack.Screen>
-          <RootStack.Screen
-            name="StartWatch"
-            component={StartWatch}
-            options={{
-              headerBackTitle: 'Back',
-            }}
-          ></RootStack.Screen>
-          <RootStack.Screen
-            name="SaveBackupPhrase"
-            component={SaveBackupPhrase}
-            options={{
-              title: 'Save Backup Phrase',
-              headerBackVisible: true,
-              headerBackTitle: 'Back',
-            }}
-          ></RootStack.Screen>
-          <RootStack.Screen
-            name="ConfirmBackupPhrase"
-            component={ConfirmBackupPhrase}
-            options={{
-              title: 'Confirm Backup Phrase',
-              headerBackVisible: true,
-            }}
-          ></RootStack.Screen>
-          <RootStack.Screen
-            name="ImportAccount"
-            component={ImportAccount}
-            options={{
-              title: 'Import Account',
-              headerBackVisible: true,
-            }}
-          ></RootStack.Screen>
-          <RootStack.Group
-            screenOptions={{
-              headerBackTitle: 'Back',
-            }}
-          >
+        <BottomSheetModalProvider>
+          <RootStack.Navigator initialRouteName="Tabs">
             <RootStack.Screen
-              name="SelectRecipient"
-              component={SelectRecipient}
+              name="Tabs"
+              component={Tabs}
               options={{
-                title: 'Select Recipient',
-                headerBackVisible: true,
+                headerShown: false,
               }}
             ></RootStack.Screen>
             <RootStack.Screen
-              name="SelectToken"
-              component={SelectToken}
+              name="Start"
+              component={Start}
               options={{
-                title: 'Select Token',
+                headerShown: false,
+              }}
+            ></RootStack.Screen>
+            <RootStack.Screen
+              name="StartWatch"
+              component={StartWatch}
+              options={{
+                headerBackTitle: 'Back',
+              }}
+            ></RootStack.Screen>
+            <RootStack.Screen
+              name="SaveBackupPhrase"
+              component={SaveBackupPhrase}
+              options={{
+                title: 'Save Backup Phrase',
                 headerBackVisible: true,
                 headerBackTitle: 'Back',
               }}
             ></RootStack.Screen>
             <RootStack.Screen
-              name="SelectAmount"
-              component={SelectAmount}
+              name="ConfirmBackupPhrase"
+              component={ConfirmBackupPhrase}
               options={{
-                title: 'Select Amount',
+                title: 'Confirm Backup Phrase',
                 headerBackVisible: true,
-                headerBackTitle: 'Back',
               }}
             ></RootStack.Screen>
             <RootStack.Screen
-              name="SelectChain"
-              component={SelectChain}
+              name="ImportAccount"
+              component={ImportAccount}
               options={{
-                title: 'Select Chain',
+                title: 'Import Account',
                 headerBackVisible: true,
-                headerBackTitle: 'Back',
               }}
             ></RootStack.Screen>
-            <RootStack.Screen
-              name="ConfirmSend"
-              component={ConfirmSend}
-              options={{
-                title: 'Confirm Send',
-                headerBackVisible: true,
+            <RootStack.Group
+              screenOptions={{
                 headerBackTitle: 'Back',
               }}
-            ></RootStack.Screen>
-          </RootStack.Group>
-          <RootStack.Screen name="AddAddress" component={AddAddress} />
-          <RootStack.Screen name="Advanced" component={Advanced} />
-        </RootStack.Navigator>
+            >
+              <RootStack.Screen
+                name="SelectRecipient"
+                component={SelectRecipient}
+                options={{
+                  title: 'Select Recipient',
+                  headerBackVisible: true,
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="SelectToken"
+                component={SelectToken}
+                options={{
+                  title: 'Select Token',
+                  headerBackVisible: true,
+                  headerBackTitle: 'Back',
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="SelectAmount"
+                component={SelectAmount}
+                options={{
+                  title: 'Select Amount',
+                  headerBackVisible: true,
+                  headerBackTitle: 'Back',
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="SelectChain"
+                component={SelectChain}
+                options={{
+                  title: 'Select Chain',
+                  headerBackVisible: true,
+                  headerBackTitle: 'Back',
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="ConfirmSend"
+                component={ConfirmSend}
+                options={{
+                  title: 'Confirm Send',
+                  headerBackVisible: true,
+                  headerBackTitle: 'Back',
+                }}
+              ></RootStack.Screen>
+            </RootStack.Group>
+            <RootStack.Screen name="AddAddress" component={AddAddress} />
+            <RootStack.Screen name="Advanced" component={Advanced} />
+          </RootStack.Navigator>
+        </BottomSheetModalProvider>
         <Toast></Toast>
       </GestureHandlerRootView>
     </TouchableWithoutFeedback>
