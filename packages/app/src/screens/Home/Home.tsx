@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import MenuItem from './components/MenuItem/MenuItem';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { Ionicons } from '@expo/vector-icons';
+// import { Ionicons } from '@expo/vector-icons';
 import { copyToClipboard, hapticOptions } from '@/lib/utils';
 import Toast from 'react-native-toast-message';
 import useAccountUsdValue from '@/hooks/useAccountUsdValue';
@@ -84,7 +84,7 @@ const HomeScreen = () => {
     }
   };
 
-  const onSwapPress = () => {
+  const _onSwapPress = () => {
     navigation.navigate('Tabs', {
       screen: 'Swap',
     });
@@ -151,6 +151,8 @@ const HomeScreen = () => {
             testID="deposit"
             onPress={onDepositPress}
           />
+          {/**
+             * 
           <MenuItem
             icon={
               <Ionicons name="swap-horizontal" size={24} color={colors.text} />
@@ -159,6 +161,7 @@ const HomeScreen = () => {
             testID="swap"
             onPress={onSwapPress}
           />
+           */}
           <MenuItem
             icon={<AntDesign name="arrowup" size={24} color={colors.text} />}
             title="Send"
