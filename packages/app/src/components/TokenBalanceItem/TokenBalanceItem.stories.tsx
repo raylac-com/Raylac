@@ -1,13 +1,13 @@
 import React from 'react';
 import { View } from 'react-native';
 import type { Meta, StoryObj } from '@storybook/react';
-import TokenBalanceCard from './TokenBalnaceCard';
+import TokenBalanceItem from './TokenBalanceItem';
 import spacing from '@/lib/styles/spacing';
 import { parseUnits } from 'viem';
 
 const meta = {
-  title: 'TokenBalanceCard',
-  component: TokenBalanceCard,
+  title: 'TokenBalanceItem',
+  component: TokenBalanceItem,
   argTypes: {
     name: { control: 'text' },
     symbol: { control: 'text' },
@@ -29,7 +29,7 @@ const meta = {
       </View>
     ),
   ],
-} satisfies Meta<typeof TokenBalanceCard>;
+} satisfies Meta<typeof TokenBalanceItem>;
 
 export default meta;
 

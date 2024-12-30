@@ -1,7 +1,7 @@
 import { ScrollView, RefreshControl, View, Pressable } from 'react-native';
 import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
-import TokenBalanceCard from '@/components/TokenBalnaceCard';
+import TokenBalanceItem from '@/components/TokenBalanceItem/TokenBalanceItem';
 import { hexToBigInt } from 'viem';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
@@ -199,7 +199,7 @@ const HomeScreen = () => {
                 setShowTokenBalanceDetailsSheet(item);
               }}
             >
-              <TokenBalanceCard
+              <TokenBalanceItem
                 balance={hexToBigInt(item.balance)}
                 tokenDecimals={item.token.decimals}
                 symbol={item.token.symbol}

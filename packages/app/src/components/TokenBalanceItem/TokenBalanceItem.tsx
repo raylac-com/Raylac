@@ -1,8 +1,8 @@
 import colors from '@/lib/styles/colors';
 import { formatAmount, formatUsdValue } from '@raylac/shared';
 import { View } from 'react-native';
-import StyledText from './StyledText/StyledText';
-import TokenLogo from './FastImage/TokenLogo';
+import StyledText from '../StyledText/StyledText';
+import TokenLogo from '../FastImage/TokenLogo';
 import BigNumber from 'bignumber.js';
 
 const shortenName = (name: string) => {
@@ -12,7 +12,7 @@ const shortenName = (name: string) => {
   return name;
 };
 
-const TokenBalanceCard = (props: {
+const TokenBalanceItem = (props: {
   name: string;
   symbol: string;
   balance: bigint;
@@ -74,4 +74,4 @@ const TokenBalanceCard = (props: {
   );
 };
 
-export default TokenBalanceCard;
+export default TokenBalanceItem;
