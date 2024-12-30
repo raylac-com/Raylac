@@ -300,15 +300,13 @@ const SelectAmount = ({ route }: Props) => {
           isBalanceSufficient={isBalanceSufficient}
         />
       </View>
-      {isSelectChainSheetOpen && (
-        <SelectChainSheet
-          onSelect={chain => {
-            setSelectedChain(chain);
-            setIsSelectChainSheetOpen(false);
-          }}
-          onClose={() => setIsSelectChainSheetOpen(false)}
-        />
-      )}
+      <SelectChainSheet
+        open={isSelectChainSheetOpen}
+        onSelect={chain => {
+          setSelectedChain(chain);
+          setIsSelectChainSheetOpen(false);
+        }}
+      />
     </View>
   );
 };

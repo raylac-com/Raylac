@@ -38,7 +38,7 @@ const useSwap = () => {
       }
 
       const addresses = await getUserAddresses();
-      const privKey = await getPrivateKey(addresses[0]);
+      const privKey = await getPrivateKey(addresses[0].address);
 
       if (!privKey) {
         throw new Error('Private key not found');

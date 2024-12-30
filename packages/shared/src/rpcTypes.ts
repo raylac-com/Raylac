@@ -30,11 +30,22 @@ export type TokenBalancesReturnType = {
   balance: Hex;
   usdValue: string;
   tokenPrice: string;
-  breakdown: {
+  // Breakdown of the token balance on chain across all addresses
+  combinedBreakdown: {
     chainId: number;
     balance: Hex;
     tokenAddress: Hex;
     usdValue: string;
+  }[];
+  // Breakdown of the token balance on chain  per address
+  perAddressBreakdown: {
+    address: Hex;
+    breakdown: {
+      chainId: number;
+      balance: Hex;
+      tokenAddress: Hex;
+      usdValue: string;
+    }[];
   }[];
 }[];
 

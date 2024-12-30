@@ -3,9 +3,9 @@ import { TokenBalancesReturnType } from '@raylac/shared';
 import { base, optimism } from 'viem/chains';
 
 const getTokenBalances = async ({
-  address: _address,
+  addresses: _addresses,
 }: {
-  address: Hex;
+  addresses: Hex[];
 }): Promise<TokenBalancesReturnType> => {
   return [
     {
@@ -26,7 +26,20 @@ const getTokenBalances = async ({
       balance: toHex(parseEther('0.4')),
       usdValue: '387.5',
       tokenPrice: '3000.24',
-      breakdown: [
+      perAddressBreakdown: [
+        {
+          address: zeroAddress,
+          breakdown: [
+            {
+              chainId: base.id,
+              balance: toHex(parseEther('0.3')),
+              tokenAddress: zeroAddress,
+              usdValue: '100.0',
+            },
+          ],
+        },
+      ],
+      combinedBreakdown: [
         {
           chainId: base.id,
           balance: toHex(parseEther('0.3')),

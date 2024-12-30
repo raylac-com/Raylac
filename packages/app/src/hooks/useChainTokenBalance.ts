@@ -1,8 +1,8 @@
 import { trpc } from '@/lib/trpc';
 import { Token } from '@raylac/shared';
-import useUserAccount from './useUserAccount';
 import { useQuery } from '@tanstack/react-query';
-import { getAddress, hexToBigInt, zeroAddress } from 'viem';
+import { getAddress, hexToBigInt } from 'viem';
+import useUserAddresses from './useUserAddresses';
 
 const useChainTokenBalance = ({
   chainId,
@@ -11,15 +11,15 @@ const useChainTokenBalance = ({
   chainId: number | null;
   token: Token | null;
 }) => {
-  const { data: userAccount } = useUserAccount();
+  const { data: userAddresses } = useUserAddresses();
 
   const { data: tokenBalances, isLoading: isLoadingTokenBalance } =
     trpc.getTokenBalances.useQuery(
       {
-        address: userAccount?.address ?? zeroAddress,
+        addresses: userAddresses?.map(address => address.address) ?? [],
       },
       {
-        enabled: !!userAccount,
+        enabled: !!userAddresses,
       }
     );
 
@@ -27,7 +27,7 @@ const useChainTokenBalance = ({
     queryKey: [
       'user-token-balance',
       token,
-      userAccount,
+      userAddresses,
       tokenBalances,
       chainId,
     ],
@@ -52,7 +52,7 @@ const useChainTokenBalance = ({
       }
 
       const totalTokenBalance = tokenBalances.find(balance => {
-        return balance.breakdown.some(breakdown => {
+        return balance.combinedBreakdown.some(breakdown => {
           return (
             getAddress(breakdown.tokenAddress) ===
             getAddress(tokenAddressOnChain.address)
@@ -60,7 +60,7 @@ const useChainTokenBalance = ({
         });
       });
 
-      const tokenBalanceOnChain = totalTokenBalance?.breakdown.find(
+      const tokenBalanceOnChain = totalTokenBalance?.combinedBreakdown.find(
         breakdown => {
           return breakdown.chainId === chainId;
         }
@@ -72,7 +72,7 @@ const useChainTokenBalance = ({
 
       return hexToBigInt(tokenBalanceOnChain.balance);
     },
-    enabled: !!token && !!tokenBalances && !!userAccount && !!chainId,
+    enabled: !!token && !!tokenBalances && !!userAddresses && !!chainId,
   });
 
   return {

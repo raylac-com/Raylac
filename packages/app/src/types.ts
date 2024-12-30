@@ -3,6 +3,7 @@ import { Hex } from 'viem';
 export enum AddressType {
   Mnemonic = 'mnemonic',
   PrivateKey = 'private-key',
+  Watch = 'watch',
 }
 
 export interface UserAddress {

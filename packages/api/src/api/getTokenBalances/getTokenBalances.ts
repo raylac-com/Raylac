@@ -40,34 +40,51 @@ export const getETHBalance = async ({
 };
 
 export const getKnownTokenBalances = async ({
-  address,
+  addresses,
 }: {
-  address: Hex;
+  addresses: Hex[];
 }): Promise<TokenBalancesReturnType> => {
   const balances = await Promise.all(
     KNOWN_TOKENS.map(async token => {
-      const multiChainBalances = await Promise.all(
+      const perAddressBreakdown = await Promise.all(
         // Get balances on each chain
-        token.addresses.map(async ({ chainId, address: contractAddress }) => {
-          const balance =
-            contractAddress === zeroAddress
-              ? await getETHBalance({ address, chainId })
-              : await getERC20TokenBalance({
-                  address,
-                  contractAddress,
+        addresses.map(async address => {
+          const addressBalanceBreakdown = await Promise.all(
+            token.addresses.map(
+              async ({ chainId, address: contractAddress }) => {
+                const balance =
+                  contractAddress === zeroAddress
+                    ? await getETHBalance({ address, chainId })
+                    : await getERC20TokenBalance({
+                        address,
+                        contractAddress,
+                        chainId,
+                      });
+
+                return {
                   chainId,
-                });
+                  tokenAddress: contractAddress,
+                  balance,
+                };
+              }
+            )
+          );
+
+          const totalBalance = addressBalanceBreakdown.reduce(
+            (acc, curr) => acc + curr.balance,
+            BigInt(0)
+          );
 
           return {
-            chainId,
-            tokenAddress: contractAddress,
-            balance,
+            address,
+            totalBalance,
+            breakdown: addressBalanceBreakdown,
           };
         })
       );
 
-      const totalBalance = multiChainBalances.reduce(
-        (acc, curr) => acc + curr.balance,
+      const totalBalance = perAddressBreakdown.reduce(
+        (acc, curr) => acc + curr.totalBalance,
         BigInt(0)
       );
 
@@ -96,22 +113,69 @@ export const getKnownTokenBalances = async ({
         .multipliedBy(new BigNumber(formatUnits(totalBalance, token.decimals)))
         .toString();
 
+      const combinedBreakdown: TokenBalancesReturnType[number]['combinedBreakdown'] =
+        [];
+
+      const chains = new Set(
+        perAddressBreakdown.flatMap(address =>
+          address.breakdown.map(breakdown => breakdown.chainId)
+        )
+      );
+
+      for (const chainId of chains) {
+        const tokenAddressOnChain = token.addresses.find(
+          address => address.chainId === chainId
+        )?.address;
+
+        if (!tokenAddressOnChain) {
+          continue;
+        }
+
+        let combinedChainBalance = BigInt(0);
+
+        for (const address of perAddressBreakdown) {
+          const chainBalance = address.breakdown.find(
+            breakdown => breakdown.chainId === chainId
+          );
+
+          if (chainBalance) {
+            combinedChainBalance += chainBalance.balance;
+          }
+        }
+
+        combinedBreakdown.push({
+          chainId,
+          balance: toHex(combinedChainBalance),
+          tokenAddress: tokenAddressOnChain,
+          usdValue: new BigNumber(usdPrice)
+            .multipliedBy(
+              new BigNumber(formatUnits(combinedChainBalance, token.decimals))
+            )
+            .toString(),
+        });
+      }
+
       const tokenBalance: TokenBalancesReturnType[number] = {
         token,
         balance: toHex(totalBalance),
         usdValue,
         tokenPrice: usdPrice,
-        breakdown: multiChainBalances
-          .filter(balance => balance.balance !== BigInt(0))
-          .sort((a, b) => (b.balance > a.balance ? 1 : -1))
-          .map(({ chainId, tokenAddress, balance }) => ({
-            chainId,
-            tokenAddress,
-            balance: toHex(balance),
-            usdValue: new BigNumber(usdPrice)
-              .multipliedBy(new BigNumber(formatUnits(balance, token.decimals)))
-              .toString(),
-          })),
+        perAddressBreakdown: perAddressBreakdown.map(address => ({
+          address: address.address,
+          breakdown: address.breakdown.map(
+            ({ chainId, tokenAddress, balance }) => ({
+              chainId,
+              tokenAddress,
+              balance: toHex(balance),
+              usdValue: new BigNumber(usdPrice)
+                .multipliedBy(
+                  new BigNumber(formatUnits(balance, token.decimals))
+                )
+                .toString(),
+            })
+          ),
+        })),
+        combinedBreakdown,
       };
 
       return tokenBalance;
@@ -128,7 +192,7 @@ const metadataCache = new NodeCache({
 /**
  * Get the balance of ERC20 tokens across all chains for a given address
  */
-const getMultiChainERC20Balances = async ({
+const _getMultiChainERC20Balances = async ({
   address,
 }: {
   address: Hex;
@@ -139,7 +203,7 @@ const getMultiChainERC20Balances = async ({
     token.addresses.map(({ address }) => getAddress(address))
   ).flat();
 
-  const multiChainTokenBalances = await Promise.all(
+  const _multiChainTokenBalances = await Promise.all(
     supportedChains.map(async chain => {
       const alchemyClient = getAlchemyClient(chain.id);
 
@@ -242,7 +306,7 @@ const getMultiChainERC20Balances = async ({
           })
       );
 
-      const multiChainTokenBalances: TokenBalancesReturnType = withUsdValue
+      const multiChainTokenBalances = withUsdValue
         .filter(token => token !== null)
         .map(({ tokenBalance, tokenMetadata, usdValue, tokenPrice }) => {
           return {
@@ -277,16 +341,24 @@ const getMultiChainERC20Balances = async ({
     })
   );
 
-  return multiChainTokenBalances.flat();
+  return [];
 };
 
-const getTokenBalances = async ({ address }: { address: Hex }) => {
-  const knownTokenBalances = await getKnownTokenBalances({ address });
-  const tokenBalances = await getMultiChainERC20Balances({ address });
+const getTokenBalances = async ({
+  addresses,
+}: {
+  addresses: Hex[];
+}): Promise<TokenBalancesReturnType> => {
+  const knownTokenBalances = await getKnownTokenBalances({ addresses });
+  /*
+  const tokenBalances = await getMultiChainERC20Balances({
+    addresses,
+  });
+  */
 
   const response: TokenBalancesReturnType = [
     ...knownTokenBalances,
-    ...tokenBalances,
+    //...tokenBalances,
   ];
 
   return response.sort((a, b) =>

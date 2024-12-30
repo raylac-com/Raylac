@@ -59,7 +59,7 @@ const pickRandom = ({ array, count }: { array: any[]; count: number }) => {
 };
 
 const ConfirmBackupPhrase = () => {
-  const { mnemonic } = useMnemonic(zeroAddress);
+  const { mnemonic } = useMnemonic();
   const [userInputs, setUserInputs] = useState<string[]>([]);
   const [hideIndices, _setHideIndices] = useState<number[]>(
     generateRandomConsecutiveNumbers({ max: 11, count: 3 })
@@ -114,7 +114,10 @@ const ConfirmBackupPhrase = () => {
             visibilityTime: 1500,
           });
 
-          await setBackupVerificationStatus('complete');
+          await setBackupVerificationStatus({
+            address: zeroAddress,
+            status: 'complete',
+          });
 
           navigation.navigate('Tabs', {
             screen: 'Home',

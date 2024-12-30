@@ -6,6 +6,8 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { hapticOptions } from '@/lib/utils';
 
 type StyledButtonProps = PressableProps & {
   isLoading?: boolean;
@@ -38,6 +40,9 @@ const StyledButton = ({ title, isLoading, ...props }: StyledButtonProps) => {
   return (
     <Pressable
       onPress={e => {
+        // Trigger haptic feedback
+        ReactNativeHapticFeedback.trigger('impactLight', hapticOptions);
+
         props.onPress?.(e);
       }}
       onPressIn={handlePressIn}

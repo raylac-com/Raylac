@@ -1,16 +1,16 @@
 import { trpc } from '@/lib/trpc';
-import useUserAccount from './useUserAccount';
-import { hexToBigInt, zeroAddress } from 'viem';
+import { hexToBigInt } from 'viem';
+import useUserAddresses from './useUserAddresses';
 
 const useTokenBalances = () => {
-  const { data: userAccount } = useUserAccount();
+  const { data: userAddresses } = useUserAddresses();
 
   const result = trpc.getTokenBalances.useQuery(
     {
-      address: userAccount?.address ?? zeroAddress,
+      addresses: userAddresses?.map(address => address.address) ?? [],
     },
     {
-      enabled: !!userAccount,
+      enabled: !!userAddresses,
     }
   );
 

@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as bip39 from 'bip39';
 import { Buffer } from 'buffer';
 import { Hex } from 'viem/_types/types/misc';
-import { UserAddress } from '@/types';
+import { AddressType, UserAddress } from '@/types';
 
 globalThis.Buffer = Buffer;
 
@@ -110,6 +110,21 @@ export const getUserAddresses = async (): Promise<UserAddress[]> => {
   const addresses = await AsyncStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
 
   return addresses ? JSON.parse(addresses) : [];
+};
+
+export const getGenesisAddress = async (): Promise<UserAddress> => {
+  const addresses = await getUserAddresses();
+
+  const genesisAddress = addresses.find(
+    address =>
+      address.type === AddressType.Mnemonic && address.accountIndex === 0
+  );
+
+  if (!genesisAddress) {
+    throw new Error('No genesis address found');
+  }
+
+  return genesisAddress;
 };
 
 export const savePrivateKey = async ({

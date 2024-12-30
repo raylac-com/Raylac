@@ -10,7 +10,7 @@ const useTokenBalance = (token: SupportedTokensReturnType[number] | null) => {
   const { data: tokenBalances, isLoading: isLoadingTokenBalance } =
     trpc.getTokenBalances.useQuery(
       {
-        address: userAccount?.address ?? zeroAddress,
+        addresses: [userAccount?.address ?? zeroAddress],
       },
       {
         enabled: !!userAccount,
@@ -30,7 +30,7 @@ const useTokenBalance = (token: SupportedTokensReturnType[number] | null) => {
       }
 
       const tokenBalance = tokenBalances.find(balance => {
-        return balance.breakdown.find(breakdown => {
+        return balance.combinedBreakdown.find(breakdown => {
           return token.addresses.some(
             tokenAddress =>
               getAddress(breakdown.tokenAddress) ===

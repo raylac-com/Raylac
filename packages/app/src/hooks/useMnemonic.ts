@@ -1,17 +1,20 @@
 import { getMnemonic } from '@/lib/key';
 import { useEffect, useState } from 'react';
-import { Hex } from 'viem/_types/types/misc';
+import useGenesisAddress from './useGenesisAddress';
 
-const useMnemonic = (address: Hex) => {
+const useMnemonic = () => {
+  const { data: genesisAddress } = useGenesisAddress();
   const [mnemonic, setMnemonic] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
-      const _mnemonic = await getMnemonic(address);
-      if (_mnemonic) {
-        setMnemonic(_mnemonic);
-      } else {
-        throw new Error('Mnemonic not found');
+      if (genesisAddress) {
+        const _mnemonic = await getMnemonic(genesisAddress.address);
+        if (_mnemonic) {
+          setMnemonic(_mnemonic);
+        } else {
+          throw new Error('Mnemonic not found');
+        }
       }
     })();
   }, []);

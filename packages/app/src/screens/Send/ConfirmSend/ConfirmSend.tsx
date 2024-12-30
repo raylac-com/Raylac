@@ -96,7 +96,7 @@ const ConfirmSend = ({ route }: Props) => {
     }
 
     const addresses = await getUserAddresses();
-    const privateKey = await getPrivateKey(addresses[0]);
+    const privateKey = await getPrivateKey(addresses[0].address);
 
     if (!privateKey) {
       throw new Error('Private key not found');

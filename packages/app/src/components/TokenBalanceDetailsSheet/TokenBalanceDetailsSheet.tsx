@@ -134,7 +134,7 @@ const TokenBalanceDetailsSheet = ({
           </View>
         </View>
         <View style={{ flexDirection: 'column', rowGap: 12 }}>
-          {tokenBalance.breakdown.map((chainTokenBalance, i) => (
+          {tokenBalance.combinedBreakdown.map((chainTokenBalance, i) => (
             <ChainTokenBalance
               key={i}
               chainId={chainTokenBalance.chainId}

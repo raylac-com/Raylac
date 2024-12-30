@@ -62,13 +62,13 @@ export const appRouter = router({
   getTokenBalances: publicProcedure
     .input(
       z.object({
-        address: z.string(),
+        addresses: z.array(z.string()),
       })
     )
     .query(async ({ input }) => {
       return MOCK_RESPONSE
-        ? getTokenBalancesMock({ address: input.address as Hex })
-        : getTokenBalances({ address: input.address as Hex });
+        ? getTokenBalancesMock({ addresses: input.addresses as Hex[] })
+        : getTokenBalances({ addresses: input.addresses as Hex[] });
     }),
 
   getToken: publicProcedure

@@ -8,8 +8,12 @@ import { AddressType, UserAddress } from '@/types';
 import { useMutation } from '@tanstack/react-query';
 
 const deriveAddress = async (fromAddress: UserAddress) => {
-  if (fromAddress.type !== AddressType.Mnemonic) {
+  if (fromAddress.type === AddressType.PrivateKey) {
     throw new Error('Cannot derive address from private key');
+  }
+
+  if (fromAddress.type === AddressType.Watch) {
+    throw new Error('Cannot derive address from watch address');
   }
 
   if (fromAddress.accountIndex !== 0) {

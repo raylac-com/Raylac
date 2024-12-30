@@ -36,3 +36,8 @@ export const getChainIcon = (chainId: number) => {
       return null;
   }
 };
+
+export const hapticOptions = {
+  enableVibrateFallback: true,
+  ignoreAndroidSystemSettings: false,
+};

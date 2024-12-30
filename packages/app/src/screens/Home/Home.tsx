@@ -1,23 +1,23 @@
 import { ScrollView, RefreshControl, View, Pressable } from 'react-native';
 import colors from '@/lib/styles/colors';
-import useUserAccount from '@/hooks/useUserAccount';
 import { trpc } from '@/lib/trpc';
 import TokenBalanceCard from '@/components/TokenBalnaceCard';
-import { hexToBigInt, zeroAddress } from 'viem';
+import { hexToBigInt } from 'viem';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import MenuItem from './components/MenuItem/MenuItem';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Ionicons } from '@expo/vector-icons';
-import { copyToClipboard } from '@/lib/utils';
+import { copyToClipboard, hapticOptions } from '@/lib/utils';
 import Toast from 'react-native-toast-message';
 import useAccountUsdValue from '@/hooks/useAccountUsdValue';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import TokenBalanceDetailsSheet from '@/components/TokenBalanceDetailsSheet/TokenBalanceDetailsSheet';
 import { TokenBalancesReturnType } from '@raylac/shared';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
+import useUserAddresses from '@/hooks/useUserAddresses';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 const HomeScreen = () => {
   const navigation = useTypedNavigation();
   const insets = useSafeAreaInsets();
@@ -33,14 +33,14 @@ const HomeScreen = () => {
   /// Queries
   ///
 
-  const { data: userAccount, isLoading: isLoadingAddress } = useUserAccount();
+  const { data: userAddresses } = useUserAddresses();
 
   const { data: tokenBalances, refetch } = trpc.getTokenBalances.useQuery(
     {
-      address: userAccount?.address ?? zeroAddress,
+      addresses: userAddresses?.map(address => address.address) ?? [],
     },
     {
-      enabled: !!userAccount,
+      enabled: !!userAddresses,
     }
   );
 
@@ -53,7 +53,7 @@ const HomeScreen = () => {
 
   useEffect(() => {
     const init = async () => {
-      if (userAccount === null && !isLoadingAddress) {
+      if (userAddresses !== undefined && userAddresses.length === 0) {
         navigation.reset({
           index: 0,
           routes: [{ name: 'Start' }],
@@ -63,15 +63,15 @@ const HomeScreen = () => {
 
     // Only run after the cache is reset and we have a definitive userAccount value
     init();
-  }, [userAccount, isLoadingAddress]);
+  }, [userAddresses]);
 
   ///
   /// Handlers
   ///
 
   const onDepositPress = () => {
-    if (userAccount) {
-      copyToClipboard(userAccount.address);
+    if (userAddresses) {
+      copyToClipboard(userAddresses[0].address);
       Toast.show({
         type: 'success',
         text1: 'Address copied to clipboard',
@@ -179,7 +179,10 @@ const HomeScreen = () => {
           {tokenBalances?.map((item, index) => (
             <Pressable
               key={index}
-              onPress={() => setShowTokenBalanceDetailsSheet(item)}
+              onPress={() => {
+                ReactNativeHapticFeedback.trigger('impactLight', hapticOptions);
+                setShowTokenBalanceDetailsSheet(item);
+              }}
             >
               <TokenBalanceCard
                 balance={hexToBigInt(item.balance)}

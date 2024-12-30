@@ -98,7 +98,6 @@ const ChainSelector = ({ chainId, setChainId }: ChainSelectorProps) => {
           setChainId(chain.id);
           setIsChainsSheetOpen(false);
         }}
-        onClose={() => setIsChainsSheetOpen(false)}
       />
     </View>
   );
