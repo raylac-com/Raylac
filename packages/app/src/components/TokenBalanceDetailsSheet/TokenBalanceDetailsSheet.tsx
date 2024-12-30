@@ -143,7 +143,7 @@ const TokenBalanceDetailsSheet = ({
                 hexToBigInt(chainTokenBalance.balance).toString(),
                 tokenBalance.token.decimals
               )}
-              usdValue={chainTokenBalance.usdValue}
+              usdValue={'0'}
             />
           ))}
         </View>

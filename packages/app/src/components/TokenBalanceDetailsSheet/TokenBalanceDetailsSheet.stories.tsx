@@ -33,8 +33,6 @@ const meta = {
             {
               chainId: base.id,
               balance: toHex(parseUnits('100', 6)),
-              tokenAddress: zeroAddress,
-              usdValue: '100',
             },
           ],
         },
@@ -43,8 +41,6 @@ const meta = {
         {
           chainId: base.id,
           balance: toHex(parseUnits('100', 6)),
-          tokenAddress: zeroAddress,
-          usdValue: '100',
         },
       ],
     },

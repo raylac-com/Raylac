@@ -33,8 +33,6 @@ const getTokenBalances = async ({
             {
               chainId: base.id,
               balance: toHex(parseEther('0.3')),
-              tokenAddress: zeroAddress,
-              usdValue: '100.0',
             },
           ],
         },
@@ -43,14 +41,10 @@ const getTokenBalances = async ({
         {
           chainId: base.id,
           balance: toHex(parseEther('0.3')),
-          tokenAddress: zeroAddress,
-          usdValue: '100.0',
         },
         {
           chainId: optimism.id,
           balance: toHex(parseEther('0.1')),
-          tokenAddress: zeroAddress,
-          usdValue: '100.0',
         },
       ],
     },

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import SwapInputCard from './components/SwapInputCard/SwapInputCard';
 import SwapOutputCard from './components/SwapOutputCard/SwapOutputCard';
-import { formatUnits, parseUnits } from 'viem';
+import { formatUnits, parseUnits, zeroAddress } from 'viem';
 import useUserAccount from '@/hooks/useUserAccount';
 import { SupportedTokensReturnType, TRPCErrorMessage } from '@raylac/shared';
 import StyledButton from '@/components/StyledButton/StyledButton';
@@ -40,6 +40,7 @@ const Swap = () => {
   const { data: inputTokenBalance } = useChainTokenBalance({
     chainId: inputChainId,
     token: inputToken,
+    address: userAccount?.address ?? zeroAddress,
   });
 
   /*
@@ -169,8 +170,10 @@ const Swap = () => {
   //
 
   const hasEnoughBalance =
-    inputTokenBalance !== undefined && parsedInputAmount !== null
-      ? inputTokenBalance >= parsedInputAmount
+    inputTokenBalance !== null &&
+    inputTokenBalance !== undefined &&
+    parsedInputAmount !== null
+      ? BigInt(inputTokenBalance.balance) >= parsedInputAmount
       : undefined;
 
   const outputAmount = swapQuote?.amountOut;
@@ -202,7 +205,11 @@ const Swap = () => {
               setToken={onInputTokenChange}
               amount={amountInputText}
               setAmount={onInputAmountChange}
-              balance={inputTokenBalance}
+              balance={
+                inputTokenBalance?.balance
+                  ? BigInt(inputTokenBalance.balance)
+                  : undefined
+              }
               isLoadingBalance={false}
               chainId={inputChainId}
               setChainId={setInputChainId}
