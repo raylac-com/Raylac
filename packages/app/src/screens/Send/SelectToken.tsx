@@ -56,7 +56,7 @@ const SelectToken = ({ navigation, route }: Props) => {
   const { data: tokenBalances } = useTokenBalances();
 
   const onTokenPress = (token: Token) => {
-    navigation.navigate('SelectFromAddress', {
+    navigation.navigate('SelectChain', {
       toAddress,
       token,
     });

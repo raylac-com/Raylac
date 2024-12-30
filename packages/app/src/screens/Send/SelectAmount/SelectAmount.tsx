@@ -1,11 +1,10 @@
-import Blockie from '@/components/Blockie/Blockie';
 import SelectChainSheet from '@/components/SelectChainSheet/SelectChainSheet';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import StyledText from '@/components/StyledText/StyledText';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
-import { getChainIcon, shortenAddress } from '@/lib/utils';
+import { getChainIcon } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import {
   BuildAggregateSendRequestBody,
@@ -22,6 +21,7 @@ import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 import BigNumber from 'bignumber.js';
 import { trpc } from '@/lib/trpc';
 import useChainTokenBalance from '@/hooks/useChainTokenBalance';
+import AddressSelector from '@/components/AddressSelector/AddressSelector';
 
 const ReviewButton = ({
   onPress,
@@ -94,6 +94,7 @@ const SelectAmount = ({ route }: Props) => {
   const toAddress = route.params.toAddress;
   const fromAddresses = route.params.fromAddresses;
   const token = route.params.token;
+  const chainId = route.params.chainId;
 
   ///
   /// Local state
@@ -101,7 +102,7 @@ const SelectAmount = ({ route }: Props) => {
   const [tokenAmountInputText, setTokenAmountInputText] = useState<string>('');
   const [usdAmountInputText, setUsdAmountInputText] = useState<string>('');
   const [selectedChain, setSelectedChain] = useState<Chain>(
-    getChainFromId(token.addresses[0].chainId)
+    getChainFromId(chainId)
   );
 
   const [isSelectChainSheetOpen, setIsSelectChainSheetOpen] =
@@ -213,6 +214,7 @@ const SelectAmount = ({ route }: Props) => {
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flex: 1, padding: 16, rowGap: 20 }}>
+        <AddressSelector address={fromAddresses[0]} setAddress={() => {}} />
         <AmountInput
           amount={tokenAmountInputText}
           setAmount={handleTokenAmountInputTextChange}
@@ -244,16 +246,6 @@ const SelectAmount = ({ route }: Props) => {
             padding: 16,
           }}
         >
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              columnGap: 4,
-            }}
-          >
-            <Blockie address={toAddress} size={24} />
-            <StyledText>{`${shortenAddress(toAddress)} receives on `}</StyledText>
-          </View>
           <Pressable
             style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
             onPress={() => setIsSelectChainSheetOpen(true)}

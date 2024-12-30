@@ -1,21 +1,42 @@
 import StyledText from '@/components/StyledText/StyledText';
 import { getChainIcon, shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
-import { supportedChains } from '@raylac/shared';
+import { getChainTokenBalance, supportedChains, Token } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlatList, Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Chain } from 'viem';
 import colors from '@/lib/styles/colors';
+import { trpc } from '@/lib/trpc';
+import useUserAddresses from '@/hooks/useUserAddresses';
 
-const ChainListItem = ({ chain }: { chain: Chain }) => {
+const ChainListItem = ({ chain, token }: { chain: Chain; token: Token }) => {
+  const { data: addresses } = useUserAddresses();
+
+  const { data: tokenBalance } = trpc.getTokenBalances.useQuery({
+    addresses: addresses?.map(address => address.address) ?? [],
+  });
+
+  const chainTokenBalance = tokenBalance
+    ? getChainTokenBalance({
+        tokenBalances: tokenBalance,
+        chainId: chain.id,
+        token: token,
+      })
+    : null;
+
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
-      <Image
-        source={getChainIcon(chain.id)}
-        style={{ width: 42, height: 42 }}
-      ></Image>
-      <StyledText>{chain.name}</StyledText>
+      <View
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
+      >
+        <Image
+          source={getChainIcon(chain.id)}
+          style={{ width: 42, height: 42 }}
+        ></Image>
+        <StyledText>{chain.name}</StyledText>
+      </View>
+      <StyledText>{chainTokenBalance?.usdValue}</StyledText>
     </View>
   );
 };
@@ -24,17 +45,13 @@ type Props = NativeStackScreenProps<RootStackParamsList, 'SelectChain'>;
 
 const SelectChain = ({ navigation, route }: Props) => {
   const toAddress = route.params.toAddress;
-  const fromAddresses = route.params.fromAddresses;
-  const amount = route.params.amount;
   const token = route.params.token;
 
   const onChainSelect = (chainId: number) => {
-    navigation.navigate('ConfirmSend', {
+    navigation.navigate('SelectFromAddress', {
       toAddress,
-      fromAddresses,
-      amount,
       token,
-      outputChainId: chainId,
+      chainId,
     });
   };
 
@@ -48,7 +65,7 @@ const SelectChain = ({ navigation, route }: Props) => {
         contentContainerStyle={{ rowGap: 16 }}
         renderItem={({ item }) => (
           <Pressable onPress={() => onChainSelect(item.id)}>
-            <ChainListItem chain={item} />
+            <ChainListItem chain={item} token={token} />
           </Pressable>
         )}
       />

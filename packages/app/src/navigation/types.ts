@@ -41,16 +41,16 @@ export type RootStackParamsList = {
   SelectFromAddress: {
     toAddress: Hex;
     token: Token;
+    chainId: number;
   };
   SelectAmount: {
     toAddress: Hex;
     fromAddresses: Hex[];
     token: Token;
+    chainId: number;
   };
   SelectChain: {
     toAddress: Hex;
-    fromAddresses: Hex[];
-    amount: string;
     token: Token;
   };
   ConfirmSend: {
