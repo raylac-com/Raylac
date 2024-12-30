@@ -1,20 +1,15 @@
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { hapticOptions } from '@/lib/utils';
-import { Pressable } from 'react-native';
+import { Pressable, PressableProps } from 'react-native';
 
-const FeedbackPressable = ({
-  onPress,
-  children,
-}: {
-  onPress: () => void;
-  children: React.ReactNode;
-}) => {
+const FeedbackPressable = ({ children, ...props }: PressableProps) => {
   return (
     <Pressable
-      onPress={() => {
+      onPress={e => {
         ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
-        onPress();
+        props.onPress?.(e);
       }}
+      {...props}
     >
       {children}
     </Pressable>

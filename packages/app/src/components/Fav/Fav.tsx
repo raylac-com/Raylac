@@ -1,19 +1,21 @@
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import colors from '@/lib/styles/colors';
 import { useState } from 'react';
+import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 
 const FavMenuItem = ({
   icon,
   label: _label,
-  onPress: _onPress,
+  onPress,
 }: {
   icon: React.ReactNode;
   label: string;
   onPress: () => void;
 }) => {
   return (
-    <Pressable
+    <FeedbackPressable
+      onPress={onPress}
       style={{
         flexDirection: 'row',
         backgroundColor: colors.background,
@@ -30,7 +32,7 @@ const FavMenuItem = ({
       >
         {icon}
       </View>
-    </Pressable>
+    </FeedbackPressable>
   );
 };
 
@@ -63,7 +65,7 @@ const Fav = () => {
       }}
     >
       {expanded && <FavMenuItems />}
-      <Pressable
+      <FeedbackPressable
         style={{
           backgroundColor: colors.text,
           borderRadius: 100,
@@ -72,13 +74,21 @@ const Fav = () => {
           height: 50,
           justifyContent: 'center',
           alignItems: 'center',
+          shadowColor: colors.text,
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+          elevation: 5,
         }}
         onPress={() => {
           setExpanded(!expanded);
         }}
       >
         <AntDesign name="plus" size={24} color={colors.background} />
-      </Pressable>
+      </FeedbackPressable>
     </View>
   );
 };
