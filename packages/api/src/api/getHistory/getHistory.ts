@@ -118,7 +118,9 @@ const getHistory = async ({
   ).flat();
 
   // Sort by timestamp in descending order
-  transfers.sort((a, b) => Number(b.timestamp) - Number(a.timestamp));
+  transfers.sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
 
   return transfers;
 };
