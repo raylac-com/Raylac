@@ -44,6 +44,16 @@ const HomeScreen = () => {
     }
   );
 
+  // Prefetch history
+  const { data: _history } = trpc.getHistory.useQuery(
+    {
+      addresses: userAddresses?.map(address => address.address) ?? [],
+    },
+    {
+      enabled: !!userAddresses,
+    }
+  );
+
   const { data: accountUsdValue, isLoading: isLoadingAccountUsdValue } =
     useAccountUsdValue();
 
