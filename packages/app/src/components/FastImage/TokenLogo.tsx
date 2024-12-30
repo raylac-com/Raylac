@@ -1,3 +1,4 @@
+import colors from '@/lib/styles/colors';
 import { Image, ImageProps } from 'expo-image';
 import { useState } from 'react';
 import { View } from 'react-native';
@@ -10,7 +11,7 @@ const TokenLogo = (props: ImageProps) => {
     return (
       <View
         style={{
-          backgroundColor: '#D9D9D9',
+          backgroundColor: colors.border,
           borderRadius: 1000,
           // @ts-ignore
           width: props.style?.width || undefined,
@@ -22,14 +23,27 @@ const TokenLogo = (props: ImageProps) => {
   }
 
   return (
-    <Image
-      {...props}
-      onError={() => setIsError(true)}
+    <View
       style={{
-        ...(typeof props.style === 'object' ? props.style : {}),
         borderRadius: 1000,
+        shadowColor: colors.border,
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.7,
+        shadowRadius: 3.84,
+        elevation: 5,
       }}
-    />
+    >
+      <Image
+        {...props}
+        onError={() => setIsError(true)}
+        style={{
+          ...(typeof props.style === 'object' ? props.style : {}),
+        }}
+      />
+    </View>
   );
 };
 
