@@ -79,6 +79,34 @@ export interface BuildMultiChainSendReturnType {
   transferStep: TransferStep;
 }
 
+export interface BuildAggregateSendRequestBody {
+  amount: string;
+  token: Token;
+  fromAddresses: Hex[];
+  toAddress: Hex;
+  chainId: number;
+}
+
+export interface BuildAggregateSendReturnType {
+  inputs: {
+    tx: {
+      to: Hex;
+      data: Hex;
+      value: string;
+      maxFeePerGas: string;
+      maxPriorityFeePerGas: string;
+      nonce: number;
+      chainId: number;
+      gas: number;
+    };
+  }[];
+}
+
+export interface SendAggregateTxRequestBody {
+  signedTxs: Hex[];
+  chainId: number;
+}
+
 export interface GetSwapQuoteRequestBody {
   sender: Hex;
   amount: string;

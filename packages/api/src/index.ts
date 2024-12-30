@@ -12,10 +12,12 @@ import { Hex } from 'viem';
 import getSupportedTokens from './api/getSupportedTokens/getSupportedTokens';
 import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.mock';
 import {
+  BuildAggregateSendRequestBody,
   BuildMultiChainSendRequestBody,
   GetHistoryRequestBody,
   GetSingleChainSwapQuoteRequestBody,
   GetSingleInputSwapQuoteRequestBody,
+  SendAggregateTxRequestBody,
   GetSwapQuoteRequestBody,
   SendTransactionRequestBody,
   SubmitSingleChainSwapRequestBody,
@@ -23,6 +25,7 @@ import {
   SubmitSwapRequestBody,
   TokenSet,
 } from '@raylac/shared';
+import buildAggregateSend from './api/buildAggregateSend/buildAggregateSend';
 import getSwapQuote from './api/getSwapQuote/getSwapQuote';
 import { ed, logger, st } from '@raylac/shared-backend';
 import getTokenPrice from './api/getTokenPrice/getTokenPrice';
@@ -40,6 +43,7 @@ import getSetBalances from './api/getSetBalances/getSetBalances';
 import getSet from './api/getSet/getSet';
 import getSingleInputSwapQuote from './api/getSingleInputSwapQuote/getSingleInputSwapQuote';
 import submitSingleInputSwap from './api/submitSingleInputSwap/submitSingleInputSwap';
+import sendAggregateTx from './api/sendAggregateTx/sendAggregateTx';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -139,6 +143,18 @@ export const appRouter = router({
     .input(z.any())
     .mutation(async ({ input }) => {
       return buildMultiChainSend(input as BuildMultiChainSendRequestBody);
+    }),
+
+  buildAggregateSend: publicProcedure
+    .input(z.any())
+    .mutation(async ({ input }) => {
+      return buildAggregateSend(input as BuildAggregateSendRequestBody);
+    }),
+
+  sendAggregateTx: publicProcedure
+    .input(z.any())
+    .mutation(async ({ input }) => {
+      return sendAggregateTx(input as SendAggregateTxRequestBody);
     }),
 
   getSwapQuote: publicProcedure.input(z.any()).mutation(async ({ input }) => {
