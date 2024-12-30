@@ -1,4 +1,3 @@
-import useUserAccount from '@/hooks/useUserAccount';
 import { trpc } from '@/lib/trpc';
 import {
   ActivityIndicator,
@@ -7,22 +6,16 @@ import {
   RefreshControl,
   View,
 } from 'react-native';
-import SwapHistoryListItem from '@/components/SwapHistoryListItem/SwapHistoryListItem';
-import { zeroAddress } from 'viem';
 import colors from '@/lib/styles/colors';
-import SwapDetailsSheet from '@/sheets/SwapDetailsSheet/SwapDetailsSheet';
-import { useState } from 'react';
 import StyledText from '@/components/StyledText/StyledText';
-import {
-  HistoryItem,
-  SwapHistoryItem,
-  TransferHistoryItem,
-} from '@raylac/shared';
+import { GetHistoryReturnType, HistoryItemType } from '@raylac/shared';
+import ReceiveHistoryListItem from '@/components/ReceiveHistoryListItem/ReceiveHistoryListItem';
 import SendHistoryListItem from '@/components/SendHistoryListItem/SendHistoryListItem';
+import useUserAddresses from '@/hooks/useUserAddresses';
+import MoveFundsHistoryListItem from '@/components/MoveFundsHistoryListItem/MoveFundsHistoryListItem';
 
 const History = () => {
-  const { data: userAccount } = useUserAccount();
-  const [selectedSwap, setSelectedSwap] = useState<HistoryItem | null>(null);
+  const { data: addresses } = useUserAddresses();
 
   const {
     data: swapHistory,
@@ -31,10 +24,10 @@ const History = () => {
     refetch,
   } = trpc.getHistory.useQuery(
     {
-      address: userAccount?.address ?? zeroAddress,
+      addresses: addresses?.map(address => address.address) ?? [],
     },
     {
-      enabled: !!userAccount,
+      enabled: !!addresses,
     }
   );
 
@@ -69,17 +62,23 @@ const History = () => {
         }}
         data={swapHistory ?? []}
         renderItem={({ item }) => {
-          if ('token' in item) {
-            return (
-              <Pressable onPress={() => {}}>
-                <SendHistoryListItem transfer={item as TransferHistoryItem} />
-              </Pressable>
-            );
-          }
-
           return (
-            <Pressable onPress={() => setSelectedSwap(item)}>
-              <SwapHistoryListItem swap={item as SwapHistoryItem} />
+            <Pressable onPress={() => {}}>
+              {item.type === HistoryItemType.OUTGOING && (
+                <SendHistoryListItem
+                  transfer={item as GetHistoryReturnType[number]}
+                />
+              )}
+              {item.type === HistoryItemType.INCOMING && (
+                <ReceiveHistoryListItem
+                  transfer={item as GetHistoryReturnType[number]}
+                />
+              )}
+              {item.type === HistoryItemType.MOVE_FUNDS && (
+                <MoveFundsHistoryListItem
+                  transfer={item as GetHistoryReturnType[number]}
+                />
+              )}
             </Pressable>
           );
         }}
@@ -93,14 +92,6 @@ const History = () => {
           />
         }
       />
-      {selectedSwap && (
-        <SwapDetailsSheet
-          swap={selectedSwap as SwapHistoryItem}
-          onClose={() => {
-            setSelectedSwap(null);
-          }}
-        />
-      )}
     </View>
   );
 };

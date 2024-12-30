@@ -4,6 +4,9 @@ import {
   getTokenPriceBySymbol,
 } from '../../lib/alchemy';
 import { AlchemyTokenPriceResponse } from '@raylac/shared';
+import NodeCache from 'node-cache';
+
+const cache = new NodeCache({ stdTTL: 60 });
 
 const getTokenPrice = async ({
   tokenAddress,
@@ -12,8 +15,20 @@ const getTokenPrice = async ({
   tokenAddress: Hex;
   chainId: number;
 }): Promise<AlchemyTokenPriceResponse> => {
+  const cachedPrice = cache.get<AlchemyTokenPriceResponse | undefined>(
+    tokenAddress
+  );
+
+  if (cachedPrice) {
+    return cachedPrice;
+  }
+
   if (tokenAddress === zeroAddress) {
-    return getTokenPriceBySymbol('ETH');
+    const result = await getTokenPriceBySymbol('ETH');
+
+    cache.set(tokenAddress, result);
+
+    return result;
   }
 
   const result = await getTokenPriceByAddress({
@@ -29,7 +44,7 @@ const getTokenPrice = async ({
     new Date(usdPrice.lastUpdatedAt).getTime() <
       Date.now() - 24 * 60 * 60 * 1000
   ) {
-    return {
+    const response = {
       ...result,
       prices: [
         {
@@ -38,7 +53,13 @@ const getTokenPrice = async ({
         },
       ],
     };
+
+    cache.set(tokenAddress, response);
+
+    return response;
   }
+
+  cache.set(tokenAddress, result);
 
   return result;
 };

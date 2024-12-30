@@ -180,7 +180,7 @@ export const appRouter = router({
   getHistory: publicProcedure
     .input(
       z.object({
-        address: z.string(),
+        addresses: z.array(z.string()),
       })
     )
     .query(async ({ input }) => {

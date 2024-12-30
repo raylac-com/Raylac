@@ -1,12 +1,12 @@
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import TokenLogo from '../FastImage/TokenLogo';
 import StyledText from '../StyledText/StyledText';
-import Feather from '@expo/vector-icons/Feather';
 import { shortenAddress } from '@/lib/utils';
 import { GetHistoryReturnType } from '@raylac/shared';
 
-const SendHistoryListItem = (props: {
+const ReceiveHistoryListItem = (props: {
   transfer: GetHistoryReturnType[number];
 }) => {
   return (
@@ -37,17 +37,17 @@ const SendHistoryListItem = (props: {
           <StyledText style={{ fontWeight: 'bold' }}>
             {`$${props.transfer.amountUsd}`}
           </StyledText>
-          <StyledText>{shortenAddress(props.transfer.to)}</StyledText>
+          <StyledText>{shortenAddress(props.transfer.from)}</StyledText>
         </View>
       </View>
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
       >
-        <StyledText style={{ color: colors.border }}>{`Sent`}</StyledText>
-        <Feather name="send" size={24} color={colors.angelPink} />
+        <StyledText style={{ color: colors.border }}>{`Received`}</StyledText>
+        <AntDesign name="arrowdown" size={24} color="black" />
       </View>
     </View>
   );
 };
 
-export default SendHistoryListItem;
+export default ReceiveHistoryListItem;

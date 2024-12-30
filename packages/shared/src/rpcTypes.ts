@@ -198,7 +198,7 @@ export interface GetTokenPriceRequestBody {
 export type GetTokenPriceReturnType = AlchemyTokenPriceResponse;
 
 export interface GetHistoryRequestBody {
-  address: Hex;
+  addresses: Hex[];
 }
 
 export type TransferHistoryItem = {
@@ -239,4 +239,19 @@ export type SwapHistoryItem = {
 
 export type HistoryItem = TransferHistoryItem | SwapHistoryItem;
 
-export type GetHistoryReturnType = HistoryItem[];
+export enum HistoryItemType {
+  OUTGOING = 'outgoing',
+  INCOMING = 'incoming',
+  MOVE_FUNDS = 'move_funds',
+}
+
+export type GetHistoryReturnType = {
+  from: Hex;
+  to: Hex;
+  amount: string;
+  token: Token;
+  amountUsd: string;
+  chainId: number;
+  timestamp: string;
+  type: HistoryItemType;
+}[];
