@@ -8,7 +8,9 @@ const AddAddress = () => {
   const onImportPrivKeyPress = () => {
     navigation.navigate('ImportAccount');
   };
-  const onWatchAddressPress = () => {};
+  const onWatchAddressPress = () => {
+    navigation.navigate('StartWatch');
+  };
   const onCreateAddressPress = () => {
     navigation.navigate('CreateAddress');
   };

@@ -1,10 +1,12 @@
 import { getUserAddresses } from '@/lib/key';
+import userKeys from '@/queryKeys/userKeys';
 import { useQuery } from '@tanstack/react-query';
 
 const useUserAddresses = () => {
   return useQuery({
-    queryKey: ['userAddresses'],
+    queryKey: userKeys.userAddresses,
     queryFn: () => getUserAddresses(),
+    gcTime: 0,
   });
 };
 

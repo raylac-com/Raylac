@@ -30,8 +30,10 @@ const useImportPrivKey = () => {
       });
 
       await queryClient.invalidateQueries({
-        queryKey: userKeys.userAddress,
+        queryKey: userKeys.userAddresses,
       });
+
+      await sleep(300);
     },
   });
 };

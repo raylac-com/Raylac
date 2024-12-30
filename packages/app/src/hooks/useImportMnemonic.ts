@@ -8,6 +8,7 @@ import {
 import { AddressType } from '@/types';
 import { sleep } from '@raylac/shared';
 import { useMutation } from '@tanstack/react-query';
+import userKeys from '@/queryKeys/userKeys';
 
 const useImportMnemonic = () => {
   const queryClient = useQueryClient();
@@ -31,7 +32,9 @@ const useImportMnemonic = () => {
         mnemonicGenesisAddress: account.address,
       });
 
-      await queryClient.invalidateQueries({ queryKey: ['userAddresses'] });
+      await queryClient.invalidateQueries({
+        queryKey: userKeys.userAddresses,
+      });
     },
   });
 };

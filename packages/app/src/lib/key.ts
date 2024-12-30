@@ -10,7 +10,7 @@ import { AddressType, UserAddress } from '@/types';
 
 globalThis.Buffer = Buffer;
 
-const USER_ADDRESSES_STORAGE_KEY = 'raylac-userAddresses';
+const USER_ADDRESSES_STORAGE_KEY = 'userAddresses';
 
 const REQUIRE_AUTHENTICATION = Device.isDevice;
 
@@ -169,4 +169,18 @@ export const getMnemonic = async (address: Hex): Promise<string | null> => {
   });
 
   return item as string | null;
+};
+
+export const removeAddress = async (address: Hex) => {
+  const addresses = await getUserAddresses();
+
+  // TODO: Delete the private key from SecureStore
+  // TODO: Delete the mnemonic from SecureStore
+
+  const newAddresses = addresses.filter(a => a.address !== address);
+
+  await AsyncStorage.setItem(
+    USER_ADDRESSES_STORAGE_KEY,
+    JSON.stringify(newAddresses)
+  );
 };

@@ -95,6 +95,14 @@ const ImportAccount = () => {
     }
   }, [inputText]);
 
+  useEffect(() => {
+    return () => {
+      setInputText('');
+      setIsInputPrivKey(false);
+      setIsInputMnemonic(false);
+    };
+  }, []);
+
   return (
     <View
       style={{
