@@ -31,7 +31,7 @@ const Start = () => {
         flexDirection: 'column',
         justifyContent: 'space-between',
         paddingTop: insets.top,
-        paddingBottom: insets.bottom,
+        paddingBottom: insets.bottom + 32,
         paddingHorizontal: 16,
         rowGap: 8,
       }}

@@ -111,7 +111,7 @@ const ImportAccount = () => {
         justifyContent: 'space-between',
         rowGap: 16,
         padding: 16,
-        paddingBottom: insets.bottom,
+        paddingBottom: insets.bottom + 32,
       }}
     >
       <MultiLineInput
