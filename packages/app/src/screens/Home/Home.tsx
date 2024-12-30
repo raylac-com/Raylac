@@ -18,6 +18,7 @@ import { TokenBalancesReturnType } from '@raylac/shared';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import Fav from '@/components/Fav/Fav';
 const HomeScreen = () => {
   const navigation = useTypedNavigation();
   const insets = useSafeAreaInsets();
@@ -110,6 +111,7 @@ const HomeScreen = () => {
         flex: 1,
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
+        position: 'relative',
       }}
     >
       <ScrollView
@@ -209,6 +211,7 @@ const HomeScreen = () => {
           ))}
         </View>
       </ScrollView>
+      <Fav />
       {showTokenBalanceDetailsSheet && (
         <TokenBalanceDetailsSheet
           tokenBalance={showTokenBalanceDetailsSheet}
