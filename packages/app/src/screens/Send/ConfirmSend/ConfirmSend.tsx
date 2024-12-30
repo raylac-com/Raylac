@@ -22,6 +22,7 @@ import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Hex, parseUnits } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
+import useTypedNavigation from '@/hooks/useTypedNavigation';
 
 const RecipientCard = ({
   toAddress,
@@ -108,6 +109,8 @@ type Props = Pick<
 
 const ConfirmSend = ({ route }: Props) => {
   const { toAddress, fromAddresses, amount, token, chainId } = route.params;
+
+  const navigation = useTypedNavigation();
   const insets = useSafeAreaInsets();
 
   const { data: userAccount } = useUserAccount();
@@ -190,6 +193,8 @@ const ConfirmSend = ({ route }: Props) => {
     };
 
     await sendAggregateTx(sendAggregateTxRequestBody);
+
+    navigation.navigate('Tabs', { screen: 'History' });
   };
 
   return (

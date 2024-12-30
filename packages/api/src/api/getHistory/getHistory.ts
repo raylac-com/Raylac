@@ -6,10 +6,11 @@ import {
 } from '@raylac/shared';
 import { getAddress, Hex, zeroAddress } from 'viem';
 import { getAlchemyClient } from '../../lib/alchemy';
-import { AssetTransfersCategory } from 'alchemy-sdk';
+import { AssetTransfersCategory, SortingOrder } from 'alchemy-sdk';
 import { getTokenMetadata } from '../../utils';
 import getTokenPrice from '../getTokenPrice/getTokenPrice';
 import BigNumber from 'bignumber.js';
+import { logger } from '@raylac/shared-backend';
 
 const getHistoryOnChain = async ({
   addresses,
@@ -29,6 +30,7 @@ const getHistoryOnChain = async ({
           AssetTransfersCategory.EXTERNAL,
         ],
         withMetadata: true,
+        order: SortingOrder.DESCENDING,
         maxCount: 10,
       });
 
@@ -38,8 +40,9 @@ const getHistoryOnChain = async ({
           AssetTransfersCategory.ERC20,
           AssetTransfersCategory.EXTERNAL,
         ],
-        withMetadata: true,
+        order: SortingOrder.DESCENDING,
         maxCount: 10,
+        withMetadata: true,
       });
 
       const transfers: GetHistoryReturnType = (
@@ -52,6 +55,9 @@ const getHistoryOnChain = async ({
             });
 
             if (!token) {
+              logger.warn(
+                `No token found for ${transfer.rawContract.address} on chain ${chainId}`
+              );
               return null;
             }
 

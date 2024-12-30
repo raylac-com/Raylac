@@ -28,6 +28,7 @@ const History = () => {
     },
     {
       enabled: !!addresses,
+      refetchOnWindowFocus: true,
     }
   );
 
