@@ -34,8 +34,6 @@ export type TokenBalancesReturnType = {
   combinedBreakdown: {
     chainId: number;
     balance: Hex;
-    tokenAddress: Hex;
-    usdValue: string;
   }[];
   // Breakdown of the token balance on chain  per address
   perAddressBreakdown: {
@@ -43,8 +41,6 @@ export type TokenBalancesReturnType = {
     breakdown: {
       chainId: number;
       balance: Hex;
-      tokenAddress: Hex;
-      usdValue: string;
     }[];
   }[];
 }[];

@@ -45,6 +45,7 @@ import Advanced from './screens/Advanced/Advanced';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import Addresses from './screens/Addresses/Addresses';
 import CreateAddress from './screens/CreateAddress/CreateAddress';
+import SelectFromAddress from './screens/Send/SelectFromAddress';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -192,6 +193,15 @@ const Screens = () => {
                 options={{
                   title: 'Select Recipient',
                   headerBackVisible: true,
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="SelectFromAddress"
+                component={SelectFromAddress}
+                options={{
+                  title: 'Select From Address',
+                  headerBackVisible: true,
+                  headerBackTitle: 'Back',
                 }}
               ></RootStack.Screen>
               <RootStack.Screen

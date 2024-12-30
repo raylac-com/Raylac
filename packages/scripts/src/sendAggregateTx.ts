@@ -28,23 +28,23 @@ const sendAggregateTx = async () => {
 
   const transferAmount = parseUnits('0.1', USDC.decimals).toString();
 
-  const chainId = arbitrum.id;
+  const chainId = base.id;
 
   const requestBody: BuildAggregateSendRequestBody = {
     token: USDC,
     amount: transferAmount,
     fromAddresses: [account.address],
-    toAddress: '0x28341dF2CCabe2Cc4A3c6e7ef2fe9E706680C196',
+    toAddress: '0x400EA6522867456E988235675b9Cb5b1Cf5b79C8',
     chainId,
   };
 
-  const multiChainSend = await client.buildAggregateSend.mutate(requestBody);
+  const aggregateSend = await client.buildAggregateSend.mutate(requestBody);
 
-  console.log(JSON.stringify(multiChainSend, null, 2));
+  console.log(JSON.stringify(aggregateSend, null, 2));
 
   const signedStepItems: Hex[] = [];
 
-  for (const step of multiChainSend.inputs) {
+  for (const step of aggregateSend.inputs) {
     const signedTx = await signEIP1159Tx({
       tx: step.tx,
       account,

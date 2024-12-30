@@ -1,15 +1,20 @@
 import { trpc } from '@/lib/trpc';
-import { Token } from '@raylac/shared';
+import { getAddressChainTokenBalance, Token } from '@raylac/shared';
 import { useQuery } from '@tanstack/react-query';
-import { getAddress, hexToBigInt } from 'viem';
+import { Hex } from 'viem';
 import useUserAddresses from './useUserAddresses';
 
+/**
+ * Returns the total token balance for a given chain and token for a list of addresses
+ */
 const useChainTokenBalance = ({
   chainId,
   token,
+  address,
 }: {
   chainId: number | null;
   token: Token | null;
+  address: Hex;
 }) => {
   const { data: userAddresses } = useUserAddresses();
 
@@ -24,53 +29,20 @@ const useChainTokenBalance = ({
     );
 
   const query = useQuery({
-    queryKey: [
-      'user-token-balance',
-      token,
-      userAddresses,
-      tokenBalances,
-      chainId,
-    ],
+    queryKey: ['user-token-balance', token, address, tokenBalances, chainId],
     queryFn: () => {
-      if (tokenBalances === undefined) {
-        throw new Error('Token balances not loaded');
-      }
-
-      // eslint-disable-next-line security/detect-possible-timing-attacks
-      if (token === null) {
-        throw new Error('Token not loaded');
-      }
-
-      const tokenAddressOnChain = token.addresses.find(
-        address => address.chainId === chainId
-      );
-
-      if (tokenAddressOnChain === undefined) {
-        throw new Error(
-          `${token.symbol} address not found for chainId ${chainId}`
-        );
-      }
-
-      const totalTokenBalance = tokenBalances.find(balance => {
-        return balance.combinedBreakdown.some(breakdown => {
-          return (
-            getAddress(breakdown.tokenAddress) ===
-            getAddress(tokenAddressOnChain.address)
-          );
+      if (token && tokenBalances && chainId) {
+        const addressChainTokenBalance = getAddressChainTokenBalance({
+          tokenBalances,
+          address,
+          chainId,
+          token,
         });
-      });
 
-      const tokenBalanceOnChain = totalTokenBalance?.combinedBreakdown.find(
-        breakdown => {
-          return breakdown.chainId === chainId;
-        }
-      );
-
-      if (tokenBalanceOnChain === undefined) {
-        return BigInt(0);
+        return addressChainTokenBalance;
       }
 
-      return hexToBigInt(tokenBalanceOnChain.balance);
+      return null;
     },
     enabled: !!token && !!tokenBalances && !!userAddresses && !!chainId,
   });

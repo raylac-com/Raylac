@@ -146,12 +146,6 @@ export const getKnownTokenBalances = async ({
         combinedBreakdown.push({
           chainId,
           balance: toHex(combinedChainBalance),
-          tokenAddress: tokenAddressOnChain,
-          usdValue: new BigNumber(usdPrice)
-            .multipliedBy(
-              new BigNumber(formatUnits(combinedChainBalance, token.decimals))
-            )
-            .toString(),
         });
       }
 
@@ -162,18 +156,10 @@ export const getKnownTokenBalances = async ({
         tokenPrice: usdPrice,
         perAddressBreakdown: perAddressBreakdown.map(address => ({
           address: address.address,
-          breakdown: address.breakdown.map(
-            ({ chainId, tokenAddress, balance }) => ({
-              chainId,
-              tokenAddress,
-              balance: toHex(balance),
-              usdValue: new BigNumber(usdPrice)
-                .multipliedBy(
-                  new BigNumber(formatUnits(balance, token.decimals))
-                )
-                .toString(),
-            })
-          ),
+          breakdown: address.breakdown.map(({ chainId, balance }) => ({
+            chainId,
+            balance: toHex(balance),
+          })),
         })),
         combinedBreakdown,
       };

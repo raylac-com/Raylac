@@ -1,27 +1,23 @@
 import Blockie from '@/components/Blockie/Blockie';
-import SendDetailsSheet from '@/components/SendDetailsSheet/SendDetailsSheet';
-import Skeleton from '@/components/Skeleton/Skeleton';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import StyledText from '@/components/StyledText/StyledText';
 import useUserAccount from '@/hooks/useUserAccount';
-import { getPrivateKey, getUserAddresses } from '@/lib/key';
+import { getPrivateKey } from '@/lib/key';
 import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import { getChainIcon, shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import {
-  BuildMultiChainSendRequestBody,
-  SendTransactionRequestBody,
-  SignedBridgeStep,
-  SignedTransferStep,
+  BuildAggregateSendRequestBody,
+  SendAggregateTxRequestBody,
   signEIP1159Tx,
 } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { parseUnits } from 'viem';
+import { Hex, parseUnits } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 
 type Props = Pick<
@@ -30,26 +26,20 @@ type Props = Pick<
 >;
 
 const ConfirmSend = ({ route }: Props) => {
-  const { address: to, amount, token, outputChainId } = route.params;
+  const { toAddress, fromAddresses, amount, token, chainId } = route.params;
   const insets = useSafeAreaInsets();
 
   const { data: userAccount } = useUserAccount();
-
-  ///
-  /// Local state
-  ///
-
-  const [isSendDetailsSheetOpen, setIsSendDetailsSheetOpen] = useState(false);
 
   ///
   /// Queries
   ///
 
   const {
-    data: multiChainSend,
-    mutateAsync: buildMultiChainSend,
-    isPending: isBuildingMultiChainSend,
-  } = trpc.buildMultiChainSend.useMutation({
+    data: aggregatedSend,
+    mutateAsync: buildAggregatedSend,
+    isPending: isBuildingAggregatedSend,
+  } = trpc.buildAggregateSend.useMutation({
     throwOnError: true,
   });
 
@@ -57,8 +47,8 @@ const ConfirmSend = ({ route }: Props) => {
   /// Mutations
   ///
 
-  const { mutateAsync: sendTransaction, isPending: isSendingTransaction } =
-    trpc.sendTransaction.useMutation();
+  const { mutateAsync: sendAggregateTx, isPending: isSendingAggregateTx } =
+    trpc.sendAggregateTx.useMutation();
 
   ///
   /// Effects
@@ -71,15 +61,15 @@ const ConfirmSend = ({ route }: Props) => {
 
     const parsedAmount = parseUnits(amount, token.decimals);
 
-    const buildMultiChainSendRequestBody: BuildMultiChainSendRequestBody = {
+    const buildAggregateSendRequestBody: BuildAggregateSendRequestBody = {
       token,
       amount: parsedAmount.toString(),
-      destinationChainId: outputChainId,
-      sender: userAccount.address,
-      to,
+      chainId: chainId,
+      fromAddresses,
+      toAddress,
     };
 
-    buildMultiChainSend(buildMultiChainSendRequestBody);
+    buildAggregatedSend(buildAggregateSendRequestBody);
   }, [userAccount]);
 
   ///
@@ -91,12 +81,11 @@ const ConfirmSend = ({ route }: Props) => {
       throw new Error('User account not loaded');
     }
 
-    if (!multiChainSend) {
-      throw new Error('Multi chain send not built');
+    if (!aggregatedSend) {
+      throw new Error('Aggregated send not built');
     }
 
-    const addresses = await getUserAddresses();
-    const privateKey = await getPrivateKey(addresses[0].address);
+    const privateKey = await getPrivateKey(fromAddresses[0]);
 
     if (!privateKey) {
       throw new Error('Private key not found');
@@ -104,40 +93,22 @@ const ConfirmSend = ({ route }: Props) => {
 
     const privateKeyAccount = privateKeyToAccount(privateKey);
 
-    const signedBridgeSteps: SignedBridgeStep[] = [];
-    for (const step of multiChainSend.bridgeSteps) {
-      const signature = await signEIP1159Tx({
+    const signedTxs: Hex[] = [];
+    for (const step of aggregatedSend.inputs) {
+      const singedTx = await signEIP1159Tx({
         tx: step.tx,
         account: privateKeyAccount,
       });
 
-      signedBridgeSteps.push({
-        ...step,
-        signature,
-      });
+      signedTxs.push(singedTx);
     }
 
-    const signature = await signEIP1159Tx({
-      tx: multiChainSend.transferStep.tx,
-      account: privateKeyAccount,
-    });
-
-    const signedTransferStep: SignedTransferStep = {
-      ...multiChainSend.transferStep,
-      signature,
+    const sendAggregateTxRequestBody: SendAggregateTxRequestBody = {
+      signedTxs,
+      chainId: chainId,
     };
 
-    const parsedAmount = parseUnits(amount, token.decimals);
-
-    const sendTransactionRequestBody: SendTransactionRequestBody = {
-      signedBridgeSteps,
-      signedTransfer: signedTransferStep,
-      sender: userAccount.address,
-      token,
-      amount: parsedAmount.toString(),
-    };
-
-    await sendTransaction(sendTransactionRequestBody);
+    await sendAggregateTx(sendAggregateTxRequestBody);
   };
 
   return (
@@ -173,102 +144,52 @@ const ConfirmSend = ({ route }: Props) => {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                 }}
+              ></View>
+              {/* Send output details */}
+              <View
+                style={{
+                  flexDirection: 'column',
+                  rowGap: 12,
+                  borderColor: colors.border,
+                  borderWidth: 1,
+                  padding: 16,
+                  borderRadius: 16,
+                }}
               >
-                {multiChainSend === undefined ? (
-                  <Skeleton style={{ width: 100, height: 24 }} />
-                ) : (
-                  <StyledText>{`${multiChainSend.inputAmountFormatted} ${token.symbol}`}</StyledText>
-                )}
-                <StyledText
-                  style={{ color: colors.subbedText }}
-                  onPress={() => setIsSendDetailsSheetOpen(true)}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    columnGap: 4,
+                  }}
                 >
-                  {`Details`}
-                </StyledText>
+                  <Blockie address={toAddress} size={24} />
+                  <StyledText>{shortenAddress(toAddress)}</StyledText>
+                </View>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    columnGap: 4,
+                  }}
+                >
+                  <StyledText>{`Network `}</StyledText>
+                  <Image
+                    source={getChainIcon(chainId)}
+                    style={{ width: 24, height: 24 }}
+                  />
+                </View>
               </View>
-            </View>
-            {/* Send output details */}
-            <View
-              style={{
-                flexDirection: 'column',
-                rowGap: 12,
-                borderColor: colors.border,
-                borderWidth: 1,
-                padding: 16,
-                borderRadius: 16,
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  columnGap: 4,
-                }}
-              >
-                <Blockie address={to} size={24} />
-                <StyledText>{shortenAddress(to)}</StyledText>
-              </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  columnGap: 4,
-                }}
-              >
-                <StyledText>{`Receives `}</StyledText>
-                {multiChainSend === undefined ? (
-                  <Skeleton style={{ width: 100, height: 24 }} />
-                ) : (
-                  <StyledText>{`${multiChainSend.outputAmountFormatted} ${token.symbol}`}</StyledText>
-                )}
-              </View>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  columnGap: 4,
-                }}
-              >
-                <StyledText>{`Network `}</StyledText>
-                <Image
-                  source={getChainIcon(outputChainId)}
-                  style={{ width: 24, height: 24 }}
-                />
-              </View>
-            </View>
-          </View>
-          <View style={{ flexDirection: 'column', rowGap: 12 }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                columnGap: 4,
-              }}
-            >
-              <StyledText>{`Bridge fee`}</StyledText>
-              {multiChainSend === undefined ? (
-                <Skeleton style={{ width: 100, height: 24 }} />
-              ) : (
-                <StyledText>{`$${multiChainSend.bridgeFeeUsd}`}</StyledText>
-              )}
             </View>
           </View>
         </View>
         <StyledButton
           title="Send"
           onPress={onSendPress}
-          isLoading={isSendingTransaction || isBuildingMultiChainSend}
-          disabled={isSendingTransaction || isBuildingMultiChainSend}
+          isLoading={isSendingAggregateTx || isBuildingAggregatedSend}
+          disabled={isSendingAggregateTx || isBuildingAggregatedSend}
         />
       </View>
-      {multiChainSend && isSendDetailsSheetOpen && (
-        <SendDetailsSheet
-          sendDetails={multiChainSend}
-          token={token}
-          onClose={() => setIsSendDetailsSheetOpen(false)}
-        />
-      )}
     </View>
   );
 };

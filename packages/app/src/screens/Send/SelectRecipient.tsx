@@ -53,7 +53,9 @@ const AddressListItem = (props: AddressListItemProps) => {
 type Props = NativeStackScreenProps<RootStackParamsList, 'SelectRecipient'>;
 
 const SelectRecipient = ({ navigation }: Props) => {
-  const [searchInput, setSearchInput] = useState('');
+  const [searchInput, setSearchInput] = useState(
+    '0x400EA6522867456E988235675b9Cb5b1Cf5b79C8'
+  );
 
   const [inputAddress, setInputAddress] = useState<Hex | null>(null);
 
@@ -108,7 +110,7 @@ const SelectRecipient = ({ navigation }: Props) => {
             address={inputAddress}
             onPress={() => {
               navigation.navigate('SelectToken', {
-                address: inputAddress,
+                toAddress: inputAddress,
               });
             }}
           ></AddressListItem>

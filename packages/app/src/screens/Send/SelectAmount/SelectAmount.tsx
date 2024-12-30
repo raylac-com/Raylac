@@ -8,7 +8,7 @@ import fontSizes from '@/lib/styles/fontSizes';
 import { getChainIcon, shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import {
-  BuildMultiChainSendRequestBody,
+  BuildAggregateSendRequestBody,
   getChainFromId,
   TRPCErrorMessage,
 } from '@raylac/shared';
@@ -16,13 +16,12 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
-import { Chain, formatUnits, parseUnits } from 'viem';
+import { Chain, parseUnits } from 'viem';
 import Entypo from '@expo/vector-icons/Entypo';
-import useTokenBalance from '@/hooks/useTokenBalance';
 import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 import BigNumber from 'bignumber.js';
 import { trpc } from '@/lib/trpc';
-import useUserAccount from '@/hooks/useUserAccount';
+import useChainTokenBalance from '@/hooks/useChainTokenBalance';
 
 const ReviewButton = ({
   onPress,
@@ -86,12 +85,15 @@ type Props = Pick<
   'route'
 >;
 
+const containsNonNumericCharacters = (text: string) => {
+  return /[^0-9.]/.test(text);
+};
+
 const SelectAmount = ({ route }: Props) => {
   const navigation = useTypedNavigation();
-  const address = route.params.address;
+  const toAddress = route.params.toAddress;
+  const fromAddresses = route.params.fromAddresses;
   const token = route.params.token;
-
-  const { data: userAccount } = useUserAccount();
 
   ///
   /// Local state
@@ -111,7 +113,12 @@ const SelectAmount = ({ route }: Props) => {
   /// Queries
   ///
 
-  const { data: tokenBalance } = useTokenBalance(token);
+  const { data: tokenBalance } = useChainTokenBalance({
+    chainId: selectedChain.id,
+    token,
+    address: fromAddresses[0],
+  });
+
   const { data: tokenPriceUsd } = useTokenPriceUsd(token);
 
   ///
@@ -119,11 +126,11 @@ const SelectAmount = ({ route }: Props) => {
   ///
 
   const {
-    data: _multiChainSend,
-    mutateAsync: buildMultiChainSend,
-    isPending: isBuildingMultiChainSend,
-    error: buildMultiChainSendError,
-  } = trpc.buildMultiChainSend.useMutation({
+    data: _aggregatedSend,
+    mutateAsync: buildAggregatedSend,
+    isPending: isBuildingAggregatedSend,
+    error: buildAggregateSendError,
+  } = trpc.buildAggregateSend.useMutation({
     throwOnError: false,
   });
 
@@ -133,40 +140,35 @@ const SelectAmount = ({ route }: Props) => {
 
   useEffect(() => {
     if (
-      buildMultiChainSendError?.message ===
-      TRPCErrorMessage.INSUFFICIENT_BALANCE
+      buildAggregateSendError?.message === TRPCErrorMessage.INSUFFICIENT_BALANCE
     ) {
       setIsBalanceSufficient(false);
     }
-  }, [buildMultiChainSendError]);
+  }, [buildAggregateSendError]);
 
   useEffect(() => {
-    if (!userAccount) {
+    if (containsNonNumericCharacters(tokenAmountInputText)) {
       return;
     }
 
     const parsedAmount = parseUnits(tokenAmountInputText, token.decimals);
 
-    const buildMultiChainSendRequestBody: BuildMultiChainSendRequestBody = {
+    const buildAggregatedSendRequestBody: BuildAggregateSendRequestBody = {
       token,
       amount: parsedAmount.toString(),
-      destinationChainId: selectedChain.id,
-      sender: userAccount.address,
-      to: address,
+      fromAddresses,
+      toAddress,
+      chainId: selectedChain.id,
     };
 
-    buildMultiChainSend(buildMultiChainSendRequestBody);
-  }, [userAccount, tokenAmountInputText, selectedChain, address]);
+    buildAggregatedSend(buildAggregatedSendRequestBody);
+  }, [tokenAmountInputText, selectedChain, fromAddresses, toAddress]);
 
   ///
   /// Handlers
   ///
 
   const handleTokenAmountInputTextChange = (amountText: string) => {
-    if (!userAccount) {
-      return;
-    }
-
     setTokenAmountInputText(amountText);
 
     if (amountText === '') {
@@ -200,31 +202,13 @@ const SelectAmount = ({ route }: Props) => {
 
   const onReviewButtonPress = () => {
     navigation.navigate('ConfirmSend', {
-      address,
+      toAddress,
+      fromAddresses,
       amount: tokenAmountInputText,
       token,
-      outputChainId: selectedChain.id,
+      chainId: selectedChain.id,
     });
   };
-
-  ///
-  /// Effects
-  ///
-
-  ///
-  /// Derived state
-  ///
-
-  const formattedTokenBalance = tokenBalance
-    ? formatUnits(tokenBalance, token.decimals)
-    : undefined;
-
-  const tokenBalanceUsd =
-    formattedTokenBalance && tokenPriceUsd
-      ? new BigNumber(formattedTokenBalance)
-          .multipliedBy(tokenPriceUsd)
-          .toFixed(2)
-      : undefined;
 
   return (
     <View style={{ flex: 1 }}>
@@ -248,7 +232,7 @@ const SelectAmount = ({ route }: Props) => {
           />
           <StyledText
             style={{ color: colors.border }}
-          >{`Balance $${tokenBalanceUsd}`}</StyledText>
+          >{`Balance $${tokenBalance?.usdValue}`}</StyledText>
         </View>
         <View
           style={{
@@ -267,8 +251,8 @@ const SelectAmount = ({ route }: Props) => {
               columnGap: 4,
             }}
           >
-            <Blockie address={address} size={24} />
-            <StyledText>{`${shortenAddress(address)} receives on `}</StyledText>
+            <Blockie address={toAddress} size={24} />
+            <StyledText>{`${shortenAddress(toAddress)} receives on `}</StyledText>
           </View>
           <Pressable
             style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
@@ -296,7 +280,7 @@ const SelectAmount = ({ route }: Props) => {
         </View>
         <ReviewButton
           onPress={onReviewButtonPress}
-          isLoading={isBuildingMultiChainSend}
+          isLoading={isBuildingAggregatedSend}
           isBalanceSufficient={isBalanceSufficient}
         />
       </View>

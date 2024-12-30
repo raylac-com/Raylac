@@ -51,13 +51,13 @@ const TokenListItem = ({
 type Props = NativeStackScreenProps<RootStackParamsList, 'SelectToken'>;
 
 const SelectToken = ({ navigation, route }: Props) => {
-  const address = route.params.address;
+  const toAddress = route.params.toAddress;
 
   const { data: tokenBalances } = useTokenBalances();
 
   const onTokenPress = (token: Token) => {
-    navigation.navigate('SelectAmount', {
-      address,
+    navigation.navigate('SelectFromAddress', {
+      toAddress,
       token,
     });
   };
@@ -65,6 +65,17 @@ const SelectToken = ({ navigation, route }: Props) => {
   return (
     <View style={{ flex: 1, padding: 16, rowGap: 16 }}>
       <FlatList
+        ListEmptyComponent={
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <StyledText>{`No tokens found`}</StyledText>
+          </View>
+        }
         data={tokenBalances}
         contentContainerStyle={{
           rowGap: 16,

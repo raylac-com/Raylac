@@ -36,22 +36,29 @@ export type RootStackParamsList = {
   // Send stack
   SelectRecipient: undefined;
   SelectToken: {
-    address: Hex;
+    toAddress: Hex;
+  };
+  SelectFromAddress: {
+    toAddress: Hex;
+    token: Token;
   };
   SelectAmount: {
-    address: Hex;
+    toAddress: Hex;
+    fromAddresses: Hex[];
     token: Token;
   };
   SelectChain: {
-    address: Hex;
+    toAddress: Hex;
+    fromAddresses: Hex[];
     amount: string;
     token: Token;
   };
   ConfirmSend: {
-    address: Hex;
+    fromAddresses: Hex[];
     token: Token;
     amount: string;
-    outputChainId: number;
+    chainId: number;
+    toAddress: Hex;
   };
 
   SaveBackupPhrase: undefined;

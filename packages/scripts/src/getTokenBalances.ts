@@ -1,16 +1,28 @@
-import { optimism } from 'viem/chains';
+import { base, optimism } from 'viem/chains';
 import { client } from './rpc';
+import {
+  ETH,
+  getAddressChainTokenBalance,
+  getChainTokenBalance,
+  getMultiChainTokenBalance,
+  USDC,
+} from '@raylac/shared';
 
 const getTokenBalances = async () => {
   const tokenBalances = await client.getTokenBalances.query({
-    addresses: ['0x400EA6522867456E988235675b9Cb5b1Cf5b79C8'],
+    addresses: [
+      '0x28341dF2CCabe2Cc4A3c6e7ef2fe9E706680C196',
+      '0x400EA6522867456E988235675b9Cb5b1Cf5b79C8',
+    ],
   });
 
-  for (const tokenBalance of tokenBalances) {
-    console.log(tokenBalance.token.symbol);
-    console.log(JSON.stringify(tokenBalance.combinedBreakdown, null, 2));
-    console.log(JSON.stringify(tokenBalance.perAddressBreakdown, null, 2));
-  }
+  const tokenBalance = getChainTokenBalance({
+    tokenBalances,
+    chainId: base.id,
+    token: ETH,
+  });
+
+  console.log(tokenBalance);
 };
 
 getTokenBalances();

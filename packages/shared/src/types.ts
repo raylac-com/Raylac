@@ -520,3 +520,9 @@ export interface LidoApyResponse {
 export enum TokenSet {
   ETH = 'eth',
 }
+
+export interface Balance {
+  balance: string;
+  formatted: string;
+  usdValue: string;
+}

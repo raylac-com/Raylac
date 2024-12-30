@@ -23,13 +23,15 @@ const ChainListItem = ({ chain }: { chain: Chain }) => {
 type Props = NativeStackScreenProps<RootStackParamsList, 'SelectChain'>;
 
 const SelectChain = ({ navigation, route }: Props) => {
-  const address = route.params.address;
+  const toAddress = route.params.toAddress;
+  const fromAddresses = route.params.fromAddresses;
   const amount = route.params.amount;
   const token = route.params.token;
 
   const onChainSelect = (chainId: number) => {
     navigation.navigate('ConfirmSend', {
-      address,
+      toAddress,
+      fromAddresses,
       amount,
       token,
       outputChainId: chainId,
@@ -39,7 +41,7 @@ const SelectChain = ({ navigation, route }: Props) => {
   return (
     <View style={{ flex: 1, padding: 16, rowGap: 16 }}>
       <StyledText style={{ color: colors.border }}>
-        {`Send to ${shortenAddress(address)}`}
+        {`Send to ${shortenAddress(toAddress)}`}
       </StyledText>
       <FlatList
         data={supportedChains}

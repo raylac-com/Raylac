@@ -52,7 +52,7 @@ const buildERC20TransferExecutionStep = ({
       maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
       nonce,
       chainId,
-      gas: 500_0000,
+      gas: 500_000,
     },
     transferDetails: {
       to: to,
@@ -104,7 +104,7 @@ const buildETHTransferExecutionStep = ({
       maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
       nonce,
       chainId,
-      gas: 500_0000,
+      gas: 500_000,
     },
     serializedTx: '0x',
   };

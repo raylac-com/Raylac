@@ -16,6 +16,7 @@ import {
   PrivateKeyAccount,
 } from 'viem';
 import {
+  Balance,
   BridgeStep,
   ChainGasInfo,
   Token,
@@ -31,6 +32,7 @@ import { ACCOUNT_IMPL_V2_ADDRESS } from './addresses';
 import RaylacAccountProxyBytecode from './bytecode/RaylacAccountProxyBytecode';
 import RaylacAccountProxyAbi from './abi/RaylacAccountProxyAbi';
 import BigNumber from 'bignumber.js';
+import { TokenBalancesReturnType } from './rpcTypes';
 
 const VIEW_TAG_BYTES = 1;
 const CHAIN_ID_BYTES = 4;
@@ -344,4 +346,157 @@ export const formatUsdValue = (num: BigNumber): string => {
   }
 
   return num.toFormat(2).replace(/\.?0+$/, '');
+};
+
+/**
+ * Extracts the balance of the given token from a list of token balances
+ */
+const getTokenBalance = ({
+  tokenBalances,
+  token,
+}: {
+  tokenBalances: TokenBalancesReturnType;
+  token: Token;
+}): TokenBalancesReturnType[number] => {
+  const tokenBalance = tokenBalances.find(balance =>
+    balance.token.addresses.some(
+      address => address.address === token.addresses[0].address
+    )
+  );
+
+  if (!tokenBalance) {
+    throw new Error(`Token balance not found for token ${token.symbol}`);
+  }
+
+  return tokenBalance;
+};
+
+/**
+ * Extracts the balance of a token from a list of token balances
+ */
+export const getMultiChainTokenBalance = ({
+  tokenBalances,
+  token,
+}: {
+  tokenBalances: TokenBalancesReturnType;
+  token: Token;
+}): Balance => {
+  const tokenBalance = getTokenBalance({ tokenBalances, token });
+
+  const usdValue = new BigNumber(
+    formatUnits(hexToBigInt(tokenBalance.balance), token.decimals)
+  ).multipliedBy(tokenBalance.tokenPrice);
+
+  const balance: Balance = {
+    balance: hexToBigInt(tokenBalance.balance).toString(),
+    formatted: formatAmount(
+      hexToBigInt(tokenBalance.balance).toString(),
+      token.decimals
+    ),
+    usdValue: formatUsdValue(usdValue),
+  };
+
+  return balance;
+};
+
+/**
+ * Extracts the chain token balance of a token from a list of token balances
+ */
+export const getChainTokenBalance = ({
+  tokenBalances,
+  chainId,
+  token,
+}: {
+  tokenBalances: TokenBalancesReturnType;
+  chainId: number;
+  token: Token;
+}) => {
+  const tokenBalance = getTokenBalance({ tokenBalances, token });
+
+  const chainTokenBalance = tokenBalance.combinedBreakdown.find(
+    breakdown => breakdown.chainId === chainId
+  );
+
+  if (!chainTokenBalance) {
+    return {
+      balance: '0',
+      formatted: '0',
+      usdValue: '0',
+    };
+  }
+
+  const usdValue = new BigNumber(
+    formatUnits(hexToBigInt(chainTokenBalance.balance), token.decimals)
+  ).multipliedBy(tokenBalance.tokenPrice);
+
+  return {
+    balance: hexToBigInt(chainTokenBalance.balance).toString(),
+    formatted: formatAmount(chainTokenBalance.balance, token.decimals),
+    usdValue: formatUsdValue(usdValue),
+  };
+};
+
+/**
+ * Extracts the address's chain token balance of the given token from a list of token balances
+ */
+export const getAddressChainTokenBalance = ({
+  tokenBalances,
+  address,
+  chainId,
+  token,
+}: {
+  tokenBalances: TokenBalancesReturnType;
+  address: Hex;
+  chainId: number;
+  token: Token;
+}) => {
+  const tokenBalance = getTokenBalance({ tokenBalances, token });
+
+  const addressTokenBalance = tokenBalance.perAddressBreakdown.find(
+    breakdown => breakdown.address === address
+  );
+
+  if (!addressTokenBalance) {
+    return {
+      balance: '0',
+      formatted: '0',
+      usdValue: '0',
+    };
+  }
+
+  const chainTokenBalance = addressTokenBalance.breakdown.find(
+    breakdown => breakdown.chainId === chainId
+  );
+
+  if (!chainTokenBalance) {
+    return {
+      balance: '0',
+      formatted: '0',
+      usdValue: '0',
+    };
+  }
+
+  const usdValue = new BigNumber(
+    formatUnits(hexToBigInt(chainTokenBalance.balance), token.decimals)
+  ).multipliedBy(tokenBalance.tokenPrice);
+
+  return {
+    balance: hexToBigInt(chainTokenBalance.balance).toString(),
+    formatted: formatAmount(chainTokenBalance.balance, token.decimals),
+    usdValue: formatUsdValue(usdValue),
+  };
+};
+
+export const getTokenAddressOnChain = (token: Token, chainId: number): Hex => {
+  const address = token.addresses.find(
+    (address: { chainId: number }) => address.chainId === chainId
+  )?.address;
+
+  if (!address) {
+    throw new Error(
+      `Token ${token.symbol} address not found for chainId ${chainId}`
+    );
+  }
+
+  return address;
 };
