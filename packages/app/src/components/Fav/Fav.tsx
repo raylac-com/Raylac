@@ -1,8 +1,10 @@
+import Entypo from '@expo/vector-icons/Entypo';
 import { View } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import colors from '@/lib/styles/colors';
 import { useState } from 'react';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
+import MoveFundsSheet from '@/components/MoveFundsSheet/MoveFundsSheet';
 
 const FavMenuItem = ({
   icon,
@@ -37,6 +39,8 @@ const FavMenuItem = ({
 };
 
 const FavMenuItems = () => {
+  const [open, setOpen] = useState(false);
+
   return (
     <View
       style={{
@@ -45,10 +49,13 @@ const FavMenuItems = () => {
       }}
     >
       <FavMenuItem
-        icon={<AntDesign name="plus" size={24} color={colors.text} />}
-        label="Add"
-        onPress={() => {}}
+        icon={<Entypo name="wallet" size={24} color={colors.text} />}
+        label="Move funds"
+        onPress={() => {
+          setOpen(true);
+        }}
       />
+      <MoveFundsSheet open={open} />
     </View>
   );
 };
