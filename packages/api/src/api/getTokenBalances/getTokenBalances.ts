@@ -45,26 +45,30 @@ export const getKnownTokenBalances = async ({
       const perAddressBreakdown = await Promise.all(
         // Get balances on each chain
         addresses.map(async address => {
-          const addressBalanceBreakdown = await Promise.all(
-            token.addresses.map(
-              async ({ chainId, address: contractAddress }) => {
-                const balance =
-                  contractAddress === zeroAddress
-                    ? await getETHBalance({ address, chainId })
-                    : await getERC20TokenBalance({
-                        address,
-                        contractAddress,
-                        chainId,
-                      });
+          const addressBalanceBreakdown = (
+            await Promise.all(
+              token.addresses.map(
+                async ({ chainId, address: contractAddress }) => {
+                  const balance =
+                    contractAddress === zeroAddress
+                      ? await getETHBalance({ address, chainId })
+                      : await getERC20TokenBalance({
+                          address,
+                          contractAddress,
+                          chainId,
+                        });
 
-                return {
-                  chainId,
-                  tokenAddress: contractAddress,
-                  balance,
-                };
-              }
+                  return {
+                    chainId,
+                    tokenAddress: contractAddress,
+                    balance,
+                  };
+                }
+              )
             )
-          );
+          )
+            // Filter out balances that are 0
+            .filter(b => b.balance !== BigInt(0));
 
           const totalBalance = addressBalanceBreakdown.reduce(
             (acc, curr) => acc + curr.balance,

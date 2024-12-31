@@ -487,6 +487,51 @@ export const getAddressChainTokenBalance = ({
   };
 };
 
+export const getAddressTokenBalances = ({
+  tokenBalances,
+  address,
+}: {
+  tokenBalances: TokenBalancesReturnType;
+  address: Hex;
+}) => {
+  const addressTokenBalances = [];
+
+  for (const tokenBalance of tokenBalances) {
+    const addressTokenBalance = tokenBalance.perAddressBreakdown.find(
+      breakdown => breakdown.address === address
+    );
+
+    if (!addressTokenBalance) {
+      continue;
+    }
+
+    const totalBalance = addressTokenBalance.breakdown.reduce(
+      (acc, breakdown) => acc + hexToBigInt(breakdown.balance),
+      BigInt(0)
+    );
+
+    const totalBalanceFormatted = formatAmount(
+      totalBalance.toString(),
+      tokenBalance.token.decimals
+    );
+
+    if (addressTokenBalance) {
+      addressTokenBalances.push({
+        token: tokenBalance.token,
+        address: address,
+        breakdown: addressTokenBalance.breakdown.map(b => ({
+          chainId: b.chainId,
+          balance: hexToBigInt(b.balance),
+        })),
+        totalBalance,
+        totalBalanceFormatted,
+      });
+    }
+  }
+
+  return addressTokenBalances;
+};
+
 export const getTokenAddressOnChain = (token: Token, chainId: number): Hex => {
   const address = token.addresses.find(
     (address: { chainId: number }) => address.chainId === chainId

@@ -3,6 +3,7 @@ import { client } from './rpc';
 import {
   ETH,
   getAddressChainTokenBalance,
+  getAddressTokenBalances,
   getChainTokenBalance,
   getMultiChainTokenBalance,
   USDC,
@@ -16,10 +17,9 @@ const getTokenBalances = async () => {
     ],
   });
 
-  const tokenBalance = getChainTokenBalance({
+  const tokenBalance = getAddressTokenBalances({
     tokenBalances,
-    chainId: base.id,
-    token: ETH,
+    address: '0x28341dF2CCabe2Cc4A3c6e7ef2fe9E706680C196',
   });
 
   console.log(tokenBalance);
