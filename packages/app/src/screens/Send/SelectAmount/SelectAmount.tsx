@@ -117,8 +117,11 @@ const SelectAmount = ({ route }: Props) => {
   /// Mutations
   ///
 
+  const { data: estimatedTransferGas, mutate: getEstimatedTransferGas } =
+    trpc.getEstimatedTransferGas.useMutation();
+
   const {
-    data: _aggregatedSend,
+    data: aggregatedSend,
     mutateAsync: buildAggregatedSend,
     isPending: isBuildingAggregatedSend,
     error: buildAggregateSendError,
@@ -129,6 +132,18 @@ const SelectAmount = ({ route }: Props) => {
   ///
   /// Effects
   ///
+
+  useEffect(() => {
+    if (tokenAmountInputText !== '' && aggregatedSend) {
+      getEstimatedTransferGas({
+        chainId,
+        token,
+        amount: parseUnits(tokenAmountInputText, token.decimals).toString(),
+        to: toAddress,
+        maxFeePerGas: aggregatedSend.inputs[0].tx.maxFeePerGas,
+      });
+    }
+  }, [tokenAmountInputText, aggregatedSend]);
 
   useEffect(() => {
     if (
@@ -274,8 +289,12 @@ const SelectAmount = ({ route }: Props) => {
             </StyledText>
           </Pressable>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ flexDirection: 'column' }}>
           <StyledText>{`Send from ${shortenAddress(fromAddresses[0])}`}</StyledText>
+          <StyledText>
+            {estimatedTransferGas &&
+              `Gas $${estimatedTransferGas?.usdValue} (${estimatedTransferGas?.formatted} ${token.symbol})`}
+          </StyledText>
         </View>
         <ReviewButton
           onPress={onReviewButtonPress}

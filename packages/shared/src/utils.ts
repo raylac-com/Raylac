@@ -128,10 +128,6 @@ export const formatAmount = (amount: string, decimals: number): string => {
     maximumFractionDigits: 6,
   });
 
-  if (formatted === '0' && amount !== '0') {
-    return '< 0';
-  }
-
   return formatted;
 };
 
@@ -357,9 +353,11 @@ export const formatBalance = ({
   token: Token;
   tokenPriceUsd: number;
 }): Balance => {
-  const usdValue = new BigNumber(formatUnits(balance, token.decimals))
-    .multipliedBy(tokenPriceUsd)
-    .toFixed(2);
+  const usdValue = formatUsdValue(
+    new BigNumber(formatUnits(balance, token.decimals)).multipliedBy(
+      tokenPriceUsd
+    )
+  );
 
   const balanceFormatted: Balance = {
     balance: balance.toString(),

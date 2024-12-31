@@ -14,6 +14,7 @@ import {
   SwapStep,
   SignedSingleInputSwapStep,
   SignedApproveStep,
+  Balance,
 } from './types';
 
 export enum TRPCErrorMessage {
@@ -255,3 +256,14 @@ export type GetHistoryReturnType = {
   timestamp: string;
   type: HistoryItemType;
 }[];
+
+export interface GetEstimatedTransferGasRequestBody {
+  chainId: number;
+  token: Token;
+  to: Hex;
+  from: Hex;
+  amount: string;
+  maxFeePerGas: string;
+}
+
+export type GetEstimatedTransferGasReturnType = Balance;

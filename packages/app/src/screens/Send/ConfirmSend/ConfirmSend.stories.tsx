@@ -18,7 +18,11 @@ const meta = {
         toAddress: '0x400EA6522867456E988235675b9Cb5b1Cf5b79C8',
         fromAddresses: ['0x28341dF2CCabe2Cc4A3c6e7ef2fe9E706680C196'],
         chainId: base.id,
-        amount: '5',
+        amount: {
+          formatted: '5',
+          balance: '5',
+          usdValue: '5',
+        },
         token: {
           symbol: 'USDC',
           name: 'USD Coin',
