@@ -1,4 +1,4 @@
-import { Token } from '@raylac/shared';
+import { Balance, Token } from '@raylac/shared';
 import { Hex } from 'viem';
 
 export type RootTabsParamsList = {
@@ -56,7 +56,7 @@ export type RootStackParamsList = {
   ConfirmSend: {
     fromAddresses: Hex[];
     token: Token;
-    amount: string;
+    amount: Balance;
     chainId: number;
     toAddress: Hex;
   };

@@ -41,6 +41,7 @@ const TokenLogo = (props: ImageProps) => {
         onError={() => setIsError(true)}
         style={{
           ...(typeof props.style === 'object' ? props.style : {}),
+          borderRadius: 1000,
         }}
       />
     </View>

@@ -6,19 +6,24 @@ import { Image } from 'expo-image';
 const TokenImageWithChain = ({
   logoURI,
   chainId,
+  size = 24,
 }: {
   logoURI: string;
   chainId: number;
+  size?: number;
 }) => {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-      <TokenLogo source={{ uri: logoURI }} style={{ width: 24, height: 24 }} />
+      <TokenLogo
+        source={{ uri: logoURI }}
+        style={{ width: size, height: size }}
+      />
       <Image
         source={getChainIcon(chainId)}
         style={{
-          width: 12,
-          height: 12,
-          marginLeft: -6,
+          width: size / 2,
+          height: size / 2,
+          marginLeft: -size / 4,
         }}
       />
     </View>

@@ -1,19 +1,46 @@
 import TokenLogo from '@/components/FastImage/TokenLogo';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import StyledText from '@/components/StyledText/StyledText';
+import TokenImageWithChain from '@/components/TokenImageWithChain/TokenImageWithChain';
+import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import { RootStackParamsList } from '@/navigation/types';
-import {
-  formatAmount,
-  getAddressTokenBalances,
-  getChainName,
-  Token,
-} from '@raylac/shared';
+import { Balance, getAddressTokenBalances, Token } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FlatList, View } from 'react-native';
 import { Hex } from 'viem';
+
+const TokenChainItem = ({
+  chainId,
+  token,
+  balance,
+}: {
+  chainId: number;
+  token: Token;
+  balance: Balance;
+}) => {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        columnGap: 8,
+        paddingLeft: 12,
+      }}
+    >
+      <TokenImageWithChain
+        chainId={chainId}
+        logoURI={token.logoURI}
+        size={32}
+      />
+      <StyledText style={{ color: colors.border }}>
+        {`$${balance.usdValue}`}
+      </StyledText>
+    </View>
+  );
+};
 
 const TokenListItem = ({
   token,
@@ -22,9 +49,9 @@ const TokenListItem = ({
   onPress,
 }: {
   token: Token;
-  balance: bigint;
+  balance: Balance;
   balanceBreakdown: {
-    balance: bigint;
+    balance: Balance;
     chainId: number;
   }[];
   onPress: ({ token, chainId }: { token: Token; chainId: number }) => void;
@@ -34,6 +61,7 @@ const TokenListItem = ({
       style={{
         flexDirection: 'column',
         rowGap: 8,
+        paddingBottom: balanceBreakdown.length > 0 ? 8 : 0,
       }}
     >
       <View
@@ -62,7 +90,7 @@ const TokenListItem = ({
               <StyledText>{token.name}</StyledText>
             </View>
             <StyledText style={{ color: colors.border }}>
-              {formatAmount(balance.toString(), token.decimals)} {token.symbol}
+              {`$${balance.usdValue}`}
             </StyledText>
           </View>
         </View>
@@ -72,10 +100,11 @@ const TokenListItem = ({
           key={index}
           onPress={() => onPress({ token, chainId: b.chainId })}
         >
-          <StyledText>{getChainName(b.chainId)}</StyledText>
-          <StyledText>
-            {formatAmount(b.balance.toString(), token.decimals)}
-          </StyledText>
+          <TokenChainItem
+            chainId={b.chainId}
+            token={token}
+            balance={b.balance}
+          />
         </FeedbackPressable>
       ))}
     </View>
@@ -102,16 +131,19 @@ const AddressCard = ({
 
   return (
     <View style={{ flexDirection: 'column', rowGap: 8 }}>
-      <StyledText>{address}</StyledText>
-      {addressTokenBalances.map((tb, index) => (
-        <TokenListItem
-          key={index}
-          token={tb.token}
-          balance={tb.totalBalance}
-          balanceBreakdown={tb.breakdown}
-          onPress={onPress}
-        />
-      ))}
+      <WalletIconAddress address={address} />
+      <FlatList
+        data={addressTokenBalances}
+        style={{ rowGap: 8 }}
+        renderItem={({ item }) => (
+          <TokenListItem
+            token={item.token}
+            balance={item.balance}
+            balanceBreakdown={item.breakdown}
+            onPress={onPress}
+          />
+        )}
+      />
     </View>
   );
 };
@@ -141,7 +173,7 @@ const SelectToken = ({ navigation, route }: Props) => {
   };
 
   return (
-    <View style={{ flex: 1, padding: 16, rowGap: 16 }}>
+    <View style={{ flex: 1, padding: 16 }}>
       <FlatList
         ListEmptyComponent={
           <View
@@ -156,7 +188,7 @@ const SelectToken = ({ navigation, route }: Props) => {
         }
         data={userAddresses}
         contentContainerStyle={{
-          rowGap: 16,
+          rowGap: 48,
         }}
         renderItem={({ item }) => (
           <AddressCard

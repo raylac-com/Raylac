@@ -348,6 +348,28 @@ export const formatUsdValue = (num: BigNumber): string => {
   return num.toFormat(2).replace(/\.?0+$/, '');
 };
 
+export const formatBalance = ({
+  balance,
+  token,
+  tokenPriceUsd,
+}: {
+  balance: bigint;
+  token: Token;
+  tokenPriceUsd: number;
+}): Balance => {
+  const usdValue = new BigNumber(formatUnits(balance, token.decimals))
+    .multipliedBy(tokenPriceUsd)
+    .toFixed(2);
+
+  const balanceFormatted: Balance = {
+    balance: balance.toString(),
+    formatted: formatAmount(balance.toString(), token.decimals),
+    usdValue: usdValue.toString(),
+  };
+
+  return balanceFormatted;
+};
+
 /**
  * Extracts the balance of the given token from a list of token balances
  */
@@ -383,18 +405,11 @@ export const getMultiChainTokenBalance = ({
 }): Balance => {
   const tokenBalance = getTokenBalance({ tokenBalances, token });
 
-  const usdValue = new BigNumber(
-    formatUnits(hexToBigInt(tokenBalance.balance), token.decimals)
-  ).multipliedBy(tokenBalance.tokenPrice);
-
-  const balance: Balance = {
-    balance: hexToBigInt(tokenBalance.balance).toString(),
-    formatted: formatAmount(
-      hexToBigInt(tokenBalance.balance).toString(),
-      token.decimals
-    ),
-    usdValue: formatUsdValue(usdValue),
-  };
+  const balance = formatBalance({
+    balance: hexToBigInt(tokenBalance.balance),
+    token,
+    tokenPriceUsd: Number(tokenBalance.tokenPrice),
+  });
 
   return balance;
 };
@@ -425,15 +440,13 @@ export const getChainTokenBalance = ({
     };
   }
 
-  const usdValue = new BigNumber(
-    formatUnits(hexToBigInt(chainTokenBalance.balance), token.decimals)
-  ).multipliedBy(tokenBalance.tokenPrice);
+  const balance = formatBalance({
+    balance: hexToBigInt(chainTokenBalance.balance),
+    token,
+    tokenPriceUsd: Number(tokenBalance.tokenPrice),
+  });
 
-  return {
-    balance: hexToBigInt(chainTokenBalance.balance).toString(),
-    formatted: formatAmount(chainTokenBalance.balance, token.decimals),
-    usdValue: formatUsdValue(usdValue),
-  };
+  return balance;
 };
 
 /**
@@ -476,15 +489,13 @@ export const getAddressChainTokenBalance = ({
     };
   }
 
-  const usdValue = new BigNumber(
-    formatUnits(hexToBigInt(chainTokenBalance.balance), token.decimals)
-  ).multipliedBy(tokenBalance.tokenPrice);
+  const balance = formatBalance({
+    balance: hexToBigInt(chainTokenBalance.balance),
+    token,
+    tokenPriceUsd: Number(tokenBalance.tokenPrice),
+  });
 
-  return {
-    balance: hexToBigInt(chainTokenBalance.balance).toString(),
-    formatted: formatAmount(chainTokenBalance.balance, token.decimals),
-    usdValue: formatUsdValue(usdValue),
-  };
+  return balance;
 };
 
 export const getAddressTokenBalances = ({
@@ -510,21 +521,23 @@ export const getAddressTokenBalances = ({
       BigInt(0)
     );
 
-    const totalBalanceFormatted = formatAmount(
-      totalBalance.toString(),
-      tokenBalance.token.decimals
-    );
-
     if (addressTokenBalance) {
       addressTokenBalances.push({
         token: tokenBalance.token,
         address: address,
         breakdown: addressTokenBalance.breakdown.map(b => ({
           chainId: b.chainId,
-          balance: hexToBigInt(b.balance),
+          balance: formatBalance({
+            balance: hexToBigInt(b.balance),
+            token: tokenBalance.token,
+            tokenPriceUsd: Number(tokenBalance.tokenPrice),
+          }),
         })),
-        totalBalance,
-        totalBalanceFormatted,
+        balance: formatBalance({
+          balance: totalBalance,
+          token: tokenBalance.token,
+          tokenPriceUsd: Number(tokenBalance.tokenPrice),
+        }),
       });
     }
   }

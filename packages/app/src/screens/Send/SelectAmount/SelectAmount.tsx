@@ -1,27 +1,24 @@
-import SelectChainSheet from '@/components/SelectChainSheet/SelectChainSheet';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import StyledText from '@/components/StyledText/StyledText';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
-import { getChainIcon } from '@/lib/utils';
+import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import {
   BuildAggregateSendRequestBody,
-  getChainFromId,
+  formatBalance,
   TRPCErrorMessage,
 } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
-import { Chain, parseUnits } from 'viem';
-import Entypo from '@expo/vector-icons/Entypo';
-import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
+import { formatUnits, parseUnits } from 'viem';
 import BigNumber from 'bignumber.js';
 import { trpc } from '@/lib/trpc';
 import useChainTokenBalance from '@/hooks/useChainTokenBalance';
-import AddressSelector from '@/components/AddressSelector/AddressSelector';
+import TokenImageWithChain from '@/components/TokenImageWithChain/TokenImageWithChain';
+import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 
 const ReviewButton = ({
   onPress,
@@ -101,12 +98,6 @@ const SelectAmount = ({ route }: Props) => {
   ///
   const [tokenAmountInputText, setTokenAmountInputText] = useState<string>('');
   const [usdAmountInputText, setUsdAmountInputText] = useState<string>('');
-  const [selectedChain, setSelectedChain] = useState<Chain>(
-    getChainFromId(chainId)
-  );
-
-  const [isSelectChainSheetOpen, setIsSelectChainSheetOpen] =
-    useState<boolean>(false);
 
   const [isBalanceSufficient, setIsBalanceSufficient] = useState<boolean>(true);
 
@@ -115,7 +106,7 @@ const SelectAmount = ({ route }: Props) => {
   ///
 
   const { data: tokenBalance } = useChainTokenBalance({
-    chainId: selectedChain.id,
+    chainId,
     token,
     address: fromAddresses[0],
   });
@@ -159,11 +150,11 @@ const SelectAmount = ({ route }: Props) => {
       amount: parsedAmount.toString(),
       fromAddresses,
       toAddress,
-      chainId: selectedChain.id,
+      chainId,
     };
 
     buildAggregatedSend(buildAggregatedSendRequestBody);
-  }, [tokenAmountInputText, selectedChain, fromAddresses, toAddress]);
+  }, [tokenAmountInputText, fromAddresses, toAddress, chainId]);
 
   ///
   /// Handlers
@@ -178,6 +169,7 @@ const SelectAmount = ({ route }: Props) => {
     }
 
     if (tokenPriceUsd !== undefined) {
+      // Update the USD amount
       const usdAmount = new BigNumber(amountText)
         .multipliedBy(tokenPriceUsd)
         .toFixed(2);
@@ -195,6 +187,7 @@ const SelectAmount = ({ route }: Props) => {
     }
 
     if (tokenPriceUsd !== undefined) {
+      // Update the USD amount
       const tokenAmount = new BigNumber(amountText).dividedBy(tokenPriceUsd);
 
       setTokenAmountInputText(tokenAmount.toString());
@@ -202,19 +195,56 @@ const SelectAmount = ({ route }: Props) => {
   };
 
   const onReviewButtonPress = () => {
+    const formattedAmount = formatBalance({
+      balance: parseUnits(tokenAmountInputText, token.decimals),
+      token,
+      tokenPriceUsd: Number(tokenPriceUsd),
+    });
+
     navigation.navigate('ConfirmSend', {
       toAddress,
       fromAddresses,
-      amount: tokenAmountInputText,
+      amount: formattedAmount,
       token,
-      chainId: selectedChain.id,
+      chainId,
     });
+  };
+
+  const onMaxBalancePress = () => {
+    if (tokenBalance) {
+      const amountText = formatUnits(
+        BigInt(tokenBalance.balance),
+        token.decimals
+      );
+      setTokenAmountInputText(amountText);
+
+      if (tokenPriceUsd !== undefined) {
+        // Update the USD amount
+        const usdAmount = new BigNumber(amountText)
+          .multipliedBy(tokenPriceUsd)
+          .toFixed(2);
+
+        setUsdAmountInputText(usdAmount);
+      }
+    }
   };
 
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flex: 1, padding: 16, rowGap: 20 }}>
-        <AddressSelector address={fromAddresses[0]} setAddress={() => {}} />
+        <View
+          style={{
+            flexDirection: 'row',
+            paddingVertical: 24,
+            justifyContent: 'center',
+          }}
+        >
+          <TokenImageWithChain
+            logoURI={token.logoURI}
+            chainId={chainId}
+            size={64}
+          />
+        </View>
         <AmountInput
           amount={tokenAmountInputText}
           setAmount={handleTokenAmountInputTextChange}
@@ -232,43 +262,20 @@ const SelectAmount = ({ route }: Props) => {
             setAmount={handleUsdAmountInputTextChange}
             postfix={'USD'}
           />
-          <StyledText
-            style={{ color: colors.border }}
-          >{`Balance $${tokenBalance?.usdValue}`}</StyledText>
-        </View>
-        <View
-          style={{
-            flexDirection: 'column',
-            rowGap: 14,
-            borderColor: colors.border,
-            borderWidth: 1,
-            borderRadius: 16,
-            padding: 16,
-          }}
-        >
           <Pressable
+            onPress={onMaxBalancePress}
             style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
-            onPress={() => setIsSelectChainSheetOpen(true)}
           >
-            <Image
-              style={{ width: 24, height: 24 }}
-              source={getChainIcon(selectedChain.id)}
-            />
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                columnGap: 0,
-              }}
-            >
-              <StyledText>{`${selectedChain.name}`}</StyledText>
-              <Entypo
-                name="chevron-small-down"
-                size={24}
-                color={colors.border}
-              />
-            </View>
+            <StyledText
+              style={{ color: colors.border, fontWeight: 'bold' }}
+            >{`MAX`}</StyledText>
+            <StyledText style={{ color: colors.border }}>
+              {`Balance $${tokenBalance?.usdValue}`}
+            </StyledText>
           </Pressable>
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <StyledText>{`Send from ${shortenAddress(fromAddresses[0])}`}</StyledText>
         </View>
         <ReviewButton
           onPress={onReviewButtonPress}
@@ -276,13 +283,6 @@ const SelectAmount = ({ route }: Props) => {
           isBalanceSufficient={isBalanceSufficient}
         />
       </View>
-      <SelectChainSheet
-        open={isSelectChainSheetOpen}
-        onSelect={chain => {
-          setSelectedChain(chain);
-          setIsSelectChainSheetOpen(false);
-        }}
-      />
     </View>
   );
 };

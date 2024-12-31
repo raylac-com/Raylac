@@ -6,36 +6,35 @@ import { getPrivateKey } from '@/lib/key';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
 import { trpc } from '@/lib/trpc';
-import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import {
   BuildAggregateSendRequestBody,
-  formatAmount,
   SendAggregateTxRequestBody,
   signEIP1159Tx,
   Token,
 } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Image } from 'expo-image';
 import { useEffect } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Hex, parseUnits } from 'viem';
+import { Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
+import TokenImageWithChain from '@/components/TokenImageWithChain/TokenImageWithChain';
+import { Balance } from '@raylac/shared';
+import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
 
 const RecipientCard = ({
   toAddress,
   token,
   amount,
+  chainId,
 }: {
   toAddress: Hex;
   token: Token;
-  amount: string;
+  amount: Balance;
+  chainId: number;
 }) => {
-  const parsedAmount = parseUnits(amount, token.decimals);
-  const formattedAmount = formatAmount(parsedAmount.toString(), token.decimals);
-
   return (
     <View
       style={{
@@ -48,16 +47,23 @@ const RecipientCard = ({
         paddingVertical: 20,
       }}
     >
-      <StyledText style={{ fontWeight: 'bold', color: colors.border }}>
-        {shortenAddress(toAddress)}
-      </StyledText>
+      <WalletIconAddress address={toAddress} />
       <View
-        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
       >
-        <Image source={token.logoURI} style={{ width: 34, height: 34 }} />
-        <StyledText style={{ fontWeight: 'bold', fontSize: fontSizes.large }}>
-          {formattedAmount} {token.symbol}
-        </StyledText>
+        <TokenImageWithChain
+          logoURI={token.logoURI}
+          chainId={chainId}
+          size={34}
+        />
+        <View style={{ flexDirection: 'column' }}>
+          <StyledText style={{ fontWeight: 'bold', fontSize: fontSizes.large }}>
+            {`$${amount.usdValue}`}
+          </StyledText>
+          <StyledText style={{ color: colors.border }}>
+            {amount.formatted} {token.symbol}
+          </StyledText>
+        </View>
       </View>
     </View>
   );
@@ -67,14 +73,13 @@ const InputCard = ({
   token,
   address,
   amount,
+  chainId,
 }: {
   token: Token;
   address: Hex;
-  amount: string;
+  amount: Balance;
+  chainId: number;
 }) => {
-  const parsedAmount = parseUnits(amount, token.decimals);
-  const formattedAmount = formatAmount(parsedAmount.toString(), token.decimals);
-
   return (
     <View
       style={{
@@ -87,16 +92,23 @@ const InputCard = ({
         paddingVertical: 20,
       }}
     >
-      <StyledText style={{ fontWeight: 'bold', color: colors.border }}>
-        {shortenAddress(address)}
-      </StyledText>
+      <WalletIconAddress address={address} />
       <View
-        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
       >
-        <Image source={token.logoURI} style={{ width: 34, height: 34 }} />
-        <StyledText style={{ fontWeight: 'bold', fontSize: fontSizes.large }}>
-          {formattedAmount} {token.symbol}
-        </StyledText>
+        <TokenImageWithChain
+          logoURI={token.logoURI}
+          chainId={chainId}
+          size={42}
+        />
+        <View style={{ flexDirection: 'column' }}>
+          <StyledText style={{ fontWeight: 'bold', fontSize: fontSizes.large }}>
+            {`$${amount.usdValue}`}
+          </StyledText>
+          <StyledText style={{ color: colors.border }}>
+            {amount.formatted} {token.symbol}
+          </StyledText>
+        </View>
       </View>
     </View>
   );
@@ -143,11 +155,9 @@ const ConfirmSend = ({ route }: Props) => {
       return;
     }
 
-    const parsedAmount = parseUnits(amount, token.decimals);
-
     const buildAggregateSendRequestBody: BuildAggregateSendRequestBody = {
       token,
-      amount: parsedAmount.toString(),
+      amount: amount.balance,
       chainId: chainId,
       fromAddresses,
       toAddress,
@@ -207,11 +217,16 @@ const ConfirmSend = ({ route }: Props) => {
           paddingTop: 48,
           paddingHorizontal: 16,
           rowGap: 48,
-          paddingBottom: insets.bottom,
+          paddingBottom: insets.bottom + 32,
         }}
       >
         <View style={{ flexDirection: 'column', rowGap: 16 }}>
-          <RecipientCard toAddress={toAddress} token={token} amount={amount} />
+          <RecipientCard
+            toAddress={toAddress}
+            token={token}
+            amount={amount}
+            chainId={chainId}
+          />
           <View
             style={{
               flexDirection: 'row',
@@ -221,7 +236,12 @@ const ConfirmSend = ({ route }: Props) => {
           >
             <Feather name="chevrons-up" size={36} color={colors.border} />
           </View>
-          <InputCard token={token} address={fromAddresses[0]} amount={amount} />
+          <InputCard
+            token={token}
+            address={fromAddresses[0]}
+            amount={amount}
+            chainId={chainId}
+          />
         </View>
         <StyledButton
           title="Send"
