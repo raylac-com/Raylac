@@ -8,7 +8,7 @@ import { RootStackParamsList } from '@/navigation/types';
 import {
   BuildAggregateSendRequestBody,
   formatBalance,
-  TRPCErrorMessage,
+  GetEstimatedTransferGasRequestBody,
 } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
@@ -124,7 +124,6 @@ const SelectAmount = ({ route }: Props) => {
     data: aggregatedSend,
     mutateAsync: buildAggregatedSend,
     isPending: isBuildingAggregatedSend,
-    error: buildAggregateSendError,
   } = trpc.buildAggregateSend.useMutation({
     throwOnError: false,
   });
@@ -134,24 +133,36 @@ const SelectAmount = ({ route }: Props) => {
   ///
 
   useEffect(() => {
-    if (tokenAmountInputText !== '' && aggregatedSend) {
-      getEstimatedTransferGas({
-        chainId,
-        token,
-        amount: parseUnits(tokenAmountInputText, token.decimals).toString(),
-        to: toAddress,
-        maxFeePerGas: aggregatedSend.inputs[0].tx.maxFeePerGas,
-      });
+    if (tokenAmountInputText !== '' && aggregatedSend && tokenBalance) {
+      const isBalanceSufficient =
+        tokenBalance.balance &&
+        parseUnits(tokenAmountInputText, token.decimals) <=
+          BigInt(tokenBalance.balance);
+
+      if (isBalanceSufficient) {
+        const requestBody: GetEstimatedTransferGasRequestBody = {
+          chainId,
+          token,
+          amount: parseUnits(tokenAmountInputText, token.decimals).toString(),
+          to: toAddress,
+          from: fromAddresses[0],
+          maxFeePerGas: aggregatedSend.inputs[0].tx.maxFeePerGas,
+        };
+
+        getEstimatedTransferGas(requestBody);
+      }
     }
-  }, [tokenAmountInputText, aggregatedSend]);
+  }, [tokenAmountInputText, aggregatedSend, tokenBalance]);
 
   useEffect(() => {
-    if (
-      buildAggregateSendError?.message === TRPCErrorMessage.INSUFFICIENT_BALANCE
-    ) {
-      setIsBalanceSufficient(false);
+    if (tokenBalance) {
+      const _isBalanceSufficient =
+        parseUnits(tokenAmountInputText, token.decimals) <=
+        BigInt(tokenBalance.balance);
+
+      setIsBalanceSufficient(_isBalanceSufficient);
     }
-  }, [buildAggregateSendError]);
+  }, [tokenAmountInputText, tokenBalance]);
 
   useEffect(() => {
     if (containsNonNumericCharacters(tokenAmountInputText)) {
