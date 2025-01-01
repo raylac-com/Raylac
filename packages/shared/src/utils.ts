@@ -535,14 +535,17 @@ export const getAddressTokenBalances = ({
 };
 
 export type PerAddressTokenBalance = {
-  address: Hex;
   totalBalance: Balance;
-  breakdown: {
+  perAddressBreakdown: {
     address: Hex;
-    balance: Balance;
-    chainId: number;
+    totalBalance: Balance;
+    chainBalances: {
+      address: Hex;
+      balance: Balance;
+      chainId: number;
+    }[];
   }[];
-}[];
+};
 
 export const getPerAddressTokenBalance = ({
   tokenBalances,
@@ -580,7 +583,7 @@ export const getPerAddressTokenBalance = ({
     balancesPerAddress.push({
       address,
       totalBalance: formattedTotalBalance,
-      breakdown: addressBalances.map(balance => ({
+      chainBalances: addressBalances.map(balance => ({
         address: balance.address,
         balance: balance.balance,
         chainId: balance.chainId,
@@ -588,7 +591,91 @@ export const getPerAddressTokenBalance = ({
     });
   }
 
-  return balancesPerAddress;
+  const totalBalance = balancesPerAddress.reduce(
+    (acc, balance) => acc + BigInt(balance.totalBalance.balance),
+    BigInt(0)
+  );
+
+  const formattedTotalBalance = formatBalance({
+    balance: totalBalance,
+    token,
+    tokenPriceUsd: Number(balancesPerAddress[0].totalBalance.tokenPriceUsd),
+  });
+
+  return {
+    totalBalance: formattedTotalBalance,
+    perAddressBreakdown: balancesPerAddress,
+  };
+};
+
+export type AddressTokenBalances = {
+  address: Hex;
+  tokenBalances: {
+    token: Token;
+    totalBalance: Balance;
+    chainBalances: {
+      chainId: number;
+      balance: Balance;
+    }[];
+  }[];
+};
+
+export const getTokenBalancePerAddress = ({
+  tokenBalances,
+  addresses,
+}: {
+  tokenBalances: TokenBalancesReturnType;
+  addresses: Hex[];
+}) => {
+  const tokenBalancesPerAddress: AddressTokenBalances[] = [];
+
+  for (const address of addresses) {
+    const addressTokenBalances = tokenBalances.filter(
+      balance => balance.address === address
+    );
+
+    // Group by token
+    const addressTokenIds = [
+      ...new Set(
+        addressTokenBalances.map(balance => getTokenId(balance.token))
+      ),
+    ];
+
+    const groupByTokens = [];
+
+    for (const tokenId of addressTokenIds) {
+      const tokenBalances = addressTokenBalances.filter(
+        balance => getTokenId(balance.token) === tokenId
+      );
+
+      const totalBalance = tokenBalances.reduce(
+        (acc, balance) => acc + BigInt(balance.balance.balance),
+        BigInt(0)
+      );
+
+      const formattedTotalBalance = formatBalance({
+        balance: totalBalance,
+        token: tokenBalances[0].token,
+        tokenPriceUsd: tokenBalances[0].balance.tokenPriceUsd,
+      });
+
+      groupByTokens.push({
+        token: tokenBalances[0].token,
+        totalBalance: formattedTotalBalance,
+        chainBalances: tokenBalances.map(balance => ({
+          chainId: balance.chainId,
+          balance: balance.balance,
+        })),
+      });
+    }
+
+    tokenBalancesPerAddress.push({
+      address,
+      tokenBalances: groupByTokens,
+    });
+  }
+
+  return tokenBalancesPerAddress;
 };
 
 export const getTokenAddressOnChain = (token: Token, chainId: number): Hex => {

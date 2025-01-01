@@ -10,7 +10,7 @@ import {
   Token,
   getAddressChainTokenBalance,
   BuildBridgeSendRequestBody,
-  getAddressTokenBalances,
+  getTokenId,
 } from '@raylac/shared';
 import { useEffect, useState } from 'react';
 import { Image, Pressable, TextInput, View } from 'react-native';
@@ -310,11 +310,12 @@ const MoveFunds = () => {
     trpc.sendAggregateTx.useMutation();
 
   useEffect(() => {
-    if (tokenBalances && fromAddress) {
-      const addressTokenBalances = getAddressTokenBalances({
-        tokenBalances: tokenBalances,
-        address: fromAddress,
-      });
+    if (tokenBalances && fromAddress && token) {
+      const addressTokenBalances = tokenBalances.filter(
+        tokenBalance =>
+          tokenBalance.address === fromAddress &&
+          getTokenId(tokenBalance.token) === getTokenId(token)
+      );
 
       if (addressTokenBalances.length > 0) {
         // eslint-disable-next-line security/detect-possible-timing-attacks

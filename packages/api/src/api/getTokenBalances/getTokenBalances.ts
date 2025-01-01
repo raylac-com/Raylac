@@ -1,4 +1,4 @@
-import { getAddress, Hex, hexToBigInt } from 'viem';
+import { getAddress, Hex } from 'viem';
 import { getPublicClient } from '../../utils';
 import {
   supportedChains,
@@ -96,10 +96,14 @@ const getMultiChainTokenBalancesFromAlchemy = async ({
       const addressChainTokenBalances = (
         await Promise.all(
           alchemyTokenBalances.tokens.map(async token => {
+            if (token.rawBalance === '0' || token.rawBalance === undefined) {
+              return null;
+            }
+
             return await formatAlchemyTokenBalance({
               address,
               tokenAddress: getAddress(token.contractAddress),
-              tokenBalance: hexToBigInt(token.rawBalance as Hex),
+              tokenBalance: BigInt(token.rawBalance),
               chainId: chain.id,
             });
           })
