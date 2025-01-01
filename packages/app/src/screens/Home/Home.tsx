@@ -19,6 +19,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import Fav from '@/components/Fav/Fav';
+import TopMenuBar from './components/TopMenuBar/TopMenuBar';
+
 const HomeScreen = () => {
   const navigation = useTypedNavigation();
   const insets = useSafeAreaInsets();
@@ -132,6 +134,7 @@ const HomeScreen = () => {
         }
         testID="home"
       >
+        <TopMenuBar />
         <View
           style={{
             flexDirection: 'column',
