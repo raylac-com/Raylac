@@ -543,6 +543,33 @@ export const getAddressTokenBalances = ({
   return addressTokenBalances;
 };
 
+export const getAddressTokenBalanceBreakdown = ({
+  tokenBalances,
+  token,
+  address,
+}: {
+  tokenBalances: TokenBalancesReturnType;
+  token: Token;
+  address: Hex;
+}) => {
+  const addressTokenBalances = getAddressTokenBalances({
+    tokenBalances,
+    address,
+  });
+
+  const addressTokenBalance = addressTokenBalances.find(balance =>
+    balance.token.addresses.some(
+      address => address.address === token.addresses[0].address
+    )
+  );
+
+  if (!addressTokenBalance) {
+    return [];
+  }
+
+  return addressTokenBalance.breakdown;
+};
+
 export const getTokenAddressOnChain = (token: Token, chainId: number): Hex => {
   const address = token.addresses.find(
     (address: { chainId: number }) => address.chainId === chainId

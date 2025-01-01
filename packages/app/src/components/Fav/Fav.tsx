@@ -6,6 +6,7 @@ import colors from '@/lib/styles/colors';
 import { useState } from 'react';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
+import { useMoveFundsContext } from '@/contexts/MoveFundsContext';
 
 const FavMenuItem = ({
   icon,
@@ -42,6 +43,8 @@ const FavMenuItem = ({
 const FavMenuItems = () => {
   const navigation = useTypedNavigation();
 
+  const { setIsSheetOpen } = useMoveFundsContext();
+
   return (
     <View
       style={{
@@ -53,7 +56,7 @@ const FavMenuItems = () => {
         icon={<Entypo name="wallet" size={24} color={colors.text} />}
         label="Move funds"
         onPress={() => {
-          navigation.navigate('Addresses');
+          setIsSheetOpen(true);
         }}
       />
       <FavMenuItem

@@ -1,0 +1,415 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
+import Feather from '@expo/vector-icons/Feather';
+import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
+import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
+import colors from '@/lib/styles/colors';
+import {
+  Balance,
+  getChainFromId,
+  SendAggregateTxRequestBody,
+  signEIP1159Tx,
+  BuildAggregateSendRequestBody,
+  Token,
+} from '@raylac/shared';
+import { useEffect, useState } from 'react';
+import { Image, Pressable, TextInput, View } from 'react-native';
+import { Hex, parseUnits } from 'viem';
+import { trpc } from '@/lib/trpc';
+import useUserAddresses from '@/hooks/useUserAddresses';
+import fontSizes from '@/lib/styles/fontSizes';
+import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
+import StyledText from '@/components/StyledText/StyledText';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MoveFundsSheetStackParamsList } from '../MoveFundsSheet';
+import { getChainIcon } from '@/lib/utils';
+import { useMoveFundsContext } from '@/contexts/MoveFundsContext';
+import StyledButton from '@/components/StyledButton/StyledButton';
+import { getPrivateKey } from '@/lib/key';
+import { privateKeyToAccount } from 'viem/accounts';
+
+const AddressSelector = ({
+  address,
+  onPress,
+}: {
+  address: Hex | null;
+  onPress: () => void;
+}) => {
+  return (
+    <FeedbackPressable onPress={onPress}>
+      {address ? (
+        <WalletIconAddress address={address} />
+      ) : (
+        <StyledText>{`Select address`}</StyledText>
+      )}
+    </FeedbackPressable>
+  );
+};
+
+const ChainSelector = ({
+  chainId,
+  onSelectPress,
+}: {
+  chainId: number;
+  onSelectPress: () => void;
+}) => {
+  return (
+    <View>
+      <Pressable
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+        onPress={onSelectPress}
+      >
+        <Image
+          source={getChainIcon(chainId)}
+          style={{ width: 24, height: 24 }}
+        />
+        <StyledText>{getChainFromId(chainId).name}</StyledText>
+      </Pressable>
+    </View>
+  );
+};
+
+const MoveFundsOutput = ({
+  toAddress,
+  token,
+  outputAmount,
+  chainId,
+}: {
+  toAddress: Hex | null;
+  token: Token | null;
+  outputAmount: Balance | null;
+  chainId: number | null;
+}) => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<MoveFundsSheetStackParamsList>>();
+
+  const onSelectOutputAddressPress = () => {
+    navigation.navigate('SelectAddress', { type: 'to' });
+  };
+
+  const onSelectOutputChainPress = () => {
+    navigation.navigate('SelectChain', { type: 'to' });
+  };
+
+  return (
+    <View
+      style={{
+        justifyContent: 'center',
+        paddingHorizontal: 22,
+        paddingVertical: 20,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 32,
+        rowGap: 12,
+      }}
+    >
+      <AddressSelector
+        address={toAddress}
+        onPress={onSelectOutputAddressPress}
+      />
+      <FeedbackPressable
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+        onPress={() => {}}
+      >
+        <TokenLogoWithChain
+          logoURI={token?.logoURI ?? null}
+          chainId={chainId}
+          size={34}
+        />
+        <StyledText
+          style={{
+            color: colors.border,
+            fontSize: fontSizes.twoXLarge,
+          }}
+        >
+          {outputAmount ? outputAmount.formatted : '0.00'} {token?.symbol}
+        </StyledText>
+      </FeedbackPressable>
+      {chainId && (
+        <ChainSelector
+          chainId={chainId}
+          onSelectPress={onSelectOutputChainPress}
+        />
+      )}
+    </View>
+  );
+};
+
+const AmountInput = ({
+  amountInputText,
+  setAmountInputText,
+}: {
+  amountInputText: string;
+  setAmountInputText: (amountInputText: string) => void;
+}) => {
+  return (
+    <TextInput
+      keyboardType="numeric"
+      value={amountInputText}
+      onChangeText={setAmountInputText}
+      placeholder={'0.00'}
+      style={{
+        fontSize: fontSizes.twoXLarge,
+        flexShrink: 1,
+        width: '100%',
+      }}
+      numberOfLines={1}
+    />
+  );
+};
+
+const MoveFundsInput = ({
+  fromAddress,
+  token,
+  chainId,
+  amountInputText,
+  setAmountInputText,
+  onOpenSelectToken,
+}: {
+  fromAddress: Hex | null;
+  token: Token | null;
+  chainId: number | null;
+  amountInputText: string;
+  setAmountInputText: (amountInputText: string) => void;
+  onOpenSelectToken: () => void;
+}) => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<MoveFundsSheetStackParamsList>>();
+
+  const onSelectInputAddressPress = () => {
+    navigation.navigate('SelectAddress', { type: 'from' });
+  };
+
+  const onSelectInputChainPress = () => {
+    navigation.navigate('SelectChain', { type: 'from' });
+  };
+
+  return (
+    <View
+      style={{
+        justifyContent: 'center',
+        paddingHorizontal: 22,
+        paddingVertical: 20,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 32,
+        rowGap: 12,
+      }}
+    >
+      <AddressSelector
+        address={fromAddress}
+        onPress={onSelectInputAddressPress}
+      />
+
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <TokenLogoWithChain
+          logoURI={token?.logoURI ?? null}
+          chainId={chainId}
+          size={34}
+        />
+        <AmountInput
+          amountInputText={amountInputText}
+          setAmountInputText={setAmountInputText}
+        />
+        <FeedbackPressable
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+          }}
+          onPress={onOpenSelectToken}
+        >
+          <StyledText
+            style={{
+              fontSize: fontSizes.twoXLarge,
+              color: colors.subbedText,
+            }}
+          >
+            {token ? token.symbol : ''}
+          </StyledText>
+          <Ionicons
+            name="chevron-expand-outline"
+            size={24}
+            color={colors.subbedText}
+          />
+        </FeedbackPressable>
+      </View>
+      {chainId && (
+        <ChainSelector
+          chainId={chainId}
+          onSelectPress={onSelectInputChainPress}
+        />
+      )}
+    </View>
+  );
+};
+
+const MoveFunds = () => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<MoveFundsSheetStackParamsList>>();
+
+  const {
+    toAddress,
+    setToAddress,
+    fromAddress,
+    setFromAddress,
+    token,
+    setToken,
+    fromChainId,
+    setFromChainId,
+    toChainId,
+    setToChainId,
+  } = useMoveFundsContext();
+
+  const [amountInputText, setAmountInputText] = useState('');
+
+  const { data: userAddresses } = useUserAddresses();
+  const { data: tokenBalances } = trpc.getTokenBalances.useQuery({
+    addresses: userAddresses?.map(address => address.address) ?? [],
+  });
+
+  const {
+    data: aggregatedSend,
+    mutateAsync: buildAggregatedSend,
+    isPending: isBuildingAggregatedSend,
+  } = trpc.buildAggregateSend.useMutation({
+    throwOnError: false,
+  });
+
+  const { mutateAsync: sendAggregateTx, isPending: isSendingAggregateTx } =
+    trpc.sendAggregateTx.useMutation();
+
+  useEffect(() => {
+    if (tokenBalances && tokenBalances.length > 0) {
+      if (token === null) {
+        setToken(tokenBalances[0].token);
+      }
+
+      if (fromChainId === null) {
+        setFromChainId(tokenBalances[0].token.addresses[0].chainId);
+      }
+
+      if (toChainId === null) {
+        setToChainId(tokenBalances[0].token.addresses[0].chainId);
+      }
+    }
+  }, [tokenBalances]);
+
+  useEffect(() => {
+    if (userAddresses) {
+      if (userAddresses.length > 0) {
+        setFromAddress(userAddresses[0].address);
+      }
+
+      if (userAddresses.length > 1) {
+        setToAddress(userAddresses[1].address);
+      }
+    }
+  }, [userAddresses]);
+
+  useEffect(() => {
+    if (fromAddress && toAddress && token && fromChainId && amountInputText) {
+      const buildAggregateSendRequestBody: BuildAggregateSendRequestBody = {
+        token,
+        amount: parseUnits(amountInputText, token.decimals).toString(),
+        chainId: fromChainId,
+        fromAddresses: [fromAddress],
+        toAddress,
+      };
+
+      buildAggregatedSend(buildAggregateSendRequestBody);
+    }
+  }, [fromAddress, toAddress, token, amountInputText]);
+
+  const onSendPress = async () => {
+    if (!aggregatedSend) {
+      throw new Error('Aggregated send not built');
+    }
+
+    if (!fromAddress) {
+      throw new Error('From address not set');
+    }
+
+    if (!fromChainId) {
+      throw new Error('From chain ID not set');
+    }
+
+    const privateKey = await getPrivateKey(fromAddress);
+
+    if (!privateKey) {
+      throw new Error('Private key not found');
+    }
+
+    const privateKeyAccount = privateKeyToAccount(privateKey);
+
+    const signedTxs: Hex[] = [];
+    for (const step of aggregatedSend.inputs) {
+      const singedTx = await signEIP1159Tx({
+        tx: step.tx,
+        account: privateKeyAccount,
+      });
+
+      signedTxs.push(singedTx);
+    }
+
+    const sendAggregateTxRequestBody: SendAggregateTxRequestBody = {
+      signedTxs,
+      chainId: fromChainId,
+    };
+
+    await sendAggregateTx(sendAggregateTxRequestBody);
+  };
+
+  return (
+    <View
+      style={{
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
+        backgroundColor: colors.background,
+        rowGap: 16,
+      }}
+    >
+      <MoveFundsOutput
+        toAddress={toAddress}
+        token={token}
+        outputAmount={null}
+        chainId={toChainId}
+      />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Feather name="chevrons-up" size={24} color={colors.border} />
+      </View>
+      <MoveFundsInput
+        fromAddress={fromAddress}
+        token={token}
+        chainId={fromChainId}
+        amountInputText={amountInputText}
+        setAmountInputText={setAmountInputText}
+        onOpenSelectToken={() => {
+          navigation.navigate('SelectToken');
+        }}
+      />
+      <StyledButton
+        title="Send"
+        onPress={onSendPress}
+        isLoading={isSendingAggregateTx || isBuildingAggregatedSend}
+      />
+    </View>
+  );
+};
+
+export default MoveFunds;

@@ -8,24 +8,37 @@ const TokenLogoWithChain = ({
   chainId,
   size = 24,
 }: {
-  logoURI: string;
-  chainId: number;
+  logoURI: string | null;
+  chainId: number | null;
   size?: number;
 }) => {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'flex-end' }}>
-      <TokenLogo
-        source={{ uri: logoURI }}
-        style={{ width: size, height: size }}
-      />
-      <Image
-        source={getChainIcon(chainId)}
-        style={{
-          width: size / 2,
-          height: size / 2,
-          marginLeft: -size / 4,
-        }}
-      />
+      {logoURI !== null ? (
+        <TokenLogo
+          source={{ uri: logoURI }}
+          style={{ width: size, height: size }}
+        />
+      ) : (
+        <View
+          style={{
+            width: size,
+            height: size,
+            borderRadius: size,
+            backgroundColor: '#D9D9D9',
+          }}
+        />
+      )}
+      {chainId !== null && (
+        <Image
+          source={getChainIcon(chainId)}
+          style={{
+            width: size / 2,
+            height: size / 2,
+            marginLeft: -size / 4,
+          }}
+        />
+      )}
     </View>
   );
 };

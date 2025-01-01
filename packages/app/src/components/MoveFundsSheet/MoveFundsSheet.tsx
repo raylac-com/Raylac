@@ -1,56 +1,71 @@
-import AddressSelector from '@/components/AddressSelector/AddressSelector';
-import useUserAddresses from '@/hooks/useUserAddresses';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import { useEffect, useRef, useState } from 'react';
-import { View } from 'react-native';
-import { Hex } from 'viem';
+import { useEffect, useRef } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import MoveFunds from './screens/MoveFunds';
+import SelectToken from './screens/SelectToken';
+import SelectChain from './screens/SelectChain';
+import colors from '@/lib/styles/colors';
+import { useMoveFundsContext } from '@/contexts/MoveFundsContext';
+import SelectAddress from './screens/SelectAddress';
 
-const MoveFundsSheet = ({ open }: { open: boolean }) => {
-  const { data: userAddresses } = useUserAddresses();
-  const [fromAddress, setFromAddress] = useState<Hex | null>(null);
-  const [toAddress, setToAddress] = useState<Hex | null>(null);
+export type MoveFundsSheetStackParamsList = {
+  MoveFunds: undefined;
+  SelectToken: undefined;
+  SelectChain: {
+    type: 'from' | 'to';
+  };
+  SelectAddress: {
+    type: 'from' | 'to';
+  };
+};
+
+const Stack = createNativeStackNavigator<MoveFundsSheetStackParamsList>();
+
+const Navigator = () => {
+  return (
+    <NavigationContainer independent={true}>
+      <Stack.Navigator initialRouteName="MoveFunds">
+        <Stack.Screen name="MoveFunds" component={MoveFunds} />
+        <Stack.Screen name="SelectToken" component={SelectToken} />
+        <Stack.Screen name="SelectChain" component={SelectChain} />
+        <Stack.Screen name="SelectAddress" component={SelectAddress} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
+const MoveFundsSheet = () => {
+  const { isSheetOpen, setIsSheetOpen } = useMoveFundsContext();
+  const insets = useSafeAreaInsets();
   const ref = useRef<BottomSheetModal>(null);
 
   useEffect(() => {
-    if (userAddresses) {
-      if (userAddresses.length > 0) {
-        setFromAddress(userAddresses[0].address);
-      }
-
-      if (userAddresses.length > 1) {
-        setToAddress(userAddresses[1].address);
-      }
-    }
-  }, [userAddresses]);
-
-  useEffect(() => {
-    if (open) {
+    if (isSheetOpen) {
       ref.current?.present();
     } else {
       ref.current?.dismiss();
     }
-  }, [open]);
+  }, [isSheetOpen]);
 
   return (
     <BottomSheetModal
       ref={ref}
       style={{
         flex: 1,
-        padding: 16,
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        paddingHorizontal: 16,
+        backgroundColor: colors.background,
       }}
       index={0}
       enablePanDownToClose
       enableDynamicSizing={false}
-      snapPoints={['100%']}
+      snapPoints={['80%']}
+      onDismiss={() => setIsSheetOpen(false)}
     >
-      <View>
-        {toAddress && (
-          <AddressSelector address={toAddress} setAddress={setToAddress} />
-        )}
-        {fromAddress && (
-          <AddressSelector address={fromAddress} setAddress={setFromAddress} />
-        )}
-      </View>
+      <Navigator />
     </BottomSheetModal>
   );
 };
