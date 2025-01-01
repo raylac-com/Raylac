@@ -81,11 +81,11 @@ const getTokenUsdPrice = async ({
     return 'notfound';
   }
 
-  // Return the price as 0 if the last update of the price is more than 24 hours ago
+  // Return the price as 0 if the last update of the price is more than 6 hours ago
   if (
     usdPriceData &&
     new Date(usdPriceData.lastUpdatedAt).getTime() <
-      Date.now() - 24 * 60 * 60 * 1000
+      Date.now() - 6 * 60 * 60 * 1000
   ) {
     await cacheUsdPrice({ tokenAddress, usdPrice: 0 });
     return 0;

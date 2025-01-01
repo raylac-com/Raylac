@@ -57,7 +57,8 @@ export const WST_ETH: Token = {
   name: 'Wrapped staked ETH',
   decimals: 18,
   verified: true,
-  logoURI: 'https://arbiscan.io/token/images/lido_32.png',
+  logoURI:
+    'https://firebasestorage.googleapis.com/v0/b/raylac-72351.appspot.com/o/wsteth.png?alt=media&token=c80c5f5e-6ada-47cf-8a30-87fd6f374bad',
   color: '#B2D7E5',
   addresses: [
     /*

@@ -121,16 +121,6 @@ export const getChainFromId = (chainId: number): Chain => {
   return chain[1] as Chain;
 };
 
-export const formatAmount = (amount: string, decimals: number): string => {
-  const formatted = Number(
-    formatUnits(BigInt(amount), decimals)
-  ).toLocaleString('en-US', {
-    maximumFractionDigits: 6,
-  });
-
-  return formatted;
-};
-
 export const sleep = (ms: number) =>
   new Promise(resolve => setTimeout(resolve, ms));
 
@@ -327,21 +317,37 @@ export const findTokenByAddress = ({
   );
 };
 
-export const formatUsdValue = (num: BigNumber): string => {
-  // If number is less than or equal to 0.1, use precision
-  // 0.1 -> 0.1
-  // 0.011 -> 0.011
-  // 0.019 -> 0.019
-  // 0.001 -> 0.001
+const formatNumber = (num: BigNumber): string => {
   if (num.lte(new BigNumber('0.01'))) {
-    return num.toPrecision(2).replace(/\.?0+$/, '');
+    // Count the number of zeros after the decimal point
+    const afterDecimal = num.toFormat().split('.')[1];
+    if (afterDecimal === undefined) {
+      return num.toFormat(0);
+    }
+
+    const zeros = afterDecimal.split('').findIndex(char => char !== '0');
+
+    if (zeros === -1) {
+      return num.toFormat(0);
+    }
+
+    return num.toFixed(zeros + 2);
   }
 
-  if (num.gte(new BigNumber('1000'))) {
-    return num.toFormat(0);
+  if (num.lt(new BigNumber('1000'))) {
+    return num.toFixed(2).replace(/\.?0+$/, '');
   }
 
-  return num.toFormat(2).replace(/\.?0+$/, '');
+  return num.toFormat(0);
+};
+
+export const formatAmount = (amount: string, decimals: number): string => {
+  const formatted = new BigNumber(formatUnits(BigInt(amount), decimals));
+  return formatNumber(formatted);
+};
+
+export const formatUsdValue = (num: BigNumber): string => {
+  return formatNumber(num);
 };
 
 export const formatBalance = ({

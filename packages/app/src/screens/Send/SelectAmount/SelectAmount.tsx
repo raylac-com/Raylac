@@ -304,7 +304,7 @@ const SelectAmount = ({ route }: Props) => {
           <StyledText>{`Send from ${shortenAddress(fromAddresses[0])}`}</StyledText>
           <StyledText>
             {estimatedTransferGas &&
-              `Gas $${estimatedTransferGas?.usdValueFormatted} (${estimatedTransferGas?.formatted} ${token.symbol})`}
+              `Gas $${estimatedTransferGas?.usdValueFormatted} (${estimatedTransferGas?.formatted} ETH)`}
           </StyledText>
         </View>
         <ReviewButton

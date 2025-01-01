@@ -22,7 +22,25 @@ const getTokenBalances = async () => {
   });
   console.timeEnd('getTokenBalances');
 
-  console.log(tokenBalances.filter(token => token.token.symbol === 'ETH'));
+  const tokenPrice = await client.getTokenPrice.mutate({
+    token: {
+      symbol: 'TOILET',
+      name: 'Skibidi',
+      decimals: 18,
+      verified: false,
+      addresses: [
+        {
+          chainId: 8453,
+          address: '0x91fAb2D5a448Fb44E3DB836F4EdEAA2310fa5715',
+        },
+      ],
+    },
+  });
+
+  console.log(tokenPrice);
+
+  const toilet = tokenBalances.filter(token => token.token.symbol === 'TOILET');
+  console.log(JSON.stringify(toilet, null, 2));
 
   /*
   console.time('groupTokenBalancesByToken');
