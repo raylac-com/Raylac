@@ -22,8 +22,9 @@ const getTokenBalances = async () => {
   });
   console.timeEnd('getTokenBalances');
 
-  console.log(tokenBalances);
+  console.log(tokenBalances.filter(token => token.token.symbol === 'ETH'));
 
+  /*
   console.time('groupTokenBalancesByToken');
   const groupedTokenBalances = groupTokenBalancesByToken({
     tokenBalances: tokenBalances,
@@ -57,6 +58,7 @@ const getTokenBalances = async () => {
 
   const totalUsdValue = getTotalUsdValue(tokenBalances);
   console.log('totalUsdValue', totalUsdValue.toString());
+  */
 };
 
 getTokenBalances();

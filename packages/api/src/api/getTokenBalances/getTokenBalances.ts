@@ -1,4 +1,4 @@
-import { getAddress, Hex } from 'viem';
+import { getAddress, Hex, hexToBigInt } from 'viem';
 import { getPublicClient } from '../../utils';
 import {
   supportedChains,
@@ -6,6 +6,7 @@ import {
   Token,
   Balance,
   formatBalance,
+  ETH,
 } from '@raylac/shared';
 import { getAlchemyClient } from '../../lib/alchemy';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
@@ -71,6 +72,30 @@ const formatAlchemyTokenBalance = async ({
   };
 };
 
+const getFormattedETHBalance = async ({
+  address,
+  chainId,
+}: {
+  address: Hex;
+  chainId: number;
+}) => {
+  const ethBalance = await getETHBalance({ address, chainId });
+
+  const ethTokenPriceUsd = await getTokenUsdPrice({ token: ETH });
+
+  if (ethTokenPriceUsd === 'notfound') {
+    throw new Error('ETH token price not found');
+  }
+
+  const formattedBalance = formatBalance({
+    balance: ethBalance,
+    token: ETH,
+    tokenPriceUsd: ethTokenPriceUsd,
+  });
+
+  return formattedBalance;
+};
+
 /**
  * Get the balance of a token across all chains for a given address from Alchemy
  */
@@ -91,24 +116,42 @@ const getMultiChainTokenBalancesFromAlchemy = async ({
       const alchemyClient = getAlchemyClient(chain.id);
 
       const alchemyTokenBalances =
-        await alchemyClient.core.getTokensForOwner(address);
+        await alchemyClient.core.getTokenBalances(address);
 
       const addressChainTokenBalances = (
         await Promise.all(
-          alchemyTokenBalances.tokens.map(async token => {
-            if (token.rawBalance === '0' || token.rawBalance === undefined) {
+          alchemyTokenBalances.tokenBalances.map(async token => {
+            if (
+              token.tokenBalance ===
+                '0x0000000000000000000000000000000000000000000000000000000000000000' ||
+              token.tokenBalance === null
+            ) {
               return null;
             }
 
             return await formatAlchemyTokenBalance({
               address,
               tokenAddress: getAddress(token.contractAddress),
-              tokenBalance: BigInt(token.rawBalance),
+              tokenBalance: hexToBigInt(token.tokenBalance as Hex),
               chainId: chain.id,
             });
           })
         )
       ).filter(tokenBalance => tokenBalance !== null);
+
+      const ethTokenBalance = await getFormattedETHBalance({
+        address,
+        chainId: chain.id,
+      });
+
+      if (ethTokenBalance.balance !== '0') {
+        addressChainTokenBalances.push({
+          token: ETH,
+          address,
+          balance: ethTokenBalance,
+          chainId: chain.id,
+        });
+      }
 
       return addressChainTokenBalances;
     })
