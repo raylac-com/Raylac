@@ -6,7 +6,6 @@ import { webcrypto } from 'node:crypto';
 import getTokenBalances, {
   getETHBalance,
 } from './api/getTokenBalances/getTokenBalances';
-import getTokenBalancesMock from './api/getTokenBalances/getTokenBalances.mock';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { Hex } from 'viem';
 import getSupportedTokens from './api/getSupportedTokens/getSupportedTokens';
@@ -72,9 +71,7 @@ export const appRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return MOCK_RESPONSE
-        ? getTokenBalancesMock({ addresses: input.addresses as Hex[] })
-        : getTokenBalances({ addresses: input.addresses as Hex[] });
+      return getTokenBalances({ addresses: input.addresses as Hex[] });
     }),
 
   getETHBalance: publicProcedure

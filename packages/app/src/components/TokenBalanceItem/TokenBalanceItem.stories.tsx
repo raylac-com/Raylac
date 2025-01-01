@@ -8,19 +8,19 @@ import { parseUnits } from 'viem';
 const meta = {
   title: 'TokenBalanceItem',
   component: TokenBalanceItem,
-  argTypes: {
-    name: { control: 'text' },
-    symbol: { control: 'text' },
-    usdValue: { control: 'text' },
-  },
   args: {
     name: 'USD Coin',
     symbol: 'USDC',
-    usdValue: '100',
     logoUrl:
       'https://firebasestorage.googleapis.com/v0/b/raylac-72351.appspot.com/o/usdc.png?alt=media&token=4e91000d-a063-4f34-bbcb-599a44151ff9',
-    balance: parseUnits('100', 6),
-    tokenDecimals: 6,
+
+    balance: {
+      balance: parseUnits('100', 6).toString(),
+      tokenPriceUsd: 1,
+      formatted: '100',
+      usdValue: '100',
+      usdValueFormatted: '100',
+    },
   },
   decorators: [
     Story => (

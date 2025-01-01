@@ -15,7 +15,6 @@ const TokenBalanceItem = (props: {
   name: string;
   symbol: string;
   balance: Balance;
-  tokenDecimals: number;
   logoUrl: string;
 }) => {
   return (

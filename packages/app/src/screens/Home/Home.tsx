@@ -146,7 +146,6 @@ const HomeScreen = () => {
             >
               <TokenBalanceItem
                 balance={item.totalBalance}
-                tokenDecimals={item.token.decimals}
                 symbol={item.token.symbol}
                 name={item.token.name}
                 logoUrl={item.token.logoURI}

@@ -286,9 +286,9 @@ const MoveFunds = () => {
     token,
     setToken,
     fromChainId,
-    setFromChainId,
+    //    setFromChainId,
     toChainId,
-    setToChainId,
+    //    setToChainId,
   } = useMoveFundsContext();
 
   const [amountInputText, setAmountInputText] = useState('');
@@ -320,22 +320,6 @@ const MoveFunds = () => {
         // eslint-disable-next-line security/detect-possible-timing-attacks
         if (token === null) {
           setToken(addressTokenBalances[0].token);
-        }
-
-        if (fromChainId === null) {
-          if (addressTokenBalances[0].breakdown.length > 0) {
-            setFromChainId(addressTokenBalances[0].breakdown[0].chainId);
-          } else {
-            setFromChainId(addressTokenBalances[0].token.addresses[0].chainId);
-          }
-        }
-
-        if (toChainId === null) {
-          if (addressTokenBalances[0].breakdown.length > 1) {
-            setToChainId(addressTokenBalances[0].breakdown[1].chainId);
-          } else {
-            setToChainId(addressTokenBalances[0].token.addresses[0].chainId);
-          }
         }
       }
     }

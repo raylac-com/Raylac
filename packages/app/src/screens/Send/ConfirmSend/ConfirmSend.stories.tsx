@@ -22,6 +22,8 @@ const meta = {
           formatted: '5',
           balance: '5',
           usdValue: '5',
+          usdValueFormatted: '5',
+          tokenPriceUsd: 1,
         },
         token: {
           symbol: 'USDC',
