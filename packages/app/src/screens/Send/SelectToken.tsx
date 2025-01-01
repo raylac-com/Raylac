@@ -9,7 +9,7 @@ import { trpc } from '@/lib/trpc';
 import { RootStackParamsList } from '@/navigation/types';
 import { Balance, getAddressTokenBalances, Token } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { FlatList, View } from 'react-native';
+import { FlatList, ScrollView, View } from 'react-native';
 import { Hex } from 'viem';
 
 const TokenChainItem = ({
@@ -169,7 +169,7 @@ const SelectToken = ({ navigation, route }: Props) => {
   };
 
   return (
-    <View style={{ flex: 1, padding: 16 }}>
+    <ScrollView style={{ flex: 1, padding: 16 }}>
       <FlatList
         ListEmptyComponent={
           <View
@@ -195,7 +195,7 @@ const SelectToken = ({ navigation, route }: Props) => {
           />
         )}
       ></FlatList>
-    </View>
+    </ScrollView>
   );
 };
 
