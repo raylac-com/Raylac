@@ -17,7 +17,7 @@ import { formatUnits, parseUnits } from 'viem';
 import BigNumber from 'bignumber.js';
 import { trpc } from '@/lib/trpc';
 import useChainTokenBalance from '@/hooks/useChainTokenBalance';
-import TokenImageWithChain from '@/components/TokenImageWithChain/TokenImageWithChain';
+import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 
 const ReviewButton = ({
@@ -265,7 +265,7 @@ const SelectAmount = ({ route }: Props) => {
             justifyContent: 'center',
           }}
         >
-          <TokenImageWithChain
+          <TokenLogoWithChain
             logoURI={token.logoURI}
             chainId={chainId}
             size={64}

@@ -20,7 +20,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Hex } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import TokenImageWithChain from '@/components/TokenImageWithChain/TokenImageWithChain';
+import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import { Balance } from '@raylac/shared';
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
 
@@ -51,7 +51,7 @@ const RecipientCard = ({
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
       >
-        <TokenImageWithChain
+        <TokenLogoWithChain
           logoURI={token.logoURI}
           chainId={chainId}
           size={34}
@@ -96,7 +96,7 @@ const InputCard = ({
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
       >
-        <TokenImageWithChain
+        <TokenLogoWithChain
           logoURI={token.logoURI}
           chainId={chainId}
           size={42}

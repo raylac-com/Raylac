@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import SwapIOCard from './components/SwapIOCard';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import colors from '@/lib/styles/colors';
-import TokenImageWithChain from '@/components/TokenImageWithChain/TokenImageWithChain';
+import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { useRef } from 'react';
 import { SwapHistoryItem } from '@raylac/shared';
@@ -68,14 +68,14 @@ const SwapDetailsSheet = ({ swap, onClose }: SwapDetailsSheetProps) => {
         </View>
         <View style={{ flexDirection: 'row', columnGap: 8 }}>
           {inputChainIds.map((chainId, i) => (
-            <TokenImageWithChain
+            <TokenLogoWithChain
               key={i}
               logoURI={swap.tokenIn.logoURI}
               chainId={chainId}
             />
           ))}
           <AntDesign name="arrowright" size={24} color={colors.subbedText} />
-          <TokenImageWithChain
+          <TokenLogoWithChain
             logoURI={swap.tokenOut.logoURI}
             chainId={outputChainId}
           />

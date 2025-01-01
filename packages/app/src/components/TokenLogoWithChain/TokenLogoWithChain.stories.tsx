@@ -1,13 +1,13 @@
 import React from 'react';
 import { View } from 'react-native';
 import type { Meta, StoryObj } from '@storybook/react';
-import TokenImageWithChain from './TokenImageWithChain';
+import TokenLogoWithChain from './TokenLogoWithChain';
 import spacing from '@/lib/styles/spacing';
 import { base } from 'viem/chains';
 
 const meta = {
-  title: 'TokenImageWithChain',
-  component: TokenImageWithChain,
+  title: 'TokenLogoWithChain',
+  component: TokenLogoWithChain,
   argTypes: {
     logoURI: { control: 'text' },
     chainId: { control: 'number' },
@@ -24,7 +24,7 @@ const meta = {
       </View>
     ),
   ],
-} satisfies Meta<typeof TokenImageWithChain>;
+} satisfies Meta<typeof TokenLogoWithChain>;
 
 export default meta;
 

@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import TokenLogo from '../FastImage/TokenLogo';
 import { Image } from 'expo-image';
 
-const TokenImageWithChain = ({
+const TokenLogoWithChain = ({
   logoURI,
   chainId,
   size = 24,
@@ -30,4 +30,4 @@ const TokenImageWithChain = ({
   );
 };
 
-export default TokenImageWithChain;
+export default TokenLogoWithChain;

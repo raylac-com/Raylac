@@ -1,7 +1,7 @@
 import TokenLogo from '@/components/FastImage/TokenLogo';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import StyledText from '@/components/StyledText/StyledText';
-import TokenImageWithChain from '@/components/TokenImageWithChain/TokenImageWithChain';
+import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import colors from '@/lib/styles/colors';
@@ -30,11 +30,7 @@ const TokenChainItem = ({
         paddingLeft: 12,
       }}
     >
-      <TokenImageWithChain
-        chainId={chainId}
-        logoURI={token.logoURI}
-        size={32}
-      />
+      <TokenLogoWithChain chainId={chainId} logoURI={token.logoURI} size={32} />
       <StyledText style={{ color: colors.border }}>
         {`$${balance.usdValue}`}
       </StyledText>
