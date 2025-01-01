@@ -1,13 +1,19 @@
 import StyledText from '@/components/StyledText/StyledText';
-import { View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
+import useTypedNavigation from '@/hooks/useTypedNavigation';
 const TopMenuBar = () => {
   const { data: addresses } = useUserAddresses();
 
+  const navigation = useTypedNavigation();
+
   return (
-    <View
+    <FeedbackPressable
+      onPress={() => {
+        navigation.navigate('Addresses');
+      }}
       style={{
         width: '100%',
         flexDirection: 'row',
@@ -20,7 +26,7 @@ const TopMenuBar = () => {
       <StyledText style={{ color: colors.border }}>
         {`${addresses?.length} addresses`}
       </StyledText>
-    </View>
+    </FeedbackPressable>
   );
 };
 

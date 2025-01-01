@@ -6,11 +6,7 @@ import { hexToBigInt } from 'viem';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import MenuItem from './components/MenuItem/MenuItem';
-import AntDesign from '@expo/vector-icons/AntDesign';
-// import { Ionicons } from '@expo/vector-icons';
-import { copyToClipboard, hapticOptions } from '@/lib/utils';
-import Toast from 'react-native-toast-message';
+import { hapticOptions } from '@/lib/utils';
 import useAccountUsdValue from '@/hooks/useAccountUsdValue';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import TokenBalanceDetailsSheet from '@/components/TokenBalanceDetailsSheet/TokenBalanceDetailsSheet';
@@ -78,35 +74,6 @@ const HomeScreen = () => {
     init();
   }, [userAddresses]);
 
-  ///
-  /// Handlers
-  ///
-
-  const onDepositPress = () => {
-    if (userAddresses) {
-      copyToClipboard(userAddresses[0].address);
-      Toast.show({
-        type: 'success',
-        text1: 'Address copied to clipboard',
-      });
-    } else {
-      Toast.show({
-        type: 'error',
-        text1: 'Address not loaded',
-      });
-    }
-  };
-
-  const _onSwapPress = () => {
-    navigation.navigate('Tabs', {
-      screen: 'Swap',
-    });
-  };
-
-  const onSendPress = () => {
-    navigation.navigate('SelectRecipient');
-  };
-
   return (
     <View
       style={{
@@ -152,37 +119,6 @@ const HomeScreen = () => {
               `$${accountUsdValue}`
             )}
           </StyledText>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            columnGap: 20,
-          }}
-        >
-          <MenuItem
-            icon={<AntDesign name="plus" size={24} color={colors.text} />}
-            title="Deposit"
-            testID="deposit"
-            onPress={onDepositPress}
-          />
-          {/**
-             * 
-          <MenuItem
-            icon={
-              <Ionicons name="swap-horizontal" size={24} color={colors.text} />
-            }
-            title="Swap"
-            testID="swap"
-            onPress={onSwapPress}
-          />
-           */}
-          <MenuItem
-            icon={<AntDesign name="arrowup" size={24} color={colors.text} />}
-            title="Send"
-            testID="send"
-            onPress={onSendPress}
-          />
         </View>
         <View
           style={{
