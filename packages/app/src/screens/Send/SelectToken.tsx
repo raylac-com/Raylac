@@ -9,7 +9,7 @@ import { trpc } from '@/lib/trpc';
 import { RootStackParamsList } from '@/navigation/types';
 import { Balance, getAddressTokenBalances, Token } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { FlatList, ScrollView, View } from 'react-native';
+import { SectionList, View } from 'react-native';
 import { Hex } from 'viem';
 
 const TokenChainItem = ({
@@ -107,41 +107,22 @@ const TokenListItem = ({
   );
 };
 
-const AddressCard = ({
-  address,
-  onPress,
-}: {
-  address: Hex;
-  onPress: ({ token, chainId }: { token: Token; chainId: number }) => void;
-}) => {
+const useTokenAddressPerAddress = () => {
   const { data: userAddresses } = useUserAddresses();
 
   const { data: tokenBalances } = trpc.getTokenBalances.useQuery({
     addresses: userAddresses?.map(a => a.address) ?? [],
   });
 
-  const addressTokenBalances = getAddressTokenBalances({
-    tokenBalances: tokenBalances ?? [],
-    address,
-  });
+  const addressTokenBalances = userAddresses?.map(a => ({
+    address: a.address,
+    tokenBalances: getAddressTokenBalances({
+      tokenBalances: tokenBalances ?? [],
+      address: a.address,
+    }),
+  }));
 
-  return (
-    <View style={{ flexDirection: 'column', rowGap: 8 }}>
-      <WalletIconAddress address={address} />
-      <FlatList
-        data={addressTokenBalances}
-        style={{ rowGap: 8 }}
-        renderItem={({ item }) => (
-          <TokenListItem
-            token={item.token}
-            balance={item.balance}
-            balanceBreakdown={item.breakdown}
-            onPress={onPress}
-          />
-        )}
-      />
-    </View>
-  );
+  return addressTokenBalances;
 };
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'SelectToken'>;
@@ -149,7 +130,7 @@ type Props = NativeStackScreenProps<RootStackParamsList, 'SelectToken'>;
 const SelectToken = ({ navigation, route }: Props) => {
   const toAddress = route.params.toAddress;
 
-  const { data: userAddresses } = useUserAddresses();
+  const addressTokenBalances = useTokenAddressPerAddress();
 
   const onTokenSelect = ({
     token,
@@ -169,33 +150,47 @@ const SelectToken = ({ navigation, route }: Props) => {
   };
 
   return (
-    <ScrollView style={{ flex: 1, padding: 16 }}>
-      <FlatList
-        ListEmptyComponent={
-          <View
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
-          >
-            <StyledText>{`No tokens found`}</StyledText>
-          </View>
-        }
-        data={userAddresses}
-        contentContainerStyle={{
-          rowGap: 48,
-        }}
-        renderItem={({ item }) => (
-          <AddressCard
-            address={item.address}
-            onPress={({ token, chainId }) =>
-              onTokenSelect({ address: item.address, token, chainId })
-            }
-          />
-        )}
-      ></FlatList>
-    </ScrollView>
+    <SectionList
+      contentContainerStyle={{
+        padding: 16,
+      }}
+      scrollEnabled
+      ListEmptyComponent={
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <StyledText>{`No tokens found`}</StyledText>
+        </View>
+      }
+      SectionSeparatorComponent={() => {
+        return <View style={{ height: 16 }} />;
+      }}
+      sections={
+        addressTokenBalances?.map(a => ({
+          title: a.address,
+          data: a.tokenBalances,
+        })) ?? []
+      }
+      keyExtractor={(item, index) => `${item.token.symbol}-${index}`}
+      renderSectionHeader={({ section }) => (
+        <WalletIconAddress address={section.title} />
+      )}
+      renderItem={({ item: tokenBalance }) => (
+        <TokenListItem
+          token={tokenBalance.token}
+          balance={tokenBalance.balance}
+          balanceBreakdown={tokenBalance.breakdown}
+          onPress={({ token, chainId }) =>
+            onTokenSelect({ address: tokenBalance.address, token, chainId })
+          }
+        />
+      )}
+      stickySectionHeadersEnabled={false}
+    />
   );
 };
 
