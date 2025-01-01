@@ -353,63 +353,42 @@ export const formatBalance = ({
   token: Token;
   tokenPriceUsd: number;
 }): Balance => {
-  const usdValue = formatUsdValue(
-    new BigNumber(formatUnits(balance, token.decimals)).multipliedBy(
-      tokenPriceUsd
-    )
-  );
+  const usdValue = new BigNumber(
+    formatUnits(balance, token.decimals)
+  ).multipliedBy(tokenPriceUsd);
+
+  const usdValueFormatted = formatUsdValue(usdValue);
 
   const balanceFormatted: Balance = {
     balance: balance.toString(),
     formatted: formatAmount(balance.toString(), token.decimals),
     usdValue: usdValue.toString(),
+    usdValueFormatted,
+    tokenPriceUsd,
   };
 
   return balanceFormatted;
 };
 
 /**
- * Extracts the balance of the given token from a list of token balances
+ * Get the price of a token from the token balances RPC response
  */
-const getTokenBalance = ({
+const getTokenPriceFromTokenBalances = ({
   tokenBalances,
   token,
 }: {
   tokenBalances: TokenBalancesReturnType;
   token: Token;
-}): TokenBalancesReturnType[number] => {
-  const tokenBalance = tokenBalances.find(balance =>
-    balance.token.addresses.some(
-      address => address.address === token.addresses[0].address
-    )
-  );
+}): number => {
+  const tokenPriceUsd = tokenBalances.find(
+    balance => getTokenId(balance.token) === getTokenId(token)
+  )?.balance.tokenPriceUsd;
 
-  if (!tokenBalance) {
-    throw new Error(`Token balance not found for token ${token.symbol}`);
+  if (!tokenPriceUsd) {
+    throw new Error(`Token price not found for token ${token.symbol}`);
   }
 
-  return tokenBalance;
-};
-
-/**
- * Extracts the balance of a token from a list of token balances
- */
-export const getMultiChainTokenBalance = ({
-  tokenBalances,
-  token,
-}: {
-  tokenBalances: TokenBalancesReturnType;
-  token: Token;
-}): Balance => {
-  const tokenBalance = getTokenBalance({ tokenBalances, token });
-
-  const balance = formatBalance({
-    balance: hexToBigInt(tokenBalance.balance),
-    token,
-    tokenPriceUsd: Number(tokenBalance.tokenPrice),
-  });
-
-  return balance;
+  return tokenPriceUsd;
 };
 
 /**
@@ -423,25 +402,27 @@ export const getChainTokenBalance = ({
   tokenBalances: TokenBalancesReturnType;
   chainId: number;
   token: Token;
-}) => {
-  const tokenBalance = getTokenBalance({ tokenBalances, token });
+}): Balance => {
+  const tokenPriceUsd = getTokenPriceFromTokenBalances({
+    tokenBalances,
+    token,
+  });
 
-  const chainTokenBalance = tokenBalance.combinedBreakdown.find(
-    breakdown => breakdown.chainId === chainId
+  const tokenBalancesOnChain = tokenBalances.filter(
+    balance =>
+      balance.chainId === chainId &&
+      getTokenId(balance.token) === getTokenId(token)
   );
 
-  if (!chainTokenBalance) {
-    return {
-      balance: '0',
-      formatted: '0',
-      usdValue: '0',
-    };
-  }
+  const totalBalance = tokenBalancesOnChain.reduce(
+    (acc, balance) => acc + BigInt(balance.balance.balance),
+    BigInt(0)
+  );
 
   const balance = formatBalance({
-    balance: hexToBigInt(chainTokenBalance.balance),
+    balance: totalBalance,
     token,
-    tokenPriceUsd: Number(tokenBalance.tokenPrice),
+    tokenPriceUsd,
   });
 
   return balance;
@@ -460,42 +441,85 @@ export const getAddressChainTokenBalance = ({
   address: Hex;
   chainId: number;
   token: Token;
-}) => {
-  const tokenBalance = getTokenBalance({ tokenBalances, token });
-
-  const addressTokenBalance = tokenBalance.perAddressBreakdown.find(
-    breakdown => breakdown.address === address
+}): Balance => {
+  const addressChainTokenBalance = tokenBalances.find(
+    balance =>
+      balance.address === address &&
+      getTokenId(balance.token) === getTokenId(token) &&
+      balance.chainId === chainId
   );
 
-  if (!addressTokenBalance) {
+  if (!addressChainTokenBalance) {
     return {
       balance: '0',
       formatted: '0',
       usdValue: '0',
+      usdValueFormatted: '0',
+      tokenPriceUsd: 0,
     };
   }
 
-  const chainTokenBalance = addressTokenBalance.breakdown.find(
-    breakdown => breakdown.chainId === chainId
-  );
-
-  if (!chainTokenBalance) {
-    return {
-      balance: '0',
-      formatted: '0',
-      usdValue: '0',
-    };
-  }
-
-  const balance = formatBalance({
-    balance: hexToBigInt(chainTokenBalance.balance),
-    token,
-    tokenPriceUsd: Number(tokenBalance.tokenPrice),
-  });
-
-  return balance;
+  return addressChainTokenBalance.balance;
 };
 
+export const getTotalUsdValue = (tokenBalances: TokenBalancesReturnType) => {
+  return formatUsdValue(
+    tokenBalances.reduce(
+      (acc, tokenBalance) =>
+        acc.plus(new BigNumber(Number(tokenBalance.balance.usdValue))),
+      new BigNumber(0)
+    )
+  );
+};
+
+export const groupTokenBalancesByToken = ({
+  tokenBalances,
+}: {
+  tokenBalances: TokenBalancesReturnType;
+}): {
+  token: Token;
+  totalBalance: Balance;
+}[] => {
+  const uniqueTokenIds = [
+    ...new Set(
+      tokenBalances.map(tokenBalance => getTokenId(tokenBalance.token))
+    ),
+  ];
+
+  const groupedByToken = [];
+
+  for (const tokenId of uniqueTokenIds) {
+    const balances = tokenBalances.filter(
+      tokenBalance => getTokenId(tokenBalance.token) === tokenId
+    );
+
+    const totalBalance = balances.reduce(
+      (acc, tokenBalance) => acc + BigInt(tokenBalance.balance.balance),
+      BigInt(0)
+    );
+
+    const formattedTotalBalance = formatBalance({
+      balance: totalBalance,
+      token: balances[0].token,
+      tokenPriceUsd: Number(balances[0].balance.tokenPriceUsd),
+    });
+
+    const token = balances[0].token;
+
+    groupedByToken.push({ token, totalBalance: formattedTotalBalance });
+  }
+
+  // Sort by usd value in descending order
+  const sortedGroupedByToken = groupedByToken.sort((a, b) => {
+    return Number(b.totalBalance.usdValue) - Number(a.totalBalance.usdValue);
+  });
+
+  return sortedGroupedByToken;
+};
+
+/**
+ * Get all token balances of a token for a given address
+ */
 export const getAddressTokenBalances = ({
   tokenBalances,
   address,
@@ -503,71 +527,68 @@ export const getAddressTokenBalances = ({
   tokenBalances: TokenBalancesReturnType;
   address: Hex;
 }) => {
-  const addressTokenBalances = [];
-
-  for (const tokenBalance of tokenBalances) {
-    const addressTokenBalance = tokenBalance.perAddressBreakdown.find(
-      breakdown => breakdown.address === address
-    );
-
-    if (!addressTokenBalance) {
-      continue;
-    }
-
-    const totalBalance = addressTokenBalance.breakdown.reduce(
-      (acc, breakdown) => acc + hexToBigInt(breakdown.balance),
-      BigInt(0)
-    );
-
-    if (addressTokenBalance) {
-      addressTokenBalances.push({
-        token: tokenBalance.token,
-        address: address,
-        breakdown: addressTokenBalance.breakdown.map(b => ({
-          chainId: b.chainId,
-          balance: formatBalance({
-            balance: hexToBigInt(b.balance),
-            token: tokenBalance.token,
-            tokenPriceUsd: Number(tokenBalance.tokenPrice),
-          }),
-        })),
-        balance: formatBalance({
-          balance: totalBalance,
-          token: tokenBalance.token,
-          tokenPriceUsd: Number(tokenBalance.tokenPrice),
-        }),
-      });
-    }
-  }
+  const addressTokenBalances = tokenBalances.filter(
+    tokenBalance => tokenBalance.address === address
+  );
 
   return addressTokenBalances;
 };
 
-export const getAddressTokenBalanceBreakdown = ({
+export type PerAddressTokenBalance = {
+  address: Hex;
+  totalBalance: Balance;
+  breakdown: {
+    address: Hex;
+    balance: Balance;
+    chainId: number;
+  }[];
+}[];
+
+export const getPerAddressTokenBalance = ({
   tokenBalances,
   token,
-  address,
 }: {
   tokenBalances: TokenBalancesReturnType;
   token: Token;
-  address: Hex;
-}) => {
-  const addressTokenBalances = getAddressTokenBalances({
-    tokenBalances,
-    address,
-  });
+}): PerAddressTokenBalance => {
+  const tokenId = getTokenId(token);
 
-  const addressTokenBalance = addressTokenBalances.find(balance =>
-    balance.token.addresses.some(
-      address => address.address === token.addresses[0].address
-    )
+  const balances = tokenBalances.filter(
+    balance => getTokenId(balance.token) === tokenId
   );
 
-  if (!addressTokenBalance) {
-    return [];
+  const addresses = [...new Set(balances.map(balance => balance.address))];
+
+  const balancesPerAddress = [];
+
+  for (const address of addresses) {
+    const addressBalances = balances.filter(
+      balance => balance.address === address
+    );
+
+    const totalBalance = addressBalances.reduce(
+      (acc, balance) => acc + BigInt(balance.balance.balance),
+      BigInt(0)
+    );
+
+    const formattedTotalBalance = formatBalance({
+      balance: totalBalance,
+      token,
+      tokenPriceUsd: Number(addressBalances[0].balance.tokenPriceUsd),
+    });
+
+    balancesPerAddress.push({
+      address,
+      totalBalance: formattedTotalBalance,
+      breakdown: addressBalances.map(balance => ({
+        address: balance.address,
+        balance: balance.balance,
+        chainId: balance.chainId,
+      })),
+    });
   }
 
-  return addressTokenBalance.breakdown;
+  return balancesPerAddress;
 };
 
 export const getTokenAddressOnChain = (token: Token, chainId: number): Hex => {
@@ -582,4 +603,10 @@ export const getTokenAddressOnChain = (token: Token, chainId: number): Hex => {
   }
 
   return address;
+};
+
+export const getTokenId = (token: Token) => {
+  // Use the first address as the token id
+  const id = token.addresses[0].address;
+  return id;
 };

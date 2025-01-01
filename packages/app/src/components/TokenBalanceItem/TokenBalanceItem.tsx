@@ -1,9 +1,8 @@
 import colors from '@/lib/styles/colors';
-import { formatAmount, formatUsdValue } from '@raylac/shared';
+import { Balance } from '@raylac/shared';
 import { View } from 'react-native';
 import StyledText from '../StyledText/StyledText';
 import TokenLogo from '../FastImage/TokenLogo';
-import BigNumber from 'bignumber.js';
 
 const shortenName = (name: string) => {
   if (name.length > 20) {
@@ -15,16 +14,10 @@ const shortenName = (name: string) => {
 const TokenBalanceItem = (props: {
   name: string;
   symbol: string;
-  balance: bigint;
+  balance: Balance;
   tokenDecimals: number;
-  usdValue: string;
   logoUrl: string;
 }) => {
-  const formattedBalance = formatAmount(
-    props.balance.toString(),
-    props.tokenDecimals
-  );
-
   return (
     <View
       style={{
@@ -63,10 +56,10 @@ const TokenBalanceItem = (props: {
             <StyledText>{shortenName(props.name)}</StyledText>
             <StyledText
               style={{ fontWeight: 'bold' }}
-            >{`$${formatUsdValue(new BigNumber(props.usdValue))}`}</StyledText>
+            >{`$${props.balance.usdValueFormatted}`}</StyledText>
           </View>
           <StyledText style={{ color: colors.border }}>
-            {formattedBalance} {props.symbol}
+            {props.balance.formatted} {props.symbol}
           </StyledText>
         </View>
       </View>

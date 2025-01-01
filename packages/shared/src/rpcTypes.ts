@@ -27,23 +27,10 @@ export enum TRPCErrorMessage {
 export type SupportedTokensReturnType = Token[];
 
 export type TokenBalancesReturnType = {
+  address: Hex;
+  chainId: number;
   token: Token;
-  balance: Hex;
-  usdValue: string;
-  tokenPrice: string;
-  // Breakdown of the token balance on chain across all addresses
-  combinedBreakdown: {
-    chainId: number;
-    balance: Hex;
-  }[];
-  // Breakdown of the token balance on chain  per address
-  perAddressBreakdown: {
-    address: Hex;
-    breakdown: {
-      chainId: number;
-      balance: Hex;
-    }[];
-  }[];
+  balance: Balance;
 }[];
 
 export interface SendTransactionRequestBody {

@@ -525,4 +525,6 @@ export interface Balance {
   balance: string;
   formatted: string;
   usdValue: string;
+  usdValueFormatted: string;
+  tokenPriceUsd: number;
 }

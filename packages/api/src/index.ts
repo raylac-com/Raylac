@@ -32,8 +32,6 @@ import getSwapQuote from './api/getSwapQuote/getSwapQuote';
 import { ed, logger, st } from '@raylac/shared-backend';
 import getTokenPrice from './api/getTokenPrice/getTokenPrice';
 import { getTokenPriceMock } from './api/getTokenPrice/getTokenPrice.mock';
-import getToken from './api/getToken/getToken';
-import getTokenMock from './api/getToken/getToken.mock';
 import submitSwap from './api/submitSwap/submitSwap';
 import sendTransaction from './api/sendTransaction/sendTransaction';
 import buildMultiChainSend from './api/buildMultichainSend/buildMultichainSend';
@@ -77,18 +75,6 @@ export const appRouter = router({
       return MOCK_RESPONSE
         ? getTokenBalancesMock({ addresses: input.addresses as Hex[] })
         : getTokenBalances({ addresses: input.addresses as Hex[] });
-    }),
-
-  getToken: publicProcedure
-    .input(z.object({ tokenAddress: z.string() }))
-    .query(async ({ input }) => {
-      return MOCK_RESPONSE
-        ? getTokenMock({
-            tokenAddress: input.tokenAddress as Hex,
-          })
-        : getToken({
-            tokenAddress: input.tokenAddress as Hex,
-          });
     }),
 
   getETHBalance: publicProcedure

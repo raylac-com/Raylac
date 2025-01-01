@@ -58,7 +58,7 @@ const RecipientCard = ({
         />
         <View style={{ flexDirection: 'column' }}>
           <StyledText style={{ fontWeight: 'bold', fontSize: fontSizes.large }}>
-            {`$${amount.usdValue}`}
+            {`$${amount.usdValueFormatted}`}
           </StyledText>
           <StyledText style={{ color: colors.border }}>
             {amount.formatted} {token.symbol}
@@ -103,7 +103,7 @@ const InputCard = ({
         />
         <View style={{ flexDirection: 'column' }}>
           <StyledText style={{ fontWeight: 'bold', fontSize: fontSizes.large }}>
-            {`$${amount.usdValue}`}
+            {`$${amount.usdValueFormatted}`}
           </StyledText>
           <StyledText style={{ color: colors.border }}>
             {amount.formatted} {token.symbol}

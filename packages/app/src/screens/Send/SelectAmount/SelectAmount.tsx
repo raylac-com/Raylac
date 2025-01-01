@@ -296,7 +296,7 @@ const SelectAmount = ({ route }: Props) => {
               style={{ color: colors.border, fontWeight: 'bold' }}
             >{`MAX`}</StyledText>
             <StyledText style={{ color: colors.border }}>
-              {`Balance $${tokenBalance?.usdValue}`}
+              {`Balance $${tokenBalance?.usdValueFormatted}`}
             </StyledText>
           </Pressable>
         </View>
@@ -304,7 +304,7 @@ const SelectAmount = ({ route }: Props) => {
           <StyledText>{`Send from ${shortenAddress(fromAddresses[0])}`}</StyledText>
           <StyledText>
             {estimatedTransferGas &&
-              `Gas $${estimatedTransferGas?.usdValue} (${estimatedTransferGas?.formatted} ${token.symbol})`}
+              `Gas $${estimatedTransferGas?.usdValueFormatted} (${estimatedTransferGas?.formatted} ${token.symbol})`}
           </StyledText>
         </View>
         <ReviewButton

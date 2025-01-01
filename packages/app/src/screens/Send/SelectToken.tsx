@@ -3,11 +3,11 @@ import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable'
 import StyledText from '@/components/StyledText/StyledText';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
+import useTokenBalances from '@/hooks/useTokenBalances';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import colors from '@/lib/styles/colors';
-import { trpc } from '@/lib/trpc';
 import { RootStackParamsList } from '@/navigation/types';
-import { Balance, getAddressTokenBalances, Token } from '@raylac/shared';
+import { Balance, formatBalance, getTokenId, Token } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { SectionList, View } from 'react-native';
 import { Hex } from 'viem';
@@ -32,7 +32,7 @@ const TokenChainItem = ({
     >
       <TokenLogoWithChain chainId={chainId} logoURI={token.logoURI} size={32} />
       <StyledText style={{ color: colors.border }}>
-        {`$${balance.usdValue}`}
+        {`$${balance.usdValueFormatted}`}
       </StyledText>
     </View>
   );
@@ -86,7 +86,7 @@ const TokenListItem = ({
               <StyledText>{token.name}</StyledText>
             </View>
             <StyledText style={{ color: colors.border }}>
-              {`$${balance.usdValue}`}
+              {`$${balance.usdValueFormatted}`}
             </StyledText>
           </View>
         </View>
@@ -107,22 +107,73 @@ const TokenListItem = ({
   );
 };
 
-const useTokenAddressPerAddress = () => {
+type AddressTokenBalances = {
+  address: Hex;
+  tokenBalances: {
+    token: Token;
+    totalBalance: Balance;
+    chainBalances: {
+      chainId: number;
+      balance: Balance;
+    }[];
+  }[];
+};
+
+const useTokenBalancePerAddress = (): AddressTokenBalances[] | undefined => {
+  const { data: tokenBalances } = useTokenBalances();
   const { data: userAddresses } = useUserAddresses();
 
-  const { data: tokenBalances } = trpc.getTokenBalances.useQuery({
-    addresses: userAddresses?.map(a => a.address) ?? [],
-  });
+  const tokenBalancesPerAddress: AddressTokenBalances[] = [];
 
-  const addressTokenBalances = userAddresses?.map(a => ({
-    address: a.address,
-    tokenBalances: getAddressTokenBalances({
-      tokenBalances: tokenBalances ?? [],
-      address: a.address,
-    }),
-  }));
+  if (tokenBalances && userAddresses) {
+    for (const address of userAddresses) {
+      const addressTokenBalances = tokenBalances.filter(
+        balance => balance.address === address.address
+      );
 
-  return addressTokenBalances;
+      // Group by tokne
+      const addressTokenIds = [
+        ...new Set(
+          addressTokenBalances.map(balance => getTokenId(balance.token))
+        ),
+      ];
+
+      const groupByTokens = [];
+
+      for (const tokenId of addressTokenIds) {
+        const tokenBalances = addressTokenBalances.filter(
+          balance => getTokenId(balance.token) === tokenId
+        );
+
+        const totalBalance = tokenBalances.reduce(
+          (acc, balance) => acc + BigInt(balance.balance.balance),
+          BigInt(0)
+        );
+
+        const formattedTotalBalance = formatBalance({
+          balance: totalBalance,
+          token: tokenBalances[0].token,
+          tokenPriceUsd: tokenBalances[0].balance.tokenPriceUsd,
+        });
+
+        groupByTokens.push({
+          token: tokenBalances[0].token,
+          totalBalance: formattedTotalBalance,
+          chainBalances: tokenBalances.map(balance => ({
+            chainId: balance.chainId,
+            balance: balance.balance,
+          })),
+        });
+      }
+
+      tokenBalancesPerAddress.push({
+        address: address.address,
+        tokenBalances: groupByTokens,
+      });
+    }
+  }
+
+  return tokenBalancesPerAddress;
 };
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'SelectToken'>;
@@ -130,7 +181,7 @@ type Props = NativeStackScreenProps<RootStackParamsList, 'SelectToken'>;
 const SelectToken = ({ navigation, route }: Props) => {
   const toAddress = route.params.toAddress;
 
-  const addressTokenBalances = useTokenAddressPerAddress();
+  const tokenBalancesPerAddress = useTokenBalancePerAddress();
 
   const onTokenSelect = ({
     token,
@@ -170,7 +221,7 @@ const SelectToken = ({ navigation, route }: Props) => {
         return <View style={{ height: 16 }} />;
       }}
       sections={
-        addressTokenBalances?.map(a => ({
+        tokenBalancesPerAddress?.map(a => ({
           title: a.address,
           data: a.tokenBalances,
         })) ?? []
@@ -179,16 +230,18 @@ const SelectToken = ({ navigation, route }: Props) => {
       renderSectionHeader={({ section }) => (
         <WalletIconAddress address={section.title} />
       )}
-      renderItem={({ item: tokenBalance }) => (
-        <TokenListItem
-          token={tokenBalance.token}
-          balance={tokenBalance.balance}
-          balanceBreakdown={tokenBalance.breakdown}
-          onPress={({ token, chainId }) =>
-            onTokenSelect({ address: tokenBalance.address, token, chainId })
-          }
-        />
-      )}
+      renderItem={({ item: tokenBalance, section }) => {
+        return (
+          <TokenListItem
+            token={tokenBalance.token}
+            balance={tokenBalance.totalBalance}
+            balanceBreakdown={tokenBalance.chainBalances}
+            onPress={({ token, chainId }) =>
+              onTokenSelect({ address: section.title, token, chainId })
+            }
+          />
+        );
+      }}
       stickySectionHeadersEnabled={false}
     />
   );

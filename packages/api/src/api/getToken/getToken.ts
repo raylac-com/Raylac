@@ -1,4 +1,4 @@
-import { findTokenByAddress, supportedChains, Token } from '@raylac/shared';
+import { findTokenByAddress, Token } from '@raylac/shared';
 import { getAddress, Hex } from 'viem';
 import { relayGetCurrencies } from '../../lib/relay';
 import { KNOWN_TOKENS } from '@raylac/shared';
@@ -10,8 +10,10 @@ const cache = new NodeCache({
 
 const getToken = async ({
   tokenAddress,
+  chainId,
 }: {
   tokenAddress: Hex;
+  chainId: number;
 }): Promise<Token> => {
   const knownToken = findTokenByAddress({
     tokens: KNOWN_TOKENS,
@@ -29,12 +31,12 @@ const getToken = async ({
   }
 
   const searchResult = await relayGetCurrencies({
-    chainIds: supportedChains.map(chain => chain.id),
+    chainIds: [chainId],
     tokenAddress,
     limit: 1,
   });
 
-  if (searchResult === undefined) {
+  if (searchResult === undefined || searchResult.length === 0) {
     throw new Error('Token not found');
   }
 

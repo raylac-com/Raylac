@@ -2,7 +2,6 @@ import { ScrollView, RefreshControl, View, Pressable } from 'react-native';
 import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import TokenBalanceItem from '@/components/TokenBalanceItem/TokenBalanceItem';
-import { hexToBigInt } from 'viem';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -10,7 +9,7 @@ import { hapticOptions } from '@/lib/utils';
 import useAccountUsdValue from '@/hooks/useAccountUsdValue';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import TokenBalanceDetailsSheet from '@/components/TokenBalanceDetailsSheet/TokenBalanceDetailsSheet';
-import { TokenBalancesReturnType } from '@raylac/shared';
+import { groupTokenBalancesByToken, Token } from '@raylac/shared';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
@@ -26,7 +25,7 @@ const HomeScreen = () => {
   ///
   const [isRefetching, setIsRefetching] = useState(false);
   const [showTokenBalanceDetailsSheet, setShowTokenBalanceDetailsSheet] =
-    useState<TokenBalancesReturnType[number] | null>(null);
+    useState<Token | null>(null);
 
   ///
   /// Queries
@@ -73,6 +72,10 @@ const HomeScreen = () => {
     // Only run after the cache is reset and we have a definitive userAccount value
     init();
   }, [userAddresses]);
+
+  const groupedTokenBalances = groupTokenBalancesByToken({
+    tokenBalances: tokenBalances ?? [],
+  });
 
   return (
     <View
@@ -130,7 +133,7 @@ const HomeScreen = () => {
             padding: 16,
           }}
         >
-          {tokenBalances?.map((item, index) => (
+          {groupedTokenBalances.map((item, index) => (
             <Pressable
               key={index}
               onPress={() => {
@@ -138,15 +141,14 @@ const HomeScreen = () => {
                   'impactMedium',
                   hapticOptions
                 );
-                setShowTokenBalanceDetailsSheet(item);
+                setShowTokenBalanceDetailsSheet(item.token);
               }}
             >
               <TokenBalanceItem
-                balance={hexToBigInt(item.balance)}
+                balance={item.totalBalance}
                 tokenDecimals={item.token.decimals}
                 symbol={item.token.symbol}
                 name={item.token.name}
-                usdValue={item.usdValue}
                 logoUrl={item.token.logoURI}
               />
             </Pressable>
@@ -156,7 +158,7 @@ const HomeScreen = () => {
       <Fav />
       {showTokenBalanceDetailsSheet && (
         <TokenBalanceDetailsSheet
-          tokenBalance={showTokenBalanceDetailsSheet}
+          token={showTokenBalanceDetailsSheet}
           onClose={() => {
             setShowTokenBalanceDetailsSheet(null);
           }}

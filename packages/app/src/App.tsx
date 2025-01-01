@@ -38,14 +38,12 @@ import SelectRecipient from './screens/Send/SelectRecipient';
 import ConfirmSend from './screens/Send/ConfirmSend/ConfirmSend';
 import SelectAmount from './screens/Send/SelectAmount/SelectAmount';
 import SelectToken from './screens/Send/SelectToken';
-import SelectChain from './screens/Send/SelectChain';
 import StartWatch from './screens/StartWatch/StartWatch';
 import AddAddress from './screens/AddAddress/AddAddress';
 import Advanced from './screens/Advanced/Advanced';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import Addresses from './screens/Addresses/Addresses';
 import CreateAddress from './screens/CreateAddress/CreateAddress';
-import SelectFromAddress from './screens/Send/SelectFromAddress';
 import { MoveFundsSheetProvider } from './contexts/MoveFundsSheetContext';
 import { MoveFundsContextProvider } from './contexts/MoveFundsContext';
 
@@ -203,15 +201,6 @@ const Screens = () => {
                     }}
                   ></RootStack.Screen>
                   <RootStack.Screen
-                    name="SelectFromAddress"
-                    component={SelectFromAddress}
-                    options={{
-                      title: 'Select From Address',
-                      headerBackVisible: true,
-                      headerBackTitle: 'Back',
-                    }}
-                  ></RootStack.Screen>
-                  <RootStack.Screen
                     name="SelectToken"
                     component={SelectToken}
                     options={{
@@ -225,15 +214,6 @@ const Screens = () => {
                     component={SelectAmount}
                     options={{
                       title: 'Select Amount',
-                      headerBackVisible: true,
-                      headerBackTitle: 'Back',
-                    }}
-                  ></RootStack.Screen>
-                  <RootStack.Screen
-                    name="SelectChain"
-                    component={SelectChain}
-                    options={{
-                      title: 'Select Chain',
                       headerBackVisible: true,
                       headerBackTitle: 'Back',
                     }}
@@ -327,7 +307,7 @@ const App = () => {
           client={queryClient}
           persistOptions={{
             persister: asyncStoragePersister,
-            buster: process.env.EXPO_PUBLIC_CACHE_BUSTER || '0',
+            buster: '44',
           }}
         >
           <ThemeProvider value={NavigationTheme}>
