@@ -134,7 +134,10 @@ const HomeScreen = () => {
             <Pressable
               key={index}
               onPress={() => {
-                ReactNativeHapticFeedback.trigger('impactLight', hapticOptions);
+                ReactNativeHapticFeedback.trigger(
+                  'impactMedium',
+                  hapticOptions
+                );
                 setShowTokenBalanceDetailsSheet(item);
               }}
             >

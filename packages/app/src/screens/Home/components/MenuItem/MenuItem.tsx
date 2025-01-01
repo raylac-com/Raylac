@@ -46,7 +46,7 @@ const MenuItem = (props: MenuItemProps) => {
   return (
     <Pressable
       onPress={() => {
-        ReactNativeHapticFeedback.trigger('impactLight', hapticOptions);
+        ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
         onPress();
       }}
       style={{}}

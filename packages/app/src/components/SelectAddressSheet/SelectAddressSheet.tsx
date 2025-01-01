@@ -34,7 +34,7 @@ const SelectAddressSheet = ({
 
   useEffect(() => {
     if (open) {
-      ReactNativeHapticFeedback.trigger('impactLight', hapticOptions);
+      ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
       ref.current?.present();
     } else {
       ref.current?.dismiss();
@@ -77,7 +77,7 @@ const SelectAddressSheet = ({
         renderItem={({ item }) => (
           <Pressable
             onPress={() => {
-              ReactNativeHapticFeedback.trigger('impactLight', hapticOptions);
+              ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
               onSelect(item.address);
             }}
           >

@@ -49,7 +49,7 @@ const StyledButton = ({
     <Pressable
       onPress={e => {
         // Trigger haptic feedback
-        ReactNativeHapticFeedback.trigger('impactLight', hapticOptions);
+        ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
 
         props.onPress?.(e);
       }}
