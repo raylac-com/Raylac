@@ -5,6 +5,7 @@ import {
   getAddressChainTokenBalance,
   getAddressTokenBalances,
   getChainTokenBalance,
+  getPerAddressTokenBalance,
   getTotalUsdValue,
   groupTokenBalancesByToken,
   USDC,
@@ -22,7 +23,6 @@ const getTokenBalances = async () => {
 
   console.log(tokenBalances);
 
-  /*
   console.time('groupTokenBalancesByToken');
   const groupedTokenBalances = groupTokenBalancesByToken({
     tokenBalances: tokenBalances,
@@ -30,9 +30,15 @@ const getTokenBalances = async () => {
   console.timeEnd('groupTokenBalancesByToken');
   console.log(groupedTokenBalances);
 
+  const perAddressTokenBalances = getPerAddressTokenBalance({
+    tokenBalances: tokenBalances,
+    token: USDC,
+  });
+
+  console.log(perAddressTokenBalances);
+
   const totalUsdValue = getTotalUsdValue(tokenBalances);
   console.log('totalUsdValue', totalUsdValue.toString());
-  */
 };
 
 getTokenBalances();

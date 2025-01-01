@@ -1,4 +1,4 @@
-import { Token } from '@raylac/shared';
+import { KNOWN_TOKENS, Token } from '@raylac/shared';
 import { redisClient } from './redis';
 import { Hex } from 'viem';
 import { relayGetToken } from './relay';
@@ -45,6 +45,14 @@ export const getToken = async ({
   chainId: number;
   tokenAddress: Hex;
 }): Promise<Token | null> => {
+  const knownToken = KNOWN_TOKENS.find(token =>
+    token.addresses.some(address => address.address === tokenAddress)
+  );
+
+  if (knownToken) {
+    return knownToken;
+  }
+
   const cachedToken = await getCachedToken(tokenAddress);
   if (cachedToken) {
     return cachedToken;

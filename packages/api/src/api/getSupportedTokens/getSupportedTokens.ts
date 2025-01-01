@@ -1,8 +1,12 @@
 import { relayGetCurrencies } from '../../lib/relay';
 import { getAddress } from 'viem';
-import { Token } from '@raylac/shared';
+import { KNOWN_TOKENS, Token } from '@raylac/shared';
 import { cacheTokens, getCachedTokens } from '../../lib/token';
 import { logger } from '@raylac/shared-backend';
+
+const knownTokenAddresses = KNOWN_TOKENS.flatMap(token =>
+  token.addresses.map(address => getAddress(address.address))
+);
 
 const getSupportedTokens = async ({
   chainIds,
@@ -28,6 +32,8 @@ const getSupportedTokens = async ({
   });
 
   const supportedTokens: Token[] = currencies
+    // Filter out tokens that are in the known tokens list
+    .filter(token => !knownTokenAddresses.includes(getAddress(token.address)))
     // Sort by verified status
     .sort((a, b) => Number(b.metadata.verified) - Number(a.metadata.verified))
     // Map to `Token`
@@ -45,9 +51,11 @@ const getSupportedTokens = async ({
       ],
     }));
 
-  await cacheTokens(supportedTokens);
+  const result = [...supportedTokens, ...KNOWN_TOKENS];
 
-  return supportedTokens;
+  await cacheTokens(result);
+
+  return result;
 };
 
 export default getSupportedTokens;
