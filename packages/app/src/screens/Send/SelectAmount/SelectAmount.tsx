@@ -1,3 +1,4 @@
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import StyledText from '@/components/StyledText/StyledText';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -6,6 +7,7 @@ import fontSizes from '@/lib/styles/fontSizes';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import {
+  Balance,
   BuildAggregateSendRequestBody,
   formatBalance,
   GetEstimatedTransferGasRequestBody,
@@ -19,6 +21,7 @@ import { trpc } from '@/lib/trpc';
 import useChainTokenBalance from '@/hooks/useChainTokenBalance';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
+import Skeleton from '@/components/Skeleton/Skeleton';
 
 const ReviewButton = ({
   onPress,
@@ -77,6 +80,28 @@ const AmountInput = ({
   );
 };
 
+const GasInfo = ({
+  gas,
+  isFetchingGasInfo,
+}: {
+  gas: Balance | undefined;
+  isFetchingGasInfo: boolean;
+}) => {
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}>
+      <FontAwesome5 name="gas-pump" size={18} color={colors.subbedText} />
+      <StyledText style={{ color: colors.subbedText }}>{`Gas`}</StyledText>
+      {isFetchingGasInfo ? (
+        <Skeleton style={{ width: 100, height: 20 }} />
+      ) : (
+        <StyledText style={{ color: colors.subbedText }}>
+          {`$${gas?.usdValueFormatted || '0'} (${gas?.formatted || '0'} ETH)`}
+        </StyledText>
+      )}
+    </View>
+  );
+};
+
 type Props = Pick<
   NativeStackScreenProps<RootStackParamsList, 'SelectAmount'>,
   'route'
@@ -117,8 +142,11 @@ const SelectAmount = ({ route }: Props) => {
   /// Mutations
   ///
 
-  const { data: estimatedTransferGas, mutate: getEstimatedTransferGas } =
-    trpc.getEstimatedTransferGas.useMutation();
+  const {
+    data: estimatedTransferGas,
+    mutate: getEstimatedTransferGas,
+    isPending: isFetchingGasInfo,
+  } = trpc.getEstimatedTransferGas.useMutation();
 
   const {
     data: aggregatedSend,
@@ -134,16 +162,20 @@ const SelectAmount = ({ route }: Props) => {
 
   useEffect(() => {
     if (tokenAmountInputText !== '' && aggregatedSend && tokenBalance) {
+      const parsedAmount = parseUnits(tokenAmountInputText, token.decimals);
+
+      if (parsedAmount === BigInt(0)) {
+        return;
+      }
+
       const isBalanceSufficient =
-        tokenBalance.balance &&
-        parseUnits(tokenAmountInputText, token.decimals) <=
-          BigInt(tokenBalance.balance);
+        tokenBalance.balance && parsedAmount <= BigInt(tokenBalance.balance);
 
       if (isBalanceSufficient) {
         const requestBody: GetEstimatedTransferGasRequestBody = {
           chainId,
           token,
-          amount: parseUnits(tokenAmountInputText, token.decimals).toString(),
+          amount: parsedAmount.toString(),
           to: toAddress,
           from: fromAddresses[0],
           maxFeePerGas: aggregatedSend.inputs[0].tx.maxFeePerGas,
@@ -170,6 +202,10 @@ const SelectAmount = ({ route }: Props) => {
     }
 
     const parsedAmount = parseUnits(tokenAmountInputText, token.decimals);
+
+    if (parsedAmount === BigInt(0)) {
+      return;
+    }
 
     const buildAggregatedSendRequestBody: BuildAggregateSendRequestBody = {
       token,
@@ -300,12 +336,31 @@ const SelectAmount = ({ route }: Props) => {
             </StyledText>
           </Pressable>
         </View>
-        <View style={{ flexDirection: 'column' }}>
-          <StyledText>{`Send from ${shortenAddress(fromAddresses[0])}`}</StyledText>
-          <StyledText>
-            {estimatedTransferGas &&
-              `Gas $${estimatedTransferGas?.usdValueFormatted} (${estimatedTransferGas?.formatted} ETH)`}
-          </StyledText>
+        <View style={{ flexDirection: 'column', rowGap: 8 }}>
+          <View
+            style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+          >
+            <StyledText style={{ color: colors.subbedText }}>
+              {`Send from `}
+            </StyledText>
+            <StyledText
+              style={{ color: colors.subbedText, fontWeight: 'bold' }}
+            >
+              {shortenAddress(fromAddresses[0])}
+            </StyledText>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              columnGap: 4,
+            }}
+          >
+            <GasInfo
+              gas={estimatedTransferGas}
+              isFetchingGasInfo={isFetchingGasInfo}
+            />
+          </View>
         </View>
         <ReviewButton
           onPress={onReviewButtonPress}
