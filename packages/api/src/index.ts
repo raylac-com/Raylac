@@ -25,6 +25,7 @@ import {
   SubmitSwapRequestBody,
   TokenSet,
   GetEstimatedTransferGasRequestBody,
+  BuildBridgeSendRequestBody,
 } from '@raylac/shared';
 import buildAggregateSend from './api/buildAggregateSend/buildAggregateSend';
 import getSwapQuote from './api/getSwapQuote/getSwapQuote';
@@ -46,6 +47,7 @@ import getSingleInputSwapQuote from './api/getSingleInputSwapQuote/getSingleInpu
 import submitSingleInputSwap from './api/submitSingleInputSwap/submitSingleInputSwap';
 import sendAggregateTx from './api/sendAggregateTx/sendAggregateTx';
 import getEstimatedTransferGas from './api/getEstimatedTransferGas/getEstimatedTransferGas';
+import buildBridgeSend from './api/buildBridgeSend/buildBridgeSend';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -151,6 +153,12 @@ export const appRouter = router({
     .input(z.any())
     .mutation(async ({ input }) => {
       return buildAggregateSend(input as BuildAggregateSendRequestBody);
+    }),
+
+  buildBridgeSend: publicProcedure
+    .input(z.any())
+    .mutation(async ({ input }) => {
+      return buildBridgeSend(input as BuildBridgeSendRequestBody);
     }),
 
   sendAggregateTx: publicProcedure

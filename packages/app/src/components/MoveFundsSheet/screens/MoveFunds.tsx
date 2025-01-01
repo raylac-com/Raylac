@@ -4,12 +4,13 @@ import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithCha
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
 import colors from '@/lib/styles/colors';
 import {
-  Balance,
   getChainFromId,
   SendAggregateTxRequestBody,
   signEIP1159Tx,
-  BuildAggregateSendRequestBody,
   Token,
+  getAddressChainTokenBalance,
+  BuildBridgeSendRequestBody,
+  getAddressTokenBalances,
 } from '@raylac/shared';
 import { useEffect, useState } from 'react';
 import { Image, Pressable, TextInput, View } from 'react-native';
@@ -77,7 +78,7 @@ const MoveFundsOutput = ({
 }: {
   toAddress: Hex | null;
   token: Token | null;
-  outputAmount: Balance | null;
+  outputAmount: string | null;
   chainId: number | null;
 }) => {
   const navigation =
@@ -126,7 +127,7 @@ const MoveFundsOutput = ({
             fontSize: fontSizes.twoXLarge,
           }}
         >
-          {outputAmount ? outputAmount.formatted : '0.00'} {token?.symbol}
+          {outputAmount ? outputAmount : '0.00'} {token?.symbol}
         </StyledText>
       </FeedbackPressable>
       {chainId && (
@@ -177,6 +178,11 @@ const MoveFundsInput = ({
   setAmountInputText: (amountInputText: string) => void;
   onOpenSelectToken: () => void;
 }) => {
+  const { data: userAddresses } = useUserAddresses();
+  const { data: tokenBalances } = trpc.getTokenBalances.useQuery({
+    addresses: userAddresses?.map(address => address.address) ?? [],
+  });
+
   const navigation =
     useNavigation<NativeStackNavigationProp<MoveFundsSheetStackParamsList>>();
 
@@ -187,6 +193,16 @@ const MoveFundsInput = ({
   const onSelectInputChainPress = () => {
     navigation.navigate('SelectChain', { type: 'from' });
   };
+
+  const balance =
+    tokenBalances && fromAddress && chainId && token
+      ? getAddressChainTokenBalance({
+          tokenBalances: tokenBalances,
+          address: fromAddress,
+          chainId: chainId,
+          token: token,
+        })
+      : undefined;
 
   return (
     <View
@@ -243,6 +259,11 @@ const MoveFundsInput = ({
           />
         </FeedbackPressable>
       </View>
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+        <StyledText style={{ color: colors.subbedText }}>
+          {balance ? balance.formatted : ''} {token?.symbol}
+        </StyledText>
+      </View>
       {chainId && (
         <ChainSelector
           chainId={chainId}
@@ -278,10 +299,10 @@ const MoveFunds = () => {
   });
 
   const {
-    data: aggregatedSend,
-    mutateAsync: buildAggregatedSend,
-    isPending: isBuildingAggregatedSend,
-  } = trpc.buildAggregateSend.useMutation({
+    data: bridgeSend,
+    mutateAsync: buildBridgeSend,
+    isPending: isBuildingBridgeSend,
+  } = trpc.buildBridgeSend.useMutation({
     throwOnError: false,
   });
 
@@ -289,50 +310,71 @@ const MoveFunds = () => {
     trpc.sendAggregateTx.useMutation();
 
   useEffect(() => {
-    if (tokenBalances && tokenBalances.length > 0) {
-      if (token === null) {
-        setToken(tokenBalances[0].token);
-      }
+    if (tokenBalances && fromAddress) {
+      const addressTokenBalances = getAddressTokenBalances({
+        tokenBalances: tokenBalances,
+        address: fromAddress,
+      });
 
-      if (fromChainId === null) {
-        setFromChainId(tokenBalances[0].token.addresses[0].chainId);
-      }
+      if (addressTokenBalances.length > 0) {
+        // eslint-disable-next-line security/detect-possible-timing-attacks
+        if (token === null) {
+          setToken(addressTokenBalances[0].token);
+        }
 
-      if (toChainId === null) {
-        setToChainId(tokenBalances[0].token.addresses[0].chainId);
+        if (fromChainId === null) {
+          if (addressTokenBalances[0].breakdown.length > 0) {
+            setFromChainId(addressTokenBalances[0].breakdown[0].chainId);
+          } else {
+            setFromChainId(addressTokenBalances[0].token.addresses[0].chainId);
+          }
+        }
+
+        if (toChainId === null) {
+          if (addressTokenBalances[0].breakdown.length > 1) {
+            setToChainId(addressTokenBalances[0].breakdown[1].chainId);
+          } else {
+            setToChainId(addressTokenBalances[0].token.addresses[0].chainId);
+          }
+        }
       }
     }
-  }, [tokenBalances]);
+  }, [tokenBalances, fromAddress]);
 
   useEffect(() => {
     if (userAddresses) {
       if (userAddresses.length > 0) {
         setFromAddress(userAddresses[0].address);
-      }
-
-      if (userAddresses.length > 1) {
-        setToAddress(userAddresses[1].address);
+        setToAddress(userAddresses[0].address);
       }
     }
   }, [userAddresses]);
 
   useEffect(() => {
-    if (fromAddress && toAddress && token && fromChainId && amountInputText) {
-      const buildAggregateSendRequestBody: BuildAggregateSendRequestBody = {
+    if (
+      fromAddress &&
+      toAddress &&
+      token &&
+      fromChainId &&
+      toChainId &&
+      amountInputText
+    ) {
+      const buildBridgeSendRequestBody: BuildBridgeSendRequestBody = {
         token,
         amount: parseUnits(amountInputText, token.decimals).toString(),
-        chainId: fromChainId,
-        fromAddresses: [fromAddress],
-        toAddress,
+        fromChainId,
+        toChainId,
+        from: fromAddress,
+        to: toAddress,
       };
 
-      buildAggregatedSend(buildAggregateSendRequestBody);
+      buildBridgeSend(buildBridgeSendRequestBody);
     }
   }, [fromAddress, toAddress, token, amountInputText]);
 
   const onSendPress = async () => {
-    if (!aggregatedSend) {
-      throw new Error('Aggregated send not built');
+    if (!bridgeSend) {
+      throw new Error('Bridge send not built');
     }
 
     if (!fromAddress) {
@@ -352,7 +394,7 @@ const MoveFunds = () => {
     const privateKeyAccount = privateKeyToAccount(privateKey);
 
     const signedTxs: Hex[] = [];
-    for (const step of aggregatedSend.inputs) {
+    for (const step of bridgeSend.steps) {
       const singedTx = await signEIP1159Tx({
         tx: step.tx,
         account: privateKeyAccount,
@@ -381,7 +423,7 @@ const MoveFunds = () => {
       <MoveFundsOutput
         toAddress={toAddress}
         token={token}
-        outputAmount={null}
+        outputAmount={bridgeSend ? bridgeSend.amountOutFormatted : null}
         chainId={toChainId}
       />
       <View
@@ -406,7 +448,7 @@ const MoveFunds = () => {
       <StyledButton
         title="Send"
         onPress={onSendPress}
-        isLoading={isSendingAggregateTx || isBuildingAggregatedSend}
+        isLoading={isSendingAggregateTx || isBuildingBridgeSend}
       />
     </View>
   );

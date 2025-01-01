@@ -168,7 +168,9 @@ export const getKnownTokenBalances = async ({
     })
   );
 
-  return balances.filter(balance => balance !== null);
+  return balances
+    .filter(balance => balance !== null)
+    .filter(balance => balance.balance !== '0x0');
 };
 
 /**

@@ -267,3 +267,24 @@ export interface GetEstimatedTransferGasRequestBody {
 }
 
 export type GetEstimatedTransferGasReturnType = Balance;
+
+export interface BuildBridgeSendRequestBody {
+  from: Hex;
+  to: Hex;
+  token: Token;
+  amount: string;
+  fromChainId: number;
+  toChainId: number;
+}
+
+export type BuildBridgeSendReturnType = {
+  steps: CrossChainSwapStep[];
+  relayerServiceFeeAmount: string;
+  relayerServiceFeeUsd: string;
+  amountIn: string;
+  amountOut: string;
+  amountInFormatted: string;
+  amountOutFormatted: string;
+  amountInUsd: string;
+  amountOutUsd: string;
+};
