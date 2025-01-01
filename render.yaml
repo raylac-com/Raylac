@@ -28,7 +28,7 @@ services:
      # A Redis instance that allows all external connections
   - type: redis
     name: raylac-redis
-    plan: free
+    plan: starter
     ipAllowList:
       - source: 0.0.0.0/0
         description: everywhere
