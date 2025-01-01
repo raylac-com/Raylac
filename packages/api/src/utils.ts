@@ -6,7 +6,6 @@ import {
   WebSocketTransport,
   PublicClient,
   Hex,
-  getAddress,
 } from 'viem';
 import * as chains from 'viem/chains';
 import { ALCHEMY_API_KEY } from './lib/envVars';
@@ -14,15 +13,12 @@ import { Network } from 'alchemy-sdk';
 import {
   ETH,
   getChainFromId,
-  KNOWN_TOKENS,
   ST_ETH,
   Token,
   TokenSet,
   WST_ETH,
 } from '@raylac/shared';
 import BigNumber from 'bignumber.js';
-import { logger } from '@raylac/shared-backend';
-import { relayGetCurrencies } from './lib/relay';
 
 export const getWebsocketClient = ({ chainId }: { chainId: number }) => {
   const chain = getChainFromId(chainId);
@@ -256,82 +252,4 @@ export const shortenUsdValue = (bn: BigNumber): string => {
   else {
     return bn.toFixed(2);
   }
-};
-
-const findTokenInKnownTokens = ({
-  tokenAddress,
-  chainId,
-}: {
-  tokenAddress: Hex;
-  chainId: number;
-}): Token | null => {
-  return (
-    KNOWN_TOKENS.find(
-      (token: Token) =>
-        token.addresses.find(
-          chainAddress =>
-            chainAddress.chainId === chainId &&
-            chainAddress.address === tokenAddress
-        ) !== undefined
-    ) || null
-  );
-};
-
-const metadataCache = new Map<string, Token>();
-
-export const getTokenMetadata = async ({
-  tokenAddress,
-  chainId,
-}: {
-  tokenAddress: Hex;
-  chainId: number;
-}): Promise<Token | null> => {
-  const knownToken = findTokenInKnownTokens({ tokenAddress, chainId });
-
-  if (knownToken) {
-    return knownToken;
-  }
-
-  // Check if the metadata is cached
-  const cachedMetadata = metadataCache.get(`relay-token-${tokenAddress}`);
-
-  if (cachedMetadata) {
-    logger.info(`Cache hit for ${cachedMetadata.name} ${tokenAddress}`);
-    return cachedMetadata;
-  }
-
-  const result = await relayGetCurrencies({
-    chainIds: [chainId],
-    tokenAddress,
-  });
-
-  const metadata = result.find(
-    token => getAddress(token.address) === getAddress(tokenAddress)
-  );
-
-  if (!metadata) {
-    logger.error(
-      `No token metadata found for ${tokenAddress} on ${getChainName(chainId)}`
-    );
-    return null;
-  }
-
-  const token: Token = {
-    name: metadata.name,
-    symbol: metadata.symbol,
-    logoURI: metadata.metadata.logoURI,
-    decimals: metadata.decimals,
-    verified: metadata.metadata.verified,
-    addresses: [
-      {
-        chainId,
-        address: tokenAddress,
-      },
-    ],
-  };
-
-  // Cache the token
-  metadataCache.set(`relay-token-${tokenAddress}`, token);
-
-  return token;
 };

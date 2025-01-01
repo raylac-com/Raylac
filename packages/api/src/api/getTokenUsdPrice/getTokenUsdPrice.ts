@@ -1,37 +1,70 @@
-import { zeroAddress } from 'viem';
+import { Hex, zeroAddress } from 'viem';
 import {
   getTokenPriceByAddress,
   getTokenPriceBySymbol,
 } from '../../lib/alchemy';
-import NodeCache from 'node-cache';
 import { Token } from '@raylac/shared';
+import { redisClient } from '../../lib/redis';
+import { logger } from '@raylac/shared-backend';
 
-const cache = new NodeCache({ stdTTL: 60 });
+const cacheUsdPrice = async ({
+  tokenAddress,
+  usdPrice,
+}: {
+  tokenAddress: Hex;
+  usdPrice: number | 'notfound';
+}) => {
+  if (usdPrice === 'notfound') {
+    await redisClient.set(`usdPrice:${tokenAddress}`, 'notfound');
+  } else {
+    await redisClient.set(`usdPrice:${tokenAddress}`, usdPrice);
+  }
+};
+
+const getCachedUsdPrice = async ({
+  tokenAddress,
+}: {
+  tokenAddress: Hex;
+}): Promise<number | 'notfound' | null> => {
+  const cachedPrice = await redisClient.get(`usdPrice:${tokenAddress}`);
+
+  if (cachedPrice === 'notfound') {
+    return 'notfound';
+  }
+
+  return cachedPrice ? Number(cachedPrice) : null;
+};
 
 const getTokenUsdPrice = async ({
   token,
 }: {
   token: Token;
-}): Promise<number> => {
+}): Promise<number | 'notfound'> => {
   const tokenAddress = token.addresses[0].address;
   const chainId = token.addresses[0].chainId;
 
-  const cachedPrice = cache.get<number | undefined>(tokenAddress);
+  const cachedPrice = await getCachedUsdPrice({ tokenAddress });
 
   if (cachedPrice) {
+    logger.info(
+      `getTokenUsdPrice: Cache hit. Token: ${token.symbol}: ${cachedPrice}`
+    );
     return cachedPrice;
   }
 
   if (tokenAddress === zeroAddress) {
     const result = await getTokenPriceBySymbol('ETH');
 
-    cache.set(tokenAddress, result);
-
     const usdPrice = result.prices.find(p => p.currency === 'usd');
 
     if (!usdPrice) {
       throw new Error(`USD price not found for ETH`);
     }
+
+    await cacheUsdPrice({
+      tokenAddress,
+      usdPrice: Number(usdPrice.value),
+    });
 
     return Number(usdPrice.value);
   }
@@ -41,27 +74,32 @@ const getTokenUsdPrice = async ({
     chainId,
   });
 
-  const usdPrice = result.prices.find(p => p.currency === 'usd');
+  const usdPriceData = result.prices.find(p => p.currency === 'usd');
 
-  if (!usdPrice) {
-    throw new Error(
-      `USD price not found for ${token.symbol} (${tokenAddress}) on chain ${chainId}`
-    );
+  if (usdPriceData === undefined) {
+    await cacheUsdPrice({ tokenAddress, usdPrice: 'notfound' });
+    return 'notfound';
   }
 
   // Return the price as 0 if the last update of the price is more than 24 hours ago
   if (
-    usdPrice &&
-    new Date(usdPrice.lastUpdatedAt).getTime() <
+    usdPriceData &&
+    new Date(usdPriceData.lastUpdatedAt).getTime() <
       Date.now() - 24 * 60 * 60 * 1000
   ) {
-    cache.set(tokenAddress, 0);
+    await cacheUsdPrice({ tokenAddress, usdPrice: 0 });
     return 0;
   }
 
-  cache.set(tokenAddress, Number(usdPrice.value));
+  const usdPrice = Number(usdPriceData.value);
 
-  return Number(usdPrice.value);
+  logger.warn(
+    `getTokenUsdPrice: Cache miss. Token: ${token.symbol} Price: ${usdPrice}`
+  );
+
+  await cacheUsdPrice({ tokenAddress, usdPrice });
+
+  return usdPrice;
 };
 
 export default getTokenUsdPrice;

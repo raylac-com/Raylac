@@ -7,10 +7,10 @@ import {
 import { getAddress, Hex, zeroAddress } from 'viem';
 import { getAlchemyClient } from '../../lib/alchemy';
 import { AssetTransfersCategory, SortingOrder } from 'alchemy-sdk';
-import { getTokenMetadata } from '../../utils';
-import getTokenPrice from '../getTokenPrice/getTokenPrice';
 import BigNumber from 'bignumber.js';
 import { logger } from '@raylac/shared-backend';
+import { getToken } from '../../lib/token';
+import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
 
 const getHistoryOnChain = async ({
   addresses,
@@ -23,6 +23,7 @@ const getHistoryOnChain = async ({
 
   const transfers = await Promise.all(
     addresses.map(async address => {
+      // Get incoming transfers
       const incoming = await alchemy.core.getAssetTransfers({
         toAddress: address,
         category: [
@@ -34,6 +35,7 @@ const getHistoryOnChain = async ({
         maxCount: 10,
       });
 
+      // Get outgoing transfers
       const outgoing = await alchemy.core.getAssetTransfers({
         fromAddress: address,
         category: [
@@ -48,7 +50,7 @@ const getHistoryOnChain = async ({
       const transfers: GetHistoryReturnType = (
         await Promise.all(
           [...incoming.transfers, ...outgoing.transfers].map(async transfer => {
-            const token = await getTokenMetadata({
+            const token = await getToken({
               tokenAddress: (transfer.rawContract.address ||
                 zeroAddress) as Hex,
               chainId,
@@ -61,13 +63,13 @@ const getHistoryOnChain = async ({
               return null;
             }
 
-            const price = await getTokenPrice({
-              tokenAddress: token.addresses[0].address,
-              chainId: token.addresses[0].chainId,
+            const usdPrice = await getTokenUsdPrice({
+              token,
             });
 
-            const usdPrice =
-              price.prices.find(p => p.currency === 'usd')?.value || '0';
+            if (usdPrice === 'notfound') {
+              return null;
+            }
 
             const amountUsd = new BigNumber(transfer.value || 0)
               .multipliedBy(new BigNumber(usdPrice))

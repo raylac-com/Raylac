@@ -275,3 +275,5 @@ export type BuildBridgeSendReturnType = {
   amountInUsd: string;
   amountOutUsd: string;
 };
+
+export type GetTokenUsdPriceReturnType = number | 'notfound';

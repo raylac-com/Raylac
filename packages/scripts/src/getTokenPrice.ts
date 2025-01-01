@@ -10,17 +10,14 @@ import {
   USDC,
 } from '@raylac/shared';
 
-const getTokenBalances = async () => {
-  console.time('getTokenBalances');
-  const tokenBalances = await client.getTokenBalances.query({
-    addresses: [
-      //      '0x28341dF2CCabe2Cc4A3c6e7ef2fe9E706680C196',
-      '0x400EA6522867456E988235675b9Cb5b1Cf5b79C8',
-    ],
+const getTokenPrice = async () => {
+  console.time('getTokenPrice');
+  const tokenPrice = await client.getTokenPrice.mutate({
+    token: USDC,
   });
-  console.timeEnd('getTokenBalances');
+  console.timeEnd('getTokenPrice');
 
-  console.log(tokenBalances);
+  console.log(tokenPrice);
 
   /*
   console.time('groupTokenBalancesByToken');
@@ -35,4 +32,4 @@ const getTokenBalances = async () => {
   */
 };
 
-getTokenBalances();
+getTokenPrice();

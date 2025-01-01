@@ -1,7 +1,7 @@
-import { RelaySupportedCurrenciesResponseBody } from '@raylac/shared';
+import { RelaySupportedCurrenciesResponseBody, Token } from '@raylac/shared';
 import { logger } from '@raylac/shared-backend';
 import axios from 'axios';
-import { getAddress } from 'viem';
+import { getAddress, Hex } from 'viem';
 
 export const relayApi = axios.create({
   baseURL: 'https://api.relay.link',
@@ -45,7 +45,6 @@ export const relayGetCurrencies = async ({
       .filter(group => group.length > 0)
       .map(group => group[0]);
   } else {
-    logger.info('Using combined search');
     const promises = [
       relayApi.post<RelaySupportedCurrenciesResponseBody>('currencies/v1', {
         chainIds,
@@ -92,4 +91,46 @@ export const relayGetCurrencies = async ({
     ...token,
     address: getAddress(token.address),
   }));
+};
+
+/**
+ * Get a token from the relay API
+ * @param chainId - The chain ID of the token
+ * @param tokenAddress - The address of the token
+ * @returns The token or null if it's not found
+ */
+export const relayGetToken = async ({
+  chainId,
+  tokenAddress,
+}: {
+  chainId: number;
+  tokenAddress: Hex;
+}): Promise<Token | null> => {
+  const searchResult = await relayGetCurrencies({
+    chainIds: [chainId],
+    tokenAddress,
+    limit: 1,
+  });
+
+  if (searchResult === undefined || searchResult.length === 0) {
+    return null;
+  }
+
+  const result = searchResult[0];
+
+  const token = {
+    symbol: result.symbol,
+    name: result.name,
+    decimals: result.decimals,
+    logoURI: result.metadata.logoURI,
+    verified: result.metadata.verified,
+    addresses: [
+      {
+        chainId,
+        address: getAddress(result.address),
+      },
+    ],
+  };
+
+  return token;
 };

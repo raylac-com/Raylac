@@ -8,9 +8,8 @@ import {
   formatBalance,
 } from '@raylac/shared';
 import { getAlchemyClient } from '../../lib/alchemy';
-import { logger } from '@raylac/shared-backend';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
-import getToken from '../getToken/getToken';
+import { getToken } from '../../lib/token';
 
 export const getETHBalance = async ({
   address,
@@ -40,15 +39,23 @@ const formatAlchemyTokenBalance = async ({
   address: Hex;
   balance: Balance;
   chainId: number;
-}> => {
+} | null> => {
   const token = await getToken({
     tokenAddress,
     chainId,
   });
 
+  if (!token) {
+    return null;
+  }
+
   const tokenPriceUsd = await getTokenUsdPrice({
     token,
   });
+
+  if (tokenPriceUsd === 'notfound') {
+    return null;
+  }
 
   const formattedBalance = formatBalance({
     balance: tokenBalance,
@@ -89,19 +96,12 @@ const getMultiChainTokenBalancesFromAlchemy = async ({
       const addressChainTokenBalances = (
         await Promise.all(
           alchemyTokenBalances.tokens.map(async token => {
-            try {
-              // If we fail to get the token metadata from Relay or the token price, we'll fail to get the token balance
-              // we'll remove the token from the response
-              return await formatAlchemyTokenBalance({
-                address,
-                tokenAddress: getAddress(token.contractAddress),
-                tokenBalance: hexToBigInt(token.rawBalance as Hex),
-                chainId: chain.id,
-              });
-            } catch (error) {
-              logger.error(error);
-              return null;
-            }
+            return await formatAlchemyTokenBalance({
+              address,
+              tokenAddress: getAddress(token.contractAddress),
+              tokenBalance: hexToBigInt(token.rawBalance as Hex),
+              chainId: chain.id,
+            });
           })
         )
       ).filter(tokenBalance => tokenBalance !== null);

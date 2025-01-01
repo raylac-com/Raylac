@@ -25,6 +25,7 @@ import {
   TokenSet,
   GetEstimatedTransferGasRequestBody,
   BuildBridgeSendRequestBody,
+  Token,
 } from '@raylac/shared';
 import buildAggregateSend from './api/buildAggregateSend/buildAggregateSend';
 import getSwapQuote from './api/getSwapQuote/getSwapQuote';
@@ -212,16 +213,14 @@ export const appRouter = router({
     }),
 
   getTokenPrice: publicProcedure
-    .input(z.object({ tokenAddress: z.string(), chainId: z.number() }))
+    .input(z.object({ token: z.any() }))
     .mutation(async ({ input }) => {
       return MOCK_RESPONSE
         ? getTokenPriceMock({
-            tokenAddress: input.tokenAddress as Hex,
-            chainId: input.chainId,
+            token: input.token as Token,
           })
         : getTokenPrice({
-            tokenAddress: input.tokenAddress as Hex,
-            chainId: input.chainId,
+            token: input.token as Token,
           });
     }),
 

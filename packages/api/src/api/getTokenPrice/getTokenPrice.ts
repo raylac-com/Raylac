@@ -1,67 +1,16 @@
-import { Hex, zeroAddress } from 'viem';
-import {
-  getTokenPriceByAddress,
-  getTokenPriceBySymbol,
-} from '../../lib/alchemy';
-import { AlchemyTokenPriceResponse } from '@raylac/shared';
-import NodeCache from 'node-cache';
-
-const cache = new NodeCache({ stdTTL: 60 });
+import { GetTokenUsdPriceReturnType, Token } from '@raylac/shared';
+import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
 
 const getTokenPrice = async ({
-  tokenAddress,
-  chainId,
+  token,
 }: {
-  tokenAddress: Hex;
-  chainId: number;
-}): Promise<AlchemyTokenPriceResponse> => {
-  const cachedPrice = cache.get<AlchemyTokenPriceResponse | undefined>(
-    tokenAddress
-  );
-
-  if (cachedPrice) {
-    return cachedPrice;
-  }
-
-  if (tokenAddress === zeroAddress) {
-    const result = await getTokenPriceBySymbol('ETH');
-
-    cache.set(tokenAddress, result);
-
-    return result;
-  }
-
-  const result = await getTokenPriceByAddress({
-    address: tokenAddress,
-    chainId,
+  token: Token;
+}): Promise<GetTokenUsdPriceReturnType> => {
+  const price = await getTokenUsdPrice({
+    token,
   });
 
-  const usdPrice = result.prices.find(p => p.currency === 'usd');
-
-  // Return the price as 0 if the last update of the price is more than 24 hours ago
-  if (
-    usdPrice &&
-    new Date(usdPrice.lastUpdatedAt).getTime() <
-      Date.now() - 24 * 60 * 60 * 1000
-  ) {
-    const response = {
-      ...result,
-      prices: [
-        {
-          ...usdPrice,
-          value: '0',
-        },
-      ],
-    };
-
-    cache.set(tokenAddress, response);
-
-    return response;
-  }
-
-  cache.set(tokenAddress, result);
-
-  return result;
+  return price;
 };
 
 export default getTokenPrice;

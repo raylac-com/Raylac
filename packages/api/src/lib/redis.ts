@@ -7,4 +7,6 @@ const redis = createClient({
   url: process.env.REDIS_URL,
 }) as ReturnType<typeof createClient>;
 
+redis.connect();
+
 export const redisClient: ReturnType<typeof createClient> = redis;
