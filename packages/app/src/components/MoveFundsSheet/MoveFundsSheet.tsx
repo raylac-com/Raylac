@@ -9,6 +9,7 @@ import SelectChain from './screens/SelectChain';
 import colors from '@/lib/styles/colors';
 import { useMoveFundsContext } from '@/contexts/MoveFundsContext';
 import SelectAddress from './screens/SelectAddress';
+import MoveComplete from './screens/MoveComplete';
 
 export type MoveFundsSheetStackParamsList = {
   MoveFunds: undefined;
@@ -19,6 +20,7 @@ export type MoveFundsSheetStackParamsList = {
   SelectAddress: {
     type: 'from' | 'to';
   };
+  MoveComplete: undefined;
 };
 
 const Stack = createNativeStackNavigator<MoveFundsSheetStackParamsList>();
@@ -31,6 +33,7 @@ const Navigator = () => {
         <Stack.Screen name="SelectToken" component={SelectToken} />
         <Stack.Screen name="SelectChain" component={SelectChain} />
         <Stack.Screen name="SelectAddress" component={SelectAddress} />
+        <Stack.Screen name="MoveComplete" component={MoveComplete} />
       </Stack.Navigator>
     </NavigationContainer>
   );

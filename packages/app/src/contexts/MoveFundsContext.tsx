@@ -16,6 +16,7 @@ const MoveFundsContext = createContext<{
   setFromChainId: (fromChainId: number | null) => void;
   toChainId: number | null;
   setToChainId: (toChainId: number | null) => void;
+  reset: () => void;
 }>({
   isSheetOpen: false,
   setIsSheetOpen: () => {},
@@ -29,6 +30,7 @@ const MoveFundsContext = createContext<{
   setFromChainId: () => {},
   toChainId: null,
   setToChainId: () => {},
+  reset: () => {},
 });
 
 // Create a provider component
@@ -43,6 +45,14 @@ export const MoveFundsContextProvider = ({
   const [token, setToken] = useState<Token | null>(null);
   const [fromChainId, setFromChainId] = useState<number | null>(null);
   const [toChainId, setToChainId] = useState<number | null>(null);
+
+  const reset = () => {
+    setToAddress(null);
+    setFromAddress(null);
+    setToken(null);
+    setFromChainId(null);
+    setToChainId(null);
+  };
 
   return (
     <MoveFundsContext.Provider
@@ -59,6 +69,7 @@ export const MoveFundsContextProvider = ({
         setFromChainId,
         toChainId,
         setToChainId,
+        reset,
       }}
     >
       {children}

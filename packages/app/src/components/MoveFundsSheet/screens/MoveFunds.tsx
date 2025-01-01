@@ -359,9 +359,15 @@ const MoveFunds = () => {
       toChainId &&
       amountInputText
     ) {
+      const parsedAmount = parseUnits(amountInputText, token.decimals);
+
+      if (parsedAmount === BigInt(0)) {
+        return;
+      }
+
       const buildBridgeSendRequestBody: BuildBridgeSendRequestBody = {
         token,
-        amount: parseUnits(amountInputText, token.decimals).toString(),
+        amount: parsedAmount.toString(),
         fromChainId,
         toChainId,
         from: fromAddress,
@@ -370,7 +376,7 @@ const MoveFunds = () => {
 
       buildBridgeSend(buildBridgeSendRequestBody);
     }
-  }, [fromAddress, toAddress, token, amountInputText]);
+  }, [fromAddress, toAddress, token, amountInputText, fromChainId, toChainId]);
 
   const onSendPress = async () => {
     if (!bridgeSend) {
@@ -409,6 +415,10 @@ const MoveFunds = () => {
     };
 
     await sendAggregateTx(sendAggregateTxRequestBody);
+
+    setAmountInputText('');
+
+    navigation.navigate('MoveComplete');
   };
 
   return (
