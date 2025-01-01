@@ -10,7 +10,7 @@ import { getTokenAddressOnChain } from '../../utils';
 import { getNonce } from '../../lib/utils';
 import { encodeFunctionData, formatUnits, Hex } from 'viem';
 import BigNumber from 'bignumber.js';
-import getTokenPrice from '../getTokenPrice/getTokenPrice';
+import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
 
 const buildERC20TransferExecutionStep = ({
   token,
@@ -131,21 +131,11 @@ const buildAggregateSend = async (
     address: fromAddress,
   });
 
-  const tokenAddress = getTokenAddressOnChain(
-    requestBody.token,
-    requestBody.chainId
-  );
-
-  const tokenPrice = await getTokenPrice({
-    chainId: requestBody.chainId,
-    tokenAddress,
+  const tokenPriceUsd = await getTokenUsdPrice({
+    token: requestBody.token,
   });
 
-  const tokenPriceUsd = tokenPrice?.prices.find(
-    price => price.currency === 'usd'
-  )?.value;
-
-  if (tokenPriceUsd === undefined) {
+  if (tokenPriceUsd === 'notfound') {
     throw new Error('Token price not found');
   }
 
@@ -158,7 +148,7 @@ const buildAggregateSend = async (
           maxPriorityFeePerGas: BigInt(maxPriorityFeePerGas),
           chainId: requestBody.chainId,
           nonce,
-          tokenPriceUsd,
+          tokenPriceUsd: tokenPriceUsd.toString(),
         })
       : buildERC20TransferExecutionStep({
           token: requestBody.token,
@@ -168,7 +158,7 @@ const buildAggregateSend = async (
           maxFeePerGas: BigInt(maxFeePerGas),
           maxPriorityFeePerGas: BigInt(maxPriorityFeePerGas),
           nonce,
-          tokenPriceUsd,
+          tokenPriceUsd: tokenPriceUsd.toString(),
         });
 
   return {

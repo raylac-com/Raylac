@@ -76,7 +76,7 @@ const useSwap = () => {
       await submitSwap(submitSwapRequestBody);
 
       await queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.getSetBalances),
+        queryKey: getQueryKey(trpc.getTokenBalances),
       });
     },
   });

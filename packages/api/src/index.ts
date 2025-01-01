@@ -3,9 +3,7 @@ import { z } from 'zod';
 import { publicProcedure, router, createCallerFactory } from './trpc';
 import { createContext } from './context';
 import { webcrypto } from 'node:crypto';
-import getTokenBalances, {
-  getETHBalance,
-} from './api/getTokenBalances/getTokenBalances';
+import getTokenBalances from './api/getTokenBalances/getTokenBalances';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { Hex } from 'viem';
 import getSupportedTokens from './api/getSupportedTokens/getSupportedTokens';
@@ -22,7 +20,6 @@ import {
   SubmitSingleChainSwapRequestBody,
   SubmitSingleInputSwapRequestBody,
   SubmitSwapRequestBody,
-  TokenSet,
   GetEstimatedTransferGasRequestBody,
   BuildBridgeSendRequestBody,
   Token,
@@ -39,8 +36,6 @@ import getHistory from './api/getHistory/getHistory';
 import getSingleChainSwapQuote from './api/getSingleChainSwapQuote/getSingleChainSwapQuote';
 import submitSingleChainSwap from './api/submitSingleChainSwap/submitSingleChainSwap';
 import getLidoApy from './api/getLidoApy/getLidoApy';
-import getSetBalances from './api/getSetBalances/getSetBalances';
-import getSet from './api/getSet/getSet';
 import getSingleInputSwapQuote from './api/getSingleInputSwapQuote/getSingleInputSwapQuote';
 import submitSingleInputSwap from './api/submitSingleInputSwap/submitSingleInputSwap';
 import sendAggregateTx from './api/sendAggregateTx/sendAggregateTx';
@@ -73,32 +68,6 @@ export const appRouter = router({
     )
     .query(async ({ input }) => {
       return getTokenBalances({ addresses: input.addresses as Hex[] });
-    }),
-
-  getETHBalance: publicProcedure
-    .input(z.object({ address: z.string(), chainId: z.number() }))
-    .query(async ({ input }) => {
-      return getETHBalance({
-        address: input.address as Hex,
-        chainId: input.chainId,
-      });
-    }),
-
-  getSetBalances: publicProcedure
-    .input(
-      z.object({ set: z.nativeEnum(TokenSet), addresses: z.array(z.string()) })
-    )
-    .query(async ({ input }) => {
-      return getSetBalances({
-        set: input.set as TokenSet,
-        addresses: input.addresses as Hex[],
-      });
-    }),
-
-  getSet: publicProcedure
-    .input(z.object({ set: z.nativeEnum(TokenSet) }))
-    .query(async ({ input }) => {
-      return getSet(input.set as TokenSet);
     }),
 
   getLidoApy: publicProcedure.query(async () => {

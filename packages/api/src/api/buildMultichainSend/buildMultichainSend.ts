@@ -22,11 +22,11 @@ import {
 } from '@reservoir0x/relay-sdk';
 import { createClient, MAINNET_RELAY_API } from '@reservoir0x/relay-sdk';
 import { getTokenAddressOnChain } from '../../utils';
-import getTokenPrice from '../getTokenPrice/getTokenPrice';
 import BigNumber from 'bignumber.js';
 import { logger } from '@raylac/shared-backend';
 import { getNonce } from '../../lib/utils';
 import { TRPCError } from '@trpc/server';
+import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
 
 createClient({
   baseApiUrl: MAINNET_RELAY_API,
@@ -423,16 +423,11 @@ const buildMultiChainSend = async ({
     destinationChainId,
   });
 
-  const tokenPrice = await getTokenPrice({
-    tokenAddress: token.addresses[0].address,
-    chainId: token.addresses[0].chainId,
+  const tokenPriceUsd = await getTokenUsdPrice({
+    token,
   });
 
-  const tokenPriceUsd = tokenPrice.prices.find(
-    p => p.currency === 'usd'
-  )?.value;
-
-  if (tokenPriceUsd === undefined) {
+  if (tokenPriceUsd === 'notfound') {
     throw new Error(`Token price not found for ${token.symbol}`);
   }
 
@@ -467,7 +462,7 @@ const buildMultiChainSend = async ({
           maxPriorityFeePerGas,
           nonce,
           chainId: destinationChainId,
-          tokenPriceUsd,
+          tokenPriceUsd: tokenPriceUsd.toString(),
         })
       : buildERC20TransferExecutionStep({
           token,
@@ -477,7 +472,7 @@ const buildMultiChainSend = async ({
           maxFeePerGas,
           maxPriorityFeePerGas,
           nonce,
-          tokenPriceUsd,
+          tokenPriceUsd: tokenPriceUsd.toString(),
         });
 
   const totalBridgeFee = bridgeSteps.reduce(

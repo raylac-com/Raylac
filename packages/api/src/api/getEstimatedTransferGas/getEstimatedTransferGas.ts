@@ -8,7 +8,7 @@ import {
   GetEstimatedTransferGasReturnType,
 } from '@raylac/shared';
 import { encodeFunctionData, zeroAddress } from 'viem';
-import getTokenPrice from '../getTokenPrice/getTokenPrice';
+import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
 
 const getEstimatedTransferGas = async ({
   chainId,
@@ -50,13 +50,9 @@ const getEstimatedTransferGas = async ({
     estimatedGasWei = estimatedGas * BigInt(maxFeePerGas);
   }
 
-  const ethPrice = await getTokenPrice({ chainId, tokenAddress: zeroAddress });
-
-  const ethPriceUsd = ethPrice.prices.find(p => p.currency === 'usd')?.value;
-
-  if (ethPriceUsd == undefined) {
-    throw new Error('No ETH usd price found');
-  }
+  const ethPriceUsd = await getTokenUsdPrice({
+    token: ETH,
+  });
 
   const estimatedGasUsd = formatBalance({
     balance: estimatedGasWei,
