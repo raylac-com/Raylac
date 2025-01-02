@@ -17,7 +17,6 @@ const ReceiveHistoryListItem = (props: {
         paddingHorizontal: 16,
         paddingVertical: 12,
         borderColor: colors.border,
-        borderBottomWidth: 1,
       }}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>

@@ -8,11 +8,8 @@ import {
 } from 'react-native';
 import colors from '@/lib/styles/colors';
 import StyledText from '@/components/StyledText/StyledText';
-import { GetHistoryReturnType, HistoryItemType } from '@raylac/shared';
-import ReceiveHistoryListItem from '@/components/ReceiveHistoryListItem/ReceiveHistoryListItem';
-import SendHistoryListItem from '@/components/SendHistoryListItem/SendHistoryListItem';
 import useUserAddresses from '@/hooks/useUserAddresses';
-import MoveFundsHistoryListItem from '@/components/MoveFundsHistoryListItem/MoveFundsHistoryListItem';
+import HistoryListItem from '@/components/HistoryListItem/HistoryListItem';
 
 const History = () => {
   const { data: addresses } = useUserAddresses();
@@ -60,26 +57,13 @@ const History = () => {
         contentContainerStyle={{
           paddingVertical: 32,
           paddingHorizontal: 16,
+          rowGap: 24,
         }}
         data={swapHistory ?? []}
         renderItem={({ item }) => {
           return (
             <Pressable onPress={() => {}}>
-              {item.type === HistoryItemType.OUTGOING && (
-                <SendHistoryListItem
-                  transfer={item as GetHistoryReturnType[number]}
-                />
-              )}
-              {item.type === HistoryItemType.INCOMING && (
-                <ReceiveHistoryListItem
-                  transfer={item as GetHistoryReturnType[number]}
-                />
-              )}
-              {item.type === HistoryItemType.MOVE_FUNDS && (
-                <MoveFundsHistoryListItem
-                  transfer={item as GetHistoryReturnType[number]}
-                />
-              )}
+              <HistoryListItem transfer={item} />
             </Pressable>
           );
         }}

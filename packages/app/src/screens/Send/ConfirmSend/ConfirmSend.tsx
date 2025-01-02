@@ -23,6 +23,7 @@ import useTypedNavigation from '@/hooks/useTypedNavigation';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import { Balance } from '@raylac/shared';
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
+import useSend from '@/hooks/useSend';
 
 const RecipientCard = ({
   toAddress,
@@ -144,7 +145,7 @@ const ConfirmSend = ({ route }: Props) => {
   ///
 
   const { mutateAsync: sendAggregateTx, isPending: isSendingAggregateTx } =
-    trpc.sendAggregateTx.useMutation();
+    useSend();
 
   ///
   /// Effects
