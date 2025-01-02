@@ -1,3 +1,4 @@
+import MoveFundsSheet from '@/components/MoveFundsSheet/MoveFundsSheet';
 import { Token } from '@raylac/shared';
 import React, { createContext, useState, useContext } from 'react';
 import { Hex } from 'viem';
@@ -73,6 +74,7 @@ export const MoveFundsContextProvider = ({
       }}
     >
       {children}
+      <MoveFundsSheet />
     </MoveFundsContext.Provider>
   );
 };

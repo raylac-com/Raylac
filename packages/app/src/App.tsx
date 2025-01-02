@@ -136,8 +136,8 @@ const Screens = () => {
       }}
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <MoveFundsContextProvider>
-          <BottomSheetModalProvider>
+        <BottomSheetModalProvider>
+          <MoveFundsContextProvider>
             <RootStack.Navigator initialRouteName="Tabs">
               <RootStack.Screen
                 name="Tabs"
@@ -234,8 +234,8 @@ const Screens = () => {
               <RootStack.Screen name="AddAddress" component={AddAddress} />
               <RootStack.Screen name="Advanced" component={Advanced} />
             </RootStack.Navigator>
-          </BottomSheetModalProvider>
-        </MoveFundsContextProvider>
+          </MoveFundsContextProvider>
+        </BottomSheetModalProvider>
         <Toast></Toast>
       </GestureHandlerRootView>
     </TouchableWithoutFeedback>
