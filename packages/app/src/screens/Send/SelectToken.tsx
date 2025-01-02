@@ -30,7 +30,7 @@ const SearchBar = ({
   onSearchInputChange,
 }: {
   onAddressSelect: (address: Hex) => void;
-  selectedAddress: Hex;
+  selectedAddress: Hex | null;
   onSearchInputChange: (text: string) => void;
 }) => {
   const { data: userAddresses } = useUserAddresses();
@@ -349,20 +349,14 @@ const SelectToken = ({ navigation, route }: Props) => {
   const toAddress = route.params.toAddress;
   const { data: userAddresses } = useUserAddresses();
 
-  const [selectedAddresses, setSelectedAddresses] = useState<Hex[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<Hex | null>(null);
   const [searchText, setSearchText] = useState('');
 
   const tokenBalancesPerAddress = useTokenBalancePerAddress({
-    addresses: selectedAddresses,
+    addresses: selectedAddress
+      ? [selectedAddress]
+      : (userAddresses?.map(a => a.address) ?? []),
   });
-
-  useEffect(() => {
-    if (selectedAddresses.length === 0) {
-      setSelectedAddresses(
-        userAddresses?.map(address => address.address) ?? []
-      );
-    }
-  }, [userAddresses]);
 
   const onTokenSelect = ({
     token,
@@ -382,7 +376,7 @@ const SelectToken = ({ navigation, route }: Props) => {
   };
 
   const onAddressSelect = (address: Hex) => {
-    setSelectedAddresses([address]);
+    setSelectedAddress(address);
   };
 
   const onSearchInputChange = (text: string) => {
@@ -455,7 +449,7 @@ const SelectToken = ({ navigation, route }: Props) => {
         stickySectionHeadersEnabled={false}
       />
       <SearchBar
-        selectedAddress={selectedAddresses[0]}
+        selectedAddress={selectedAddress}
         onAddressSelect={onAddressSelect}
         onSearchInputChange={onSearchInputChange}
       />

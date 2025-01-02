@@ -1,4 +1,3 @@
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import StyledText from '@/components/StyledText/StyledText';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -9,13 +8,13 @@ import { RootStackParamsList } from '@/navigation/types';
 import {
   Balance,
   BuildAggregateSendRequestBody,
-  formatBalance,
+  formatAmount,
   GetEstimatedTransferGasRequestBody,
 } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
-import { Pressable, TextInput, View } from 'react-native';
-import { formatUnits, parseUnits } from 'viem';
+import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import { formatUnits, Hex, parseUnits } from 'viem';
 import BigNumber from 'bignumber.js';
 import { trpc } from '@/lib/trpc';
 import useChainTokenBalance from '@/hooks/useChainTokenBalance';
@@ -23,6 +22,12 @@ import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithCha
 import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import SendToCard from '@/components/SendToCard/SendToCard';
+import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
+import useSend from '@/hooks/useSend';
+
+const ConfirmButton = ({ onPress }: { onPress: () => void }) => {
+  return <StyledButton title="Confirm" onPress={onPress} />;
+};
 
 const ReviewButton = ({
   onPress,
@@ -37,46 +42,51 @@ const ReviewButton = ({
     <StyledButton
       disabled={!isBalanceSufficient}
       isLoading={isLoading}
-      title={isBalanceSufficient ? 'Next' : 'Insufficient balance'}
+      title={isBalanceSufficient ? 'Review' : 'Insufficient balance'}
       onPress={onPress}
     />
   );
 };
 
-const AmountInput = ({
-  amount,
-  setAmount,
-  postfix,
+const SendFromDetail = ({ address }: { address: Hex }) => {
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      <StyledText style={{ color: colors.subbedText }}>
+        {`Send from`}
+      </StyledText>
+      <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
+        {shortenAddress(address)}
+      </StyledText>
+    </View>
+  );
+};
+
+const BalanceDetail = ({
+  balance,
+  onMaxPress,
 }: {
-  amount: string;
-  setAmount: (amount: string) => void;
-  postfix: string;
+  balance: Balance | undefined;
+  onMaxPress: () => void;
 }) => {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}>
-      <TextInput
-        keyboardType="numeric"
-        value={amount}
-        autoFocus
-        onChangeText={setAmount}
-        placeholder={'0.00'}
-        style={{
-          fontSize: fontSizes.twoXLarge,
-          flexShrink: 1,
-          width: '100%',
-          borderWidth: 1,
-          borderColor: colors.border,
-          borderRadius: 16,
-          height: 56,
-          paddingHorizontal: 16,
-        }}
-        numberOfLines={1}
-      />
-      <StyledText
-        style={{ fontSize: fontSizes.twoXLarge, color: colors.border }}
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      <StyledText style={{ color: colors.subbedText }}>{`Balance`}</StyledText>
+      <View
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
       >
-        {postfix}
-      </StyledText>
+        {balance ? (
+          <StyledText style={{ color: colors.subbedText }}>
+            {`$${balance.usdValueFormatted}`}
+          </StyledText>
+        ) : (
+          <Skeleton style={{ width: 100, height: 20 }} />
+        )}
+        <Pressable onPress={onMaxPress}>
+          <StyledText
+            style={{ color: colors.subbedText, fontWeight: 'bold' }}
+          >{`MAX`}</StyledText>
+        </Pressable>
+      </View>
     </View>
   );
 };
@@ -89,8 +99,7 @@ const GasInfo = ({
   isFetchingGasInfo: boolean;
 }) => {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}>
-      <FontAwesome5 name="gas-pump" size={18} color={colors.subbedText} />
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <StyledText style={{ color: colors.subbedText }}>{`Gas`}</StyledText>
       {isFetchingGasInfo ? (
         <Skeleton style={{ width: 100, height: 20 }} />
@@ -102,6 +111,21 @@ const GasInfo = ({
     </View>
   );
 };
+
+/*
+const AvailableGasDetail = ({ availableGas }: { availableGas: Balance }) => {
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      <StyledText
+        style={{ color: colors.subbedText }}
+      >{`Available gas`}</StyledText>
+      <StyledText style={{ color: colors.subbedText }}>
+        {availableGas.formatted}
+      </StyledText>
+    </View>
+  );
+};
+*/
 
 type Props = Pick<
   NativeStackScreenProps<RootStackParamsList, 'SelectAmount'>,
@@ -122,10 +146,12 @@ const SelectAmount = ({ route }: Props) => {
   ///
   /// Local state
   ///
-  const [tokenAmountInputText, setTokenAmountInputText] = useState<string>('');
-  const [usdAmountInputText, setUsdAmountInputText] = useState<string>('');
+  const [amountInputText, setAmountInputText] = useState<string>('');
 
   const [isBalanceSufficient, setIsBalanceSufficient] = useState<boolean>(true);
+
+  const [isReadyToConfirm, setIsReadyToConfirm] = useState<boolean>(false);
+  const [inputMode, setInputMode] = useState<'token' | 'usd'>('token');
 
   ///
   /// Queries
@@ -158,12 +184,18 @@ const SelectAmount = ({ route }: Props) => {
   });
 
   ///
+  /// Mutations
+  ///
+
+  const { mutateAsync: sendAggregateTx } = useSend();
+
+  ///
   /// Effects
   ///
 
   useEffect(() => {
-    if (tokenAmountInputText !== '' && aggregatedSend && tokenBalance) {
-      const parsedAmount = parseUnits(tokenAmountInputText, token.decimals);
+    if (amountInputText !== '' && aggregatedSend && tokenBalance) {
+      const parsedAmount = parseUnits(amountInputText, token.decimals);
 
       if (parsedAmount === BigInt(0)) {
         return;
@@ -185,24 +217,24 @@ const SelectAmount = ({ route }: Props) => {
         getEstimatedTransferGas(requestBody);
       }
     }
-  }, [tokenAmountInputText, aggregatedSend, tokenBalance]);
+  }, [amountInputText, aggregatedSend, tokenBalance]);
 
   useEffect(() => {
     if (tokenBalance) {
       const _isBalanceSufficient =
-        parseUnits(tokenAmountInputText, token.decimals) <=
+        parseUnits(amountInputText, token.decimals) <=
         BigInt(tokenBalance.balance);
 
       setIsBalanceSufficient(_isBalanceSufficient);
     }
-  }, [tokenAmountInputText, tokenBalance]);
+  }, [amountInputText, tokenBalance]);
 
   useEffect(() => {
-    if (containsNonNumericCharacters(tokenAmountInputText)) {
+    if (containsNonNumericCharacters(amountInputText)) {
       return;
     }
 
-    const parsedAmount = parseUnits(tokenAmountInputText, token.decimals);
+    const parsedAmount = parseUnits(amountInputText, token.decimals);
 
     if (parsedAmount === BigInt(0)) {
       return;
@@ -217,59 +249,32 @@ const SelectAmount = ({ route }: Props) => {
     };
 
     buildAggregatedSend(buildAggregatedSendRequestBody);
-  }, [tokenAmountInputText, fromAddresses, toAddress, chainId]);
+  }, [amountInputText, fromAddresses, toAddress, chainId]);
 
   ///
   /// Handlers
   ///
 
-  const handleTokenAmountInputTextChange = (amountText: string) => {
-    setTokenAmountInputText(amountText);
-
-    if (amountText === '') {
-      setUsdAmountInputText('');
-      return;
-    }
-
-    if (tokenPriceUsd !== undefined) {
-      // Update the USD amount
-      const usdAmount = new BigNumber(amountText)
-        .multipliedBy(tokenPriceUsd)
-        .toFixed(2);
-
-      setUsdAmountInputText(usdAmount);
-    }
-  };
-
-  const handleUsdAmountInputTextChange = (amountText: string) => {
-    setUsdAmountInputText(amountText);
-
-    if (amountText === '') {
-      setTokenAmountInputText('');
-      return;
-    }
-
-    if (tokenPriceUsd !== undefined) {
-      // Update the USD amount
-      const tokenAmount = new BigNumber(amountText).dividedBy(tokenPriceUsd);
-
-      setTokenAmountInputText(tokenAmount.toString());
-    }
+  const amountInputTextChange = (amountText: string) => {
+    setAmountInputText(amountText);
   };
 
   const onReviewButtonPress = () => {
-    const formattedAmount = formatBalance({
-      balance: parseUnits(tokenAmountInputText, token.decimals),
-      token,
-      tokenPriceUsd: Number(tokenPriceUsd),
+    setIsReadyToConfirm(true);
+  };
+
+  const onConfirmButtonPress = async () => {
+    if (!aggregatedSend) {
+      throw new Error('aggregatedSend is undefined');
+    }
+
+    await sendAggregateTx({
+      aggregatedSend,
+      chainId,
     });
 
-    navigation.navigate('ConfirmSend', {
-      toAddress,
-      fromAddresses,
-      amount: formattedAmount,
-      token,
-      chainId,
+    navigation.navigate('Tabs', {
+      screen: 'History',
     });
   };
 
@@ -279,98 +284,143 @@ const SelectAmount = ({ route }: Props) => {
         BigInt(tokenBalance.balance),
         token.decimals
       );
-      setTokenAmountInputText(amountText);
-
-      if (tokenPriceUsd !== undefined) {
-        // Update the USD amount
-        const usdAmount = new BigNumber(amountText)
-          .multipliedBy(tokenPriceUsd)
-          .toFixed(2);
-
-        setUsdAmountInputText(usdAmount);
-      }
+      setAmountInputText(amountText);
     }
   };
 
+  let subAmount: string | undefined;
+
+  if (tokenPriceUsd !== undefined) {
+    if (amountInputText !== '') {
+      if (inputMode === 'token') {
+        subAmount = new BigNumber(amountInputText)
+          .multipliedBy(tokenPriceUsd)
+          .toFixed(2);
+      } else {
+        const tokenAmountRaw = new BigNumber(amountInputText).dividedBy(
+          tokenPriceUsd
+        );
+        subAmount = formatAmount(
+          parseUnits(tokenAmountRaw.toString(), token.decimals).toString(),
+          token.decimals
+        );
+      }
+    }
+  }
+
   return (
-    <View style={{ flex: 1 }}>
-      <View style={{ flex: 1, padding: 16, rowGap: 20 }}>
-        <SendToCard toAddress={toAddress} alignCenter />
+    <ScrollView contentContainerStyle={{ flex: 1, padding: 16, rowGap: 20 }}>
+      <SendToCard toAddress={toAddress} />
+      <View
+        style={{
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          rowGap: 8,
+          borderWidth: 1,
+          borderColor: colors.border,
+          borderRadius: 32,
+          padding: 16,
+        }}
+      >
         <View
           style={{
             flexDirection: 'row',
-            paddingVertical: 24,
-            justifyContent: 'center',
+            alignItems: 'center',
+            columnGap: 8,
           }}
         >
           <TokenLogoWithChain
             logoURI={token.logoURI}
             chainId={chainId}
-            size={64}
+            size={42}
           />
+          <TextInput
+            keyboardType="numeric"
+            value={amountInputText}
+            autoFocus
+            onChangeText={amountInputTextChange}
+            placeholder={'0.00'}
+            style={{
+              fontSize: fontSizes.twoXLarge,
+              flexShrink: 1,
+              width: '100%',
+              height: 56,
+            }}
+            numberOfLines={1}
+          />
+          <StyledText
+            style={{ fontSize: fontSizes.twoXLarge, color: colors.border }}
+          >
+            {inputMode === 'token' ? token.symbol : 'USD'}
+          </StyledText>
         </View>
-        <AmountInput
-          amount={tokenAmountInputText}
-          setAmount={handleTokenAmountInputTextChange}
-          postfix={token.symbol}
-        />
-        <View
-          style={{
-            flexDirection: 'column',
-            alignItems: 'flex-end',
-            rowGap: 8,
+        <View>
+          {subAmount &&
+            (inputMode === 'usd' ? (
+              <StyledText
+                style={{
+                  color: colors.subbedText,
+                  fontWeight: 'bold',
+                }}
+              >
+                {`$${subAmount}`}
+              </StyledText>
+            ) : (
+              <StyledText
+                style={{
+                  color: colors.subbedText,
+                  fontWeight: 'bold',
+                }}
+              >
+                {`${subAmount} ${token.symbol}`}
+              </StyledText>
+            ))}
+        </View>
+        <FeedbackPressable
+          onPress={() => {
+            if (inputMode === 'token') {
+              setInputMode('usd');
+            } else {
+              setInputMode('token');
+            }
           }}
         >
-          <AmountInput
-            amount={usdAmountInputText}
-            setAmount={handleUsdAmountInputTextChange}
-            postfix={'USD'}
-          />
-          <Pressable
-            onPress={onMaxBalancePress}
-            style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
-          >
-            <StyledText
-              style={{ color: colors.border, fontWeight: 'bold' }}
-            >{`MAX`}</StyledText>
-            <StyledText style={{ color: colors.border }}>
-              {`Balance $${tokenBalance?.usdValueFormatted}`}
-            </StyledText>
-          </Pressable>
-        </View>
-        <View style={{ flexDirection: 'column', rowGap: 8 }}>
-          <View
-            style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
-          >
-            <StyledText style={{ color: colors.subbedText }}>
-              {`Send from `}
-            </StyledText>
-            <StyledText
-              style={{ color: colors.subbedText, fontWeight: 'bold' }}
-            >
-              {shortenAddress(fromAddresses[0])}
-            </StyledText>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              columnGap: 4,
-            }}
-          >
-            <GasInfo
-              gas={estimatedTransferGas}
-              isFetchingGasInfo={isFetchingGasInfo}
-            />
-          </View>
-        </View>
+          <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
+            {`Switch to ${inputMode === 'token' ? 'USD' : token.symbol}`}
+          </StyledText>
+        </FeedbackPressable>
+      </View>
+      {/** Details */}
+      <View
+        style={{
+          flexDirection: 'column',
+          rowGap: 12,
+          borderWidth: 1,
+          borderColor: colors.border,
+          borderRadius: 32,
+          padding: 16,
+        }}
+      >
+        <BalanceDetail
+          balance={tokenBalance ?? undefined}
+          onMaxPress={onMaxBalancePress}
+        />
+        <SendFromDetail address={fromAddresses[0]} />
+        <GasInfo
+          gas={estimatedTransferGas}
+          isFetchingGasInfo={isFetchingGasInfo}
+        />
+      </View>
+      {isReadyToConfirm ? (
+        <ConfirmButton onPress={onConfirmButtonPress} />
+      ) : (
         <ReviewButton
           onPress={onReviewButtonPress}
           isLoading={isBuildingAggregatedSend}
           isBalanceSufficient={isBalanceSufficient}
         />
-      </View>
-    </View>
+      )}
+    </ScrollView>
   );
 };
 

@@ -9,7 +9,6 @@ import { trpc } from '@/lib/trpc';
 import { RootStackParamsList } from '@/navigation/types';
 import {
   BuildAggregateSendRequestBody,
-  SendAggregateTxRequestBody,
   signEIP1159Tx,
   Token,
 } from '@raylac/shared';
@@ -198,18 +197,10 @@ const ConfirmSend = ({ route }: Props) => {
       signedTxs.push(singedTx);
     }
 
-    const sendAggregateTxRequestBody: SendAggregateTxRequestBody = {
-      signedTxs,
-      chainId: chainId,
-      transfer: {
-        token,
-        amount: amount,
-        from: fromAddresses[0],
-        to: toAddress,
-      },
-    };
-
-    await sendAggregateTx(sendAggregateTxRequestBody);
+    await sendAggregateTx({
+      aggregatedSend,
+      chainId,
+    });
 
     navigation.navigate('Tabs', { screen: 'History' });
   };
