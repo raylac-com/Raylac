@@ -11,9 +11,118 @@ import colors from '@/lib/styles/colors';
 import { RootStackParamsList } from '@/navigation/types';
 import { Balance, formatBalance, getTokenId, Token } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useState } from 'react';
-import { SectionList, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  Keyboard,
+  KeyboardEvent,
+  ScrollView,
+  SectionList,
+  TextInput,
+  View,
+} from 'react-native';
 import { Hex } from 'viem';
+import BigNumber from 'bignumber.js';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+const SearchBar = ({
+  onAddressSelect,
+  selectedAddress,
+  onSearchInputChange,
+}: {
+  onAddressSelect: (address: Hex) => void;
+  selectedAddress: Hex;
+  onSearchInputChange: (text: string) => void;
+}) => {
+  const { data: userAddresses } = useUserAddresses();
+
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  useEffect(() => {
+    const onKeyboardShow = (e: KeyboardEvent) => {
+      setKeyboardHeight(e.endCoordinates.height);
+    };
+
+    const onKeyboardHide = () => {
+      setKeyboardHeight(0);
+    };
+
+    const showSub = Keyboard.addListener('keyboardWillShow', onKeyboardShow);
+    const hideSub = Keyboard.addListener('keyboardWillHide', onKeyboardHide);
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  return (
+    <View
+      style={{
+        flexDirection: 'column',
+        position: 'absolute',
+        bottom: keyboardHeight + 32,
+        left: 0,
+        right: 0,
+        paddingHorizontal: 16,
+        rowGap: 8,
+        width: '100%',
+      }}
+    >
+      <ScrollView
+        horizontal
+        contentContainerStyle={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          columnGap: 8,
+        }}
+      >
+        {userAddresses?.map(address => (
+          <FeedbackPressable
+            onPress={() => onAddressSelect(address.address)}
+            style={{
+              paddingVertical: 8,
+              paddingHorizontal: 16,
+              borderColor:
+                selectedAddress === address.address
+                  ? colors.text
+                  : colors.border,
+              backgroundColor: colors.background,
+              borderWidth: selectedAddress === address.address ? 2 : 1,
+              borderRadius: 32,
+            }}
+            key={address.address}
+          >
+            <WalletIconAddress address={address.address} />
+          </FeedbackPressable>
+        ))}
+      </ScrollView>
+      <TextInput
+        placeholder="Search"
+        autoCorrect={false}
+        autoComplete="off"
+        onChangeText={onSearchInputChange}
+        style={{
+          width: '100%',
+          height: 56,
+          borderWidth: 1,
+          borderColor: colors.border,
+          borderRadius: 32,
+          paddingVertical: 12,
+          paddingHorizontal: 22,
+          backgroundColor: colors.background,
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+          elevation: 5,
+        }}
+      />
+    </View>
+  );
+};
 
 const TokenChainItem = ({
   chainId,
@@ -151,19 +260,22 @@ type AddressTokenBalances = {
   }[];
 };
 
-const useTokenBalancePerAddress = (): AddressTokenBalances[] | undefined => {
+const useTokenBalancePerAddress = ({
+  addresses,
+}: {
+  addresses: Hex[];
+}): AddressTokenBalances[] | undefined => {
   const { data: tokenBalances } = useTokenBalances();
-  const { data: userAddresses } = useUserAddresses();
 
   const tokenBalancesPerAddress: AddressTokenBalances[] = [];
 
-  if (tokenBalances && userAddresses) {
-    for (const address of userAddresses) {
+  if (tokenBalances && addresses) {
+    for (const address of addresses) {
       const addressTokenBalances = tokenBalances.filter(
-        balance => balance.address === address.address
+        balance => balance.address === address
       );
 
-      // Group by tokne
+      // Group by token
       const addressTokenIds = [
         ...new Set(
           addressTokenBalances.map(balance => getTokenId(balance.token))
@@ -198,22 +310,59 @@ const useTokenBalancePerAddress = (): AddressTokenBalances[] | undefined => {
         });
       }
 
+      const sortedGroupByTokens = groupByTokens.sort((a, b) => {
+        if (a.token.addresses.length > b.token.addresses.length) {
+          return -1;
+        }
+
+        if (a.token.addresses.length < b.token.addresses.length) {
+          return 1;
+        }
+
+        if (
+          new BigNumber(a.totalBalance.usdValue).gt(b.totalBalance.usdValue)
+        ) {
+          return -1;
+        } else {
+          return 1;
+        }
+      });
+
       tokenBalancesPerAddress.push({
-        address: address.address,
-        tokenBalances: groupByTokens,
+        address,
+        tokenBalances: sortedGroupByTokens,
       });
     }
   }
 
-  return tokenBalancesPerAddress;
+  const sortedTokenBalancesPerAddress = tokenBalancesPerAddress.sort((a, b) => {
+    return b.tokenBalances.length - a.tokenBalances.length;
+  });
+
+  return sortedTokenBalancesPerAddress;
 };
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'SelectToken'>;
 
 const SelectToken = ({ navigation, route }: Props) => {
+  const insets = useSafeAreaInsets();
   const toAddress = route.params.toAddress;
+  const { data: userAddresses } = useUserAddresses();
 
-  const tokenBalancesPerAddress = useTokenBalancePerAddress();
+  const [selectedAddresses, setSelectedAddresses] = useState<Hex[]>([]);
+  const [searchText, setSearchText] = useState('');
+
+  const tokenBalancesPerAddress = useTokenBalancePerAddress({
+    addresses: selectedAddresses,
+  });
+
+  useEffect(() => {
+    if (selectedAddresses.length === 0) {
+      setSelectedAddresses(
+        userAddresses?.map(address => address.address) ?? []
+      );
+    }
+  }, [userAddresses]);
 
   const onTokenSelect = ({
     token,
@@ -232,14 +381,39 @@ const SelectToken = ({ navigation, route }: Props) => {
     });
   };
 
+  const onAddressSelect = (address: Hex) => {
+    setSelectedAddresses([address]);
+  };
+
+  const onSearchInputChange = (text: string) => {
+    setSearchText(text);
+  };
+
+  const filteredTokenBalancesPerAddress = useMemo(() => {
+    return tokenBalancesPerAddress?.map(a => ({
+      ...a,
+      tokenBalances: a.tokenBalances.filter(
+        b =>
+          b.token.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          b.token.symbol.toLowerCase().includes(searchText.toLowerCase())
+      ),
+    }));
+  }, [tokenBalancesPerAddress, searchText]);
+
   return (
-    <View style={{ flex: 1 }}>
+    <View
+      style={{
+        flex: 1,
+        position: 'relative',
+        paddingBottom: insets.bottom,
+      }}
+    >
       <View style={{ padding: 16 }}>
         <SendToCard toAddress={toAddress} />
       </View>
       <SectionList
+        style={{ flex: 1, padding: 16 }}
         contentContainerStyle={{
-          padding: 16,
           rowGap: 8,
         }}
         scrollEnabled
@@ -255,14 +429,16 @@ const SelectToken = ({ navigation, route }: Props) => {
           </View>
         }
         sections={
-          tokenBalancesPerAddress?.map(a => ({
+          filteredTokenBalancesPerAddress?.map(a => ({
             title: a.address,
             data: a.tokenBalances,
           })) ?? []
         }
-        keyExtractor={(item, index) => `${item.token.symbol}-${index}`}
+        keyExtractor={(item, index) => `${item.token.addresses[0]}-${index}`}
         renderSectionHeader={({ section }) => (
-          <WalletIconAddress address={section.title} />
+          <View style={{ height: 32 }}>
+            <WalletIconAddress address={section.title} />
+          </View>
         )}
         renderItem={({ item: tokenBalance, section }) => {
           return (
@@ -277,6 +453,11 @@ const SelectToken = ({ navigation, route }: Props) => {
           );
         }}
         stickySectionHeadersEnabled={false}
+      />
+      <SearchBar
+        selectedAddress={selectedAddresses[0]}
+        onAddressSelect={onAddressSelect}
+        onSearchInputChange={onSearchInputChange}
       />
     </View>
   );

@@ -1,16 +1,35 @@
-import Feather from '@expo/vector-icons/Feather';
 import { View } from 'react-native';
 import StyledText from '../StyledText/StyledText';
 import { Hex } from 'viem';
-import WalletIconAddress from '../WalletIconAddress/WalletIconAddress';
 import colors from '@/lib/styles/colors';
+import { shortenAddress } from '@/lib/utils';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
-const SendToCard = ({ toAddress }: { toAddress: Hex }) => {
+const SendToCard = ({
+  toAddress,
+  alignCenter,
+}: {
+  toAddress: Hex;
+  alignCenter?: boolean;
+}) => {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}>
-      <Feather name="send" size={20} color={'#FF4959'} />
-      <StyledText style={{ color: colors.border }}>{`Send to`}</StyledText>
-      <WalletIconAddress address={toAddress} />
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        columnGap: 8,
+        justifyContent: alignCenter ? 'center' : 'flex-start',
+      }}
+    >
+      <FontAwesome name="send" size={18} color={colors.border} />
+      <View
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+      >
+        <StyledText style={{ color: colors.border }}>{`Send to `}</StyledText>
+        <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
+          {shortenAddress(toAddress)}
+        </StyledText>
+      </View>
     </View>
   );
 };

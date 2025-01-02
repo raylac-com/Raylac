@@ -22,6 +22,7 @@ import useChainTokenBalance from '@/hooks/useChainTokenBalance';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 import Skeleton from '@/components/Skeleton/Skeleton';
+import SendToCard from '@/components/SendToCard/SendToCard';
 
 const ReviewButton = ({
   onPress,
@@ -294,6 +295,7 @@ const SelectAmount = ({ route }: Props) => {
   return (
     <View style={{ flex: 1 }}>
       <View style={{ flex: 1, padding: 16, rowGap: 20 }}>
+        <SendToCard toAddress={toAddress} alignCenter />
         <View
           style={{
             flexDirection: 'row',
