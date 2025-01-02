@@ -528,3 +528,12 @@ export interface Balance {
   usdValueFormatted: string;
   tokenPriceUsd: number;
 }
+
+export interface PendingTx {
+  chainId: number;
+  txHash: Hex;
+  from: Hex;
+  to: Hex;
+  amount: Balance;
+  token: Token;
+}

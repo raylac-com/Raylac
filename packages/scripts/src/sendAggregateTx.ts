@@ -10,16 +10,12 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { client } from './rpc';
 import {
   BuildAggregateSendRequestBody,
-  BuildMultiChainSendRequestBody,
-  ETH,
+  HistoryItemType,
   SendAggregateTxRequestBody,
-  SignedBridgeStep,
-  SignedTransferStep,
   signEIP1159Tx,
-  supportedChains,
   USDC,
 } from '@raylac/shared';
-import { arbitrum, polygon, base, optimism, zora, zksync } from 'viem/chains';
+import { base, optimism } from 'viem/chains';
 
 const sendAggregateTx = async () => {
   const account = privateKeyToAccount(
@@ -28,7 +24,7 @@ const sendAggregateTx = async () => {
 
   const transferAmount = parseUnits('0.1', USDC.decimals).toString();
 
-  const chainId = base.id;
+  const chainId = optimism.id;
 
   const requestBody: BuildAggregateSendRequestBody = {
     token: USDC,
@@ -56,13 +52,19 @@ const sendAggregateTx = async () => {
   const sendAggregateTxRequestBody: SendAggregateTxRequestBody = {
     signedTxs: signedStepItems,
     chainId,
+    transfer: aggregateSend.transfer,
   };
 
   const response = await client.sendAggregateTx.mutate(
     sendAggregateTxRequestBody
   );
 
-  console.log(response);
+  const history = await client.getHistory.query({
+    addresses: [account.address],
+  });
+
+  const pendingTxs = history.filter(tx => tx.type === HistoryItemType.PENDING);
+  console.log(pendingTxs);
 };
 
 sendAggregateTx();

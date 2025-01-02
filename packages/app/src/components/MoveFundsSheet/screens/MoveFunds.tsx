@@ -11,6 +11,7 @@ import {
   getAddressChainTokenBalance,
   BuildBridgeSendRequestBody,
   getTokenId,
+  formatBalance,
 } from '@raylac/shared';
 import { useEffect, useState } from 'react';
 import { Image, Pressable, TextInput, View } from 'react-native';
@@ -28,6 +29,7 @@ import { useMoveFundsContext } from '@/contexts/MoveFundsContext';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import { getPrivateKey } from '@/lib/key';
 import { privateKeyToAccount } from 'viem/accounts';
+import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 
 const AddressSelector = ({
   address,
@@ -309,6 +311,8 @@ const MoveFunds = () => {
   const { mutateAsync: sendAggregateTx, isPending: isSendingAggregateTx } =
     trpc.sendAggregateTx.useMutation();
 
+  const { data: tokenPriceUsd } = useTokenPriceUsd(token);
+
   useEffect(() => {
     if (tokenBalances && fromAddress && token) {
       const addressTokenBalances = tokenBalances.filter(
@@ -372,8 +376,20 @@ const MoveFunds = () => {
       throw new Error('From address not set');
     }
 
+    if (!toAddress) {
+      throw new Error('To address not set');
+    }
+
     if (!fromChainId) {
       throw new Error('From chain ID not set');
+    }
+
+    if (!token) {
+      throw new Error('Token not set');
+    }
+
+    if (tokenPriceUsd === undefined || tokenPriceUsd === 'notfound') {
+      throw new Error('Token price not found');
     }
 
     const privateKey = await getPrivateKey(fromAddress);
@@ -393,10 +409,23 @@ const MoveFunds = () => {
 
       signedTxs.push(singedTx);
     }
+    const parsedAmount = parseUnits(amountInputText, token.decimals);
+
+    const formattedAmount = formatBalance({
+      balance: parsedAmount,
+      token: token,
+      tokenPriceUsd: tokenPriceUsd,
+    });
 
     const sendAggregateTxRequestBody: SendAggregateTxRequestBody = {
       signedTxs,
       chainId: fromChainId,
+      transfer: {
+        token,
+        amount: formattedAmount,
+        from: fromAddress,
+        to: toAddress,
+      },
     };
 
     await sendAggregateTx(sendAggregateTxRequestBody);

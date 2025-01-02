@@ -200,6 +200,12 @@ const ConfirmSend = ({ route }: Props) => {
     const sendAggregateTxRequestBody: SendAggregateTxRequestBody = {
       signedTxs,
       chainId: chainId,
+      transfer: {
+        token,
+        amount: amount,
+        from: fromAddresses[0],
+        to: toAddress,
+      },
     };
 
     await sendAggregateTx(sendAggregateTxRequestBody);

@@ -35,7 +35,7 @@ const SendHistoryListItem = (props: {
           }}
         >
           <StyledText style={{ fontWeight: 'bold' }}>
-            {`$${props.transfer.amountUsd}`}
+            {`$${props.transfer.amount.usdValueFormatted}`}
           </StyledText>
           <StyledText>{shortenAddress(props.transfer.to)}</StyledText>
         </View>

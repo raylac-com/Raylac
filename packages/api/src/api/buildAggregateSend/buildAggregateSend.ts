@@ -5,6 +5,7 @@ import {
   BuildAggregateSendReturnType,
   Token,
   getGasInfo,
+  formatBalance,
 } from '@raylac/shared';
 import { getTokenAddressOnChain } from '../../utils';
 import { getNonce } from '../../lib/utils';
@@ -161,8 +162,20 @@ const buildAggregateSend = async (
           tokenPriceUsd: tokenPriceUsd.toString(),
         });
 
+  const formattedAmount = formatBalance({
+    balance: BigInt(requestBody.amount),
+    token: requestBody.token,
+    tokenPriceUsd: tokenPriceUsd,
+  });
+
   return {
     inputs: [tx],
+    transfer: {
+      from: fromAddress,
+      to: requestBody.toAddress,
+      amount: formattedAmount,
+      token: requestBody.token,
+    },
   };
 };
 

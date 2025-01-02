@@ -1,16 +1,17 @@
 import {
+  formatBalance,
   GetHistoryRequestBody,
   GetHistoryReturnType,
   HistoryItemType,
   supportedChains,
 } from '@raylac/shared';
-import { getAddress, Hex, zeroAddress } from 'viem';
+import { getAddress, Hex, parseUnits, zeroAddress } from 'viem';
 import { getAlchemyClient } from '../../lib/alchemy';
 import { AssetTransfersCategory, SortingOrder } from 'alchemy-sdk';
-import BigNumber from 'bignumber.js';
 import { logger } from '@raylac/shared-backend';
 import { getToken } from '../../lib/token';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
+import { deletePendingTx, getPendingTxsFromRedis } from '../../lib/transaction';
 
 const getHistoryOnChain = async ({
   addresses,
@@ -71,10 +72,6 @@ const getHistoryOnChain = async ({
               return null;
             }
 
-            const amountUsd = new BigNumber(transfer.value || 0)
-              .multipliedBy(new BigNumber(usdPrice))
-              .toFixed(2);
-
             const fromAddress = getAddress(transfer.from as Hex);
             const toAddress = getAddress(transfer.to! as Hex);
 
@@ -91,15 +88,24 @@ const getHistoryOnChain = async ({
               type = HistoryItemType.INCOMING;
             }
 
+            const formattedAmount = formatBalance({
+              balance: parseUnits(
+                transfer.value?.toString() || '0',
+                token.decimals
+              ),
+              token,
+              tokenPriceUsd: usdPrice,
+            });
+
             const transferItem: GetHistoryReturnType[number] = {
               from: fromAddress,
               to: toAddress,
-              amount: transfer.value?.toString() || '0',
+              amount: formattedAmount,
               token,
-              amountUsd,
               chainId: chainId,
               timestamp: transfer.metadata.blockTimestamp,
               type,
+              txHash: transfer.hash as Hex,
             };
 
             return transferItem;
@@ -125,12 +131,58 @@ const getHistory = async ({
     )
   ).flat();
 
+  const confirmedTxHashes = transfers.map(tx => tx.txHash);
+
+  // Get pending transactions
+  const pendingTxs = await Promise.all(
+    addresses.map(async address => {
+      const pendingTxsInRedis = await getPendingTxsFromRedis(address);
+
+      // Array to store pending transactions filtered from redis
+      const pendingTxs = [];
+
+      // Array to store confirmed transactions filtered from redis
+      const confirmedTxs = [];
+
+      for (const tx of pendingTxsInRedis) {
+        // Check if the transaction is confirmed
+        const isConfirmed = confirmedTxHashes.includes(tx.txHash);
+
+        if (!isConfirmed) {
+          pendingTxs.push(tx);
+        } else {
+          confirmedTxs.push(tx);
+        }
+      }
+
+      // Delete confirmed transactions from redis
+      await deletePendingTx(confirmedTxs);
+
+      return pendingTxs;
+    })
+  );
+
+  const pending = pendingTxs.flat();
+
+  const pendingTransfers = pending.map(tx => ({
+    from: tx.from,
+    to: tx.to,
+    amount: tx.amount,
+    token: tx.token,
+    chainId: tx.chainId,
+    timestamp: new Date().toISOString(),
+    type: HistoryItemType.PENDING,
+    txHash: tx.txHash,
+  }));
+
+  const allTransfers = [...transfers, ...pendingTransfers];
+
   // Sort by timestamp in descending order
-  transfers.sort(
+  allTransfers.sort(
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
 
-  return transfers;
+  return allTransfers;
 };
 
 export default getHistory;

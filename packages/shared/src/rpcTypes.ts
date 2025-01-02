@@ -84,11 +84,23 @@ export interface BuildAggregateSendReturnType {
       gas: number;
     };
   }[];
+  transfer: {
+    from: Hex;
+    to: Hex;
+    amount: Balance;
+    token: Token;
+  };
 }
 
 export interface SendAggregateTxRequestBody {
   signedTxs: Hex[];
   chainId: number;
+  transfer: {
+    from: Hex;
+    to: Hex;
+    amount: Balance;
+    token: Token;
+  };
 }
 
 export interface GetSwapQuoteRequestBody {
@@ -231,17 +243,18 @@ export enum HistoryItemType {
   OUTGOING = 'outgoing',
   INCOMING = 'incoming',
   MOVE_FUNDS = 'move_funds',
+  PENDING = 'pending',
 }
 
 export type GetHistoryReturnType = {
   from: Hex;
   to: Hex;
-  amount: string;
   token: Token;
-  amountUsd: string;
   chainId: number;
+  amount: Balance;
   timestamp: string;
   type: HistoryItemType;
+  txHash: Hex;
 }[];
 
 export interface GetEstimatedTransferGasRequestBody {

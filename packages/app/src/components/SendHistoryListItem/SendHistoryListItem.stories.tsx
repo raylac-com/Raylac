@@ -13,6 +13,7 @@ const meta = {
   component: SendHistoryListItem,
   args: {
     transfer: {
+      txHash: '0x123',
       chainId: base.id,
       type: HistoryItemType.OUTGOING,
       token: {
@@ -47,8 +48,13 @@ const meta = {
       },
       from: '0x28341dF2CCabe2Cc4A3c6e7ef2fe9E706680C196',
       to: '0x28341dF2CCabe2Cc4A3c6e7ef2fe9E706680C196',
-      amount: '1000000',
-      amountUsd: '0.9999452727',
+      amount: {
+        balance: '1000000',
+        formatted: '1000000',
+        usdValue: '0.9999452727',
+        usdValueFormatted: '0.9999452727',
+        tokenPriceUsd: 0.0000009999452727,
+      },
       timestamp: Date.now().toString(),
     },
   },
