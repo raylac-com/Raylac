@@ -11,11 +11,12 @@ import fontSizes from '@/lib/styles/fontSizes';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import colors from '@/lib/styles/colors';
 import { shortenAddress } from '@/lib/utils';
-import { Linking } from 'react-native';
+import { Linking, Pressable, View } from 'react-native';
 import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
+import { Hex } from 'viem';
 
 const LABELS: Record<HistoryItemType, string> = {
-  [HistoryItemType.OUTGOING]: 'Sent',
+  [HistoryItemType.OUTGOING]: 'Send',
   [HistoryItemType.INCOMING]: 'Received',
   [HistoryItemType.MOVE_FUNDS]: 'Move Funds',
   [HistoryItemType.PENDING]: 'Pending',
@@ -28,6 +29,76 @@ export interface HistoryListItemSheetProps {
 
 const shortenTxHash = (txHash: string) => {
   return `${txHash.slice(0, 6)}...${txHash.slice(-4)}`;
+};
+
+const FromAddress = ({ address }: { address: Hex }) => {
+  return (
+    <Pressable
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
+      <StyledText style={{ color: colors.subbedText }}>{`From`} </StyledText>
+      <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
+        {shortenAddress(address)}
+      </StyledText>
+    </Pressable>
+  );
+};
+
+const ToAddress = ({ address }: { address: Hex }) => {
+  return (
+    <Pressable
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
+      <StyledText style={{ color: colors.subbedText }}>{`To`} </StyledText>
+      <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
+        {shortenAddress(address)}
+      </StyledText>
+    </Pressable>
+  );
+};
+
+const TxHash = ({ txHash, chainId }: { txHash: string; chainId: number }) => {
+  return (
+    <FeedbackPressable
+      style={{ flexDirection: 'row', justifyContent: 'space-between' }}
+      onPress={() => {
+        Linking.openURL(`${getExplorerUrl(chainId)}/tx/${txHash}`);
+      }}
+    >
+      <StyledText style={{ color: colors.subbedText }}>
+        {`Transaction`}{' '}
+      </StyledText>
+      <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
+        {`${shortenTxHash(txHash)}`}
+      </StyledText>
+    </FeedbackPressable>
+  );
+};
+
+const DateTime = ({ date }: { date: Date }) => {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
+      <StyledText style={{ color: colors.subbedText }}>{`Time`} </StyledText>
+      <StyledText style={{ color: colors.subbedText }}>
+        {new Date(date).toLocaleDateString()}{' '}
+        {new Date(date).toLocaleTimeString()}
+      </StyledText>
+    </View>
+  );
 };
 
 const HistoryListItemSheet = ({
@@ -48,17 +119,19 @@ const HistoryListItemSheet = ({
       ref={ref}
       style={{
         flex: 1,
+        paddingTop: insets.top,
         paddingBottom: insets.bottom + 32,
       }}
       onDismiss={onClose}
       enablePanDownToClose
+      enableDynamicSizing={false}
       snapPoints={['100%']}
     >
       <BottomSheetView
         style={{
           flex: 1,
+          width: '100%',
           flexDirection: 'column',
-          alignItems: 'flex-start',
           rowGap: 24,
           paddingVertical: 32,
           paddingHorizontal: 16,
@@ -67,45 +140,39 @@ const HistoryListItemSheet = ({
         <StyledText
           style={{ fontWeight: 'bold', fontSize: fontSizes.large }}
         >{`${label} details`}</StyledText>
-        <TokenLogoWithChain
-          logoURI={transfer.token.logoURI}
-          chainId={transfer.chainId}
-          size={32}
-        />
-        <StyledText
-          style={{ fontSize: fontSizes.twoXLarge, fontWeight: 'bold' }}
-        >
-          {`$${transfer.amount.usdValueFormatted}`}
-        </StyledText>
-        <StyledText
+        <View
           style={{
-            color: colors.subbedText,
-            fontWeight: 'bold',
+            flexDirection: 'row',
+            alignItems: 'center',
+            columnGap: 16,
           }}
         >
-          {`${transfer.amount.formatted} ${transfer.token.symbol}`}
-        </StyledText>
-        <StyledText style={{ color: colors.subbedText }}>
-          {`From ${shortenAddress(transfer.from)} `}
-        </StyledText>
-        <StyledText style={{ color: colors.subbedText }}>
-          {`To ${shortenAddress(transfer.to)} `}
-        </StyledText>
-        <FeedbackPressable
-          style={{ flexDirection: 'row', alignItems: 'center' }}
-          onPress={() => {
-            Linking.openURL(
-              `${getExplorerUrl(transfer.chainId)}/tx/${transfer.txHash}`
-            );
-          }}
-        >
-          <StyledText style={{ color: colors.subbedText }}>
-            {`${shortenTxHash(transfer.txHash)}`}
+          <TokenLogoWithChain
+            logoURI={transfer.token.logoURI}
+            chainId={transfer.chainId}
+            size={64}
+          />
+          <StyledText
+            style={{ fontSize: fontSizes.xLarge, fontWeight: 'bold' }}
+          >
+            {`$${transfer.amount.usdValueFormatted}`}
           </StyledText>
-        </FeedbackPressable>
-        <StyledText style={{ color: colors.subbedText }}>
-          {`${new Date(transfer.timestamp).toLocaleDateString()}`}
-        </StyledText>
+        </View>
+        <View
+          style={{
+            flexDirection: 'column',
+            rowGap: 16,
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 16,
+            padding: 16,
+          }}
+        >
+          <FromAddress address={transfer.from} />
+          <ToAddress address={transfer.to} />
+          <TxHash txHash={transfer.txHash} chainId={transfer.chainId} />
+          <DateTime date={new Date(transfer.timestamp)} />
+        </View>
       </BottomSheetView>
     </BottomSheetModal>
   );
