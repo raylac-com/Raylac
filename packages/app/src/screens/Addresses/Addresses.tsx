@@ -1,14 +1,14 @@
 import Feather from '@expo/vector-icons/Feather';
 import StyledText from '@/components/StyledText/StyledText';
 import useUserAddresses from '@/hooks/useUserAddresses';
-import { Alert, FlatList, View } from 'react-native';
+import { Alert, FlatList, Pressable, View } from 'react-native';
 import { Hex } from 'viem';
 import colors from '@/lib/styles/colors';
 import { copyToClipboard, shortenAddress } from '@/lib/utils';
 import Toast from 'react-native-toast-message';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import useDeleteAddress from '@/hooks/useDeleteAddress';
 
@@ -58,17 +58,17 @@ const AddressListItem = ({ address }: { address: Hex }) => {
         flexDirection: 'row',
         justifyContent: 'space-between',
         paddingRight: 16,
+        borderWidth: 1,
+        borderColor: colors.border,
+        borderRadius: 16,
+        padding: 16,
       }}
     >
-      <View
+      <Pressable
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
+        onPress={onCopyPress}
       >
-        <Feather
-          name="copy"
-          size={20}
-          color={colors.border}
-          onPress={onCopyPress}
-        />
+        <Feather name="copy" size={20} color={colors.border} />
         <StyledText
           style={{
             fontWeight: 'bold',
@@ -76,7 +76,7 @@ const AddressListItem = ({ address }: { address: Hex }) => {
         >
           {shortenAddress(address)}
         </StyledText>
-      </View>
+      </Pressable>
       <FontAwesome
         name="remove"
         size={20}
@@ -90,20 +90,27 @@ const AddressListItem = ({ address }: { address: Hex }) => {
 const Addresses = () => {
   const { data: addresses } = useUserAddresses();
   const navigation = useTypedNavigation();
+  const insets = useSafeAreaInsets();
 
   const onAddAddressPress = () => {
     navigation.navigate('AddAddress');
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, paddingHorizontal: 16 }}>
+    <View
+      style={{
+        flex: 1,
+        padding: 16,
+        paddingBottom: insets.bottom,
+      }}
+    >
       <FlatList
         data={addresses}
         renderItem={({ item }) => <AddressListItem address={item.address} />}
-        contentContainerStyle={{ rowGap: 10 }}
+        contentContainerStyle={{ rowGap: 16 }}
       />
       <StyledButton title="Add address" onPress={onAddAddressPress} />
-    </SafeAreaView>
+    </View>
   );
 };
 
