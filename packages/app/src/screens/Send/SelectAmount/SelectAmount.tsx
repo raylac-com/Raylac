@@ -25,22 +25,32 @@ import SendToCard from '@/components/SendToCard/SendToCard';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import useSend from '@/hooks/useSend';
 
-const ConfirmButton = ({ onPress }: { onPress: () => void }) => {
-  return <StyledButton title="Confirm" onPress={onPress} />;
+const ConfirmButton = ({
+  onPress,
+  isLoading,
+}: {
+  onPress: () => void;
+  isLoading: boolean;
+}) => {
+  return (
+    <StyledButton title="Confirm" onLongPress={onPress} isLoading={isLoading} />
+  );
 };
 
 const ReviewButton = ({
   onPress,
   isLoading,
   isBalanceSufficient,
+  isReadyForReview,
 }: {
   onPress: () => void;
   isLoading: boolean;
   isBalanceSufficient: boolean;
+  isReadyForReview: boolean;
 }) => {
   return (
     <StyledButton
-      disabled={!isBalanceSufficient}
+      disabled={!isBalanceSufficient || !isReadyForReview}
       isLoading={isLoading}
       title={isBalanceSufficient ? 'Review' : 'Insufficient balance'}
       onPress={onPress}
@@ -187,7 +197,7 @@ const SelectAmount = ({ route }: Props) => {
   /// Mutations
   ///
 
-  const { mutateAsync: sendAggregateTx } = useSend();
+  const { mutateAsync: sendAggregateTx, isPending: isSending } = useSend();
 
   ///
   /// Effects
@@ -308,6 +318,8 @@ const SelectAmount = ({ route }: Props) => {
     }
   }
 
+  const isReadyForReview = isBalanceSufficient && aggregatedSend !== undefined;
+
   return (
     <ScrollView contentContainerStyle={{ flex: 1, padding: 16, rowGap: 20 }}>
       <SendToCard toAddress={toAddress} />
@@ -412,12 +424,13 @@ const SelectAmount = ({ route }: Props) => {
         />
       </View>
       {isReadyToConfirm ? (
-        <ConfirmButton onPress={onConfirmButtonPress} />
+        <ConfirmButton onPress={onConfirmButtonPress} isLoading={isSending} />
       ) : (
         <ReviewButton
           onPress={onReviewButtonPress}
           isLoading={isBuildingAggregatedSend}
           isBalanceSufficient={isBalanceSufficient}
+          isReadyForReview={isReadyForReview}
         />
       )}
     </ScrollView>
