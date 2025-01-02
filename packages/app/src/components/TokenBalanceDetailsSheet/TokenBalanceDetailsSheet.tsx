@@ -7,24 +7,23 @@ import {
 } from '@raylac/shared';
 import StyledText from '../StyledText/StyledText';
 import { View } from 'react-native';
-import { Image } from 'expo-image';
 import TokenLogo from '../FastImage/TokenLogo';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
-import { getChainIcon } from '@/lib/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useTokenBalances from '@/hooks/useTokenBalances';
 import { Balance } from '@raylac/shared/src/types';
 import { Hex } from 'viem';
 import WalletIconAddress from '../WalletIconAddress/WalletIconAddress';
+import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 
 const ChainTokenBalance = ({
   chainId,
-  symbol,
+  token,
   balance,
 }: {
   chainId: number;
-  symbol: string;
+  token: Token;
   balance: Balance;
 }) => {
   return (
@@ -38,22 +37,25 @@ const ChainTokenBalance = ({
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
       >
-        <Image
-          source={getChainIcon(chainId)}
-          style={{
-            width: 24,
-            height: 24,
-          }}
-        ></Image>
+        <TokenLogoWithChain
+          chainId={chainId}
+          logoURI={token.logoURI}
+          size={24}
+        />
         <StyledText
           style={{
+            fontWeight: 'bold',
             color: colors.subbedText,
           }}
-        >
-          {balance.formatted} {symbol}
-        </StyledText>
+        >{`$${balance.usdValueFormatted}`}</StyledText>
       </View>
-      <StyledText>{`$${balance.usdValueFormatted}`}</StyledText>
+      <StyledText
+        style={{
+          color: colors.subbedText,
+        }}
+      >
+        {balance.formatted} {token.symbol}
+      </StyledText>
     </View>
   );
 };
@@ -68,16 +70,27 @@ const AddressTokenBalance = ({
   balance: PerAddressTokenBalance['perAddressBreakdown'][number];
 }) => {
   return (
-    <View>
+    <View style={{ flexDirection: 'column', rowGap: 8 }}>
       <WalletIconAddress address={address} />
-      {balance.chainBalances.map((chainTokenBalance, i) => (
-        <ChainTokenBalance
-          key={i}
-          chainId={chainTokenBalance.chainId}
-          symbol={token.symbol}
-          balance={chainTokenBalance.balance}
-        />
-      ))}
+      <View
+        style={{
+          flexDirection: 'column',
+          rowGap: 16,
+          borderWidth: 1,
+          borderColor: colors.border,
+          borderRadius: 16,
+          padding: 16,
+        }}
+      >
+        {balance.chainBalances.map((chainTokenBalance, i) => (
+          <ChainTokenBalance
+            key={i}
+            chainId={chainTokenBalance.chainId}
+            token={token}
+            balance={chainTokenBalance.balance}
+          />
+        ))}
+      </View>
     </View>
   );
 };
@@ -120,9 +133,7 @@ const TokenBalanceDetailsSheet = ({
           flex: 1,
           flexDirection: 'column',
           alignItems: 'center',
-          rowGap: 60,
-          paddingTop: 32,
-          paddingHorizontal: 42,
+          paddingHorizontal: 16,
           paddingBottom: 32,
         }}
       >
@@ -130,36 +141,41 @@ const TokenBalanceDetailsSheet = ({
           style={{
             width: '100%',
             flexDirection: 'column',
-            alignItems: 'center',
             borderRadius: 32,
             paddingVertical: 26,
-            borderWidth: 1,
-            borderColor: colors.border,
             rowGap: 24,
           }}
         >
           <View
-            style={{ flexDirection: 'column', alignItems: 'center', rowGap: 6 }}
+            style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
           >
             <TokenLogo
               source={{ uri: token.logoURI }}
               style={{
-                width: 90,
-                height: 90,
+                width: 24,
+                height: 24,
               }}
             />
-            <StyledText style={{ fontSize: fontSizes.large }}>
-              {token.name}
-            </StyledText>
+            <StyledText>{token.name}</StyledText>
           </View>
-          <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-            <StyledText>{perAddressBalances.totalBalance.formatted}</StyledText>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+            }}
+          >
+            <StyledText
+              style={{ fontSize: fontSizes.xLarge, fontWeight: 'bold' }}
+            >
+              {`$${perAddressBalances.totalBalance.usdValueFormatted}`}
+            </StyledText>
             <StyledText style={{ color: colors.subbedText }}>
-              {perAddressBalances.totalBalance.usdValueFormatted}
+              {perAddressBalances.totalBalance.formatted} {token.symbol}
             </StyledText>
           </View>
         </View>
-        <View style={{ flexDirection: 'column', rowGap: 12 }}>
+        <View style={{ flexDirection: 'column', rowGap: 48 }}>
           {perAddressBalances.perAddressBreakdown.map(
             (addressTokenBalance, i) => (
               <AddressTokenBalance
