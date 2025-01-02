@@ -703,3 +703,18 @@ export const getTokenId = (token: Token) => {
   const id = token.addresses[0].address;
   return id;
 };
+
+export const getExplorerUrl = (chainId: number) => {
+  switch (chainId) {
+    case chains.mainnet.id:
+      return 'https://etherscan.io';
+    case chains.base.id:
+      return 'https://basescan.org';
+    case chains.optimism.id:
+      return 'https://optimistic.etherscan.io';
+    case chains.arbitrum.id:
+      return 'https://arbiscan.io';
+    default:
+      return '';
+  }
+};
