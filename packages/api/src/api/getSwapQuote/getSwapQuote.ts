@@ -17,7 +17,7 @@ import axios from 'axios';
 import { getETHBalance } from '../getTokenBalances/getTokenBalances';
 import { TRPCError } from '@trpc/server';
 import { getTokenAddressOnChain } from '../../utils';
-import { getNonce } from '../../lib/utils';
+import { getNonce } from '../../utils';
 
 /**
  * Builds the swap inputs and outputs

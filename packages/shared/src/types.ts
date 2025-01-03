@@ -1,45 +1,5 @@
 import { Chain, Hex } from 'viem';
 
-export interface UserOperation {
-  sender: Hex;
-  nonce: Hex;
-  initCode: Hex;
-  callData: Hex;
-  callGasLimit: Hex;
-  verificationGasLimit: Hex;
-  preVerificationGas: Hex;
-  maxFeePerGas: Hex;
-  maxPriorityFeePerGas: Hex;
-  paymasterAndData: Hex;
-  signature: Hex;
-  chainId: number;
-}
-
-export interface DecodedUserOperationContext {
-  /**
-   * Tag to map transactions across multiple chains.
-   * Transactions with the same multi chain tag are part of the same UserAction.
-   */
-  multiChainTag: Hex;
-  /**
-   * Number of chains that the UserAction that corresponds to this UserOperation spans.
-   */
-  numChains: number;
-}
-
-export interface StealthAddressWithEphemeral {
-  address: Hex;
-  viewTag: Hex;
-  signerAddress: Hex;
-  ephemeralPubKey: Hex;
-}
-
-export interface User {
-  id: number;
-  name: string;
-  username: string;
-}
-
 export interface RelayGetQuoteRequestBody {
   user: Hex;
   recipient: Hex;
@@ -66,62 +26,6 @@ export interface RelayExecutionStepItem {
     endpoint: string;
     method: string;
   };
-}
-
-export interface BridgeStep {
-  tx: {
-    to: Hex;
-    data: Hex;
-    value: string;
-    maxFeePerGas: string;
-    maxPriorityFeePerGas: string;
-    nonce: number;
-    chainId: number;
-    gas: number;
-  };
-  bridgeDetails: {
-    to: Hex;
-    amountIn: string;
-    amountOut: string;
-    amountInFormatted: string;
-    amountOutFormatted: string;
-    originChainGasCurrency: string;
-    originChainGasFee: string;
-    originChainGasFeeFormatted: string;
-    originChainGasFeeUsd: string;
-    destinationChainGasCurrency: string;
-    destinationChainGasFee: string;
-    destinationChainGasFeeFormatted: string;
-    destinationChainGasFeeUsd: string;
-    bridgeFee: string;
-    bridgeFeeFormatted: string;
-    bridgeFeeUsd: string;
-    fromChainId: number;
-    toChainId: number;
-  };
-  serializedTx: Hex;
-}
-
-export interface TransferStep {
-  tx: {
-    to: Hex;
-    data: Hex;
-    value: string;
-    maxFeePerGas: string;
-    maxPriorityFeePerGas: string;
-    nonce: number;
-    chainId: number;
-    gas: number;
-  };
-  transferDetails: {
-    to: Hex;
-    amount: string;
-    amountFormatted: string;
-    amountUsd: string;
-    chainId: number;
-  };
-  relayerFee?: RelayGasFee;
-  serializedTx: Hex;
 }
 
 export interface CrossChainSwapStep {
@@ -167,14 +71,6 @@ export interface ApproveStep {
     gas: number;
   };
 }
-
-export type SignedBridgeStep = BridgeStep & {
-  signature: Hex;
-};
-
-export type SignedTransferStep = TransferStep & {
-  signature: Hex;
-};
 
 export type SignedCrossChainSwapStep = CrossChainSwapStep & {
   signature: Hex;

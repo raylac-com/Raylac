@@ -8,7 +8,7 @@ import {
   getPublicClient,
 } from '@raylac/shared';
 import { getTokenAddressOnChain } from '../../utils';
-import { getNonce, getGasInfo } from '../../lib/utils';
+import { getNonce, getGasInfo } from '../../utils';
 import { encodeFunctionData, Hex } from 'viem';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
 

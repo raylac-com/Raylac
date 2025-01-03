@@ -301,7 +301,7 @@ const useTokenBalancePerAddress = ({
         );
 
         const formattedTotalBalance = formatTokenAmount({
-          balance: totalBalance,
+          amount: totalBalance,
           token: tokenBalances[0].token,
           tokenPriceUsd: tokenBalances[0].balance.tokenPriceUsd,
         });

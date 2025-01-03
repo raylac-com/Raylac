@@ -15,7 +15,7 @@ import {
 } from '@raylac/shared';
 import { relayApi } from '../../lib/relay';
 import axios from 'axios';
-import { getNonce } from '../../lib/utils';
+import { getNonce } from '../../utils';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
 import { zeroAddress } from 'viem';
 
