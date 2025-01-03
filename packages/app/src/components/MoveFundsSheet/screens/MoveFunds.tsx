@@ -30,6 +30,7 @@ import StyledButton from '@/components/StyledButton/StyledButton';
 import { getPrivateKey } from '@/lib/key';
 import { privateKeyToAccount } from 'viem/accounts';
 import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
+import useTokenBalances from '@/hooks/useTokenBalances';
 
 const AddressSelector = ({
   address,
@@ -296,9 +297,7 @@ const MoveFunds = () => {
   const [amountInputText, setAmountInputText] = useState('');
 
   const { data: userAddresses } = useUserAddresses();
-  const { data: tokenBalances } = trpc.getTokenBalances.useQuery({
-    addresses: userAddresses?.map(address => address.address) ?? [],
-  });
+  const { data: tokenBalances } = useTokenBalances();
 
   const {
     data: bridgeSend,

@@ -45,6 +45,7 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import Addresses from './screens/Addresses/Addresses';
 import CreateAddress from './screens/CreateAddress/CreateAddress';
 import { MoveFundsContextProvider } from './contexts/MoveFundsContext';
+import MoveFundsSheet from './components/MoveFundsSheet/MoveFundsSheet';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -136,8 +137,8 @@ const Screens = () => {
       }}
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <BottomSheetModalProvider>
-          <MoveFundsContextProvider>
+        <MoveFundsContextProvider>
+          <BottomSheetModalProvider>
             <RootStack.Navigator initialRouteName="Tabs">
               <RootStack.Screen
                 name="Tabs"
@@ -234,8 +235,9 @@ const Screens = () => {
               <RootStack.Screen name="AddAddress" component={AddAddress} />
               <RootStack.Screen name="Advanced" component={Advanced} />
             </RootStack.Navigator>
-          </MoveFundsContextProvider>
-        </BottomSheetModalProvider>
+            <MoveFundsSheet />
+          </BottomSheetModalProvider>
+        </MoveFundsContextProvider>
         <Toast></Toast>
       </GestureHandlerRootView>
     </TouchableWithoutFeedback>
