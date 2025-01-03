@@ -77,7 +77,10 @@ const StyledButton = ({
       >
         {icon}
         {isLoading ? (
-          <ActivityIndicator size={24} color="white" />
+          <ActivityIndicator
+            size={24}
+            color={variant === 'primary' ? colors.background : colors.text}
+          />
         ) : (
           <StyledText
             style={{

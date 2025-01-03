@@ -24,6 +24,7 @@ import Skeleton from '@/components/Skeleton/Skeleton';
 import SendToCard from '@/components/SendToCard/SendToCard';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import useSend from '@/hooks/useSend';
+import Toast from 'react-native-toast-message';
 
 const ConfirmButton = ({
   onPress,
@@ -33,7 +34,7 @@ const ConfirmButton = ({
   isLoading: boolean;
 }) => {
   return (
-    <StyledButton title="Confirm" onLongPress={onPress} isLoading={isLoading} />
+    <StyledButton title="Confirm" onPress={onPress} isLoading={isLoading} />
   );
 };
 
@@ -52,6 +53,7 @@ const ReviewButton = ({
     <StyledButton
       disabled={!isBalanceSufficient || !isReadyForReview}
       isLoading={isLoading}
+      variant="outline"
       title={isBalanceSufficient ? 'Review' : 'Insufficient balance'}
       onPress={onPress}
     />
@@ -230,14 +232,22 @@ const SelectAmount = ({ route }: Props) => {
   }, [amountInputText, aggregatedSend, tokenBalance]);
 
   useEffect(() => {
-    if (tokenBalance) {
-      const _isBalanceSufficient =
-        parseUnits(amountInputText, token.decimals) <=
-        BigInt(tokenBalance.balance);
+    if (tokenBalance && tokenPriceUsd !== null && tokenPriceUsd !== undefined) {
+      if (inputMode === 'token') {
+        const _isBalanceSufficient =
+          parseUnits(amountInputText, token.decimals) <=
+          BigInt(tokenBalance.balance);
 
-      setIsBalanceSufficient(_isBalanceSufficient);
+        setIsBalanceSufficient(_isBalanceSufficient);
+      } else {
+        const _isBalanceSufficient =
+          new BigNumber(amountInputText).dividedBy(tokenPriceUsd) <=
+          new BigNumber(tokenBalance.balance);
+
+        setIsBalanceSufficient(_isBalanceSufficient);
+      }
     }
-  }, [amountInputText, tokenBalance]);
+  }, [amountInputText, tokenBalance, tokenPriceUsd]);
 
   useEffect(() => {
     if (containsNonNumericCharacters(amountInputText)) {
@@ -261,6 +271,12 @@ const SelectAmount = ({ route }: Props) => {
     buildAggregatedSend(buildAggregatedSendRequestBody);
   }, [amountInputText, fromAddresses, toAddress, chainId]);
 
+  useEffect(() => {
+    if (aggregatedSend) {
+      setIsReadyToConfirm(false);
+    }
+  }, [aggregatedSend]);
+
   ///
   /// Handlers
   ///
@@ -283,6 +299,12 @@ const SelectAmount = ({ route }: Props) => {
       chainId,
     });
 
+    Toast.show({
+      type: 'success',
+      text1: 'Sent',
+      text2: 'Your transaction has been sent',
+    });
+
     navigation.navigate('Tabs', {
       screen: 'History',
     });
@@ -300,7 +322,7 @@ const SelectAmount = ({ route }: Props) => {
 
   let subAmount: string | undefined;
 
-  if (tokenPriceUsd !== undefined) {
+  if (tokenPriceUsd !== undefined && tokenPriceUsd !== null) {
     if (amountInputText !== '') {
       if (inputMode === 'token') {
         subAmount = new BigNumber(amountInputText)
@@ -368,14 +390,14 @@ const SelectAmount = ({ route }: Props) => {
         </View>
         <View>
           {subAmount &&
-            (inputMode === 'usd' ? (
+            (inputMode === 'token' ? (
               <StyledText
                 style={{
                   color: colors.subbedText,
                   fontWeight: 'bold',
                 }}
               >
-                {`$${subAmount}`}
+                {`~$${subAmount}`}
               </StyledText>
             ) : (
               <StyledText
@@ -384,7 +406,7 @@ const SelectAmount = ({ route }: Props) => {
                   fontWeight: 'bold',
                 }}
               >
-                {`${subAmount} ${token.symbol}`}
+                {`~${subAmount} ${token.symbol}`}
               </StyledText>
             ))}
         </View>
