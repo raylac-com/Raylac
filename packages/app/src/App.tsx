@@ -6,7 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RootStackParamsList, RootTabsParamsList } from './navigation/types';
 import Home from './screens/Home/Home';
-import Swap from './screens/Swap/Swap';
+// import Swap from './screens/Swap/Swap';
 import { NavigationContainer, ThemeProvider } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc, getRpcLinks } from './lib/trpc';
@@ -35,13 +35,16 @@ import { Keyboard } from 'react-native';
 import { TouchableWithoutFeedback } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import SelectRecipient from './screens/Send/SelectRecipient';
-import ConfirmSend from './screens/Send/ConfirmSend/ConfirmSend';
 import SelectAmount from './screens/Send/SelectAmount/SelectAmount';
 import SelectToken from './screens/Send/SelectToken';
-import SelectChain from './screens/Send/SelectChain';
 import StartWatch from './screens/StartWatch/StartWatch';
 import AddAddress from './screens/AddAddress/AddAddress';
 import Advanced from './screens/Advanced/Advanced';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import Addresses from './screens/Addresses/Addresses';
+import CreateAddress from './screens/CreateAddress/CreateAddress';
+import { MoveFundsContextProvider } from './contexts/MoveFundsContext';
+import MoveFundsSheet from './components/MoveFundsSheet/MoveFundsSheet';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -66,6 +69,8 @@ const Tabs = () => {
           ),
         }}
       ></Tab.Screen>
+      {/**
+       * 
       <Tab.Screen
         name="Swap"
         component={Swap}
@@ -77,6 +82,7 @@ const Tabs = () => {
           tabBarShowLabel: false,
         }}
       ></Tab.Screen>
+       */}
       <Tab.Screen
         name="History"
         component={History}
@@ -130,106 +136,98 @@ const Screens = () => {
       }}
     >
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <RootStack.Navigator initialRouteName="Tabs">
-          <RootStack.Screen
-            name="Tabs"
-            component={Tabs}
-            options={{
-              headerShown: false,
-            }}
-          ></RootStack.Screen>
-          <RootStack.Screen
-            name="Start"
-            component={Start}
-            options={{
-              headerShown: false,
-            }}
-          ></RootStack.Screen>
-          <RootStack.Screen
-            name="StartWatch"
-            component={StartWatch}
-            options={{
-              headerBackTitle: 'Back',
-            }}
-          ></RootStack.Screen>
-          <RootStack.Screen
-            name="SaveBackupPhrase"
-            component={SaveBackupPhrase}
-            options={{
-              title: 'Save Backup Phrase',
-              headerBackVisible: true,
-              headerBackTitle: 'Back',
-            }}
-          ></RootStack.Screen>
-          <RootStack.Screen
-            name="ConfirmBackupPhrase"
-            component={ConfirmBackupPhrase}
-            options={{
-              title: 'Confirm Backup Phrase',
-              headerBackVisible: true,
-            }}
-          ></RootStack.Screen>
-          <RootStack.Screen
-            name="ImportAccount"
-            component={ImportAccount}
-            options={{
-              title: 'Import Account',
-              headerBackVisible: true,
-            }}
-          ></RootStack.Screen>
-          <RootStack.Group
-            screenOptions={{
-              headerBackTitle: 'Back',
-            }}
-          >
-            <RootStack.Screen
-              name="SelectRecipient"
-              component={SelectRecipient}
-              options={{
-                title: 'Select Recipient',
-                headerBackVisible: true,
-              }}
-            ></RootStack.Screen>
-            <RootStack.Screen
-              name="SelectToken"
-              component={SelectToken}
-              options={{
-                title: 'Select Token',
-                headerBackVisible: true,
-                headerBackTitle: 'Back',
-              }}
-            ></RootStack.Screen>
-            <RootStack.Screen
-              name="SelectAmount"
-              component={SelectAmount}
-              options={{
-                title: 'Select Amount',
-                headerBackVisible: true,
-                headerBackTitle: 'Back',
-              }}
-            ></RootStack.Screen>
-            <RootStack.Screen
-              name="SelectChain"
-              component={SelectChain}
-              options={{
-                title: 'Select Chain',
-                headerBackVisible: true,
-                headerBackTitle: 'Back',
-              }}
-            ></RootStack.Screen>
-            <RootStack.Screen
-              name="ConfirmSend"
-              component={ConfirmSend}
-              options={{
-                title: 'Confirm Send',
-                headerBackVisible: true,
-                headerBackTitle: 'Back',
-              }}
-            ></RootStack.Screen>
-          </RootStack.Group>
-          <RootStack.Screen name="AddAddress" component={AddAddress} />
-          <RootStack.Screen name="Advanced" component={Advanced} />
-        </RootStack.Navigator>
+        <MoveFundsContextProvider>
+          <BottomSheetModalProvider>
+            <RootStack.Navigator initialRouteName="Tabs">
+              <RootStack.Screen
+                name="Tabs"
+                component={Tabs}
+                options={{
+                  headerShown: false,
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="Start"
+                component={Start}
+                options={{
+                  headerShown: false,
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="StartWatch"
+                component={StartWatch}
+                options={{
+                  headerBackTitle: 'Back',
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="SaveBackupPhrase"
+                component={SaveBackupPhrase}
+                options={{
+                  title: 'Save Backup Phrase',
+                  headerBackVisible: true,
+                  headerBackTitle: 'Back',
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="ConfirmBackupPhrase"
+                component={ConfirmBackupPhrase}
+                options={{
+                  title: 'Confirm Backup Phrase',
+                  headerBackVisible: true,
+                }}
+              ></RootStack.Screen>
+              <RootStack.Screen
+                name="ImportAccount"
+                component={ImportAccount}
+                options={{
+                  title: 'Import Account',
+                  headerBackVisible: true,
+                }}
+              ></RootStack.Screen>
+              <RootStack.Group
+                screenOptions={{
+                  headerBackTitle: 'Back',
+                }}
+              >
+                <RootStack.Screen
+                  name="SelectRecipient"
+                  component={SelectRecipient}
+                  options={{
+                    title: 'Select Recipient',
+                    headerBackVisible: true,
+                  }}
+                ></RootStack.Screen>
+                <RootStack.Screen
+                  name="SelectToken"
+                  component={SelectToken}
+                  options={{
+                    title: 'Select Token',
+                    headerBackVisible: true,
+                    headerBackTitle: 'Back',
+                  }}
+                ></RootStack.Screen>
+                <RootStack.Screen
+                  name="SelectAmount"
+                  component={SelectAmount}
+                  options={{
+                    title: 'Select Amount',
+                    headerBackVisible: true,
+                    headerBackTitle: 'Back',
+                  }}
+                ></RootStack.Screen>
+              </RootStack.Group>
+              <RootStack.Screen name="Addresses" component={Addresses} />
+              <RootStack.Screen
+                name="CreateAddress"
+                component={CreateAddress}
+              />
+              <RootStack.Screen name="AddAddress" component={AddAddress} />
+              <RootStack.Screen name="Advanced" component={Advanced} />
+            </RootStack.Navigator>
+            <MoveFundsSheet />
+          </BottomSheetModalProvider>
+        </MoveFundsContextProvider>
         <Toast></Toast>
       </GestureHandlerRootView>
     </TouchableWithoutFeedback>
@@ -263,9 +261,9 @@ const asyncStoragePersister = createAsyncStoragePersister({
 const App = () => {
   const [loaded, error] = useFonts({
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    'Lato-Regular': require('../assets/Lato-Regular.ttf'),
+    'Nunito-Regular': require('../assets/Nunito-Regular.ttf'),
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    'Lato-Bold': require('../assets/Lato-Bold.ttf'),
+    'Nunito-Bold': require('../assets/Nunito-Bold.ttf'),
   });
 
   if (error) {
@@ -298,7 +296,7 @@ const App = () => {
           client={queryClient}
           persistOptions={{
             persister: asyncStoragePersister,
-            buster: process.env.EXPO_PUBLIC_CACHE_BUSTER || '0',
+            buster: '44',
           }}
         >
           <ThemeProvider value={NavigationTheme}>

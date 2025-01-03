@@ -1,7 +1,11 @@
-import { SupportedTokensReturnType } from '@raylac/shared';
 import { relayGetCurrencies } from '../../lib/relay';
 import { getAddress } from 'viem';
-import { KNOWN_TOKENS } from '@raylac/shared';
+import { KNOWN_TOKENS, Token } from '@raylac/shared';
+import { cacheTokens, getCachedTokens } from '../../lib/token';
+
+const knownTokenAddresses = KNOWN_TOKENS.flatMap(token =>
+  token.addresses.map(address => getAddress(address.address))
+);
 
 const getSupportedTokens = async ({
   chainIds,
@@ -9,7 +13,13 @@ const getSupportedTokens = async ({
 }: {
   chainIds: number[];
   searchTerm?: string;
-}): Promise<SupportedTokensReturnType> => {
+}): Promise<Token[]> => {
+  const cachedTokens = await getCachedTokens();
+
+  if (cachedTokens.length > 0) {
+    return cachedTokens;
+  }
+
   const currencies = await relayGetCurrencies({
     chainIds,
     searchTerm,
@@ -17,15 +27,12 @@ const getSupportedTokens = async ({
       searchTerm === '' || searchTerm === undefined ? false : undefined,
   });
 
-  const knownTokenAddresses = KNOWN_TOKENS.flatMap(token =>
-    token.addresses.map(address => getAddress(address.address))
-  );
-
-  const supportedTokens: SupportedTokensReturnType = currencies
+  const supportedTokens: Token[] = currencies
+    // Filter out tokens that are in the known tokens list
     .filter(token => !knownTokenAddresses.includes(getAddress(token.address)))
     // Sort by verified status
     .sort((a, b) => Number(b.metadata.verified) - Number(a.metadata.verified))
-    // Map to `SupportedTokensReturnType`
+    // Map to `Token`
     .map(token => ({
       symbol: token.symbol,
       name: token.name,
@@ -40,15 +47,11 @@ const getSupportedTokens = async ({
       ],
     }));
 
-  const filteredKnownTokens = searchTerm
-    ? KNOWN_TOKENS.filter(
-        token =>
-          token.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          token.symbol.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : KNOWN_TOKENS;
+  const result = [...supportedTokens, ...KNOWN_TOKENS];
 
-  return [...filteredKnownTokens, ...supportedTokens];
+  await cacheTokens(result);
+
+  return result;
 };
 
 export default getSupportedTokens;

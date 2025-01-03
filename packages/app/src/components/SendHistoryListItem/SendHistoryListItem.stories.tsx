@@ -6,13 +6,16 @@ import SendHistoryListItem from './SendHistoryListItem';
 import { arbitrum, polygon, zksync } from 'viem/chains';
 import { base, optimism } from 'viem/chains';
 import { getAddress } from 'viem';
+import { HistoryItemType } from '@raylac/shared';
 
 const meta = {
   title: 'SendHistoryListItem',
   component: SendHistoryListItem,
   args: {
     transfer: {
-      destinationChainId: base.id,
+      txHash: '0x123',
+      chainId: base.id,
+      type: HistoryItemType.OUTGOING,
       token: {
         symbol: 'USDC',
         name: 'USD Coin',
@@ -43,24 +46,16 @@ const meta = {
           },
         ],
       },
-      txHash:
-        '0x0b6edba17459fd482d72989b785bd985f22ae6bbc0821bc5aecafe6855dec589',
       from: '0x28341dF2CCabe2Cc4A3c6e7ef2fe9E706680C196',
       to: '0x28341dF2CCabe2Cc4A3c6e7ef2fe9E706680C196',
-      amount: '1000000',
-      amountUsd: '0.9999452727',
-      bridges: [
-        {
-          txHash:
-            '0x87bd3f213b62b1344ec34f430f0cbd2d3d6c61652bda071ffb610ada7721083e',
-          fromChainId: 10,
-          toChainId: 42161,
-          amountIn: '1015550',
-          amountOut: '1000000',
-          bridgeFeeAmount: '15550',
-          bridgeFeeUsd: '0.015533',
-        },
-      ],
+      amount: {
+        balance: '1000000',
+        formatted: '1000000',
+        usdValue: '0.9999452727',
+        usdValueFormatted: '0.9999452727',
+        tokenPriceUsd: 0.0000009999452727,
+      },
+      timestamp: Date.now().toString(),
     },
   },
   decorators: [

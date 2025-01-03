@@ -1,163 +1,188 @@
 import {
+  formatBalance,
   GetHistoryRequestBody,
   GetHistoryReturnType,
-  SwapHistoryItem,
-  TransferHistoryItem,
+  HistoryItemType,
+  supportedChains,
 } from '@raylac/shared';
-import prisma from '../../lib/prisma';
-import getToken from '../getToken/getToken';
-import { formatUnits, Hex } from 'viem';
+import { getAddress, Hex, parseUnits, zeroAddress } from 'viem';
+import { getAlchemyClient } from '../../lib/alchemy';
+import { AssetTransfersCategory, SortingOrder } from 'alchemy-sdk';
+import { logger } from '@raylac/shared-backend';
+import { getToken } from '../../lib/token';
+import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
+import { deletePendingTx, getPendingTxsFromRedis } from '../../lib/transaction';
 
-const getHistory = async ({
-  address,
-}: GetHistoryRequestBody): Promise<GetHistoryReturnType> => {
-  const result = await prisma.history.findMany({
-    include: {
-      Transfer: {
-        select: {
-          txHash: true,
-          from: true,
-          to: true,
-          amount: true,
-          tokenAddress: true,
-          amountUsd: true,
-          destinationChainId: true,
-          bridges: {
-            select: {
-              txHash: true,
-              fromChainId: true,
-              toChainId: true,
-              amountIn: true,
-              amountOut: true,
-              bridgeFeeAmount: true,
-              bridgeFeeUsd: true,
-            },
-          },
-        },
-      },
-      Swap: {
-        select: {
-          lineItems: {
-            select: {
-              fromChainId: true,
-              toChainId: true,
-              txHash: true,
-            },
-          },
-          address: true,
-          amountIn: true,
-          amountOut: true,
-          amountInUsd: true,
-          amountOutUsd: true,
-          tokenAddressIn: true,
-          tokenAddressOut: true,
-        },
-      },
-    },
-    where: {
-      OR: [
-        {
-          Transfer: {
-            OR: [{ from: address }, { to: address }],
-          },
-        },
-        {
-          Swap: {
-            address,
-          },
-        },
-      ],
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+const getHistoryOnChain = async ({
+  addresses,
+  chainId,
+}: {
+  addresses: Hex[];
+  chainId: number;
+}): Promise<GetHistoryReturnType> => {
+  const alchemy = await getAlchemyClient(chainId);
 
-  const history = await Promise.all(
-    result
-      .map(item => item.Transfer || item.Swap)
-      .filter(item => item !== null)
-      .map(async item => {
-        if ('tokenAddress' in item) {
-          // Return `item` as `TransferHistoryItem`
+  const transfers = await Promise.all(
+    addresses.map(async address => {
+      // Get incoming transfers
+      const incoming = await alchemy.core.getAssetTransfers({
+        toAddress: address,
+        category: [
+          AssetTransfersCategory.ERC20,
+          AssetTransfersCategory.EXTERNAL,
+        ],
+        withMetadata: true,
+        order: SortingOrder.DESCENDING,
+        maxCount: 10,
+      });
 
-          const token = await getToken({
-            tokenAddress: item.tokenAddress as Hex,
-          });
+      // Get outgoing transfers
+      const outgoing = await alchemy.core.getAssetTransfers({
+        fromAddress: address,
+        category: [
+          AssetTransfersCategory.ERC20,
+          AssetTransfersCategory.EXTERNAL,
+        ],
+        order: SortingOrder.DESCENDING,
+        maxCount: 10,
+        withMetadata: true,
+      });
 
-          const amount = item.amount.toString();
-          const amountUsd = item.amountUsd.toString();
+      const transfers: GetHistoryReturnType = (
+        await Promise.all(
+          [...incoming.transfers, ...outgoing.transfers].map(async transfer => {
+            const token = await getToken({
+              tokenAddress: (transfer.rawContract.address ||
+                zeroAddress) as Hex,
+              chainId,
+            });
 
-          const transferHistoryItem: TransferHistoryItem = {
-            token,
-            txHash: item.txHash as Hex,
-            from: item.from as Hex,
-            to: item.to as Hex,
-            destinationChainId: item.destinationChainId,
-            amount,
-            amountUsd,
-            bridges: item.bridges.map(bridge => ({
-              txHash: bridge.txHash as Hex,
-              fromChainId: bridge.fromChainId,
-              toChainId: bridge.toChainId,
-              amountIn: bridge.amountIn.toString(),
-              amountOut: bridge.amountOut.toString(),
-              bridgeFeeAmount: bridge.bridgeFeeAmount.toString(),
-              bridgeFeeUsd: bridge.bridgeFeeUsd.toString(),
-            })),
-          };
+            if (!token) {
+              logger.warn(
+                `No token found for ${transfer.rawContract.address} on chain ${chainId}`
+              );
+              return null;
+            }
 
-          return transferHistoryItem;
-        } else {
-          // Return `item` as `SwapHistoryItem`
+            const usdPrice = await getTokenUsdPrice({
+              token,
+            });
 
-          const tokenIn = await getToken({
-            tokenAddress: item.tokenAddressIn as Hex,
-          });
+            if (usdPrice === null) {
+              return null;
+            }
 
-          const tokenOut = await getToken({
-            tokenAddress: item.tokenAddressOut as Hex,
-          });
+            const fromAddress = getAddress(transfer.from as Hex);
+            const toAddress = getAddress(transfer.to! as Hex);
 
-          const amountIn = item.amountIn.toString();
-          const amountOut = item.amountOut.toString();
+            let type;
 
-          const amountInFormatted = formatUnits(
-            BigInt(amountIn),
-            tokenIn.decimals
-          );
+            if (
+              addresses.includes(fromAddress) &&
+              addresses.includes(toAddress)
+            ) {
+              type = HistoryItemType.MOVE_FUNDS;
+            } else if (addresses.includes(fromAddress)) {
+              type = HistoryItemType.OUTGOING;
+            } else {
+              type = HistoryItemType.INCOMING;
+            }
 
-          const amountOutFormatted = formatUnits(
-            BigInt(amountOut),
-            tokenOut.decimals
-          );
+            const formattedAmount = formatBalance({
+              balance: parseUnits(
+                transfer.value?.toString() || '0',
+                token.decimals
+              ),
+              token,
+              tokenPriceUsd: usdPrice,
+            });
 
-          const amountInUsd = item.amountInUsd.toString();
-          const amountOutUsd = item.amountOutUsd.toString();
+            const transferItem: GetHistoryReturnType[number] = {
+              from: fromAddress,
+              to: toAddress,
+              amount: formattedAmount,
+              token,
+              chainId: chainId,
+              timestamp: transfer.metadata.blockTimestamp,
+              type,
+              txHash: transfer.hash as Hex,
+            };
 
-          const swapHistoryItem: SwapHistoryItem = {
-            lineItems: item.lineItems.map(lineItem => ({
-              txHash: lineItem.txHash as Hex,
-              fromChainId: lineItem.fromChainId,
-              toChainId: lineItem.toChainId,
-            })),
-            address: item.address as Hex,
-            amountIn,
-            amountOut,
-            amountInUsd,
-            amountOutUsd,
-            tokenIn,
-            tokenOut,
-            amountInFormatted,
-            amountOutFormatted,
-          };
+            return transferItem;
+          })
+        )
+      ).filter(item => item !== null);
 
-          return swapHistoryItem;
-        }
-      })
+      return transfers;
+    })
   );
 
-  return history as GetHistoryReturnType;
+  return transfers.flat();
+};
+
+const getHistory = async ({
+  addresses,
+}: GetHistoryRequestBody): Promise<GetHistoryReturnType> => {
+  const transfers = (
+    await Promise.all(
+      supportedChains.map(chainId =>
+        getHistoryOnChain({ addresses, chainId: chainId.id })
+      )
+    )
+  ).flat();
+
+  const confirmedTxHashes = transfers.map(tx => tx.txHash);
+
+  // Get pending transactions
+  const pendingTxs = await Promise.all(
+    addresses.map(async address => {
+      const pendingTxsInRedis = await getPendingTxsFromRedis(address);
+
+      // Array to store pending transactions filtered from redis
+      const pendingTxs = [];
+
+      // Array to store confirmed transactions filtered from redis
+      const confirmedTxs = [];
+
+      for (const tx of pendingTxsInRedis) {
+        // Check if the transaction is confirmed
+        const isConfirmed = confirmedTxHashes.includes(tx.txHash);
+
+        if (!isConfirmed) {
+          pendingTxs.push(tx);
+        } else {
+          confirmedTxs.push(tx);
+        }
+      }
+
+      // Delete confirmed transactions from redis
+      await deletePendingTx(confirmedTxs);
+
+      return pendingTxs;
+    })
+  );
+
+  const pending = pendingTxs.flat();
+
+  const pendingTransfers = pending.map(tx => ({
+    from: tx.from,
+    to: tx.to,
+    amount: tx.amount,
+    token: tx.token,
+    chainId: tx.chainId,
+    timestamp: new Date().toISOString(),
+    type: HistoryItemType.PENDING,
+    txHash: tx.txHash,
+  }));
+
+  const allTransfers = [...transfers, ...pendingTransfers];
+
+  // Sort by timestamp in descending order
+  allTransfers.sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
+
+  return allTransfers;
 };
 
 export default getHistory;

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import SwapInputCard from './components/SwapInputCard/SwapInputCard';
 import SwapOutputCard from './components/SwapOutputCard/SwapOutputCard';
-import { trpc } from '@/lib/trpc';
 import { formatUnits, parseUnits, zeroAddress } from 'viem';
 import useUserAccount from '@/hooks/useUserAccount';
 import { SupportedTokensReturnType, TRPCErrorMessage } from '@raylac/shared';
@@ -11,12 +10,11 @@ import useDebounce from '@/hooks/useDebounce';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
-import useTokenBalance from '@/hooks/useTokenBalance';
 import { View } from 'react-native';
 import { SearchTokenSheetProvider } from '@/contexts/SearchInputTokenSheetContext';
 import { SearchOutputTokenSheetProvider } from '@/contexts/SearchOutputTokenSheetContext';
-import SwapPath from './components/SwapPath/SwapPath';
-import useSwap from '@/hooks/useSwap';
+import useSingleInputSwap from '@/hooks/useSingleInputSwap';
+import useChainTokenBalance from '@/hooks/useChainTokenBalance';
 
 type Token = SupportedTokensReturnType[number];
 
@@ -30,6 +28,8 @@ const Swap = () => {
   const [inputToken, setInputToken] = useState<Token | null>(null);
   const [outputToken, setOutputToken] = useState<Token | null>(null);
   const [amountInputText, setAmountInputText] = useState<string>('');
+  const [inputChainId, setInputChainId] = useState<number | null>(null);
+  const [outputChainId, setOutputChainId] = useState<number | null>(null);
 
   const { data: userAccount } = useUserAccount();
 
@@ -37,7 +37,11 @@ const Swap = () => {
   // Fetch data
   //
 
-  const { data: inputTokenBalance } = useTokenBalance(inputToken);
+  const { data: inputTokenBalance } = useChainTokenBalance({
+    chainId: inputChainId,
+    token: inputToken,
+    address: userAccount?.address ?? zeroAddress,
+  });
 
   /*
   const { data: tokenBalances, isLoading: isLoadingTokenBalances } =
@@ -51,24 +55,6 @@ const Swap = () => {
     );
   */
 
-  const { data: inputTokenMetadata } = trpc.getToken.useQuery(
-    {
-      tokenAddress: inputToken?.addresses[0].address ?? zeroAddress,
-    },
-    {
-      enabled: !!inputToken,
-    }
-  );
-
-  const { data: outputTokenMetadata } = trpc.getToken.useQuery(
-    {
-      tokenAddress: outputToken?.addresses[0].address ?? zeroAddress,
-    },
-    {
-      enabled: !!outputToken,
-    }
-  );
-
   // Mutations
 
   const {
@@ -78,7 +64,8 @@ const Swap = () => {
     error: getSwapQuoteError,
   } = useGetSwapQuote();
 
-  const { mutateAsync: swap, isPending: isSwapping } = useSwap();
+  const { mutateAsync: submitSingleInputSwap, isPending: isSwapping } =
+    useSingleInputSwap();
 
   //
   // Effects
@@ -100,14 +87,29 @@ const Swap = () => {
   );
 
   useEffect(() => {
-    if (debouncedParsedInputAmount && inputToken && outputToken) {
+    if (
+      debouncedParsedInputAmount &&
+      inputToken &&
+      outputToken &&
+      inputChainId &&
+      outputChainId
+    ) {
       getSwapQuote({
         amount: debouncedParsedInputAmount,
         inputToken,
         outputToken,
+        inputChainId,
+        outputChainId,
       });
     }
-  }, [debouncedParsedInputAmount, userAccount, outputToken, getSwapQuote]);
+  }, [
+    debouncedParsedInputAmount,
+    userAccount,
+    outputToken,
+    getSwapQuote,
+    inputChainId,
+    outputChainId,
+  ]);
 
   //
   // Handlers
@@ -117,20 +119,50 @@ const Swap = () => {
     setAmountInputText(amount);
   };
 
-  const onSwapPress = async () => {
-    if (swapQuote) {
-      await swap({
-        swapQuote: swapQuote,
-      });
-
+  const onInputTokenChange = (token: Token | null) => {
+    if (token) {
+      setInputToken(token);
+      setInputChainId(token.addresses[0].chainId);
+    } else {
       setInputToken(null);
-      setOutputToken(null);
-      setAmountInputText('');
-
-      navigation.navigate('Tabs', {
-        screen: 'History',
-      });
+      setInputChainId(null);
     }
+  };
+
+  const onOutputTokenChange = (token: Token | null) => {
+    if (token) {
+      setOutputToken(token);
+      setOutputChainId(token.addresses[0].chainId);
+    } else {
+      setOutputToken(null);
+      setOutputChainId(null);
+    }
+  };
+
+  const onSwapPress = async () => {
+    if (!inputToken) {
+      throw new Error('Input token is null');
+    }
+
+    if (!outputToken) {
+      throw new Error('Output token is null');
+    }
+
+    if (!swapQuote) {
+      throw new Error('Swap quote is null');
+    }
+
+    await submitSingleInputSwap({
+      swapQuote,
+    });
+
+    setInputToken(null);
+    setOutputToken(null);
+    setAmountInputText('');
+
+    navigation.navigate('Tabs', {
+      screen: 'History',
+    });
   };
 
   //
@@ -138,8 +170,10 @@ const Swap = () => {
   //
 
   const hasEnoughBalance =
-    inputTokenBalance !== undefined && parsedInputAmount !== null
-      ? inputTokenBalance >= parsedInputAmount
+    inputTokenBalance !== null &&
+    inputTokenBalance !== undefined &&
+    parsedInputAmount !== null
+      ? BigInt(inputTokenBalance.balance) >= parsedInputAmount
       : undefined;
 
   const outputAmount = swapQuote?.amountOut;
@@ -160,59 +194,60 @@ const Swap = () => {
           style={{
             flexDirection: 'column',
             paddingVertical: 20,
+            flex: 1,
+            justifyContent: 'space-between',
             paddingHorizontal: 16,
-            rowGap: 16,
           }}
         >
-          <SwapInputCard
-            token={inputToken}
-            setToken={setInputToken}
-            amount={amountInputText}
-            setAmount={onInputAmountChange}
-            balance={inputTokenBalance}
-            isLoadingBalance={false}
-            // isLoadingBalance={isLoadingTokenBalances}
-          />
-          {swapQuote && inputTokenMetadata && outputTokenMetadata && (
-            <SwapPath
-              inputs={swapQuote.inputs.map(input => ({
-                ...input,
-                token: inputTokenMetadata,
-              }))}
-              output={{
-                chainId: swapQuote.output.chainId,
-                token: outputTokenMetadata,
-              }}
+          <View style={{ flex: 1, rowGap: 16 }}>
+            <SwapInputCard
+              token={inputToken}
+              setToken={onInputTokenChange}
+              amount={amountInputText}
+              setAmount={onInputAmountChange}
+              balance={
+                inputTokenBalance?.balance
+                  ? BigInt(inputTokenBalance.balance)
+                  : undefined
+              }
+              isLoadingBalance={false}
+              chainId={inputChainId}
+              setChainId={setInputChainId}
+              // isLoadingBalance={isLoadingTokenBalances}
             />
-          )}
-          <SwapOutputCard
-            token={outputToken}
-            setToken={setOutputToken}
-            amount={outputAmountFormatted}
-            setAmount={() => {}}
-            isLoadingAmount={isGettingSwapQuote}
-            usdAmount={outputAmountUsd ? Number(outputAmountUsd) : 0}
-          />
-          <StyledText style={{ color: colors.border }}>
-            {swapQuote ? `Total fee $${swapQuote.relayerServiceFeeUsd}` : ''}
-          </StyledText>
-          <StyledButton
-            disabled={
-              isAmountTooSmall ||
-              hasEnoughBalance === false ||
-              isSwapping ||
-              !swapQuote
-            }
-            isLoading={isSwapping}
-            title={
-              isAmountTooSmall
-                ? 'Amount too small'
-                : hasEnoughBalance === false
-                  ? 'Insufficient balance'
-                  : 'Swap'
-            }
-            onPress={onSwapPress}
-          />
+            <SwapOutputCard
+              token={outputToken}
+              setToken={onOutputTokenChange}
+              amount={outputAmountFormatted}
+              setAmount={() => {}}
+              isLoadingAmount={isGettingSwapQuote}
+              usdAmount={outputAmountUsd ? Number(outputAmountUsd) : 0}
+              chainId={outputChainId}
+              setChainId={setOutputChainId}
+            />
+          </View>
+          <View style={{ rowGap: 16 }}>
+            <StyledText style={{ color: colors.border }}>
+              {swapQuote ? `Bridge fee $${swapQuote.relayerServiceFeeUsd}` : ''}
+            </StyledText>
+            <StyledButton
+              disabled={
+                isAmountTooSmall ||
+                hasEnoughBalance === false ||
+                isSwapping ||
+                !swapQuote
+              }
+              isLoading={isSwapping}
+              title={
+                isAmountTooSmall
+                  ? 'Amount too small'
+                  : hasEnoughBalance === false
+                    ? 'Insufficient balance'
+                    : 'Swap'
+              }
+              onPress={onSwapPress}
+            />
+          </View>
         </View>
       </SearchTokenSheetProvider>
     </SearchOutputTokenSheetProvider>

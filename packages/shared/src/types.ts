@@ -85,6 +85,14 @@ export interface BridgeStep {
     amountOut: string;
     amountInFormatted: string;
     amountOutFormatted: string;
+    originChainGasCurrency: string;
+    originChainGasFee: string;
+    originChainGasFeeFormatted: string;
+    originChainGasFeeUsd: string;
+    destinationChainGasCurrency: string;
+    destinationChainGasFee: string;
+    destinationChainGasFeeFormatted: string;
+    destinationChainGasFeeUsd: string;
     bridgeFee: string;
     bridgeFeeFormatted: string;
     bridgeFeeUsd: string;
@@ -130,16 +138,34 @@ export interface CrossChainSwapStep {
     chainId: number;
     gas: number;
   };
-  /*
-  swapDetails: {
-    tokenIn: Token;
-    tokenOut: Token;
-    amountIn: string;
-    amountOut: string;
-    amountInUsd: string;
-    amountOutUsd: string;
+}
+
+export interface SwapStep {
+  originChainId: number;
+  destinationChainId: number;
+  tx: {
+    to: Hex;
+    data: Hex;
+    value: string;
+    maxFeePerGas: string;
+    maxPriorityFeePerGas: string;
+    nonce: number;
+    chainId: number;
+    gas: number;
   };
-  */
+}
+
+export interface ApproveStep {
+  tx: {
+    to: Hex;
+    data: Hex;
+    value: string;
+    maxFeePerGas: string;
+    maxPriorityFeePerGas: string;
+    nonce: number;
+    chainId: number;
+    gas: number;
+  };
 }
 
 export type SignedBridgeStep = BridgeStep & {
@@ -151,6 +177,14 @@ export type SignedTransferStep = TransferStep & {
 };
 
 export type SignedCrossChainSwapStep = CrossChainSwapStep & {
+  signature: Hex;
+};
+
+export type SignedSingleInputSwapStep = SwapStep & {
+  signature: Hex;
+};
+
+export type SignedApproveStep = ApproveStep & {
   signature: Hex;
 };
 
@@ -475,4 +509,21 @@ export interface LidoApyResponse {
 
 export enum TokenSet {
   ETH = 'eth',
+}
+
+export interface Balance {
+  balance: string;
+  formatted: string;
+  usdValue: string;
+  usdValueFormatted: string;
+  tokenPriceUsd: number;
+}
+
+export interface PendingTx {
+  chainId: number;
+  txHash: Hex;
+  from: Hex;
+  to: Hex;
+  amount: Balance;
+  token: Token;
 }

@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 import { useSearchInputTokenSheet } from '@/contexts/SearchInputTokenSheetContext';
+import ChainSelector from '../ChainSelector/ChainSelector';
 
 const SwapInputCard = ({
   token,
@@ -16,6 +17,8 @@ const SwapInputCard = ({
   balance,
   isLoadingBalance,
   setAmount,
+  chainId,
+  setChainId,
 }: {
   token: SupportedTokensReturnType[number] | null;
   setToken: (value: SupportedTokensReturnType[number] | null) => void;
@@ -23,6 +26,8 @@ const SwapInputCard = ({
   setAmount: (value: string) => void;
   balance: bigint | undefined;
   isLoadingBalance: boolean;
+  chainId: number | null;
+  setChainId: (value: number | null) => void;
 }) => {
   const { setIsOpen, selectedToken } = useSearchInputTokenSheet();
 
@@ -70,6 +75,8 @@ const SwapInputCard = ({
       ? formatAmount(balance.toString(), token.decimals)
       : undefined;
 
+  const showChainSelector = token && token.addresses.length > 1;
+
   return (
     <View
       style={{
@@ -82,6 +89,9 @@ const SwapInputCard = ({
         rowGap: 14,
       }}
     >
+      {showChainSelector && chainId !== null && (
+        <ChainSelector chainId={chainId} setChainId={setChainId} />
+      )}
       <SwapAmountInput
         selectedToken={token}
         onSelectTokenPress={() => {

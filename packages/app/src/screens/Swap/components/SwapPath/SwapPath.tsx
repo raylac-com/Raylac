@@ -1,5 +1,5 @@
 import StyledText from '@/components/StyledText/StyledText';
-import TokenImageWithChain from '@/components/TokenImageWithChain/TokenImageWithChain';
+import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import colors from '@/lib/styles/colors';
 import {
@@ -33,7 +33,7 @@ const SwapPathListItem = ({
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
       >
-        <TokenImageWithChain
+        <TokenLogoWithChain
           logoURI={inputToken.logoURI}
           chainId={inputChainId}
         />
@@ -46,7 +46,7 @@ const SwapPathListItem = ({
           {inputToken.symbol}
         </StyledText>
         <AntDesign name="arrowright" size={24} color={colors.subbedText} />
-        <TokenImageWithChain
+        <TokenLogoWithChain
           logoURI={outputToken.logoURI}
           chainId={outputChainId}
         />

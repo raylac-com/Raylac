@@ -1,31 +1,30 @@
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { useRef } from 'react';
 import {
-  formatAmount,
-  formatUsdValue,
-  TokenBalancesReturnType,
+  getPerAddressTokenBalance,
+  PerAddressTokenBalance,
+  Token,
 } from '@raylac/shared';
 import StyledText from '../StyledText/StyledText';
 import { View } from 'react-native';
-import { Image } from 'expo-image';
 import TokenLogo from '../FastImage/TokenLogo';
 import colors from '@/lib/styles/colors';
-import { hexToBigInt } from 'viem';
 import fontSizes from '@/lib/styles/fontSizes';
-import { getChainIcon } from '@/lib/utils';
-import BigNumber from 'bignumber.js';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import useTokenBalances from '@/hooks/useTokenBalances';
+import { Balance } from '@raylac/shared/src/types';
+import { Hex } from 'viem';
+import WalletIconAddress from '../WalletIconAddress/WalletIconAddress';
+import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 
 const ChainTokenBalance = ({
   chainId,
-  symbol,
-  formattedBalance,
-  usdValue,
+  token,
+  balance,
 }: {
   chainId: number;
-  symbol: string;
-  formattedBalance: string;
-  usdValue: string;
+  token: Token;
+  balance: Balance;
 }) => {
   return (
     <View
@@ -38,37 +37,82 @@ const ChainTokenBalance = ({
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
       >
-        <Image
-          source={getChainIcon(chainId)}
-          style={{
-            width: 24,
-            height: 24,
-          }}
-        ></Image>
+        <TokenLogoWithChain
+          chainId={chainId}
+          logoURI={token.logoURI}
+          size={24}
+        />
         <StyledText
           style={{
+            fontWeight: 'bold',
             color: colors.subbedText,
           }}
-        >
-          {formattedBalance} {symbol}
-        </StyledText>
+        >{`$${balance.usdValueFormatted}`}</StyledText>
       </View>
-      <StyledText>{`$${formatUsdValue(new BigNumber(usdValue))}`}</StyledText>
+      <StyledText
+        style={{
+          color: colors.subbedText,
+        }}
+      >
+        {balance.formatted} {token.symbol}
+      </StyledText>
+    </View>
+  );
+};
+
+const AddressTokenBalance = ({
+  address,
+  token,
+  balance,
+}: {
+  address: Hex;
+  token: Token;
+  balance: PerAddressTokenBalance['perAddressBreakdown'][number];
+}) => {
+  return (
+    <View style={{ flexDirection: 'column', rowGap: 8 }}>
+      <WalletIconAddress address={address} />
+      <View
+        style={{
+          flexDirection: 'column',
+          rowGap: 16,
+          borderWidth: 1,
+          borderColor: colors.border,
+          borderRadius: 16,
+          padding: 16,
+        }}
+      >
+        {balance.chainBalances.map((chainTokenBalance, i) => (
+          <ChainTokenBalance
+            key={i}
+            chainId={chainTokenBalance.chainId}
+            token={token}
+            balance={chainTokenBalance.balance}
+          />
+        ))}
+      </View>
     </View>
   );
 };
 
 export interface TokenBalanceDetailsSheetProps {
-  tokenBalance: TokenBalancesReturnType[number];
+  token: Token;
   onClose: () => void;
 }
 
 const TokenBalanceDetailsSheet = ({
-  tokenBalance,
+  token,
   onClose,
 }: TokenBalanceDetailsSheetProps) => {
   const ref = useRef<BottomSheet>(null);
   const insets = useSafeAreaInsets();
+
+  const { data: tokenBalances } = useTokenBalances();
+
+  const perAddressBalances = getPerAddressTokenBalance({
+    tokenBalances: tokenBalances ?? [],
+    token,
+  });
 
   return (
     <BottomSheet
@@ -89,9 +133,7 @@ const TokenBalanceDetailsSheet = ({
           flex: 1,
           flexDirection: 'column',
           alignItems: 'center',
-          rowGap: 60,
-          paddingTop: 32,
-          paddingHorizontal: 42,
+          paddingHorizontal: 16,
           paddingBottom: 32,
         }}
       >
@@ -99,53 +141,51 @@ const TokenBalanceDetailsSheet = ({
           style={{
             width: '100%',
             flexDirection: 'column',
-            alignItems: 'center',
             borderRadius: 32,
             paddingVertical: 26,
-            borderWidth: 1,
-            borderColor: colors.border,
             rowGap: 24,
           }}
         >
           <View
-            style={{ flexDirection: 'column', alignItems: 'center', rowGap: 6 }}
+            style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
           >
             <TokenLogo
-              source={{ uri: tokenBalance.token.logoURI }}
+              source={{ uri: token.logoURI }}
               style={{
-                width: 90,
-                height: 90,
+                width: 24,
+                height: 24,
               }}
             />
-            <StyledText style={{ fontSize: fontSizes.large }}>
-              {tokenBalance.token.name}
-            </StyledText>
+            <StyledText>{token.name}</StyledText>
           </View>
-          <View style={{ flexDirection: 'column', alignItems: 'center' }}>
-            <StyledText>
-              {formatAmount(
-                hexToBigInt(tokenBalance.balance).toString(),
-                tokenBalance.token.decimals
-              )}
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+            }}
+          >
+            <StyledText
+              style={{ fontSize: fontSizes.xLarge, fontWeight: 'bold' }}
+            >
+              {`$${perAddressBalances.totalBalance.usdValueFormatted}`}
             </StyledText>
             <StyledText style={{ color: colors.subbedText }}>
-              {`$${formatUsdValue(new BigNumber(tokenBalance.usdValue))}`}
+              {perAddressBalances.totalBalance.formatted} {token.symbol}
             </StyledText>
           </View>
         </View>
-        <View style={{ flexDirection: 'column', rowGap: 12 }}>
-          {tokenBalance.breakdown.map((chainTokenBalance, i) => (
-            <ChainTokenBalance
-              key={i}
-              chainId={chainTokenBalance.chainId}
-              symbol={tokenBalance.token.symbol}
-              formattedBalance={formatAmount(
-                hexToBigInt(chainTokenBalance.balance).toString(),
-                tokenBalance.token.decimals
-              )}
-              usdValue={chainTokenBalance.usdValue}
-            />
-          ))}
+        <View style={{ flexDirection: 'column', rowGap: 48 }}>
+          {perAddressBalances.perAddressBreakdown.map(
+            (addressTokenBalance, i) => (
+              <AddressTokenBalance
+                key={i}
+                address={addressTokenBalance.address}
+                token={token}
+                balance={addressTokenBalance}
+              />
+            )
+          )}
         </View>
       </BottomSheetView>
     </BottomSheet>

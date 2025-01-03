@@ -1,28 +1,39 @@
-import StyledButton from '@/components/StyledButton/StyledButton';
+import Entypo from '@expo/vector-icons/Entypo';
+import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import StyledText from '@/components/StyledText/StyledText';
-import { useSignOut } from '@/hooks/useSignOut';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
+import colors from '@/lib/styles/colors';
+
+const SettingsListItem = ({
+  title,
+  icon,
+  onPress,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  onPress: () => void;
+}) => {
+  return (
+    <FeedbackPressable
+      onPress={onPress}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+    >
+      {icon}
+      <StyledText>{title}</StyledText>
+    </FeedbackPressable>
+  );
+};
 
 const Settings = () => {
   const navigation = useTypedNavigation();
 
-  const { mutateAsync: signOut, isPending: isSigningOut } = useSignOut();
-
-  const onAddAddressPress = () => {
-    navigation.navigate('AddAddress');
+  const onAddressesPress = () => {
+    navigation.navigate('Addresses');
   };
 
   const onAdvancedPress = () => {
     navigation.navigate('Advanced');
-  };
-
-  const onSignOutPress = async () => {
-    await signOut();
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Start' }],
-    });
   };
 
   return (
@@ -34,19 +45,18 @@ const Settings = () => {
         padding: 16,
       }}
     >
-      <View style={{ flexDirection: 'column', gap: 16 }}>
-        <Pressable onPress={onAddAddressPress}>
-          <StyledText>{`Add address`}</StyledText>
-        </Pressable>
-        <Pressable onPress={onAdvancedPress}>
-          <StyledText>{`Advanced`}</StyledText>
-        </Pressable>
+      <View style={{ flexDirection: 'column', gap: 28 }}>
+        <SettingsListItem
+          title="Addresses"
+          icon={<Entypo name="wallet" size={24} color={colors.border} />}
+          onPress={onAddressesPress}
+        />
+        <SettingsListItem
+          title="Advanced"
+          icon={<Entypo name="rocket" size={24} color={colors.border} />}
+          onPress={onAdvancedPress}
+        />
       </View>
-      <StyledButton
-        title="Sign out"
-        onPress={onSignOutPress}
-        isLoading={isSigningOut}
-      />
     </View>
   );
 };

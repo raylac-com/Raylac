@@ -1,4 +1,4 @@
-import { Token } from '@raylac/shared';
+import { Balance, Token } from '@raylac/shared';
 import { Hex } from 'viem';
 
 export type RootTabsParamsList = {
@@ -36,26 +36,36 @@ export type RootStackParamsList = {
   // Send stack
   SelectRecipient: undefined;
   SelectToken: {
-    address: Hex;
+    toAddress: Hex;
+  };
+  SelectFromAddress: {
+    toAddress: Hex;
+    token: Token;
+    chainId: number;
   };
   SelectAmount: {
-    address: Hex;
+    toAddress: Hex;
+    fromAddresses: Hex[];
     token: Token;
+    chainId: number;
   };
   SelectChain: {
-    address: Hex;
-    amount: string;
+    toAddress: Hex;
     token: Token;
   };
   ConfirmSend: {
-    address: Hex;
+    fromAddresses: Hex[];
     token: Token;
-    amount: string;
-    outputChainId: number;
+    amount: Balance;
+    chainId: number;
+    toAddress: Hex;
   };
+  MoveFunds: undefined;
 
   SaveBackupPhrase: undefined;
   ConfirmBackupPhrase: undefined;
 
+  Addresses: undefined;
   AddAddress: undefined;
+  CreateAddress: undefined;
 };

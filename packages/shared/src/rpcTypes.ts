@@ -10,27 +10,27 @@ import {
   SwapOutput,
   SwapInput,
   CrossChainSwapStep,
+  ApproveStep,
+  SwapStep,
+  SignedSingleInputSwapStep,
+  SignedApproveStep,
+  Balance,
 } from './types';
 
 export enum TRPCErrorMessage {
   SWAP_AMOUNT_TOO_SMALL = 'Swap output amount is too small to cover fees required to execute swap',
   SWAP_NO_ROUTES_FOUND = 'No routes found for the requested swap',
   SWAP_INSUFFICIENT_LIQUIDITY = 'Solver has insufficient liquidity for this swap',
+  INSUFFICIENT_BALANCE = 'Insufficient balance',
 }
 
 export type SupportedTokensReturnType = Token[];
 
 export type TokenBalancesReturnType = {
+  address: Hex;
+  chainId: number;
   token: Token;
-  balance: Hex;
-  usdValue: string;
-  tokenPrice: string;
-  breakdown: {
-    chainId: number;
-    balance: Hex;
-    tokenAddress: Hex;
-    usdValue: string;
-  }[];
+  balance: Balance;
 }[];
 
 export interface SendTransactionRequestBody {
@@ -61,6 +61,56 @@ export interface BuildMultiChainSendReturnType {
   outputAmountUsd: string;
   bridgeSteps: BridgeStep[];
   transferStep: TransferStep;
+}
+
+export interface BuildSendRequestBody {
+  amount: string;
+  token: Token;
+  fromAddress: Hex;
+  toAddress: Hex;
+  chainId: number;
+}
+
+export interface BuildSendReturnType {
+  tx: {
+    to: Hex;
+    data: Hex;
+    value: string;
+    maxFeePerGas: string;
+    maxPriorityFeePerGas: string;
+    nonce: number;
+    chainId: number;
+    gas: number;
+  };
+  transfer: {
+    from: Hex;
+    to: Hex;
+    amount: Balance;
+    token: Token;
+    gasFee: Balance;
+  };
+}
+
+export interface SendTxRequestBody {
+  signedTx: Hex;
+  chainId: number;
+  transfer: {
+    from: Hex;
+    to: Hex;
+    amount: Balance;
+    token: Token;
+  };
+}
+
+export interface SendBridgeTxRequestBody {
+  signedTxs: Hex[];
+  chainId: number;
+  transfer: {
+    from: Hex;
+    to: Hex;
+    amount: Balance;
+    token: Token;
+  };
 }
 
 export interface GetSwapQuoteRequestBody {
@@ -105,6 +155,29 @@ export type GetSingleChainSwapQuoteReturnType = {
   amountOutUsd: string;
 };
 
+export interface GetSingleInputSwapQuoteRequestBody {
+  sender: Hex;
+  amount: string;
+  inputToken: Token;
+  outputToken: Token;
+  inputChainId: number;
+  outputChainId: number;
+}
+
+export type GetSingleInputSwapQuoteReturnType = {
+  approveStep: ApproveStep | null;
+  swapStep: SwapStep;
+  amountIn: string;
+  amountOut: string;
+  amountInFormatted: string;
+  amountOutFormatted: string;
+  amountInUsd: string;
+  amountOutUsd: string;
+  relayerServiceFeeUsd: string;
+  originChainGasAmountFormatted: string;
+  originChainGasUsd: string;
+};
+
 export interface SubmitSwapRequestBody {
   sender: Hex;
   signedSwapSteps: SignedCrossChainSwapStep[];
@@ -122,6 +195,11 @@ export interface SubmitSingleChainSwapRequestBody {
   signedSwapSteps: SignedCrossChainSwapStep[];
 }
 
+export interface SubmitSingleInputSwapRequestBody {
+  signedApproveStep: SignedApproveStep | null;
+  signedSwapStep: SignedSingleInputSwapStep;
+}
+
 export interface GetTokenPriceRequestBody {
   tokenAddress: Hex;
   chainId: number;
@@ -130,7 +208,7 @@ export interface GetTokenPriceRequestBody {
 export type GetTokenPriceReturnType = AlchemyTokenPriceResponse;
 
 export interface GetHistoryRequestBody {
-  address: Hex;
+  addresses: Hex[];
 }
 
 export type TransferHistoryItem = {
@@ -171,4 +249,58 @@ export type SwapHistoryItem = {
 
 export type HistoryItem = TransferHistoryItem | SwapHistoryItem;
 
-export type GetHistoryReturnType = HistoryItem[];
+export enum HistoryItemType {
+  OUTGOING = 'outgoing',
+  INCOMING = 'incoming',
+  MOVE_FUNDS = 'move_funds',
+  PENDING = 'pending',
+}
+
+export type GetHistoryReturnType = {
+  from: Hex;
+  to: Hex;
+  token: Token;
+  chainId: number;
+  amount: Balance;
+  timestamp: string;
+  type: HistoryItemType;
+  txHash: Hex;
+}[];
+
+export interface GetEstimatedTransferGasRequestBody {
+  chainId: number;
+  token: Token;
+  to: Hex;
+  from: Hex;
+  amount: string;
+  maxFeePerGas: string;
+}
+
+export type GetEstimatedTransferGasReturnType = Balance;
+
+export interface BuildBridgeSendRequestBody {
+  from: Hex;
+  to: Hex;
+  token: Token;
+  amount: string;
+  fromChainId: number;
+  toChainId: number;
+}
+
+export type BuildBridgeSendReturnType = {
+  steps: CrossChainSwapStep[];
+  transfer: {
+    from: Hex;
+    to: Hex;
+    amount: Balance;
+    token: Token;
+  };
+  originChainGas: Balance;
+  relayerServiceFeeToken: Token;
+  relayerServiceFee: Balance;
+  amountIn: Balance;
+  amountOut: Balance;
+  relayerFeeChainId: number;
+};
+
+export type GetTokenUsdPriceReturnType = number | null;

@@ -1,4 +1,3 @@
-import useUserAccount from '@/hooks/useUserAccount';
 import { trpc } from '@/lib/trpc';
 import {
   ActivityIndicator,
@@ -7,22 +6,13 @@ import {
   RefreshControl,
   View,
 } from 'react-native';
-import SwapHistoryListItem from '@/components/SwapHistoryListItem/SwapHistoryListItem';
-import { zeroAddress } from 'viem';
 import colors from '@/lib/styles/colors';
-import SwapDetailsSheet from '@/sheets/SwapDetailsSheet/SwapDetailsSheet';
-import { useState } from 'react';
 import StyledText from '@/components/StyledText/StyledText';
-import {
-  HistoryItem,
-  SwapHistoryItem,
-  TransferHistoryItem,
-} from '@raylac/shared';
-import SendHistoryListItem from '@/components/SendHistoryListItem/SendHistoryListItem';
+import useUserAddresses from '@/hooks/useUserAddresses';
+import HistoryListItem from '@/components/HistoryListItem/HistoryListItem';
 
 const History = () => {
-  const { data: userAccount } = useUserAccount();
-  const [selectedSwap, setSelectedSwap] = useState<HistoryItem | null>(null);
+  const { data: addresses } = useUserAddresses();
 
   const {
     data: swapHistory,
@@ -31,10 +21,11 @@ const History = () => {
     refetch,
   } = trpc.getHistory.useQuery(
     {
-      address: userAccount?.address ?? zeroAddress,
+      addresses: addresses?.map(address => address.address) ?? [],
     },
     {
-      enabled: !!userAccount,
+      enabled: !!addresses,
+      refetchOnWindowFocus: true,
     }
   );
 
@@ -66,20 +57,13 @@ const History = () => {
         contentContainerStyle={{
           paddingVertical: 32,
           paddingHorizontal: 16,
+          rowGap: 24,
         }}
         data={swapHistory ?? []}
         renderItem={({ item }) => {
-          if ('token' in item) {
-            return (
-              <Pressable onPress={() => {}}>
-                <SendHistoryListItem transfer={item as TransferHistoryItem} />
-              </Pressable>
-            );
-          }
-
           return (
-            <Pressable onPress={() => setSelectedSwap(item)}>
-              <SwapHistoryListItem swap={item as SwapHistoryItem} />
+            <Pressable onPress={() => {}}>
+              <HistoryListItem transfer={item} />
             </Pressable>
           );
         }}
@@ -93,14 +77,6 @@ const History = () => {
           />
         }
       />
-      {selectedSwap && (
-        <SwapDetailsSheet
-          swap={selectedSwap as SwapHistoryItem}
-          onClose={() => {
-            setSelectedSwap(null);
-          }}
-        />
-      )}
     </View>
   );
 };

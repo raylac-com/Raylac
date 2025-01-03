@@ -9,7 +9,6 @@ import {
 } from 'viem/accounts';
 import { TRPCError } from '@trpc/server';
 import {
-  buildSwapIo,
   getGasInfo,
   getPublicClient,
   getSenderAddressV2,

@@ -8,7 +8,8 @@ import Toast from 'react-native-toast-message';
 import { setBackupVerificationStatus } from '@/lib/key';
 import MnemonicWord from '@/components/MnemonicWord/MnemonicWord';
 import fontSizes from '@/lib/styles/fontSizes';
-import useMnemonicAndPrivKey from '@/hooks/useMnemonic';
+import useMnemonic from '@/hooks/useMnemonic';
+import { zeroAddress } from 'viem';
 
 const generateRandomNumbers = ({
   max,
@@ -58,7 +59,7 @@ const pickRandom = ({ array, count }: { array: any[]; count: number }) => {
 };
 
 const ConfirmBackupPhrase = () => {
-  const { mnemonic } = useMnemonicAndPrivKey();
+  const { mnemonic } = useMnemonic();
   const [userInputs, setUserInputs] = useState<string[]>([]);
   const [hideIndices, _setHideIndices] = useState<number[]>(
     generateRandomConsecutiveNumbers({ max: 11, count: 3 })
@@ -113,7 +114,10 @@ const ConfirmBackupPhrase = () => {
             visibilityTime: 1500,
           });
 
-          await setBackupVerificationStatus('complete');
+          await setBackupVerificationStatus({
+            address: zeroAddress,
+            status: 'complete',
+          });
 
           navigation.navigate('Tabs', {
             screen: 'Home',

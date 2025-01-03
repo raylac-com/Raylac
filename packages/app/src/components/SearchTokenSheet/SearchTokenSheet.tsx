@@ -2,7 +2,7 @@ import Skeleton from '@/components/Skeleton/Skeleton';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
-import { formatAmount, supportedChains, Token } from '@raylac/shared';
+import { Balance, supportedChains, Token } from '@raylac/shared';
 import { useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
@@ -21,7 +21,7 @@ const TokenListItem = ({
   onPress,
 }: {
   token: Token;
-  balance: bigint;
+  balance: Balance | null;
   onPress: () => void;
 }) => {
   const tokenChainIds = token.addresses.map(address => address.chainId);
@@ -57,7 +57,7 @@ const TokenListItem = ({
             )}
           </View>
           <StyledText style={{ color: colors.border }}>
-            {formatAmount(balance.toString(), token.decimals)} {token.symbol}
+            {balance?.formatted} {token.symbol}
           </StyledText>
         </View>
       </View>
@@ -150,7 +150,6 @@ const SearchTokenSheet = ({
       )
       .map(token => ({
         token: token,
-        balance: BigInt(0),
       })) ?? [];
 
   const tokenList = [...tokensWithBalances, ...tokensWithoutBalances];
@@ -197,7 +196,7 @@ const SearchTokenSheet = ({
           return (
             <TokenListItem
               token={item.token}
-              balance={item.balance}
+              balance={null}
               onPress={() => {
                 onSelectToken(item.token);
               }}

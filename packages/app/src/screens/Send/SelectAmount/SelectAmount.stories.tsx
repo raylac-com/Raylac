@@ -15,7 +15,9 @@ const meta = {
       name: 'SelectAmount',
       key: 'SelectAmount',
       params: {
-        address: '0x0000000000000000000000000000000000000000',
+        chainId: base.id,
+        toAddress: '0x0000000000000000000000000000000000000000',
+        fromAddresses: ['0x400EA6522867456E988235675b9Cb5b1Cf5b79C8'],
         token: {
           symbol: 'ETH',
           name: 'Ethereum',

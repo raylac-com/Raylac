@@ -3,39 +3,42 @@ import { z } from 'zod';
 import { publicProcedure, router, createCallerFactory } from './trpc';
 import { createContext } from './context';
 import { webcrypto } from 'node:crypto';
-import getTokenBalances, {
-  getETHBalance,
-} from './api/getTokenBalances/getTokenBalances';
-import getTokenBalancesMock from './api/getTokenBalances/getTokenBalances.mock';
+import getTokenBalances from './api/getTokenBalances/getTokenBalances';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { Hex } from 'viem';
 import getSupportedTokens from './api/getSupportedTokens/getSupportedTokens';
 import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.mock';
 import {
-  BuildMultiChainSendRequestBody,
+  BuildSendRequestBody,
   GetHistoryRequestBody,
   GetSingleChainSwapQuoteRequestBody,
+  GetSingleInputSwapQuoteRequestBody,
+  SendTxRequestBody,
   GetSwapQuoteRequestBody,
-  SendTransactionRequestBody,
   SubmitSingleChainSwapRequestBody,
+  SubmitSingleInputSwapRequestBody,
   SubmitSwapRequestBody,
-  TokenSet,
+  GetEstimatedTransferGasRequestBody,
+  BuildBridgeSendRequestBody,
+  Token,
+  SendBridgeTxRequestBody,
 } from '@raylac/shared';
+import buildSend from './api/buildSend/buildSend';
 import getSwapQuote from './api/getSwapQuote/getSwapQuote';
 import { ed, logger, st } from '@raylac/shared-backend';
 import getTokenPrice from './api/getTokenPrice/getTokenPrice';
 import { getTokenPriceMock } from './api/getTokenPrice/getTokenPrice.mock';
-import getToken from './api/getToken/getToken';
-import getTokenMock from './api/getToken/getToken.mock';
 import submitSwap from './api/submitSwap/submitSwap';
-import sendTransaction from './api/sendTransaction/sendTransaction';
-import buildMultiChainSend from './api/buildMultichainSend/buildMultichainSend';
 import getHistory from './api/getHistory/getHistory';
 import getSingleChainSwapQuote from './api/getSingleChainSwapQuote/getSingleChainSwapQuote';
 import submitSingleChainSwap from './api/submitSingleChainSwap/submitSingleChainSwap';
 import getLidoApy from './api/getLidoApy/getLidoApy';
-import getSetBalances from './api/getSetBalances/getSetBalances';
-import getSet from './api/getSet/getSet';
+import getSingleInputSwapQuote from './api/getSingleInputSwapQuote/getSingleInputSwapQuote';
+import submitSingleInputSwap from './api/submitSingleInputSwap/submitSingleInputSwap';
+import sendTx from './api/sendTx/sendTx';
+import getEstimatedTransferGas from './api/getEstimatedTransferGas/getEstimatedTransferGas';
+import buildBridgeSend from './api/buildBridgeSend/buildBridgeSend';
+import sendBridgeTx from './api/sendBridgeTx/sendBridgeTx';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -58,51 +61,11 @@ export const appRouter = router({
   getTokenBalances: publicProcedure
     .input(
       z.object({
-        address: z.string(),
+        addresses: z.array(z.string()),
       })
     )
     .query(async ({ input }) => {
-      return MOCK_RESPONSE
-        ? getTokenBalancesMock({ address: input.address as Hex })
-        : getTokenBalances({ address: input.address as Hex });
-    }),
-
-  getToken: publicProcedure
-    .input(z.object({ tokenAddress: z.string() }))
-    .query(async ({ input }) => {
-      return MOCK_RESPONSE
-        ? getTokenMock({
-            tokenAddress: input.tokenAddress as Hex,
-          })
-        : getToken({
-            tokenAddress: input.tokenAddress as Hex,
-          });
-    }),
-
-  getETHBalance: publicProcedure
-    .input(z.object({ address: z.string(), chainId: z.number() }))
-    .query(async ({ input }) => {
-      return getETHBalance({
-        address: input.address as Hex,
-        chainId: input.chainId,
-      });
-    }),
-
-  getSetBalances: publicProcedure
-    .input(
-      z.object({ set: z.nativeEnum(TokenSet), addresses: z.array(z.string()) })
-    )
-    .query(async ({ input }) => {
-      return getSetBalances({
-        set: input.set as TokenSet,
-        addresses: input.addresses as Hex[],
-      });
-    }),
-
-  getSet: publicProcedure
-    .input(z.object({ set: z.nativeEnum(TokenSet) }))
-    .query(async ({ input }) => {
-      return getSet(input.set as TokenSet);
+      return getTokenBalances({ addresses: input.addresses as Hex[] });
     }),
 
   getLidoApy: publicProcedure.query(async () => {
@@ -119,17 +82,29 @@ export const appRouter = router({
       return submitSingleChainSwap(input as SubmitSingleChainSwapRequestBody);
     }),
 
-  sendTransaction: publicProcedure
+  submitSingleInputSwap: publicProcedure
     .input(z.any())
     .mutation(async ({ input }) => {
-      return sendTransaction(input as SendTransactionRequestBody);
+      return submitSingleInputSwap(input as SubmitSingleInputSwapRequestBody);
     }),
 
-  buildMultiChainSend: publicProcedure
+  buildSend: publicProcedure.input(z.any()).mutation(async ({ input }) => {
+    return buildSend(input as BuildSendRequestBody);
+  }),
+
+  buildBridgeSend: publicProcedure
     .input(z.any())
     .mutation(async ({ input }) => {
-      return buildMultiChainSend(input as BuildMultiChainSendRequestBody);
+      return buildBridgeSend(input as BuildBridgeSendRequestBody);
     }),
+
+  sendTx: publicProcedure.input(z.any()).mutation(async ({ input }) => {
+    return sendTx(input as SendTxRequestBody);
+  }),
+
+  sendBridgeTx: publicProcedure.input(z.any()).mutation(async ({ input }) => {
+    return sendBridgeTx(input as SendBridgeTxRequestBody);
+  }),
 
   getSwapQuote: publicProcedure.input(z.any()).mutation(async ({ input }) => {
     return getSwapQuote(input as GetSwapQuoteRequestBody);
@@ -143,10 +118,18 @@ export const appRouter = router({
       );
     }),
 
+  getSingleInputSwapQuote: publicProcedure
+    .input(z.any())
+    .mutation(async ({ input }) => {
+      return getSingleInputSwapQuote(
+        input as GetSingleInputSwapQuoteRequestBody
+      );
+    }),
+
   getHistory: publicProcedure
     .input(
       z.object({
-        address: z.string(),
+        addresses: z.array(z.string()),
       })
     )
     .query(async ({ input }) => {
@@ -185,17 +168,23 @@ export const appRouter = router({
     }),
 
   getTokenPrice: publicProcedure
-    .input(z.object({ tokenAddress: z.string(), chainId: z.number() }))
+    .input(z.object({ token: z.any() }))
     .mutation(async ({ input }) => {
       return MOCK_RESPONSE
         ? getTokenPriceMock({
-            tokenAddress: input.tokenAddress as Hex,
-            chainId: input.chainId,
+            token: input.token as Token,
           })
         : getTokenPrice({
-            tokenAddress: input.tokenAddress as Hex,
-            chainId: input.chainId,
+            token: input.token as Token,
           });
+    }),
+
+  getEstimatedTransferGas: publicProcedure
+    .input(z.any())
+    .mutation(async ({ input }) => {
+      return getEstimatedTransferGas(
+        input as GetEstimatedTransferGasRequestBody
+      );
     }),
 
   getGitCommit: publicProcedure.query(async () => {

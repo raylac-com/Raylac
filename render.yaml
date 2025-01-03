@@ -7,7 +7,7 @@ services:
     previewPlan: starter
     runtime: node
     region: oregon
-    buildCommand: rm -rf ./packages/{app,contracts,scripts,web} && pnpm i --ignore-scripts && pnpm build
+    buildCommand: rm -rf ./packages/{app,scripts,web} && pnpm i --ignore-scripts && pnpm build
     startCommand: NODE_ENV=production pnpm -F api start
     preDeployCommand: pnpm -F db migrate:prod
     autoDeploy: true
@@ -19,33 +19,20 @@ services:
         fromDatabase:
           name: raylac
           property: connectionString
-      - key: ANVIL_RPC_URL
+      - key: REDIS_URL
         fromService:
-          name: anvil
-          type: web
-          envVarKey: RENDER_EXTERNAL_URL
-  - type: web
-    name: raylac-web
-    plan: standard
-    previewPlan: starter
-    runtime: node
-    region: oregon
-    buildCommand: rm -rf ./packages/{app,contracts,scripts} && pnpm i --ignore-scripts && pnpm build
-    startCommand: NODE_ENV=production pnpm -F web start
-    autoDeploy: true
-    envVars:
-      - fromGroup: raylac
-      - key: NODE_VERSION
-        value: 18.18.0
-      - key: DATABASE_URL
-        fromDatabase:
-          name: raylac
+          name: raylac-redis
+          type: redis
           property: connectionString
-      - key: NEXT_PUBLIC_API_URL
-        fromService:
-          name: raylac-api
-          type: web
-          envVarKey: RENDER_EXTERNAL_URL
+      
+     # A Redis instance that allows all external connections
+  - type: redis
+    name: raylac-redis
+    plan: starter
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: everywhere
+
 
 databases:
   - name: raylac

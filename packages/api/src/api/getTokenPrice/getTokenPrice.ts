@@ -1,46 +1,16 @@
-import { Hex, zeroAddress } from 'viem';
-import {
-  getTokenPriceByAddress,
-  getTokenPriceBySymbol,
-} from '../../lib/alchemy';
-import { AlchemyTokenPriceResponse } from '@raylac/shared';
+import { GetTokenUsdPriceReturnType, Token } from '@raylac/shared';
+import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
 
 const getTokenPrice = async ({
-  tokenAddress,
-  chainId,
+  token,
 }: {
-  tokenAddress: Hex;
-  chainId: number;
-}): Promise<AlchemyTokenPriceResponse> => {
-  if (tokenAddress === zeroAddress) {
-    return getTokenPriceBySymbol('ETH');
-  }
-
-  const result = await getTokenPriceByAddress({
-    address: tokenAddress,
-    chainId,
+  token: Token;
+}): Promise<GetTokenUsdPriceReturnType> => {
+  const price = await getTokenUsdPrice({
+    token,
   });
 
-  const usdPrice = result.prices.find(p => p.currency === 'usd');
-
-  // Return the price as 0 if the last update of the price is more than 24 hours ago
-  if (
-    usdPrice &&
-    new Date(usdPrice.lastUpdatedAt).getTime() <
-      Date.now() - 24 * 60 * 60 * 1000
-  ) {
-    return {
-      ...result,
-      prices: [
-        {
-          ...usdPrice,
-          value: '0',
-        },
-      ],
-    };
-  }
-
-  return result;
+  return price;
 };
 
 export default getTokenPrice;

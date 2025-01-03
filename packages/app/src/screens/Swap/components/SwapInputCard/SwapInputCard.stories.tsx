@@ -9,15 +9,6 @@ import { zeroAddress } from 'viem';
 const meta = {
   title: 'SwapInputCard',
   component: SwapInputCard,
-  argTypes: {
-    token: {
-      control: {
-        type: 'object',
-      },
-    },
-    amount: { control: 'text' },
-    isLoadingBalance: { control: 'boolean' },
-  },
   args: {
     token: {
       addresses: [
@@ -38,6 +29,8 @@ const meta = {
     amount: '100',
     setToken: () => {},
     setAmount: () => {},
+    chainId: base.id,
+    setChainId: () => {},
   },
   decorators: [
     Story => (

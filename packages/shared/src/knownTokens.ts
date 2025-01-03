@@ -1,14 +1,6 @@
 import { supportedChains, Token } from '.';
 import { getAddress, zeroAddress } from 'viem';
-import {
-  arbitrum,
-  base,
-  mainnet,
-  optimism,
-  polygon,
-  scroll,
-  zksync,
-} from 'viem/chains';
+import { arbitrum, base, mainnet, optimism, polygon } from 'viem/chains';
 
 export const ETH: Token = {
   symbol: 'ETH',
@@ -47,6 +39,7 @@ export const USDC: Token = {
       chainId: arbitrum.id,
       address: getAddress('0xaf88d065e77c8cC2239327C5EDb3A432268e5831'),
     },
+    /*
     {
       chainId: polygon.id,
       address: getAddress('0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359'),
@@ -55,6 +48,7 @@ export const USDC: Token = {
       chainId: zksync.id,
       address: getAddress('0x1d17CBcF0D6D143135aE902365D2E5e2A16538D4'),
     },
+    */
   ],
 };
 
@@ -63,13 +57,16 @@ export const WST_ETH: Token = {
   name: 'Wrapped staked ETH',
   decimals: 18,
   verified: true,
-  logoURI: 'https://arbiscan.io/token/images/lido_32.png',
+  logoURI:
+    'https://firebasestorage.googleapis.com/v0/b/raylac-72351.appspot.com/o/wsteth.png?alt=media&token=c80c5f5e-6ada-47cf-8a30-87fd6f374bad',
   color: '#B2D7E5',
   addresses: [
+    /*
     {
       chainId: mainnet.id,
       address: getAddress('0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0'),
     },
+    */
     {
       chainId: arbitrum.id,
       address: getAddress('0x5979D7b546E38E414F7E9822514be443A4800529'),
@@ -82,10 +79,12 @@ export const WST_ETH: Token = {
       chainId: base.id,
       address: getAddress('0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452'),
     },
+    /*
     {
       chainId: scroll.id,
       address: getAddress('0xf610A9dfB7C89644979b4A0f27063E9e7d7Cda32'),
     },
+    */
   ],
 };
 

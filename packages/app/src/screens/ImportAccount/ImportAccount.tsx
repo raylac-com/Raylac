@@ -6,15 +6,18 @@ import Toast from 'react-native-toast-message';
 import MultiLineInput from '@/components/MultiLineInput';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useImportPrivKey from '@/hooks/useImportPrivKey';
-import { isHex } from 'viem';
+import { Hex, isHex } from 'viem';
+import * as bip39 from 'bip39';
+import useImportMnemonic from '@/hooks/useImportMnemonic';
 
 /**
  * Sign in screen
  */
 const ImportAccount = () => {
   const insets = useSafeAreaInsets();
-  const [privKey, setPrivKey] = useState('');
-  const [isPrivKeyValid, setIsPrivKeyValid] = useState(false);
+  const [inputText, setInputText] = useState('');
+  const [isInputPrivKey, setIsInputPrivKey] = useState(false);
+  const [isInputMnemonic, setIsInputMnemonic] = useState(false);
 
   const {
     mutateAsync: importPrivKey,
@@ -22,14 +25,46 @@ const ImportAccount = () => {
     error: importPrivKeyError,
   } = useImportPrivKey();
 
+  const {
+    mutateAsync: importMnemonic,
+    isPending: isImportingMnemonic,
+    error: importMnemonicError,
+  } = useImportMnemonic();
+
   const navigation = useTypedNavigation();
 
-  const onImportPrivKeyPress = useCallback(async () => {
-    if (isHex(privKey)) {
-      await importPrivKey({ privKey });
+  const onImportPress = useCallback(async () => {
+    if (isInputPrivKey) {
+      // Sanity check
+      if (!isHex(inputText)) {
+        throw new Error('Invalid private key');
+      }
+
+      await importPrivKey({ privKey: inputText as Hex });
       navigation.navigate('Tabs', { screen: 'Home' });
+      return;
     }
-  }, [importPrivKey, privKey]);
+
+    if (isInputMnemonic) {
+      // Sanity check
+      if (!bip39.validateMnemonic(inputText)) {
+        throw new Error('Invalid mnemonic');
+      }
+
+      await importMnemonic({ mnemonic: inputText });
+      navigation.navigate('Tabs', { screen: 'Home' });
+      return;
+    }
+
+    throw new Error('Invalid input');
+  }, [
+    importPrivKey,
+    importMnemonic,
+    navigation,
+    inputText,
+    isInputPrivKey,
+    isInputMnemonic,
+  ]);
 
   useEffect(() => {
     if (importPrivKeyError) {
@@ -39,14 +74,34 @@ const ImportAccount = () => {
         type: 'error',
       });
     }
-  }, [importPrivKeyError]);
+
+    if (importMnemonicError) {
+      Toast.show({
+        text1: 'Error',
+        text2: importMnemonicError.message,
+        type: 'error',
+      });
+    }
+  }, [importPrivKeyError, importMnemonicError]);
 
   useEffect(() => {
-    if (privKey) {
-      const _isPrivKeyValid = isHex(privKey);
-      setIsPrivKeyValid(_isPrivKeyValid);
+    if (inputText) {
+      const _isInputPrivKey = isHex(inputText);
+
+      setIsInputPrivKey(_isInputPrivKey);
+
+      const _isInputMnemonic = bip39.validateMnemonic(inputText);
+      setIsInputMnemonic(_isInputMnemonic);
     }
-  }, [privKey]);
+  }, [inputText]);
+
+  useEffect(() => {
+    return () => {
+      setInputText('');
+      setIsInputPrivKey(false);
+      setIsInputMnemonic(false);
+    };
+  }, []);
 
   return (
     <View
@@ -56,7 +111,7 @@ const ImportAccount = () => {
         justifyContent: 'space-between',
         rowGap: 16,
         padding: 16,
-        paddingBottom: insets.bottom,
+        paddingBottom: insets.bottom + 32,
       }}
     >
       <MultiLineInput
@@ -64,15 +119,15 @@ const ImportAccount = () => {
         autoFocus
         autoCapitalize="none"
         multiline
-        placeholder={'Enter your private key'}
-        value={privKey}
-        onChangeText={setPrivKey}
+        placeholder={'Enter mnemonic or private key'}
+        value={inputText}
+        onChangeText={setInputText}
       ></MultiLineInput>
       <StyledButton
-        isLoading={isImportingPrivKey}
-        title={'Import account'}
-        onPress={onImportPrivKeyPress}
-        disabled={!isPrivKeyValid}
+        isLoading={isImportingPrivKey || isImportingMnemonic}
+        title={`Import ${isInputPrivKey ? 'private key' : isInputMnemonic ? 'mnemonic' : 'account'}`}
+        onPress={onImportPress}
+        disabled={!isInputPrivKey && !isInputMnemonic}
       ></StyledButton>
     </View>
   );

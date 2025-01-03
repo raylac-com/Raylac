@@ -7,6 +7,8 @@ import Animated, {
 
 import colors from '@/lib/styles/colors';
 import StyledText from '@/components/StyledText/StyledText';
+import { hapticOptions } from '@/lib/utils';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 interface MenuItemProps {
   icon: React.ReactNode;
@@ -43,7 +45,10 @@ const MenuItem = (props: MenuItemProps) => {
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={() => {
+        ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
+        onPress();
+      }}
       style={{}}
       testID={testID}
       onPressIn={handlePressIn}
@@ -66,8 +71,9 @@ const MenuItem = (props: MenuItemProps) => {
             alignItems: 'center',
             width: 48,
             height: 48,
-            backgroundColor: color ?? colors.text,
             borderRadius: 100,
+            borderColor: colors.border,
+            borderWidth: 2,
           }}
         >
           {icon}

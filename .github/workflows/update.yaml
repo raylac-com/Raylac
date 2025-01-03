@@ -36,7 +36,7 @@ jobs:
       - name: 🏗 Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 18.17.0
+          node-version: 18.18.0
           cache: 'pnpm'
 
       - name: 🏗 Setup EAS
@@ -56,5 +56,7 @@ jobs:
         working-directory: packages/app
 
       - name: 🚀 Create update
-        run: eas update --auto --non-interactive
+        run: eas update --auto --branch main
         working-directory: packages/app
+        env:
+          APP_VARIANT: production

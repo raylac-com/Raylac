@@ -5,6 +5,7 @@ import { SupportedTokensReturnType } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
 import { useSearchOutputTokenSheet } from '@/contexts/SearchOutputTokenSheetContext';
 import { useEffect } from 'react';
+import ChainSelector from '../ChainSelector/ChainSelector';
 
 const SwapOutputCard = ({
   token,
@@ -13,6 +14,8 @@ const SwapOutputCard = ({
   usdAmount,
   setAmount,
   isLoadingAmount,
+  chainId,
+  setChainId,
 }: {
   token: SupportedTokensReturnType[number] | null;
   setToken: (value: SupportedTokensReturnType[number] | null) => void;
@@ -20,6 +23,8 @@ const SwapOutputCard = ({
   usdAmount: number;
   setAmount: (value: string) => void;
   isLoadingAmount: boolean;
+  chainId: number | null;
+  setChainId: (value: number | null) => void;
 }) => {
   const { setIsOpen: setIsOutputTokenOpen, selectedToken } =
     useSearchOutputTokenSheet();
@@ -29,6 +34,8 @@ const SwapOutputCard = ({
       setToken(selectedToken);
     }
   }, [selectedToken]);
+
+  const showChainSelector = token && token.addresses.length > 1;
 
   return (
     <View
@@ -42,6 +49,9 @@ const SwapOutputCard = ({
         rowGap: 14,
       }}
     >
+      {showChainSelector && chainId !== null && (
+        <ChainSelector chainId={chainId} setChainId={setChainId} />
+      )}
       <SwapAmountInput
         selectedToken={token}
         isLoadingAmount={isLoadingAmount}

@@ -1,23 +1,9 @@
-import { AlchemyTokenPriceResponse } from '@raylac/shared';
-import { toAlchemyNetwork } from '../../utils';
-import { Hex } from 'viem';
+import { GetTokenUsdPriceReturnType, Token } from '@raylac/shared';
 
 export const getTokenPriceMock = async ({
-  tokenAddress,
-  chainId,
+  token: _token,
 }: {
-  tokenAddress: Hex;
-  chainId: number;
-}): Promise<AlchemyTokenPriceResponse> => {
-  return {
-    network: toAlchemyNetwork(chainId),
-    address: tokenAddress,
-    prices: [
-      {
-        currency: 'usd',
-        value: '1345.54444444444',
-        lastUpdatedAt: new Date().toISOString(),
-      },
-    ],
-  };
+  token: Token;
+}): Promise<GetTokenUsdPriceReturnType> => {
+  return 1345.54444444444;
 };

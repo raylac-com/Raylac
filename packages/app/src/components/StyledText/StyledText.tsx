@@ -10,7 +10,9 @@ const StyledText = ({ children, ...props }: TextProps) => {
           fontSize: fontSizes.base,
           fontFamily:
             // @ts-ignore
-            props.style?.fontWeight === 'bold' ? 'Lato-Bold' : 'Lato-Regular',
+            props.style?.fontWeight === 'bold'
+              ? 'Nunito-Bold'
+              : 'Nunito-Regular',
         },
         typeof props.style === 'object' ? props.style : {},
       ]}

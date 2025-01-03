@@ -1,22 +1,20 @@
 import { ScrollView, RefreshControl, View, Pressable } from 'react-native';
 import colors from '@/lib/styles/colors';
-import useUserAccount from '@/hooks/useUserAccount';
 import { trpc } from '@/lib/trpc';
-import TokenBalanceCard from '@/components/TokenBalnaceCard';
-import { hexToBigInt, zeroAddress } from 'viem';
+import TokenBalanceItem from '@/components/TokenBalanceItem/TokenBalanceItem';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import MenuItem from './components/MenuItem/MenuItem';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import { Ionicons } from '@expo/vector-icons';
-import { copyToClipboard } from '@/lib/utils';
-import Toast from 'react-native-toast-message';
+import { hapticOptions } from '@/lib/utils';
 import useAccountUsdValue from '@/hooks/useAccountUsdValue';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import TokenBalanceDetailsSheet from '@/components/TokenBalanceDetailsSheet/TokenBalanceDetailsSheet';
-import { TokenBalancesReturnType } from '@raylac/shared';
+import { groupTokenBalancesByToken, Token } from '@raylac/shared';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import useUserAddresses from '@/hooks/useUserAddresses';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import Fav from '@/components/Fav/Fav';
+import TopMenuBar from './components/TopMenuBar/TopMenuBar';
 
 const HomeScreen = () => {
   const navigation = useTypedNavigation();
@@ -27,20 +25,30 @@ const HomeScreen = () => {
   ///
   const [isRefetching, setIsRefetching] = useState(false);
   const [showTokenBalanceDetailsSheet, setShowTokenBalanceDetailsSheet] =
-    useState<TokenBalancesReturnType[number] | null>(null);
+    useState<Token | null>(null);
 
   ///
   /// Queries
   ///
 
-  const { data: userAccount, isLoading: isLoadingAddress } = useUserAccount();
+  const { data: userAddresses } = useUserAddresses();
 
   const { data: tokenBalances, refetch } = trpc.getTokenBalances.useQuery(
     {
-      address: userAccount?.address ?? zeroAddress,
+      addresses: userAddresses?.map(address => address.address) ?? [],
     },
     {
-      enabled: !!userAccount,
+      enabled: !!userAddresses,
+    }
+  );
+
+  // Prefetch history
+  const { data: _history } = trpc.getHistory.useQuery(
+    {
+      addresses: userAddresses?.map(address => address.address) ?? [],
+    },
+    {
+      enabled: !!userAddresses,
     }
   );
 
@@ -53,7 +61,7 @@ const HomeScreen = () => {
 
   useEffect(() => {
     const init = async () => {
-      if (userAccount === null && !isLoadingAddress) {
+      if (userAddresses !== undefined && userAddresses.length === 0) {
         navigation.reset({
           index: 0,
           routes: [{ name: 'Start' }],
@@ -63,36 +71,11 @@ const HomeScreen = () => {
 
     // Only run after the cache is reset and we have a definitive userAccount value
     init();
-  }, [userAccount, isLoadingAddress]);
+  }, [userAddresses]);
 
-  ///
-  /// Handlers
-  ///
-
-  const onDepositPress = () => {
-    if (userAccount) {
-      copyToClipboard(userAccount.address);
-      Toast.show({
-        type: 'success',
-        text1: 'Address copied to clipboard',
-      });
-    } else {
-      Toast.show({
-        type: 'error',
-        text1: 'Address not loaded',
-      });
-    }
-  };
-
-  const onSwapPress = () => {
-    navigation.navigate('Tabs', {
-      screen: 'Swap',
-    });
-  };
-
-  const onSendPress = () => {
-    navigation.navigate('SelectRecipient');
-  };
+  const groupedTokenBalances = groupTokenBalancesByToken({
+    tokenBalances: tokenBalances ?? [],
+  });
 
   return (
     <View
@@ -100,13 +83,13 @@ const HomeScreen = () => {
         flex: 1,
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
+        position: 'relative',
       }}
     >
       <ScrollView
         contentContainerStyle={{
           rowGap: 24,
           paddingVertical: 32,
-          paddingHorizontal: 16,
         }}
         refreshControl={
           <RefreshControl
@@ -121,67 +104,60 @@ const HomeScreen = () => {
         }
         testID="home"
       >
-        <StyledText style={{ fontSize: 36, color: colors.text }}>
-          {isLoadingAccountUsdValue ? (
-            <Skeleton style={{ width: 100, height: 24 }} />
-          ) : (
-            `$${accountUsdValue}`
-          )}
-        </StyledText>
-        <View style={{ flexDirection: 'row', columnGap: 20 }}>
-          <MenuItem
-            icon={<AntDesign name="plus" size={24} color={colors.background} />}
-            title="Deposit"
-            testID="deposit"
-            onPress={onDepositPress}
-          />
-          <MenuItem
-            icon={
-              <Ionicons
-                name="swap-horizontal"
-                size={24}
-                color={colors.background}
-              />
-            }
-            title="Swap"
-            testID="swap"
-            onPress={onSwapPress}
-          />
-          <MenuItem
-            icon={
-              <AntDesign name="arrowup" size={24} color={colors.background} />
-            }
-            title="Send"
-            testID="send"
-            onPress={onSendPress}
-          />
+        <TopMenuBar />
+        <View
+          style={{
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: 184,
+          }}
+        >
+          <StyledText
+            style={{ fontSize: 36, fontWeight: 'bold', color: colors.text }}
+          >
+            {isLoadingAccountUsdValue ? (
+              <Skeleton style={{ width: 100, height: 24 }} />
+            ) : (
+              `$${accountUsdValue}`
+            )}
+          </StyledText>
         </View>
         <View
           style={{
             flexDirection: 'column',
-            rowGap: 8,
+            borderWidth: 1,
+            borderColor: colors.border,
+            borderRadius: 20,
+            borderBottomWidth: 0,
+            padding: 16,
           }}
         >
-          {tokenBalances?.map((item, index) => (
+          {groupedTokenBalances.map((item, index) => (
             <Pressable
               key={index}
-              onPress={() => setShowTokenBalanceDetailsSheet(item)}
+              onPress={() => {
+                ReactNativeHapticFeedback.trigger(
+                  'impactMedium',
+                  hapticOptions
+                );
+                setShowTokenBalanceDetailsSheet(item.token);
+              }}
             >
-              <TokenBalanceCard
-                balance={hexToBigInt(item.balance)}
-                tokenDecimals={item.token.decimals}
+              <TokenBalanceItem
+                balance={item.totalBalance}
                 symbol={item.token.symbol}
                 name={item.token.name}
-                usdValue={item.usdValue}
                 logoUrl={item.token.logoURI}
               />
             </Pressable>
           ))}
         </View>
       </ScrollView>
+      <Fav />
       {showTokenBalanceDetailsSheet && (
         <TokenBalanceDetailsSheet
-          tokenBalance={showTokenBalanceDetailsSheet}
+          token={showTokenBalanceDetailsSheet}
           onClose={() => {
             setShowTokenBalanceDetailsSheet(null);
           }}

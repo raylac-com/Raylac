@@ -1,7 +1,7 @@
 import MnemonicWord from '@/components/MnemonicWord/MnemonicWord';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { getMnemonicAndPrivKey } from '@/lib/key';
+import { getMnemonic, getUserAddresses } from '@/lib/key';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
 import spacing from '@/lib/styles/spacing';
@@ -20,9 +20,10 @@ const SaveBackupPhrase = () => {
   const [mnemonic, setMnemonic] = useState<string | null>(null);
 
   const onRevealPress = useCallback(async () => {
-    const result = await getMnemonicAndPrivKey();
-    if (result) {
-      setMnemonic(result.mnemonic);
+    const addresses = await getUserAddresses();
+    const _mnemonic = await getMnemonic(addresses[0].address);
+    if (_mnemonic) {
+      setMnemonic(_mnemonic);
     } else {
       throw new Error('Failed to get mnemonic');
     }

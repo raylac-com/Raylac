@@ -8,11 +8,12 @@ import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import colors from '../src/lib/styles/colors';
 import Toast from 'react-native-toast-message';
 import { NavigationContainer } from '@react-navigation/native';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 const Provider = ({ children }: { children: React.ReactNode }) => {
   const [loaded, _error] = useFonts({
-    'Lato-Regular': require('../assets/Lato-Regular.ttf'),
-    'Lato-Bold': require('../assets/Lato-Bold.ttf'),
+    'Nunito-Regular': require('../assets/Nunito-Regular.ttf'),
+    'Nunito-Bold': require('../assets/Nunito-Bold.ttf'),
   });
 
   if (!loaded) {
@@ -35,19 +36,21 @@ const Provider = ({ children }: { children: React.ReactNode }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <NavigationContainer>
-          <SafeAreaProvider>
-            <SafeAreaView
-              style={{
-                flex: 1,
-                backgroundColor: colors.background,
-              }}
-            >
-              {children}
-            </SafeAreaView>
-            <Toast></Toast>
-          </SafeAreaProvider>
-        </NavigationContainer>
+        <BottomSheetModalProvider>
+          <NavigationContainer>
+            <SafeAreaProvider>
+              <SafeAreaView
+                style={{
+                  flex: 1,
+                  backgroundColor: colors.background,
+                }}
+              >
+                {children}
+              </SafeAreaView>
+              <Toast></Toast>
+            </SafeAreaProvider>
+          </NavigationContainer>
+        </BottomSheetModalProvider>
       </trpc.Provider>
     </QueryClientProvider>
   );

@@ -8,6 +8,7 @@ import Blockie from '@/components/Blockie/Blockie';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamsList } from '@/navigation/types';
 import useEnsAddress from '@/hooks/useEnsAddress';
+import useUserAddresses from '@/hooks/useUserAddresses';
 
 interface AddressListItemProps {
   address: Hex;
@@ -24,7 +25,6 @@ const AddressListItem = (props: AddressListItemProps) => {
         flexDirection: 'row',
         alignItems: 'center',
         columnGap: 8,
-        marginBottom: 16,
       }}
     >
       <Blockie address={address} size={36}></Blockie>
@@ -53,8 +53,9 @@ const AddressListItem = (props: AddressListItemProps) => {
 type Props = NativeStackScreenProps<RootStackParamsList, 'SelectRecipient'>;
 
 const SelectRecipient = ({ navigation }: Props) => {
-  const [searchInput, setSearchInput] = useState('');
+  const { data: userAddresses } = useUserAddresses();
 
+  const [searchInput, setSearchInput] = useState('');
   const [inputAddress, setInputAddress] = useState<Hex | null>(null);
 
   const { data: ensAddress } = useEnsAddress(searchInput);
@@ -68,6 +69,12 @@ const SelectRecipient = ({ navigation }: Props) => {
       setInputAddress(null);
     }
   }, [searchInput, ensAddress]);
+
+  const onAddressPress = (address: Hex) => {
+    navigation.navigate('SelectToken', {
+      toAddress: address,
+    });
+  };
 
   return (
     <View
@@ -84,7 +91,7 @@ const SelectRecipient = ({ navigation }: Props) => {
         autoCorrect={false}
         autoComplete="off"
         value={searchInput}
-        placeholder="Ethereum address"
+        placeholder="ENS or Ethereum address"
         onChangeText={setSearchInput}
         testID="search-ethereum-address"
         style={{
@@ -97,23 +104,25 @@ const SelectRecipient = ({ navigation }: Props) => {
           paddingVertical: 4,
         }}
       ></TextInput>
-      {inputAddress && (
-        <View
-          style={{
-            marginTop: 24,
-            width: '100%',
-          }}
-        >
+      <View style={{ marginTop: 24, width: '100%', rowGap: 20 }}>
+        {inputAddress && (
           <AddressListItem
             address={inputAddress}
             onPress={() => {
-              navigation.navigate('SelectToken', {
-                address: inputAddress,
-              });
+              onAddressPress(inputAddress);
             }}
           ></AddressListItem>
-        </View>
-      )}
+        )}
+        {userAddresses?.map(a => (
+          <AddressListItem
+            key={a.address}
+            address={a.address}
+            onPress={() => {
+              onAddressPress(a.address);
+            }}
+          ></AddressListItem>
+        ))}
+      </View>
     </View>
   );
 };

@@ -3,10 +3,12 @@ import colors from '@/lib/styles/colors';
 import TokenLogo from '../FastImage/TokenLogo';
 import StyledText from '../StyledText/StyledText';
 import Feather from '@expo/vector-icons/Feather';
-import { TransferHistoryItem } from '@raylac/shared';
 import { shortenAddress } from '@/lib/utils';
+import { GetHistoryReturnType } from '@raylac/shared';
 
-const SendHistoryListItem = (props: { transfer: TransferHistoryItem }) => {
+const SendHistoryListItem = (props: {
+  transfer: GetHistoryReturnType[number];
+}) => {
   return (
     <View
       style={{
@@ -33,7 +35,7 @@ const SendHistoryListItem = (props: { transfer: TransferHistoryItem }) => {
           }}
         >
           <StyledText style={{ fontWeight: 'bold' }}>
-            {`$${props.transfer.amountUsd}`}
+            {`$${props.transfer.amount.usdValueFormatted}`}
           </StyledText>
           <StyledText>{shortenAddress(props.transfer.to)}</StyledText>
         </View>

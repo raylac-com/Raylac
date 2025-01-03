@@ -1,32 +1,30 @@
 import { trpc } from '@/lib/trpc';
-import useUserAccount from './useUserAccount';
+import useUserAddresses from './useUserAddresses';
 import { useQuery } from '@tanstack/react-query';
-import { zeroAddress } from 'viem';
-import BigNumber from 'bignumber.js';
-import { formatUsdValue } from '@raylac/shared';
+import { getTotalUsdValue } from '@raylac/shared';
 
 const useAccountUsdValue = () => {
-  const { data: userAccount } = useUserAccount();
+  const { data: userAddresses } = useUserAddresses();
 
   const { data: tokenBalances } = trpc.getTokenBalances.useQuery(
     {
-      address: userAccount?.address ?? zeroAddress,
+      addresses: userAddresses?.map(address => address.address) ?? [],
     },
     {
-      enabled: !!userAccount,
+      enabled: !!userAddresses,
     }
   );
 
   const query = useQuery({
-    queryKey: ['account-usd-value', userAccount, tokenBalances],
+    queryKey: ['account-usd-value', userAddresses, tokenBalances],
     queryFn: () => {
-      const accountUsdValue = tokenBalances?.reduce((acc, tokenBalance) => {
-        return acc.plus(new BigNumber(tokenBalance.usdValue));
-      }, new BigNumber(0));
+      if (tokenBalances === undefined) {
+        return null;
+      }
 
-      return accountUsdValue === undefined
-        ? null
-        : formatUsdValue(accountUsdValue);
+      const accountUsdValue = getTotalUsdValue(tokenBalances);
+
+      return accountUsdValue;
     },
   });
 

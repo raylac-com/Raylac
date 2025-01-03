@@ -1,30 +1,17 @@
-import {
-  formatUnits,
-  getAddress,
-  Hex,
-  hexToBigInt,
-  toHex,
-  zeroAddress,
-} from 'viem';
+import { getAddress, Hex } from 'viem';
 import { getPublicClient } from '../../utils';
 import {
   supportedChains,
-  getERC20TokenBalance,
   TokenBalancesReturnType,
-  getChainName,
-  RelaySupportedCurrenciesResponseBody,
+  Token,
+  Balance,
+  formatBalance,
+  ETH,
 } from '@raylac/shared';
-import {
-  getAlchemyClient,
-  getTokenPriceByAddress,
-  getTokenPriceBySymbol,
-} from '../../lib/alchemy';
-import { KNOWN_TOKENS } from '@raylac/shared';
-import BigNumber from 'bignumber.js';
-import { logger } from '@raylac/shared-backend';
-import { relayGetCurrencies } from '../../lib/relay';
-import NodeCache from 'node-cache';
-import getTokenPrice from '../getTokenPrice/getTokenPrice';
+import { getAlchemyClient } from '../../lib/alchemy';
+import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
+import { getToken } from '../../lib/token';
+import { OwnedToken } from 'alchemy-sdk';
 
 export const getETHBalance = async ({
   address,
@@ -39,259 +26,180 @@ export const getETHBalance = async ({
   return balance;
 };
 
-export const getKnownTokenBalances = async ({
+const formatAlchemyTokenBalance = async ({
   address,
+  tokenAddress,
+  tokenBalance,
+  chainId,
 }: {
   address: Hex;
-}): Promise<TokenBalancesReturnType> => {
-  const balances = await Promise.all(
-    KNOWN_TOKENS.map(async token => {
-      const multiChainBalances = await Promise.all(
-        // Get balances on each chain
-        token.addresses.map(async ({ chainId, address: contractAddress }) => {
-          const balance =
-            contractAddress === zeroAddress
-              ? await getETHBalance({ address, chainId })
-              : await getERC20TokenBalance({
-                  address,
-                  contractAddress,
-                  chainId,
-                });
+  tokenAddress: Hex;
+  tokenBalance: bigint;
+  chainId: number;
+}): Promise<{
+  token: Token;
+  address: Hex;
+  balance: Balance;
+  chainId: number;
+} | null> => {
+  const token = await getToken({
+    tokenAddress,
+    chainId,
+  });
 
-          return {
-            chainId,
-            tokenAddress: contractAddress,
-            balance,
-          };
-        })
-      );
+  if (!token) {
+    return null;
+  }
 
-      const totalBalance = multiChainBalances.reduce(
-        (acc, curr) => acc + curr.balance,
-        BigInt(0)
-      );
+  const tokenPriceUsd = await getTokenUsdPrice({
+    token,
+  });
 
-      if (totalBalance === BigInt(0)) {
-        logger.info(`No balance found for known token ${token.symbol}`);
-        return null;
-      }
+  if (tokenPriceUsd === null) {
+    return null;
+  }
 
-      const tokenPrice =
-        token.symbol === 'ETH'
-          ? await getTokenPriceBySymbol('ETH')
-          : await getTokenPriceByAddress({
-              chainId: token.addresses[0].chainId,
-              address: token.addresses[0].address,
-            });
+  const formattedBalance = formatBalance({
+    balance: tokenBalance,
+    token,
+    tokenPriceUsd,
+  });
 
-      const usdPrice = tokenPrice.prices.find(
-        price => price.currency === 'usd'
-      )?.value;
-
-      if (!usdPrice) {
-        throw new Error(`USD price not found for known token ${token.symbol}`);
-      }
-
-      const usdValue = new BigNumber(usdPrice)
-        .multipliedBy(new BigNumber(formatUnits(totalBalance, token.decimals)))
-        .toString();
-
-      const tokenBalance: TokenBalancesReturnType[number] = {
-        token,
-        balance: toHex(totalBalance),
-        usdValue,
-        tokenPrice: usdPrice,
-        breakdown: multiChainBalances
-          .filter(balance => balance.balance !== BigInt(0))
-          .sort((a, b) => (b.balance > a.balance ? 1 : -1))
-          .map(({ chainId, tokenAddress, balance }) => ({
-            chainId,
-            tokenAddress,
-            balance: toHex(balance),
-            usdValue: new BigNumber(usdPrice)
-              .multipliedBy(new BigNumber(formatUnits(balance, token.decimals)))
-              .toString(),
-          })),
-      };
-
-      return tokenBalance;
-    })
-  );
-
-  return balances.filter(balance => balance !== null);
+  return {
+    address,
+    token,
+    balance: formattedBalance,
+    chainId,
+  };
 };
 
-const metadataCache = new NodeCache({
-  stdTTL: 60 * 60 * 24, // 24 hours
-});
+const getFormattedETHBalance = async ({
+  address,
+  chainId,
+}: {
+  address: Hex;
+  chainId: number;
+}) => {
+  const ethBalance = await getETHBalance({ address, chainId });
+
+  const ethTokenPriceUsd = await getTokenUsdPrice({ token: ETH });
+
+  if (ethTokenPriceUsd === null) {
+    throw new Error('ETH token price not found');
+  }
+
+  const formattedBalance = formatBalance({
+    balance: ethBalance,
+    token: ETH,
+    tokenPriceUsd: ethTokenPriceUsd,
+  });
+
+  return formattedBalance;
+};
+
+const getTokenBalancesFromAlchemy = async ({
+  address,
+  chainId,
+}: {
+  address: Hex;
+  chainId: number;
+}): Promise<OwnedToken[]> => {
+  const alchemyClient = getAlchemyClient(chainId);
+
+  const balances: OwnedToken[] = [];
+  let pageKey: string | undefined = undefined;
+
+  for (let i = 0; i < 10; i++) {
+    const tokenBalances = await alchemyClient.core.getTokensForOwner(address, {
+      pageKey,
+    });
+
+    balances.push(...tokenBalances.tokens);
+
+    if (tokenBalances.pageKey) {
+      pageKey = tokenBalances.pageKey;
+    } else {
+      break;
+    }
+  }
+
+  return balances;
+};
 
 /**
- * Get the balance of ERC20 tokens across all chains for a given address
+ * Get the balance of a token across all chains for a given address from Alchemy
  */
-const getMultiChainERC20Balances = async ({
+const getMultiChainTokenBalancesFromAlchemy = async ({
   address,
 }: {
   address: Hex;
-}): Promise<TokenBalancesReturnType> => {
-  // Get addresses of all known tokens
-  // We use this to filter out known tokens from the Alchemy response
-  const knownTokenAddresses = KNOWN_TOKENS.map(token =>
-    token.addresses.map(({ address }) => getAddress(address))
-  ).flat();
-
-  const multiChainTokenBalances = await Promise.all(
+}): Promise<
+  {
+    address: Hex;
+    token: Token;
+    balance: Balance;
+    chainId: number;
+  }[]
+> => {
+  const tokenBalances = await Promise.all(
     supportedChains.map(async chain => {
-      const alchemyClient = getAlchemyClient(chain.id);
+      const alchemyTokenBalances = await getTokenBalancesFromAlchemy({
+        address,
+        chainId: chain.id,
+      });
 
-      // Get token balances on chain
-      const tokenBalances = await alchemyClient.core.getTokenBalances(address);
-
-      const tokensWithNonZeroBalances = tokenBalances.tokenBalances
-        // Filter out known tokens
-        .filter(
-          tokenBalance =>
-            !knownTokenAddresses.includes(
-              getAddress(tokenBalance.contractAddress as Hex)
-            )
-        )
-        // Filter out balances that are 0
-        .filter(
-          tokenBalance =>
-            tokenBalance !== null &&
-            hexToBigInt(tokenBalance.tokenBalance as Hex) !== BigInt(0)
-        );
-
-      const withMetadata = await Promise.all(
-        tokensWithNonZeroBalances.map(async tokenBalance => {
-          const tokenAddress = getAddress(tokenBalance.contractAddress);
-
-          // Check if the metadata is cached
-          const cachedMetadata = metadataCache.get<
-            RelaySupportedCurrenciesResponseBody[number][number]
-          >(`relay-token-${tokenAddress}`);
-
-          if (cachedMetadata) {
-            logger.info(`Cache hit for ${cachedMetadata.name} ${tokenAddress}`);
-            return { tokenBalance, tokenMetadata: cachedMetadata };
-          }
-
-          const result = await relayGetCurrencies({
-            chainIds: [chain.id],
-            tokenAddress,
-          });
-
-          const metadata = result.find(
-            token =>
-              getAddress(token.address) ===
-              getAddress(tokenBalance.contractAddress)
-          );
-
-          if (!metadata) {
-            logger.error(
-              `No token metadata found for ${tokenBalance.contractAddress} on ${getChainName(chain.id)}`
-            );
-            return null;
-          }
-
-          // Cache the metadata
-          metadataCache.set(`relay-token-${tokenAddress}`, metadata);
-
-          return { tokenBalance, tokenMetadata: metadata };
-        })
-      );
-
-      const withUsdValue = await Promise.all(
-        withMetadata
-          .filter(token => token !== null)
-          .map(async ({ tokenBalance, tokenMetadata }) => {
-            // Get token price for the token
-            const tokenPrice = await getTokenPrice({
-              tokenAddress: tokenBalance.contractAddress as Hex,
-              chainId: chain.id,
-            });
-
-            const usdPrice = tokenPrice.prices.find(
-              price => price.currency === 'usd'
-            )?.value;
-
-            if (!usdPrice) {
-              logger.info(
-                `No USD price found for ${tokenBalance.contractAddress}`
-              );
+      const addressChainTokenBalances = (
+        await Promise.all(
+          alchemyTokenBalances.map(async token => {
+            if (token.rawBalance === '0' || token.rawBalance === undefined) {
               return null;
             }
 
-            // Calculate the USD value of the token
-            const usdValue = new BigNumber(usdPrice)
-              .multipliedBy(
-                new BigNumber(
-                  formatUnits(
-                    hexToBigInt(tokenBalance.tokenBalance as Hex),
-                    tokenMetadata.decimals!
-                  )
-                )
-              )
-              .toString();
-
-            return {
-              tokenBalance,
-              tokenMetadata,
-              usdValue,
-              tokenPrice: usdPrice,
-            };
+            return await formatAlchemyTokenBalance({
+              address,
+              tokenAddress: getAddress(token.contractAddress),
+              tokenBalance: BigInt(token.rawBalance),
+              chainId: chain.id,
+            });
           })
-      );
+        )
+      ).filter(tokenBalance => tokenBalance !== null);
 
-      const multiChainTokenBalances: TokenBalancesReturnType = withUsdValue
-        .filter(token => token !== null)
-        .map(({ tokenBalance, tokenMetadata, usdValue, tokenPrice }) => {
-          return {
-            token: {
-              name: tokenMetadata.name,
-              symbol: tokenMetadata.symbol,
-              logoURI: tokenMetadata.metadata.logoURI,
-              decimals: tokenMetadata.decimals,
-              verified: tokenMetadata.metadata.verified,
-              addresses: [
-                {
-                  chainId: chain.id,
-                  address: tokenBalance.contractAddress as Hex,
-                },
-              ],
-            },
-            balance: tokenBalance.tokenBalance as Hex,
-            usdValue,
-            tokenPrice,
-            breakdown: [
-              {
-                chainId: chain.id,
-                balance: tokenBalance.tokenBalance as Hex,
-                tokenAddress: tokenBalance.contractAddress as Hex,
-                usdValue,
-              },
-            ],
-          };
+      const ethTokenBalance = await getFormattedETHBalance({
+        address,
+        chainId: chain.id,
+      });
+
+      if (ethTokenBalance.balance !== '0') {
+        addressChainTokenBalances.push({
+          token: ETH,
+          address,
+          balance: ethTokenBalance,
+          chainId: chain.id,
         });
+      }
 
-      return multiChainTokenBalances;
+      return addressChainTokenBalances;
     })
   );
 
-  return multiChainTokenBalances.flat();
+  return tokenBalances.flat();
 };
 
-const getTokenBalances = async ({ address }: { address: Hex }) => {
-  const knownTokenBalances = await getKnownTokenBalances({ address });
-  const tokenBalances = await getMultiChainERC20Balances({ address });
+const getTokenBalances = async ({
+  addresses,
+}: {
+  addresses: Hex[];
+}): Promise<TokenBalancesReturnType> => {
+  const tokenBalances = (
+    await Promise.all(
+      addresses.map(address =>
+        getMultiChainTokenBalancesFromAlchemy({ address })
+      )
+    )
+  ).flat();
 
-  const response: TokenBalancesReturnType = [
-    ...knownTokenBalances,
-    ...tokenBalances,
-  ];
-
-  return response.sort((a, b) =>
-    new BigNumber(a.usdValue).gt(b.usdValue) ? -1 : 1
-  );
+  return tokenBalances;
 };
 
 export default getTokenBalances;

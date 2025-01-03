@@ -1,24 +1,25 @@
-import { getMnemonicAndPrivKey } from '@/lib/key';
+import { getMnemonic } from '@/lib/key';
 import { useEffect, useState } from 'react';
-import { Hex } from 'viem/_types/types/misc';
+import useGenesisAddress from './useGenesisAddress';
 
-const useMnemonicAndPrivKey = () => {
+const useMnemonic = () => {
+  const { data: genesisAddress } = useGenesisAddress();
   const [mnemonic, setMnemonic] = useState<string | null>(null);
-  const [privKey, setPrivKey] = useState<Hex | null>(null);
 
   useEffect(() => {
     (async () => {
-      const _mnemonicAndPrivKey = await getMnemonicAndPrivKey();
-      if (_mnemonicAndPrivKey) {
-        setMnemonic(_mnemonicAndPrivKey.mnemonic);
-        setPrivKey(_mnemonicAndPrivKey.privKey);
-      } else {
-        throw new Error('Mnemonic not found');
+      if (genesisAddress) {
+        const _mnemonic = await getMnemonic(genesisAddress.address);
+        if (_mnemonic) {
+          setMnemonic(_mnemonic);
+        } else {
+          throw new Error('Mnemonic not found');
+        }
       }
     })();
   }, []);
 
-  return { mnemonic, privKey };
+  return { mnemonic };
 };
 
-export default useMnemonicAndPrivKey;
+export default useMnemonic;

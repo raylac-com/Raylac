@@ -1,6 +1,6 @@
 import colors from '@/lib/styles/colors';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
-import TokenImageWithChain from '@/components/TokenImageWithChain/TokenImageWithChain';
+import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { BuildMultiChainSendReturnType, Token } from '@raylac/shared';
@@ -22,7 +22,7 @@ const TokenAmountOnChain = ({
 }) => {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}>
-      <TokenImageWithChain logoURI={token.logoURI} chainId={chainId} />
+      <TokenLogoWithChain logoURI={token.logoURI} chainId={chainId} />
       <StyledText>
         {amountFormatted} {token.symbol}
       </StyledText>
