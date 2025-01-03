@@ -8,26 +8,23 @@ import { Hex } from 'viem';
  * Get the gas info for all supported chains
  */
 export const getGasInfo = async ({
-  chainIds,
+  chainId,
 }: {
-  chainIds: number[];
-}): Promise<ChainGasInfo[]> => {
-  const gasInfo: ChainGasInfo[] = [];
-  for (const chainId of chainIds) {
-    const client = getPublicClient({ chainId });
-    const block = await client.getBlock({ blockTag: 'latest' });
-    const maxPriorityFeePerGas = await getMaxPriorityFeePerGas({ chainId });
+  chainId: number;
+}): Promise<ChainGasInfo> => {
+  const client = getPublicClient({ chainId });
+  const block = await client.getBlock({ blockTag: 'latest' });
+  const maxPriorityFeePerGas = await getMaxPriorityFeePerGas({ chainId });
 
-    if (block.baseFeePerGas === null) {
-      throw new Error('baseFeePerGas is null');
-    }
-
-    gasInfo.push({
-      chainId,
-      baseFeePerGas: block.baseFeePerGas,
-      maxPriorityFeePerGas,
-    });
+  if (block.baseFeePerGas === null) {
+    throw new Error('baseFeePerGas is null');
   }
+
+  const gasInfo: ChainGasInfo = {
+    chainId,
+    baseFeePerGas: block.baseFeePerGas,
+    maxPriorityFeePerGas,
+  };
 
   return gasInfo;
 };

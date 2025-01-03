@@ -18,14 +18,13 @@ import {
 import {
   Balance,
   BridgeStep,
-  ChainGasInfo,
   Token,
   TransferStep,
   UserOperation,
 } from './types';
 import RaylacAccountV2Abi from './abi/RaylacAccountV2Abi';
 import * as chains from 'viem/chains';
-import { getAlchemyRpcUrl, getPublicClient } from './ethRpc';
+import { getAlchemyRpcUrl } from './ethRpc';
 import axios from 'axios';
 import {
   ACCOUNT_FACTORY_V2_ADDRESS,
@@ -251,34 +250,6 @@ export const getMaxPriorityFeePerGas = async ({
   }
 
   return BigInt(result.data.result!);
-};
-
-/**
- * Get the gas info for all supported chains
- */
-export const getGasInfo = async ({
-  chainIds,
-}: {
-  chainIds: number[];
-}): Promise<ChainGasInfo[]> => {
-  const gasInfo: ChainGasInfo[] = [];
-  for (const chainId of chainIds) {
-    const client = getPublicClient({ chainId });
-    const block = await client.getBlock({ blockTag: 'latest' });
-    const maxPriorityFeePerGas = await getMaxPriorityFeePerGas({ chainId });
-
-    if (block.baseFeePerGas === null) {
-      throw new Error('baseFeePerGas is null');
-    }
-
-    gasInfo.push({
-      chainId,
-      baseFeePerGas: block.baseFeePerGas,
-      maxPriorityFeePerGas,
-    });
-  }
-
-  return gasInfo;
 };
 
 export const getChainName = (chainId: number) => {

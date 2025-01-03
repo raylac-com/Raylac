@@ -3,13 +3,12 @@ import {
   ERC20Abi,
   BuildSendReturnType,
   Token,
-  getGasInfo,
   formatBalance,
   ETH,
   getPublicClient,
 } from '@raylac/shared';
 import { getTokenAddressOnChain } from '../../utils';
-import { getNonce } from '../../lib/utils';
+import { getNonce, getGasInfo } from '../../lib/utils';
 import { encodeFunctionData, Hex } from 'viem';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
 
@@ -106,10 +105,10 @@ const buildETHTransferExecutionStep = async ({
 const buildSend = async (
   requestBody: BuildSendRequestBody
 ): Promise<BuildSendReturnType> => {
-  const gasInfo = await getGasInfo({ chainIds: [requestBody.chainId] });
+  const gasInfo = await getGasInfo({ chainId: requestBody.chainId });
 
-  const baseFeePerGas = gasInfo[0].baseFeePerGas;
-  const maxPriorityFeePerGas = gasInfo[0].maxPriorityFeePerGas;
+  const baseFeePerGas = gasInfo.baseFeePerGas;
+  const maxPriorityFeePerGas = gasInfo.maxPriorityFeePerGas;
   const maxFeePerGas = baseFeePerGas + maxPriorityFeePerGas;
 
   const fromAddress = requestBody.fromAddress;
