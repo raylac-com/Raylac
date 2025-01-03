@@ -77,12 +77,7 @@ const getHistoryOnChain = async ({
 
             let type;
 
-            if (
-              addresses.includes(fromAddress) &&
-              addresses.includes(toAddress)
-            ) {
-              type = HistoryItemType.MOVE_FUNDS;
-            } else if (addresses.includes(fromAddress)) {
+            if (addresses.includes(fromAddress)) {
               type = HistoryItemType.OUTGOING;
             } else {
               type = HistoryItemType.INCOMING;
@@ -117,7 +112,15 @@ const getHistoryOnChain = async ({
     })
   );
 
-  return transfers.flat();
+  // Filter out same tx hashes
+  const uniqueTransfers = transfers
+    .flat()
+    .filter(
+      (transfer, index, self) =>
+        index === self.findIndex(t => t.txHash === transfer.txHash)
+    );
+
+  return uniqueTransfers;
 };
 
 const getHistory = async ({

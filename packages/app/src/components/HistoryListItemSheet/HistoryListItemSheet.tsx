@@ -1,8 +1,10 @@
+import Feather from '@expo/vector-icons/Feather';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import {
   getExplorerUrl,
   GetHistoryReturnType,
   HistoryItemType,
+  isRelayReceiverAddress,
 } from '@raylac/shared';
 import { useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,10 +12,11 @@ import StyledText from '../StyledText/StyledText';
 import fontSizes from '@/lib/styles/fontSizes';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import colors from '@/lib/styles/colors';
-import { shortenAddress } from '@/lib/utils';
+import { copyToClipboard, shortenAddress } from '@/lib/utils';
 import { Linking, Pressable, View } from 'react-native';
 import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import { Hex } from 'viem';
+import Toast from 'react-native-toast-message';
 
 const LABELS: Record<HistoryItemType, string> = {
   [HistoryItemType.OUTGOING]: 'Send',
@@ -32,6 +35,15 @@ const shortenTxHash = (txHash: string) => {
 };
 
 const FromAddress = ({ address }: { address: Hex }) => {
+  const onCopyPress = () => {
+    copyToClipboard(address);
+
+    Toast.show({
+      type: 'success',
+      text1: 'Copied to clipboard',
+    });
+  };
+
   return (
     <Pressable
       style={{
@@ -41,14 +53,31 @@ const FromAddress = ({ address }: { address: Hex }) => {
       }}
     >
       <StyledText style={{ color: colors.subbedText }}>{`From`} </StyledText>
-      <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-        {shortenAddress(address)}
-      </StyledText>
+      <FeedbackPressable
+        onPress={onCopyPress}
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+      >
+        <Feather name="copy" size={18} color={colors.subbedText} />
+        <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
+          {isRelayReceiverAddress(address)
+            ? 'Relay Receiver'
+            : shortenAddress(address)}
+        </StyledText>
+      </FeedbackPressable>
     </Pressable>
   );
 };
 
 const ToAddress = ({ address }: { address: Hex }) => {
+  const onCopyPress = () => {
+    copyToClipboard(address);
+
+    Toast.show({
+      type: 'success',
+      text1: 'Copied to clipboard',
+    });
+  };
+
   return (
     <Pressable
       style={{
@@ -58,9 +87,17 @@ const ToAddress = ({ address }: { address: Hex }) => {
       }}
     >
       <StyledText style={{ color: colors.subbedText }}>{`To`} </StyledText>
-      <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-        {shortenAddress(address)}
-      </StyledText>
+      <FeedbackPressable
+        onPress={onCopyPress}
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+      >
+        <Feather name="copy" size={18} color={colors.subbedText} />
+        <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
+          {isRelayReceiverAddress(address)
+            ? 'Relay Receiver'
+            : shortenAddress(address)}
+        </StyledText>
+      </FeedbackPressable>
     </Pressable>
   );
 };

@@ -27,7 +27,11 @@ import RaylacAccountV2Abi from './abi/RaylacAccountV2Abi';
 import * as chains from 'viem/chains';
 import { getAlchemyRpcUrl, getPublicClient } from './ethRpc';
 import axios from 'axios';
-import { ACCOUNT_FACTORY_V2_ADDRESS, ENTRY_POINT_ADDRESS } from './addresses';
+import {
+  ACCOUNT_FACTORY_V2_ADDRESS,
+  ENTRY_POINT_ADDRESS,
+  RELAY_RECEIVER_ADDRESSES,
+} from './addresses';
 import { ACCOUNT_IMPL_V2_ADDRESS } from './addresses';
 import RaylacAccountProxyBytecode from './bytecode/RaylacAccountProxyBytecode';
 import RaylacAccountProxyAbi from './abi/RaylacAccountProxyAbi';
@@ -717,4 +721,8 @@ export const getExplorerUrl = (chainId: number) => {
     default:
       return '';
   }
+};
+
+export const isRelayReceiverAddress = (address: Hex) => {
+  return RELAY_RECEIVER_ADDRESSES.includes(getAddress(address));
 };
