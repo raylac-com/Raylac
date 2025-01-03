@@ -9,7 +9,12 @@ import useTokenBalances from '@/hooks/useTokenBalances';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import colors from '@/lib/styles/colors';
 import { RootStackParamsList } from '@/navigation/types';
-import { Balance, formatBalance, getTokenId, Token } from '@raylac/shared';
+import {
+  TokenAmount,
+  formatTokenAmount,
+  getTokenId,
+  Token,
+} from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -132,7 +137,7 @@ const TokenChainItem = ({
 }: {
   chainId: number;
   token: Token;
-  balance: Balance;
+  balance: TokenAmount;
 }) => {
   return (
     <View
@@ -157,9 +162,9 @@ const TokenListItem = ({
   onPress,
 }: {
   token: Token;
-  balance: Balance;
+  balance: TokenAmount;
   balanceBreakdown: {
-    balance: Balance;
+    balance: TokenAmount;
     chainId: number;
   }[];
   onPress: ({ token, chainId }: { token: Token; chainId: number }) => void;
@@ -253,10 +258,10 @@ type AddressTokenBalances = {
   address: Hex;
   tokenBalances: {
     token: Token;
-    totalBalance: Balance;
+    totalBalance: TokenAmount;
     chainBalances: {
       chainId: number;
-      balance: Balance;
+      balance: TokenAmount;
     }[];
   }[];
 };
@@ -291,11 +296,11 @@ const useTokenBalancePerAddress = ({
         );
 
         const totalBalance = tokenBalances.reduce(
-          (acc, balance) => acc + BigInt(balance.balance.balance),
+          (acc, balance) => acc + BigInt(balance.balance.amount),
           BigInt(0)
         );
 
-        const formattedTotalBalance = formatBalance({
+        const formattedTotalBalance = formatTokenAmount({
           balance: totalBalance,
           token: tokenBalances[0].token,
           tokenPriceUsd: tokenBalances[0].balance.tokenPriceUsd,

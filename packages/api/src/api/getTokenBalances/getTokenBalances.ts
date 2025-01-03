@@ -4,8 +4,8 @@ import {
   supportedChains,
   TokenBalancesReturnType,
   Token,
-  Balance,
-  formatBalance,
+  TokenAmount,
+  formatTokenAmount,
   ETH,
 } from '@raylac/shared';
 import { getAlchemyClient } from '../../lib/alchemy';
@@ -39,7 +39,7 @@ const formatAlchemyTokenBalance = async ({
 }): Promise<{
   token: Token;
   address: Hex;
-  balance: Balance;
+  balance: TokenAmount;
   chainId: number;
 } | null> => {
   const token = await getToken({
@@ -59,8 +59,8 @@ const formatAlchemyTokenBalance = async ({
     return null;
   }
 
-  const formattedBalance = formatBalance({
-    balance: tokenBalance,
+  const formattedBalance = formatTokenAmount({
+    amount: tokenBalance,
     token,
     tokenPriceUsd,
   });
@@ -88,8 +88,8 @@ const getFormattedETHBalance = async ({
     throw new Error('ETH token price not found');
   }
 
-  const formattedBalance = formatBalance({
-    balance: ethBalance,
+  const formattedBalance = formatTokenAmount({
+    amount: ethBalance,
     token: ETH,
     tokenPriceUsd: ethTokenPriceUsd,
   });
@@ -137,7 +137,7 @@ const getMultiChainTokenBalancesFromAlchemy = async ({
   {
     address: Hex;
     token: Token;
-    balance: Balance;
+    balance: TokenAmount;
     chainId: number;
   }[]
 > => {
@@ -170,7 +170,7 @@ const getMultiChainTokenBalancesFromAlchemy = async ({
         chainId: chain.id,
       });
 
-      if (ethTokenBalance.balance !== '0') {
+      if (ethTokenBalance.amount !== '0') {
         addressChainTokenBalances.push({
           token: ETH,
           address,

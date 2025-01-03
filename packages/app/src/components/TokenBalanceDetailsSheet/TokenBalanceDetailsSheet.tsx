@@ -12,7 +12,7 @@ import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useTokenBalances from '@/hooks/useTokenBalances';
-import { Balance } from '@raylac/shared/src/types';
+import { TokenAmount } from '@raylac/shared/src/types';
 import { Hex } from 'viem';
 import WalletIconAddress from '../WalletIconAddress/WalletIconAddress';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
@@ -24,7 +24,7 @@ const ChainTokenBalance = ({
 }: {
   chainId: number;
   token: Token;
-  balance: Balance;
+  balance: TokenAmount;
 }) => {
   return (
     <View

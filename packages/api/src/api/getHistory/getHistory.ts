@@ -1,5 +1,5 @@
 import {
-  formatBalance,
+  formatTokenAmount,
   GetHistoryRequestBody,
   GetHistoryReturnType,
   HistoryItemType,
@@ -83,8 +83,8 @@ const getHistoryOnChain = async ({
               type = HistoryItemType.INCOMING;
             }
 
-            const formattedAmount = formatBalance({
-              balance: parseUnits(
+            const formattedAmount = formatTokenAmount({
+              amount: parseUnits(
                 transfer.value?.toString() || '0',
                 token.decimals
               ),

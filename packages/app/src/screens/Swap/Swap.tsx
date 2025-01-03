@@ -173,7 +173,7 @@ const Swap = () => {
     inputTokenBalance !== null &&
     inputTokenBalance !== undefined &&
     parsedInputAmount !== null
-      ? BigInt(inputTokenBalance.balance) >= parsedInputAmount
+      ? BigInt(inputTokenBalance.amount) >= parsedInputAmount
       : undefined;
 
   const outputAmount = swapQuote?.amountOut;
@@ -206,8 +206,8 @@ const Swap = () => {
               amount={amountInputText}
               setAmount={onInputAmountChange}
               balance={
-                inputTokenBalance?.balance
-                  ? BigInt(inputTokenBalance.balance)
+                inputTokenBalance?.amount
+                  ? BigInt(inputTokenBalance.amount)
                   : undefined
               }
               isLoadingBalance={false}

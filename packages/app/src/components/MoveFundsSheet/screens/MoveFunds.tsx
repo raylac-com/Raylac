@@ -10,7 +10,7 @@ import {
   getAddressChainTokenBalance,
   BuildBridgeSendRequestBody,
   getTokenId,
-  formatBalance,
+  formatTokenAmount,
   SendBridgeTxRequestBody,
 } from '@raylac/shared';
 import { useEffect, useState } from 'react';
@@ -410,8 +410,8 @@ const MoveFunds = () => {
     }
     const parsedAmount = parseUnits(amountInputText, token.decimals);
 
-    const formattedAmount = formatBalance({
-      balance: parsedAmount,
+    const formattedAmount = formatTokenAmount({
+      amount: parsedAmount,
       token: token,
       tokenPriceUsd: tokenPriceUsd,
     });

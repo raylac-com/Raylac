@@ -511,8 +511,8 @@ export enum TokenSet {
   ETH = 'eth',
 }
 
-export interface Balance {
-  balance: string;
+export interface TokenAmount {
+  amount: string;
   formatted: string;
   usdValue: string;
   usdValueFormatted: string;
@@ -524,6 +524,6 @@ export interface PendingTx {
   txHash: Hex;
   from: Hex;
   to: Hex;
-  amount: Balance;
+  amount: TokenAmount;
   token: Token;
 }

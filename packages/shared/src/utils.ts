@@ -16,7 +16,7 @@ import {
   PrivateKeyAccount,
 } from 'viem';
 import {
-  Balance,
+  TokenAmount,
   BridgeStep,
   Token,
   TransferStep,
@@ -325,30 +325,30 @@ export const formatUsdValue = (num: BigNumber): string => {
   return formatNumber(num);
 };
 
-export const formatBalance = ({
-  balance,
+export const formatTokenAmount = ({
+  amount,
   token,
   tokenPriceUsd,
 }: {
-  balance: bigint;
+  amount: bigint;
   token: Token;
   tokenPriceUsd: number;
-}): Balance => {
+}): TokenAmount => {
   const usdValue = new BigNumber(
-    formatUnits(balance, token.decimals)
+    formatUnits(amount, token.decimals)
   ).multipliedBy(tokenPriceUsd);
 
   const usdValueFormatted = formatUsdValue(usdValue);
 
-  const balanceFormatted: Balance = {
-    balance: balance.toString(),
-    formatted: formatAmount(balance.toString(), token.decimals),
+  const amountFormatted: TokenAmount = {
+    amount: amount.toString(),
+    formatted: formatAmount(amount.toString(), token.decimals),
     usdValue: usdValue.toString(),
     usdValueFormatted,
     tokenPriceUsd,
   };
 
-  return balanceFormatted;
+  return amountFormatted;
 };
 
 /**
@@ -383,7 +383,7 @@ export const getChainTokenBalance = ({
   tokenBalances: TokenBalancesReturnType;
   chainId: number;
   token: Token;
-}): Balance => {
+}): TokenAmount => {
   const tokenPriceUsd = getTokenPriceFromTokenBalances({
     tokenBalances,
     token,
@@ -396,12 +396,12 @@ export const getChainTokenBalance = ({
   );
 
   const totalBalance = tokenBalancesOnChain.reduce(
-    (acc, balance) => acc + BigInt(balance.balance.balance),
+    (acc, balance) => acc + BigInt(balance.balance.amount),
     BigInt(0)
   );
 
-  const balance = formatBalance({
-    balance: totalBalance,
+  const balance = formatTokenAmount({
+    amount: totalBalance,
     token,
     tokenPriceUsd,
   });
@@ -422,7 +422,7 @@ export const getAddressChainTokenBalance = ({
   address: Hex;
   chainId: number;
   token: Token;
-}): Balance => {
+}): TokenAmount => {
   const addressChainTokenBalance = tokenBalances.find(
     balance =>
       balance.address === address &&
@@ -432,7 +432,7 @@ export const getAddressChainTokenBalance = ({
 
   if (!addressChainTokenBalance) {
     return {
-      balance: '0',
+      amount: '0',
       formatted: '0',
       usdValue: '0',
       usdValueFormatted: '0',
@@ -459,7 +459,7 @@ export const groupTokenBalancesByToken = ({
   tokenBalances: TokenBalancesReturnType;
 }): {
   token: Token;
-  totalBalance: Balance;
+  totalBalance: TokenAmount;
 }[] => {
   const uniqueTokenIds = [
     ...new Set(
@@ -475,12 +475,12 @@ export const groupTokenBalancesByToken = ({
     );
 
     const totalBalance = balances.reduce(
-      (acc, tokenBalance) => acc + BigInt(tokenBalance.balance.balance),
+      (acc, tokenBalance) => acc + BigInt(tokenBalance.balance.amount),
       BigInt(0)
     );
 
-    const formattedTotalBalance = formatBalance({
-      balance: totalBalance,
+    const formattedTotalBalance = formatTokenAmount({
+      amount: totalBalance,
       token: balances[0].token,
       tokenPriceUsd: Number(balances[0].balance.tokenPriceUsd),
     });
@@ -516,13 +516,13 @@ export const getAddressTokenBalances = ({
 };
 
 export type PerAddressTokenBalance = {
-  totalBalance: Balance;
+  totalBalance: TokenAmount;
   perAddressBreakdown: {
     address: Hex;
-    totalBalance: Balance;
+    totalBalance: TokenAmount;
     chainBalances: {
       address: Hex;
-      balance: Balance;
+      balance: TokenAmount;
       chainId: number;
     }[];
   }[];
@@ -551,12 +551,12 @@ export const getPerAddressTokenBalance = ({
     );
 
     const totalBalance = addressBalances.reduce(
-      (acc, balance) => acc + BigInt(balance.balance.balance),
+      (acc, balance) => acc + BigInt(balance.balance.amount),
       BigInt(0)
     );
 
-    const formattedTotalBalance = formatBalance({
-      balance: totalBalance,
+    const formattedTotalBalance = formatTokenAmount({
+      amount: totalBalance,
       token,
       tokenPriceUsd: Number(addressBalances[0].balance.tokenPriceUsd),
     });
@@ -573,12 +573,12 @@ export const getPerAddressTokenBalance = ({
   }
 
   const totalBalance = balancesPerAddress.reduce(
-    (acc, balance) => acc + BigInt(balance.totalBalance.balance),
+    (acc, balance) => acc + BigInt(balance.totalBalance.amount),
     BigInt(0)
   );
 
-  const formattedTotalBalance = formatBalance({
-    balance: totalBalance,
+  const formattedTotalBalance = formatTokenAmount({
+    amount: totalBalance,
     token,
     tokenPriceUsd: Number(balancesPerAddress[0].totalBalance.tokenPriceUsd),
   });
@@ -593,10 +593,10 @@ export type AddressTokenBalances = {
   address: Hex;
   tokenBalances: {
     token: Token;
-    totalBalance: Balance;
+    totalBalance: TokenAmount;
     chainBalances: {
       chainId: number;
-      balance: Balance;
+      balance: TokenAmount;
     }[];
   }[];
 };
@@ -630,12 +630,12 @@ export const getTokenBalancePerAddress = ({
       );
 
       const totalBalance = tokenBalances.reduce(
-        (acc, balance) => acc + BigInt(balance.balance.balance),
+        (acc, balance) => acc + BigInt(balance.balance.amount),
         BigInt(0)
       );
 
-      const formattedTotalBalance = formatBalance({
-        balance: totalBalance,
+      const formattedTotalBalance = formatTokenAmount({
+        amount: totalBalance,
         token: tokenBalances[0].token,
         tokenPriceUsd: tokenBalances[0].balance.tokenPriceUsd,
       });

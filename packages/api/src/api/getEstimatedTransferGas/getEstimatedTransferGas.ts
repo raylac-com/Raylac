@@ -1,7 +1,7 @@
 import {
   ERC20Abi,
   ETH,
-  formatBalance,
+  formatTokenAmount,
   GetEstimatedTransferGasRequestBody,
   getPublicClient,
   getTokenAddressOnChain,
@@ -54,8 +54,8 @@ const getEstimatedTransferGas = async ({
     token: ETH,
   });
 
-  const estimatedGasUsd = formatBalance({
-    balance: estimatedGasWei,
+  const estimatedGasUsd = formatTokenAmount({
+    amount: estimatedGasWei,
     token: ETH,
     tokenPriceUsd: Number(ethPriceUsd),
   });

@@ -3,7 +3,7 @@ import {
   ERC20Abi,
   BuildSendReturnType,
   Token,
-  formatBalance,
+  formatTokenAmount,
   ETH,
   getPublicClient,
 } from '@raylac/shared';
@@ -156,14 +156,14 @@ const buildSend = async (
     throw new Error('ETH price not found');
   }
 
-  const gasFeeFormatted = formatBalance({
-    balance: gasFee,
+  const gasFeeFormatted = formatTokenAmount({
+    amount: gasFee,
     token: ETH,
     tokenPriceUsd: ethPriceUsd,
   });
 
-  const formattedAmount = formatBalance({
-    balance: BigInt(requestBody.amount),
+  const formattedAmount = formatTokenAmount({
+    amount: BigInt(requestBody.amount),
     token: requestBody.token,
     tokenPriceUsd: tokenPriceUsd,
   });
