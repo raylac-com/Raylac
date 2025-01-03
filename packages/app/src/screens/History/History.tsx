@@ -26,6 +26,7 @@ const History = () => {
     {
       enabled: !!addresses,
       refetchOnWindowFocus: true,
+      refetchOnMount: true,
     }
   );
 

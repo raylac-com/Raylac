@@ -39,6 +39,7 @@ const HomeScreen = () => {
     },
     {
       enabled: !!userAddresses,
+      refetchOnWindowFocus: true,
     }
   );
 

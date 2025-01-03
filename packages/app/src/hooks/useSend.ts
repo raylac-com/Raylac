@@ -49,8 +49,12 @@ const useSend = () => {
 
       await sendTx(sendTxRequestBody);
 
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: getQueryKey(trpc.getHistory),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: getQueryKey(trpc.getTokenBalances),
       });
     },
   });
