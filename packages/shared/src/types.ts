@@ -238,6 +238,7 @@ export type RelaySupportedCurrenciesResponseBody = {
 }[][];
 
 export interface Token {
+  id: Hex;
   symbol: string;
   name: string;
   decimals: number;

@@ -9,12 +9,7 @@ import useTokenBalances from '@/hooks/useTokenBalances';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import colors from '@/lib/styles/colors';
 import { RootStackParamsList } from '@/navigation/types';
-import {
-  TokenAmount,
-  formatTokenAmount,
-  getTokenId,
-  Token,
-} from '@raylac/shared';
+import { TokenAmount, formatTokenAmount, Token } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -283,16 +278,14 @@ const useTokenBalancePerAddress = ({
 
       // Group by token
       const addressTokenIds = [
-        ...new Set(
-          addressTokenBalances.map(balance => getTokenId(balance.token))
-        ),
+        ...new Set(addressTokenBalances.map(balance => balance.token.id)),
       ];
 
       const groupByTokens = [];
 
       for (const tokenId of addressTokenIds) {
         const tokenBalances = addressTokenBalances.filter(
-          balance => getTokenId(balance.token) === tokenId
+          balance => balance.token.id === tokenId
         );
 
         const totalBalance = tokenBalances.reduce(

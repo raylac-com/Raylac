@@ -9,7 +9,6 @@ import {
   Token,
   getAddressChainTokenBalance,
   BuildBridgeSendRequestBody,
-  getTokenId,
   formatTokenAmount,
   SendBridgeTxRequestBody,
 } from '@raylac/shared';
@@ -317,7 +316,7 @@ const MoveFunds = () => {
       const addressTokenBalances = tokenBalances.filter(
         tokenBalance =>
           tokenBalance.address === fromAddress &&
-          getTokenId(tokenBalance.token) === getTokenId(token)
+          tokenBalance.token.id === token.id
       );
 
       if (addressTokenBalances.length > 0) {

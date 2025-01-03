@@ -168,7 +168,7 @@ const getTokenPriceFromTokenBalances = ({
   token: Token;
 }): number => {
   const tokenPriceUsd = tokenBalances.find(
-    balance => getTokenId(balance.token) === getTokenId(token)
+    balance => balance.token.id === token.id
   )?.balance.tokenPriceUsd;
 
   if (!tokenPriceUsd) {
@@ -196,9 +196,7 @@ export const getChainTokenBalance = ({
   });
 
   const tokenBalancesOnChain = tokenBalances.filter(
-    balance =>
-      balance.chainId === chainId &&
-      getTokenId(balance.token) === getTokenId(token)
+    balance => balance.chainId === chainId && balance.token.id === token.id
   );
 
   const totalBalance = tokenBalancesOnChain.reduce(
@@ -232,7 +230,7 @@ export const getAddressChainTokenBalance = ({
   const addressChainTokenBalance = tokenBalances.find(
     balance =>
       balance.address === address &&
-      getTokenId(balance.token) === getTokenId(token) &&
+      balance.token.id === token.id &&
       balance.chainId === chainId
   );
 
@@ -268,16 +266,14 @@ export const groupTokenBalancesByToken = ({
   totalBalance: TokenAmount;
 }[] => {
   const uniqueTokenIds = [
-    ...new Set(
-      tokenBalances.map(tokenBalance => getTokenId(tokenBalance.token))
-    ),
+    ...new Set(tokenBalances.map(tokenBalance => tokenBalance.token.id)),
   ];
 
   const groupedByToken = [];
 
   for (const tokenId of uniqueTokenIds) {
     const balances = tokenBalances.filter(
-      tokenBalance => getTokenId(tokenBalance.token) === tokenId
+      tokenBalance => tokenBalance.token.id === tokenId
     );
 
     const totalBalance = balances.reduce(
@@ -341,10 +337,8 @@ export const getPerAddressTokenBalance = ({
   tokenBalances: TokenBalancesReturnType;
   token: Token;
 }): PerAddressTokenBalance => {
-  const tokenId = getTokenId(token);
-
   const balances = tokenBalances.filter(
-    balance => getTokenId(balance.token) === tokenId
+    balance => balance.token.id === token.id
   );
 
   const addresses = [...new Set(balances.map(balance => balance.address))];
@@ -423,16 +417,14 @@ export const getTokenBalancePerAddress = ({
 
     // Group by token
     const addressTokenIds = [
-      ...new Set(
-        addressTokenBalances.map(balance => getTokenId(balance.token))
-      ),
+      ...new Set(addressTokenBalances.map(balance => balance.token.id)),
     ];
 
     const groupByTokens = [];
 
     for (const tokenId of addressTokenIds) {
       const tokenBalances = addressTokenBalances.filter(
-        balance => getTokenId(balance.token) === tokenId
+        balance => balance.token.id === tokenId
       );
 
       const totalBalance = tokenBalances.reduce(
@@ -477,12 +469,6 @@ export const getTokenAddressOnChain = (token: Token, chainId: number): Hex => {
   }
 
   return address;
-};
-
-export const getTokenId = (token: Token) => {
-  // Use the first address as the token id
-  const id = token.addresses.sort((a, b) => a.chainId - b.chainId)[0].address;
-  return id;
 };
 
 export const getExplorerUrl = (chainId: number) => {
