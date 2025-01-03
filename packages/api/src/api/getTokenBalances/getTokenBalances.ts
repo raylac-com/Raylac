@@ -55,7 +55,7 @@ const formatAlchemyTokenBalance = async ({
     token,
   });
 
-  if (tokenPriceUsd === 'notfound') {
+  if (tokenPriceUsd === null) {
     return null;
   }
 
@@ -84,7 +84,7 @@ const getFormattedETHBalance = async ({
 
   const ethTokenPriceUsd = await getTokenUsdPrice({ token: ETH });
 
-  if (ethTokenPriceUsd === 'notfound') {
+  if (ethTokenPriceUsd === null) {
     throw new Error('ETH token price not found');
   }
 

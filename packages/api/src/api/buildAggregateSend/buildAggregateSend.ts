@@ -136,7 +136,7 @@ const buildAggregateSend = async (
     token: requestBody.token,
   });
 
-  if (tokenPriceUsd === 'notfound') {
+  if (tokenPriceUsd === null) {
     throw new Error('Token price not found');
   }
 

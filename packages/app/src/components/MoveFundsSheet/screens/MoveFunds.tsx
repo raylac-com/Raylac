@@ -388,7 +388,7 @@ const MoveFunds = () => {
       throw new Error('Token not set');
     }
 
-    if (tokenPriceUsd === undefined || tokenPriceUsd === 'notfound') {
+    if (tokenPriceUsd === undefined || tokenPriceUsd === null) {
       throw new Error('Token price not found');
     }
 

@@ -68,7 +68,7 @@ const getHistoryOnChain = async ({
               token,
             });
 
-            if (usdPrice === 'notfound') {
+            if (usdPrice === null) {
               return null;
             }
 
