@@ -56,7 +56,7 @@ jobs:
         working-directory: packages/app
 
       - name: 🚀 Create update
-        run: eas update --auto --branch main
+        run: eas update --auto --branch production
         working-directory: packages/app
         env:
           APP_VARIANT: production
