@@ -7,6 +7,8 @@ import { Token } from '@raylac/shared';
 import { redisClient } from '../../lib/redis';
 import { logger } from '@raylac/shared-backend';
 
+const PRICE_CACHE_EXPIRATION_SECONDS = 60 * 3; // 3 minutes
+
 const cacheUsdPrice = async ({
   tokenAddress,
   usdPrice,
@@ -15,9 +17,13 @@ const cacheUsdPrice = async ({
   usdPrice: number | 'notfound';
 }) => {
   if (usdPrice === 'notfound') {
-    await redisClient.set(`usdPrice:${tokenAddress}`, 'notfound');
+    await redisClient.set(`usdPrice:${tokenAddress}`, 'notfound', {
+      EX: PRICE_CACHE_EXPIRATION_SECONDS,
+    });
   } else {
-    await redisClient.set(`usdPrice:${tokenAddress}`, usdPrice);
+    await redisClient.set(`usdPrice:${tokenAddress}`, usdPrice, {
+      EX: PRICE_CACHE_EXPIRATION_SECONDS,
+    });
   }
 };
 
