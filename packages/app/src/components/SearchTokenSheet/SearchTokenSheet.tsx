@@ -2,7 +2,7 @@ import Skeleton from '@/components/Skeleton/Skeleton';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
-import { Balance, supportedChains, Token } from '@raylac/shared';
+import { TokenAmount, supportedChains, Token } from '@raylac/shared';
 import { useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
@@ -21,7 +21,7 @@ const TokenListItem = ({
   onPress,
 }: {
   token: Token;
-  balance: Balance | null;
+  balance: TokenAmount | null;
   onPress: () => void;
 }) => {
   const tokenChainIds = token.addresses.map(address => address.chainId);

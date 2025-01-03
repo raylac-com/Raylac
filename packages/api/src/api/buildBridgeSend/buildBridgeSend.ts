@@ -2,7 +2,7 @@ import { logger } from '@raylac/shared-backend';
 import {
   CrossChainSwapStep,
   ETH,
-  formatBalance,
+  formatTokenAmount,
   TRPCErrorMessage,
 } from '@raylac/shared';
 import { TRPCError } from '@trpc/server';
@@ -15,7 +15,7 @@ import {
 } from '@raylac/shared';
 import { relayApi } from '../../lib/relay';
 import axios from 'axios';
-import { getNonce } from '../../lib/utils';
+import { getNonce } from '../../utils';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
 import { zeroAddress } from 'viem';
 
@@ -102,14 +102,14 @@ const buildBridgeSend = async ({
     throw new Error('tokenPriceUsd is undefined');
   }
 
-  const amountInFormatted = formatBalance({
-    balance: BigInt(amountIn),
+  const amountInFormatted = formatTokenAmount({
+    amount: BigInt(amountIn),
     token,
     tokenPriceUsd,
   });
 
-  const amountOutFormatted = formatBalance({
-    balance: BigInt(amountOut),
+  const amountOutFormatted = formatTokenAmount({
+    amount: BigInt(amountOut),
     token,
     tokenPriceUsd,
   });
@@ -126,8 +126,8 @@ const buildBridgeSend = async ({
     throw new Error('originChainGas is undefined');
   }
 
-  const originChainGasFormatted = formatBalance({
-    balance: BigInt(originChainGas),
+  const originChainGasFormatted = formatTokenAmount({
+    amount: BigInt(originChainGas),
     token: ETH,
     tokenPriceUsd: ethPriceUsd,
   });
@@ -172,8 +172,8 @@ const buildBridgeSend = async ({
     throw new Error('feeTokenPriceUsd is undefined');
   }
 
-  const relayerServiceFeeFormatted = formatBalance({
-    balance: BigInt(relayFeeAmount),
+  const relayerServiceFeeFormatted = formatTokenAmount({
+    amount: BigInt(relayFeeAmount),
     token: relayerFeeToken,
     tokenPriceUsd: feeTokenPriceUsd,
   });

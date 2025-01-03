@@ -4,6 +4,7 @@ import * as chains from 'viem/chains';
 export const supportedChains: Chain[] = [
   //  chains.optimism,
   //  chains.optimismSepolia,
+  chains.mainnet,
   chains.base,
   chains.optimism,
   chains.arbitrum,

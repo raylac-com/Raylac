@@ -3,6 +3,7 @@ import { getAddress, zeroAddress } from 'viem';
 import { arbitrum, base, mainnet, optimism, polygon } from 'viem/chains';
 
 export const ETH: Token = {
+  id: zeroAddress,
   symbol: 'ETH',
   name: 'Ethereum',
   decimals: 18,
@@ -19,6 +20,7 @@ export const ETH: Token = {
 };
 
 export const USDC: Token = {
+  id: getAddress('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'),
   symbol: 'USDC',
   name: 'USD Coin',
   decimals: 6,
@@ -53,6 +55,7 @@ export const USDC: Token = {
 };
 
 export const WST_ETH: Token = {
+  id: getAddress('0x5979D7b546E38E414F7E9822514be443A4800529'),
   symbol: 'wstETH',
   name: 'Wrapped staked ETH',
   decimals: 18,
@@ -89,6 +92,7 @@ export const WST_ETH: Token = {
 };
 
 export const ST_ETH: Token = {
+  id: getAddress('0xae7ab96520DE3A18E5e111B5EaAb095312D7fE84'),
   symbol: 'stETH',
   name: 'Staked ETH',
   decimals: 18,

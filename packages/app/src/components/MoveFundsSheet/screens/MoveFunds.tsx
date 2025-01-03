@@ -9,8 +9,7 @@ import {
   Token,
   getAddressChainTokenBalance,
   BuildBridgeSendRequestBody,
-  getTokenId,
-  formatBalance,
+  formatTokenAmount,
   SendBridgeTxRequestBody,
 } from '@raylac/shared';
 import { useEffect, useState } from 'react';
@@ -317,7 +316,7 @@ const MoveFunds = () => {
       const addressTokenBalances = tokenBalances.filter(
         tokenBalance =>
           tokenBalance.address === fromAddress &&
-          getTokenId(tokenBalance.token) === getTokenId(token)
+          tokenBalance.token.id === token.id
       );
 
       if (addressTokenBalances.length > 0) {
@@ -410,8 +409,8 @@ const MoveFunds = () => {
     }
     const parsedAmount = parseUnits(amountInputText, token.decimals);
 
-    const formattedAmount = formatBalance({
-      balance: parsedAmount,
+    const formattedAmount = formatTokenAmount({
+      amount: parsedAmount,
       token: token,
       tokenPriceUsd: tokenPriceUsd,
     });

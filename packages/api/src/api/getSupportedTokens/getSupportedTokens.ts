@@ -34,6 +34,7 @@ const getSupportedTokens = async ({
     .sort((a, b) => Number(b.metadata.verified) - Number(a.metadata.verified))
     // Map to `Token`
     .map(token => ({
+      id: getAddress(token.address),
       symbol: token.symbol,
       name: token.name,
       decimals: token.decimals,

@@ -18,7 +18,6 @@ import {
   SubmitSingleChainSwapRequestBody,
   SubmitSingleInputSwapRequestBody,
   SubmitSwapRequestBody,
-  GetEstimatedTransferGasRequestBody,
   BuildBridgeSendRequestBody,
   Token,
   SendBridgeTxRequestBody,
@@ -36,9 +35,9 @@ import getLidoApy from './api/getLidoApy/getLidoApy';
 import getSingleInputSwapQuote from './api/getSingleInputSwapQuote/getSingleInputSwapQuote';
 import submitSingleInputSwap from './api/submitSingleInputSwap/submitSingleInputSwap';
 import sendTx from './api/sendTx/sendTx';
-import getEstimatedTransferGas from './api/getEstimatedTransferGas/getEstimatedTransferGas';
 import buildBridgeSend from './api/buildBridgeSend/buildBridgeSend';
 import sendBridgeTx from './api/sendBridgeTx/sendBridgeTx';
+import getTokenBalancesMock from './api/getTokenBalances/getTokenBalances.mock';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -65,7 +64,13 @@ export const appRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return getTokenBalances({ addresses: input.addresses as Hex[] });
+      const response = MOCK_RESPONSE
+        ? await getTokenBalancesMock({
+            addresses: input.addresses as Hex[],
+          })
+        : await getTokenBalances({ addresses: input.addresses as Hex[] });
+
+      return response;
     }),
 
   getLidoApy: publicProcedure.query(async () => {
@@ -177,14 +182,6 @@ export const appRouter = router({
         : getTokenPrice({
             token: input.token as Token,
           });
-    }),
-
-  getEstimatedTransferGas: publicProcedure
-    .input(z.any())
-    .mutation(async ({ input }) => {
-      return getEstimatedTransferGas(
-        input as GetEstimatedTransferGasRequestBody
-      );
     }),
 
   getGitCommit: publicProcedure.query(async () => {

@@ -6,7 +6,7 @@ import fontSizes from '@/lib/styles/fontSizes';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
 import {
-  Balance,
+  TokenAmount,
   BuildBridgeSendRequestBody,
   BuildSendRequestBody,
   ETH,
@@ -115,12 +115,14 @@ const BalanceDetail = ({
   balance,
   onMaxPress,
 }: {
-  balance: Balance | undefined;
+  balance: TokenAmount | undefined;
   onMaxPress: () => void;
 }) => {
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-      <StyledText style={{ color: colors.subbedText }}>{`Balance`}</StyledText>
+      <StyledText
+        style={{ color: colors.subbedText }}
+      >{`TokenAmount`}</StyledText>
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
       >
@@ -145,7 +147,7 @@ const GasInfo = ({
   gas,
   isFetchingGasInfo,
 }: {
-  gas: Balance | undefined;
+  gas: TokenAmount | undefined;
   isFetchingGasInfo: boolean;
 }) => {
   return (
@@ -169,7 +171,7 @@ const BridgeFeeInfo = ({
 }: {
   feeToken: Token;
   feeChainId: number;
-  bridgeFee: Balance | undefined;
+  bridgeFee: TokenAmount | undefined;
 }) => {
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -308,13 +310,13 @@ const SelectAmount = ({ route }: Props) => {
       if (inputMode === 'token') {
         const _isBalanceSufficient =
           parseUnits(amountInputText, token.decimals) <=
-          BigInt(tokenBalance.balance);
+          BigInt(tokenBalance.amount);
 
         setIsBalanceSufficient(_isBalanceSufficient);
       } else {
         const _isBalanceSufficient =
           new BigNumber(amountInputText).dividedBy(tokenPriceUsd) <=
-          new BigNumber(tokenBalance.balance);
+          new BigNumber(tokenBalance.amount);
 
         setIsBalanceSufficient(_isBalanceSufficient);
       }
@@ -324,17 +326,17 @@ const SelectAmount = ({ route }: Props) => {
   useEffect(() => {
     if (ethBalance !== undefined && tokenBalance !== undefined) {
       if (sendData) {
-        const sendGas = BigInt(sendData.transfer.gasFee.balance);
-        setIsGasSufficient(sendGas <= BigInt(ethBalance.balance));
+        const sendGas = BigInt(sendData.transfer.gasFee.amount);
+        setIsGasSufficient(sendGas <= BigInt(ethBalance.amount));
       }
 
       if (bridgeSendData) {
-        const bridgeFee = BigInt(bridgeSendData.relayerServiceFee.balance);
+        const bridgeFee = BigInt(bridgeSendData.relayerServiceFee.amount);
 
         if (bridgeSendData.relayerServiceFeeToken.symbol === 'ETH') {
-          setIsGasSufficient(bridgeFee <= BigInt(ethBalance.balance));
+          setIsGasSufficient(bridgeFee <= BigInt(ethBalance.amount));
         } else {
-          setIsGasSufficient(bridgeFee <= BigInt(tokenBalance.balance));
+          setIsGasSufficient(bridgeFee <= BigInt(tokenBalance.amount));
         }
       }
     }
@@ -442,7 +444,7 @@ const SelectAmount = ({ route }: Props) => {
   const onMaxBalancePress = () => {
     if (tokenBalance) {
       const amountText = formatUnits(
-        BigInt(tokenBalance.balance),
+        BigInt(tokenBalance.amount),
         token.decimals
       );
       setAmountInputText(amountText);

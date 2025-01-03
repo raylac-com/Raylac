@@ -5,6 +5,7 @@ import SwapHistoryListItem from './SwapHistoryListItem';
 import spacing from '@/lib/styles/spacing';
 import { zeroAddress } from 'viem';
 import { base, optimism } from 'viem/chains';
+import { USDC } from '@raylac/shared';
 
 const meta = {
   title: 'SwapHistoryListItem',
@@ -21,24 +22,8 @@ const meta = {
       amountOutUsd: '100',
       amountInFormatted: '100',
       amountOutFormatted: '100',
-      tokenIn: {
-        symbol: 'USDC',
-        name: 'USD Coin',
-        decimals: 6,
-        verified: true,
-        logoURI:
-          'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389',
-        addresses: [],
-      },
-      tokenOut: {
-        symbol: 'USDC',
-        name: 'USD Coin',
-        decimals: 6,
-        verified: true,
-        logoURI:
-          'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389',
-        addresses: [],
-      },
+      tokenIn: USDC,
+      tokenOut: USDC,
       lineItems: [
         {
           fromChainId: base.id,

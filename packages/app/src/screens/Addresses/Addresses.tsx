@@ -1,7 +1,7 @@
 import Feather from '@expo/vector-icons/Feather';
 import StyledText from '@/components/StyledText/StyledText';
 import useUserAddresses from '@/hooks/useUserAddresses';
-import { Alert, FlatList, Pressable, View } from 'react-native';
+import { Alert, FlatList, Image, Pressable, View } from 'react-native';
 import { Hex } from 'viem';
 import colors from '@/lib/styles/colors';
 import { copyToClipboard, shortenAddress } from '@/lib/utils';
@@ -11,6 +11,8 @@ import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import useDeleteAddress from '@/hooks/useDeleteAddress';
+import { supportedChains } from '@raylac/shared';
+import { getChainIcon } from '@/lib/utils';
 
 const AddressListItem = ({ address }: { address: Hex }) => {
   const { mutateAsync: deleteAddress } = useDeleteAddress();
@@ -62,6 +64,14 @@ const AddressListItem = ({ address }: { address: Hex }) => {
         borderColor: colors.border,
         borderRadius: 16,
         padding: 16,
+        shadowColor: colors.border,
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
       }}
     >
       <Pressable
@@ -87,6 +97,31 @@ const AddressListItem = ({ address }: { address: Hex }) => {
   );
 };
 
+const SupportedChains = () => {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        width: '100%',
+        columnGap: 8,
+      }}
+    >
+      <StyledText style={{ color: colors.subbedText }}>
+        {`Supported chains`}
+      </StyledText>
+      <View style={{ flexDirection: 'row', columnGap: 4 }}>
+        {supportedChains.map(chain => (
+          <Image
+            key={chain.id}
+            source={getChainIcon(chain.id)}
+            style={{ width: 24, height: 24 }}
+          />
+        ))}
+      </View>
+    </View>
+  );
+};
+
 const Addresses = () => {
   const { data: addresses } = useUserAddresses();
   const navigation = useTypedNavigation();
@@ -102,8 +137,10 @@ const Addresses = () => {
         flex: 1,
         padding: 16,
         paddingBottom: insets.bottom,
+        rowGap: 32,
       }}
     >
+      <SupportedChains />
       <FlatList
         data={addresses}
         renderItem={({ item }) => <AddressListItem address={item.address} />}

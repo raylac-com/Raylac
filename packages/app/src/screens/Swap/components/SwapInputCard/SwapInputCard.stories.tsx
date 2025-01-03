@@ -4,26 +4,13 @@ import type { Meta, StoryObj } from '@storybook/react';
 import SwapInputCard from './SwapInputCard';
 import spacing from '@/lib/styles/spacing';
 import { base } from 'viem/chains';
-import { zeroAddress } from 'viem';
+import { USDC } from '@raylac/shared';
 
 const meta = {
   title: 'SwapInputCard',
   component: SwapInputCard,
   args: {
-    token: {
-      addresses: [
-        {
-          chainId: base.id,
-          address: zeroAddress,
-        },
-      ],
-      name: 'USD Coin',
-      symbol: 'USDC',
-      decimals: 18,
-      verified: true,
-      logoURI:
-        'https://firebasestorage.googleapis.com/v0/b/raylac-72351.appspot.com/o/usdc.png?alt=media&token=4e91000d-a063-4f34-bbcb-599a44151ff9',
-    },
+    token: USDC,
     balance: undefined,
     isLoadingBalance: false,
     amount: '100',

@@ -5,20 +5,14 @@ import {
   webSocket,
   WebSocketTransport,
   PublicClient,
-  Hex,
 } from 'viem';
 import * as chains from 'viem/chains';
 import { ALCHEMY_API_KEY } from './lib/envVars';
 import { Network } from 'alchemy-sdk';
-import {
-  ETH,
-  getChainFromId,
-  ST_ETH,
-  Token,
-  TokenSet,
-  WST_ETH,
-} from '@raylac/shared';
-import BigNumber from 'bignumber.js';
+import { getChainFromId, Token } from '@raylac/shared';
+import { getMaxPriorityFeePerGas } from '@raylac/shared';
+import { ChainGasInfo } from '@raylac/shared';
+import { Hex } from 'viem';
 
 export const getWebsocketClient = ({ chainId }: { chainId: number }) => {
   const chain = getChainFromId(chainId);
@@ -225,31 +219,43 @@ export const getTokenAddressOnChain = (token: Token, chainId: number): Hex => {
   return address;
 };
 
-export const getTokensInSet = (set: TokenSet) => {
-  switch (set) {
-    case TokenSet.ETH:
-      return [ETH, WST_ETH, ST_ETH];
-    default:
-      throw new Error(`Unknown token set: ${set}`);
+/**
+ * Get the gas info for all supported chains
+ */
+export const getGasInfo = async ({
+  chainId,
+}: {
+  chainId: number;
+}): Promise<ChainGasInfo> => {
+  const client = getPublicClient({ chainId });
+  const block = await client.getBlock({ blockTag: 'latest' });
+  const maxPriorityFeePerGas = await getMaxPriorityFeePerGas({ chainId });
+
+  if (block.baseFeePerGas === null) {
+    throw new Error('baseFeePerGas is null');
   }
+
+  const gasInfo: ChainGasInfo = {
+    chainId,
+    baseFeePerGas: block.baseFeePerGas,
+    maxPriorityFeePerGas,
+  };
+
+  return gasInfo;
 };
 
-export const shortenUsdValue = (bn: BigNumber): string => {
-  // If the number is 1 billion or larger
-  if (bn.gte(1e9)) {
-    // Divide by 1e9, keep 2 decimals, append "B"
-    return `${bn.div(1e9).toFixed(2)}B`;
-  }
-  // If it's at least 1 million
-  else if (bn.gte(1e6)) {
-    return `${bn.div(1e6).toFixed(2)}M`;
-  }
-  // If it's at least 1 thousand
-  else if (bn.gte(1e3)) {
-    return `${bn.div(1e3).toFixed(2)}K`;
-  }
-  // Otherwise, just return the number with 2 decimals
-  else {
-    return bn.toFixed(2);
-  }
+export const getNonce = async ({
+  chainId,
+  address,
+}: {
+  chainId: number;
+  address: Hex;
+}) => {
+  const publicClient = getPublicClient({
+    chainId,
+  });
+
+  return await publicClient.getTransactionCount({
+    address,
+  });
 };

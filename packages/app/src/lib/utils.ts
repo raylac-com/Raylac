@@ -1,6 +1,13 @@
 import { Hex } from 'viem';
 import * as Clipboard from 'expo-clipboard';
-import { arbitrum, base, optimism, polygon, zksync } from 'viem/chains';
+import {
+  arbitrum,
+  base,
+  mainnet,
+  optimism,
+  polygon,
+  zksync,
+} from 'viem/chains';
 
 export const shortenAddress = (address: Hex) => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -17,6 +24,9 @@ export const getClipboardText = async () => {
 
 export const getChainIcon = (chainId: number) => {
   switch (chainId) {
+    case mainnet.id:
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      return require('../../assets/chains/ethereum.png');
     case optimism.id:
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       return require('../../assets/chains/op.png');

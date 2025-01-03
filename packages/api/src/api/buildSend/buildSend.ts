@@ -3,18 +3,19 @@ import {
   ERC20Abi,
   BuildSendReturnType,
   Token,
-  getGasInfo,
-  formatBalance,
+  formatTokenAmount,
   ETH,
+  getPublicClient,
 } from '@raylac/shared';
 import { getTokenAddressOnChain } from '../../utils';
-import { getNonce } from '../../lib/utils';
+import { getNonce, getGasInfo } from '../../utils';
 import { encodeFunctionData, Hex } from 'viem';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
 
-const buildERC20TransferExecutionStep = ({
+const buildERC20TransferExecutionStep = async ({
   token,
   amount,
+  from,
   to,
   chainId,
   maxFeePerGas,
@@ -23,18 +24,30 @@ const buildERC20TransferExecutionStep = ({
 }: {
   token: Token;
   amount: bigint;
+  from: Hex;
   to: Hex;
   chainId: number;
   maxFeePerGas: bigint;
   maxPriorityFeePerGas: bigint;
   nonce: number;
-}): BuildSendReturnType['tx'] => {
+}): Promise<BuildSendReturnType['tx']> => {
   const tokenAddress = getTokenAddressOnChain(token, chainId);
 
   const data = encodeFunctionData({
     abi: ERC20Abi,
     functionName: 'transfer',
     args: [to, amount],
+  });
+
+  const publicClient = getPublicClient({
+    chainId,
+  });
+
+  const gas = await publicClient.estimateGas({
+    account: from,
+    to: tokenAddress,
+    data,
+    value: BigInt(0),
   });
 
   return {
@@ -45,13 +58,14 @@ const buildERC20TransferExecutionStep = ({
     maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
     nonce,
     chainId,
-    gas: 500_000,
+    gas: Number(gas),
   };
 };
 
-const buildETHTransferExecutionStep = ({
+const buildETHTransferExecutionStep = async ({
   amount,
   to,
+  from,
   maxFeePerGas,
   maxPriorityFeePerGas,
   nonce,
@@ -59,11 +73,23 @@ const buildETHTransferExecutionStep = ({
 }: {
   amount: bigint;
   to: Hex;
+  from: Hex;
   maxFeePerGas: bigint;
   maxPriorityFeePerGas: bigint;
   chainId: number;
   nonce: number;
-}): BuildSendReturnType['tx'] => {
+}): Promise<BuildSendReturnType['tx']> => {
+  const publicClient = getPublicClient({
+    chainId,
+  });
+
+  const gas = await publicClient.estimateGas({
+    account: from,
+    to: to,
+    data: '0x',
+    value: amount,
+  });
+
   return {
     to: to,
     data: '0x',
@@ -72,17 +98,17 @@ const buildETHTransferExecutionStep = ({
     maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
     nonce,
     chainId,
-    gas: 500_000,
+    gas: Number(gas),
   };
 };
 
 const buildSend = async (
   requestBody: BuildSendRequestBody
 ): Promise<BuildSendReturnType> => {
-  const gasInfo = await getGasInfo({ chainIds: [requestBody.chainId] });
+  const gasInfo = await getGasInfo({ chainId: requestBody.chainId });
 
-  const baseFeePerGas = gasInfo[0].baseFeePerGas;
-  const maxPriorityFeePerGas = gasInfo[0].maxPriorityFeePerGas;
+  const baseFeePerGas = gasInfo.baseFeePerGas;
+  const maxPriorityFeePerGas = gasInfo.maxPriorityFeePerGas;
   const maxFeePerGas = baseFeePerGas + maxPriorityFeePerGas;
 
   const fromAddress = requestBody.fromAddress;
@@ -102,17 +128,19 @@ const buildSend = async (
 
   const tx =
     requestBody.token.symbol === 'ETH'
-      ? buildETHTransferExecutionStep({
+      ? await buildETHTransferExecutionStep({
           amount: BigInt(requestBody.amount),
           to: requestBody.toAddress,
+          from: fromAddress,
           maxFeePerGas: BigInt(maxFeePerGas),
           maxPriorityFeePerGas: BigInt(maxPriorityFeePerGas),
           chainId: requestBody.chainId,
           nonce,
         })
-      : buildERC20TransferExecutionStep({
+      : await buildERC20TransferExecutionStep({
           token: requestBody.token,
           amount: BigInt(requestBody.amount),
+          from: fromAddress,
           to: requestBody.toAddress,
           chainId: requestBody.chainId,
           maxFeePerGas: BigInt(maxFeePerGas),
@@ -128,14 +156,14 @@ const buildSend = async (
     throw new Error('ETH price not found');
   }
 
-  const gasFeeFormatted = formatBalance({
-    balance: gasFee,
+  const gasFeeFormatted = formatTokenAmount({
+    amount: gasFee,
     token: ETH,
     tokenPriceUsd: ethPriceUsd,
   });
 
-  const formattedAmount = formatBalance({
-    balance: BigInt(requestBody.amount),
+  const formattedAmount = formatTokenAmount({
+    amount: BigInt(requestBody.amount),
     token: requestBody.token,
     tokenPriceUsd: tokenPriceUsd,
   });

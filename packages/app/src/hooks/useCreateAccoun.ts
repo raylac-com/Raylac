@@ -33,6 +33,7 @@ const useCreateAccount = () => {
       });
 
       await queryClient.invalidateQueries({ queryKey: ['userAddresses'] });
+      await queryClient.invalidateQueries({ queryKey: ['genesisAddress'] });
     },
   });
 };

@@ -1,44 +1,4 @@
-import { Chain, Hex } from 'viem';
-
-export interface UserOperation {
-  sender: Hex;
-  nonce: Hex;
-  initCode: Hex;
-  callData: Hex;
-  callGasLimit: Hex;
-  verificationGasLimit: Hex;
-  preVerificationGas: Hex;
-  maxFeePerGas: Hex;
-  maxPriorityFeePerGas: Hex;
-  paymasterAndData: Hex;
-  signature: Hex;
-  chainId: number;
-}
-
-export interface DecodedUserOperationContext {
-  /**
-   * Tag to map transactions across multiple chains.
-   * Transactions with the same multi chain tag are part of the same UserAction.
-   */
-  multiChainTag: Hex;
-  /**
-   * Number of chains that the UserAction that corresponds to this UserOperation spans.
-   */
-  numChains: number;
-}
-
-export interface StealthAddressWithEphemeral {
-  address: Hex;
-  viewTag: Hex;
-  signerAddress: Hex;
-  ephemeralPubKey: Hex;
-}
-
-export interface User {
-  id: number;
-  name: string;
-  username: string;
-}
+import { Hex } from 'viem';
 
 export interface RelayGetQuoteRequestBody {
   user: Hex;
@@ -66,62 +26,6 @@ export interface RelayExecutionStepItem {
     endpoint: string;
     method: string;
   };
-}
-
-export interface BridgeStep {
-  tx: {
-    to: Hex;
-    data: Hex;
-    value: string;
-    maxFeePerGas: string;
-    maxPriorityFeePerGas: string;
-    nonce: number;
-    chainId: number;
-    gas: number;
-  };
-  bridgeDetails: {
-    to: Hex;
-    amountIn: string;
-    amountOut: string;
-    amountInFormatted: string;
-    amountOutFormatted: string;
-    originChainGasCurrency: string;
-    originChainGasFee: string;
-    originChainGasFeeFormatted: string;
-    originChainGasFeeUsd: string;
-    destinationChainGasCurrency: string;
-    destinationChainGasFee: string;
-    destinationChainGasFeeFormatted: string;
-    destinationChainGasFeeUsd: string;
-    bridgeFee: string;
-    bridgeFeeFormatted: string;
-    bridgeFeeUsd: string;
-    fromChainId: number;
-    toChainId: number;
-  };
-  serializedTx: Hex;
-}
-
-export interface TransferStep {
-  tx: {
-    to: Hex;
-    data: Hex;
-    value: string;
-    maxFeePerGas: string;
-    maxPriorityFeePerGas: string;
-    nonce: number;
-    chainId: number;
-    gas: number;
-  };
-  transferDetails: {
-    to: Hex;
-    amount: string;
-    amountFormatted: string;
-    amountUsd: string;
-    chainId: number;
-  };
-  relayerFee?: RelayGasFee;
-  serializedTx: Hex;
 }
 
 export interface CrossChainSwapStep {
@@ -167,14 +71,6 @@ export interface ApproveStep {
     gas: number;
   };
 }
-
-export type SignedBridgeStep = BridgeStep & {
-  signature: Hex;
-};
-
-export type SignedTransferStep = TransferStep & {
-  signature: Hex;
-};
 
 export type SignedCrossChainSwapStep = CrossChainSwapStep & {
   signature: Hex;
@@ -289,140 +185,16 @@ export interface RelayGetQuoteResponseBody {
   };
 }
 
-/**
- * Token balance of an address on a chain
- */
-export interface AddressTokenBalance {
-  tokenId: string;
-  address: Hex;
-  balance: string;
-  chainId: number;
-}
-
-export interface SupportedToken {
-  tokenId: string;
-  symbol: string;
-  name: string;
-  decimals: number;
-  logoURI: string;
-  addresses: {
-    address: Hex;
-    chain: Chain;
-    syncFrom?: bigint;
-  }[];
-}
-
-export interface TraceInitAction {
-  from: Hex;
-  gas: Hex;
-  init: Hex;
-  value: Hex;
-}
-
-export interface TraceCallAction {
-  from: Hex;
-  callType: 'call' | 'delegatecall' | 'staticcall';
-  gas: Hex;
-  input: Hex;
-  to: Hex;
-  value: Hex;
-}
-
-type TraceResponse<T extends string, A> = {
-  action: A;
-  blockHash: Hex;
-  blockNumber: number;
-  result: { gasUsed: Hex; output: Hex };
-  subtraces: number;
-  traceAddress: number[];
-  transactionHash: Hex;
-  transactionPosition: number;
-  type: T;
-};
-
-export type TraceResponseData =
-  | TraceResponse<'call', TraceCallAction>
-  | TraceResponse<'create', TraceInitAction>;
-
-export type BlockTraceCallResponse = any;
-
-export interface BlockTransactionResponse {
-  from: Hex;
-  gas: Hex;
-  gasUsed: Hex;
-  to: Hex;
-  input: Hex;
-  calls?: BlockTransactionResponse[];
-  value: Hex;
-  type: 'CALL' | 'CREATE';
-}
-
-export type BlockTraceResponse = {
-  txHash: Hex;
-  result: BlockTransactionResponse;
-}[];
-
-export type AnvilBlockTraceResponse = {
-  action: {
-    from: Hex;
-    callType: 'call' | 'create';
-    gas: Hex;
-    input: Hex;
-    to: Hex;
-    value: Hex;
-  };
-  blockHash: Hex;
-  blockNumber: number;
-  result: { gasUsed: Hex; output: Hex };
-  subtraces: number;
-  traceAddress: number[];
-  transactionHash: Hex;
-  transactionPosition: number;
-  type: 'call' | 'create';
-}[];
-
-export interface TraceWithTraceAddress extends BlockTransactionResponse {
-  txHash: Hex;
-  traceAddress: number[];
-}
-
-export interface TokenBalanceQueryResult {
-  tokenId: string;
-  balance: string;
-}
-
-export interface AccountBalancePerChainQueryResult {
-  chainId: number;
-  balance: string;
-  address: Hex;
-  tokenId: string;
-}
-
 export interface CoingeckoTokenPriceResponse {
   [key: string]: {
     usd: number;
   };
 }
 
-export type SyncJob = 'UserOps' | 'Traces';
-
 export interface ChainGasInfo {
   baseFeePerGas: bigint;
   maxPriorityFeePerGas: bigint;
   chainId: number;
-}
-
-export interface RaylacAccountExecuteArgs {
-  to: Hex;
-  value: bigint;
-  data: Hex;
-  tag: Hex;
-}
-
-export enum UserActionType {
-  Transfer = '0x01',
-  Swap = '0x02',
-  Bridge = '0x03',
 }
 
 export interface AlchemyTokenPriceResponse {
@@ -466,6 +238,7 @@ export type RelaySupportedCurrenciesResponseBody = {
 }[][];
 
 export interface Token {
+  id: Hex;
   symbol: string;
   name: string;
   decimals: number;
@@ -511,8 +284,8 @@ export enum TokenSet {
   ETH = 'eth',
 }
 
-export interface Balance {
-  balance: string;
+export interface TokenAmount {
+  amount: string;
   formatted: string;
   usdValue: string;
   usdValueFormatted: string;
@@ -524,6 +297,6 @@ export interface PendingTx {
   txHash: Hex;
   from: Hex;
   to: Hex;
-  amount: Balance;
+  amount: TokenAmount;
   token: Token;
 }

@@ -1,10 +1,6 @@
 import { Hex } from 'viem';
 import {
   AlchemyTokenPriceResponse,
-  BridgeStep,
-  SignedBridgeStep,
-  SignedTransferStep,
-  TransferStep,
   Token,
   SignedCrossChainSwapStep,
   SwapOutput,
@@ -14,7 +10,7 @@ import {
   SwapStep,
   SignedSingleInputSwapStep,
   SignedApproveStep,
-  Balance,
+  TokenAmount,
 } from './types';
 
 export enum TRPCErrorMessage {
@@ -30,16 +26,8 @@ export type TokenBalancesReturnType = {
   address: Hex;
   chainId: number;
   token: Token;
-  balance: Balance;
+  balance: TokenAmount;
 }[];
-
-export interface SendTransactionRequestBody {
-  signedBridgeSteps: SignedBridgeStep[];
-  signedTransfer: SignedTransferStep;
-  sender: Hex;
-  token: Token;
-  amount: string;
-}
 
 export interface BuildMultiChainSendRequestBody {
   amount: string;
@@ -47,20 +35,6 @@ export interface BuildMultiChainSendRequestBody {
   sender: Hex;
   to: Hex;
   destinationChainId: number;
-}
-
-export interface BuildMultiChainSendReturnType {
-  inputAmount: string;
-  inputAmountFormatted: string;
-  inputAmountUsd: string;
-  outputAmount: string;
-  outputAmountFormatted: string;
-  bridgeFee: string;
-  bridgeFeeFormatted: string;
-  bridgeFeeUsd: string;
-  outputAmountUsd: string;
-  bridgeSteps: BridgeStep[];
-  transferStep: TransferStep;
 }
 
 export interface BuildSendRequestBody {
@@ -85,9 +59,9 @@ export interface BuildSendReturnType {
   transfer: {
     from: Hex;
     to: Hex;
-    amount: Balance;
+    amount: TokenAmount;
     token: Token;
-    gasFee: Balance;
+    gasFee: TokenAmount;
   };
 }
 
@@ -97,7 +71,7 @@ export interface SendTxRequestBody {
   transfer: {
     from: Hex;
     to: Hex;
-    amount: Balance;
+    amount: TokenAmount;
     token: Token;
   };
 }
@@ -108,7 +82,7 @@ export interface SendBridgeTxRequestBody {
   transfer: {
     from: Hex;
     to: Hex;
-    amount: Balance;
+    amount: TokenAmount;
     token: Token;
   };
 }
@@ -261,7 +235,7 @@ export type GetHistoryReturnType = {
   to: Hex;
   token: Token;
   chainId: number;
-  amount: Balance;
+  amount: TokenAmount;
   timestamp: string;
   type: HistoryItemType;
   txHash: Hex;
@@ -276,7 +250,7 @@ export interface GetEstimatedTransferGasRequestBody {
   maxFeePerGas: string;
 }
 
-export type GetEstimatedTransferGasReturnType = Balance;
+export type GetEstimatedTransferGasReturnType = TokenAmount;
 
 export interface BuildBridgeSendRequestBody {
   from: Hex;
@@ -292,14 +266,14 @@ export type BuildBridgeSendReturnType = {
   transfer: {
     from: Hex;
     to: Hex;
-    amount: Balance;
+    amount: TokenAmount;
     token: Token;
   };
-  originChainGas: Balance;
+  originChainGas: TokenAmount;
   relayerServiceFeeToken: Token;
-  relayerServiceFee: Balance;
-  amountIn: Balance;
-  amountOut: Balance;
+  relayerServiceFee: TokenAmount;
+  amountIn: TokenAmount;
+  amountOut: TokenAmount;
   relayerFeeChainId: number;
 };
 

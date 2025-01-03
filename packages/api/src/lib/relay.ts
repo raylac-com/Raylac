@@ -119,6 +119,7 @@ export const relayGetToken = async ({
   const result = searchResult[0];
 
   const token = {
+    id: getAddress(result.address),
     symbol: result.symbol,
     name: result.name,
     decimals: result.decimals,

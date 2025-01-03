@@ -1,5 +1,5 @@
 import colors from '@/lib/styles/colors';
-import { Balance } from '@raylac/shared';
+import { TokenAmount } from '@raylac/shared';
 import { View } from 'react-native';
 import StyledText from '../StyledText/StyledText';
 import TokenLogo from '../FastImage/TokenLogo';
@@ -14,7 +14,7 @@ const shortenName = (name: string) => {
 const TokenBalanceItem = (props: {
   name: string;
   symbol: string;
-  balance: Balance;
+  balance: TokenAmount;
   logoUrl: string;
 }) => {
   return (

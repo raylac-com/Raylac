@@ -12,7 +12,7 @@ import {
 import { ed, logger, st } from '@raylac/shared-backend';
 import { getTokenAddressOnChain } from '../../utils';
 import BigNumber from 'bignumber.js';
-import { getNonce } from '../../lib/utils';
+import { getNonce } from '../../utils';
 import { relayApi } from '../../lib/relay';
 import { TRPCError } from '@trpc/server';
 import axios from 'axios';

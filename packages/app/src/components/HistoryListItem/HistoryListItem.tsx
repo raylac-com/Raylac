@@ -3,7 +3,11 @@ import colors from '@/lib/styles/colors';
 import StyledText from '../StyledText/StyledText';
 import Feather from '@expo/vector-icons/Feather';
 import { shortenAddress } from '@/lib/utils';
-import { GetHistoryReturnType, HistoryItemType } from '@raylac/shared';
+import {
+  GetHistoryReturnType,
+  HistoryItemType,
+  isRelayReceiverAddress,
+} from '@raylac/shared';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import { useState } from 'react';
 import HistoryListItemSheet from '../HistoryListItemSheet/HistoryListItemSheet';
@@ -76,7 +80,13 @@ const HistoryListItem = (props: { transfer: GetHistoryReturnType[number] }) => {
             <StyledText
               style={{ fontWeight: 'bold', color: colors.subbedText }}
             >
-              {shortenAddress(props.transfer.to)}
+              {isRelayReceiverAddress(props.transfer.to)
+                ? 'Relay Receiver'
+                : shortenAddress(
+                    props.transfer.type === HistoryItemType.INCOMING
+                      ? props.transfer.from
+                      : props.transfer.to
+                  )}
             </StyledText>
           </View>
         </View>
