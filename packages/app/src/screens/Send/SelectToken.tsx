@@ -23,6 +23,7 @@ import {
 import { Hex } from 'viem';
 import BigNumber from 'bignumber.js';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AddressType } from '@/types';
 
 const SearchBar = ({
   onAddressSelect,
@@ -355,7 +356,9 @@ const SelectToken = ({ navigation, route }: Props) => {
   const tokenBalancesPerAddress = useTokenBalancePerAddress({
     addresses: selectedAddress
       ? [selectedAddress]
-      : (userAddresses?.map(a => a.address) ?? []),
+      : (userAddresses
+          ?.filter(a => a.type !== AddressType.Watch)
+          .map(a => a.address) ?? []),
   });
 
   const onTokenSelect = ({
