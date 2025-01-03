@@ -1,5 +1,5 @@
 import { SupportedTokensReturnType } from '@raylac/shared';
-import { zeroAddress } from 'viem';
+import { getAddress, zeroAddress } from 'viem';
 import { base } from 'viem/chains';
 
 const getSupportedTokens = (_args: {
@@ -10,6 +10,7 @@ const getSupportedTokens = (_args: {
     {
       symbol: 'ETH',
       name: 'Ethereum',
+      id: zeroAddress,
       verified: true,
       addresses: [
         {
@@ -24,6 +25,7 @@ const getSupportedTokens = (_args: {
     {
       symbol: 'USDC',
       name: 'USD Coin',
+      id: getAddress('0x833589fcd6edb6e08f4c7c32d4f71b54bda02913'),
       verified: true,
       addresses: [
         {
