@@ -9,38 +9,36 @@ import { Hex } from 'viem';
 import getSupportedTokens from './api/getSupportedTokens/getSupportedTokens';
 import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.mock';
 import {
-  BuildAggregateSendRequestBody,
-  BuildMultiChainSendRequestBody,
+  BuildSendRequestBody,
   GetHistoryRequestBody,
   GetSingleChainSwapQuoteRequestBody,
   GetSingleInputSwapQuoteRequestBody,
-  SendAggregateTxRequestBody,
+  SendTxRequestBody,
   GetSwapQuoteRequestBody,
-  SendTransactionRequestBody,
   SubmitSingleChainSwapRequestBody,
   SubmitSingleInputSwapRequestBody,
   SubmitSwapRequestBody,
   GetEstimatedTransferGasRequestBody,
   BuildBridgeSendRequestBody,
   Token,
+  SendBridgeTxRequestBody,
 } from '@raylac/shared';
-import buildAggregateSend from './api/buildAggregateSend/buildAggregateSend';
+import buildSend from './api/buildSend/buildSend';
 import getSwapQuote from './api/getSwapQuote/getSwapQuote';
 import { ed, logger, st } from '@raylac/shared-backend';
 import getTokenPrice from './api/getTokenPrice/getTokenPrice';
 import { getTokenPriceMock } from './api/getTokenPrice/getTokenPrice.mock';
 import submitSwap from './api/submitSwap/submitSwap';
-import sendTransaction from './api/sendTransaction/sendTransaction';
-import buildMultiChainSend from './api/buildMultichainSend/buildMultichainSend';
 import getHistory from './api/getHistory/getHistory';
 import getSingleChainSwapQuote from './api/getSingleChainSwapQuote/getSingleChainSwapQuote';
 import submitSingleChainSwap from './api/submitSingleChainSwap/submitSingleChainSwap';
 import getLidoApy from './api/getLidoApy/getLidoApy';
 import getSingleInputSwapQuote from './api/getSingleInputSwapQuote/getSingleInputSwapQuote';
 import submitSingleInputSwap from './api/submitSingleInputSwap/submitSingleInputSwap';
-import sendAggregateTx from './api/sendAggregateTx/sendAggregateTx';
+import sendTx from './api/sendTx/sendTx';
 import getEstimatedTransferGas from './api/getEstimatedTransferGas/getEstimatedTransferGas';
 import buildBridgeSend from './api/buildBridgeSend/buildBridgeSend';
+import sendBridgeTx from './api/sendBridgeTx/sendBridgeTx';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -90,23 +88,9 @@ export const appRouter = router({
       return submitSingleInputSwap(input as SubmitSingleInputSwapRequestBody);
     }),
 
-  sendTransaction: publicProcedure
-    .input(z.any())
-    .mutation(async ({ input }) => {
-      return sendTransaction(input as SendTransactionRequestBody);
-    }),
-
-  buildMultiChainSend: publicProcedure
-    .input(z.any())
-    .mutation(async ({ input }) => {
-      return buildMultiChainSend(input as BuildMultiChainSendRequestBody);
-    }),
-
-  buildAggregateSend: publicProcedure
-    .input(z.any())
-    .mutation(async ({ input }) => {
-      return buildAggregateSend(input as BuildAggregateSendRequestBody);
-    }),
+  buildSend: publicProcedure.input(z.any()).mutation(async ({ input }) => {
+    return buildSend(input as BuildSendRequestBody);
+  }),
 
   buildBridgeSend: publicProcedure
     .input(z.any())
@@ -114,11 +98,13 @@ export const appRouter = router({
       return buildBridgeSend(input as BuildBridgeSendRequestBody);
     }),
 
-  sendAggregateTx: publicProcedure
-    .input(z.any())
-    .mutation(async ({ input }) => {
-      return sendAggregateTx(input as SendAggregateTxRequestBody);
-    }),
+  sendTx: publicProcedure.input(z.any()).mutation(async ({ input }) => {
+    return sendTx(input as SendTxRequestBody);
+  }),
+
+  sendBridgeTx: publicProcedure.input(z.any()).mutation(async ({ input }) => {
+    return sendBridgeTx(input as SendBridgeTxRequestBody);
+  }),
 
   getSwapQuote: publicProcedure.input(z.any()).mutation(async ({ input }) => {
     return getSwapQuote(input as GetSwapQuoteRequestBody);

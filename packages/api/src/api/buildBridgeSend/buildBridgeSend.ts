@@ -1,9 +1,11 @@
 import { logger } from '@raylac/shared-backend';
-
-import { CrossChainSwapStep, TRPCErrorMessage } from '@raylac/shared';
-
+import {
+  CrossChainSwapStep,
+  ETH,
+  formatBalance,
+  TRPCErrorMessage,
+} from '@raylac/shared';
 import { TRPCError } from '@trpc/server';
-
 import {
   BuildBridgeSendReturnType,
   BuildBridgeSendRequestBody,
@@ -14,7 +16,8 @@ import {
 import { relayApi } from '../../lib/relay';
 import axios from 'axios';
 import { getNonce } from '../../lib/utils';
-import { formatUnits } from 'viem';
+import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
+import { zeroAddress } from 'viem';
 
 const buildBridgeSend = async ({
   from,
@@ -24,17 +27,20 @@ const buildBridgeSend = async ({
   fromChainId,
   toChainId,
 }: BuildBridgeSendRequestBody): Promise<BuildBridgeSendReturnType> => {
+  const originTokenAddress = getTokenAddressOnChain(token, fromChainId);
+  const destinationTokenAddress = getTokenAddressOnChain(token, toChainId);
+
   const requestBody: RelaySwapMultiInputRequestBody = {
     user: from,
     recipient: to,
     origins: [
       {
         chainId: fromChainId,
-        currency: getTokenAddressOnChain(token, fromChainId),
+        currency: originTokenAddress,
         amount: amount,
       },
     ],
-    destinationCurrency: getTokenAddressOnChain(token, toChainId),
+    destinationCurrency: destinationTokenAddress,
     destinationChainId: toChainId,
     partial: false,
     tradeType: 'EXACT_INPUT',
@@ -90,22 +96,80 @@ const buildBridgeSend = async ({
   const amountIn = amount;
   const amountOut = quote.details.currencyOut.amount;
 
-  const amountInFormatted = formatUnits(BigInt(amountIn), token.decimals);
-  const amountOutFormatted = formatUnits(BigInt(amountOut), token.decimals);
+  const tokenPriceUsd = await getTokenUsdPrice({ token });
 
-  const amountInUsd = quote.details.currencyIn.amountUsd;
-  const amountOutUsd = quote.details.currencyOut.amountUsd;
-
-  const relayerServiceFeeAmount = quote.fees.relayerService.amount;
-  const relayerServiceFeeUsd = quote.fees.relayerService.amountUsd;
-
-  if (relayerServiceFeeAmount === undefined) {
-    throw new Error('relayerServiceFeeAmount ');
+  if (tokenPriceUsd === null) {
+    throw new Error('tokenPriceUsd is undefined');
   }
 
-  if (relayerServiceFeeUsd === undefined) {
-    throw new Error('relayerServiceFeeUsd is undefined');
+  const amountInFormatted = formatBalance({
+    balance: BigInt(amountIn),
+    token,
+    tokenPriceUsd,
+  });
+
+  const amountOutFormatted = formatBalance({
+    balance: BigInt(amountOut),
+    token,
+    tokenPriceUsd,
+  });
+
+  const ethPriceUsd = await getTokenUsdPrice({ token: ETH });
+
+  if (ethPriceUsd === null) {
+    throw new Error('ETH price not found');
   }
+
+  const originChainGas = quote.fees.gas.amount;
+
+  if (originChainGas === undefined) {
+    throw new Error('originChainGas is undefined');
+  }
+
+  const originChainGasFormatted = formatBalance({
+    balance: BigInt(originChainGas),
+    token: ETH,
+    tokenPriceUsd: ethPriceUsd,
+  });
+
+  const relayerFeeCurrency = quote.fees.relayer.currency;
+  const relayFeeAmount = quote.fees.relayer.amount;
+
+  if (relayerFeeCurrency?.address === undefined) {
+    throw new Error('relayerFeeCurrency.address is undefined');
+  }
+
+  let relayerFeeToken;
+  if (
+    relayerFeeCurrency?.address === originTokenAddress ||
+    relayerFeeCurrency?.address === destinationTokenAddress
+  ) {
+    relayerFeeToken = token;
+  } else if (relayerFeeCurrency?.address === zeroAddress) {
+    relayerFeeToken = ETH;
+  } else {
+    throw new Error(
+      `Unknown fee token ${relayerFeeCurrency?.address} for bridge send`
+    );
+  }
+
+  if (relayFeeAmount === undefined) {
+    throw new Error('relayFeeAmount ');
+  }
+
+  const feeTokenPriceUsd = await getTokenUsdPrice({
+    token: relayerFeeToken,
+  });
+
+  if (feeTokenPriceUsd === null) {
+    throw new Error('feeTokenPriceUsd is undefined');
+  }
+
+  const relayerServiceFeeFormatted = formatBalance({
+    balance: BigInt(relayFeeAmount),
+    token: relayerFeeToken,
+    tokenPriceUsd: feeTokenPriceUsd,
+  });
 
   let fromChainNonce = await getNonce({
     address: from,
@@ -119,7 +183,7 @@ const buildBridgeSend = async ({
 
     const item = step.items[0];
 
-    const crossChainSwapStep: CrossChainSwapStep = {
+    const crossChainSendStep: CrossChainSwapStep = {
       originChainId: item.data.chainId,
       destinationChainId: item.data.chainId,
       id: step.id as 'swap' | 'approve',
@@ -137,19 +201,22 @@ const buildBridgeSend = async ({
 
     fromChainNonce++;
 
-    return crossChainSwapStep;
+    return crossChainSendStep;
   });
 
   return {
     steps: steps,
-    relayerServiceFeeAmount: relayerServiceFeeAmount.toString(),
-    relayerServiceFeeUsd: relayerServiceFeeUsd.toString(),
-    amountIn,
-    amountOut,
-    amountInFormatted,
-    amountOutFormatted,
-    amountInUsd,
-    amountOutUsd,
+    transfer: {
+      from: from,
+      to: to,
+      amount: amountInFormatted,
+      token,
+    },
+    originChainGas: originChainGasFormatted,
+    relayerServiceFeeToken: relayerFeeToken,
+    relayerServiceFee: relayerServiceFeeFormatted,
+    amountIn: amountInFormatted,
+    amountOut: amountOutFormatted,
   };
 };
 

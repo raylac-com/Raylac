@@ -35,7 +35,6 @@ import { Keyboard } from 'react-native';
 import { TouchableWithoutFeedback } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import SelectRecipient from './screens/Send/SelectRecipient';
-import ConfirmSend from './screens/Send/ConfirmSend/ConfirmSend';
 import SelectAmount from './screens/Send/SelectAmount/SelectAmount';
 import SelectToken from './screens/Send/SelectToken';
 import StartWatch from './screens/StartWatch/StartWatch';
@@ -213,15 +212,6 @@ const Screens = () => {
                   component={SelectAmount}
                   options={{
                     title: 'Select Amount',
-                    headerBackVisible: true,
-                    headerBackTitle: 'Back',
-                  }}
-                ></RootStack.Screen>
-                <RootStack.Screen
-                  name="ConfirmSend"
-                  component={ConfirmSend}
-                  options={{
-                    title: 'Confirm Send',
                     headerBackVisible: true,
                     headerBackTitle: 'Back',
                   }}

@@ -1,16 +1,15 @@
 import {
-  BuildAggregateSendRequestBody,
+  BuildSendRequestBody,
   ERC20Abi,
-  TransferStep,
-  BuildAggregateSendReturnType,
+  BuildSendReturnType,
   Token,
   getGasInfo,
   formatBalance,
+  ETH,
 } from '@raylac/shared';
 import { getTokenAddressOnChain } from '../../utils';
 import { getNonce } from '../../lib/utils';
-import { encodeFunctionData, formatUnits, Hex } from 'viem';
-import BigNumber from 'bignumber.js';
+import { encodeFunctionData, Hex } from 'viem';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
 
 const buildERC20TransferExecutionStep = ({
@@ -21,7 +20,6 @@ const buildERC20TransferExecutionStep = ({
   maxFeePerGas,
   maxPriorityFeePerGas,
   nonce,
-  tokenPriceUsd,
 }: {
   token: Token;
   amount: bigint;
@@ -30,8 +28,7 @@ const buildERC20TransferExecutionStep = ({
   maxFeePerGas: bigint;
   maxPriorityFeePerGas: bigint;
   nonce: number;
-  tokenPriceUsd: string;
-}) => {
+}): BuildSendReturnType['tx'] => {
   const tokenAddress = getTokenAddressOnChain(token, chainId);
 
   const data = encodeFunctionData({
@@ -40,32 +37,16 @@ const buildERC20TransferExecutionStep = ({
     args: [to, amount],
   });
 
-  const amountUsd = new BigNumber(
-    formatUnits(amount, token.decimals)
-  ).multipliedBy(new BigNumber(tokenPriceUsd));
-
-  const step: TransferStep = {
-    tx: {
-      to: tokenAddress,
-      data,
-      value: '0',
-      maxFeePerGas: maxFeePerGas.toString(),
-      maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
-      nonce,
-      chainId,
-      gas: 500_000,
-    },
-    transferDetails: {
-      to: to,
-      amount: amount.toString(),
-      amountFormatted: formatUnits(amount, token.decimals),
-      amountUsd: amountUsd.toString(),
-      chainId,
-    },
-    serializedTx: '0x',
+  return {
+    to: tokenAddress,
+    data,
+    value: '0',
+    maxFeePerGas: maxFeePerGas.toString(),
+    maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+    nonce,
+    chainId,
+    gas: 500_000,
   };
-
-  return step;
 };
 
 const buildETHTransferExecutionStep = ({
@@ -75,7 +56,6 @@ const buildETHTransferExecutionStep = ({
   maxPriorityFeePerGas,
   nonce,
   chainId,
-  tokenPriceUsd,
 }: {
   amount: bigint;
   to: Hex;
@@ -83,50 +63,30 @@ const buildETHTransferExecutionStep = ({
   maxPriorityFeePerGas: bigint;
   chainId: number;
   nonce: number;
-  tokenPriceUsd: string;
-}) => {
-  const amountUsd = new BigNumber(formatUnits(amount, 18)).multipliedBy(
-    new BigNumber(tokenPriceUsd)
-  );
-
-  const step: TransferStep = {
-    transferDetails: {
-      to: to,
-      amount: amount.toString(),
-      amountFormatted: formatUnits(amount, 18),
-      amountUsd: amountUsd.toString(),
-      chainId,
-    },
-    tx: {
-      to: to,
-      data: '0x',
-      value: amount.toString(),
-      maxFeePerGas: maxFeePerGas.toString(),
-      maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
-      nonce,
-      chainId,
-      gas: 500_000,
-    },
-    serializedTx: '0x',
+}): BuildSendReturnType['tx'] => {
+  return {
+    to: to,
+    data: '0x',
+    value: amount.toString(),
+    maxFeePerGas: maxFeePerGas.toString(),
+    maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+    nonce,
+    chainId,
+    gas: 500_000,
   };
-
-  return step;
 };
 
-const buildAggregateSend = async (
-  requestBody: BuildAggregateSendRequestBody
-): Promise<BuildAggregateSendReturnType> => {
+const buildSend = async (
+  requestBody: BuildSendRequestBody
+): Promise<BuildSendReturnType> => {
   const gasInfo = await getGasInfo({ chainIds: [requestBody.chainId] });
 
   const baseFeePerGas = gasInfo[0].baseFeePerGas;
   const maxPriorityFeePerGas = gasInfo[0].maxPriorityFeePerGas;
   const maxFeePerGas = baseFeePerGas + maxPriorityFeePerGas;
 
-  if (requestBody.fromAddresses.length > 1) {
-    throw new Error('Multiple from addresses not supported');
-  }
+  const fromAddress = requestBody.fromAddress;
 
-  const fromAddress = requestBody.fromAddresses[0];
   const nonce = await getNonce({
     chainId: requestBody.chainId,
     address: fromAddress,
@@ -149,7 +109,6 @@ const buildAggregateSend = async (
           maxPriorityFeePerGas: BigInt(maxPriorityFeePerGas),
           chainId: requestBody.chainId,
           nonce,
-          tokenPriceUsd: tokenPriceUsd.toString(),
         })
       : buildERC20TransferExecutionStep({
           token: requestBody.token,
@@ -159,8 +118,21 @@ const buildAggregateSend = async (
           maxFeePerGas: BigInt(maxFeePerGas),
           maxPriorityFeePerGas: BigInt(maxPriorityFeePerGas),
           nonce,
-          tokenPriceUsd: tokenPriceUsd.toString(),
         });
+
+  const gasFee = BigInt(tx.gas) * BigInt(maxFeePerGas);
+
+  const ethPriceUsd = await getTokenUsdPrice({ token: ETH });
+
+  if (ethPriceUsd === null) {
+    throw new Error('ETH price not found');
+  }
+
+  const gasFeeFormatted = formatBalance({
+    balance: gasFee,
+    token: ETH,
+    tokenPriceUsd: ethPriceUsd,
+  });
 
   const formattedAmount = formatBalance({
     balance: BigInt(requestBody.amount),
@@ -169,14 +141,15 @@ const buildAggregateSend = async (
   });
 
   return {
-    inputs: [tx],
+    tx,
     transfer: {
       from: fromAddress,
       to: requestBody.toAddress,
       amount: formattedAmount,
       token: requestBody.token,
+      gasFee: gasFeeFormatted,
     },
   };
 };
 
-export default buildAggregateSend;
+export default buildSend;

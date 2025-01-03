@@ -5,13 +5,13 @@ import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress'
 import colors from '@/lib/styles/colors';
 import {
   getChainFromId,
-  SendAggregateTxRequestBody,
   signEIP1159Tx,
   Token,
   getAddressChainTokenBalance,
   BuildBridgeSendRequestBody,
   getTokenId,
   formatBalance,
+  SendBridgeTxRequestBody,
 } from '@raylac/shared';
 import { useEffect, useState } from 'react';
 import { Image, Pressable, TextInput, View } from 'react-native';
@@ -307,8 +307,8 @@ const MoveFunds = () => {
     throwOnError: false,
   });
 
-  const { mutateAsync: sendAggregateTx, isPending: isSendingAggregateTx } =
-    trpc.sendAggregateTx.useMutation();
+  const { mutateAsync: sendBridgeTx, isPending: isSendingBridgeTx } =
+    trpc.sendBridgeTx.useMutation();
 
   const { data: tokenPriceUsd } = useTokenPriceUsd(token);
 
@@ -416,7 +416,7 @@ const MoveFunds = () => {
       tokenPriceUsd: tokenPriceUsd,
     });
 
-    const sendAggregateTxRequestBody: SendAggregateTxRequestBody = {
+    const sendBridgeTxRequestBody: SendBridgeTxRequestBody = {
       signedTxs,
       chainId: fromChainId,
       transfer: {
@@ -427,7 +427,7 @@ const MoveFunds = () => {
       },
     };
 
-    await sendAggregateTx(sendAggregateTxRequestBody);
+    await sendBridgeTx(sendBridgeTxRequestBody);
 
     setAmountInputText('');
 
@@ -446,7 +446,7 @@ const MoveFunds = () => {
       <MoveFundsOutput
         toAddress={toAddress}
         token={token}
-        outputAmount={bridgeSend ? bridgeSend.amountOutFormatted : null}
+        outputAmount={bridgeSend ? bridgeSend.amountOut.formatted : null}
         chainId={toChainId}
       />
       <View
@@ -471,7 +471,7 @@ const MoveFunds = () => {
       <StyledButton
         title="Send"
         onPress={onSendPress}
-        isLoading={isSendingAggregateTx || isBuildingBridgeSend}
+        isLoading={isSendingBridgeTx || isBuildingBridgeSend}
       />
     </View>
   );

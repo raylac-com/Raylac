@@ -4,23 +4,24 @@ import { trpc } from '@/lib/trpc';
 import { getQueryKey } from '@trpc/react-query';
 import {
   signEIP1159Tx,
-  BuildSendReturnType,
-  SendTxRequestBody,
+  BuildBridgeSendReturnType,
+  SendBridgeTxRequestBody,
 } from '@raylac/shared';
 import { getPrivateKey } from '@/lib/key';
 import { privateKeyToAccount } from 'viem/accounts';
+import { Hex } from 'viem';
 
-const useSend = () => {
+const useBridgeSend = () => {
   const queryClient = useQueryClient();
 
-  const { mutateAsync: sendTx } = trpc.sendTx.useMutation();
+  const { mutateAsync: sendBridgeTx } = trpc.sendBridgeTx.useMutation();
 
   return useMutation({
     mutationFn: async ({
       sendData,
       chainId,
     }: {
-      sendData: BuildSendReturnType;
+      sendData: BuildBridgeSendReturnType;
       chainId: number;
     }) => {
       const privateKey = await getPrivateKey(sendData.transfer.from);
@@ -31,13 +32,17 @@ const useSend = () => {
 
       const privateKeyAccount = privateKeyToAccount(privateKey);
 
-      const signedTx = await signEIP1159Tx({
-        tx: sendData.tx,
-        account: privateKeyAccount,
-      });
+      const signedTxs: Hex[] = [];
+      for (const step of sendData.steps) {
+        const signedTx = await signEIP1159Tx({
+          tx: step.tx,
+          account: privateKeyAccount,
+        });
+        signedTxs.push(signedTx);
+      }
 
-      const sendTxRequestBody: SendTxRequestBody = {
-        signedTx,
+      const sendBridgeTxRequestBody: SendBridgeTxRequestBody = {
+        signedTxs,
         chainId,
         transfer: {
           token: sendData.transfer.token,
@@ -47,7 +52,7 @@ const useSend = () => {
         },
       };
 
-      await sendTx(sendTxRequestBody);
+      await sendBridgeTx(sendBridgeTxRequestBody);
 
       await queryClient.invalidateQueries({
         queryKey: getQueryKey(trpc.getHistory),
@@ -56,4 +61,4 @@ const useSend = () => {
   });
 };
 
-export default useSend;
+export default useBridgeSend;

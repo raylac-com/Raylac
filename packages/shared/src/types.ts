@@ -138,16 +138,6 @@ export interface CrossChainSwapStep {
     chainId: number;
     gas: number;
   };
-  /*
-  swapDetails: {
-    tokenIn: Token;
-    tokenOut: Token;
-    amountIn: string;
-    amountOut: string;
-    amountInUsd: string;
-    amountOutUsd: string;
-  };
-  */
 }
 
 export interface SwapStep {

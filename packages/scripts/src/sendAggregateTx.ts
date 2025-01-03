@@ -9,15 +9,15 @@ import {
 import { privateKeyToAccount } from 'viem/accounts';
 import { client } from './rpc';
 import {
-  BuildAggregateSendRequestBody,
+  BuildSendRequestBody,
   HistoryItemType,
-  SendAggregateTxRequestBody,
+  SendTxRequestBody,
   signEIP1159Tx,
   USDC,
 } from '@raylac/shared';
 import { base, optimism } from 'viem/chains';
 
-const sendAggregateTx = async () => {
+const sendTx = async () => {
   const account = privateKeyToAccount(
     process.env.TEST_RELAY_PRIVATE_KEY as Hex
   );
@@ -26,7 +26,7 @@ const sendAggregateTx = async () => {
 
   const chainId = optimism.id;
 
-  const requestBody: BuildAggregateSendRequestBody = {
+  const requestBody: BuildSendRequestBody = {
     token: USDC,
     amount: transferAmount,
     fromAddresses: [account.address],
@@ -34,7 +34,7 @@ const sendAggregateTx = async () => {
     chainId,
   };
 
-  const aggregateSend = await client.buildAggregateSend.mutate(requestBody);
+  const aggregateSend = await client.buildSend.mutate(requestBody);
 
   console.log(JSON.stringify(aggregateSend, null, 2));
 
@@ -49,15 +49,13 @@ const sendAggregateTx = async () => {
     signedStepItems.push(signedTx);
   }
 
-  const sendAggregateTxRequestBody: SendAggregateTxRequestBody = {
+  const sendAggregateTxRequestBody: SendTxRequestBody = {
     signedTxs: signedStepItems,
     chainId,
     transfer: aggregateSend.transfer,
   };
 
-  const response = await client.sendAggregateTx.mutate(
-    sendAggregateTxRequestBody
-  );
+  const response = await client.sendTx.mutate(sendAggregateTxRequestBody);
 
   const history = await client.getHistory.query({
     addresses: [account.address],
@@ -67,4 +65,4 @@ const sendAggregateTx = async () => {
   console.log(pendingTxs);
 };
 
-sendAggregateTx();
+sendTx();

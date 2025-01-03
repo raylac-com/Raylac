@@ -1,8 +1,10 @@
 import {
   BuildBridgeSendRequestBody,
   ETH,
-  SendAggregateTxRequestBody,
+  SendBridgeTxRequestBody,
+  SendTxRequestBody,
   signEIP1159Tx,
+  USDC,
 } from '@raylac/shared';
 import { base } from 'viem/chains';
 import { arbitrum } from 'viem/chains';
@@ -22,7 +24,7 @@ const bridgeSend = async () => {
     from: account.address,
     to: '0x400EA6522867456E988235675b9Cb5b1Cf5b79C8',
     token: ETH,
-    amount: parseUnits('0.0001', 18).toString(),
+    amount: '1000000000000000000',
     fromChainId,
     toChainId,
   };
@@ -41,12 +43,15 @@ const bridgeSend = async () => {
     signedStepItems.push(signedTx);
   }
 
-  const sendAggregateTxRequestBody: SendAggregateTxRequestBody = {
+  /*
+  const sendBridgeTxRequestBody: SendBridgeTxRequestBody = {
     signedTxs: signedStepItems,
     chainId: fromChainId,
+    transfer: response.transfer,
   };
 
-  await client.sendAggregateTx.mutate(sendAggregateTxRequestBody);
+  await client.sendBridgeTx.mutate(sendBridgeTxRequestBody);
+  */
 };
 
 bridgeSend();

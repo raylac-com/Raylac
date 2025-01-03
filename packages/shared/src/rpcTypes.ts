@@ -63,27 +63,37 @@ export interface BuildMultiChainSendReturnType {
   transferStep: TransferStep;
 }
 
-export interface BuildAggregateSendRequestBody {
+export interface BuildSendRequestBody {
   amount: string;
   token: Token;
-  fromAddresses: Hex[];
+  fromAddress: Hex;
   toAddress: Hex;
   chainId: number;
 }
 
-export interface BuildAggregateSendReturnType {
-  inputs: {
-    tx: {
-      to: Hex;
-      data: Hex;
-      value: string;
-      maxFeePerGas: string;
-      maxPriorityFeePerGas: string;
-      nonce: number;
-      chainId: number;
-      gas: number;
-    };
-  }[];
+export interface BuildSendReturnType {
+  tx: {
+    to: Hex;
+    data: Hex;
+    value: string;
+    maxFeePerGas: string;
+    maxPriorityFeePerGas: string;
+    nonce: number;
+    chainId: number;
+    gas: number;
+  };
+  transfer: {
+    from: Hex;
+    to: Hex;
+    amount: Balance;
+    token: Token;
+    gasFee: Balance;
+  };
+}
+
+export interface SendTxRequestBody {
+  signedTx: Hex;
+  chainId: number;
   transfer: {
     from: Hex;
     to: Hex;
@@ -92,7 +102,7 @@ export interface BuildAggregateSendReturnType {
   };
 }
 
-export interface SendAggregateTxRequestBody {
+export interface SendBridgeTxRequestBody {
   signedTxs: Hex[];
   chainId: number;
   transfer: {
@@ -279,14 +289,17 @@ export interface BuildBridgeSendRequestBody {
 
 export type BuildBridgeSendReturnType = {
   steps: CrossChainSwapStep[];
-  relayerServiceFeeAmount: string;
-  relayerServiceFeeUsd: string;
-  amountIn: string;
-  amountOut: string;
-  amountInFormatted: string;
-  amountOutFormatted: string;
-  amountInUsd: string;
-  amountOutUsd: string;
+  transfer: {
+    from: Hex;
+    to: Hex;
+    amount: Balance;
+    token: Token;
+  };
+  originChainGas: Balance;
+  relayerServiceFeeToken: Token;
+  relayerServiceFee: Balance;
+  amountIn: Balance;
+  amountOut: Balance;
 };
 
 export type GetTokenUsdPriceReturnType = number | null;
