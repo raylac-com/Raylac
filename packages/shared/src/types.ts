@@ -1,4 +1,4 @@
-import { Chain, Hex } from 'viem';
+import { Hex } from 'viem';
 
 export interface RelayGetQuoteRequestBody {
   user: Hex;
@@ -185,140 +185,16 @@ export interface RelayGetQuoteResponseBody {
   };
 }
 
-/**
- * Token balance of an address on a chain
- */
-export interface AddressTokenBalance {
-  tokenId: string;
-  address: Hex;
-  balance: string;
-  chainId: number;
-}
-
-export interface SupportedToken {
-  tokenId: string;
-  symbol: string;
-  name: string;
-  decimals: number;
-  logoURI: string;
-  addresses: {
-    address: Hex;
-    chain: Chain;
-    syncFrom?: bigint;
-  }[];
-}
-
-export interface TraceInitAction {
-  from: Hex;
-  gas: Hex;
-  init: Hex;
-  value: Hex;
-}
-
-export interface TraceCallAction {
-  from: Hex;
-  callType: 'call' | 'delegatecall' | 'staticcall';
-  gas: Hex;
-  input: Hex;
-  to: Hex;
-  value: Hex;
-}
-
-type TraceResponse<T extends string, A> = {
-  action: A;
-  blockHash: Hex;
-  blockNumber: number;
-  result: { gasUsed: Hex; output: Hex };
-  subtraces: number;
-  traceAddress: number[];
-  transactionHash: Hex;
-  transactionPosition: number;
-  type: T;
-};
-
-export type TraceResponseData =
-  | TraceResponse<'call', TraceCallAction>
-  | TraceResponse<'create', TraceInitAction>;
-
-export type BlockTraceCallResponse = any;
-
-export interface BlockTransactionResponse {
-  from: Hex;
-  gas: Hex;
-  gasUsed: Hex;
-  to: Hex;
-  input: Hex;
-  calls?: BlockTransactionResponse[];
-  value: Hex;
-  type: 'CALL' | 'CREATE';
-}
-
-export type BlockTraceResponse = {
-  txHash: Hex;
-  result: BlockTransactionResponse;
-}[];
-
-export type AnvilBlockTraceResponse = {
-  action: {
-    from: Hex;
-    callType: 'call' | 'create';
-    gas: Hex;
-    input: Hex;
-    to: Hex;
-    value: Hex;
-  };
-  blockHash: Hex;
-  blockNumber: number;
-  result: { gasUsed: Hex; output: Hex };
-  subtraces: number;
-  traceAddress: number[];
-  transactionHash: Hex;
-  transactionPosition: number;
-  type: 'call' | 'create';
-}[];
-
-export interface TraceWithTraceAddress extends BlockTransactionResponse {
-  txHash: Hex;
-  traceAddress: number[];
-}
-
-export interface TokenBalanceQueryResult {
-  tokenId: string;
-  balance: string;
-}
-
-export interface AccountBalancePerChainQueryResult {
-  chainId: number;
-  balance: string;
-  address: Hex;
-  tokenId: string;
-}
-
 export interface CoingeckoTokenPriceResponse {
   [key: string]: {
     usd: number;
   };
 }
 
-export type SyncJob = 'UserOps' | 'Traces';
-
 export interface ChainGasInfo {
   baseFeePerGas: bigint;
   maxPriorityFeePerGas: bigint;
   chainId: number;
-}
-
-export interface RaylacAccountExecuteArgs {
-  to: Hex;
-  value: bigint;
-  data: Hex;
-  tag: Hex;
-}
-
-export enum UserActionType {
-  Transfer = '0x01',
-  Swap = '0x02',
-  Bridge = '0x03',
 }
 
 export interface AlchemyTokenPriceResponse {

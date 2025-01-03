@@ -481,7 +481,7 @@ export const getTokenAddressOnChain = (token: Token, chainId: number): Hex => {
 
 export const getTokenId = (token: Token) => {
   // Use the first address as the token id
-  const id = token.addresses[0].address;
+  const id = token.addresses.sort((a, b) => a.chainId - b.chainId)[0].address;
   return id;
 };
 
