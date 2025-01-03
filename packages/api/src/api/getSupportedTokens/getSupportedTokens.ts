@@ -2,7 +2,6 @@ import { relayGetCurrencies } from '../../lib/relay';
 import { getAddress } from 'viem';
 import { KNOWN_TOKENS, Token } from '@raylac/shared';
 import { cacheTokens, getCachedTokens } from '../../lib/token';
-import { logger } from '@raylac/shared-backend';
 
 const knownTokenAddresses = KNOWN_TOKENS.flatMap(token =>
   token.addresses.map(address => getAddress(address.address))
@@ -18,9 +17,6 @@ const getSupportedTokens = async ({
   const cachedTokens = await getCachedTokens();
 
   if (cachedTokens.length > 0) {
-    logger.info(
-      `getSupportedTokens: Cache hit. Returning ${cachedTokens.length} tokens`
-    );
     return cachedTokens;
   }
 

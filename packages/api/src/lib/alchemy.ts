@@ -1,5 +1,5 @@
 import { toAlchemyNetwork } from '../utils';
-import { Alchemy } from 'alchemy-sdk';
+import { Alchemy, HistoricalPriceInterval } from 'alchemy-sdk';
 import { ALCHEMY_API_KEY } from './envVars';
 import { AlchemyTokenPriceResponse } from '@raylac/shared';
 import { Hex } from 'viem';
@@ -33,30 +33,35 @@ export const getTokenPriceByAddress = async ({
 }: {
   chainId: number;
   address: Hex;
-}) => {
-  const headers = {
-    Accept: 'application/json',
-    Authorization: `Bearer ${ALCHEMY_API_KEY}`,
-  };
+}): Promise<string | null> => {
+  const alchemyClient = getAlchemyClient(chainId);
 
-  const url = `https://api.g.alchemy.com/prices/v1/tokens/by-address`;
+  const startTime = new Date().getTime() / 1000 - 24 * 60 * 60; // Yesterday
+  const endTime = new Date().getTime() / 1000; // Today
 
-  const response = await axios.post<{ data: AlchemyTokenPriceResponse[] }>(
-    url,
-    {
-      addresses: [
-        {
-          address,
-          network: toAlchemyNetwork(chainId),
-        },
-      ],
-    },
-    {
-      headers: headers,
+  try {
+    const result = await alchemyClient.prices.getHistoricalPriceByAddress(
+      toAlchemyNetwork(chainId),
+      address,
+      startTime,
+      endTime,
+      HistoricalPriceInterval.ONE_DAY
+    );
+
+    const data = result.data;
+
+    if (data.length === 0) {
+      return null;
     }
-  );
 
-  return response.data.data[0];
+    return data[data.length - 1].value;
+  } catch (err: any) {
+    if (err.message.includes('Token address not found')) {
+      return null;
+    }
+
+    throw err;
+  }
 };
 
 export const getTokenPrices = async ({

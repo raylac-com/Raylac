@@ -69,37 +69,23 @@ const getTokenUsdPrice = async ({
     return Number(usdPrice.value);
   }
 
-  const result = await getTokenPriceByAddress({
+  const usdPrice = await getTokenPriceByAddress({
     address: tokenAddress,
     chainId,
   });
 
-  const usdPriceData = result.prices.find(p => p.currency === 'usd');
-
-  if (usdPriceData === undefined) {
+  if (usdPrice === null) {
     await cacheUsdPrice({ tokenAddress, usdPrice: 'notfound' });
     return 'notfound';
   }
-
-  // Return the price as 0 if the last update of the price is more than 6 hours ago
-  if (
-    usdPriceData &&
-    new Date(usdPriceData.lastUpdatedAt).getTime() <
-      Date.now() - 6 * 60 * 60 * 1000
-  ) {
-    await cacheUsdPrice({ tokenAddress, usdPrice: 0 });
-    return 0;
-  }
-
-  const usdPrice = Number(usdPriceData.value);
 
   logger.warn(
     `getTokenUsdPrice: Cache miss. Token: ${token.symbol} Price: ${usdPrice}`
   );
 
-  await cacheUsdPrice({ tokenAddress, usdPrice });
+  await cacheUsdPrice({ tokenAddress, usdPrice: Number(usdPrice) });
 
-  return usdPrice;
+  return Number(usdPrice);
 };
 
 export default getTokenUsdPrice;

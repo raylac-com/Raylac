@@ -35,7 +35,19 @@ export const getCachedTokens = async (): Promise<Token[]> => {
   }
 
   const tokens = await redisClient.mGet(keys);
-  return tokens.map(token => JSON.parse(token as string));
+  return tokens
+    .map(token => {
+      try {
+        const parsed = JSON.parse(token as string);
+        if (parsed.addresses !== undefined) {
+          return parsed;
+        }
+        return null;
+      } catch (_error) {
+        return null;
+      }
+    })
+    .filter(item => item !== null);
 };
 
 export const getToken = async ({
