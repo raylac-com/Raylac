@@ -15,6 +15,40 @@ import useUserAddresses from '@/hooks/useUserAddresses';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import Fav from '@/components/Fav/Fav';
 import TopMenuBar from './components/TopMenuBar/TopMenuBar';
+import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
+import AntDesign from '@expo/vector-icons/AntDesign';
+
+const AddAddressButton = () => {
+  const navigation = useTypedNavigation();
+  return (
+    <FeedbackPressable
+      style={{
+        borderRadius: 32,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: colors.border,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        columnGap: 8,
+        shadowColor: colors.text,
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+      }}
+      onPress={() => navigation.navigate('Addresses')}
+    >
+      <AntDesign name="plus" size={20} color={colors.text} />
+      <StyledText style={{ color: colors.text, fontWeight: 'bold' }}>
+        {'Add address'}
+      </StyledText>
+    </FeedbackPressable>
+  );
+};
 
 const HomeScreen = () => {
   const navigation = useTypedNavigation();
@@ -134,6 +168,22 @@ const HomeScreen = () => {
             padding: 16,
           }}
         >
+          {groupedTokenBalances.length === 0 && (
+            <View
+              style={{
+                flex: 1,
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                rowGap: 48,
+              }}
+            >
+              <StyledText style={{ marginTop: 16, color: colors.subbedText }}>
+                {`No tokens found`}
+              </StyledText>
+              <AddAddressButton />
+            </View>
+          )}
           {groupedTokenBalances.map((item, index) => (
             <Pressable
               key={index}

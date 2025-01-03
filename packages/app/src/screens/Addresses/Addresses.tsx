@@ -64,6 +64,14 @@ const AddressListItem = ({ address }: { address: Hex }) => {
         borderColor: colors.border,
         borderRadius: 16,
         padding: 16,
+        shadowColor: colors.border,
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
       }}
     >
       <Pressable

@@ -37,6 +37,7 @@ import submitSingleInputSwap from './api/submitSingleInputSwap/submitSingleInput
 import sendTx from './api/sendTx/sendTx';
 import buildBridgeSend from './api/buildBridgeSend/buildBridgeSend';
 import sendBridgeTx from './api/sendBridgeTx/sendBridgeTx';
+import getTokenBalancesMock from './api/getTokenBalances/getTokenBalances.mock';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -63,7 +64,13 @@ export const appRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return getTokenBalances({ addresses: input.addresses as Hex[] });
+      const response = MOCK_RESPONSE
+        ? await getTokenBalancesMock({
+            addresses: input.addresses as Hex[],
+          })
+        : await getTokenBalances({ addresses: input.addresses as Hex[] });
+
+      return response;
     }),
 
   getLidoApy: publicProcedure.query(async () => {

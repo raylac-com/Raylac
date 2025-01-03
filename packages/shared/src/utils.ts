@@ -265,6 +265,10 @@ export const groupTokenBalancesByToken = ({
   token: Token;
   totalBalance: TokenAmount;
 }[] => {
+  if (tokenBalances.length === 0) {
+    return [];
+  }
+
   const uniqueTokenIds = [
     ...new Set(tokenBalances.map(tokenBalance => tokenBalance.token.id)),
   ];
@@ -408,6 +412,10 @@ export const getTokenBalancePerAddress = ({
   tokenBalances: TokenBalancesReturnType;
   addresses: Hex[];
 }) => {
+  if (tokenBalances.length === 0) {
+    return [];
+  }
+
   const tokenBalancesPerAddress: AddressTokenBalances[] = [];
 
   for (const address of addresses) {
