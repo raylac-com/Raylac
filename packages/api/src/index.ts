@@ -18,7 +18,6 @@ import {
   SubmitSingleChainSwapRequestBody,
   SubmitSingleInputSwapRequestBody,
   SubmitSwapRequestBody,
-  GetEstimatedTransferGasRequestBody,
   BuildBridgeSendRequestBody,
   Token,
   SendBridgeTxRequestBody,
@@ -36,7 +35,6 @@ import getLidoApy from './api/getLidoApy/getLidoApy';
 import getSingleInputSwapQuote from './api/getSingleInputSwapQuote/getSingleInputSwapQuote';
 import submitSingleInputSwap from './api/submitSingleInputSwap/submitSingleInputSwap';
 import sendTx from './api/sendTx/sendTx';
-import getEstimatedTransferGas from './api/getEstimatedTransferGas/getEstimatedTransferGas';
 import buildBridgeSend from './api/buildBridgeSend/buildBridgeSend';
 import sendBridgeTx from './api/sendBridgeTx/sendBridgeTx';
 
@@ -177,14 +175,6 @@ export const appRouter = router({
         : getTokenPrice({
             token: input.token as Token,
           });
-    }),
-
-  getEstimatedTransferGas: publicProcedure
-    .input(z.any())
-    .mutation(async ({ input }) => {
-      return getEstimatedTransferGas(
-        input as GetEstimatedTransferGasRequestBody
-      );
     }),
 
   getGitCommit: publicProcedure.query(async () => {
