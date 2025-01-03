@@ -1,12 +1,12 @@
 import Feather from '@expo/vector-icons/Feather';
-import Entypo from '@expo/vector-icons/Entypo';
+// import Entypo from '@expo/vector-icons/Entypo';
 import { View } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import colors from '@/lib/styles/colors';
 import { useState } from 'react';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { useMoveFundsContext } from '@/contexts/MoveFundsContext';
+// import { useMoveFundsContext } from '@/contexts/MoveFundsContext';
 
 const FavMenuItem = ({
   icon,
@@ -43,7 +43,7 @@ const FavMenuItem = ({
 const FavMenuItems = () => {
   const navigation = useTypedNavigation();
 
-  const { setIsSheetOpen } = useMoveFundsContext();
+  //  const { setIsSheetOpen } = useMoveFundsContext();
 
   return (
     <View
@@ -52,6 +52,8 @@ const FavMenuItems = () => {
         rowGap: 20,
       }}
     >
+      {/**
+         * 
       <FavMenuItem
         icon={<Entypo name="wallet" size={24} color={colors.text} />}
         label="Move funds"
@@ -59,6 +61,7 @@ const FavMenuItems = () => {
           setIsSheetOpen(true);
         }}
       />
+       */}
       <FavMenuItem
         icon={<Feather name="send" size={24} color={colors.text} />}
         label="Send"

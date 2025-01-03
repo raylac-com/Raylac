@@ -9,6 +9,7 @@ import {
   Balance,
   BuildBridgeSendRequestBody,
   BuildSendRequestBody,
+  ETH,
   formatAmount,
   Token,
 } from '@raylac/shared';
@@ -18,7 +19,6 @@ import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { formatUnits, Hex, parseUnits } from 'viem';
 import BigNumber from 'bignumber.js';
 import { trpc } from '@/lib/trpc';
-import useChainTokenBalance from '@/hooks/useChainTokenBalance';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 import Skeleton from '@/components/Skeleton/Skeleton';
@@ -30,6 +30,7 @@ import { Image } from 'expo-image';
 import { getChainIcon } from '@/lib/utils';
 import SelectChainSheet from '@/components/SelectChainSheet/SelectChainSheet';
 import useBridgeSend from '@/hooks/useBridgeSend';
+import useAddressChainTokenBalance from '@/hooks/useAddressChainTokenBalance';
 
 const ConfirmButton = ({
   onPress,
@@ -47,19 +48,29 @@ const ReviewButton = ({
   onPress,
   isLoading,
   isBalanceSufficient,
+  isGasSufficient,
   isReadyForReview,
 }: {
   onPress: () => void;
   isLoading: boolean;
   isBalanceSufficient: boolean;
+  isGasSufficient: boolean;
   isReadyForReview: boolean;
 }) => {
+  let label = 'Review';
+
+  if (!isBalanceSufficient) {
+    label = 'Insufficient balance';
+  } else if (!isGasSufficient) {
+    label = 'Insufficient gas';
+  }
+
   return (
     <StyledButton
-      disabled={!isBalanceSufficient || !isReadyForReview}
+      disabled={!isBalanceSufficient || !isGasSufficient || !isReadyForReview}
       isLoading={isLoading}
       variant="outline"
-      title={isBalanceSufficient ? 'Review' : 'Insufficient balance'}
+      title={label}
       onPress={onPress}
     />
   );
@@ -89,7 +100,7 @@ const ChainDetail = ({
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <StyledText
         style={{ color: colors.subbedText }}
-      >{`Receives on`}</StyledText>
+      >{`Recipient receives on`}</StyledText>
       <FeedbackPressable onPress={onSelectPress}>
         <Image
           source={getChainIcon(chainId)}
@@ -153,9 +164,11 @@ const GasInfo = ({
 
 const BridgeFeeInfo = ({
   feeToken,
+  feeChainId,
   bridgeFee,
 }: {
   feeToken: Token;
+  feeChainId: number;
   bridgeFee: Balance | undefined;
 }) => {
   return (
@@ -164,9 +177,18 @@ const BridgeFeeInfo = ({
         style={{ color: colors.subbedText }}
       >{`Bridge fee`}</StyledText>
       {bridgeFee ? (
-        <StyledText style={{ color: colors.subbedText }}>
-          {`$${bridgeFee.usdValueFormatted} (${bridgeFee.formatted} ${feeToken.symbol})`}
-        </StyledText>
+        <View
+          style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+        >
+          <TokenLogoWithChain
+            logoURI={feeToken.logoURI}
+            chainId={feeChainId}
+            size={24}
+          />
+          <StyledText style={{ color: colors.subbedText }}>
+            {`$${bridgeFee.usdValueFormatted}`}
+          </StyledText>
+        </View>
       ) : (
         <Skeleton style={{ width: 100, height: 20 }} />
       )}
@@ -174,20 +196,34 @@ const BridgeFeeInfo = ({
   );
 };
 
-/*
-const AvailableGasDetail = ({ availableGas }: { availableGas: Balance }) => {
+const AvailableGasDetail = ({
+  address,
+  chainId,
+}: {
+  address: Hex;
+  chainId: number;
+}) => {
+  const ethBalance = useAddressChainTokenBalance({
+    address,
+    chainId,
+    token: ETH,
+  });
+
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <StyledText
         style={{ color: colors.subbedText }}
       >{`Available gas`}</StyledText>
-      <StyledText style={{ color: colors.subbedText }}>
-        {availableGas.formatted}
-      </StyledText>
+      {ethBalance ? (
+        <StyledText style={{ color: colors.subbedText }}>
+          {`$${ethBalance.usdValueFormatted} (${ethBalance.formatted} ETH)`}
+        </StyledText>
+      ) : (
+        <Skeleton style={{ width: 100, height: 20 }} />
+      )}
     </View>
   );
 };
-*/
 
 type Props = Pick<
   NativeStackScreenProps<RootStackParamsList, 'SelectAmount'>,
@@ -216,18 +252,25 @@ const SelectAmount = ({ route }: Props) => {
   const [amountInputText, setAmountInputText] = useState<string>('');
 
   const [isBalanceSufficient, setIsBalanceSufficient] = useState<boolean>(true);
+  const [isGasSufficient, setIsGasSufficient] = useState<boolean>(true);
 
   const [isReadyToConfirm, setIsReadyToConfirm] = useState<boolean>(false);
-  const [inputMode, setInputMode] = useState<'token' | 'usd'>('token');
+  const [inputMode, setInputMode] = useState<'token' | 'usd'>('usd');
 
   ///
   /// Queries
   ///
 
-  const { data: tokenBalance } = useChainTokenBalance({
+  const tokenBalance = useAddressChainTokenBalance({
     chainId: fromChainId,
     token,
     address: fromAddresses[0],
+  });
+
+  const ethBalance = useAddressChainTokenBalance({
+    address: fromAddresses[0],
+    chainId: fromChainId,
+    token: ETH,
   });
 
   const { data: tokenPriceUsd } = useTokenPriceUsd(token);
@@ -279,11 +322,34 @@ const SelectAmount = ({ route }: Props) => {
   }, [amountInputText, tokenBalance, tokenPriceUsd]);
 
   useEffect(() => {
+    if (ethBalance !== undefined && tokenBalance !== undefined) {
+      if (sendData) {
+        const sendGas = BigInt(sendData.transfer.gasFee.balance);
+        setIsGasSufficient(sendGas <= BigInt(ethBalance.balance));
+      }
+
+      if (bridgeSendData) {
+        const bridgeFee = BigInt(bridgeSendData.relayerServiceFee.balance);
+
+        if (bridgeSendData.relayerServiceFeeToken.symbol === 'ETH') {
+          setIsGasSufficient(bridgeFee <= BigInt(ethBalance.balance));
+        } else {
+          setIsGasSufficient(bridgeFee <= BigInt(tokenBalance.balance));
+        }
+      }
+    }
+  }, [sendData, bridgeSendData, ethBalance]);
+
+  useEffect(() => {
     if (containsNonNumericCharacters(amountInputText)) {
       return;
     }
 
     if (tokenPriceUsd === null || tokenPriceUsd === undefined) {
+      return;
+    }
+
+    if (amountInputText === '') {
       return;
     }
 
@@ -515,8 +581,10 @@ const SelectAmount = ({ route }: Props) => {
           <BridgeFeeInfo
             bridgeFee={bridgeSendData?.relayerServiceFee}
             feeToken={bridgeSendData?.relayerServiceFeeToken}
+            feeChainId={bridgeSendData?.relayerFeeChainId}
           />
         )}
+        <AvailableGasDetail address={fromAddresses[0]} chainId={fromChainId} />
       </View>
       {isReadyToConfirm ? (
         <ConfirmButton
@@ -528,6 +596,7 @@ const SelectAmount = ({ route }: Props) => {
           onPress={onReviewButtonPress}
           isLoading={isBuildingSend || isBuildingBridgeSend}
           isBalanceSufficient={isBalanceSufficient}
+          isGasSufficient={isGasSufficient}
           isReadyForReview={isReadyForReview}
         />
       )}

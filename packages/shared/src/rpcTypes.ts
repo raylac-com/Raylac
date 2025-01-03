@@ -300,6 +300,7 @@ export type BuildBridgeSendReturnType = {
   relayerServiceFee: Balance;
   amountIn: Balance;
   amountOut: Balance;
+  relayerFeeChainId: number;
 };
 
 export type GetTokenUsdPriceReturnType = number | null;

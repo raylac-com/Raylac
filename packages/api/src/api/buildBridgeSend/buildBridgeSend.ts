@@ -133,6 +133,13 @@ const buildBridgeSend = async ({
   });
 
   const relayerFeeCurrency = quote.fees.relayer.currency;
+
+  const relayerFeeChainId = quote.fees.relayer.currency?.chainId;
+
+  if (relayerFeeChainId === undefined) {
+    throw new Error('relayerFeeChainId is undefined');
+  }
+
   const relayFeeAmount = quote.fees.relayer.amount;
 
   if (relayerFeeCurrency?.address === undefined) {
@@ -213,6 +220,7 @@ const buildBridgeSend = async ({
       token,
     },
     originChainGas: originChainGasFormatted,
+    relayerFeeChainId,
     relayerServiceFeeToken: relayerFeeToken,
     relayerServiceFee: relayerServiceFeeFormatted,
     amountIn: amountInFormatted,
