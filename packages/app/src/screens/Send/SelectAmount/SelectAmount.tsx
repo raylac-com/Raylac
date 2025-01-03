@@ -25,6 +25,9 @@ import SendToCard from '@/components/SendToCard/SendToCard';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import useSend from '@/hooks/useSend';
 import Toast from 'react-native-toast-message';
+import { Image } from 'expo-image';
+import { getChainIcon } from '@/lib/utils';
+import SelectChainSheet from '@/components/SelectChainSheet/SelectChainSheet';
 
 const ConfirmButton = ({
   onPress,
@@ -69,6 +72,28 @@ const SendFromDetail = ({ address }: { address: Hex }) => {
       <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
         {shortenAddress(address)}
       </StyledText>
+    </View>
+  );
+};
+
+const ChainDetail = ({
+  chainId,
+  onSelectPress,
+}: {
+  chainId: number;
+  onSelectPress: () => void;
+}) => {
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      <StyledText
+        style={{ color: colors.subbedText }}
+      >{`Receives on`}</StyledText>
+      <FeedbackPressable onPress={onSelectPress}>
+        <Image
+          source={getChainIcon(chainId)}
+          style={{ width: 24, height: 24 }}
+        />
+      </FeedbackPressable>
     </View>
   );
 };
@@ -153,7 +178,10 @@ const SelectAmount = ({ route }: Props) => {
   const toAddress = route.params.toAddress;
   const fromAddresses = route.params.fromAddresses;
   const token = route.params.token;
-  const chainId = route.params.chainId;
+  const _chainId = route.params.chainId;
+
+  const [isChainsSheetOpen, setIsChainsSheetOpen] = useState(false);
+  const [chainId, setChainId] = useState<number>(_chainId);
 
   ///
   /// Local state
@@ -439,6 +467,10 @@ const SelectAmount = ({ route }: Props) => {
           balance={tokenBalance ?? undefined}
           onMaxPress={onMaxBalancePress}
         />
+        <ChainDetail
+          chainId={chainId}
+          onSelectPress={() => setIsChainsSheetOpen(true)}
+        />
         <SendFromDetail address={fromAddresses[0]} />
         <GasInfo
           gas={estimatedTransferGas}
@@ -455,6 +487,13 @@ const SelectAmount = ({ route }: Props) => {
           isReadyForReview={isReadyForReview}
         />
       )}
+      <SelectChainSheet
+        open={isChainsSheetOpen}
+        onSelect={chain => {
+          setChainId(chain.id);
+          setIsChainsSheetOpen(false);
+        }}
+      />
     </ScrollView>
   );
 };

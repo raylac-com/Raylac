@@ -115,6 +115,7 @@ const SelectRecipient = ({ navigation }: Props) => {
         )}
         {userAddresses?.map(a => (
           <AddressListItem
+            key={a.address}
             address={a.address}
             onPress={() => {
               onAddressPress(a.address);
