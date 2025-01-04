@@ -145,14 +145,19 @@ const getMultiChainTokenBalancesFromAlchemy = async ({
 > => {
   const tokenBalances = await Promise.all(
     supportedChains.map(async chain => {
-      const alchemyTokenBalances = await getTokenBalancesFromAlchemy({
+      const alchemyTokenBalancesPromise = getTokenBalancesFromAlchemy({
+        address,
+        chainId: chain.id,
+      });
+
+      const ethTokenBalancePromise = getFormattedETHBalance({
         address,
         chainId: chain.id,
       });
 
       const addressChainTokenBalances = (
         await Promise.all(
-          alchemyTokenBalances.map(async token => {
+          (await alchemyTokenBalancesPromise).map(async token => {
             if (!token.tokenBalance) {
               return null;
             }
@@ -173,10 +178,7 @@ const getMultiChainTokenBalancesFromAlchemy = async ({
         )
       ).filter(tokenBalance => tokenBalance !== null);
 
-      const ethTokenBalance = await getFormattedETHBalance({
-        address,
-        chainId: chain.id,
-      });
+      const ethTokenBalance = await ethTokenBalancePromise;
 
       if (ethTokenBalance.amount !== '0') {
         addressChainTokenBalances.push({
