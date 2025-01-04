@@ -168,7 +168,7 @@ const HomeScreen = () => {
             padding: 16,
           }}
         >
-          {groupedTokenBalances.length === 0 && (
+          {groupedTokenBalances.length === 0 && tokenBalances !== undefined && (
             <View
               style={{
                 flex: 1,
