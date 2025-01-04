@@ -1,8 +1,4 @@
-import {
-  savePrivateKey,
-  setBackupVerificationStatus,
-  saveUserAddress,
-} from '@/lib/key';
+import { savePrivateKey, saveUserAddress, getDefaultAddress } from '@/lib/key';
 import userKeys from '@/queryKeys/userKeys';
 import { AddressType } from '@/types';
 import { sleep } from '@raylac/shared/out/utils';
@@ -19,14 +15,14 @@ const useImportPrivKey = () => {
       const account = privateKeyToAccount(privKey);
 
       await savePrivateKey({ address: account.address, privKey });
+
+      const defaultAddress = await getDefaultAddress();
+
       await saveUserAddress({
         address: account.address,
         type: AddressType.PrivateKey,
-      });
-
-      await setBackupVerificationStatus({
-        address: account.address,
-        status: 'complete',
+        isBackupVerified: true,
+        isDefault: defaultAddress ? false : true,
       });
 
       await queryClient.invalidateQueries({

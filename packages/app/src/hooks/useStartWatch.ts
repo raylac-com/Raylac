@@ -1,4 +1,4 @@
-import { saveUserAddress, setBackupVerificationStatus } from '@/lib/key';
+import { getDefaultAddress, saveUserAddress } from '@/lib/key';
 import userKeys from '@/queryKeys/userKeys';
 import { AddressType } from '@/types';
 import { sleep } from '@raylac/shared/out/utils';
@@ -12,9 +12,15 @@ const useStartWatch = () => {
     mutationFn: async ({ address }: { address: Hex }) => {
       await sleep(300);
 
-      await saveUserAddress({ address, type: AddressType.Watch });
+      const defaultAddress = await getDefaultAddress();
 
-      await setBackupVerificationStatus({ address, status: 'complete' });
+      await saveUserAddress({
+        address,
+        type: AddressType.Watch,
+        isBackupVerified: true,
+        // If there is no default address, we make this the default address
+        isDefault: defaultAddress ? false : true,
+      });
 
       await queryClient.invalidateQueries({
         queryKey: userKeys.userAddresses,

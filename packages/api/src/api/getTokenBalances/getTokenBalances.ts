@@ -1,4 +1,4 @@
-import { getAddress, Hex } from 'viem';
+import { getAddress, Hex, hexToBigInt } from 'viem';
 import { getPublicClient } from '../../utils';
 import {
   supportedChains,
@@ -11,7 +11,7 @@ import {
 import { getAlchemyClient } from '../../lib/alchemy';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
 import { getToken } from '../../lib/token';
-import { OwnedToken } from 'alchemy-sdk';
+import { TokenBalancesResponseErc20, TokenBalanceType } from 'alchemy-sdk';
 
 export const getETHBalance = async ({
   address,
@@ -103,21 +103,23 @@ const getTokenBalancesFromAlchemy = async ({
 }: {
   address: Hex;
   chainId: number;
-}): Promise<OwnedToken[]> => {
+}): Promise<TokenBalancesResponseErc20['tokenBalances']> => {
   const alchemyClient = getAlchemyClient(chainId);
 
-  const balances: OwnedToken[] = [];
+  const balances: TokenBalancesResponseErc20['tokenBalances'] = [];
   let pageKey: string | undefined = undefined;
 
   for (let i = 0; i < 10; i++) {
-    const tokenBalances = await alchemyClient.core.getTokensForOwner(address, {
-      pageKey,
-    });
+    const result: TokenBalancesResponseErc20 =
+      await alchemyClient.core.getTokenBalances(address, {
+        type: TokenBalanceType.ERC20,
+        pageKey,
+      });
 
-    balances.push(...tokenBalances.tokens);
+    balances.push(...result.tokenBalances);
 
-    if (tokenBalances.pageKey) {
-      pageKey = tokenBalances.pageKey;
+    if (result.pageKey) {
+      pageKey = result.pageKey;
     } else {
       break;
     }
@@ -143,32 +145,40 @@ const getMultiChainTokenBalancesFromAlchemy = async ({
 > => {
   const tokenBalances = await Promise.all(
     supportedChains.map(async chain => {
-      const alchemyTokenBalances = await getTokenBalancesFromAlchemy({
+      const alchemyTokenBalancesPromise = getTokenBalancesFromAlchemy({
+        address,
+        chainId: chain.id,
+      });
+
+      const ethTokenBalancePromise = getFormattedETHBalance({
         address,
         chainId: chain.id,
       });
 
       const addressChainTokenBalances = (
         await Promise.all(
-          alchemyTokenBalances.map(async token => {
-            if (token.rawBalance === '0' || token.rawBalance === undefined) {
+          (await alchemyTokenBalancesPromise).map(async token => {
+            if (!token.tokenBalance) {
+              return null;
+            }
+
+            const balance = hexToBigInt(token.tokenBalance as Hex);
+
+            if (balance === BigInt(0)) {
               return null;
             }
 
             return await formatAlchemyTokenBalance({
               address,
               tokenAddress: getAddress(token.contractAddress),
-              tokenBalance: BigInt(token.rawBalance),
+              tokenBalance: balance,
               chainId: chain.id,
             });
           })
         )
       ).filter(tokenBalance => tokenBalance !== null);
 
-      const ethTokenBalance = await getFormattedETHBalance({
-        address,
-        chainId: chain.id,
-      });
+      const ethTokenBalance = await ethTokenBalancePromise;
 
       if (ethTokenBalance.amount !== '0') {
         addressChainTokenBalances.push({

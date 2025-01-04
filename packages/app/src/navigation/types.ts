@@ -62,8 +62,12 @@ export type RootStackParamsList = {
   };
   MoveFunds: undefined;
 
-  SaveBackupPhrase: undefined;
-  ConfirmBackupPhrase: undefined;
+  SaveBackupPhrase: {
+    genesisAddress: Hex;
+  };
+  ConfirmBackupPhrase: {
+    genesisAddress: Hex;
+  };
 
   Addresses: undefined;
   AddAddress: undefined;

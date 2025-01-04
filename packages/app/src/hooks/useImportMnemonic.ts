@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
   getAccountFromMnemonic,
+  getDefaultAddress,
   saveMnemonic,
   savePrivateKey,
   saveUserAddress,
@@ -25,16 +26,23 @@ const useImportMnemonic = () => {
       await saveMnemonic({ address: account.address, mnemonic });
       await savePrivateKey({ address: account.address, privKey });
 
+      const defaultAddress = await getDefaultAddress();
+
       await saveUserAddress({
         address: account.address,
         type: AddressType.Mnemonic,
         accountIndex: 0,
+        isBackupVerified: false,
+        // If there is no default address, we make this the default address
+        isDefault: defaultAddress ? false : true,
         mnemonicGenesisAddress: account.address,
       });
 
       await queryClient.invalidateQueries({
         queryKey: userKeys.userAddresses,
       });
+
+      return account.address;
     },
   });
 };

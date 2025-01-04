@@ -1,7 +1,7 @@
 import MnemonicWord from '@/components/MnemonicWord/MnemonicWord';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { getMnemonic, getUserAddresses } from '@/lib/key';
+import { getMnemonic } from '@/lib/key';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
 import spacing from '@/lib/styles/spacing';
@@ -11,8 +11,13 @@ import { useCallback, useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamsList } from '@/navigation/types';
 
-const SaveBackupPhrase = () => {
+type Props = NativeStackScreenProps<RootStackParamsList, 'SaveBackupPhrase'>;
+
+const SaveBackupPhrase = ({ route }: Props) => {
+  const { genesisAddress } = route.params;
   const insets = useSafeAreaInsets();
 
   const navigation = useTypedNavigation();
@@ -20,8 +25,8 @@ const SaveBackupPhrase = () => {
   const [mnemonic, setMnemonic] = useState<string | null>(null);
 
   const onRevealPress = useCallback(async () => {
-    const addresses = await getUserAddresses();
-    const _mnemonic = await getMnemonic(addresses[0].address);
+    // TODO: Is this safe?
+    const _mnemonic = await getMnemonic(genesisAddress);
     if (_mnemonic) {
       setMnemonic(_mnemonic);
     } else {
@@ -165,7 +170,9 @@ const SaveBackupPhrase = () => {
         <StyledButton
           title="I saved my backup phrase"
           onPress={() => {
-            navigation.navigate('ConfirmBackupPhrase');
+            navigation.navigate('ConfirmBackupPhrase', {
+              genesisAddress,
+            });
           }}
         ></StyledButton>
       </View>

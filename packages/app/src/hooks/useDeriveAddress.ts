@@ -4,8 +4,9 @@ import {
   getUserAddresses,
   saveUserAddress,
 } from '@/lib/key';
+import userKeys from '@/queryKeys/userKeys';
 import { AddressType, UserAddress } from '@/types';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const deriveAddress = async (fromAddress: UserAddress) => {
   if (fromAddress.type === AddressType.PrivateKey) {
@@ -20,42 +21,52 @@ const deriveAddress = async (fromAddress: UserAddress) => {
     throw new Error('Account index must be 0');
   }
 
+  const addresses = await getUserAddresses();
+  const addressesInMnemonicGroup = addresses.filter(
+    address => address.mnemonicGenesisAddress === fromAddress.address
+  );
+
+  const lastAccountIndex =
+    // Sort by account index
+    addressesInMnemonicGroup.sort(
+      (a, b) => b.accountIndex! - a.accountIndex!
+    )[0]?.accountIndex ?? 0;
+
+  const newAccountIndex = lastAccountIndex + 1;
+
   const mnemonic = await getMnemonic(fromAddress.address);
 
   if (!mnemonic) {
     throw new Error('Mnemonic not found');
   }
 
-  const newAccountIndex = fromAddress.accountIndex + 1;
-  const addresses = await getUserAddresses();
-
-  const addressesInMnemonicGroup = addresses.filter(
-    address => address.mnemonicGenesisAddress === fromAddress.address
-  );
-
-  const lastAccountIndex =
-    addressesInMnemonicGroup.sort(
-      (a, b) => a.accountIndex! - b.accountIndex!
-    )[0]?.accountIndex ?? 0;
-
   const { account } = await getAccountFromMnemonic({
     mnemonic,
-    accountIndex: lastAccountIndex + 1,
+    accountIndex: newAccountIndex,
   });
 
   await saveUserAddress({
     address: account.address,
     type: AddressType.Mnemonic,
     accountIndex: newAccountIndex,
+    mnemonicGenesisAddress: fromAddress.address,
+    isBackupVerified: true,
+    isDefault: false,
   });
 
   return account;
 };
 
 const useDeriveAddress = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (fromAddress: UserAddress) => {
       const account = await deriveAddress(fromAddress);
+
+      await queryClient.invalidateQueries({
+        queryKey: userKeys.userAddresses,
+      });
 
       return account;
     },
