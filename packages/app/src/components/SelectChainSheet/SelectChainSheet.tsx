@@ -43,7 +43,6 @@ const SelectChainSheet = ({
       ref.current?.present();
     } else {
       ref.current?.dismiss();
-      onClose();
     }
   }, [open]);
 
@@ -56,6 +55,7 @@ const SelectChainSheet = ({
         rowGap: 16,
       }}
       index={0}
+      onDismiss={onClose}
       enablePanDownToClose
       enableDynamicSizing={false}
       snapPoints={['100%']}

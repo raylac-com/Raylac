@@ -112,7 +112,7 @@ const ChainDetail = ({
           source={getChainIcon(chainId)}
           style={{ width: 24, height: 24 }}
         />
-        <Entypo name="chevron-thin-right" size={20} color={colors.border} />
+        <Entypo name="chevron-thin-right" size={16} color={colors.border} />
       </View>
     </FeedbackPressable>
   );
