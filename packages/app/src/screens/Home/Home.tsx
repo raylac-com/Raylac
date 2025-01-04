@@ -38,7 +38,11 @@ const AddAddressButton = () => {
         shadowOpacity: 0.22,
         shadowRadius: 2.22,
       }}
-      onPress={() => navigation.navigate('Addresses')}
+      onPress={() =>
+        navigation.navigate('Tabs', {
+          screen: 'Addresses',
+        })
+      }
     >
       <AntDesign name="plus" size={20} color={colors.text} />
       <StyledText style={{ color: colors.text, fontWeight: 'bold' }}>

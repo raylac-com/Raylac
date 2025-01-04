@@ -5,6 +5,7 @@ export type RootTabsParamsList = {
   Home: undefined;
   Swap: undefined;
   History: undefined;
+  Addresses: undefined;
   Settings: undefined;
 };
 
@@ -69,7 +70,6 @@ export type RootStackParamsList = {
     genesisAddress: Hex;
   };
 
-  Addresses: undefined;
   AddAddress: undefined;
   CreateAddress: undefined;
 };

@@ -12,9 +12,9 @@ const MnemonicWord = (props: MnemonicWordProps) => {
   return (
     <View
       style={{
-        borderRadius: 8,
+        borderRadius: 12,
         paddingVertical: 8,
-        paddingHorizontal: 10,
+        paddingHorizontal: 8,
         backgroundColor: bgColor || colors.text,
       }}
     >

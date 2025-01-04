@@ -55,11 +55,15 @@ const CreateAddress = () => {
       }
 
       await deriveAddress(mnemonicGenesisAddress);
+      navigation.navigate('Tabs', {
+        screen: 'Addresses',
+      });
     } else {
-      await createAccount();
+      const address = await createAccount();
+      navigation.navigate('SaveBackupPhrase', {
+        genesisAddress: address,
+      });
     }
-
-    navigation.navigate('Addresses');
   };
 
   return (

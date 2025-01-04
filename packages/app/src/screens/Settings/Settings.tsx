@@ -28,10 +28,6 @@ const SettingsListItem = ({
 const Settings = () => {
   const navigation = useTypedNavigation();
 
-  const onAddressesPress = () => {
-    navigation.navigate('Addresses');
-  };
-
   const onAdvancedPress = () => {
     navigation.navigate('Advanced');
   };
@@ -46,11 +42,6 @@ const Settings = () => {
       }}
     >
       <View style={{ flexDirection: 'column', gap: 28 }}>
-        <SettingsListItem
-          title="Addresses"
-          icon={<Entypo name="wallet" size={24} color={colors.border} />}
-          onPress={onAddressesPress}
-        />
         <SettingsListItem
           title="Advanced"
           icon={<Entypo name="rocket" size={24} color={colors.border} />}

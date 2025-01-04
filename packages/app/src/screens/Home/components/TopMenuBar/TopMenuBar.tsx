@@ -12,7 +12,9 @@ const TopMenuBar = () => {
   return (
     <FeedbackPressable
       onPress={() => {
-        navigation.navigate('Addresses');
+        navigation.navigate('Tabs', {
+          screen: 'Addresses',
+        });
       }}
       style={{
         width: '100%',
