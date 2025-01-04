@@ -1,6 +1,5 @@
-import AntDesign from '@expo/vector-icons/AntDesign';
 import colors from '@/lib/styles/colors';
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import * as bip39 from 'bip39';
 import StyledButton from '@/components/StyledButton/StyledButton';
@@ -75,33 +74,6 @@ const ConfirmBackupPhrase = ({ route }: Props) => {
   const [choices, _setChoices] = useState<string[]>([]);
 
   const navigation = useTypedNavigation();
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      // Hide the default back arrow if you want to fully replace it:
-      headerBackVisible: false,
-      // Provide a custom left button:
-      headerLeft: () => (
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <AntDesign name="left" size={17} color={colors.text} />
-          <Text
-            style={{
-              color: colors.text,
-              fontSize: 17,
-              marginLeft: 5,
-            }}
-            onPress={() => {
-              navigation.navigate('SaveBackupPhrase', {
-                genesisAddress,
-              });
-            }}
-          >
-            {`Back`}
-          </Text>
-        </View>
-      ),
-    });
-  }, [navigation]);
 
   useEffect(() => {
     if (mnemonic) {
@@ -282,6 +254,14 @@ const ConfirmBackupPhrase = ({ route }: Props) => {
             setUserInputs([]);
           }}
           variant="outline"
+        ></StyledButton>
+        <StyledButton
+          title="Go back"
+          onPress={() => {
+            navigation.navigate('SaveBackupPhrase', {
+              genesisAddress,
+            });
+          }}
         ></StyledButton>
       </View>
     </View>

@@ -25,11 +25,11 @@ const SaveBackupPhrase = ({ route }: Props) => {
   const [mnemonic, setMnemonic] = useState<string | null>(null);
 
   const onRevealPress = useCallback(async () => {
-    // TODO: Is this safe?
     const _mnemonic = await getMnemonic(genesisAddress);
     if (_mnemonic) {
       setMnemonic(_mnemonic);
     } else {
+      // TODO: Is this safe?
       throw new Error('Failed to get mnemonic');
     }
   }, [setMnemonic]);
@@ -56,7 +56,7 @@ const SaveBackupPhrase = ({ route }: Props) => {
         flex: 1,
         justifyContent: 'space-between',
         paddingTop: insets.top,
-        paddingBottom: insets.bottom,
+        paddingBottom: insets.bottom + 32,
         paddingHorizontal: 16,
       }}
     >
