@@ -67,15 +67,14 @@ export const saveUserAddress = async (userAddress: UserAddress) => {
     ? (JSON.parse(addressesRaw) as UserAddress[])
     : [];
 
-  if (addresses.some(a => a.address === userAddress.address)) {
-    return;
-  }
+  // Overwrite the existing address if it already exists
+  const newAddresses = addresses.filter(a => a.address !== userAddress.address);
 
-  addresses.push(userAddress);
+  newAddresses.push(userAddress);
 
   await AsyncStorage.setItem(
     USER_ADDRESSES_STORAGE_KEY,
-    JSON.stringify(addresses)
+    JSON.stringify(newAddresses)
   );
 };
 
