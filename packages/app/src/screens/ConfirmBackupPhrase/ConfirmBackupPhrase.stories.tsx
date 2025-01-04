@@ -9,7 +9,9 @@ const meta = {
   title: 'ConfirmBackupPhrase',
   component: ConfirmBackupPhrase,
   argTypes: {},
-  args: {},
+  args: {
+    genesisAddress: '0x0000000000000000000000000000000000000000',
+  },
   decorators: [
     Story => (
       <StorybookStack.Navigator>

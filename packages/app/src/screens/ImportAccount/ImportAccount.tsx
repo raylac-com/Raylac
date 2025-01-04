@@ -9,6 +9,7 @@ import useImportPrivKey from '@/hooks/useImportPrivKey';
 import { Hex, isHex } from 'viem';
 import * as bip39 from 'bip39';
 import useImportMnemonic from '@/hooks/useImportMnemonic';
+import { setBackupVerified } from '@/lib/key';
 
 /**
  * Sign in screen
@@ -18,6 +19,12 @@ const ImportAccount = () => {
   const [inputText, setInputText] = useState('');
   const [isInputPrivKey, setIsInputPrivKey] = useState(false);
   const [isInputMnemonic, setIsInputMnemonic] = useState(false);
+
+  const clearState = () => {
+    setInputText('');
+    setIsInputPrivKey(false);
+    setIsInputMnemonic(false);
+  };
 
   const {
     mutateAsync: importPrivKey,
@@ -37,26 +44,30 @@ const ImportAccount = () => {
     if (isInputPrivKey) {
       // Sanity check
       if (!isHex(inputText)) {
+        clearState();
         throw new Error('Invalid private key');
       }
 
       await importPrivKey({ privKey: inputText as Hex });
-      navigation.navigate('Tabs', { screen: 'Home' });
-      return;
-    }
+      clearState();
 
-    if (isInputMnemonic) {
+      navigation.navigate('Tabs', { screen: 'Home' });
+    } else if (isInputMnemonic) {
       // Sanity check
       if (!bip39.validateMnemonic(inputText)) {
+        clearState();
         throw new Error('Invalid mnemonic');
       }
 
-      await importMnemonic({ mnemonic: inputText });
-      navigation.navigate('Tabs', { screen: 'Home' });
-      return;
-    }
+      const address = await importMnemonic({ mnemonic: inputText });
+      await setBackupVerified(address);
+      clearState();
 
-    throw new Error('Invalid input');
+      navigation.navigate('Tabs', { screen: 'Home' });
+    } else {
+      clearState();
+      throw new Error('Invalid input');
+    }
   }, [
     importPrivKey,
     importMnemonic,

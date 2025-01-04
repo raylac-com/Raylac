@@ -6,12 +6,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as bip39 from 'bip39';
 import { Buffer } from 'buffer';
 import { Hex } from 'viem/_types/types/misc';
-import { AddressType, UserAddress } from '@/types';
+import { UserAddress } from '@/types';
+import { getAddress } from 'viem';
 
 globalThis.Buffer = Buffer;
 
 const USER_ADDRESSES_STORAGE_KEY = 'userAddresses';
-
 const REQUIRE_AUTHENTICATION = Device.isDevice;
 
 /**
@@ -26,36 +26,6 @@ const buildMnemonicStorageKey = (address: Hex) => {
  */
 const buildPrivateKeyStorageKey = (address: Hex) => {
   return `${address}-private-key`;
-};
-
-/**
- * Build a storage key for the backup verification status of an address.
- */
-export const buildBackupVerificationStatusStorageKey = (address: Hex) => {
-  return `${address}-backup-verification-status`;
-};
-
-export const isBackupVerificationComplete = async (
-  address: Hex
-): Promise<boolean> => {
-  const item = await AsyncStorage.getItem(
-    buildBackupVerificationStatusStorageKey(address)
-  );
-
-  return item === 'true';
-};
-
-export const setBackupVerificationStatus = async ({
-  address,
-  status,
-}: {
-  address: Hex;
-  status: 'complete' | 'incomplete';
-}) => {
-  await AsyncStorage.setItem(
-    buildBackupVerificationStatusStorageKey(address),
-    status === 'complete' ? 'true' : 'false'
-  );
 };
 
 /**
@@ -87,6 +57,9 @@ export const getAccountFromMnemonic = async ({
 
 export const saveUserAddress = async (userAddress: UserAddress) => {
   // TODO: Check that the address is checksummed
+  if (userAddress.address !== getAddress(userAddress.address)) {
+    throw new Error(`Address must be checksummed: ${userAddress.address}`);
+  }
 
   const addressesRaw = await AsyncStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
 
@@ -106,27 +79,38 @@ export const saveUserAddress = async (userAddress: UserAddress) => {
   );
 };
 
+export const setBackupVerified = async (address: Hex) => {
+  if (address !== getAddress(address)) {
+    throw new Error(`Address must be checksummed: ${address}`);
+  }
+
+  const addresses = await getUserAddresses();
+
+  const newAddresses = addresses.map(a =>
+    a.address === address ? { ...a, isBackupVerified: true } : a
+  );
+
+  await AsyncStorage.setItem(
+    USER_ADDRESSES_STORAGE_KEY,
+    JSON.stringify(newAddresses)
+  );
+};
+
 export const getUserAddresses = async (): Promise<UserAddress[]> => {
   const addresses = await AsyncStorage.getItem(USER_ADDRESSES_STORAGE_KEY);
 
   return addresses ? JSON.parse(addresses) : [];
 };
 
-export const getGenesisAddress = async (): Promise<UserAddress> => {
+export const getDefaultAddress = async (): Promise<UserAddress | null> => {
   const addresses = await getUserAddresses();
 
-  const genesisAddress = addresses.find(
-    address =>
-      address.type === AddressType.Mnemonic && address.accountIndex === 0
-  );
-
-  if (!genesisAddress) {
-    throw new Error('No genesis address found');
-  }
-
-  return genesisAddress;
+  return addresses.find(a => a.isDefault) || null;
 };
 
+/**
+ * Save the private key to SecureStore.
+ */
 export const savePrivateKey = async ({
   address,
   privKey,
@@ -151,6 +135,9 @@ export const getPrivateKey = async (address: Hex): Promise<Hex | null> => {
   return item as Hex;
 };
 
+/**
+ * Save the mnemonic to SecureStore.
+ */
 export const saveMnemonic = async ({
   address,
   mnemonic,
@@ -163,6 +150,9 @@ export const saveMnemonic = async ({
   });
 };
 
+/**
+ * Get mnemonic for a genesis address from SecureStore.
+ */
 export const getMnemonic = async (address: Hex): Promise<string | null> => {
   const item = await SecureStore.getItem(buildMnemonicStorageKey(address), {
     requireAuthentication: REQUIRE_AUTHENTICATION,
@@ -171,11 +161,11 @@ export const getMnemonic = async (address: Hex): Promise<string | null> => {
   return item as string | null;
 };
 
+/**
+ * Remove an address from the user's addresses.
+ */
 export const removeAddress = async (address: Hex) => {
   const addresses = await getUserAddresses();
-
-  // TODO: Delete the private key from SecureStore
-  // TODO: Delete the mnemonic from SecureStore
 
   const newAddresses = addresses.filter(a => a.address !== address);
 

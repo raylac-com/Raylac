@@ -174,7 +174,7 @@ const Screens = () => {
                 component={ConfirmBackupPhrase}
                 options={{
                   title: 'Confirm Backup Phrase',
-                  headerBackVisible: true,
+                  headerBackVisible: false,
                 }}
               ></RootStack.Screen>
               <RootStack.Screen

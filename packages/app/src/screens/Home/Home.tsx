@@ -17,6 +17,7 @@ import Fav from '@/components/Fav/Fav';
 import TopMenuBar from './components/TopMenuBar/TopMenuBar';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { getDefaultAddress } from '@/lib/key';
 
 const AddAddressButton = () => {
   const navigation = useTypedNavigation();
@@ -96,17 +97,22 @@ const HomeScreen = () => {
 
   useEffect(() => {
     const init = async () => {
-      if (userAddresses !== undefined && userAddresses.length === 0) {
+      const defaultAddress = await getDefaultAddress();
+      if (defaultAddress === null) {
         navigation.reset({
           index: 0,
           routes: [{ name: 'Start' }],
+        });
+      } else if (!defaultAddress.isBackupVerified) {
+        navigation.navigate('ConfirmBackupPhrase', {
+          genesisAddress: defaultAddress.address,
         });
       }
     };
 
     // Only run after the cache is reset and we have a definitive userAccount value
     init();
-  }, [userAddresses]);
+  }, []);
 
   const groupedTokenBalances = groupTokenBalancesByToken({
     tokenBalances: tokenBalances ?? [],
