@@ -256,7 +256,7 @@ const ConfirmBackupPhrase = ({ route }: Props) => {
           variant="outline"
         ></StyledButton>
         <StyledButton
-          title="Go back"
+          title="View backup phrase"
           onPress={() => {
             navigation.navigate('SaveBackupPhrase', {
               genesisAddress,
