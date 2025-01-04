@@ -67,11 +67,10 @@ const AddressListItem = ({ address }: { address: UserAddress }) => {
         shadowColor: colors.border,
         shadowOffset: {
           width: 0,
-          height: 2,
+          height: 1,
         },
-        shadowOpacity: 0.25,
+        shadowOpacity: 0.5,
         shadowRadius: 3.84,
-        elevation: 5,
       }}
     >
       <Pressable
@@ -140,8 +139,9 @@ const Addresses = () => {
     <View
       style={{
         flex: 1,
-        padding: 16,
-        paddingBottom: insets.bottom,
+        paddingTop: 16,
+        paddingHorizontal: 16,
+        paddingBottom: insets.bottom + 16,
         rowGap: 32,
       }}
     >
