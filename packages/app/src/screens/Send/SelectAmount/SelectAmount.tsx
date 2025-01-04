@@ -1,3 +1,4 @@
+import Entypo from '@expo/vector-icons/Entypo';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import StyledText from '@/components/StyledText/StyledText';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -97,17 +98,23 @@ const ChainDetail = ({
   onSelectPress: () => void;
 }) => {
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+    <FeedbackPressable
+      style={{ flexDirection: 'row', justifyContent: 'space-between' }}
+      onPress={onSelectPress}
+    >
       <StyledText
         style={{ color: colors.subbedText }}
       >{`Recipient receives on`}</StyledText>
-      <FeedbackPressable onPress={onSelectPress}>
+      <View
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 2 }}
+      >
         <Image
           source={getChainIcon(chainId)}
           style={{ width: 24, height: 24 }}
         />
-      </FeedbackPressable>
-    </View>
+        <Entypo name="chevron-thin-right" size={20} color={colors.border} />
+      </View>
+    </FeedbackPressable>
   );
 };
 
@@ -606,6 +613,9 @@ const SelectAmount = ({ route }: Props) => {
         open={isChainsSheetOpen}
         onSelect={chain => {
           setToChainId(chain.id);
+          setIsChainsSheetOpen(false);
+        }}
+        onClose={() => {
           setIsChainsSheetOpen(false);
         }}
       />
