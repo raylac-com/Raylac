@@ -73,7 +73,11 @@ const StartWatch = () => {
           {ensAddress ? `${ensAddress}` : ''}
         </StyledText>
       </View>
-      <StyledButton title="Start" onPress={onStartPress} disabled={!canStart} />
+      <StyledButton
+        title="Watch address"
+        onPress={onStartPress}
+        disabled={!canStart}
+      />
     </View>
   );
 };

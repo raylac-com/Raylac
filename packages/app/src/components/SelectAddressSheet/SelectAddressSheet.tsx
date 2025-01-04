@@ -1,11 +1,11 @@
 import StyledText from '@/components/StyledText/StyledText';
-import { hapticOptions, shortenAddress } from '@/lib/utils';
+import { shortenAddress } from '@/lib/utils';
 import { Pressable, View } from 'react-native';
 import { Hex } from 'viem';
 import { BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useEffect, useRef } from 'react';
 import colors from '@/lib/styles/colors';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import { triggerHapticFeedback } from '@/lib/utils';
 import useUserAddresses from '@/hooks/useUserAddresses';
 
 const AddressListItem = ({ address }: { address: Hex }) => {
@@ -34,7 +34,7 @@ const SelectAddressSheet = ({
 
   useEffect(() => {
     if (open) {
-      ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
+      triggerHapticFeedback();
       ref.current?.present();
     } else {
       ref.current?.dismiss();
@@ -77,7 +77,7 @@ const SelectAddressSheet = ({
         renderItem={({ item }) => (
           <Pressable
             onPress={() => {
-              ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
+              triggerHapticFeedback();
               onSelect(item.address);
             }}
           >

@@ -1,28 +1,69 @@
 import StyledButton from '@/components/StyledButton/StyledButton';
 import StyledText from '@/components/StyledText/StyledText';
+import useCreateAccount from '@/hooks/useCreateAccoun';
 import useDeriveAddress from '@/hooks/useDeriveAddress';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { getGenesisAddress } from '@/lib/key';
+import useUserAddresses from '@/hooks/useUserAddresses';
+import { getUserAddresses } from '@/lib/key';
 import colors from '@/lib/styles/colors';
-import { useState } from 'react';
+import { shortenAddress } from '@/lib/utils';
+import { useEffect, useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Hex } from 'viem';
 
 const CreateAddress = () => {
   const insets = useSafeAreaInsets();
   const [name, setName] = useState('');
   const navigation = useTypedNavigation();
+
+  const [mnemonicGenesisAddress, setMnemonicGenesisAddress] =
+    useState<Hex | null>(null);
+
   const { mutateAsync: deriveAddress, isPending: isDerivingAddress } =
     useDeriveAddress();
 
+  const { mutateAsync: createAccount, isPending: isCreatingAccount } =
+    useCreateAccount();
+
+  const { data: userAddresses } = useUserAddresses();
+
+  useEffect(() => {
+    if (userAddresses) {
+      const _mnemonicGenesisAddress = userAddresses.find(
+        a => a.mnemonicGenesisAddress
+      );
+
+      if (_mnemonicGenesisAddress) {
+        setMnemonicGenesisAddress(
+          _mnemonicGenesisAddress.mnemonicGenesisAddress!
+        );
+      }
+    }
+  }, [userAddresses]);
+
   const onCreatePress = async () => {
-    const genesisAddress = await getGenesisAddress();
+    const addresses = await getUserAddresses();
 
-    // TODO Create a mnemonic group if there are no mnemonic addresses
+    if (mnemonicGenesisAddress) {
+      const mnemonicGenesisAddress = addresses.find(
+        a => a.mnemonicGenesisAddress
+      );
 
-    await deriveAddress(genesisAddress);
+      if (!mnemonicGenesisAddress) {
+        throw new Error('No mnemonic address found');
+      }
 
-    navigation.goBack();
+      await deriveAddress(mnemonicGenesisAddress);
+      navigation.navigate('Tabs', {
+        screen: 'Addresses',
+      });
+    } else {
+      const address = await createAccount();
+      navigation.navigate('SaveBackupPhrase', {
+        genesisAddress: address,
+      });
+    }
   };
 
   return (
@@ -35,6 +76,13 @@ const CreateAddress = () => {
         paddingHorizontal: 16,
       }}
     >
+      <View>
+        <StyledText>
+          {mnemonicGenesisAddress
+            ? `Deriving from ${shortenAddress(mnemonicGenesisAddress)}`
+            : 'New'}
+        </StyledText>
+      </View>
       <View>
         <StyledText>{`Name`}</StyledText>
         <TextInput
@@ -50,10 +98,11 @@ const CreateAddress = () => {
           }}
         />
       </View>
+
       <StyledButton
         title="Create"
         onPress={onCreatePress}
-        isLoading={isDerivingAddress}
+        isLoading={isDerivingAddress || isCreatingAccount}
       />
     </View>
   );

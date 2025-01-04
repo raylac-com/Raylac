@@ -5,11 +5,13 @@ import * as bip39 from 'bip39';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import Toast from 'react-native-toast-message';
-import { setBackupVerificationStatus } from '@/lib/key';
 import MnemonicWord from '@/components/MnemonicWord/MnemonicWord';
 import fontSizes from '@/lib/styles/fontSizes';
 import useMnemonic from '@/hooks/useMnemonic';
-import { zeroAddress } from 'viem';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamsList } from '@/navigation/types';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { setBackupVerified } from '@/lib/key';
 
 const generateRandomNumbers = ({
   max,
@@ -58,8 +60,12 @@ const pickRandom = ({ array, count }: { array: any[]; count: number }) => {
   return indices.map(index => array[index]);
 };
 
-const ConfirmBackupPhrase = () => {
-  const { mnemonic } = useMnemonic();
+type Props = NativeStackScreenProps<RootStackParamsList, 'ConfirmBackupPhrase'>;
+
+const ConfirmBackupPhrase = ({ route }: Props) => {
+  const { genesisAddress } = route.params;
+  const insets = useSafeAreaInsets();
+  const { mnemonic } = useMnemonic(genesisAddress);
   const [userInputs, setUserInputs] = useState<string[]>([]);
   const [hideIndices, _setHideIndices] = useState<number[]>(
     generateRandomConsecutiveNumbers({ max: 11, count: 3 })
@@ -99,24 +105,23 @@ const ConfirmBackupPhrase = () => {
       if (userInputs.length === 3 && mnemonic) {
         // Check the mnemonic
         const mnemonicWords = mnemonic.split(' ');
+
+        // Fill in the mnemonic with the user inputs
         const filledMnemonic = mnemonicWords.map((word, index) => {
           const hideIndex = hideIndices.indexOf(index);
           // eslint-disable-next-line security/detect-object-injection
           return hideIndex !== -1 ? userInputs[hideIndex] : word;
         });
 
-        const mnemonicValid = bip39.validateMnemonic(filledMnemonic.join(' '));
+        const mnemonicValid = mnemonic === filledMnemonic.join(' ');
 
         if (mnemonicValid) {
+          await setBackupVerified(genesisAddress);
+
           Toast.show({
             type: 'success',
             text1: 'Backup phrase confirmed',
             visibilityTime: 1500,
-          });
-
-          await setBackupVerificationStatus({
-            address: zeroAddress,
-            status: 'complete',
           });
 
           navigation.navigate('Tabs', {
@@ -138,83 +143,50 @@ const ConfirmBackupPhrase = () => {
   return (
     <View
       style={{
-        padding: 16,
         rowGap: 16,
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        flex: 1,
+        paddingBottom: insets.bottom + 16,
+        paddingTop: 16,
+        paddingHorizontal: 16,
       }}
     >
-      <FlatList
-        data={mnemonic?.split(' ')}
-        contentContainerStyle={{
-          justifyContent: 'space-between',
-          alignContent: 'center',
-        }}
-        renderItem={({ item, index }) => {
-          const hide = hideIndices.includes(index);
-
-          const hideIndex = hideIndices.indexOf(index);
-          // eslint-disable-next-line security/detect-object-injection
-          const fillWord = hideIndex !== -1 ? userInputs[hideIndex] : '';
-
-          return (
-            <View
-              key={index}
-              style={{
-                paddingHorizontal: 8,
-                paddingVertical: 8,
-                flex: 1,
-              }}
-            >
-              <MnemonicWord
-                word={hide ? fillWord : item}
-                index={index + 1}
-                bgColor={hide ? colors.primary : colors.text}
-              ></MnemonicWord>
-            </View>
-          );
-        }}
+      <View
         style={{
-          marginBottom: 16,
-        }}
-        numColumns={3}
-      ></FlatList>
-      <Text
-        style={{
-          color: colors.text,
-          textAlign: 'center',
-          fontSize: fontSizes.base,
+          flexDirection: 'column',
+          justifyContent: 'center',
+          rowGap: 16,
         }}
       >
-        {`Choose 3 words from the list below to complete the phrase`}
-      </Text>
-      <View style={{}}>
         <FlatList
-          data={choices}
+          data={mnemonic?.split(' ')}
           contentContainerStyle={{
             justifyContent: 'space-between',
             alignContent: 'center',
           }}
           renderItem={({ item, index }) => {
-            const choiceIndex = userInputs.findIndex(word => item === word);
-            const disabled = userInputs.length === 3 || choiceIndex !== -1;
+            const hide = hideIndices.includes(index);
+
+            const hideIndex = hideIndices.indexOf(index);
+            // eslint-disable-next-line security/detect-object-injection
+            const fillWord = hideIndex !== -1 ? userInputs[hideIndex] : '';
 
             return (
-              <Pressable
+              <View
                 key={index}
                 style={{
                   paddingHorizontal: 8,
                   paddingVertical: 8,
                   flex: 1,
                 }}
-                onPress={() => {
-                  onChoicePress(item);
-                }}
-                disabled={disabled}
               >
                 <MnemonicWord
-                  word={item}
-                  bgColor={disabled ? colors.gray : colors.text}
+                  word={hide ? fillWord : item}
+                  index={index + 1}
+                  bgColor={hide ? colors.text : colors.border}
                 ></MnemonicWord>
-              </Pressable>
+              </View>
             );
           }}
           style={{
@@ -222,10 +194,73 @@ const ConfirmBackupPhrase = () => {
           }}
           numColumns={3}
         ></FlatList>
+        <Text
+          style={{
+            color: colors.text,
+            textAlign: 'center',
+            fontSize: fontSizes.base,
+          }}
+        >
+          {`Choose 3 words from the list below to complete the phrase`}
+        </Text>
+        <View style={{}}>
+          <FlatList
+            data={choices}
+            contentContainerStyle={{
+              justifyContent: 'space-between',
+              alignContent: 'center',
+            }}
+            renderItem={({ item, index }) => {
+              const choiceIndex = userInputs.findIndex(word => item === word);
+              const disabled = userInputs.length === 3 || choiceIndex !== -1;
+
+              return (
+                <Pressable
+                  key={index}
+                  style={{
+                    paddingHorizontal: 8,
+                    paddingVertical: 8,
+                    flex: 1,
+                  }}
+                  onPress={() => {
+                    onChoicePress(item);
+                  }}
+                  disabled={disabled}
+                >
+                  <MnemonicWord
+                    word={item}
+                    bgColor={disabled ? colors.gray : colors.text}
+                  ></MnemonicWord>
+                </Pressable>
+              );
+            }}
+            style={{
+              marginBottom: 16,
+            }}
+            numColumns={3}
+          ></FlatList>
+        </View>
+      </View>
+      <View
+        style={{
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          rowGap: 16,
+        }}
+      >
         <StyledButton
           title="Clear"
           onPress={() => {
             setUserInputs([]);
+          }}
+          variant="outline"
+        ></StyledButton>
+        <StyledButton
+          title="Go back"
+          onPress={() => {
+            navigation.navigate('SaveBackupPhrase', {
+              genesisAddress,
+            });
           }}
         ></StyledButton>
       </View>

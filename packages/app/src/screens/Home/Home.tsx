@@ -1,22 +1,21 @@
-import { ScrollView, RefreshControl, View, Pressable } from 'react-native';
+import { ScrollView, RefreshControl, View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import TokenBalanceItem from '@/components/TokenBalanceItem/TokenBalanceItem';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { hapticOptions } from '@/lib/utils';
 import useAccountUsdValue from '@/hooks/useAccountUsdValue';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import TokenBalanceDetailsSheet from '@/components/TokenBalanceDetailsSheet/TokenBalanceDetailsSheet';
 import { groupTokenBalancesByToken, Token } from '@raylac/shared';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useUserAddresses from '@/hooks/useUserAddresses';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import Fav from '@/components/Fav/Fav';
 import TopMenuBar from './components/TopMenuBar/TopMenuBar';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { getDefaultAddress } from '@/lib/key';
 
 const AddAddressButton = () => {
   const navigation = useTypedNavigation();
@@ -34,13 +33,16 @@ const AddAddressButton = () => {
         shadowColor: colors.text,
         shadowOffset: {
           width: 0,
-          height: 2,
+          height: 1,
         },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+        shadowOpacity: 0.22,
+        shadowRadius: 2.22,
       }}
-      onPress={() => navigation.navigate('Addresses')}
+      onPress={() =>
+        navigation.navigate('Tabs', {
+          screen: 'Addresses',
+        })
+      }
     >
       <AntDesign name="plus" size={20} color={colors.text} />
       <StyledText style={{ color: colors.text, fontWeight: 'bold' }}>
@@ -96,17 +98,22 @@ const HomeScreen = () => {
 
   useEffect(() => {
     const init = async () => {
-      if (userAddresses !== undefined && userAddresses.length === 0) {
+      const defaultAddress = await getDefaultAddress();
+      if (defaultAddress === null) {
         navigation.reset({
           index: 0,
           routes: [{ name: 'Start' }],
+        });
+      } else if (!defaultAddress.isBackupVerified) {
+        navigation.navigate('ConfirmBackupPhrase', {
+          genesisAddress: defaultAddress.address,
         });
       }
     };
 
     // Only run after the cache is reset and we have a definitive userAccount value
     init();
-  }, [userAddresses]);
+  }, []);
 
   const groupedTokenBalances = groupTokenBalancesByToken({
     tokenBalances: tokenBalances ?? [],
@@ -168,7 +175,7 @@ const HomeScreen = () => {
             padding: 16,
           }}
         >
-          {groupedTokenBalances.length === 0 && (
+          {groupedTokenBalances.length === 0 && tokenBalances !== undefined && (
             <View
               style={{
                 flex: 1,
@@ -185,13 +192,9 @@ const HomeScreen = () => {
             </View>
           )}
           {groupedTokenBalances.map((item, index) => (
-            <Pressable
+            <FeedbackPressable
               key={index}
               onPress={() => {
-                ReactNativeHapticFeedback.trigger(
-                  'impactMedium',
-                  hapticOptions
-                );
                 setShowTokenBalanceDetailsSheet(item.token);
               }}
             >
@@ -201,7 +204,7 @@ const HomeScreen = () => {
                 name={item.token.name}
                 logoUrl={item.token.logoURI}
               />
-            </Pressable>
+            </FeedbackPressable>
           ))}
         </View>
       </ScrollView>

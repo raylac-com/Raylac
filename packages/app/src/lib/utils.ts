@@ -1,3 +1,4 @@
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { Hex } from 'viem';
 import * as Clipboard from 'expo-clipboard';
 import {
@@ -8,6 +9,7 @@ import {
   polygon,
   zksync,
 } from 'viem/chains';
+import { Platform } from 'react-native';
 
 export const shortenAddress = (address: Hex) => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -50,4 +52,10 @@ export const getChainIcon = (chainId: number) => {
 export const hapticOptions = {
   enableVibrateFallback: true,
   ignoreAndroidSystemSettings: false,
+};
+
+export const triggerHapticFeedback = () => {
+  if (Platform.OS === 'ios') {
+    ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
+  }
 };

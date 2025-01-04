@@ -2,7 +2,6 @@ import Feather from '@expo/vector-icons/Feather';
 import StyledText from '@/components/StyledText/StyledText';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import { Alert, FlatList, Image, Pressable, View } from 'react-native';
-import { Hex } from 'viem';
 import colors from '@/lib/styles/colors';
 import { copyToClipboard, shortenAddress } from '@/lib/utils';
 import Toast from 'react-native-toast-message';
@@ -13,12 +12,13 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import useDeleteAddress from '@/hooks/useDeleteAddress';
 import { supportedChains } from '@raylac/shared';
 import { getChainIcon } from '@/lib/utils';
+import { UserAddress } from '@/types';
 
-const AddressListItem = ({ address }: { address: Hex }) => {
+const AddressListItem = ({ address }: { address: UserAddress }) => {
   const { mutateAsync: deleteAddress } = useDeleteAddress();
 
   const onCopyPress = () => {
-    copyToClipboard(address);
+    copyToClipboard(address.address);
 
     Toast.show({
       type: 'success',
@@ -41,7 +41,7 @@ const AddressListItem = ({ address }: { address: Hex }) => {
           text: 'Remove',
           style: 'destructive',
           onPress: async () => {
-            await deleteAddress(address);
+            await deleteAddress(address.address);
             Toast.show({
               type: 'success',
               text1: 'Address removed',
@@ -67,11 +67,10 @@ const AddressListItem = ({ address }: { address: Hex }) => {
         shadowColor: colors.border,
         shadowOffset: {
           width: 0,
-          height: 2,
+          height: 1,
         },
-        shadowOpacity: 0.25,
+        shadowOpacity: 0.5,
         shadowRadius: 3.84,
-        elevation: 5,
       }}
     >
       <Pressable
@@ -84,8 +83,13 @@ const AddressListItem = ({ address }: { address: Hex }) => {
             fontWeight: 'bold',
           }}
         >
-          {shortenAddress(address)}
+          {shortenAddress(address.address)}
         </StyledText>
+        {address.isDefault && (
+          <StyledText style={{ color: colors.subbedText }}>
+            {`Default`}
+          </StyledText>
+        )}
       </Pressable>
       <FontAwesome
         name="remove"
@@ -135,15 +139,16 @@ const Addresses = () => {
     <View
       style={{
         flex: 1,
-        padding: 16,
-        paddingBottom: insets.bottom,
+        paddingTop: 16,
+        paddingHorizontal: 16,
+        paddingBottom: insets.bottom + 16,
         rowGap: 32,
       }}
     >
       <SupportedChains />
       <FlatList
         data={addresses}
-        renderItem={({ item }) => <AddressListItem address={item.address} />}
+        renderItem={({ item }) => <AddressListItem address={item} />}
         contentContainerStyle={{ rowGap: 16 }}
       />
       <StyledButton title="Add address" onPress={onAddAddressPress} />

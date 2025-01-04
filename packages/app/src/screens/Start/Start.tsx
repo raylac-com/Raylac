@@ -20,8 +20,10 @@ const Start = () => {
     useCreateAccount();
 
   const onCreateAccountPress = async () => {
-    await createAccount();
-    navigation.navigate('SaveBackupPhrase');
+    const address = await createAccount();
+    navigation.navigate('SaveBackupPhrase', {
+      genesisAddress: address,
+    });
   };
 
   return (

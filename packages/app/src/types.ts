@@ -10,6 +10,9 @@ export interface UserAddress {
   address: Hex;
   type: AddressType;
   accountIndex?: number;
+  isBackupVerified: boolean;
+  isDefault: boolean;
+
   // The address of the first account in the mnemonic group
   mnemonicGenesisAddress?: Hex;
 }

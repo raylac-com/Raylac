@@ -5,6 +5,7 @@ export type RootTabsParamsList = {
   Home: undefined;
   Swap: undefined;
   History: undefined;
+  Addresses: undefined;
   Settings: undefined;
 };
 
@@ -62,10 +63,13 @@ export type RootStackParamsList = {
   };
   MoveFunds: undefined;
 
-  SaveBackupPhrase: undefined;
-  ConfirmBackupPhrase: undefined;
+  SaveBackupPhrase: {
+    genesisAddress: Hex;
+  };
+  ConfirmBackupPhrase: {
+    genesisAddress: Hex;
+  };
 
-  Addresses: undefined;
   AddAddress: undefined;
   CreateAddress: undefined;
 };
