@@ -2,15 +2,21 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import ConfirmBackupPhrase from './ConfirmBackupPhrase';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { zeroAddress } from 'viem';
 
 const StorybookStack = createNativeStackNavigator();
 
 const meta = {
   title: 'ConfirmBackupPhrase',
   component: ConfirmBackupPhrase,
-  argTypes: {},
   args: {
-    genesisAddress: '0x0000000000000000000000000000000000000000',
+    route: {
+      name: 'ConfirmBackupPhrase',
+      key: 'ConfirmBackupPhrase',
+      params: {
+        genesisAddress: zeroAddress,
+      },
+    },
   },
   decorators: [
     Story => (
@@ -31,4 +37,5 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+// @ts-ignore
 export const Basic: Story = {};

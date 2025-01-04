@@ -1,18 +1,16 @@
-import { ScrollView, RefreshControl, View, Pressable } from 'react-native';
+import { ScrollView, RefreshControl, View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import TokenBalanceItem from '@/components/TokenBalanceItem/TokenBalanceItem';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import { hapticOptions } from '@/lib/utils';
 import useAccountUsdValue from '@/hooks/useAccountUsdValue';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import TokenBalanceDetailsSheet from '@/components/TokenBalanceDetailsSheet/TokenBalanceDetailsSheet';
 import { groupTokenBalancesByToken, Token } from '@raylac/shared';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useUserAddresses from '@/hooks/useUserAddresses';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import Fav from '@/components/Fav/Fav';
 import TopMenuBar from './components/TopMenuBar/TopMenuBar';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
@@ -191,13 +189,9 @@ const HomeScreen = () => {
             </View>
           )}
           {groupedTokenBalances.map((item, index) => (
-            <Pressable
+            <FeedbackPressable
               key={index}
               onPress={() => {
-                ReactNativeHapticFeedback.trigger(
-                  'impactMedium',
-                  hapticOptions
-                );
                 setShowTokenBalanceDetailsSheet(item.token);
               }}
             >
@@ -207,7 +201,7 @@ const HomeScreen = () => {
                 name={item.token.name}
                 logoUrl={item.token.logoURI}
               />
-            </Pressable>
+            </FeedbackPressable>
           ))}
         </View>
       </ScrollView>

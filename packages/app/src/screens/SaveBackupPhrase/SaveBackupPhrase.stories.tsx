@@ -8,8 +8,15 @@ const StorybookStack = createNativeStackNavigator();
 const meta = {
   title: 'SaveBackupPhrase',
   component: SaveBackupPhrase,
-  argTypes: {},
-  args: {},
+  args: {
+    route: {
+      name: 'SaveBackupPhrase',
+      key: 'SaveBackupPhrase',
+      params: {
+        genesisAddress: '0x0000000000000000000000000000000000000000',
+      },
+    },
+  },
   decorators: [
     Story => (
       <StorybookStack.Navigator>
@@ -29,4 +36,5 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
+// @ts-ignore
 export const Basic: Story = {};
