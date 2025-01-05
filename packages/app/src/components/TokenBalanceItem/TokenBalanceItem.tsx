@@ -2,7 +2,7 @@ import colors from '@/lib/styles/colors';
 import { TokenAmount } from '@raylac/shared';
 import { View } from 'react-native';
 import StyledText from '../StyledText/StyledText';
-import TokenLogo from '../FastImage/TokenLogo';
+import TokenLogo from '../TokenLogo/TokenLogo';
 
 const shortenName = (name: string) => {
   if (name.length > 20) {

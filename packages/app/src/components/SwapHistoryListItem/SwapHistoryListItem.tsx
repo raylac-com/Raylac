@@ -3,7 +3,7 @@ import StyledText from '../StyledText/StyledText';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Entypo from '@expo/vector-icons/Entypo';
 import colors from '@/lib/styles/colors';
-import TokenLogo from '../FastImage/TokenLogo';
+import TokenLogo from '../TokenLogo/TokenLogo';
 import { SwapHistoryItem } from '@raylac/shared';
 
 const SwapHistoryListItem = (props: { swap: SwapHistoryItem }) => {

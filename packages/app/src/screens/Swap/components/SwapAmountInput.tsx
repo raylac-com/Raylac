@@ -5,7 +5,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { SupportedTokensReturnType } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
 import Skeleton from '@/components/Skeleton/Skeleton';
-import TokenLogo from '@/components/FastImage/TokenLogo';
+import TokenLogo from '@/components/TokenLogo/TokenLogo';
 
 const SwapAmountInput = ({
   selectedToken,

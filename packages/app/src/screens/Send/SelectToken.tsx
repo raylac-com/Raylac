@@ -1,5 +1,5 @@
 import Entypo from '@expo/vector-icons/Entypo';
-import TokenLogo from '@/components/FastImage/TokenLogo';
+import TokenLogo from '@/components/TokenLogo/TokenLogo';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import SendToCard from '@/components/SendToCard/SendToCard';
 import StyledText from '@/components/StyledText/StyledText';

@@ -1,7 +1,7 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { View } from 'react-native';
 import colors from '@/lib/styles/colors';
-import TokenLogo from '../FastImage/TokenLogo';
+import TokenLogo from '../TokenLogo/TokenLogo';
 import StyledText from '../StyledText/StyledText';
 import { shortenAddress } from '@/lib/utils';
 import { GetHistoryReturnType } from '@raylac/shared';

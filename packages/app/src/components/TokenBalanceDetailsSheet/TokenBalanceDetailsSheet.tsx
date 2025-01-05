@@ -7,7 +7,7 @@ import {
 } from '@raylac/shared';
 import StyledText from '../StyledText/StyledText';
 import { View } from 'react-native';
-import TokenLogo from '../FastImage/TokenLogo';
+import TokenLogo from '../TokenLogo/TokenLogo';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
