@@ -335,6 +335,9 @@ export type PerAddressTokenBalance = {
   }[];
 };
 
+/**
+ * Get per address balance of a token
+ */
 export const getPerAddressTokenBalance = ({
   tokenBalances,
   token,
@@ -382,10 +385,15 @@ export const getPerAddressTokenBalance = ({
     BigInt(0)
   );
 
+  const tokenPriceUsd =
+    balancesPerAddress.length > 0
+      ? Number(balancesPerAddress[0].totalBalance.tokenPriceUsd)
+      : 0;
+
   const formattedTotalBalance = formatTokenAmount({
     amount: totalBalance,
     token,
-    tokenPriceUsd: Number(balancesPerAddress[0].totalBalance.tokenPriceUsd),
+    tokenPriceUsd,
   });
 
   return {
