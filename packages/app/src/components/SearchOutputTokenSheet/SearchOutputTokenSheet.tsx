@@ -15,6 +15,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { getChainIcon } from '@/lib/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { trpc } from '@/lib/trpc';
+import useDebounce from '@/hooks/useDebounce';
 
 const TokenListItem = ({
   token,
@@ -81,7 +82,7 @@ const TokenListItem = ({
 };
 
 export const SearchInput = ({
-  value,
+  value: _value,
   onChangeText,
 }: {
   value: string;
@@ -90,7 +91,6 @@ export const SearchInput = ({
   return (
     <BottomSheetTextInput
       placeholder="Search for a token"
-      value={value}
       onChangeText={onChangeText}
       autoCapitalize="none"
       style={{
@@ -125,9 +125,11 @@ const SearchOutputTokenSheet = ({
     }
   }, [open]);
 
+  const { debouncedValue: debouncedSearchText } = useDebounce(searchText, 200);
+
   const { data: tokens } = trpc.getSupportedTokens.useQuery({
     chainIds: supportedChains.map(chain => chain.id),
-    searchTerm: searchText,
+    searchTerm: debouncedSearchText,
   });
 
   const tokenList = tokens ?? [undefined, undefined, undefined];
@@ -147,7 +149,12 @@ const SearchOutputTokenSheet = ({
       onDismiss={onClose}
       enableDynamicSizing={false}
     >
-      <SearchInput value={searchText} onChangeText={setSearchText} />
+      <SearchInput
+        value={searchText}
+        onChangeText={text => {
+          setSearchText(text);
+        }}
+      />
       <BottomSheetFlatList
         data={tokenList}
         keyExtractor={(_item, index) => index.toString()}

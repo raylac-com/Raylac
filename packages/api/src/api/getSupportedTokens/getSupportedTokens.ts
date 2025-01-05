@@ -17,11 +17,23 @@ const getSupportedTokens = async ({
   const cachedTokens = await getCachedTokens();
 
   if (cachedTokens.length > 0) {
-    return (
-      cachedTokens
+    const sortedTokens = cachedTokens.sort(
+      (a, b) =>
         // Sort by verified status
-        .sort((a, b) => Number(b.verified) - Number(a.verified))
+        Number(b.verified) - Number(a.verified)
     );
+
+    if (searchTerm) {
+      const searchResults = sortedTokens.filter(
+        token =>
+          token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          token.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+
+      return searchResults;
+    }
+
+    return sortedTokens;
   }
 
   const currencies = await relayGetCurrencies({

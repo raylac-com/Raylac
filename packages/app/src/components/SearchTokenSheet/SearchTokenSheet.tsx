@@ -2,7 +2,7 @@ import Skeleton from '@/components/Skeleton/Skeleton';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { TokenAmount, Token } from '@raylac/shared';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
 import {
@@ -82,7 +82,7 @@ const TokenListItem = ({
 };
 
 export const SearchInput = ({
-  value,
+  value: _value,
   onChangeText,
 }: {
   value: string;
@@ -91,7 +91,6 @@ export const SearchInput = ({
   return (
     <BottomSheetTextInput
       placeholder="Search for a token"
-      value={value}
       onChangeText={onChangeText}
       autoCapitalize="none"
       style={{
@@ -137,6 +136,18 @@ const SearchTokenSheet = ({
       ? tokenBalancePerAddress[0].tokenBalances
       : [undefined];
 
+  const tokenListSearchResults = useMemo(() => {
+    return searchText
+      ? tokenList.filter(
+          token =>
+            token?.token.symbol
+              .toLowerCase()
+              .includes(searchText.toLowerCase()) ||
+            token?.token.name.toLowerCase().includes(searchText.toLowerCase())
+        )
+      : tokenList;
+  }, [searchText, tokenList]);
+
   return (
     <BottomSheetModal
       ref={ref}
@@ -152,9 +163,14 @@ const SearchTokenSheet = ({
       onDismiss={onClose}
       enableDynamicSizing={false}
     >
-      <SearchInput value={searchText} onChangeText={setSearchText} />
+      <SearchInput
+        value={searchText}
+        onChangeText={text => {
+          setSearchText(text);
+        }}
+      />
       <BottomSheetFlatList
-        data={tokenList}
+        data={tokenListSearchResults}
         contentContainerStyle={{
           marginTop: 14,
           rowGap: 16,
