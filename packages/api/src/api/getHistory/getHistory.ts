@@ -138,28 +138,29 @@ const getHistoryOnChain = async ({
   const transfers = await Promise.all(
     addresses.map(async address => {
       // Get incoming transfers
-      const incoming = await alchemy.core.getAssetTransfers({
-        toAddress: address,
-        category: [
-          AssetTransfersCategory.ERC20,
-          AssetTransfersCategory.EXTERNAL,
-        ],
-        withMetadata: true,
-        order: SortingOrder.DESCENDING,
-        maxCount: 10,
-      });
-
-      // Get outgoing transfers
-      const outgoing = await alchemy.core.getAssetTransfers({
-        fromAddress: address,
-        category: [
-          AssetTransfersCategory.ERC20,
-          AssetTransfersCategory.EXTERNAL,
-        ],
-        order: SortingOrder.DESCENDING,
-        maxCount: 10,
-        withMetadata: true,
-      });
+      const [incoming, outgoing] = await Promise.all([
+        alchemy.core.getAssetTransfers({
+          toAddress: address,
+          category: [
+            AssetTransfersCategory.ERC20,
+            AssetTransfersCategory.EXTERNAL,
+          ],
+          withMetadata: true,
+          order: SortingOrder.DESCENDING,
+          maxCount: 10,
+        }),
+        // Get outgoing transfers
+        alchemy.core.getAssetTransfers({
+          fromAddress: address,
+          category: [
+            AssetTransfersCategory.ERC20,
+            AssetTransfersCategory.EXTERNAL,
+          ],
+          order: SortingOrder.DESCENDING,
+          maxCount: 10,
+          withMetadata: true,
+        }),
+      ]);
 
       // Map the Alchemy transfer data to `GetHistoryReturnType`
       const transfers: GetHistoryReturnType = (
