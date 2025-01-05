@@ -13,6 +13,7 @@ const swapHistory = async () => {
   });
   console.timeEnd('getHistory');
   for (const item of history) {
+    console.log(JSON.stringify(item, null, 2));
     if (
       item.relayId ===
       '0x376b25f86be36c498bf3639dd1a70188280be315399525f08344643138700c2c'

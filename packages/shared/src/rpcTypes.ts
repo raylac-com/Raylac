@@ -240,6 +240,7 @@ export interface BuildBridgeSendRequestBody {
 }
 
 export type BuildBridgeSendReturnType = {
+  relayRequestId: Hex;
   steps: CrossChainSwapStep[];
   transfer: {
     from: Hex;

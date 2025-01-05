@@ -47,15 +47,13 @@ const useSend = () => {
         },
       };
 
-      await sendTx(sendTxRequestBody);
-
-      queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.getHistory),
-      });
+      const txHash = await sendTx(sendTxRequestBody);
 
       queryClient.invalidateQueries({
         queryKey: getQueryKey(trpc.getTokenBalances),
       });
+
+      return txHash;
     },
   });
 };

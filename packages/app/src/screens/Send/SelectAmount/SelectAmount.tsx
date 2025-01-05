@@ -422,30 +422,63 @@ const SelectAmount = ({ route }: Props) => {
         throw new Error('bridgeSendData is undefined');
       }
 
+      const requestId = bridgeSendData.relayRequestId;
+
       await sendBridgeTx({
         sendData: bridgeSendData,
         chainId: fromChainId,
+      });
+
+      Toast.show({
+        type: 'success',
+        text1: 'Sent',
+        text2: 'Your transaction has been sent',
+      });
+
+      navigation.navigate('Tabs', {
+        screen: 'History',
+        params: {
+          pendingBridgeTransfer: {
+            requestId,
+            fromChainId,
+            toChainId,
+            from: fromAddresses[0],
+            to: toAddress,
+            amount: bridgeSendData.amountIn,
+            token,
+          },
+        },
       });
     } else {
       if (!sendData) {
         throw new Error('sendData is undefined');
       }
 
-      await sendTx({
+      const txHash = await sendTx({
         sendData: sendData,
         chainId: fromChainId,
       });
+
+      Toast.show({
+        type: 'success',
+        text1: 'Sent',
+        text2: 'Your transaction has been sent',
+      });
+
+      navigation.navigate('Tabs', {
+        screen: 'History',
+        params: {
+          pendingTransfer: {
+            txHash,
+            from: fromAddresses[0],
+            to: toAddress,
+            amount: sendData.transfer.amount,
+            token: sendData.transfer.token,
+            chainId: fromChainId,
+          },
+        },
+      });
     }
-
-    Toast.show({
-      type: 'success',
-      text1: 'Sent',
-      text2: 'Your transaction has been sent',
-    });
-
-    navigation.navigate('Tabs', {
-      screen: 'History',
-    });
   };
 
   const onMaxBalancePress = () => {

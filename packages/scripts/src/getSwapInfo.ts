@@ -13,11 +13,13 @@ const getSwapInfo = async () => {
     'requests/v2',
     {
       params: {
-        hash: '0xe143e4b4b745e4a7d59e73d7ced357051ad62804f80ba3259ad7c6ea74db97ff',
+        id: '0xb21712263461657c43f75af3379632c8891d92aab5240bf5bdf9f6518ebfee70',
         //user: '0x28341dF2CCabe2Cc4A3c6e7ef2fe9E706680C196',
       },
     }
   );
+
+  console.log(swapInfo);
 
   /*
   const request = swapInfo.data.requests[0];

@@ -4,7 +4,27 @@ import { Hex } from 'viem';
 export type RootTabsParamsList = {
   Home: undefined;
   Swap: undefined;
-  History: undefined;
+  History:
+    | {
+        pendingTransfer?: {
+          txHash: Hex;
+          from: Hex;
+          to: Hex;
+          chainId: number;
+          token: Token;
+          amount: TokenAmount;
+        };
+        pendingBridgeTransfer?: {
+          from: Hex;
+          to: Hex;
+          fromChainId: number;
+          toChainId: number;
+          token: Token;
+          amount: TokenAmount;
+          requestId: Hex;
+        };
+      }
+    | undefined;
   Addresses: undefined;
   Settings: undefined;
 };
