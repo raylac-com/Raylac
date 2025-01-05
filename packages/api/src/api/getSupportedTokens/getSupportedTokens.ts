@@ -17,7 +17,11 @@ const getSupportedTokens = async ({
   const cachedTokens = await getCachedTokens();
 
   if (cachedTokens.length > 0) {
-    return cachedTokens;
+    return (
+      cachedTokens
+        // Sort by verified status
+        .sort((a, b) => Number(b.verified) - Number(a.verified))
+    );
   }
 
   const currencies = await relayGetCurrencies({

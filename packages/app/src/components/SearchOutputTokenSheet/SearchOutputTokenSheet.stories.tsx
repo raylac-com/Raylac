@@ -1,14 +1,12 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import SearchTokenSheet from './SearchTokenSheet';
+import SearchOutputTokenSheet from './SearchOutputTokenSheet';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { zeroAddress } from 'viem';
 
 const meta = {
-  title: 'SearchTokenSheet',
-  component: SearchTokenSheet,
+  title: 'SearchOutputTokenSheet',
+  component: SearchOutputTokenSheet,
   args: {
-    address: zeroAddress,
     open: true,
     onSelectToken: () => {},
     onClose: () => {},
@@ -22,7 +20,7 @@ const meta = {
       );
     },
   ],
-} satisfies Meta<typeof SearchTokenSheet>;
+} satisfies Meta<typeof SearchOutputTokenSheet>;
 
 export default meta;
 

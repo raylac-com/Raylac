@@ -31,7 +31,7 @@ export const getCachedToken = async (
 };
 
 export const getCachedTokens = async (): Promise<Token[]> => {
-  const keys = await redisClient.keys('*');
+  const keys = await redisClient.keys('token:*');
   if (keys.length === 0) {
     return [];
   }

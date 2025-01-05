@@ -78,22 +78,22 @@ interface AddressSelectorProps {
 }
 
 const AddressSelector = ({ address, setAddress }: AddressSelectorProps) => {
-  const [isChainsSheetOpen, setIsChainsSheetOpen] = useState(false);
-
+  const [isAddressSheetOpen, setIsAddressSheetOpen] = useState(false);
   return (
     <View>
       <Pressable
         style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-        onPress={() => setIsChainsSheetOpen(true)}
+        onPress={() => setIsAddressSheetOpen(true)}
       >
         <StyledText>{shortenAddress(address)}</StyledText>
         <Entypo name="chevron-down" size={20} color={colors.border} />
       </Pressable>
       <SelectAddressSheet
-        open={isChainsSheetOpen}
+        open={isAddressSheetOpen}
+        onClose={() => setIsAddressSheetOpen(false)}
         onSelect={address => {
           setAddress(address);
-          setIsChainsSheetOpen(false);
+          setIsAddressSheetOpen(false);
         }}
       />
     </View>

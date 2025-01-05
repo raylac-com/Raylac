@@ -141,15 +141,11 @@ export interface GetSingleInputSwapQuoteRequestBody {
 export type GetSingleInputSwapQuoteReturnType = {
   approveStep: ApproveStep | null;
   swapStep: SwapStep;
-  amountIn: string;
-  amountOut: string;
-  amountInFormatted: string;
-  amountOutFormatted: string;
-  amountInUsd: string;
-  amountOutUsd: string;
-  relayerServiceFeeUsd: string;
-  originChainGasAmountFormatted: string;
-  originChainGasUsd: string;
+  amountIn: TokenAmount;
+  amountOut: TokenAmount;
+  relayerFeeToken: Token;
+  originChainGas: TokenAmount;
+  relayerFee: TokenAmount;
 };
 
 export interface SubmitSwapRequestBody {

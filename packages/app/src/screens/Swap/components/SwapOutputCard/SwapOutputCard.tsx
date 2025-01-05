@@ -1,17 +1,17 @@
 import { View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import SwapAmountInput from '../SwapAmountInput';
-import { SupportedTokensReturnType } from '@raylac/shared';
+import { SupportedTokensReturnType, TokenAmount } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
-import { useSearchOutputTokenSheet } from '@/contexts/SearchOutputTokenSheetContext';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import ChainSelector from '../ChainSelector/ChainSelector';
+import SearchOutputTokenSheet from '@/components/SearchOutputTokenSheet/SearchOutputTokenSheet';
+import Skeleton from '@/components/Skeleton/Skeleton';
 
 const SwapOutputCard = ({
   token,
   setToken,
   amount,
-  usdAmount,
   setAmount,
   isLoadingAmount,
   chainId,
@@ -19,21 +19,19 @@ const SwapOutputCard = ({
 }: {
   token: SupportedTokensReturnType[number] | null;
   setToken: (value: SupportedTokensReturnType[number] | null) => void;
-  amount: string;
-  usdAmount: number;
+  amount: TokenAmount | undefined;
   setAmount: (value: string) => void;
   isLoadingAmount: boolean;
   chainId: number | null;
   setChainId: (value: number | null) => void;
 }) => {
-  const { setIsOpen: setIsOutputTokenOpen, selectedToken } =
-    useSearchOutputTokenSheet();
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    if (selectedToken) {
-      setToken(selectedToken);
+    if (token) {
+      setToken(token);
     }
-  }, [selectedToken]);
+  }, [token]);
 
   const showChainSelector = token && token.addresses.length > 1;
 
@@ -55,22 +53,38 @@ const SwapOutputCard = ({
       <SwapAmountInput
         selectedToken={token}
         isLoadingAmount={isLoadingAmount}
-        amount={amount}
+        amount={amount?.formatted ?? ''}
         setAmount={setAmount}
         onSelectTokenPress={() => {
-          setIsOutputTokenOpen(true);
+          setIsOpen(true);
         }}
       />
-      <View
-        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
-      >
-        <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-          {`${usdAmount}`}
-        </StyledText>
-        <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-          {`USD`}
-        </StyledText>
-      </View>
+      {token && (
+        <View
+          style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+        >
+          {isLoadingAmount ? (
+            <Skeleton style={{ width: 50, height: 20 }} />
+          ) : (
+            <StyledText
+              style={{ color: colors.subbedText, fontWeight: 'bold' }}
+            >
+              {`${amount?.usdValueFormatted ?? ''}`}
+            </StyledText>
+          )}
+          <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
+            {`USD`}
+          </StyledText>
+        </View>
+      )}
+      <SearchOutputTokenSheet
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        onSelectToken={token => {
+          setToken(token);
+          setIsOpen(false);
+        }}
+      />
     </View>
   );
 };

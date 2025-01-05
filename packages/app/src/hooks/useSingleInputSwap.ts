@@ -6,30 +6,27 @@ import {
 import { signEIP1159Tx, sleep } from '@raylac/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { getQueryKey } from '@trpc/react-query';
-import useUserAccount from './useUserAccount';
 import { privateKeyToAccount } from 'viem/accounts';
 import { getPrivateKey } from '@/lib/key';
+import { Hex } from 'viem';
 
 const useSingleInputSwap = () => {
   const queryClient = useQueryClient();
-  const { data: userAccount } = useUserAccount();
 
   const { mutateAsync: submitSingleInputSwap } =
     trpc.submitSingleInputSwap.useMutation();
 
   return useMutation({
     mutationFn: async ({
+      address,
       swapQuote,
     }: {
+      address: Hex;
       swapQuote: GetSingleInputSwapQuoteReturnType;
     }) => {
       await sleep(100);
 
-      if (!userAccount) {
-        throw new Error('User account not loaded');
-      }
-
-      const privKey = await getPrivateKey(userAccount.address);
+      const privKey = await getPrivateKey(address);
 
       if (!privKey) {
         throw new Error('Private key not found');

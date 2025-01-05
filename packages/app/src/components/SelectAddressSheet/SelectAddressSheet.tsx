@@ -25,9 +25,11 @@ const AddressListItem = ({ address }: { address: Hex }) => {
 const SelectAddressSheet = ({
   open,
   onSelect,
+  onClose,
 }: {
   open: boolean;
   onSelect: (address: Hex) => void;
+  onClose: () => void;
 }) => {
   const { data: addresses } = useUserAddresses();
   const ref = useRef<BottomSheetModal>(null);
@@ -49,6 +51,7 @@ const SelectAddressSheet = ({
         padding: 16,
         rowGap: 16,
       }}
+      onDismiss={onClose}
       index={0}
       enablePanDownToClose
       enableDynamicSizing={false}

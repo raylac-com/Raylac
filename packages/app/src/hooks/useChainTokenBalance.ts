@@ -2,7 +2,7 @@ import { trpc } from '@/lib/trpc';
 import { getAddressChainTokenBalance, Token } from '@raylac/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Hex } from 'viem';
-import useUserAddresses from './useUserAddresses';
+import useUserAddresses from './useWriterAddresses';
 
 /**
  * Returns the total token balance for a given chain and token for a list of addresses

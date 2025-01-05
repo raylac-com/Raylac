@@ -5,7 +5,7 @@ const getSupportedTokens = async () => {
   const supportedTokens = await client.getSupportedTokens.query({
     chainIds: supportedChains.map(chain => chain.id),
   });
-  console.log(supportedTokens);
+  console.log(supportedTokens.map(token => token.addresses));
 };
 
 getSupportedTokens();

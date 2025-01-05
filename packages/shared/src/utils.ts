@@ -1,11 +1,12 @@
-import { Chain, formatUnits, getAddress, Hex, PrivateKeyAccount } from 'viem';
 import { TokenAmount, Token } from './types';
+import { Chain, formatUnits, getAddress, Hex, PrivateKeyAccount } from 'viem';
+import {} from './types';
 import * as chains from 'viem/chains';
 import { getAlchemyRpcUrl } from './ethRpc';
 import axios from 'axios';
+import { RELAY_RECEIVER_ADDRESSES } from './addresses';
 import BigNumber from 'bignumber.js';
 import { TokenBalancesReturnType } from './rpcTypes';
-import { RELAY_RECEIVER_ADDRESSES } from './addresses';
 
 /**
  * Returns viem's `Chain` object from a chain ID

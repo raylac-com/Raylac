@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import SwapInputCard from './components/SwapInputCard/SwapInputCard';
 import SwapOutputCard from './components/SwapOutputCard/SwapOutputCard';
-import { formatUnits, parseUnits, zeroAddress } from 'viem';
-import useUserAccount from '@/hooks/useUserAccount';
+import { Hex, parseUnits, zeroAddress } from 'viem';
 import { SupportedTokensReturnType, TRPCErrorMessage } from '@raylac/shared';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useGetSwapQuote from '@/hooks/useGetSwapQuote';
@@ -11,15 +10,16 @@ import useTypedNavigation from '@/hooks/useTypedNavigation';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { View } from 'react-native';
-import { SearchTokenSheetProvider } from '@/contexts/SearchInputTokenSheetContext';
-import { SearchOutputTokenSheetProvider } from '@/contexts/SearchOutputTokenSheetContext';
 import useSingleInputSwap from '@/hooks/useSingleInputSwap';
 import useChainTokenBalance from '@/hooks/useChainTokenBalance';
+import AddressSelector from './components/AddressSelector/AddressSelector';
+import useWriterAddresses from '@/hooks/useWriterAddresses';
 
 type Token = SupportedTokensReturnType[number];
 
 const Swap = () => {
   const navigation = useTypedNavigation();
+  const { data: writerAddresses } = useWriterAddresses();
 
   //
   // Local State
@@ -30,8 +30,7 @@ const Swap = () => {
   const [amountInputText, setAmountInputText] = useState<string>('');
   const [inputChainId, setInputChainId] = useState<number | null>(null);
   const [outputChainId, setOutputChainId] = useState<number | null>(null);
-
-  const { data: userAccount } = useUserAccount();
+  const [selectedAddress, setSelectedAddress] = useState<Hex | null>(null);
 
   //
   // Fetch data
@@ -40,20 +39,8 @@ const Swap = () => {
   const { data: inputTokenBalance } = useChainTokenBalance({
     chainId: inputChainId,
     token: inputToken,
-    address: userAccount?.address ?? zeroAddress,
+    address: selectedAddress ?? zeroAddress,
   });
-
-  /*
-  const { data: tokenBalances, isLoading: isLoadingTokenBalances } =
-    trpc.getTokenBalances.useQuery(
-      {
-        address: userAccount?.address ?? zeroAddress,
-      },
-      {
-        enabled: !!userAccount,
-      }
-    );
-  */
 
   // Mutations
 
@@ -70,6 +57,14 @@ const Swap = () => {
   //
   // Effects
   //
+
+  useEffect(() => {
+    if (writerAddresses) {
+      if (writerAddresses.length > 0) {
+        setSelectedAddress(writerAddresses[0].address);
+      }
+    }
+  }, [writerAddresses]);
 
   useEffect(() => {
     if (getSwapQuoteError) {
@@ -92,9 +87,11 @@ const Swap = () => {
       inputToken &&
       outputToken &&
       inputChainId &&
-      outputChainId
+      outputChainId &&
+      selectedAddress
     ) {
       getSwapQuote({
+        address: selectedAddress,
         amount: debouncedParsedInputAmount,
         inputToken,
         outputToken,
@@ -103,8 +100,9 @@ const Swap = () => {
       });
     }
   }, [
+    selectedAddress,
     debouncedParsedInputAmount,
-    userAccount,
+    inputToken,
     outputToken,
     getSwapQuote,
     inputChainId,
@@ -152,7 +150,12 @@ const Swap = () => {
       throw new Error('Swap quote is null');
     }
 
+    if (!selectedAddress) {
+      throw new Error('Selected address is null');
+    }
+
     await submitSingleInputSwap({
+      address: selectedAddress,
       swapQuote,
     });
 
@@ -176,81 +179,80 @@ const Swap = () => {
       ? BigInt(inputTokenBalance.amount) >= parsedInputAmount
       : undefined;
 
-  const outputAmount = swapQuote?.amountOut;
-  const outputAmountUsd = swapQuote?.amountOutUsd;
-
-  const outputAmountFormatted =
-    outputAmount && outputToken
-      ? formatUnits(BigInt(outputAmount), outputToken.decimals)
-      : '';
-
   const isAmountTooSmall =
     getSwapQuoteError?.message === TRPCErrorMessage.SWAP_AMOUNT_TOO_SMALL;
 
   return (
-    <SearchOutputTokenSheetProvider>
-      <SearchTokenSheetProvider>
-        <View
-          style={{
-            flexDirection: 'column',
-            paddingVertical: 20,
-            flex: 1,
-            justifyContent: 'space-between',
-            paddingHorizontal: 16,
-          }}
-        >
-          <View style={{ flex: 1, rowGap: 16 }}>
-            <SwapInputCard
-              token={inputToken}
-              setToken={onInputTokenChange}
-              amount={amountInputText}
-              setAmount={onInputAmountChange}
-              balance={
-                inputTokenBalance?.amount
-                  ? BigInt(inputTokenBalance.amount)
-                  : undefined
-              }
-              isLoadingBalance={false}
-              chainId={inputChainId}
-              setChainId={setInputChainId}
-              // isLoadingBalance={isLoadingTokenBalances}
-            />
-            <SwapOutputCard
-              token={outputToken}
-              setToken={onOutputTokenChange}
-              amount={outputAmountFormatted}
-              setAmount={() => {}}
-              isLoadingAmount={isGettingSwapQuote}
-              usdAmount={outputAmountUsd ? Number(outputAmountUsd) : 0}
-              chainId={outputChainId}
-              setChainId={setOutputChainId}
-            />
-          </View>
-          <View style={{ rowGap: 16 }}>
-            <StyledText style={{ color: colors.border }}>
-              {swapQuote ? `Bridge fee $${swapQuote.relayerServiceFeeUsd}` : ''}
-            </StyledText>
-            <StyledButton
-              disabled={
-                isAmountTooSmall ||
-                hasEnoughBalance === false ||
-                isSwapping ||
-                !swapQuote
-              }
-              isLoading={isSwapping}
-              title={
-                isAmountTooSmall
-                  ? 'Amount too small'
-                  : hasEnoughBalance === false
-                    ? 'Insufficient balance'
-                    : 'Swap'
-              }
-              onPress={onSwapPress}
-            />
-          </View>
-        </View>
-      </SearchTokenSheetProvider>
-    </SearchOutputTokenSheetProvider>
+    <View
+      style={{
+        flexDirection: 'column',
+        paddingVertical: 20,
+        flex: 1,
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+      }}
+    >
+      <View style={{ flex: 1, rowGap: 16 }}>
+        <SwapInputCard
+          address={selectedAddress}
+          token={inputToken}
+          setToken={onInputTokenChange}
+          amount={amountInputText}
+          setAmount={onInputAmountChange}
+          balance={
+            inputTokenBalance?.amount
+              ? BigInt(inputTokenBalance.amount)
+              : undefined
+          }
+          isLoadingBalance={false}
+          chainId={inputChainId}
+          setChainId={setInputChainId}
+          // isLoadingBalance={isLoadingTokenBalances}
+        />
+        <SwapOutputCard
+          token={outputToken}
+          setToken={onOutputTokenChange}
+          amount={swapQuote?.amountOut}
+          setAmount={() => {}}
+          isLoadingAmount={isGettingSwapQuote}
+          chainId={outputChainId}
+          setChainId={setOutputChainId}
+        />
+      </View>
+      <View style={{ rowGap: 16 }}>
+        <AddressSelector
+          selectedAddress={selectedAddress}
+          setSelectedAddress={setSelectedAddress}
+        />
+        <StyledText style={{ color: colors.border }}>
+          {swapQuote
+            ? `Gas fee ${swapQuote.originChainGas.usdValueFormatted} USD`
+            : ''}
+        </StyledText>
+        <StyledText style={{ color: colors.border }}>
+          {swapQuote
+            ? `Bridge fee ${swapQuote.relayerFee.usdValueFormatted} USD`
+            : ''}
+        </StyledText>
+        <StyledButton
+          disabled={
+            isAmountTooSmall ||
+            hasEnoughBalance === false ||
+            isSwapping ||
+            !swapQuote
+          }
+          isLoading={isSwapping}
+          title={
+            isAmountTooSmall
+              ? 'Amount too small'
+              : hasEnoughBalance === false
+                ? 'Insufficient balance'
+                : 'Swap'
+          }
+          onPress={onSwapPress}
+        />
+      </View>
+    </View>
   );
 };
 

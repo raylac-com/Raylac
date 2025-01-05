@@ -1,7 +1,7 @@
 import Skeleton from '@/components/Skeleton/Skeleton';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
-import { TokenAmount, Token } from '@raylac/shared';
+import { TokenAmount, Token, supportedChains } from '@raylac/shared';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
@@ -14,8 +14,7 @@ import TokenLogo from '../FastImage/TokenLogo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getChainIcon } from '@/lib/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import useTokenBalancePerAddress from '@/hooks/useTokenBalancePerAddress';
-import { Hex } from 'viem/_types/types/misc';
+import { trpc } from '@/lib/trpc';
 
 const TokenListItem = ({
   token,
@@ -105,13 +104,11 @@ export const SearchInput = ({
   );
 };
 
-const SearchTokenSheet = ({
-  address,
+const SearchOutputTokenSheet = ({
   open,
   onSelectToken,
   onClose,
 }: {
-  address: Hex | null;
   open: boolean;
   onSelectToken: (token: Token) => void;
   onClose: () => void;
@@ -128,14 +125,12 @@ const SearchTokenSheet = ({
     }
   }, [open]);
 
-  const tokenBalancePerAddress = useTokenBalancePerAddress({
-    addresses: address ? [address] : [],
+  const { data: tokens } = trpc.getSupportedTokens.useQuery({
+    chainIds: supportedChains.map(chain => chain.id),
+    searchTerm: searchText,
   });
 
-  const tokenList =
-    tokenBalancePerAddress && tokenBalancePerAddress.length > 0
-      ? tokenBalancePerAddress[0].tokenBalances
-      : [undefined];
+  const tokenList = tokens ?? [undefined, undefined, undefined];
 
   return (
     <BottomSheetModal
@@ -155,6 +150,7 @@ const SearchTokenSheet = ({
       <SearchInput value={searchText} onChangeText={setSearchText} />
       <BottomSheetFlatList
         data={tokenList}
+        keyExtractor={(_item, index) => index.toString()}
         contentContainerStyle={{
           marginTop: 14,
           rowGap: 16,
@@ -164,22 +160,17 @@ const SearchTokenSheet = ({
             {`No tokens found`}
           </StyledText>
         }
-        keyExtractor={(_item, index) => index.toString()}
-        renderItem={({
-          item,
-        }: {
-          item: (typeof tokenList)[number] | undefined;
-        }) => {
+        renderItem={({ item }) => {
           if (item === undefined) {
             return <Skeleton style={{ width: '100%', height: 42 }} />;
           }
 
           return (
             <TokenListItem
-              token={item.token}
+              token={item}
               balance={null}
               onPress={() => {
-                onSelectToken(item.token);
+                onSelectToken(item);
               }}
             />
           );
@@ -189,4 +180,4 @@ const SearchTokenSheet = ({
   );
 };
 
-export default SearchTokenSheet;
+export default SearchOutputTokenSheet;

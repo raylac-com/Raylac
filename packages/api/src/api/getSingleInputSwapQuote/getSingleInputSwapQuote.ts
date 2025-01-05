@@ -1,7 +1,7 @@
 import {
   ApproveStep,
-  formatAmount,
-  formatUsdValue,
+  ETH,
+  formatTokenAmount,
   GetSingleInputSwapQuoteRequestBody,
   GetSingleInputSwapQuoteReturnType,
   RelayGetQuoteResponseBody,
@@ -11,11 +11,12 @@ import {
 } from '@raylac/shared';
 import { ed, logger, st } from '@raylac/shared-backend';
 import { getTokenAddressOnChain } from '../../utils';
-import BigNumber from 'bignumber.js';
 import { getNonce } from '../../utils';
 import { relayApi } from '../../lib/relay';
 import { TRPCError } from '@trpc/server';
 import axios from 'axios';
+import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
+import { zeroAddress } from 'viem';
 
 const getSingleInputSwapQuote = async ({
   sender,
@@ -113,7 +114,9 @@ const getSingleInputSwapQuote = async ({
         to: approveStepItem.data.to,
         value: approveStepItem.data.value,
         maxFeePerGas: approveStepItem.data.maxFeePerGas,
-        maxPriorityFeePerGas: approveStepItem.data.maxPriorityFeePerGas,
+        maxPriorityFeePerGas: (
+          BigInt(approveStepItem.data.maxPriorityFeePerGas) * BigInt(2)
+        ).toString(),
         chainId: approveStepItem.data.chainId,
         gas: approveStepItem.data.gas ?? 300_000,
         nonce,
@@ -145,7 +148,9 @@ const getSingleInputSwapQuote = async ({
       to: swapStepItem.data.to,
       value: swapStepItem.data.value,
       maxFeePerGas: swapStepItem.data.maxFeePerGas,
-      maxPriorityFeePerGas: swapStepItem.data.maxPriorityFeePerGas,
+      maxPriorityFeePerGas: (
+        BigInt(swapStepItem.data.maxPriorityFeePerGas) * BigInt(2)
+      ).toString(),
       chainId: swapStepItem.data.chainId,
       gas: swapStepItem.data.gas ?? 300_000,
       nonce: nonce,
@@ -155,50 +160,96 @@ const getSingleInputSwapQuote = async ({
   const amountIn = amount;
   const amountOut = quote.details.currencyOut.amount;
 
-  const amountInFormatted = formatAmount(amountIn, inputToken.decimals);
-  const amountOutFormatted = formatAmount(amountOut, outputToken.decimals);
+  const inputTokenPrice = await getTokenUsdPrice({ token: inputToken });
 
-  const amountInUsd = formatUsdValue(
-    new BigNumber(quote.details.currencyIn.amountUsd)
-  );
-  const amountOutUsd = formatUsdValue(
-    new BigNumber(quote.details.currencyOut.amountUsd)
-  );
-
-  const originChainGasAmountFormatted = quote.fees.gas.amountFormatted;
-
-  if (originChainGasAmountFormatted === undefined) {
-    throw new Error('Origin chain gas amount is undefined');
+  if (inputTokenPrice === null) {
+    throw new Error('Failed to get input token price');
   }
 
-  const originChainGasUsd = quote.fees.gas.amountUsd;
+  const outputTokenPrice = await getTokenUsdPrice({ token: outputToken });
 
-  if (originChainGasUsd === undefined) {
-    throw new Error('Origin chain gas usd is undefined');
+  if (outputTokenPrice === null) {
+    throw new Error('Failed to get output token price');
   }
 
-  const relayerServiceFeeUsd = quote.fees.relayerService.amountUsd;
+  const amountInFormatted = formatTokenAmount({
+    amount: BigInt(amountIn),
+    token: inputToken,
+    tokenPriceUsd: inputTokenPrice,
+  });
 
-  if (relayerServiceFeeUsd === undefined) {
-    throw new Error('Relay service fee is undefined');
+  const amountOutFormatted = formatTokenAmount({
+    amount: BigInt(amountOut),
+    token: outputToken,
+    tokenPriceUsd: outputTokenPrice,
+  });
+
+  const ethPriceUsd = await getTokenUsdPrice({ token: ETH });
+
+  if (ethPriceUsd === null) {
+    throw new Error('ETH price not found');
   }
 
-  const relayerServiceFeeUsdFormatted = formatUsdValue(
-    new BigNumber(relayerServiceFeeUsd)
-  );
+  const originChainGas = quote.fees.gas.amount;
+
+  if (originChainGas === undefined) {
+    throw new Error('originChainGas is undefined');
+  }
+
+  const originChainGasFormatted = formatTokenAmount({
+    amount: BigInt(originChainGas),
+    token: ETH,
+    tokenPriceUsd: ethPriceUsd,
+  });
+
+  const relayerFee = quote.fees.relayer.amount;
+
+  if (!relayerFee) {
+    throw new Error('Relayer fee is undefined');
+  }
+
+  const relayerFeeCurrency = quote.fees.relayer.currency;
+
+  if (!relayerFeeCurrency) {
+    throw new Error('Relayer fee currency is undefined');
+  }
+
+  let relayerFeeToken;
+  if (
+    relayerFeeCurrency?.address === inputTokenAddress ||
+    relayerFeeCurrency?.address === outputTokenAddress
+  ) {
+    relayerFeeToken = inputToken;
+  } else if (relayerFeeCurrency?.address === zeroAddress) {
+    relayerFeeToken = ETH;
+  } else {
+    throw new Error(
+      `Unknown fee token ${relayerFeeCurrency?.address} for bridge send`
+    );
+  }
+
+  const feeTokenPriceUsd = await getTokenUsdPrice({
+    token: relayerFeeToken,
+  });
+
+  if (feeTokenPriceUsd === null) {
+    throw new Error('feeTokenPriceUsd is undefined');
+  }
+
+  const relayerFeeFormatted = formatTokenAmount({
+    amount: BigInt(relayerFee),
+    token: relayerFeeToken,
+    tokenPriceUsd: feeTokenPriceUsd,
+  });
 
   return {
     approveStep,
     swapStep,
-    amountIn,
-    amountOut,
-    amountInFormatted,
-    amountOutFormatted,
-    amountInUsd,
-    amountOutUsd,
-    relayerServiceFeeUsd: relayerServiceFeeUsdFormatted,
-    originChainGasAmountFormatted,
-    originChainGasUsd: formatUsdValue(new BigNumber(originChainGasUsd)),
+    originChainGas: originChainGasFormatted,
+    amountIn: amountInFormatted,
+    amountOut: amountOutFormatted,
+    relayerFeeToken,
+    relayerFee: relayerFeeFormatted,
   };
 };
 

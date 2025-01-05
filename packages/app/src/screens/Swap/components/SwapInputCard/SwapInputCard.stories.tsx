@@ -5,6 +5,7 @@ import SwapInputCard from './SwapInputCard';
 import spacing from '@/lib/styles/spacing';
 import { base } from 'viem/chains';
 import { USDC } from '@raylac/shared';
+import { zeroAddress } from 'viem';
 
 const meta = {
   title: 'SwapInputCard',
@@ -18,6 +19,7 @@ const meta = {
     setAmount: () => {},
     chainId: base.id,
     setChainId: () => {},
+    address: zeroAddress,
   },
   decorators: [
     Story => (
