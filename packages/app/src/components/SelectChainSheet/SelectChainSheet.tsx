@@ -29,9 +29,11 @@ const ChainListItem = ({ chain }: { chain: Chain }) => {
 const SelectChainSheet = ({
   open,
   onSelect,
+  onClose,
 }: {
   open: boolean;
   onSelect: (chain: Chain) => void;
+  onClose: () => void;
 }) => {
   const ref = useRef<BottomSheetModal>(null);
 
@@ -53,6 +55,7 @@ const SelectChainSheet = ({
         rowGap: 16,
       }}
       index={0}
+      onDismiss={onClose}
       enablePanDownToClose
       enableDynamicSizing={false}
       snapPoints={['100%']}
