@@ -51,6 +51,7 @@ const SwapOutputCard = ({
         <ChainSelector chainId={chainId} setChainId={setChainId} />
       )}
       <SwapAmountInput
+        chainId={chainId}
         selectedToken={token}
         isLoadingAmount={isLoadingAmount}
         amount={amount?.formatted ?? ''}

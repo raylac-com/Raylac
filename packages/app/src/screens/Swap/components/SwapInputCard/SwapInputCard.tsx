@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 import ChainSelector from '../ChainSelector/ChainSelector';
-import SearchTokenSheet from '@/components/SearchTokenSheet/SearchTokenSheet';
+import SearchInputTokenSheet from '@/components/SearchInputTokenSheet/SearchInputTokenSheet';
 
 const SwapInputCard = ({
   token,
@@ -95,6 +95,7 @@ const SwapInputCard = ({
         <ChainSelector chainId={chainId} setChainId={setChainId} />
       )}
       <SwapAmountInput
+        chainId={chainId}
         selectedToken={token}
         onSelectTokenPress={() => {
           setIsOpen(true);
@@ -154,7 +155,7 @@ const SwapInputCard = ({
           </Pressable>
         </View>
       )}
-      <SearchTokenSheet
+      <SearchInputTokenSheet
         address={address}
         open={isOpen}
         onSelectToken={token => {

@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Hex } from 'viem';
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
+import colors from '@/lib/styles/colors';
 
 interface AddressSelectorProps {
   selectedAddress: Hex | null;
@@ -23,9 +24,10 @@ const AddressSelector = ({
         alignItems: 'center',
         gap: 6,
         borderWidth: 1,
-        borderRadius: 10,
+        borderRadius: 16,
         paddingHorizontal: 16,
         paddingVertical: 12,
+        borderColor: colors.border,
       }}
     >
       <FeedbackPressable onPress={() => setIsOpen(true)}>

@@ -69,15 +69,14 @@ const Tabs = () => {
           ),
         }}
       ></Tab.Screen>
-
       <Tab.Screen
-        name="History"
-        component={History}
+        name="Addresses"
+        component={Addresses}
         options={{
           tabBarLabel: () => null,
           tabBarShowLabel: false,
           tabBarIcon: ({ color }) => (
-            <AntDesign name="clockcircle" size={24} color={color} />
+            <AntDesign name="bars" size={24} color={color} />
           ),
         }}
       ></Tab.Screen>
@@ -93,13 +92,13 @@ const Tabs = () => {
         }}
       ></Tab.Screen>
       <Tab.Screen
-        name="Addresses"
-        component={Addresses}
+        name="History"
+        component={History}
         options={{
           tabBarLabel: () => null,
           tabBarShowLabel: false,
           tabBarIcon: ({ color }) => (
-            <AntDesign name="bars" size={24} color={color} />
+            <AntDesign name="clockcircle" size={24} color={color} />
           ),
         }}
       ></Tab.Screen>

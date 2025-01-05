@@ -6,7 +6,8 @@ import { BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useEffect, useRef } from 'react';
 import colors from '@/lib/styles/colors';
 import { triggerHapticFeedback } from '@/lib/utils';
-import useUserAddresses from '@/hooks/useUserAddresses';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import useWriterAddresses from '@/hooks/useWriterAddresses';
 
 const AddressListItem = ({ address }: { address: Hex }) => {
   return (
@@ -31,8 +32,9 @@ const SelectAddressSheet = ({
   onSelect: (address: Hex) => void;
   onClose: () => void;
 }) => {
-  const { data: addresses } = useUserAddresses();
+  const { data: writerAddresses } = useWriterAddresses();
   const ref = useRef<BottomSheetModal>(null);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (open) {
@@ -48,7 +50,9 @@ const SelectAddressSheet = ({
       ref={ref}
       style={{
         flex: 1,
-        padding: 16,
+        paddingTop: insets.top + 16,
+        paddingBottom: insets.bottom + 16,
+        paddingHorizontal: 16,
         rowGap: 16,
       }}
       onDismiss={onClose}
@@ -75,7 +79,7 @@ const SelectAddressSheet = ({
         </StyledText>
       </View>
       <BottomSheetFlatList
-        data={addresses}
+        data={writerAddresses}
         contentContainerStyle={{ rowGap: 16 }}
         renderItem={({ item }) => (
           <Pressable

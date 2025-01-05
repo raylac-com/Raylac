@@ -141,7 +141,7 @@ const SearchOutputTokenSheet = ({
         flex: 1,
         paddingHorizontal: 16,
         paddingTop: insets.top + 16,
-        paddingBottom: insets.bottom + 16,
+        paddingBottom: insets.bottom,
       }}
       index={0}
       snapPoints={['100%']}
@@ -159,6 +159,7 @@ const SearchOutputTokenSheet = ({
         data={tokenList}
         keyExtractor={(_item, index) => index.toString()}
         contentContainerStyle={{
+          flex: 1,
           marginTop: 14,
           rowGap: 16,
         }}

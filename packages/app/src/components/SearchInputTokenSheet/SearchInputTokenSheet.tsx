@@ -104,7 +104,7 @@ export const SearchInput = ({
   );
 };
 
-const SearchTokenSheet = ({
+const SearchInputTokenSheet = ({
   address,
   open,
   onSelectToken,
@@ -205,4 +205,4 @@ const SearchTokenSheet = ({
   );
 };
 
-export default SearchTokenSheet;
+export default SearchInputTokenSheet;

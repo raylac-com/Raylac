@@ -220,10 +220,6 @@ const Swap = () => {
         />
       </View>
       <View style={{ rowGap: 16 }}>
-        <AddressSelector
-          selectedAddress={selectedAddress}
-          setSelectedAddress={setSelectedAddress}
-        />
         <StyledText style={{ color: colors.border }}>
           {swapQuote
             ? `Gas fee ${swapQuote.originChainGas.usdValueFormatted} USD`
@@ -234,6 +230,10 @@ const Swap = () => {
             ? `Bridge fee ${swapQuote.relayerFee.usdValueFormatted} USD`
             : ''}
         </StyledText>
+        <AddressSelector
+          selectedAddress={selectedAddress}
+          setSelectedAddress={setSelectedAddress}
+        />
         <StyledButton
           disabled={
             isAmountTooSmall ||
