@@ -200,6 +200,8 @@ export type TransferHistoryItem = {
   amount: TokenAmount;
   token: Token;
   timestamp: string;
+  fromEnsName?: string;
+  toEnsName?: string;
 };
 
 export type SwapHistoryItem = {

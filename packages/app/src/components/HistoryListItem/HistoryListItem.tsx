@@ -12,6 +12,7 @@ import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import { useState } from 'react';
 import HistoryListItemSheet from '../HistoryListItemSheet/HistoryListItemSheet';
 import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
+import useEnsName from '@/hooks/useEnsName';
 
 const LABELS: Record<Exclude<HistoryItemType, HistoryItemType.SWAP>, string> = {
   [HistoryItemType.OUTGOING]: 'Sent',
@@ -44,6 +45,9 @@ const HistoryListItem = (props: { transfer: TransferHistoryItem }) => {
     ];
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const { data: senderEnsName } = useEnsName(props.transfer.from);
+  const { data: recipientEnsName } = useEnsName(props.transfer.to);
 
   return (
     <View>
@@ -107,11 +111,9 @@ const HistoryListItem = (props: { transfer: TransferHistoryItem }) => {
             >
               {isRelayReceiverAddress(props.transfer.to)
                 ? 'Relay Receiver'
-                : shortenAddress(
-                    props.transfer.type === HistoryItemType.INCOMING
-                      ? props.transfer.from
-                      : props.transfer.to
-                  )}
+                : props.transfer.type === HistoryItemType.INCOMING
+                  ? senderEnsName || shortenAddress(props.transfer.from)
+                  : recipientEnsName || shortenAddress(props.transfer.to)}
             </StyledText>
           </View>
         </View>

@@ -18,6 +18,7 @@ import { logger } from '@raylac/shared-backend';
 import { getToken } from '../../lib/token';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
 import { relayGetRequest } from '../../lib/relay';
+import { getEnsName } from '../../lib/ens';
 
 const getTokenPriceOrThrow = async (token: Token): Promise<number> => {
   const tokenUsdPrice = await getTokenUsdPrice({ token });
@@ -90,6 +91,9 @@ const mapAsRelayTx = async ({
   const sender = getAddress(relayRequest.data.metadata.sender);
   const recipient = getAddress(relayRequest.data.metadata.recipient);
 
+  const senderEnsName = await getEnsName(sender);
+  const recipientEnsName = await getEnsName(recipient);
+
   if (currencyIn.currency.address === currencyOut.currency.address) {
     const transferItem: TransferHistoryItem = {
       relayId: relayRequest.id,
@@ -105,6 +109,8 @@ const mapAsRelayTx = async ({
           ? HistoryItemType.OUTGOING
           : HistoryItemType.INCOMING,
       txHash: txHash,
+      fromEnsName: senderEnsName ?? undefined,
+      toEnsName: recipientEnsName ?? undefined,
     };
 
     return transferItem;

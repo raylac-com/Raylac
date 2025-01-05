@@ -3,7 +3,6 @@ import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import {
   getExplorerUrl,
   HistoryItemType,
-  isRelayReceiverAddress,
   TransferHistoryItem,
 } from '@raylac/shared';
 import { useEffect, useRef } from 'react';
@@ -17,6 +16,7 @@ import { Linking, Pressable, View } from 'react-native';
 import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import { Hex } from 'viem';
 import Toast from 'react-native-toast-message';
+import useEnsName from '@/hooks/useEnsName';
 
 type TransferListItemType = Exclude<HistoryItemType, HistoryItemType.SWAP>;
 
@@ -37,6 +37,7 @@ const shortenTxHash = (txHash: string) => {
 };
 
 const FromAddress = ({ address }: { address: Hex }) => {
+  const { data: senderEnsName } = useEnsName(address);
   const onCopyPress = () => {
     copyToClipboard(address);
 
@@ -61,9 +62,7 @@ const FromAddress = ({ address }: { address: Hex }) => {
       >
         <Feather name="copy" size={18} color={colors.subbedText} />
         <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-          {isRelayReceiverAddress(address)
-            ? 'Relay Receiver'
-            : shortenAddress(address)}
+          {senderEnsName ?? shortenAddress(address)}
         </StyledText>
       </FeedbackPressable>
     </Pressable>
@@ -71,6 +70,7 @@ const FromAddress = ({ address }: { address: Hex }) => {
 };
 
 const ToAddress = ({ address }: { address: Hex }) => {
+  const { data: recipientEnsName } = useEnsName(address);
   const onCopyPress = () => {
     copyToClipboard(address);
 
@@ -95,9 +95,7 @@ const ToAddress = ({ address }: { address: Hex }) => {
       >
         <Feather name="copy" size={18} color={colors.subbedText} />
         <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-          {isRelayReceiverAddress(address)
-            ? 'Relay Receiver'
-            : shortenAddress(address)}
+          {recipientEnsName ?? shortenAddress(address)}
         </StyledText>
       </FeedbackPressable>
     </Pressable>
