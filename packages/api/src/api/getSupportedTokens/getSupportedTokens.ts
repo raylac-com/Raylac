@@ -1,7 +1,7 @@
 import { relayGetCurrencies } from '../../lib/relay';
-import { getAddress } from 'viem';
-import { KNOWN_TOKENS, Token } from '@raylac/shared';
-import { cacheTokens, getCachedTokens } from '../../lib/token';
+import { getAddress, isAddress } from 'viem';
+import { KNOWN_TOKENS, supportedChains, Token } from '@raylac/shared';
+import { getToken } from '../../lib/token';
 
 const knownTokenAddresses = KNOWN_TOKENS.flatMap(token =>
   token.addresses.map(address => getAddress(address.address))
@@ -14,26 +14,30 @@ const getSupportedTokens = async ({
   chainIds: number[];
   searchTerm?: string;
 }): Promise<Token[]> => {
-  const cachedTokens = await getCachedTokens();
-
-  if (cachedTokens.length > 0) {
-    const sortedTokens = cachedTokens.sort(
-      (a, b) =>
-        // Sort by verified status
-        Number(b.verified) - Number(a.verified)
+  if (
+    searchTerm &&
+    isAddress(searchTerm, {
+      strict: false,
+    })
+  ) {
+    const tokens = await Promise.all(
+      supportedChains.map(chain =>
+        getToken({
+          chainId: chain.id,
+          tokenAddress: searchTerm,
+        })
+      )
     );
 
-    if (searchTerm) {
-      const searchResults = sortedTokens.filter(
-        token =>
-          token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          token.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-
-      return searchResults;
-    }
-
-    return sortedTokens;
+    return (
+      tokens
+        .filter(token => token !== null)
+        // There might be duplicates as the nature of the Relay API
+        .filter(
+          (token, index, self) =>
+            index === self.findIndex(t => t.id === token.id)
+        )
+    );
   }
 
   const currencies = await relayGetCurrencies({
@@ -66,9 +70,15 @@ const getSupportedTokens = async ({
 
   const result = [...supportedTokens, ...KNOWN_TOKENS];
 
-  await cacheTokens(result);
+  const searchResults = searchTerm
+    ? result.filter(
+        token =>
+          token.symbol.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          token.name.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : result;
 
-  return result;
+  return searchResults;
 };
 
 export default getSupportedTokens;
