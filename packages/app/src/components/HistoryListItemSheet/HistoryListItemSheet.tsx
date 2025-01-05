@@ -2,9 +2,9 @@ import Feather from '@expo/vector-icons/Feather';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import {
   getExplorerUrl,
-  GetHistoryReturnType,
   HistoryItemType,
   isRelayReceiverAddress,
+  TransferHistoryItem,
 } from '@raylac/shared';
 import { useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,7 +18,9 @@ import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import { Hex } from 'viem';
 import Toast from 'react-native-toast-message';
 
-const LABELS: Record<HistoryItemType, string> = {
+type TransferListItemType = Exclude<HistoryItemType, HistoryItemType.SWAP>;
+
+const LABELS: Record<TransferListItemType, string> = {
   [HistoryItemType.OUTGOING]: 'Send',
   [HistoryItemType.INCOMING]: 'Received',
   [HistoryItemType.MOVE_FUNDS]: 'Move Funds',
@@ -26,7 +28,7 @@ const LABELS: Record<HistoryItemType, string> = {
 };
 
 export interface HistoryListItemSheetProps {
-  transfer: GetHistoryReturnType[number];
+  transfer: TransferHistoryItem;
   onClose: () => void;
 }
 
@@ -145,7 +147,7 @@ const HistoryListItemSheet = ({
   const insets = useSafeAreaInsets();
   const ref = useRef<BottomSheetModal>(null);
 
-  const label = LABELS[transfer.type];
+  const label = LABELS[transfer.type as TransferListItemType];
 
   useEffect(() => {
     ref.current?.present();
@@ -186,7 +188,11 @@ const HistoryListItemSheet = ({
         >
           <TokenLogoWithChain
             logoURI={transfer.token.logoURI}
-            chainId={transfer.chainId}
+            chainId={
+              transfer.type === HistoryItemType.INCOMING
+                ? transfer.toChainId
+                : transfer.fromChainId
+            }
             size={64}
           />
           <StyledText
@@ -207,7 +213,7 @@ const HistoryListItemSheet = ({
         >
           <FromAddress address={transfer.from} />
           <ToAddress address={transfer.to} />
-          <TxHash txHash={transfer.txHash} chainId={transfer.chainId} />
+          <TxHash txHash={transfer.txHash} chainId={transfer.toChainId} />
           <DateTime date={new Date(transfer.timestamp)} />
         </View>
       </BottomSheetView>

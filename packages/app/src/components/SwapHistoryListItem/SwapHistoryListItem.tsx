@@ -39,7 +39,7 @@ const SwapHistoryListItem = (props: { swap: SwapHistoryItem }) => {
           style={{ width: 38, height: 38 }}
         />
         <StyledText style={{ fontWeight: 'bold' }}>
-          {`$${Number(props.swap.amountInUsd).toFixed(2)}`}
+          {`$${props.swap.amountIn.usdValueFormatted}`}
         </StyledText>
       </View>
       <View

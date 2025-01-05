@@ -10,6 +10,12 @@ import colors from '@/lib/styles/colors';
 import StyledText from '@/components/StyledText/StyledText';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import HistoryListItem from '@/components/HistoryListItem/HistoryListItem';
+import {
+  HistoryItemType,
+  TransferHistoryItem,
+  SwapHistoryItem as SwapHistoryItemType,
+} from '@raylac/shared';
+import SwapHistoryItem from '@/components/SwapHistoryItem/SwapHistoryItem';
 
 const History = () => {
   const { data: addresses } = useUserAddresses();
@@ -64,7 +70,11 @@ const History = () => {
         renderItem={({ item }) => {
           return (
             <Pressable onPress={() => {}}>
-              <HistoryListItem transfer={item} />
+              {item.type === HistoryItemType.SWAP ? (
+                <SwapHistoryItem swap={item as SwapHistoryItemType} />
+              ) : (
+                <HistoryListItem transfer={item as TransferHistoryItem} />
+              )}
             </Pressable>
           );
         }}
