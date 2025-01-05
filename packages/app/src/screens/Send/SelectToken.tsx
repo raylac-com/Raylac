@@ -24,6 +24,7 @@ import { Hex } from 'viem';
 import BigNumber from 'bignumber.js';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AddressType } from '@/types';
+import useWriterAddresses from '@/hooks/useWriterAddresses';
 
 const SearchBar = ({
   onAddressSelect,
@@ -34,7 +35,7 @@ const SearchBar = ({
   selectedAddress: Hex | null;
   onSearchInputChange: (text: string) => void;
 }) => {
-  const { data: userAddresses } = useUserAddresses();
+  const { data: writerAddresses } = useWriterAddresses();
 
   const [keyboardHeight, setKeyboardHeight] = useState(0);
 
@@ -77,7 +78,7 @@ const SearchBar = ({
           columnGap: 8,
         }}
       >
-        {userAddresses?.map(address => (
+        {writerAddresses?.map(address => (
           <FeedbackPressable
             onPress={() => onAddressSelect(address.address)}
             style={{
