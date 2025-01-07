@@ -16,9 +16,7 @@ const meta = {
         <StorybookStack.Screen
           name="StartWatch"
           component={() => Story()}
-          options={{
-            headerShown: false,
-          }}
+          options={{}}
         ></StorybookStack.Screen>
       </StorybookStack.Navigator>
     ),

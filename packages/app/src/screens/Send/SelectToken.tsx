@@ -1,4 +1,5 @@
 import Entypo from '@expo/vector-icons/Entypo';
+import * as Clipboard from 'expo-clipboard';
 import TokenLogo from '@/components/TokenLogo/TokenLogo';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import SendToCard from '@/components/SendToCard/SendToCard';
@@ -22,15 +23,18 @@ import { Hex } from 'viem';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useTokenBalancePerAddress from '@/hooks/useTokenBalancePerAddress';
 import useWriterAddresses from '@/hooks/useWriterAddresses';
+import SearchInputAccessory from '@/components/SearchInputAccessory/SearchInputAccessory';
 
 const SearchBar = ({
   onAddressSelect,
   selectedAddress,
   onSearchInputChange,
+  searchText,
 }: {
   onAddressSelect: (address: Hex) => void;
   selectedAddress: Hex | null;
   onSearchInputChange: (text: string) => void;
+  searchText: string;
 }) => {
   const { data: writerAddresses } = useWriterAddresses();
 
@@ -118,6 +122,15 @@ const SearchBar = ({
           shadowRadius: 3.84,
           elevation: 5,
         }}
+        value={searchText}
+        inputAccessoryViewID={'test'}
+      />
+      <SearchInputAccessory
+        onClear={() => onSearchInputChange('')}
+        onPaste={async () =>
+          onSearchInputChange(await Clipboard.getStringAsync())
+        }
+        inputAccessoryViewID={'test'}
       />
     </View>
   );
@@ -354,6 +367,7 @@ const SelectToken = ({ navigation, route }: Props) => {
         stickySectionHeadersEnabled={false}
       />
       <SearchBar
+        searchText={searchText}
         selectedAddress={selectedAddress}
         onAddressSelect={onAddressSelect}
         onSearchInputChange={onSearchInputChange}
