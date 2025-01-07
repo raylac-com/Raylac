@@ -6,8 +6,12 @@ import TokenLogo from '../TokenLogo/TokenLogo';
 import { SwapHistoryItem } from '@raylac/shared';
 import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
+import SwapListItemSheet from '../SwapListItemSheet/SwapListItemSheet';
+import { useState } from 'react';
 
 const SwapListItem = (props: { swap: SwapHistoryItem }) => {
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
   return (
     <View>
       <FeedbackPressable
@@ -15,6 +19,7 @@ const SwapListItem = (props: { swap: SwapHistoryItem }) => {
           flexDirection: 'row',
           justifyContent: 'space-between',
         }}
+        onPress={() => setIsSheetOpen(true)}
       >
         <View
           style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
@@ -66,6 +71,12 @@ const SwapListItem = (props: { swap: SwapHistoryItem }) => {
           </StyledText>
         </View>
       </FeedbackPressable>
+      {isSheetOpen && (
+        <SwapListItemSheet
+          swap={props.swap}
+          onClose={() => setIsSheetOpen(false)}
+        />
+      )}
     </View>
   );
 };
