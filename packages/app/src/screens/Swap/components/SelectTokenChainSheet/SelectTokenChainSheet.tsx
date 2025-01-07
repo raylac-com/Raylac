@@ -1,15 +1,24 @@
 import StyledText from '@/components/StyledText/StyledText';
-import { getChainIcon, triggerHapticFeedback } from '@/lib/utils';
-import { supportedChains } from '@raylac/shared';
+import { triggerHapticFeedback } from '@/lib/utils';
+import { Token, TokenAmount } from '@raylac/shared';
 import { Pressable, View } from 'react-native';
-import { Image } from 'expo-image';
-import { Chain } from 'viem';
+import { Hex } from 'viem';
 import { BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useEffect, useRef } from 'react';
 import colors from '@/lib/styles/colors';
+import useAddressTokenBalance from '@/hooks/useAddressTokenBalance';
+import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const ChainListItem = ({ chain }: { chain: Chain }) => {
+const ChainTokenListItem = ({
+  chainId,
+  token,
+  balance,
+}: {
+  chainId: number;
+  token: Token;
+  balance: TokenAmount;
+}) => {
   return (
     <View
       style={{
@@ -18,28 +27,31 @@ const ChainListItem = ({ chain }: { chain: Chain }) => {
         columnGap: 8,
       }}
     >
-      <Image
-        source={getChainIcon(chain.id)}
-        style={{ width: 32, height: 32 }}
-      ></Image>
-      <StyledText>{chain.name}</StyledText>
+      <TokenLogoWithChain chainId={chainId} logoURI={token.logoURI} size={42} />
+      <StyledText style={{ color: colors.subbedText }}>
+        {`$${balance.usdValueFormatted} ${token.symbol}`}
+      </StyledText>
     </View>
   );
 };
 
-const SelectChainSheet = ({
-  title,
+const SelectTokenChainSheet = ({
   open,
+  token,
+  address,
   onSelect,
   onClose,
 }: {
-  title: string;
   open: boolean;
-  onSelect: (chain: Chain) => void;
+  token: Token;
+  address: Hex;
+  onSelect: (chainId: number) => void;
   onClose: () => void;
 }) => {
   const insets = useSafeAreaInsets();
   const ref = useRef<BottomSheetModal>(null);
+
+  const addressTokenBalance = useAddressTokenBalance({ address, token });
 
   useEffect(() => {
     if (open) {
@@ -55,10 +67,10 @@ const SelectChainSheet = ({
       ref={ref}
       style={{
         flex: 1,
+        paddingHorizontal: 16,
         rowGap: 16,
         paddingTop: insets.top + 16,
-        paddingBottom: insets.bottom + 156,
-        paddingHorizontal: 16,
+        paddingBottom: insets.bottom + 16,
       }}
       index={0}
       onDismiss={onClose}
@@ -80,20 +92,24 @@ const SelectChainSheet = ({
             color: colors.subbedText,
           }}
         >
-          {title}
+          {`Select input token chain`}
         </StyledText>
       </View>
       <BottomSheetFlatList
-        data={supportedChains}
+        data={addressTokenBalance?.chainBalances}
         contentContainerStyle={{ rowGap: 16 }}
         renderItem={({ item }) => (
           <Pressable
             onPress={() => {
               triggerHapticFeedback();
-              onSelect(item);
+              onSelect(item.chainId);
             }}
           >
-            <ChainListItem chain={item} />
+            <ChainTokenListItem
+              chainId={item.chainId}
+              token={token}
+              balance={item.balance}
+            />
           </Pressable>
         )}
       />
@@ -101,4 +117,4 @@ const SelectChainSheet = ({
   );
 };
 
-export default SelectChainSheet;
+export default SelectTokenChainSheet;

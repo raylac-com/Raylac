@@ -25,6 +25,7 @@ type Props = NativeStackScreenProps<RootTabsParamsList, 'History'>;
 const History = ({ route }: Props) => {
   const pendingTransfer = route.params?.pendingTransfer;
   const pendingBridgeTransfer = route.params?.pendingBridgeTransfer;
+  const pendingSwap = route.params?.pendingSwap;
 
   const { data: addresses } = useUserAddresses();
 
@@ -44,7 +45,11 @@ const History = ({ route }: Props) => {
     }
   );
 
-  const history = fetchedHistory ?? [];
+  const history =
+    fetchedHistory?.map(item => ({
+      ...item,
+      isPending: false,
+    })) ?? [];
 
   const isTxConfirmed = (txHash: Hex) => {
     return fetchedHistory?.some(
@@ -55,7 +60,9 @@ const History = ({ route }: Props) => {
   const isRelayIntentConfirmed = (requestId: string) => {
     return fetchedHistory?.some(
       item =>
-        item.type === HistoryItemType.OUTGOING && item.relayId === requestId
+        (item.type === HistoryItemType.OUTGOING ||
+          item.type === HistoryItemType.SWAP) &&
+        item.relayId === requestId
     );
   };
 
@@ -73,6 +80,7 @@ const History = ({ route }: Props) => {
           amount: pendingTransfer.amount,
           token: pendingTransfer.token,
           timestamp: new Date().toISOString(),
+          isPending: true,
         });
       }
     } else if (pendingBridgeTransfer) {
@@ -88,6 +96,23 @@ const History = ({ route }: Props) => {
           amount: pendingBridgeTransfer.amount,
           token: pendingBridgeTransfer.token,
           timestamp: new Date().toISOString(),
+          isPending: true,
+        });
+      }
+    } else if (pendingSwap) {
+      if (!isRelayIntentConfirmed(pendingSwap.requestId)) {
+        history.unshift({
+          type: HistoryItemType.SWAP,
+          relayId: pendingSwap.requestId,
+          address: pendingSwap.address,
+          amountIn: pendingSwap.inputAmount,
+          amountOut: pendingSwap.outputAmount,
+          tokenIn: pendingSwap.tokenIn,
+          tokenOut: pendingSwap.tokenOut,
+          fromChainId: pendingSwap.fromChainId,
+          toChainId: pendingSwap.toChainId,
+          timestamp: new Date().toISOString(),
+          isPending: true,
         });
       }
     }
@@ -128,7 +153,10 @@ const History = ({ route }: Props) => {
           return (
             <Pressable onPress={() => {}}>
               {item.type === HistoryItemType.SWAP ? (
-                <SwapListItem swap={item as SwapHistoryItemType} />
+                <SwapListItem
+                  swap={item as SwapHistoryItemType}
+                  isPending={item.isPending}
+                />
               ) : (
                 <TransferListItem transfer={item as TransferHistoryItem} />
               )}

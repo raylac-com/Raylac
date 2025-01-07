@@ -146,6 +146,7 @@ export type GetSingleInputSwapQuoteReturnType = {
   relayerFeeToken: Token;
   originChainGas: TokenAmount;
   relayerFee: TokenAmount;
+  relayRequestId: Hex;
 };
 
 export interface SubmitSwapRequestBody {

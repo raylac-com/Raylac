@@ -120,7 +120,6 @@ const Swap = () => {
   const onInputTokenChange = (token: Token | null) => {
     if (token) {
       setInputToken(token);
-      setInputChainId(token.addresses[0].chainId);
     } else {
       setInputToken(null);
       setInputChainId(null);
@@ -163,8 +162,22 @@ const Swap = () => {
     setOutputToken(null);
     setAmountInputText('');
 
+    const pendingSwapData = {
+      address: selectedAddress,
+      tokenIn: inputToken,
+      tokenOut: outputToken,
+      inputAmount: swapQuote.amountIn,
+      outputAmount: swapQuote.amountOut,
+      fromChainId: inputChainId,
+      toChainId: outputChainId,
+      requestId: swapQuote.relayRequestId,
+    };
+
     navigation.navigate('Tabs', {
       screen: 'History',
+      params: {
+        pendingSwap: pendingSwapData,
+      },
     });
   };
 

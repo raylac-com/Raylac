@@ -42,7 +42,7 @@ export const relayGetCurrencies = async ({
         tokens: tokenAddresses,
         term: searchTerm,
         useExternalSearch,
-        limit: limit ?? 10,
+        limit: limit ?? 30,
       }
     );
 
@@ -57,7 +57,7 @@ export const relayGetCurrencies = async ({
         tokens: tokenAddresses,
         term: searchTerm,
         useExternalSearch: false,
-        limit: limit ?? 10,
+        limit: limit ?? 30,
       }),
       relayApi.post<RelaySupportedCurrenciesResponseBody>('currencies/v1', {
         chainIds,
@@ -176,10 +176,12 @@ export const relayGetRequest = async ({
 
   const relayRequestData = response.data.requests[0];
 
-  await redisClient.set(
-    `relay:request:${txHash}`,
-    JSON.stringify(relayRequestData)
-  );
+  if (relayRequestData.status !== 'pending') {
+    await redisClient.set(
+      `relay:request:${txHash}`,
+      JSON.stringify(relayRequestData)
+    );
+  }
 
   return relayRequestData;
 };

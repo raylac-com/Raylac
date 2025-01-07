@@ -9,7 +9,7 @@ import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import SwapListItemSheet from '../SwapListItemSheet/SwapListItemSheet';
 import { useState } from 'react';
 
-const SwapListItem = (props: { swap: SwapHistoryItem }) => {
+const SwapListItem = (props: { swap: SwapHistoryItem; isPending: boolean }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   return (
@@ -50,11 +50,40 @@ const SwapListItem = (props: { swap: SwapHistoryItem }) => {
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',
-                columnGap: 4,
+                columnGap: 16,
               }}
             >
-              <StyledText style={{ color: colors.border }}>{`Swap`}</StyledText>
-              <Feather name={'repeat'} size={16} color={colors.subbedText} />
+              {props.isPending ? (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    columnGap: 4,
+                  }}
+                >
+                  <StyledText style={{ color: colors.border }}>
+                    {`Pending`}
+                  </StyledText>
+                  <Feather name="clock" size={14} color={colors.border} />
+                </View>
+              ) : (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    columnGap: 4,
+                  }}
+                >
+                  <StyledText
+                    style={{ color: colors.border }}
+                  >{`Swap`}</StyledText>
+                  <Feather
+                    name={'repeat'}
+                    size={16}
+                    color={colors.subbedText}
+                  />
+                </View>
+              )}
             </View>
             <StyledText
               style={{ fontWeight: 'bold', color: colors.subbedText }}

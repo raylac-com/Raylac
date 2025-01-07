@@ -4,7 +4,7 @@ import SwapAmountInput from '../SwapAmountInput';
 import { SupportedTokensReturnType, TokenAmount } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
-import ChainSelector from '../ChainSelector/ChainSelector';
+import ChainSelector from '@/screens/Swap/components/ChainSelector/ChainSelector';
 import SearchOutputTokenSheet from '@/components/SearchOutputTokenSheet/SearchOutputTokenSheet';
 import Skeleton from '@/components/Skeleton/Skeleton';
 
@@ -48,7 +48,11 @@ const SwapOutputCard = ({
       }}
     >
       {showChainSelector && chainId !== null && (
-        <ChainSelector chainId={chainId} setChainId={setChainId} />
+        <ChainSelector
+          title="Select output chain"
+          chainId={chainId}
+          setChainId={setChainId}
+        />
       )}
       <SwapAmountInput
         chainId={chainId}

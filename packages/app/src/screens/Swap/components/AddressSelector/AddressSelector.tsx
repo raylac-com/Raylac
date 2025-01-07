@@ -6,7 +6,7 @@ import { Hex } from 'viem';
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import colors from '@/lib/styles/colors';
-
+import Feather from '@expo/vector-icons/Feather';
 interface AddressSelectorProps {
   selectedAddress: Hex | null;
   setSelectedAddress: (address: Hex) => void;
@@ -31,11 +31,22 @@ const AddressSelector = ({
       }}
     >
       <FeedbackPressable onPress={() => setIsOpen(true)}>
-        {selectedAddress ? (
-          <WalletIconAddress address={selectedAddress} />
-        ) : (
-          <StyledText>{`Select an address`}</StyledText>
-        )}
+        <View
+          style={{
+            width: '100%',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 6,
+          }}
+        >
+          {selectedAddress ? (
+            <WalletIconAddress address={selectedAddress} />
+          ) : (
+            <StyledText>{`Select an address`}</StyledText>
+          )}
+          <Feather name="chevron-up" size={24} color={colors.subbedText} />
+        </View>
       </FeedbackPressable>
       <SelectAddressSheet
         open={isOpen}

@@ -1,5 +1,5 @@
 import { getChainIcon } from '@/lib/utils';
-import { getChainFromId } from '@raylac/shared';
+import { getChainFromId, Token } from '@raylac/shared';
 import { Image } from 'expo-image';
 import Entypo from '@expo/vector-icons/Entypo';
 import { supportedChains } from '@raylac/shared';
@@ -8,7 +8,8 @@ import { Pressable, View } from 'react-native';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
-import SelectChainSheet from '@/components/SelectChainSheet/SelectChainSheet';
+import { Hex } from 'viem';
+import SelectTokenChainSheet from '../SelectTokenChainSheet/SelectTokenChainSheet';
 
 const ChainListItem = ({
   chainId,
@@ -28,7 +29,7 @@ const ChainListItem = ({
   );
 };
 
-export const ChainSelectorSheet = ({
+export const TokenChainSelectorSheet = ({
   onSelectChain,
   onClose,
 }: {
@@ -71,19 +72,29 @@ export const ChainSelectorSheet = ({
   );
 };
 
-interface ChainSelectorProps {
-  title: string;
+interface TokenChainSelectorProps {
+  token: Token;
+  address: Hex;
   chainId: number;
   setChainId: (chainId: number) => void;
 }
 
-const ChainSelector = ({ title, chainId, setChainId }: ChainSelectorProps) => {
+const TokenChainSelector = ({
+  token,
+  address,
+  chainId,
+  setChainId,
+}: TokenChainSelectorProps) => {
   const [isChainsSheetOpen, setIsChainsSheetOpen] = useState(false);
 
   return (
     <View>
       <Pressable
-        style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 6,
+        }}
         onPress={() => setIsChainsSheetOpen(true)}
       >
         <Image
@@ -93,11 +104,12 @@ const ChainSelector = ({ title, chainId, setChainId }: ChainSelectorProps) => {
         <StyledText>{getChainFromId(chainId).name}</StyledText>
         <Entypo name="chevron-down" size={20} color={colors.border} />
       </Pressable>
-      <SelectChainSheet
-        title={title}
+      <SelectTokenChainSheet
         open={isChainsSheetOpen}
-        onSelect={chain => {
-          setChainId(chain.id);
+        token={token}
+        address={address}
+        onSelect={chainId => {
+          setChainId(chainId);
           setIsChainsSheetOpen(false);
         }}
         onClose={() => {
@@ -108,4 +120,4 @@ const ChainSelector = ({ title, chainId, setChainId }: ChainSelectorProps) => {
   );
 };
 
-export default ChainSelector;
+export default TokenChainSelector;

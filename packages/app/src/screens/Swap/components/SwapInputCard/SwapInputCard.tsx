@@ -7,7 +7,7 @@ import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
-import ChainSelector from '../ChainSelector/ChainSelector';
+import TokenChainSelector from '../TokenChainSelector/TokenChainSelector';
 import SearchInputTokenSheet from '@/components/SearchInputTokenSheet/SearchInputTokenSheet';
 
 const SwapInputCard = ({
@@ -91,8 +91,13 @@ const SwapInputCard = ({
         rowGap: 14,
       }}
     >
-      {showChainSelector && chainId !== null && (
-        <ChainSelector chainId={chainId} setChainId={setChainId} />
+      {showChainSelector && chainId !== null && address !== null && (
+        <TokenChainSelector
+          chainId={chainId}
+          setChainId={setChainId}
+          token={token}
+          address={address}
+        />
       )}
       <SwapAmountInput
         chainId={chainId}
@@ -158,8 +163,9 @@ const SwapInputCard = ({
       <SearchInputTokenSheet
         address={address}
         open={isOpen}
-        onSelectToken={token => {
+        onSelect={({ token, chainId }) => {
           setToken(token);
+          setChainId(chainId);
           setIsOpen(false);
         }}
         onClose={() => {

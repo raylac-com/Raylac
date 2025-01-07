@@ -118,6 +118,12 @@ const mapAsRelayTx = async ({
     return transferItem;
   }
 
+  if (relayRequest.data.inTxs.length !== 1) {
+    throw new Error(
+      `Relay request ${relayRequest.id} has ${relayRequest.data.inTxs.length} input transactions`
+    );
+  }
+
   const swapCurrencyIn = relayRequest.data.inTxs[0].stateChanges.find(
     change =>
       change.address === address.toLowerCase() &&
@@ -127,6 +133,18 @@ const mapAsRelayTx = async ({
   if (!swapCurrencyIn) {
     throw new Error(
       `No swap currency in found for Relay request ${relayRequest.id}`
+    );
+  }
+
+  if (relayRequest.data.outTxs.length !== 1) {
+    throw new Error(
+      `Relay request ${relayRequest.id} has ${relayRequest.data.outTxs.length} output transactions`
+    );
+  }
+
+  if (relayRequest.data.outTxs[0].stateChanges === undefined) {
+    throw new Error(
+      `Relay request ${relayRequest.id} has no output state changes`
     );
   }
 

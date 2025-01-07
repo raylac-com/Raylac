@@ -1,10 +1,10 @@
+import Entypo from '@expo/vector-icons/Entypo';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { TokenAmount, Token } from '@raylac/shared';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { Image } from 'expo-image';
 import {
   BottomSheetFlatList,
   BottomSheetModal,
@@ -12,72 +12,154 @@ import {
 } from '@gorhom/bottom-sheet';
 import TokenLogo from '../TokenLogo/TokenLogo';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { getChainIcon } from '@/lib/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useTokenBalancePerAddress from '@/hooks/useTokenBalancePerAddress';
 import { Hex } from 'viem/_types/types/misc';
+import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
+import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
+
+const ChainTokenBalance = ({
+  chainId,
+  token,
+  balance,
+}: {
+  chainId: number;
+  token: Token;
+  balance: TokenAmount;
+}) => {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        columnGap: 8,
+      }}
+    >
+      <TokenLogoWithChain chainId={chainId} logoURI={token.logoURI} size={42} />
+      <StyledText style={{ color: colors.border }}>
+        {`$${balance.usdValueFormatted}`}
+      </StyledText>
+    </View>
+  );
+};
 
 const TokenListItem = ({
   token,
-  balance,
-  onPress,
+  totalBalance,
+  chainBalances,
+  onSelect,
 }: {
   token: Token;
-  balance: TokenAmount | null;
-  onPress: () => void;
+  totalBalance: TokenAmount | null;
+  chainBalances: {
+    chainId: number;
+    balance: TokenAmount;
+  }[];
+  onSelect: ({ token, chainId }: { token: Token; chainId: number }) => void;
 }) => {
-  const tokenChainIds = token.addresses.map(address => address.chainId);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const isMultiChain = chainBalances.length > 1;
 
   return (
-    <Pressable
-      onPress={onPress}
+    <View
       style={{
-        flexDirection: 'row',
-        columnGap: 8,
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        flexDirection: 'column',
+        rowGap: 8,
+        paddingBottom: isMultiChain ? 8 : 0,
       }}
     >
       <View
-        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
-      >
-        <TokenLogo
-          source={{ uri: token.logoURI }}
-          style={{ width: 42, height: 42 }}
-        />
-        <View style={{ flexDirection: 'column', rowGap: 4 }}>
-          <View
-            style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
-          >
-            <StyledText>{token.name}</StyledText>
-            {token.verified && (
-              <Ionicons
-                name="shield-checkmark"
-                size={18}
-                color={colors.green}
-              />
-            )}
-          </View>
-          <StyledText style={{ color: colors.border }}>
-            {balance?.formatted} {token.symbol}
-          </StyledText>
-        </View>
-      </View>
-      <View
         style={{
           flexDirection: 'row',
+          columnGap: 8,
           alignItems: 'center',
+          justifyContent: 'space-between',
         }}
       >
-        {tokenChainIds.map((chainId, i) => (
-          <Image
-            key={i}
-            source={getChainIcon(chainId)}
-            style={{ width: 18, height: 18, marginLeft: -9 }}
-          />
-        ))}
+        <Pressable
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            columnGap: 8,
+            width: '100%',
+          }}
+          onPress={() => {
+            if (isMultiChain) {
+              setIsExpanded(!isExpanded);
+            } else {
+              onSelect({ token, chainId: chainBalances[0].chainId });
+            }
+          }}
+        >
+          <View
+            style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
+          >
+            <TokenLogo
+              source={{ uri: token.logoURI }}
+              style={{ width: 42, height: 42 }}
+            />
+            <View style={{ flexDirection: 'column', rowGap: 4 }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  columnGap: 4,
+                }}
+              >
+                <StyledText>{token.name}</StyledText>
+                {token.verified && (
+                  <Ionicons
+                    name="shield-checkmark"
+                    size={18}
+                    color={colors.green}
+                  />
+                )}
+              </View>
+              <StyledText style={{ color: colors.border }}>
+                {`$${totalBalance?.usdValueFormatted}`}
+              </StyledText>
+            </View>
+            {/**
+          * 
+        <ScrollView horizontal contentContainerStyle={{ columnGap: 16 }}>
+          {chainBalances.map((chainBalance, index) => (
+            <ChainTokenBalance
+              key={index}
+              chainId={chainBalance.chainId}
+              balance={chainBalance.balance}
+            />
+          ))}
+        </ScrollView>
+        */}
+          </View>
+          {isMultiChain && (
+            <Entypo
+              name={isExpanded ? 'chevron-up' : 'chevron-down'}
+              size={24}
+              color={colors.border}
+            />
+          )}
+        </Pressable>
       </View>
-    </Pressable>
+      {isExpanded && (
+        <View style={{ marginBottom: 32, rowGap: 12 }}>
+          {chainBalances.map((b, index) => (
+            <FeedbackPressable
+              key={index}
+              onPress={() => onSelect({ token, chainId: b.chainId })}
+            >
+              <ChainTokenBalance
+                chainId={b.chainId}
+                token={token}
+                balance={b.balance}
+              />
+            </FeedbackPressable>
+          ))}
+        </View>
+      )}
+    </View>
   );
 };
 
@@ -107,12 +189,12 @@ export const SearchInput = ({
 const SearchInputTokenSheet = ({
   address,
   open,
-  onSelectToken,
+  onSelect,
   onClose,
 }: {
   address: Hex | null;
   open: boolean;
-  onSelectToken: (token: Token) => void;
+  onSelect: ({ token, chainId }: { token: Token; chainId: number }) => void;
   onClose: () => void;
 }) => {
   const ref = useRef<BottomSheetModal>(null);
@@ -193,10 +275,9 @@ const SearchInputTokenSheet = ({
           return (
             <TokenListItem
               token={item.token}
-              balance={null}
-              onPress={() => {
-                onSelectToken(item.token);
-              }}
+              totalBalance={item.totalBalance}
+              chainBalances={item.chainBalances}
+              onSelect={onSelect}
             />
           );
         }}

@@ -23,6 +23,16 @@ export type RootTabsParamsList = {
           amount: TokenAmount;
           requestId: Hex;
         };
+        pendingSwap?: {
+          address: Hex;
+          tokenIn: Token;
+          tokenOut: Token;
+          inputAmount: TokenAmount;
+          outputAmount: TokenAmount;
+          fromChainId: number;
+          toChainId: number;
+          requestId: Hex;
+        };
       }
     | undefined;
   Addresses: undefined;

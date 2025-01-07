@@ -138,7 +138,6 @@ const SearchOutputTokenSheet = ({
     <BottomSheetModal
       ref={ref}
       style={{
-        flex: 1,
         paddingHorizontal: 16,
         paddingTop: insets.top + 16,
         paddingBottom: insets.bottom,
@@ -158,11 +157,14 @@ const SearchOutputTokenSheet = ({
       <BottomSheetFlatList
         data={tokenList}
         keyExtractor={(_item, index) => index.toString()}
-        contentContainerStyle={{
-          flex: 1,
-          marginTop: 14,
-          rowGap: 16,
+        style={{
+          marginTop: 16,
         }}
+        contentContainerStyle={{
+          rowGap: 16,
+          paddingBottom: 240,
+        }}
+        nestedScrollEnabled
         ListEmptyComponent={
           <StyledText style={{ textAlign: 'center', color: colors.border }}>
             {`No tokens found`}

@@ -13,7 +13,7 @@ const swapHistory = async () => {
   });
   console.timeEnd('getHistory');
 
-  console.log(JSON.stringify(history, null, 2));
+  console.log(JSON.stringify(history[0], null, 2));
 };
 
 swapHistory();

@@ -1,5 +1,4 @@
 import StyledText from '@/components/StyledText/StyledText';
-import { shortenAddress } from '@/lib/utils';
 import { Pressable, View } from 'react-native';
 import { Hex } from 'viem';
 import { BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet';
@@ -8,6 +7,7 @@ import colors from '@/lib/styles/colors';
 import { triggerHapticFeedback } from '@/lib/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useWriterAddresses from '@/hooks/useWriterAddresses';
+import WalletIconAddress from '../WalletIconAddress/WalletIconAddress';
 
 const AddressListItem = ({ address }: { address: Hex }) => {
   return (
@@ -18,7 +18,7 @@ const AddressListItem = ({ address }: { address: Hex }) => {
         columnGap: 8,
       }}
     >
-      <StyledText>{shortenAddress(address)}</StyledText>
+      <WalletIconAddress address={address} />
     </View>
   );
 };
@@ -49,17 +49,16 @@ const SelectAddressSheet = ({
     <BottomSheetModal
       ref={ref}
       style={{
-        flex: 1,
         paddingTop: insets.top + 16,
         paddingBottom: insets.bottom + 16,
         paddingHorizontal: 16,
         rowGap: 16,
       }}
       onDismiss={onClose}
-      index={0}
+      index={1}
       enablePanDownToClose
-      enableDynamicSizing={false}
-      snapPoints={['100%']}
+      enableDynamicSizing={true}
+      snapPoints={['50%', '100%']}
     >
       <View
         style={{
@@ -67,7 +66,6 @@ const SelectAddressSheet = ({
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
-          marginBottom: 16,
         }}
       >
         <StyledText
@@ -80,7 +78,12 @@ const SelectAddressSheet = ({
       </View>
       <BottomSheetFlatList
         data={writerAddresses}
-        contentContainerStyle={{ rowGap: 16 }}
+        style={{
+          marginTop: 24,
+        }}
+        contentContainerStyle={{
+          rowGap: 16,
+        }}
         renderItem={({ item }) => (
           <Pressable
             onPress={() => {

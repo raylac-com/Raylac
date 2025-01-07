@@ -16,7 +16,7 @@ import { relayApi } from '../../lib/relay';
 import { TRPCError } from '@trpc/server';
 import axios from 'axios';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
-import { zeroAddress } from 'viem';
+import { Hex, zeroAddress } from 'viem';
 
 const getSingleInputSwapQuote = async ({
   sender,
@@ -114,9 +114,7 @@ const getSingleInputSwapQuote = async ({
         to: approveStepItem.data.to,
         value: approveStepItem.data.value,
         maxFeePerGas: approveStepItem.data.maxFeePerGas,
-        maxPriorityFeePerGas: (
-          BigInt(approveStepItem.data.maxPriorityFeePerGas) * BigInt(2)
-        ).toString(),
+        maxPriorityFeePerGas: approveStepItem.data.maxPriorityFeePerGas,
         chainId: approveStepItem.data.chainId,
         gas: approveStepItem.data.gas ?? 300_000,
         nonce,
@@ -148,9 +146,7 @@ const getSingleInputSwapQuote = async ({
       to: swapStepItem.data.to,
       value: swapStepItem.data.value,
       maxFeePerGas: swapStepItem.data.maxFeePerGas,
-      maxPriorityFeePerGas: (
-        BigInt(swapStepItem.data.maxPriorityFeePerGas) * BigInt(2)
-      ).toString(),
+      maxPriorityFeePerGas: swapStepItem.data.maxPriorityFeePerGas,
       chainId: swapStepItem.data.chainId,
       gas: swapStepItem.data.gas ?? 300_000,
       nonce: nonce,
@@ -242,6 +238,8 @@ const getSingleInputSwapQuote = async ({
     tokenPriceUsd: feeTokenPriceUsd,
   });
 
+  const relayRequestId = swapStepQuote.requestId;
+
   return {
     approveStep,
     swapStep,
@@ -250,6 +248,7 @@ const getSingleInputSwapQuote = async ({
     amountOut: amountOutFormatted,
     relayerFeeToken,
     relayerFee: relayerFeeFormatted,
+    relayRequestId: relayRequestId as Hex,
   };
 };
 
