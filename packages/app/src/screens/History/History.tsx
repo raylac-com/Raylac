@@ -8,14 +8,14 @@ import {
 } from 'react-native';
 import colors from '@/lib/styles/colors';
 import StyledText from '@/components/StyledText/StyledText';
-import useUserAddresses from '@/hooks/useUserAddresses';
-import HistoryListItem from '@/components/HistoryListItem/HistoryListItem';
+import TransferListItem from '@/components/TransferListItem/TransferListItem';
 import {
   HistoryItemType,
   TransferHistoryItem,
   SwapHistoryItem as SwapHistoryItemType,
 } from '@raylac/shared';
-import SwapHistoryItem from '@/components/SwapHistoryItem/SwapHistoryItem';
+import useUserAddresses from '@/hooks/useUserAddresses';
+import SwapListItem from '@/components/SwapListItem/SwapListItem';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootTabsParamsList } from '@/navigation/types';
 import { Hex } from 'viem/_types/types/misc';
@@ -128,9 +128,9 @@ const History = ({ route }: Props) => {
           return (
             <Pressable onPress={() => {}}>
               {item.type === HistoryItemType.SWAP ? (
-                <SwapHistoryItem swap={item as SwapHistoryItemType} />
+                <SwapListItem swap={item as SwapHistoryItemType} />
               ) : (
-                <HistoryListItem transfer={item as TransferHistoryItem} />
+                <TransferListItem transfer={item as TransferHistoryItem} />
               )}
             </Pressable>
           );

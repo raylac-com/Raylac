@@ -1,15 +1,15 @@
 import React from 'react';
 import { View } from 'react-native';
 import type { Meta, StoryObj } from '@storybook/react';
-import SwapHistoryListItem from './SwapHistoryListItem';
+import SwapListItem from './SwapListItem';
 import spacing from '@/lib/styles/spacing';
 import { zeroAddress } from 'viem';
 import { base, optimism } from 'viem/chains';
 import { HistoryItemType, USDC } from '@raylac/shared';
 
 const meta = {
-  title: 'SwapHistoryListItem',
-  component: SwapHistoryListItem,
+  title: 'SwapListItem',
+  component: SwapListItem,
   argTypes: {
     swap: { control: 'object' },
   },
@@ -46,7 +46,7 @@ const meta = {
       </View>
     ),
   ],
-} satisfies Meta<typeof SwapHistoryListItem>;
+} satisfies Meta<typeof SwapListItem>;
 
 export default meta;
 

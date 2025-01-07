@@ -27,7 +27,7 @@ const LABELS: Record<TransferListItemType, string> = {
   [HistoryItemType.PENDING]: 'Pending',
 };
 
-export interface HistoryListItemSheetProps {
+export interface TransferListItemSheetProps {
   transfer: TransferHistoryItem;
   onClose: () => void;
 }
@@ -138,10 +138,10 @@ const DateTime = ({ date }: { date: Date }) => {
   );
 };
 
-const HistoryListItemSheet = ({
+const TransferListItemSheet = ({
   transfer,
   onClose,
-}: HistoryListItemSheetProps) => {
+}: TransferListItemSheetProps) => {
   const insets = useSafeAreaInsets();
   const ref = useRef<BottomSheetModal>(null);
 
@@ -219,4 +219,4 @@ const HistoryListItemSheet = ({
   );
 };
 
-export default HistoryListItemSheet;
+export default TransferListItemSheet;

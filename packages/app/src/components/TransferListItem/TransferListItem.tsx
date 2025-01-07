@@ -10,7 +10,7 @@ import {
 } from '@raylac/shared';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import { useState } from 'react';
-import HistoryListItemSheet from '../HistoryListItemSheet/HistoryListItemSheet';
+import TransferListItemSheet from '../TransferListItemSheet/TransferListItemSheet';
 import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import useEnsName from '@/hooks/useEnsName';
 
@@ -38,7 +38,7 @@ const COLORS: Record<Exclude<HistoryItemType, HistoryItemType.SWAP>, string> = {
   [HistoryItemType.PENDING]: colors.subbedText,
 };
 
-const HistoryListItem = (props: { transfer: TransferHistoryItem }) => {
+const TransferListItem = (props: { transfer: TransferHistoryItem }) => {
   const label =
     LABELS[
       props.transfer.type as Exclude<HistoryItemType, HistoryItemType.SWAP>
@@ -122,7 +122,7 @@ const HistoryListItem = (props: { transfer: TransferHistoryItem }) => {
         </StyledText>
       </FeedbackPressable>
       {isSheetOpen && (
-        <HistoryListItemSheet
+        <TransferListItemSheet
           transfer={props.transfer}
           onClose={() => setIsSheetOpen(false)}
         />
@@ -131,4 +131,4 @@ const HistoryListItem = (props: { transfer: TransferHistoryItem }) => {
   );
 };
 
-export default HistoryListItem;
+export default TransferListItem;
