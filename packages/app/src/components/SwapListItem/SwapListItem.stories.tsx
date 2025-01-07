@@ -10,9 +10,6 @@ import { HistoryItemType, USDC } from '@raylac/shared';
 const meta = {
   title: 'SwapListItem',
   component: SwapListItem,
-  argTypes: {
-    swap: { control: 'object' },
-  },
   args: {
     swap: {
       address: zeroAddress,
@@ -38,6 +35,7 @@ const meta = {
       toChainId: optimism.id,
       timestamp: new Date().toISOString(),
     },
+    isPending: false,
   },
   decorators: [
     Story => (

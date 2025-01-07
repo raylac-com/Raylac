@@ -10,7 +10,7 @@ const meta = {
   args: {
     address: zeroAddress,
     open: true,
-    onSelectToken: () => {},
+    onSelect: () => {},
     onClose: () => {},
   },
   decorators: [

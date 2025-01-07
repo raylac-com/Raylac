@@ -643,6 +643,7 @@ const SelectAmount = ({ route }: Props) => {
         />
       )}
       <SelectChainSheet
+        title="Select recipient chain"
         open={isChainsSheetOpen}
         onSelect={chain => {
           setToChainId(chain.id);
