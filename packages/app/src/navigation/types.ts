@@ -3,7 +3,9 @@ import { Hex } from 'viem';
 
 export type RootTabsParamsList = {
   Home: undefined;
-  Swap: undefined;
+  Swap: {
+    fromToken?: Token;
+  };
   History:
     | {
         pendingTransfer?: {

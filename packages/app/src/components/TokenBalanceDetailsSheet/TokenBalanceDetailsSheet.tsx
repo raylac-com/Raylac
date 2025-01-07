@@ -1,4 +1,5 @@
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import Feather from '@expo/vector-icons/Feather';
 import { useRef } from 'react';
 import {
   getPerAddressTokenBalance,
@@ -16,6 +17,8 @@ import { TokenAmount } from '@raylac/shared/src/types';
 import { Hex } from 'viem';
 import WalletIconAddress from '../WalletIconAddress/WalletIconAddress';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
+import StyledButton from '../StyledButton/StyledButton';
+import useTypedNavigation from '@/hooks/useTypedNavigation';
 
 const ChainTokenBalance = ({
   chainId,
@@ -106,6 +109,7 @@ const TokenBalanceDetailsSheet = ({
 }: TokenBalanceDetailsSheetProps) => {
   const ref = useRef<BottomSheet>(null);
   const insets = useSafeAreaInsets();
+  const navigation = useTypedNavigation();
 
   const { data: tokenBalances } = useTokenBalances();
 
@@ -113,6 +117,21 @@ const TokenBalanceDetailsSheet = ({
     tokenBalances: tokenBalances ?? [],
     token,
   });
+
+  const onSendPress = () => {
+    onClose();
+    navigation.navigate('SelectRecipient');
+  };
+
+  const onSwapPress = () => {
+    onClose();
+    navigation.navigate('Tabs', {
+      screen: 'Swap',
+      params: {
+        fromToken: token,
+      },
+    });
+  };
 
   return (
     <BottomSheet
@@ -134,58 +153,90 @@ const TokenBalanceDetailsSheet = ({
           flexDirection: 'column',
           alignItems: 'center',
           paddingHorizontal: 16,
-          paddingBottom: 32,
+          paddingBottom: insets.bottom + 16,
         }}
       >
-        <View
-          style={{
-            width: '100%',
-            flexDirection: 'column',
-            borderRadius: 32,
-            paddingVertical: 26,
-            rowGap: 24,
-          }}
-        >
-          <View
-            style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
-          >
-            <TokenLogo
-              source={{ uri: token.logoURI }}
+        <View style={{ flex: 1 }}>
+          <View style={{ flex: 1, flexDirection: 'column', rowGap: 32 }}>
+            <View
               style={{
-                width: 24,
-                height: 24,
+                width: '100%',
+                flexDirection: 'column',
+                borderRadius: 32,
+                paddingVertical: 26,
+                rowGap: 24,
               }}
-            />
-            <StyledText>{token.name}</StyledText>
+            >
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  columnGap: 8,
+                }}
+              >
+                <TokenLogo
+                  source={{ uri: token.logoURI }}
+                  style={{
+                    width: 24,
+                    height: 24,
+                  }}
+                />
+                <StyledText>{token.name}</StyledText>
+              </View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'flex-end',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <StyledText
+                  style={{ fontSize: fontSizes.xLarge, fontWeight: 'bold' }}
+                >
+                  {`$${perAddressBalances.totalBalance.usdValueFormatted}`}
+                </StyledText>
+                <StyledText style={{ color: colors.subbedText }}>
+                  {perAddressBalances.totalBalance.formatted} {token.symbol}
+                </StyledText>
+              </View>
+            </View>
+            <View style={{ flexDirection: 'column', rowGap: 48 }}>
+              {perAddressBalances.perAddressBreakdown.map(
+                (addressTokenBalance, i) => (
+                  <AddressTokenBalance
+                    key={i}
+                    address={addressTokenBalance.address}
+                    token={token}
+                    balance={addressTokenBalance}
+                  />
+                )
+              )}
+            </View>
           </View>
           <View
             style={{
+              width: '100%',
               flexDirection: 'row',
-              alignItems: 'flex-end',
-              justifyContent: 'space-between',
+              columnGap: 8,
+              paddingBottom: 32,
             }}
           >
-            <StyledText
-              style={{ fontSize: fontSizes.xLarge, fontWeight: 'bold' }}
-            >
-              {`$${perAddressBalances.totalBalance.usdValueFormatted}`}
-            </StyledText>
-            <StyledText style={{ color: colors.subbedText }}>
-              {perAddressBalances.totalBalance.formatted} {token.symbol}
-            </StyledText>
-          </View>
-        </View>
-        <View style={{ flexDirection: 'column', rowGap: 48 }}>
-          {perAddressBalances.perAddressBreakdown.map(
-            (addressTokenBalance, i) => (
-              <AddressTokenBalance
-                key={i}
-                address={addressTokenBalance.address}
-                token={token}
-                balance={addressTokenBalance}
+            <View style={{ flex: 1 }}>
+              <StyledButton
+                variant="outline"
+                icon={<Feather name="send" size={18} color={colors.border} />}
+                title="Send"
+                onPress={onSendPress}
               />
-            )
-          )}
+            </View>
+            <View style={{ flex: 1 }}>
+              <StyledButton
+                icon={<Feather name="repeat" size={18} color={colors.border} />}
+                title="Swap"
+                onPress={onSwapPress}
+              />
+            </View>
+          </View>
         </View>
       </BottomSheetView>
     </BottomSheet>

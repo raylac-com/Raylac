@@ -14,12 +14,17 @@ import useSingleInputSwap from '@/hooks/useSingleInputSwap';
 import useChainTokenBalance from '@/hooks/useChainTokenBalance';
 import AddressSelector from './components/AddressSelector/AddressSelector';
 import useWriterAddresses from '@/hooks/useWriterAddresses';
+import { RootTabsParamsList } from '@/navigation/types';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type Token = SupportedTokensReturnType[number];
 
-const Swap = () => {
+type Props = NativeStackScreenProps<RootTabsParamsList, 'Swap'>;
+
+const Swap = ({ route }: Props) => {
   const navigation = useTypedNavigation();
   const { data: writerAddresses } = useWriterAddresses();
+  const { fromToken } = route.params;
 
   //
   // Local State
@@ -57,6 +62,12 @@ const Swap = () => {
   //
   // Effects
   //
+
+  useEffect(() => {
+    if (fromToken) {
+      setInputToken(fromToken);
+    }
+  }, [fromToken]);
 
   useEffect(() => {
     if (writerAddresses) {
