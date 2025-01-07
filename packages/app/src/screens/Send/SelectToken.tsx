@@ -345,12 +345,18 @@ const SelectToken = ({ navigation, route }: Props) => {
         paddingBottom: insets.bottom,
       }}
     >
-      <View style={{ padding: 16 }}>
-        <SendToCard toAddress={toAddress} />
-      </View>
       <SectionList
-        style={{ flex: 1, padding: 16 }}
+        style={{
+          flex: 1,
+          padding: 16,
+        }}
+        ListHeaderComponent={
+          <View style={{ marginBottom: 32 }}>
+            <SendToCard toAddress={toAddress} />
+          </View>
+        }
         contentContainerStyle={{
+          paddingBottom: 120,
           rowGap: 8,
         }}
         scrollEnabled
