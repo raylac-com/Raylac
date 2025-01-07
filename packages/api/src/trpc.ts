@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import { initTRPC } from '@trpc/server';
 import type { Context } from './context';
 import { ZodError } from 'zod';
@@ -25,5 +26,13 @@ const t = initTRPC.context<Context>().create({
 });
 
 export const router = t.router;
-export const publicProcedure = t.procedure;
 export const createCallerFactory = t.createCallerFactory;
+
+const sentryMiddleware = t.middleware(
+  Sentry.trpcMiddleware({
+    attachRpcInput: true,
+  })
+);
+
+const sentrifiedProcedure = t.procedure.use(sentryMiddleware);
+export const publicProcedure = sentrifiedProcedure;
