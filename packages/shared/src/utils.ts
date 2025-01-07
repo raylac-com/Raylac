@@ -544,3 +544,36 @@ export const pendingBridgeTransferToHistoryItem = (
     timestamp: new Date().toISOString(),
   };
 };
+
+const COLORS = [
+  { name: 'Cerulean', hex: '#007BA7' },
+  { name: 'Coral', hex: '#FF7F50' },
+  { name: 'Saffron', hex: '#F4C430' },
+  { name: 'Emerald', hex: '#50C878' },
+  { name: 'Amethyst', hex: '#9966CC' },
+  { name: 'Crimson', hex: '#DC143C' },
+  { name: 'Teal', hex: '#008080' },
+  { name: 'Turquoise', hex: '#40E0D0' },
+  { name: 'Salmon', hex: '#FA8072' },
+  { name: 'Lavender', hex: '#E6E6FA' },
+  { name: 'Slate Blue', hex: '#6A5ACD' },
+  { name: 'Steel Blue', hex: '#4682B4' },
+  { name: 'Pale Gold', hex: '#E6BE8A' },
+  { name: 'Olive Green', hex: '#808000' },
+  { name: 'Peach', hex: '#FFCBA4' },
+  { name: 'Navy', hex: '#000080' },
+  { name: 'Mint', hex: '#98FF98' },
+  { name: 'Mulberry', hex: '#C54B8C' },
+  { name: 'Azure', hex: '#007FFF' },
+  { name: 'Sandy Brown', hex: '#F4A460' },
+];
+
+export const getColorForAddress = (address: Hex): Hex => {
+  // Convert address to number by taking first 4 bytes
+  const addressNum = parseInt(address.slice(2, 10), 16);
+  // Use modulo to get index within COLORS array bounds
+  const colorIndex = addressNum % COLORS.length;
+
+  // eslint-disable-next-line security/detect-object-injection
+  return COLORS[colorIndex].hex as Hex;
+};
