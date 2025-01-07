@@ -327,7 +327,17 @@ export interface RelayGetRequestsReturnType {
           from: Hex;
           value: string;
         };
-        stateChanges: [];
+        stateChanges: {
+          change: {
+            data: {
+              tokenKind: string;
+              tokenAddress: Hex;
+            };
+            kind: string;
+            balanceDiff: string;
+          };
+          address: Hex;
+        }[];
         hash: Hex;
         block: number;
         type: string;
@@ -390,7 +400,17 @@ export interface RelayGetRequestsReturnType {
           from: Hex;
           value: string;
         };
-        stateChanges: [];
+        stateChanges: {
+          change: {
+            data: {
+              tokenKind: string;
+              tokenAddress: Hex;
+            };
+            kind: string;
+            balanceDiff: string;
+          };
+          address: Hex;
+        }[];
         hash: Hex;
         block: number;
         type: string;

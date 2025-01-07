@@ -57,6 +57,8 @@ const mapAsRelayTx = async ({
 
   const currencyIn = relayRequest.data.metadata.currencyIn;
   const currencyOut = relayRequest.data.metadata.currencyOut;
+  const fromChainId = relayRequest.data.inTxs[0].chainId;
+  const toChainId = relayRequest.data.outTxs[0].chainId;
 
   const amountIn = currencyIn.amount;
 
@@ -101,8 +103,8 @@ const mapAsRelayTx = async ({
       to: recipient,
       amount: amountInFormatted,
       token: tokenIn,
-      fromChainId: currencyIn.currency.chainId,
-      toChainId: currencyOut.currency.chainId,
+      fromChainId: fromChainId,
+      toChainId: toChainId,
       timestamp: relayRequest.createdAt,
       type:
         address === sender
@@ -116,16 +118,50 @@ const mapAsRelayTx = async ({
     return transferItem;
   }
 
+  const swapCurrencyIn = relayRequest.data.inTxs[0].stateChanges.find(
+    change =>
+      change.address === address.toLowerCase() &&
+      change.change.balanceDiff.startsWith('-')
+  )?.change.data.tokenAddress;
+
+  if (!swapCurrencyIn) {
+    throw new Error(
+      `No swap currency in found for Relay request ${relayRequest.id}`
+    );
+  }
+
+  const swapCurrencyOut = relayRequest.data.outTxs[0].stateChanges.find(
+    change =>
+      change.address === address.toLowerCase() &&
+      !change.change.balanceDiff.startsWith('-')
+  );
+
+  if (!swapCurrencyOut) {
+    throw new Error(
+      `No swap currency out found for Relay request ${relayRequest.id}`
+    );
+  }
+
+  const swapTokenIn = await getTokenOrThrow({
+    tokenAddress: swapCurrencyIn,
+    chainId: relayRequest.data.inTxs[0].chainId,
+  });
+
+  const swapTokenOut = await getTokenOrThrow({
+    tokenAddress: swapCurrencyOut.change.data.tokenAddress,
+    chainId: relayRequest.data.outTxs[0].chainId,
+  });
+
   const swapHistoryItem: SwapHistoryItem = {
     relayId: relayRequest.id,
     type: HistoryItemType.SWAP,
     address: getAddress(relayRequest.data.metadata.sender),
     amountIn: amountInFormatted,
     amountOut: amountOutFormatted,
-    tokenIn: tokenIn,
-    tokenOut: tokenOut,
-    fromChainId: currencyIn.currency.chainId,
-    toChainId: currencyOut.currency.chainId,
+    tokenIn: swapTokenIn,
+    tokenOut: swapTokenOut,
+    fromChainId: fromChainId,
+    toChainId: toChainId,
     timestamp: relayRequest.createdAt,
   };
 
