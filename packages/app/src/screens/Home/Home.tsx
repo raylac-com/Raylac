@@ -15,7 +15,7 @@ import Fav from '@/components/Fav/Fav';
 import TopMenuBar from './components/TopMenuBar/TopMenuBar';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { getDefaultAddress } from '@/lib/key';
+import { getUserAddresses } from '@/lib/key';
 
 const AddAddressButton = () => {
   const navigation = useTypedNavigation();
@@ -98,15 +98,21 @@ const HomeScreen = () => {
 
   useEffect(() => {
     const init = async () => {
-      const defaultAddress = await getDefaultAddress();
-      if (defaultAddress === null) {
+      const addresses = await getUserAddresses();
+
+      if (addresses.length === 0) {
         navigation.reset({
           index: 0,
           routes: [{ name: 'Start' }],
         });
-      } else if (!defaultAddress.isBackupVerified) {
+      }
+
+      const nonBackupVerifiedAddress = addresses.find(a => !a.isBackupVerified);
+
+      // If there is no non-backup verified address, we need to confirm the backup phrase
+      if (nonBackupVerifiedAddress) {
         navigation.navigate('ConfirmBackupPhrase', {
-          genesisAddress: defaultAddress.address,
+          genesisAddress: nonBackupVerifiedAddress.address,
         });
       }
     };

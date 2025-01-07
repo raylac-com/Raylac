@@ -101,12 +101,6 @@ export const getUserAddresses = async (): Promise<UserAddress[]> => {
   return addresses ? JSON.parse(addresses) : [];
 };
 
-export const getDefaultAddress = async (): Promise<UserAddress | null> => {
-  const addresses = await getUserAddresses();
-
-  return addresses.find(a => a.isDefault) || null;
-};
-
 /**
  * Save the private key to SecureStore.
  */
