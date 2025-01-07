@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import colors from '@/lib/styles/colors';
 import { useState } from 'react';
 import useStartWatch from '@/hooks/useStartWatch';
-import { isAddress, Hex } from 'viem';
+import { isAddress, Hex, getAddress } from 'viem';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import useEnsAddress from '@/hooks/useEnsAddress';
 
@@ -20,14 +20,14 @@ const StartWatch = () => {
 
   const onStartPress = async () => {
     if (isAddress(address)) {
-      await startWatch({ address: address as Hex });
+      await startWatch({ address: getAddress(address) as Hex });
 
       navigation.reset({
         index: 0,
         routes: [{ name: 'Tabs', params: { screen: 'Home' } }],
       });
     } else if (ensAddress) {
-      await startWatch({ address: ensAddress as Hex });
+      await startWatch({ address: getAddress(ensAddress) as Hex });
 
       navigation.reset({
         index: 0,
