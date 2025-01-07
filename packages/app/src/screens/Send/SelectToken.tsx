@@ -24,6 +24,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useTokenBalancePerAddress from '@/hooks/useTokenBalancePerAddress';
 import useWriterAddresses from '@/hooks/useWriterAddresses';
 import SearchInputAccessory from '@/components/SearchInputAccessory/SearchInputAccessory';
+import {
+  withTiming,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 
 const SearchBar = ({
   onAddressSelect,
@@ -176,8 +182,29 @@ const TokenListItem = ({
   onPress: ({ token, chainId }: { token: Token; chainId: number }) => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const heightAnimation = useSharedValue(0);
 
   const isMultiChain = balanceBreakdown.length > 1;
+
+  const animatedStyles = useAnimatedStyle(() => {
+    return {
+      height: heightAnimation.value,
+      rowGap: 12,
+      overflow: 'hidden',
+    };
+  });
+
+  useEffect(() => {
+    if (isExpanded) {
+      heightAnimation.value = withTiming(balanceBreakdown.length * 60, {
+        duration: 200,
+      });
+    } else {
+      heightAnimation.value = withTiming(0, {
+        duration: 200,
+      });
+    }
+  }, [isExpanded, balanceBreakdown.length]);
 
   return (
     <View
@@ -240,22 +267,20 @@ const TokenListItem = ({
           )}
         </FeedbackPressable>
       </View>
-      {isExpanded && (
-        <View style={{ marginBottom: 32, rowGap: 12 }}>
-          {balanceBreakdown.map((b, index) => (
-            <FeedbackPressable
-              key={index}
-              onPress={() => onPress({ token, chainId: b.chainId })}
-            >
-              <TokenChainItem
-                chainId={b.chainId}
-                token={token}
-                balance={b.balance}
-              />
-            </FeedbackPressable>
-          ))}
-        </View>
-      )}
+      <Animated.View style={animatedStyles}>
+        {balanceBreakdown.map((b, index) => (
+          <FeedbackPressable
+            onPress={() => onPress({ token, chainId: b.chainId })}
+            key={index}
+          >
+            <TokenChainItem
+              chainId={b.chainId}
+              token={token}
+              balance={b.balance}
+            />
+          </FeedbackPressable>
+        ))}
+      </Animated.View>
     </View>
   );
 };
