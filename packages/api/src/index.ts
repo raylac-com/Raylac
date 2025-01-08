@@ -14,7 +14,6 @@ import {
   GetSingleChainSwapQuoteRequestBody,
   GetSingleInputSwapQuoteRequestBody,
   SendTxRequestBody,
-  GetSwapQuoteRequestBody,
   SubmitSingleChainSwapRequestBody,
   SubmitSingleInputSwapRequestBody,
   SubmitSwapRequestBody,
@@ -23,7 +22,6 @@ import {
   SendBridgeTxRequestBody,
 } from '@raylac/shared';
 import buildSend from './api/buildSend/buildSend';
-import getSwapQuote from './api/getSwapQuote/getSwapQuote';
 import { ed, logger, st } from '@raylac/shared-backend';
 import getTokenPrice from './api/getTokenPrice/getTokenPrice';
 import { getTokenPriceMock } from './api/getTokenPrice/getTokenPrice.mock';
@@ -109,10 +107,6 @@ export const appRouter = router({
 
   sendBridgeTx: publicProcedure.input(z.any()).mutation(async ({ input }) => {
     return sendBridgeTx(input as SendBridgeTxRequestBody);
-  }),
-
-  getSwapQuote: publicProcedure.input(z.any()).mutation(async ({ input }) => {
-    return getSwapQuote(input as GetSwapQuoteRequestBody);
   }),
 
   getSingleChainSwapQuote: publicProcedure

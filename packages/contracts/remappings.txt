@@ -1,0 +1,5 @@
+@openzeppelin-contracts-upgradeable-4.2.0/=dependencies/@openzeppelin-contracts-upgradeable-4.2.0/
+@openzeppelin/contracts/=dependencies/@openzeppelin-contracts-4.2.0/
+account-abstraction-0.6.0/=dependencies/account-abstraction-0.6.0/
+forge-std-1.9.3/=dependencies/forge-std-1.9.3/
+openzeppelin-foundry-upgrades-0.3.6/=dependencies/openzeppelin-foundry-upgrades-0.3.6/

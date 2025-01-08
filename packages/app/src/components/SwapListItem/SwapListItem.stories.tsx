@@ -34,6 +34,8 @@ const meta = {
       fromChainId: base.id,
       toChainId: optimism.id,
       timestamp: new Date().toISOString(),
+      inTxHash: '0x123',
+      outTxHash: '0x123',
     },
     isPending: false,
   },

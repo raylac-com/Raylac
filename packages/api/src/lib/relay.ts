@@ -159,7 +159,7 @@ export const relayGetRequest = async ({
   txHash,
 }: {
   txHash: Hex;
-}): Promise<RelayGetRequestsReturnType['requests'][number]> => {
+}): Promise<RelayGetRequestsReturnType['requests'][number] | null> => {
   const cachedRequest = await getCachedRelayRequest({ txHash });
 
   if (cachedRequest) {
@@ -171,7 +171,8 @@ export const relayGetRequest = async ({
   );
 
   if (response.data.requests.length === 0) {
-    throw new Error(`No request found for ${txHash}`);
+    // We assume that Relay hasn't indexed the tx yet
+    return null;
   }
 
   const relayRequestData = response.data.requests[0];

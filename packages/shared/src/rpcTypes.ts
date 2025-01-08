@@ -3,8 +3,6 @@ import {
   AlchemyTokenPriceResponse,
   Token,
   SignedCrossChainSwapStep,
-  SwapOutput,
-  SwapInput,
   CrossChainSwapStep,
   ApproveStep,
   SwapStep,
@@ -87,28 +85,6 @@ export interface SendBridgeTxRequestBody {
   };
 }
 
-export interface GetSwapQuoteRequestBody {
-  sender: Hex;
-  amount: string;
-  inputToken: Token;
-  outputToken: Token;
-  chainId?: number;
-}
-
-export type GetSwapQuoteReturnType = {
-  inputs: SwapInput[];
-  output: SwapOutput;
-  swapSteps: CrossChainSwapStep[];
-  relayerServiceFeeAmount: string;
-  relayerServiceFeeUsd: string;
-  amountIn: string;
-  amountOut: string;
-  amountInFormatted: string;
-  amountOutFormatted: string;
-  amountInUsd: string;
-  amountOutUsd: string;
-};
-
 export interface GetSingleChainSwapQuoteRequestBody {
   sender: Hex;
   amount: string;
@@ -183,16 +159,14 @@ export interface GetHistoryRequestBody {
 }
 
 export enum HistoryItemType {
-  OUTGOING = 'outgoing',
-  INCOMING = 'incoming',
-  MOVE_FUNDS = 'move_funds',
-  PENDING = 'pending',
+  TRANSFER = 'transfer',
+  BRIDGE_TRANSFER = 'bridge_transfer',
   SWAP = 'swap',
 }
 
 export type TransferHistoryItem = {
-  relayId?: string;
-  type: HistoryItemType;
+  type: HistoryItemType.TRANSFER;
+  direction: 'outgoing' | 'incoming';
   txHash: Hex;
   from: Hex;
   to: Hex;
@@ -201,8 +175,21 @@ export type TransferHistoryItem = {
   amount: TokenAmount;
   token: Token;
   timestamp: string;
-  fromEnsName?: string;
-  toEnsName?: string;
+};
+
+export type BridgeTransferHistoryItem = {
+  relayId: string;
+  type: HistoryItemType.BRIDGE_TRANSFER;
+  direction: 'outgoing' | 'incoming';
+  from: Hex;
+  to: Hex;
+  fromChainId: number;
+  toChainId: number;
+  amount: TokenAmount;
+  token: Token;
+  timestamp: string;
+  inTxHash: Hex;
+  outTxHash: Hex;
 };
 
 export type SwapHistoryItem = {
@@ -216,9 +203,14 @@ export type SwapHistoryItem = {
   fromChainId: number;
   toChainId: number;
   timestamp: string;
+  inTxHash: Hex;
+  outTxHash: Hex;
 };
 
-export type HistoryItem = TransferHistoryItem | SwapHistoryItem;
+export type HistoryItem =
+  | TransferHistoryItem
+  | BridgeTransferHistoryItem
+  | SwapHistoryItem;
 
 export type GetHistoryReturnType = HistoryItem[];
 

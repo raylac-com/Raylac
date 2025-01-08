@@ -360,37 +360,39 @@ export interface RelayGetRequestsReturnType {
         name: string;
         decimals: number;
       };
-      metadata: {
-        sender: Hex;
-        recipient: Hex;
-        currencyIn: {
-          currency: {
-            chainId: number;
-            address: Hex;
-            symbol: string;
-            name: string;
-            decimals: number;
-          };
-          amount: string;
-          amountFormatted: string;
-          amountUsd: string;
-          minimumAmount: string;
-        };
-        currencyOut: {
-          currency: {
-            chainId: number;
-            address: Hex;
-            symbol: string;
-            name: string;
-            decimals: number;
-          };
-          amount: string;
-          amountFormatted: string;
-          amountUsd: string;
-          minimumAmount: string;
-        };
-        rate: string;
-      };
+      metadata:
+        | {
+            sender: Hex;
+            recipient: Hex;
+            currencyIn: {
+              currency: {
+                chainId: number;
+                address: Hex;
+                symbol: string;
+                name: string;
+                decimals: number;
+              };
+              amount: string;
+              amountFormatted: string;
+              amountUsd: string;
+              minimumAmount: string;
+            };
+            currencyOut: {
+              currency: {
+                chainId: number;
+                address: Hex;
+                symbol: string;
+                name: string;
+                decimals: number;
+              };
+              amount: string;
+              amountFormatted: string;
+              amountUsd: string;
+              minimumAmount: string;
+            };
+            rate: string;
+          }
+        | undefined;
       timeEstimate: number;
       outTxs: {
         fee: string;

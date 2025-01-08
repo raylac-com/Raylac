@@ -3,6 +3,7 @@ import {
   CrossChainSwapStep,
   ETH,
   formatTokenAmount,
+  RelayGetQuoteRequestBody,
   TRPCErrorMessage,
 } from '@raylac/shared';
 import { TRPCError } from '@trpc/server';
@@ -10,7 +11,6 @@ import {
   BuildBridgeSendReturnType,
   BuildBridgeSendRequestBody,
   RelayGetQuoteResponseBody,
-  RelaySwapMultiInputRequestBody,
   getTokenAddressOnChain,
 } from '@raylac/shared';
 import { relayApi } from '../../lib/relay';
@@ -30,27 +30,21 @@ const buildBridgeSend = async ({
   const originTokenAddress = getTokenAddressOnChain(token, fromChainId);
   const destinationTokenAddress = getTokenAddressOnChain(token, toChainId);
 
-  const requestBody: RelaySwapMultiInputRequestBody = {
+  const requestBody: RelayGetQuoteRequestBody = {
     user: from,
     recipient: to,
-    origins: [
-      {
-        chainId: fromChainId,
-        currency: originTokenAddress,
-        amount: amount,
-      },
-    ],
+    originCurrency: originTokenAddress,
+    originChainId: fromChainId,
+    amount: amount,
     destinationCurrency: destinationTokenAddress,
     destinationChainId: toChainId,
-    partial: false,
     tradeType: 'EXACT_INPUT',
-    useUserOperation: false,
   };
 
   let quote;
   try {
     const { data } = await relayApi.post<RelayGetQuoteResponseBody>(
-      '/execute/swap/multi-input',
+      '/quote',
       requestBody
     );
     quote = data;
@@ -148,8 +142,10 @@ const buildBridgeSend = async ({
 
   let relayerFeeToken;
   if (
-    relayerFeeCurrency?.address === originTokenAddress ||
-    relayerFeeCurrency?.address === destinationTokenAddress
+    relayerFeeCurrency.address.toLowerCase() ===
+      originTokenAddress.toLowerCase() ||
+    relayerFeeCurrency.address.toLowerCase() ===
+      destinationTokenAddress.toLowerCase()
   ) {
     relayerFeeToken = token;
   } else if (relayerFeeCurrency?.address === zeroAddress) {
@@ -211,7 +207,7 @@ const buildBridgeSend = async ({
     return crossChainSendStep;
   });
 
-  const swapStep = quote.steps.find(step => step.id === 'swap');
+  const swapStep = quote.steps.find(step => step.id === 'deposit');
 
   if (!swapStep) {
     throw new Error('Swap step not found');

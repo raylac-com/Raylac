@@ -80,7 +80,8 @@ const Tabs = () => {
           ),
         }}
       ></Tab.Screen>
-      {/*<Tab.Screen
+      {/**
+      <Tab.Screen
         name="Swap"
         component={Swap}
         options={{
@@ -90,7 +91,9 @@ const Tabs = () => {
           ),
           tabBarShowLabel: false,
         }}
-      ></Tab.Screen>*/}
+      ></Tab.Screen>
+        *
+       */}
       <Tab.Screen
         name="History"
         component={History}

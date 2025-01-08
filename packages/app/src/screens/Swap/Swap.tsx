@@ -24,7 +24,7 @@ type Props = NativeStackScreenProps<RootTabsParamsList, 'Swap'>;
 const Swap = ({ route }: Props) => {
   const navigation = useTypedNavigation();
   const { data: writerAddresses } = useWriterAddresses();
-  const { fromToken } = route.params;
+  const { fromToken } = route.params ?? { fromToken: null };
 
   //
   // Local State
