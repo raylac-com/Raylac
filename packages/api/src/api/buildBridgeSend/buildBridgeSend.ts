@@ -190,7 +190,7 @@ const buildBridgeSend = async ({
     const crossChainStep: CrossChainSwapStep = {
       originChainId: item.data.chainId,
       destinationChainId: item.data.chainId,
-      id: step.id as 'swap' | 'approve',
+      id: (step.id === 'swap' ? 'deposit' : step.id) as 'deposit' | 'approve',
       tx: {
         data: item.data.data,
         to: item.data.to,
