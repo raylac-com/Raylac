@@ -57,9 +57,6 @@ importers:
       '@lifi/sdk':
         specifier: ^3.4.4
         version: 3.4.4(@solana/wallet-adapter-base@0.9.23(@solana/web3.js@1.98.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)))(@solana/web3.js@1.98.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(viem@2.21.57(bufferutil@4.0.8)(typescript@5.7.2)(utf-8-validate@5.0.10)(zod@3.24.1))(zod@3.24.1)
-      '@raylac/db':
-        specifier: workspace:*
-        version: link:../db
       '@raylac/shared':
         specifier: workspace:*
         version: link:../shared
@@ -315,15 +312,6 @@ importers:
         specifier: ^15.8.0
         version: 15.10.1(react-native@0.76.5(@babel/core@7.26.0)(@babel/preset-env@7.26.0(@babel/core@7.26.0))(@types/react@18.3.18)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)
 
-  packages/db:
-    dependencies:
-      '@prisma/client':
-        specifier: 5.12.1
-        version: 5.12.1(prisma@5.12.1)
-      prisma:
-        specifier: 5.12.1
-        version: 5.12.1
-
   packages/scripts:
     dependencies:
       '@noble/secp256k1':
@@ -332,9 +320,6 @@ importers:
       '@raylac/api':
         specifier: workspace:*
         version: link:../api
-      '@raylac/db':
-        specifier: workspace:*
-        version: link:../db
       '@raylac/shared':
         specifier: workspace:*
         version: link:../shared
@@ -403,9 +388,6 @@ importers:
 
   packages/shared-backend:
     dependencies:
-      '@raylac/db':
-        specifier: workspace:*
-        version: link:../db
       winston:
         specifier: ^3.15.0
         version: 3.17.0
@@ -2081,30 +2063,6 @@ packages:
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
     engines: {node: '>=14'}
-
-  '@prisma/client@5.12.1':
-    resolution: {integrity: sha512-6/JnizEdlSBxDIdiLbrBdMW5NqDxOmhXAJaNXiPpgzAPr/nLZResT6MMpbOHLo5yAbQ1Vv5UU8PTPRzb0WIxdA==}
-    engines: {node: '>=16.13'}
-    peerDependencies:
-      prisma: '*'
-    peerDependenciesMeta:
-      prisma:
-        optional: true
-
-  '@prisma/debug@5.12.1':
-    resolution: {integrity: sha512-kd/wNsR0klrv79o1ITsbWxYyh4QWuBidvxsXSParPsYSu0ircUmNk3q4ojsgNc3/81b0ozg76iastOG43tbf8A==}
-
-  '@prisma/engines-version@5.12.0-21.473ed3124229e22d881cb7addf559799debae1ab':
-    resolution: {integrity: sha512-6yvO8s80Tym61aB4QNtYZfWVmE3pwqe807jEtzm8C5VDe7nw8O1FGX3TXUaXmWV0fQTIAfRbeL2Gwrndabp/0g==}
-
-  '@prisma/engines@5.12.1':
-    resolution: {integrity: sha512-HQDdglLw2bZR/TXD2Y+YfDMvi5Q8H+acbswqOsWyq9pPjBLYJ6gzM+ptlTU/AV6tl0XSZLU1/7F4qaWa8bqpJA==}
-
-  '@prisma/fetch-engine@5.12.1':
-    resolution: {integrity: sha512-qSs3KcX1HKcea1A+hlJVK/ljj0PNIUHDxAayGMvgJBqmaN32P9tCidlKz1EGv6WoRFICYnk3Dd/YFLBwnFIozA==}
-
-  '@prisma/get-platform@5.12.1':
-    resolution: {integrity: sha512-pgIR+pSvhYHiUcqXVEZS31NrFOTENC9yFUdEAcx7cdQBoZPmHVjtjN4Ss6NzVDMYPrKJJ51U14EhEoeuBlMioQ==}
 
   '@prisma/instrumentation@5.22.0':
     resolution: {integrity: sha512-LxccF392NN37ISGxIurUljZSh1YWnphO34V5a0+T7FVQG2u9bhAXRTJpgmQ3483woVhkraQZFF7cbRrpbw/F4Q==}
@@ -5916,11 +5874,6 @@ packages:
     resolution: {integrity: sha512-Pdlw/oPxN+aXdmM9R00JVC9WVFoCLTKJvDVLgmJ+qAffBMxsV85l/Lu7sNx4zSzPyoL2euImuEwHhOXdEgNFZQ==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
 
-  prisma@5.12.1:
-    resolution: {integrity: sha512-SkMnb6wyIxTv9ACqiHBI2u9gD6y98qXRoCoLEnZsF6yee5Qg828G+ARrESN+lQHdw4maSZFFSBPPDpvSiVTo0Q==}
-    engines: {node: '>=16.13'}
-    hasBin: true
-
   proc-log@4.2.0:
     resolution: {integrity: sha512-g8+OnU/L2v+wyiVK+D5fA34J7EH8jZ8DDlvwhRCMxmMj7UCBvxiO1mGeN+36JXIKF4zevU4kRBd8lVgG9vLelA==}
     engines: {node: ^14.17.0 || ^16.13.0 || >=18.0.0}
@@ -9480,31 +9433,6 @@ snapshots:
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
-
-  '@prisma/client@5.12.1(prisma@5.12.1)':
-    optionalDependencies:
-      prisma: 5.12.1
-
-  '@prisma/debug@5.12.1': {}
-
-  '@prisma/engines-version@5.12.0-21.473ed3124229e22d881cb7addf559799debae1ab': {}
-
-  '@prisma/engines@5.12.1':
-    dependencies:
-      '@prisma/debug': 5.12.1
-      '@prisma/engines-version': 5.12.0-21.473ed3124229e22d881cb7addf559799debae1ab
-      '@prisma/fetch-engine': 5.12.1
-      '@prisma/get-platform': 5.12.1
-
-  '@prisma/fetch-engine@5.12.1':
-    dependencies:
-      '@prisma/debug': 5.12.1
-      '@prisma/engines-version': 5.12.0-21.473ed3124229e22d881cb7addf559799debae1ab
-      '@prisma/get-platform': 5.12.1
-
-  '@prisma/get-platform@5.12.1':
-    dependencies:
-      '@prisma/debug': 5.12.1
 
   '@prisma/instrumentation@5.22.0':
     dependencies:
@@ -14135,10 +14063,6 @@ snapshots:
       '@jest/schemas': 29.6.3
       ansi-styles: 5.2.0
       react-is: 18.3.1
-
-  prisma@5.12.1:
-    dependencies:
-      '@prisma/engines': 5.12.1
 
   proc-log@4.2.0: {}
 

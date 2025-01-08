@@ -18,7 +18,6 @@
   "license": "ISC",
   "dependencies": {
     "@lifi/sdk": "^3.4.4",
-    "@raylac/db": "workspace:*",
     "@raylac/shared": "workspace:*",
     "@raylac/shared-backend": "workspace:*",
     "@reservoir0x/relay-sdk": "^1.4.7",
