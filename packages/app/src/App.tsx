@@ -6,7 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RootStackParamsList, RootTabsParamsList } from './navigation/types';
 import Home from './screens/Home/Home';
-import Swap from './screens/Swap/Swap';
+// import Swap from './screens/Swap/Swap';
 import { NavigationContainer, ThemeProvider } from '@react-navigation/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { trpc, getRpcLinks } from './lib/trpc';
@@ -80,7 +80,7 @@ const Tabs = () => {
           ),
         }}
       ></Tab.Screen>
-      <Tab.Screen
+      {/*<Tab.Screen
         name="Swap"
         component={Swap}
         options={{
@@ -90,7 +90,7 @@ const Tabs = () => {
           ),
           tabBarShowLabel: false,
         }}
-      ></Tab.Screen>
+      ></Tab.Screen>*/}
       <Tab.Screen
         name="History"
         component={History}
