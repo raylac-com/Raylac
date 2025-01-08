@@ -23,6 +23,6 @@
   },
   "dependencies": {
     "winston": "^3.15.0",
-    "@raylac/db": "workspace:*"
+    "chalk": "^5.3.0"
   }
 }

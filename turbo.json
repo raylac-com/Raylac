@@ -5,8 +5,8 @@
       "cache": false
     },
     "build": {
-      "dependsOn": ["^db:generate", "^build"],
-      "outputs": ["out/**", ".next/**"]
+      "dependsOn": ["^build"],
+      "outputs": ["out/**"]
     },
     "build:watch": {
       "outputs": ["out/**"]

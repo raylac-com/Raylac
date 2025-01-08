@@ -2,7 +2,6 @@ import { Hex } from 'viem';
 import {
   AlchemyTokenPriceResponse,
   Token,
-  SignedCrossChainSwapStep,
   CrossChainSwapStep,
   ApproveStep,
   SwapStep,
@@ -85,26 +84,6 @@ export interface SendBridgeTxRequestBody {
   };
 }
 
-export interface GetSingleChainSwapQuoteRequestBody {
-  sender: Hex;
-  amount: string;
-  inputToken: Token;
-  outputToken: Token;
-  chainId: number;
-}
-
-export type GetSingleChainSwapQuoteReturnType = {
-  swapSteps: CrossChainSwapStep[];
-  relayerServiceFeeAmount: string;
-  relayerServiceFeeUsd: string;
-  amountIn: string;
-  amountOut: string;
-  amountInFormatted: string;
-  amountOutFormatted: string;
-  amountInUsd: string;
-  amountOutUsd: string;
-};
-
 export interface GetSingleInputSwapQuoteRequestBody {
   sender: Hex;
   amount: string;
@@ -124,23 +103,6 @@ export type GetSingleInputSwapQuoteReturnType = {
   relayerFee: TokenAmount;
   relayRequestId: Hex;
 };
-
-export interface SubmitSwapRequestBody {
-  sender: Hex;
-  signedSwapSteps: SignedCrossChainSwapStep[];
-  amountIn: string;
-  amountOut: string;
-  amountInUsd: string;
-  amountOutUsd: string;
-  tokenIn: Token;
-  tokenOut: Token;
-  relayerServiceFeeAmount: string;
-  relayerServiceFeeUsd: string;
-}
-
-export interface SubmitSingleChainSwapRequestBody {
-  signedSwapSteps: SignedCrossChainSwapStep[];
-}
 
 export interface SubmitSingleInputSwapRequestBody {
   signedApproveStep: SignedApproveStep | null;

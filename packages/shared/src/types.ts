@@ -72,10 +72,6 @@ export interface ApproveStep {
   };
 }
 
-export type SignedCrossChainSwapStep = CrossChainSwapStep & {
-  signature: Hex;
-};
-
 export type SignedSingleInputSwapStep = SwapStep & {
   signature: Hex;
 };

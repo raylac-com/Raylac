@@ -4,9 +4,7 @@
     "run": "dotenv -e ../../.env -- tsx $1"
   },
   "dependencies": {
-    "@noble/secp256k1": "^2.1.0",
     "@raylac/api": "workspace:*",
-    "@raylac/db": "workspace:*",
     "@raylac/shared": "workspace:*",
     "@trpc/client": "11.0.0-rc.439",
     "@trpc/server": "11.0.0-rc.439",
@@ -14,7 +12,6 @@
     "axios": "^1.7.2",
     "bip39": "^3.1.0",
     "dotenv": "^16.4.5",
-    "nanoid": "^5.0.7",
     "viem": "^2.17.0"
   },
   "devDependencies": {
