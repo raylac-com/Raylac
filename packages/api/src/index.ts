@@ -11,7 +11,6 @@ import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.
 import {
   BuildSendRequestBody,
   GetHistoryRequestBody,
-  GetSingleChainSwapQuoteRequestBody,
   GetSingleInputSwapQuoteRequestBody,
   SendTxRequestBody,
   SubmitSingleInputSwapRequestBody,
@@ -24,7 +23,6 @@ import { ed, logger, st } from '@raylac/shared-backend';
 import getTokenPrice from './api/getTokenPrice/getTokenPrice';
 import { getTokenPriceMock } from './api/getTokenPrice/getTokenPrice.mock';
 import getHistory from './api/getHistory/getHistory';
-import getSingleChainSwapQuote from './api/getSingleChainSwapQuote/getSingleChainSwapQuote';
 import getLidoApy from './api/getLidoApy/getLidoApy';
 import getSingleInputSwapQuote from './api/getSingleInputSwapQuote/getSingleInputSwapQuote';
 import submitSingleInputSwap from './api/submitSingleInputSwap/submitSingleInputSwap';
@@ -94,14 +92,6 @@ export const appRouter = router({
   sendBridgeTx: publicProcedure.input(z.any()).mutation(async ({ input }) => {
     return sendBridgeTx(input as SendBridgeTxRequestBody);
   }),
-
-  getSingleChainSwapQuote: publicProcedure
-    .input(z.any())
-    .mutation(async ({ input }) => {
-      return getSingleChainSwapQuote(
-        input as GetSingleChainSwapQuoteRequestBody
-      );
-    }),
 
   getSingleInputSwapQuote: publicProcedure
     .input(z.any())

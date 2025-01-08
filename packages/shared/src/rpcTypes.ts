@@ -84,26 +84,6 @@ export interface SendBridgeTxRequestBody {
   };
 }
 
-export interface GetSingleChainSwapQuoteRequestBody {
-  sender: Hex;
-  amount: string;
-  inputToken: Token;
-  outputToken: Token;
-  chainId: number;
-}
-
-export type GetSingleChainSwapQuoteReturnType = {
-  swapSteps: CrossChainSwapStep[];
-  relayerServiceFeeAmount: string;
-  relayerServiceFeeUsd: string;
-  amountIn: string;
-  amountOut: string;
-  amountInFormatted: string;
-  amountOutFormatted: string;
-  amountInUsd: string;
-  amountOutUsd: string;
-};
-
 export interface GetSingleInputSwapQuoteRequestBody {
   sender: Hex;
   amount: string;
