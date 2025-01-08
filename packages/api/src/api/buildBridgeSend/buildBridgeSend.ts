@@ -17,7 +17,7 @@ import { relayApi } from '../../lib/relay';
 import axios from 'axios';
 import { getNonce } from '../../utils';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
-import { zeroAddress } from 'viem';
+import { Hex, zeroAddress } from 'viem';
 
 const buildBridgeSend = async ({
   from,
@@ -211,7 +211,14 @@ const buildBridgeSend = async ({
     return crossChainSendStep;
   });
 
+  const swapStep = quote.steps.find(step => step.id === 'swap');
+
+  if (!swapStep) {
+    throw new Error('Swap step not found');
+  }
+
   return {
+    relayRequestId: swapStep.requestId as Hex,
     steps: steps,
     transfer: {
       from: from,

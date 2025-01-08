@@ -7,6 +7,7 @@ import { Chain } from 'viem';
 import { BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useEffect, useRef } from 'react';
 import colors from '@/lib/styles/colors';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const ChainListItem = ({ chain }: { chain: Chain }) => {
   return (
@@ -27,14 +28,17 @@ const ChainListItem = ({ chain }: { chain: Chain }) => {
 };
 
 const SelectChainSheet = ({
+  title,
   open,
   onSelect,
   onClose,
 }: {
+  title: string;
   open: boolean;
   onSelect: (chain: Chain) => void;
   onClose: () => void;
 }) => {
+  const insets = useSafeAreaInsets();
   const ref = useRef<BottomSheetModal>(null);
 
   useEffect(() => {
@@ -51,8 +55,10 @@ const SelectChainSheet = ({
       ref={ref}
       style={{
         flex: 1,
-        padding: 16,
         rowGap: 16,
+        paddingTop: insets.top + 16,
+        paddingBottom: insets.bottom + 156,
+        paddingHorizontal: 16,
       }}
       index={0}
       onDismiss={onClose}
@@ -74,7 +80,7 @@ const SelectChainSheet = ({
             color: colors.subbedText,
           }}
         >
-          {`Select chain`}
+          {title}
         </StyledText>
       </View>
       <BottomSheetFlatList

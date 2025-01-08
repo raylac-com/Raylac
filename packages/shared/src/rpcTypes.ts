@@ -141,15 +141,12 @@ export interface GetSingleInputSwapQuoteRequestBody {
 export type GetSingleInputSwapQuoteReturnType = {
   approveStep: ApproveStep | null;
   swapStep: SwapStep;
-  amountIn: string;
-  amountOut: string;
-  amountInFormatted: string;
-  amountOutFormatted: string;
-  amountInUsd: string;
-  amountOutUsd: string;
-  relayerServiceFeeUsd: string;
-  originChainGasAmountFormatted: string;
-  originChainGasUsd: string;
+  amountIn: TokenAmount;
+  amountOut: TokenAmount;
+  relayerFeeToken: Token;
+  originChainGas: TokenAmount;
+  relayerFee: TokenAmount;
+  relayRequestId: Hex;
 };
 
 export interface SubmitSwapRequestBody {
@@ -185,61 +182,45 @@ export interface GetHistoryRequestBody {
   addresses: Hex[];
 }
 
-export type TransferHistoryItem = {
-  txHash: Hex;
-  from: Hex;
-  to: Hex;
-  destinationChainId: number;
-  amount: string;
-  amountUsd: string;
-  bridges: {
-    txHash: Hex;
-    toChainId: number;
-    fromChainId: number;
-    amountIn: string;
-    amountOut: string;
-    bridgeFeeAmount: string;
-    bridgeFeeUsd: string;
-  }[];
-  token: Token;
-};
-
-export type SwapHistoryItem = {
-  lineItems: {
-    txHash: Hex;
-    fromChainId: number;
-    toChainId: number;
-  }[];
-  address: Hex;
-  amountIn: string;
-  amountOut: string;
-  amountInUsd: string;
-  amountOutUsd: string;
-  tokenIn: Token;
-  tokenOut: Token;
-  amountInFormatted: string;
-  amountOutFormatted: string;
-};
-
-export type HistoryItem = TransferHistoryItem | SwapHistoryItem;
-
 export enum HistoryItemType {
   OUTGOING = 'outgoing',
   INCOMING = 'incoming',
   MOVE_FUNDS = 'move_funds',
   PENDING = 'pending',
+  SWAP = 'swap',
 }
 
-export type GetHistoryReturnType = {
-  from: Hex;
-  to: Hex;
-  token: Token;
-  chainId: number;
-  amount: TokenAmount;
-  timestamp: string;
+export type TransferHistoryItem = {
+  relayId?: string;
   type: HistoryItemType;
   txHash: Hex;
-}[];
+  from: Hex;
+  to: Hex;
+  fromChainId: number;
+  toChainId: number;
+  amount: TokenAmount;
+  token: Token;
+  timestamp: string;
+  fromEnsName?: string;
+  toEnsName?: string;
+};
+
+export type SwapHistoryItem = {
+  relayId: string;
+  type: HistoryItemType.SWAP;
+  address: Hex;
+  amountIn: TokenAmount;
+  amountOut: TokenAmount;
+  tokenIn: Token;
+  tokenOut: Token;
+  fromChainId: number;
+  toChainId: number;
+  timestamp: string;
+};
+
+export type HistoryItem = TransferHistoryItem | SwapHistoryItem;
+
+export type GetHistoryReturnType = HistoryItem[];
 
 export interface GetEstimatedTransferGasRequestBody {
   chainId: number;
@@ -262,6 +243,7 @@ export interface BuildBridgeSendRequestBody {
 }
 
 export type BuildBridgeSendReturnType = {
+  relayRequestId: Hex;
   steps: CrossChainSwapStep[];
   transfer: {
     from: Hex;

@@ -1,7 +1,12 @@
-import { RelaySupportedCurrenciesResponseBody, Token } from '@raylac/shared';
+import {
+  RelayGetRequestsReturnType,
+  RelaySupportedCurrenciesResponseBody,
+  Token,
+} from '@raylac/shared';
 import { logger } from '@raylac/shared-backend';
 import axios from 'axios';
 import { getAddress, Hex } from 'viem';
+import { redisClient } from './redis';
 
 export const relayApi = axios.create({
   baseURL: 'https://api.relay.link',
@@ -37,7 +42,7 @@ export const relayGetCurrencies = async ({
         tokens: tokenAddresses,
         term: searchTerm,
         useExternalSearch,
-        limit: limit ?? 10,
+        limit: limit ?? 30,
       }
     );
 
@@ -52,7 +57,7 @@ export const relayGetCurrencies = async ({
         tokens: tokenAddresses,
         term: searchTerm,
         useExternalSearch: false,
-        limit: limit ?? 10,
+        limit: limit ?? 30,
       }),
       relayApi.post<RelaySupportedCurrenciesResponseBody>('currencies/v1', {
         chainIds,
@@ -134,4 +139,49 @@ export const relayGetToken = async ({
   };
 
   return token;
+};
+
+const getCachedRelayRequest = async ({
+  txHash,
+}: {
+  txHash: Hex;
+}): Promise<RelayGetRequestsReturnType['requests'][number] | null> => {
+  const cachedRequest = await redisClient.get(`relay:request:${txHash}`);
+
+  if (cachedRequest) {
+    return JSON.parse(cachedRequest);
+  }
+
+  return null;
+};
+
+export const relayGetRequest = async ({
+  txHash,
+}: {
+  txHash: Hex;
+}): Promise<RelayGetRequestsReturnType['requests'][number]> => {
+  const cachedRequest = await getCachedRelayRequest({ txHash });
+
+  if (cachedRequest) {
+    return cachedRequest;
+  }
+
+  const response = await relayApi.get<RelayGetRequestsReturnType>(
+    `requests/v2?hash=${txHash}`
+  );
+
+  if (response.data.requests.length === 0) {
+    throw new Error(`No request found for ${txHash}`);
+  }
+
+  const relayRequestData = response.data.requests[0];
+
+  if (relayRequestData.status !== 'pending') {
+    await redisClient.set(
+      `relay:request:${txHash}`,
+      JSON.stringify(relayRequestData)
+    );
+  }
+
+  return relayRequestData;
 };

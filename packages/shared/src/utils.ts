@@ -1,11 +1,18 @@
-import { Chain, formatUnits, getAddress, Hex, PrivateKeyAccount } from 'viem';
 import { TokenAmount, Token } from './types';
+import { Chain, formatUnits, getAddress, Hex, PrivateKeyAccount } from 'viem';
+import {} from './types';
 import * as chains from 'viem/chains';
 import { getAlchemyRpcUrl } from './ethRpc';
 import axios from 'axios';
-import BigNumber from 'bignumber.js';
-import { TokenBalancesReturnType } from './rpcTypes';
 import { RELAY_RECEIVER_ADDRESSES } from './addresses';
+import BigNumber from 'bignumber.js';
+import {
+  SendTxRequestBody,
+  HistoryItemType,
+  TokenBalancesReturnType,
+  TransferHistoryItem,
+  SendBridgeTxRequestBody,
+} from './rpcTypes';
 
 /**
  * Returns viem's `Chain` object from a chain ID
@@ -334,6 +341,9 @@ export type PerAddressTokenBalance = {
   }[];
 };
 
+/**
+ * Get per address balance of a token
+ */
 export const getPerAddressTokenBalance = ({
   tokenBalances,
   token,
@@ -381,10 +391,15 @@ export const getPerAddressTokenBalance = ({
     BigInt(0)
   );
 
+  const tokenPriceUsd =
+    balancesPerAddress.length > 0
+      ? Number(balancesPerAddress[0].totalBalance.tokenPriceUsd)
+      : 0;
+
   const formattedTotalBalance = formatTokenAmount({
     amount: totalBalance,
     token,
-    tokenPriceUsd: Number(balancesPerAddress[0].totalBalance.tokenPriceUsd),
+    tokenPriceUsd,
   });
 
   return {
@@ -496,4 +511,69 @@ export const getExplorerUrl = (chainId: number) => {
 
 export const isRelayReceiverAddress = (address: Hex) => {
   return RELAY_RECEIVER_ADDRESSES.includes(getAddress(address));
+};
+
+export const pendingTransferToHistoryItem = (
+  pendingTransfer: SendTxRequestBody
+): TransferHistoryItem => {
+  return {
+    type: HistoryItemType.PENDING,
+    txHash: pendingTransfer.signedTx,
+    from: pendingTransfer.transfer.from,
+    to: pendingTransfer.transfer.to,
+    fromChainId: pendingTransfer.chainId,
+    toChainId: pendingTransfer.chainId,
+    amount: pendingTransfer.transfer.amount,
+    token: pendingTransfer.transfer.token,
+    timestamp: new Date().toISOString(),
+  };
+};
+
+export const pendingBridgeTransferToHistoryItem = (
+  pendingBridgeTransfer: SendBridgeTxRequestBody
+): TransferHistoryItem => {
+  return {
+    type: HistoryItemType.PENDING,
+    txHash: '0x',
+    from: pendingBridgeTransfer.transfer.from,
+    to: pendingBridgeTransfer.transfer.to,
+    fromChainId: pendingBridgeTransfer.chainId,
+    toChainId: pendingBridgeTransfer.chainId,
+    amount: pendingBridgeTransfer.transfer.amount,
+    token: pendingBridgeTransfer.transfer.token,
+    timestamp: new Date().toISOString(),
+  };
+};
+
+const COLORS = [
+  { name: 'Cerulean', hex: '#007BA7' },
+  { name: 'Coral', hex: '#FF7F50' },
+  { name: 'Saffron', hex: '#F4C430' },
+  { name: 'Emerald', hex: '#50C878' },
+  { name: 'Amethyst', hex: '#9966CC' },
+  { name: 'Crimson', hex: '#DC143C' },
+  { name: 'Teal', hex: '#008080' },
+  { name: 'Turquoise', hex: '#40E0D0' },
+  { name: 'Salmon', hex: '#FA8072' },
+  { name: 'Lavender', hex: '#E6E6FA' },
+  { name: 'Slate Blue', hex: '#6A5ACD' },
+  { name: 'Steel Blue', hex: '#4682B4' },
+  { name: 'Pale Gold', hex: '#E6BE8A' },
+  { name: 'Olive Green', hex: '#808000' },
+  { name: 'Peach', hex: '#FFCBA4' },
+  { name: 'Navy', hex: '#000080' },
+  { name: 'Mint', hex: '#98FF98' },
+  { name: 'Mulberry', hex: '#C54B8C' },
+  { name: 'Azure', hex: '#007FFF' },
+  { name: 'Sandy Brown', hex: '#F4A460' },
+];
+
+export const getColorForAddress = (address: Hex): Hex => {
+  // Convert address to number by taking first 4 bytes
+  const addressNum = parseInt(address.slice(2, 10), 16);
+  // Use modulo to get index within COLORS array bounds
+  const colorIndex = addressNum % COLORS.length;
+
+  // eslint-disable-next-line security/detect-object-injection
+  return COLORS[colorIndex].hex as Hex;
 };

@@ -72,11 +72,12 @@ export const ChainSelectorSheet = ({
 };
 
 interface ChainSelectorProps {
+  title: string;
   chainId: number;
   setChainId: (chainId: number) => void;
 }
 
-const ChainSelector = ({ chainId, setChainId }: ChainSelectorProps) => {
+const ChainSelector = ({ title, chainId, setChainId }: ChainSelectorProps) => {
   const [isChainsSheetOpen, setIsChainsSheetOpen] = useState(false);
 
   return (
@@ -87,12 +88,13 @@ const ChainSelector = ({ chainId, setChainId }: ChainSelectorProps) => {
       >
         <Image
           source={getChainIcon(chainId)}
-          style={{ width: 24, height: 24 }}
+          style={{ width: 16, height: 16 }}
         />
         <StyledText>{getChainFromId(chainId).name}</StyledText>
         <Entypo name="chevron-down" size={20} color={colors.border} />
       </Pressable>
       <SelectChainSheet
+        title={title}
         open={isChainsSheetOpen}
         onSelect={chain => {
           setChainId(chain.id);

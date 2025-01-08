@@ -8,17 +8,12 @@ const StorybookStack = createNativeStackNavigator();
 const meta = {
   title: 'ImportAccount',
   component: ImportAccount,
-  argTypes: {},
-  args: {},
   decorators: [
     Story => (
       <StorybookStack.Navigator>
         <StorybookStack.Screen
           name="ImportAccount"
           component={() => Story()}
-          options={{
-            headerShown: false,
-          }}
         ></StorybookStack.Screen>
       </StorybookStack.Navigator>
     ),

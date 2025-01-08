@@ -1,5 +1,5 @@
 import { trpc } from '@/lib/trpc';
-import useUserAddresses from './useUserAddresses';
+import useUserAddresses from './useWriterAddresses';
 import { useQuery } from '@tanstack/react-query';
 import { getTotalUsdValue } from '@raylac/shared';
 

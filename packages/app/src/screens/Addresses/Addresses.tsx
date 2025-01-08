@@ -3,7 +3,7 @@ import StyledText from '@/components/StyledText/StyledText';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import { Alert, FlatList, Image, Pressable, View } from 'react-native';
 import colors from '@/lib/styles/colors';
-import { copyToClipboard, shortenAddress } from '@/lib/utils';
+import { copyToClipboard } from '@/lib/utils';
 import Toast from 'react-native-toast-message';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -13,6 +13,7 @@ import useDeleteAddress from '@/hooks/useDeleteAddress';
 import { supportedChains } from '@raylac/shared';
 import { getChainIcon } from '@/lib/utils';
 import { UserAddress } from '@/types';
+import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
 
 const AddressListItem = ({ address }: { address: UserAddress }) => {
   const { mutateAsync: deleteAddress } = useDeleteAddress();
@@ -78,13 +79,7 @@ const AddressListItem = ({ address }: { address: UserAddress }) => {
         onPress={onCopyPress}
       >
         <Feather name="copy" size={20} color={colors.border} />
-        <StyledText
-          style={{
-            fontWeight: 'bold',
-          }}
-        >
-          {shortenAddress(address.address)}
-        </StyledText>
+        <WalletIconAddress address={address.address} />
         {address.isDefault && (
           <StyledText style={{ color: colors.subbedText }}>
             {`Default`}

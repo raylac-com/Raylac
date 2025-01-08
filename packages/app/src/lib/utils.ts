@@ -1,5 +1,5 @@
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import { Hex } from 'viem';
+import { Hex, parseUnits } from 'viem';
 import * as Clipboard from 'expo-clipboard';
 import {
   arbitrum,
@@ -10,6 +10,7 @@ import {
   zksync,
 } from 'viem/chains';
 import { Platform } from 'react-native';
+import { TokenAmount } from '@raylac/shared';
 
 export const shortenAddress = (address: Hex) => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -58,4 +59,12 @@ export const triggerHapticFeedback = () => {
   if (Platform.OS === 'ios') {
     ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
   }
+};
+
+export const MOCK_TOKEN_AMOUNT: TokenAmount = {
+  amount: parseUnits('0.1', 18).toString(),
+  formatted: '0.1',
+  tokenPriceUsd: 1,
+  usdValue: '0.1',
+  usdValueFormatted: '0.1',
 };

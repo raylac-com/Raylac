@@ -1,16 +1,17 @@
+import Feather from '@expo/vector-icons/Feather';
+import * as Clipboard from 'expo-clipboard';
 import StyledText from '@/components/StyledText/StyledText';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import { Alert, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import colors from '@/lib/styles/colors';
 import { useState } from 'react';
 import useStartWatch from '@/hooks/useStartWatch';
-import { isAddress, Hex } from 'viem';
+import { isAddress, Hex, getAddress } from 'viem';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import useEnsAddress from '@/hooks/useEnsAddress';
+import SearchInputAccessory from '@/components/SearchInputAccessory/SearchInputAccessory';
 
 const StartWatch = () => {
-  const insets = useSafeAreaInsets();
   const [address, setAddress] = useState('');
   const { mutateAsync: startWatch } = useStartWatch();
 
@@ -20,14 +21,14 @@ const StartWatch = () => {
 
   const onStartPress = async () => {
     if (isAddress(address)) {
-      await startWatch({ address: address as Hex });
+      await startWatch({ address: getAddress(address) as Hex });
 
       navigation.reset({
         index: 0,
         routes: [{ name: 'Tabs', params: { screen: 'Home' } }],
       });
     } else if (ensAddress) {
-      await startWatch({ address: ensAddress as Hex });
+      await startWatch({ address: getAddress(ensAddress) as Hex });
 
       navigation.reset({
         index: 0,
@@ -39,18 +40,27 @@ const StartWatch = () => {
   };
 
   const canStart = isAddress(address) || ensAddress;
+  const inputAccessoryViewID = 'startwatch.input';
 
   return (
     <View
       style={{
         flex: 1,
         flexDirection: 'column',
-        padding: 16,
-        paddingBottom: insets.bottom,
+        paddingHorizontal: 16,
         rowGap: 16,
       }}
     >
       <View style={{ flexDirection: 'column', rowGap: 16 }}>
+        <View
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: 100,
+          }}
+        >
+          <Feather name="eye" size={48} color={colors.border} />
+        </View>
         <TextInput
           style={{
             borderWidth: 1,
@@ -67,11 +77,17 @@ const StartWatch = () => {
           autoCapitalize="none"
           autoCorrect={false}
           autoComplete="off"
-          placeholder="Your Ethereum address"
+          placeholder="ENS or Ethereum address"
+          inputAccessoryViewID={inputAccessoryViewID}
         />
-        <StyledText style={{ color: colors.border }}>
-          {ensAddress ? `${ensAddress}` : ''}
-        </StyledText>
+        {ensAddress && (
+          <StyledText style={{ color: colors.border }}>{ensAddress}</StyledText>
+        )}
+        <SearchInputAccessory
+          onClear={() => setAddress('')}
+          onPaste={async () => setAddress(await Clipboard.getStringAsync())}
+          inputAccessoryViewID={inputAccessoryViewID}
+        />
       </View>
       <StyledButton
         title="Watch address"

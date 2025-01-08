@@ -19,8 +19,10 @@ import {
   ETH,
   getPublicClient,
   GetSingleInputSwapQuoteRequestBody,
+  GetSingleInputSwapQuoteReturnType,
   getWalletClient,
   signEIP1159Tx,
+  sleep,
   SubmitSingleInputSwapRequestBody,
   USDC,
   WST_ETH,
@@ -37,16 +39,17 @@ const swap = async () => {
   const requestBody: GetSingleInputSwapQuoteRequestBody = {
     sender: sender,
     inputToken: USDC,
-    outputToken: USDC,
+    outputToken: ETH,
     amount: swapAmount.toString(),
     inputChainId: base.id,
-    outputChainId: arbitrum.id,
+    outputChainId: base.id,
   };
 
   const quote = await client.getSingleInputSwapQuote.mutate(requestBody);
 
   console.log('quote');
   console.log(JSON.stringify(quote, null, 2));
+  await sleep(3000);
 
   const signedApproveTx = quote.approveStep
     ? await signEIP1159Tx({
@@ -70,6 +73,9 @@ const swap = async () => {
       signature: signedSwapTx,
     },
   };
+
+  console.log('submitRequestBody');
+  console.log(JSON.stringify(submitRequestBody, null, 2));
 
   const tx = await client.submitSingleInputSwap.mutate(submitRequestBody);
 };

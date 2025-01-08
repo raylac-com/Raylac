@@ -1,14 +1,14 @@
 import { Pressable, TextInput, View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import SwapAmountInput from '../SwapAmountInput';
-import { formatUnits } from 'viem';
+import { formatUnits, Hex } from 'viem';
 import { formatAmount, SupportedTokensReturnType } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
-import { useSearchInputTokenSheet } from '@/contexts/SearchInputTokenSheetContext';
-import ChainSelector from '../ChainSelector/ChainSelector';
+import TokenChainSelector from '../TokenChainSelector/TokenChainSelector';
+import SearchInputTokenSheet from '@/components/SearchInputTokenSheet/SearchInputTokenSheet';
 
 const SwapInputCard = ({
   token,
@@ -19,6 +19,7 @@ const SwapInputCard = ({
   setAmount,
   chainId,
   setChainId,
+  address,
 }: {
   token: SupportedTokensReturnType[number] | null;
   setToken: (value: SupportedTokensReturnType[number] | null) => void;
@@ -28,8 +29,9 @@ const SwapInputCard = ({
   isLoadingBalance: boolean;
   chainId: number | null;
   setChainId: (value: number | null) => void;
+  address: Hex | null;
 }) => {
-  const { setIsOpen, selectedToken } = useSearchInputTokenSheet();
+  const [isOpen, setIsOpen] = useState(false);
 
   const [userInputMode, setUserInputMode] = useState<'USD' | 'TOKEN'>('TOKEN');
   const [usdAmountInput, setUsdAmountInput] = useState<string>('');
@@ -37,10 +39,10 @@ const SwapInputCard = ({
   const { data: tokenPriceUsd } = useTokenPriceUsd(token);
 
   useEffect(() => {
-    if (selectedToken) {
-      setToken(selectedToken);
+    if (token) {
+      setToken(token);
     }
-  }, [selectedToken]);
+  }, [token]);
 
   useEffect(() => {
     if (userInputMode === 'TOKEN' && tokenPriceUsd !== undefined) {
@@ -89,10 +91,16 @@ const SwapInputCard = ({
         rowGap: 14,
       }}
     >
-      {showChainSelector && chainId !== null && (
-        <ChainSelector chainId={chainId} setChainId={setChainId} />
+      {showChainSelector && chainId !== null && address !== null && (
+        <TokenChainSelector
+          chainId={chainId}
+          setChainId={setChainId}
+          token={token}
+          address={address}
+        />
       )}
       <SwapAmountInput
+        chainId={chainId}
         selectedToken={token}
         onSelectTokenPress={() => {
           setIsOpen(true);
@@ -152,6 +160,18 @@ const SwapInputCard = ({
           </Pressable>
         </View>
       )}
+      <SearchInputTokenSheet
+        address={address}
+        open={isOpen}
+        onSelect={({ token, chainId }) => {
+          setToken(token);
+          setChainId(chainId);
+          setIsOpen(false);
+        }}
+        onClose={() => {
+          setIsOpen(false);
+        }}
+      />
     </View>
   );
 };

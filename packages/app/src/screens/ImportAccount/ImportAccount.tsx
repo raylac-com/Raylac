@@ -1,15 +1,18 @@
+import * as Clipboard from 'expo-clipboard';
+import Feather from '@expo/vector-icons/Feather';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { useCallback, useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { TextInput, View } from 'react-native';
 import Toast from 'react-native-toast-message';
-import MultiLineInput from '@/components/MultiLineInput';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useImportPrivKey from '@/hooks/useImportPrivKey';
 import { Hex, isHex } from 'viem';
 import * as bip39 from 'bip39';
 import useImportMnemonic from '@/hooks/useImportMnemonic';
 import { setBackupVerified } from '@/lib/key';
+import colors from '@/lib/styles/colors';
+import SearchInputAccessory from '@/components/SearchInputAccessory/SearchInputAccessory';
 
 /**
  * Sign in screen
@@ -114,26 +117,52 @@ const ImportAccount = () => {
     };
   }, []);
 
+  const inputAccessoryViewID = 'import-account-input-accessory';
+
   return (
     <View
       style={{
         flex: 1,
         flexDirection: 'column',
-        justifyContent: 'space-between',
         rowGap: 16,
         padding: 16,
         paddingBottom: insets.bottom + 32,
       }}
     >
-      <MultiLineInput
+      <View
+        style={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: 100,
+        }}
+      >
+        <Feather name="key" size={48} color={colors.border} />
+      </View>
+      <TextInput
+        style={{
+          height: 160,
+          color: colors.text,
+          width: '100%',
+          borderWidth: 1,
+          borderColor: colors.border,
+          borderRadius: 16,
+          padding: 16,
+        }}
+        placeholder={'Enter mnemonic or private key'}
+        placeholderTextColor={colors.border}
+        multiline={true}
         editable
         autoFocus
         autoCapitalize="none"
-        multiline
-        placeholder={'Enter mnemonic or private key'}
         value={inputText}
         onChangeText={setInputText}
-      ></MultiLineInput>
+        inputAccessoryViewID={inputAccessoryViewID}
+      />
+      <SearchInputAccessory
+        onClear={() => setInputText('')}
+        onPaste={async () => setInputText(await Clipboard.getStringAsync())}
+        inputAccessoryViewID={inputAccessoryViewID}
+      />
       <StyledButton
         isLoading={isImportingPrivKey || isImportingMnemonic}
         title={`Import ${isInputPrivKey ? 'private key' : isInputMnemonic ? 'mnemonic' : 'account'}`}

@@ -5,16 +5,18 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { SupportedTokensReturnType } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
 import Skeleton from '@/components/Skeleton/Skeleton';
-import TokenLogo from '@/components/FastImage/TokenLogo';
+import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 
 const SwapAmountInput = ({
   selectedToken,
+  chainId,
   onSelectTokenPress,
   amount,
   setAmount,
   isLoadingAmount,
 }: {
   selectedToken: SupportedTokensReturnType[number] | null;
+  chainId: number | null;
   onSelectTokenPress: () => void;
   isLoadingAmount: boolean;
   amount: string;
@@ -33,9 +35,10 @@ const SwapAmountInput = ({
         onPress={onSelectTokenPress}
       >
         {selectedToken ? (
-          <TokenLogo
-            source={{ uri: selectedToken.logoURI }}
-            style={{ width: 34, height: 34 }}
+          <TokenLogoWithChain
+            chainId={chainId}
+            logoURI={selectedToken.logoURI}
+            size={34}
           />
         ) : (
           <View

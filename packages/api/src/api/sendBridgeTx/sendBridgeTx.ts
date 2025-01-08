@@ -4,6 +4,7 @@ import {
   SendBridgeTxRequestBody,
 } from '@raylac/shared';
 import { logger } from '@raylac/shared-backend';
+import { Hex } from 'viem';
 
 const sendBridgeTx = async ({
   signedTxs,
@@ -17,6 +18,7 @@ const sendBridgeTx = async ({
     chainId,
   });
 
+  const txHashes: Hex[] = [];
   for (const signedTx of signedTxs) {
     const tx = await walletClient.sendRawTransaction({
       serializedTransaction: signedTx,
@@ -26,7 +28,11 @@ const sendBridgeTx = async ({
     await publicClient.waitForTransactionReceipt({
       hash: tx,
     });
+
+    txHashes.push(tx);
   }
+
+  return txHashes[0];
 };
 
 export default sendBridgeTx;

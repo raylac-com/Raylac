@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node';
 import { initTRPC } from '@trpc/server';
 import type { Context } from './context';
 import { ZodError } from 'zod';
@@ -25,21 +26,13 @@ const t = initTRPC.context<Context>().create({
 });
 
 export const router = t.router;
-export const publicProcedure = t.procedure;
 export const createCallerFactory = t.createCallerFactory;
 
-// procedure that asserts that the user is logged in
-export const authedProcedure = t.procedure.use(async opts => {
-  const { ctx } = opts;
+const sentryMiddleware = t.middleware(
+  Sentry.trpcMiddleware({
+    attachRpcInput: true,
+  })
+);
 
-  if (!ctx.userId) {
-    throw new Error('User not logged in');
-  }
-
-  return opts.next({
-    ctx: {
-      ...ctx,
-      userId: ctx.userId,
-    },
-  });
-});
+const sentrifiedProcedure = t.procedure.use(sentryMiddleware);
+export const publicProcedure = sentrifiedProcedure;

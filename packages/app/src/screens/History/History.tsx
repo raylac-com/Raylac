@@ -8,14 +8,29 @@ import {
 } from 'react-native';
 import colors from '@/lib/styles/colors';
 import StyledText from '@/components/StyledText/StyledText';
+import TransferListItem from '@/components/TransferListItem/TransferListItem';
+import {
+  HistoryItemType,
+  TransferHistoryItem,
+  SwapHistoryItem as SwapHistoryItemType,
+} from '@raylac/shared';
 import useUserAddresses from '@/hooks/useUserAddresses';
-import HistoryListItem from '@/components/HistoryListItem/HistoryListItem';
+import SwapListItem from '@/components/SwapListItem/SwapListItem';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootTabsParamsList } from '@/navigation/types';
+import { Hex } from 'viem/_types/types/misc';
 
-const History = () => {
+type Props = NativeStackScreenProps<RootTabsParamsList, 'History'>;
+
+const History = ({ route }: Props) => {
+  const pendingTransfer = route.params?.pendingTransfer;
+  const pendingBridgeTransfer = route.params?.pendingBridgeTransfer;
+  const pendingSwap = route.params?.pendingSwap;
+
   const { data: addresses } = useUserAddresses();
 
   const {
-    data: swapHistory,
+    data: fetchedHistory,
     isLoading,
     isRefetching,
     refetch,
@@ -29,6 +44,79 @@ const History = () => {
       refetchOnMount: true,
     }
   );
+
+  const history =
+    fetchedHistory?.map(item => ({
+      ...item,
+      isPending: false,
+    })) ?? [];
+
+  const isTxConfirmed = (txHash: Hex) => {
+    return fetchedHistory?.some(
+      item => item.type === HistoryItemType.OUTGOING && item.txHash === txHash
+    );
+  };
+
+  const isRelayIntentConfirmed = (requestId: string) => {
+    return fetchedHistory?.some(
+      item =>
+        (item.type === HistoryItemType.OUTGOING ||
+          item.type === HistoryItemType.SWAP) &&
+        item.relayId === requestId
+    );
+  };
+
+  if (fetchedHistory) {
+    if (pendingTransfer) {
+      if (!isTxConfirmed(pendingTransfer.txHash)) {
+        // We show the pending transfer in the history as a pending transfer is not confirmed yet
+        history.unshift({
+          type: HistoryItemType.PENDING,
+          txHash: '0x',
+          from: pendingTransfer.from,
+          to: pendingTransfer.to,
+          fromChainId: pendingTransfer.chainId,
+          toChainId: pendingTransfer.chainId,
+          amount: pendingTransfer.amount,
+          token: pendingTransfer.token,
+          timestamp: new Date().toISOString(),
+          isPending: true,
+        });
+      }
+    } else if (pendingBridgeTransfer) {
+      if (!isRelayIntentConfirmed(pendingBridgeTransfer.requestId)) {
+        // We show the pending transfer in the history as a pending transfer is not confirmed yet
+        history.unshift({
+          type: HistoryItemType.PENDING,
+          txHash: '0x',
+          from: pendingBridgeTransfer.from,
+          to: pendingBridgeTransfer.to,
+          fromChainId: pendingBridgeTransfer.fromChainId,
+          toChainId: pendingBridgeTransfer.toChainId,
+          amount: pendingBridgeTransfer.amount,
+          token: pendingBridgeTransfer.token,
+          timestamp: new Date().toISOString(),
+          isPending: true,
+        });
+      }
+    } else if (pendingSwap) {
+      if (!isRelayIntentConfirmed(pendingSwap.requestId)) {
+        history.unshift({
+          type: HistoryItemType.SWAP,
+          relayId: pendingSwap.requestId,
+          address: pendingSwap.address,
+          amountIn: pendingSwap.inputAmount,
+          amountOut: pendingSwap.outputAmount,
+          tokenIn: pendingSwap.tokenIn,
+          tokenOut: pendingSwap.tokenOut,
+          fromChainId: pendingSwap.fromChainId,
+          toChainId: pendingSwap.toChainId,
+          timestamp: new Date().toISOString(),
+          isPending: true,
+        });
+      }
+    }
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -60,11 +148,18 @@ const History = () => {
           paddingHorizontal: 16,
           rowGap: 24,
         }}
-        data={swapHistory ?? []}
+        data={history ?? []}
         renderItem={({ item }) => {
           return (
             <Pressable onPress={() => {}}>
-              <HistoryListItem transfer={item} />
+              {item.type === HistoryItemType.SWAP ? (
+                <SwapListItem
+                  swap={item as SwapHistoryItemType}
+                  isPending={item.isPending}
+                />
+              ) : (
+                <TransferListItem transfer={item as TransferHistoryItem} />
+              )}
             </Pressable>
           );
         }}

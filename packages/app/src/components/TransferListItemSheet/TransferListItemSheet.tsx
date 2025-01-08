@@ -2,9 +2,8 @@ import Feather from '@expo/vector-icons/Feather';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import {
   getExplorerUrl,
-  GetHistoryReturnType,
   HistoryItemType,
-  isRelayReceiverAddress,
+  TransferHistoryItem,
 } from '@raylac/shared';
 import { useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,16 +16,19 @@ import { Linking, Pressable, View } from 'react-native';
 import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import { Hex } from 'viem';
 import Toast from 'react-native-toast-message';
+import useEnsName from '@/hooks/useEnsName';
 
-const LABELS: Record<HistoryItemType, string> = {
+type TransferListItemType = Exclude<HistoryItemType, HistoryItemType.SWAP>;
+
+const LABELS: Record<TransferListItemType, string> = {
   [HistoryItemType.OUTGOING]: 'Send',
   [HistoryItemType.INCOMING]: 'Received',
   [HistoryItemType.MOVE_FUNDS]: 'Move Funds',
   [HistoryItemType.PENDING]: 'Pending',
 };
 
-export interface HistoryListItemSheetProps {
-  transfer: GetHistoryReturnType[number];
+export interface TransferListItemSheetProps {
+  transfer: TransferHistoryItem;
   onClose: () => void;
 }
 
@@ -35,6 +37,7 @@ const shortenTxHash = (txHash: string) => {
 };
 
 const FromAddress = ({ address }: { address: Hex }) => {
+  const { data: senderEnsName } = useEnsName(address);
   const onCopyPress = () => {
     copyToClipboard(address);
 
@@ -59,9 +62,7 @@ const FromAddress = ({ address }: { address: Hex }) => {
       >
         <Feather name="copy" size={18} color={colors.subbedText} />
         <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-          {isRelayReceiverAddress(address)
-            ? 'Relay Receiver'
-            : shortenAddress(address)}
+          {senderEnsName ?? shortenAddress(address)}
         </StyledText>
       </FeedbackPressable>
     </Pressable>
@@ -69,6 +70,7 @@ const FromAddress = ({ address }: { address: Hex }) => {
 };
 
 const ToAddress = ({ address }: { address: Hex }) => {
+  const { data: recipientEnsName } = useEnsName(address);
   const onCopyPress = () => {
     copyToClipboard(address);
 
@@ -93,9 +95,7 @@ const ToAddress = ({ address }: { address: Hex }) => {
       >
         <Feather name="copy" size={18} color={colors.subbedText} />
         <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-          {isRelayReceiverAddress(address)
-            ? 'Relay Receiver'
-            : shortenAddress(address)}
+          {recipientEnsName ?? shortenAddress(address)}
         </StyledText>
       </FeedbackPressable>
     </Pressable>
@@ -138,14 +138,14 @@ const DateTime = ({ date }: { date: Date }) => {
   );
 };
 
-const HistoryListItemSheet = ({
+const TransferListItemSheet = ({
   transfer,
   onClose,
-}: HistoryListItemSheetProps) => {
+}: TransferListItemSheetProps) => {
   const insets = useSafeAreaInsets();
   const ref = useRef<BottomSheetModal>(null);
 
-  const label = LABELS[transfer.type];
+  const label = LABELS[transfer.type as TransferListItemType];
 
   useEffect(() => {
     ref.current?.present();
@@ -186,7 +186,11 @@ const HistoryListItemSheet = ({
         >
           <TokenLogoWithChain
             logoURI={transfer.token.logoURI}
-            chainId={transfer.chainId}
+            chainId={
+              transfer.type === HistoryItemType.INCOMING
+                ? transfer.toChainId
+                : transfer.fromChainId
+            }
             size={64}
           />
           <StyledText
@@ -207,7 +211,7 @@ const HistoryListItemSheet = ({
         >
           <FromAddress address={transfer.from} />
           <ToAddress address={transfer.to} />
-          <TxHash txHash={transfer.txHash} chainId={transfer.chainId} />
+          <TxHash txHash={transfer.txHash} chainId={transfer.toChainId} />
           <DateTime date={new Date(transfer.timestamp)} />
         </View>
       </BottomSheetView>
@@ -215,4 +219,4 @@ const HistoryListItemSheet = ({
   );
 };
 
-export default HistoryListItemSheet;
+export default TransferListItemSheet;

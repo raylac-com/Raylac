@@ -4,39 +4,50 @@ import StyledText from '../StyledText/StyledText';
 import Feather from '@expo/vector-icons/Feather';
 import { shortenAddress } from '@/lib/utils';
 import {
-  GetHistoryReturnType,
   HistoryItemType,
   isRelayReceiverAddress,
+  TransferHistoryItem,
 } from '@raylac/shared';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import { useState } from 'react';
-import HistoryListItemSheet from '../HistoryListItemSheet/HistoryListItemSheet';
+import TransferListItemSheet from '../TransferListItemSheet/TransferListItemSheet';
 import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
+import useEnsName from '@/hooks/useEnsName';
 
-const LABELS: Record<HistoryItemType, string> = {
+const LABELS: Record<Exclude<HistoryItemType, HistoryItemType.SWAP>, string> = {
   [HistoryItemType.OUTGOING]: 'Sent',
   [HistoryItemType.INCOMING]: 'Received',
   [HistoryItemType.MOVE_FUNDS]: 'Move Funds',
   [HistoryItemType.PENDING]: 'Pending',
 };
 
-const ICONS: Record<HistoryItemType, keyof typeof Feather.glyphMap> = {
+const ICONS: Record<
+  Exclude<HistoryItemType, HistoryItemType.SWAP>,
+  keyof typeof Feather.glyphMap
+> = {
   [HistoryItemType.OUTGOING]: 'send',
   [HistoryItemType.INCOMING]: 'arrow-down-circle',
   [HistoryItemType.MOVE_FUNDS]: 'arrow-right-circle',
   [HistoryItemType.PENDING]: 'clock',
 };
 
-const COLORS: Record<HistoryItemType, string> = {
+const COLORS: Record<Exclude<HistoryItemType, HistoryItemType.SWAP>, string> = {
   [HistoryItemType.OUTGOING]: colors.angelPink,
   [HistoryItemType.INCOMING]: colors.green,
   [HistoryItemType.MOVE_FUNDS]: colors.subbedText,
   [HistoryItemType.PENDING]: colors.subbedText,
 };
 
-const HistoryListItem = (props: { transfer: GetHistoryReturnType[number] }) => {
-  const label = LABELS[props.transfer.type];
+const TransferListItem = (props: { transfer: TransferHistoryItem }) => {
+  const label =
+    LABELS[
+      props.transfer.type as Exclude<HistoryItemType, HistoryItemType.SWAP>
+    ];
+
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  const { data: senderEnsName } = useEnsName(props.transfer.from);
+  const { data: recipientEnsName } = useEnsName(props.transfer.to);
 
   return (
     <View>
@@ -52,7 +63,11 @@ const HistoryListItem = (props: { transfer: GetHistoryReturnType[number] }) => {
           style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
         >
           <TokenLogoWithChain
-            chainId={props.transfer.chainId}
+            chainId={
+              props.transfer.type === HistoryItemType.INCOMING
+                ? props.transfer.toChainId
+                : props.transfer.fromChainId
+            }
             logoURI={props.transfer.token.logoURI}
             size={42}
           />
@@ -72,9 +87,23 @@ const HistoryListItem = (props: { transfer: GetHistoryReturnType[number] }) => {
             >
               <StyledText style={{ color: colors.border }}>{label}</StyledText>
               <Feather
-                name={ICONS[props.transfer.type]}
+                name={
+                  ICONS[
+                    props.transfer.type as Exclude<
+                      HistoryItemType,
+                      HistoryItemType.SWAP
+                    >
+                  ]
+                }
                 size={18}
-                color={COLORS[props.transfer.type]}
+                color={
+                  COLORS[
+                    props.transfer.type as Exclude<
+                      HistoryItemType,
+                      HistoryItemType.SWAP
+                    >
+                  ]
+                }
               />
             </View>
             <StyledText
@@ -82,11 +111,9 @@ const HistoryListItem = (props: { transfer: GetHistoryReturnType[number] }) => {
             >
               {isRelayReceiverAddress(props.transfer.to)
                 ? 'Relay Receiver'
-                : shortenAddress(
-                    props.transfer.type === HistoryItemType.INCOMING
-                      ? props.transfer.from
-                      : props.transfer.to
-                  )}
+                : props.transfer.type === HistoryItemType.INCOMING
+                  ? senderEnsName || shortenAddress(props.transfer.from)
+                  : recipientEnsName || shortenAddress(props.transfer.to)}
             </StyledText>
           </View>
         </View>
@@ -95,7 +122,7 @@ const HistoryListItem = (props: { transfer: GetHistoryReturnType[number] }) => {
         </StyledText>
       </FeedbackPressable>
       {isSheetOpen && (
-        <HistoryListItemSheet
+        <TransferListItemSheet
           transfer={props.transfer}
           onClose={() => setIsSheetOpen(false)}
         />
@@ -104,4 +131,4 @@ const HistoryListItem = (props: { transfer: GetHistoryReturnType[number] }) => {
   );
 };
 
-export default HistoryListItem;
+export default TransferListItem;

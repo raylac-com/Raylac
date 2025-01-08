@@ -69,9 +69,18 @@ const Tabs = () => {
           ),
         }}
       ></Tab.Screen>
-      {/**
-       * 
       <Tab.Screen
+        name="Addresses"
+        component={Addresses}
+        options={{
+          tabBarLabel: () => null,
+          tabBarShowLabel: false,
+          tabBarIcon: ({ color }) => (
+            <AntDesign name="bars" size={24} color={color} />
+          ),
+        }}
+      ></Tab.Screen>
+      {/*<Tab.Screen
         name="Swap"
         component={Swap}
         options={{
@@ -81,9 +90,7 @@ const Tabs = () => {
           ),
           tabBarShowLabel: false,
         }}
-      ></Tab.Screen>
-       */}
-
+      ></Tab.Screen>*/}
       <Tab.Screen
         name="History"
         component={History}
@@ -92,17 +99,6 @@ const Tabs = () => {
           tabBarShowLabel: false,
           tabBarIcon: ({ color }) => (
             <AntDesign name="clockcircle" size={24} color={color} />
-          ),
-        }}
-      ></Tab.Screen>
-      <Tab.Screen
-        name="Addresses"
-        component={Addresses}
-        options={{
-          tabBarLabel: () => null,
-          tabBarShowLabel: false,
-          tabBarIcon: ({ color }) => (
-            <AntDesign name="bars" size={24} color={color} />
           ),
         }}
       ></Tab.Screen>

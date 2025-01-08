@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { trpc } from '@/lib/trpc';
-import { getQueryKey } from '@trpc/react-query';
 import {
   signEIP1159Tx,
   BuildBridgeSendReturnType,
@@ -10,10 +9,10 @@ import {
 import { getPrivateKey } from '@/lib/key';
 import { privateKeyToAccount } from 'viem/accounts';
 import { Hex } from 'viem';
+import { getQueryKey } from '@trpc/react-query';
 
 const useBridgeSend = () => {
   const queryClient = useQueryClient();
-
   const { mutateAsync: sendBridgeTx } = trpc.sendBridgeTx.useMutation();
 
   return useMutation({
@@ -52,11 +51,13 @@ const useBridgeSend = () => {
         },
       };
 
-      await sendBridgeTx(sendBridgeTxRequestBody);
-
-      await queryClient.invalidateQueries({
-        queryKey: getQueryKey(trpc.getHistory),
+      queryClient.invalidateQueries({
+        queryKey: getQueryKey(trpc.getTokenBalances),
       });
+
+      const txHash = await sendBridgeTx(sendBridgeTxRequestBody);
+
+      return txHash;
     },
   });
 };

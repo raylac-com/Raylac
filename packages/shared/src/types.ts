@@ -300,3 +300,125 @@ export interface PendingTx {
   amount: TokenAmount;
   token: Token;
 }
+
+export interface RelayGetRequestsReturnType {
+  requests: {
+    id: string;
+    status: string;
+    user: Hex;
+    recipient: Hex;
+    data: {
+      failReason: string;
+      fees: {
+        gas: string;
+        fixed: string;
+        price: string;
+      };
+      feesUsd: {
+        gas: string;
+        fixed: string;
+        price: string;
+      };
+      inTxs: {
+        fee: string;
+        data: {
+          to: Hex;
+          data: Hex;
+          from: Hex;
+          value: string;
+        };
+        stateChanges: {
+          change: {
+            data: {
+              tokenKind: string;
+              tokenAddress: Hex;
+            };
+            kind: string;
+            balanceDiff: string;
+          };
+          address: Hex;
+        }[];
+        hash: Hex;
+        block: number;
+        type: string;
+        chainId: number;
+        timestamp: number;
+      }[];
+      currency: string;
+      currencyObject: {
+        chainId: number;
+        address: Hex;
+        symbol: string;
+        name: string;
+        decimals: number;
+      };
+      feeCurrency: string;
+      feeCurrencyObject: {
+        chainId: number;
+        address: Hex;
+        symbol: string;
+        name: string;
+        decimals: number;
+      };
+      metadata: {
+        sender: Hex;
+        recipient: Hex;
+        currencyIn: {
+          currency: {
+            chainId: number;
+            address: Hex;
+            symbol: string;
+            name: string;
+            decimals: number;
+          };
+          amount: string;
+          amountFormatted: string;
+          amountUsd: string;
+          minimumAmount: string;
+        };
+        currencyOut: {
+          currency: {
+            chainId: number;
+            address: Hex;
+            symbol: string;
+            name: string;
+            decimals: number;
+          };
+          amount: string;
+          amountFormatted: string;
+          amountUsd: string;
+          minimumAmount: string;
+        };
+        rate: string;
+      };
+      timeEstimate: number;
+      outTxs: {
+        fee: string;
+        data: {
+          to: Hex;
+          data: Hex;
+          from: Hex;
+          value: string;
+        };
+        stateChanges: {
+          change: {
+            data: {
+              tokenKind: string;
+              tokenAddress: Hex;
+            };
+            kind: string;
+            balanceDiff: string;
+          };
+          address: Hex;
+        }[];
+        hash: Hex;
+        block: number;
+        type: string;
+        chainId: number;
+        timestamp: number;
+      }[];
+    };
+    createdAt: string;
+    updatedAt: string;
+  }[];
+}

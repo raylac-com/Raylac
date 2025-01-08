@@ -1,15 +1,14 @@
 import Entypo from '@expo/vector-icons/Entypo';
-import TokenLogo from '@/components/FastImage/TokenLogo';
+import * as Clipboard from 'expo-clipboard';
+import TokenLogo from '@/components/TokenLogo/TokenLogo';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import SendToCard from '@/components/SendToCard/SendToCard';
 import StyledText from '@/components/StyledText/StyledText';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
-import useTokenBalances from '@/hooks/useTokenBalances';
-import useUserAddresses from '@/hooks/useUserAddresses';
 import colors from '@/lib/styles/colors';
 import { RootStackParamsList } from '@/navigation/types';
-import { TokenAmount, formatTokenAmount, Token } from '@raylac/shared';
+import { TokenAmount, Token } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useMemo, useState } from 'react';
 import {
@@ -21,19 +20,27 @@ import {
   View,
 } from 'react-native';
 import { Hex } from 'viem';
-import BigNumber from 'bignumber.js';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AddressType } from '@/types';
+import useTokenBalancePerAddress from '@/hooks/useTokenBalancePerAddress';
 import useWriterAddresses from '@/hooks/useWriterAddresses';
+import SearchInputAccessory from '@/components/SearchInputAccessory/SearchInputAccessory';
+import {
+  withTiming,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 
 const SearchBar = ({
   onAddressSelect,
   selectedAddress,
   onSearchInputChange,
+  searchText,
 }: {
   onAddressSelect: (address: Hex) => void;
   selectedAddress: Hex | null;
   onSearchInputChange: (text: string) => void;
+  searchText: string;
 }) => {
   const { data: writerAddresses } = useWriterAddresses();
 
@@ -121,6 +128,15 @@ const SearchBar = ({
           shadowRadius: 3.84,
           elevation: 5,
         }}
+        value={searchText}
+        inputAccessoryViewID={'test'}
+      />
+      <SearchInputAccessory
+        onClear={() => onSearchInputChange('')}
+        onPaste={async () =>
+          onSearchInputChange(await Clipboard.getStringAsync())
+        }
+        inputAccessoryViewID={'test'}
       />
     </View>
   );
@@ -166,8 +182,29 @@ const TokenListItem = ({
   onPress: ({ token, chainId }: { token: Token; chainId: number }) => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const heightAnimation = useSharedValue(0);
 
   const isMultiChain = balanceBreakdown.length > 1;
+
+  const animatedStyles = useAnimatedStyle(() => {
+    return {
+      height: heightAnimation.value,
+      rowGap: 12,
+      overflow: 'hidden',
+    };
+  });
+
+  useEffect(() => {
+    if (isExpanded) {
+      heightAnimation.value = withTiming(balanceBreakdown.length * 60, {
+        duration: 200,
+      });
+    } else {
+      heightAnimation.value = withTiming(0, {
+        duration: 200,
+      });
+    }
+  }, [isExpanded, balanceBreakdown.length]);
 
   return (
     <View
@@ -230,116 +267,22 @@ const TokenListItem = ({
           )}
         </FeedbackPressable>
       </View>
-      {isExpanded && (
-        <View style={{ marginBottom: 32, rowGap: 12 }}>
-          {balanceBreakdown.map((b, index) => (
-            <FeedbackPressable
-              key={index}
-              onPress={() => onPress({ token, chainId: b.chainId })}
-            >
-              <TokenChainItem
-                chainId={b.chainId}
-                token={token}
-                balance={b.balance}
-              />
-            </FeedbackPressable>
-          ))}
-        </View>
-      )}
+      <Animated.View style={animatedStyles}>
+        {balanceBreakdown.map((b, index) => (
+          <FeedbackPressable
+            onPress={() => onPress({ token, chainId: b.chainId })}
+            key={index}
+          >
+            <TokenChainItem
+              chainId={b.chainId}
+              token={token}
+              balance={b.balance}
+            />
+          </FeedbackPressable>
+        ))}
+      </Animated.View>
     </View>
   );
-};
-
-type AddressTokenBalances = {
-  address: Hex;
-  tokenBalances: {
-    token: Token;
-    totalBalance: TokenAmount;
-    chainBalances: {
-      chainId: number;
-      balance: TokenAmount;
-    }[];
-  }[];
-};
-
-const useTokenBalancePerAddress = ({
-  addresses,
-}: {
-  addresses: Hex[];
-}): AddressTokenBalances[] | undefined => {
-  const { data: tokenBalances } = useTokenBalances();
-
-  const tokenBalancesPerAddress: AddressTokenBalances[] = [];
-
-  if (tokenBalances && addresses) {
-    for (const address of addresses) {
-      const addressTokenBalances = tokenBalances.filter(
-        balance => balance.address === address
-      );
-
-      // Group by token
-      const addressTokenIds = [
-        ...new Set(addressTokenBalances.map(balance => balance.token.id)),
-      ];
-
-      const groupByTokens = [];
-
-      for (const tokenId of addressTokenIds) {
-        const tokenBalances = addressTokenBalances.filter(
-          balance => balance.token.id === tokenId
-        );
-
-        const totalBalance = tokenBalances.reduce(
-          (acc, balance) => acc + BigInt(balance.balance.amount),
-          BigInt(0)
-        );
-
-        const formattedTotalBalance = formatTokenAmount({
-          amount: totalBalance,
-          token: tokenBalances[0].token,
-          tokenPriceUsd: tokenBalances[0].balance.tokenPriceUsd,
-        });
-
-        groupByTokens.push({
-          token: tokenBalances[0].token,
-          totalBalance: formattedTotalBalance,
-          chainBalances: tokenBalances.map(balance => ({
-            chainId: balance.chainId,
-            balance: balance.balance,
-          })),
-        });
-      }
-
-      const sortedGroupByTokens = groupByTokens.sort((a, b) => {
-        if (a.token.addresses.length > b.token.addresses.length) {
-          return -1;
-        }
-
-        if (a.token.addresses.length < b.token.addresses.length) {
-          return 1;
-        }
-
-        if (
-          new BigNumber(a.totalBalance.usdValue).gt(b.totalBalance.usdValue)
-        ) {
-          return -1;
-        } else {
-          return 1;
-        }
-      });
-
-      tokenBalancesPerAddress.push({
-        address,
-        tokenBalances: sortedGroupByTokens,
-      });
-    }
-  }
-
-  const sortedTokenBalancesPerAddress = tokenBalancesPerAddress.sort((a, b) => {
-    return b.tokenBalances.length - a.tokenBalances.length;
-  });
-
-  return sortedTokenBalancesPerAddress;
 };
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'SelectToken'>;
@@ -347,7 +290,7 @@ type Props = NativeStackScreenProps<RootStackParamsList, 'SelectToken'>;
 const SelectToken = ({ navigation, route }: Props) => {
   const insets = useSafeAreaInsets();
   const toAddress = route.params.toAddress;
-  const { data: userAddresses } = useUserAddresses();
+  const { data: writerAddresses } = useWriterAddresses();
 
   const [selectedAddress, setSelectedAddress] = useState<Hex | null>(null);
   const [searchText, setSearchText] = useState('');
@@ -355,9 +298,7 @@ const SelectToken = ({ navigation, route }: Props) => {
   const tokenBalancesPerAddress = useTokenBalancePerAddress({
     addresses: selectedAddress
       ? [selectedAddress]
-      : (userAddresses
-          ?.filter(a => a.type !== AddressType.Watch)
-          .map(a => a.address) ?? []),
+      : (writerAddresses?.map(a => a.address) ?? []),
   });
 
   const onTokenSelect = ({
@@ -404,12 +345,18 @@ const SelectToken = ({ navigation, route }: Props) => {
         paddingBottom: insets.bottom,
       }}
     >
-      <View style={{ padding: 16 }}>
-        <SendToCard toAddress={toAddress} />
-      </View>
       <SectionList
-        style={{ flex: 1, padding: 16 }}
+        style={{
+          flex: 1,
+          padding: 16,
+        }}
+        ListHeaderComponent={
+          <View style={{ marginBottom: 32 }}>
+            <SendToCard toAddress={toAddress} />
+          </View>
+        }
         contentContainerStyle={{
+          paddingBottom: 120,
           rowGap: 8,
         }}
         scrollEnabled
@@ -451,6 +398,7 @@ const SelectToken = ({ navigation, route }: Props) => {
         stickySectionHeadersEnabled={false}
       />
       <SearchBar
+        searchText={searchText}
         selectedAddress={selectedAddress}
         onAddressSelect={onAddressSelect}
         onSearchInputChange={onSearchInputChange}

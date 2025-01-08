@@ -1,12 +1,13 @@
 import StyledText from '@/components/StyledText/StyledText';
-import { shortenAddress } from '@/lib/utils';
 import { Pressable, View } from 'react-native';
 import { Hex } from 'viem';
 import { BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useEffect, useRef } from 'react';
 import colors from '@/lib/styles/colors';
 import { triggerHapticFeedback } from '@/lib/utils';
-import useUserAddresses from '@/hooks/useUserAddresses';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import useWriterAddresses from '@/hooks/useWriterAddresses';
+import WalletIconAddress from '../WalletIconAddress/WalletIconAddress';
 
 const AddressListItem = ({ address }: { address: Hex }) => {
   return (
@@ -17,7 +18,7 @@ const AddressListItem = ({ address }: { address: Hex }) => {
         columnGap: 8,
       }}
     >
-      <StyledText>{shortenAddress(address)}</StyledText>
+      <WalletIconAddress address={address} />
     </View>
   );
 };
@@ -25,12 +26,15 @@ const AddressListItem = ({ address }: { address: Hex }) => {
 const SelectAddressSheet = ({
   open,
   onSelect,
+  onClose,
 }: {
   open: boolean;
   onSelect: (address: Hex) => void;
+  onClose: () => void;
 }) => {
-  const { data: addresses } = useUserAddresses();
+  const { data: writerAddresses } = useWriterAddresses();
   const ref = useRef<BottomSheetModal>(null);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (open) {
@@ -45,14 +49,16 @@ const SelectAddressSheet = ({
     <BottomSheetModal
       ref={ref}
       style={{
-        flex: 1,
-        padding: 16,
+        paddingTop: insets.top + 16,
+        paddingBottom: insets.bottom + 16,
+        paddingHorizontal: 16,
         rowGap: 16,
       }}
-      index={0}
+      onDismiss={onClose}
+      index={1}
       enablePanDownToClose
-      enableDynamicSizing={false}
-      snapPoints={['100%']}
+      enableDynamicSizing={true}
+      snapPoints={['50%', '100%']}
     >
       <View
         style={{
@@ -60,7 +66,6 @@ const SelectAddressSheet = ({
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
-          marginBottom: 16,
         }}
       >
         <StyledText
@@ -72,8 +77,13 @@ const SelectAddressSheet = ({
         </StyledText>
       </View>
       <BottomSheetFlatList
-        data={addresses}
-        contentContainerStyle={{ rowGap: 16 }}
+        data={writerAddresses}
+        style={{
+          marginTop: 24,
+        }}
+        contentContainerStyle={{
+          rowGap: 16,
+        }}
         renderItem={({ item }) => (
           <Pressable
             onPress={() => {

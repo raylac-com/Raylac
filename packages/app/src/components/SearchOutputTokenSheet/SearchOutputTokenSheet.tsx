@@ -1,19 +1,21 @@
 import Skeleton from '@/components/Skeleton/Skeleton';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
-import { trpc } from '@/lib/trpc';
-import { TokenAmount, supportedChains, Token } from '@raylac/shared';
-import { useRef, useState } from 'react';
+import { TokenAmount, Token, supportedChains } from '@raylac/shared';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
-import BottomSheet, {
+import {
   BottomSheetFlatList,
+  BottomSheetModal,
   BottomSheetTextInput,
 } from '@gorhom/bottom-sheet';
-import TokenLogo from '../FastImage/TokenLogo';
+import TokenLogo from '../TokenLogo/TokenLogo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getChainIcon } from '@/lib/utils';
-import useTokenBalances from '@/hooks/useTokenBalances';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { trpc } from '@/lib/trpc';
+import useDebounce from '@/hooks/useDebounce';
 
 const TokenListItem = ({
   token,
@@ -80,7 +82,7 @@ const TokenListItem = ({
 };
 
 export const SearchInput = ({
-  value,
+  value: _value,
   onChangeText,
 }: {
   value: string;
@@ -89,7 +91,6 @@ export const SearchInput = ({
   return (
     <BottomSheetTextInput
       placeholder="Search for a token"
-      value={value}
       onChangeText={onChangeText}
       autoCapitalize="none"
       style={{
@@ -103,109 +104,90 @@ export const SearchInput = ({
   );
 };
 
-const SearchTokenSheet = ({
+const SearchOutputTokenSheet = ({
+  open,
   onSelectToken,
   onClose,
 }: {
+  open: boolean;
   onSelectToken: (token: Token) => void;
   onClose: () => void;
 }) => {
-  const ref = useRef<BottomSheet>(null);
+  const ref = useRef<BottomSheetModal>(null);
   const [searchText, setSearchText] = useState('');
+  const insets = useSafeAreaInsets();
 
-  const { data: tokenBalances, isLoading: isLoadingTokenBalances } =
-    useTokenBalances();
+  useEffect(() => {
+    if (open) {
+      ref.current?.present();
+    } else {
+      ref.current?.dismiss();
+    }
+  }, [open]);
 
-  const { data: supportedTokens, isLoading: isLoadingSupportedTokens } =
-    trpc.getSupportedTokens.useQuery(
-      {
-        chainIds: supportedChains.map(chain => chain.id),
-        searchTerm: searchText,
-      },
-      {
-        enabled: !isLoadingTokenBalances,
-      }
-    );
+  const { debouncedValue: debouncedSearchText } = useDebounce(searchText, 200);
 
-  const tokensWithBalances =
-    tokenBalances?.filter(
-      token =>
-        token.token.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        token.token.symbol.toLowerCase().includes(searchText.toLowerCase())
-    ) ?? [];
+  const { data: tokens } = trpc.getSupportedTokens.useQuery({
+    chainIds: supportedChains.map(chain => chain.id),
+    searchTerm: debouncedSearchText,
+  });
 
-  // Get the token addresses of the tokens with balances
-  const tokenAddressesWithBalances = tokensWithBalances.flatMap(token =>
-    token.token.addresses.map(address => address.address)
-  );
-
-  // Get the tokens without balances
-  const tokensWithoutBalances =
-    supportedTokens
-      ?.filter(
-        token =>
-          !token.addresses.some(address =>
-            tokenAddressesWithBalances.includes(address.address)
-          )
-      )
-      .map(token => ({
-        token: token,
-      })) ?? [];
-
-  const tokenList = [...tokensWithBalances, ...tokensWithoutBalances];
+  const tokenList = tokens ?? [undefined, undefined, undefined];
 
   return (
-    <BottomSheet
+    <BottomSheetModal
       ref={ref}
       style={{
-        flex: 1,
         paddingHorizontal: 16,
-        paddingVertical: 32,
+        paddingTop: insets.top + 16,
+        paddingBottom: insets.bottom,
       }}
       index={0}
       snapPoints={['100%']}
       enablePanDownToClose
-      onClose={onClose}
+      onDismiss={onClose}
       enableDynamicSizing={false}
     >
-      <SearchInput value={searchText} onChangeText={setSearchText} />
-      <BottomSheetFlatList
-        data={
-          isLoadingTokenBalances || isLoadingSupportedTokens
-            ? new Array(3).fill(undefined)
-            : tokenList
-        }
-        contentContainerStyle={{
-          marginTop: 14,
-          rowGap: 16,
+      <SearchInput
+        value={searchText}
+        onChangeText={text => {
+          setSearchText(text);
         }}
+      />
+      <BottomSheetFlatList
+        data={tokenList}
+        keyExtractor={(_item, index) => index.toString()}
+        style={{
+          marginTop: 16,
+        }}
+        contentContainerStyle={{
+          rowGap: 16,
+          paddingBottom: 240,
+        }}
+        nestedScrollEnabled
         ListEmptyComponent={
           <StyledText style={{ textAlign: 'center', color: colors.border }}>
             {`No tokens found`}
           </StyledText>
         }
-        renderItem={({
-          item,
-        }: {
-          item: (typeof tokenList)[number] | undefined;
-        }) => {
+        renderItem={({ item }) => {
           if (item === undefined) {
             return <Skeleton style={{ width: '100%', height: 42 }} />;
           }
 
           return (
             <TokenListItem
-              token={item.token}
+              token={item}
               balance={null}
               onPress={() => {
-                onSelectToken(item.token);
+                onSelectToken(item);
               }}
             />
           );
         }}
       />
-    </BottomSheet>
+    </BottomSheetModal>
   );
 };
 
-export default SearchTokenSheet;
+export default SearchOutputTokenSheet;

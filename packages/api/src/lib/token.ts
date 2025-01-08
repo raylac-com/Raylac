@@ -15,29 +15,11 @@ export const cacheToken = async ({
   await redisClient.set(getTokenKey(tokenAddress), JSON.stringify(token));
 };
 
-export const cacheTokens = async (tokens: Token[]) => {
-  await redisClient.mSet(
-    Object.fromEntries(
-      tokens.map(token => [token.addresses[0].address, JSON.stringify(token)])
-    )
-  );
-};
-
 export const getCachedToken = async (
   tokenAddress: Hex
 ): Promise<Token | null> => {
   const token = await redisClient.get(getTokenKey(tokenAddress));
   return token ? JSON.parse(token) : null;
-};
-
-export const getCachedTokens = async (): Promise<Token[]> => {
-  const keys = await redisClient.keys('*');
-  if (keys.length === 0) {
-    return [];
-  }
-
-  const tokens = await redisClient.mGet(keys);
-  return tokens.filter(token => token !== null).map(token => JSON.parse(token));
 };
 
 export const getToken = async ({

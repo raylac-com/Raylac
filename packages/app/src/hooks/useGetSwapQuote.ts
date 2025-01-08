@@ -1,11 +1,9 @@
 import { GetSingleInputSwapQuoteRequestBody, Token } from '@raylac/shared';
 import { useMutation } from '@tanstack/react-query';
 import { trpc } from '@/lib/trpc';
-import useUserAccount from './useUserAccount';
+import { Hex } from 'viem';
 
 const useGetSwapQuote = () => {
-  const { data: userAccount } = useUserAccount();
-
   const { mutateAsync: getSingleInputSwapQuote } =
     trpc.getSingleInputSwapQuote.useMutation({
       throwOnError: false,
@@ -13,24 +11,22 @@ const useGetSwapQuote = () => {
 
   return useMutation({
     mutationFn: async ({
+      address,
       amount,
       inputToken,
       outputToken,
       inputChainId,
       outputChainId,
     }: {
+      address: Hex;
       amount: bigint;
       inputToken: Token;
       outputToken: Token;
       inputChainId: number;
       outputChainId: number;
     }) => {
-      if (!userAccount) {
-        throw new Error('User address not loaded');
-      }
-
       const requestBody: GetSingleInputSwapQuoteRequestBody = {
-        sender: userAccount.address,
+        sender: address,
         amount: amount.toString(),
         inputToken,
         outputToken,

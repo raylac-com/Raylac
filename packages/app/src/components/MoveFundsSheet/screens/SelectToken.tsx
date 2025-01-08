@@ -10,7 +10,7 @@ import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { useNavigation } from '@react-navigation/native';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
-import TokenLogo from '@/components/FastImage/TokenLogo';
+import TokenLogo from '@/components/TokenLogo/TokenLogo';
 import { useMoveFundsContext } from '@/contexts/MoveFundsContext';
 
 const TokenListItem = ({
