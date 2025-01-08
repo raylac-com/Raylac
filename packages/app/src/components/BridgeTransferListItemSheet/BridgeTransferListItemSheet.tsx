@@ -1,6 +1,6 @@
 import Feather from '@expo/vector-icons/Feather';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
-import { getExplorerUrl, TransferHistoryItem } from '@raylac/shared';
+import { getExplorerUrl, BridgeTransferHistoryItem } from '@raylac/shared';
 import { useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import StyledText from '../StyledText/StyledText';
@@ -13,9 +13,10 @@ import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import { Hex } from 'viem';
 import Toast from 'react-native-toast-message';
 import useEnsName from '@/hooks/useEnsName';
+import ChainLogo from '../ChainLogo/ChainLogo';
 
-export interface TransferListItemSheetProps {
-  transfer: TransferHistoryItem;
+export interface BridgeTransferListItemSheetProps {
+  transfer: BridgeTransferHistoryItem;
   onClose: () => void;
 }
 
@@ -100,9 +101,14 @@ const TxHash = ({ txHash, chainId }: { txHash: string; chainId: number }) => {
       <StyledText style={{ color: colors.subbedText }}>
         {`Transaction`}{' '}
       </StyledText>
-      <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-        {`${shortenTxHash(txHash)}`}
-      </StyledText>
+      <View
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+      >
+        <ChainLogo chainId={chainId} size={16} />
+        <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
+          {`${shortenTxHash(txHash)}`}
+        </StyledText>
+      </View>
     </FeedbackPressable>
   );
 };
@@ -125,10 +131,10 @@ const DateTime = ({ date }: { date: Date }) => {
   );
 };
 
-const TransferListItemSheet = ({
+const BridgeTransferListItemSheet = ({
   transfer,
   onClose,
-}: TransferListItemSheetProps) => {
+}: BridgeTransferListItemSheetProps) => {
   const insets = useSafeAreaInsets();
   const ref = useRef<BottomSheetModal>(null);
 
@@ -196,7 +202,8 @@ const TransferListItemSheet = ({
         >
           <FromAddress address={transfer.from} />
           <ToAddress address={transfer.to} />
-          <TxHash txHash={transfer.txHash} chainId={transfer.toChainId} />
+          <TxHash txHash={transfer.inTxHash} chainId={transfer.fromChainId} />
+          <TxHash txHash={transfer.outTxHash} chainId={transfer.toChainId} />
           <DateTime date={new Date(transfer.timestamp)} />
         </View>
       </BottomSheetView>
@@ -204,4 +211,4 @@ const TransferListItemSheet = ({
   );
 };
 
-export default TransferListItemSheet;
+export default BridgeTransferListItemSheet;

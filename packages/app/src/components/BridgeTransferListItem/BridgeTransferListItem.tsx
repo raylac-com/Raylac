@@ -3,14 +3,16 @@ import colors from '@/lib/styles/colors';
 import StyledText from '../StyledText/StyledText';
 import Feather from '@expo/vector-icons/Feather';
 import { shortenAddress } from '@/lib/utils';
-import { TransferHistoryItem } from '@raylac/shared';
+import { BridgeTransferHistoryItem } from '@raylac/shared';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import { useState } from 'react';
-import TransferListItemSheet from '../TransferListItemSheet/TransferListItemSheet';
+import BridgeTransferListItemSheet from '../BridgeTransferListItemSheet/BridgeTransferListItemSheet';
 import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import useEnsName from '@/hooks/useEnsName';
 
-const TransferListItem = (props: { transfer: TransferHistoryItem }) => {
+const BridgeTransferListItem = (props: {
+  transfer: BridgeTransferHistoryItem;
+}) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const { data: senderEnsName } = useEnsName(props.transfer.from);
@@ -79,7 +81,7 @@ const TransferListItem = (props: { transfer: TransferHistoryItem }) => {
         </StyledText>
       </FeedbackPressable>
       {isSheetOpen && (
-        <TransferListItemSheet
+        <BridgeTransferListItemSheet
           transfer={props.transfer}
           onClose={() => setIsSheetOpen(false)}
         />
@@ -88,4 +90,4 @@ const TransferListItem = (props: { transfer: TransferHistoryItem }) => {
   );
 };
 
-export default TransferListItem;
+export default BridgeTransferListItem;

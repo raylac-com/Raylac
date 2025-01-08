@@ -2,14 +2,11 @@ import {
   formatTokenAmount,
   GetHistoryRequestBody,
   GetHistoryReturnType,
-  RELAY_RECEIVER_ADDRESSES,
   supportedChains,
   SwapHistoryItem,
-  TransferHistoryItem,
   Token,
   HistoryItemType,
-  RELAY_ERC20_ROUTER_ADDRESSES,
-  HistoryItem,
+  BridgeTransferHistoryItem,
 } from '@raylac/shared';
 import { getAddress, Hex, parseUnits, zeroAddress } from 'viem';
 import { getAlchemyClient } from '../../lib/alchemy';
@@ -18,7 +15,6 @@ import { logger } from '@raylac/shared-backend';
 import { getToken } from '../../lib/token';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
 import { relayGetRequest } from '../../lib/relay';
-import { getEnsName } from '../../lib/ens';
 
 const getTokenPriceOrThrow = async (token: Token): Promise<number> => {
   const tokenUsdPrice = await getTokenUsdPrice({ token });
@@ -52,28 +48,50 @@ const mapAsRelayTx = async ({
 }: {
   txHash: Hex;
   address: Hex;
-}): Promise<HistoryItem> => {
+}): Promise<BridgeTransferHistoryItem | SwapHistoryItem | null> => {
   const relayRequest = await relayGetRequest({ txHash });
 
-  const currencyIn = relayRequest.data.metadata.currencyIn;
-  const currencyOut = relayRequest.data.metadata.currencyOut;
-  const fromChainId = relayRequest.data.inTxs[0].chainId;
-  const toChainId = relayRequest.data.outTxs[0].chainId;
+  if (!relayRequest) {
+    return null;
+  }
 
-  const amountIn = currencyIn.amount;
+  if (relayRequest.data.inTxs.length === 0) {
+    throw new Error(
+      `Relay request ${relayRequest.id} has 0 input transactions`
+    );
+  }
+
+  if (relayRequest.data.outTxs.length === 0) {
+    throw new Error(
+      `Relay request ${relayRequest.id} has 0 output transactions`
+    );
+  }
+
+  const inTx = relayRequest.data.inTxs[0];
+  const outTx = relayRequest.data.outTxs[0];
+
+  const sender = relayRequest.data.metadata.sender;
+  const recipient = relayRequest.data.metadata.recipient;
+
+  const currencyIn = relayRequest.data.metadata.currencyIn;
+  const amountIn = relayRequest.data.metadata.currencyIn.amount;
+
+  const currencyOut = relayRequest.data.metadata.currencyOut;
+  const amountOut = relayRequest.data.metadata.currencyOut.amount;
+
+  const fromChainId = inTx.chainId;
+  const toChainId = outTx.chainId;
 
   const tokenIn = await getTokenOrThrow({
-    tokenAddress: currencyIn.currency.address,
-    chainId: currencyIn.currency.chainId,
+    tokenAddress: getAddress(currencyIn.currency.address),
+    chainId: fromChainId,
   });
 
   const tokenInUsdPrice = await getTokenPriceOrThrow(tokenIn);
 
-  const amountOut = currencyOut.amount;
-
   const tokenOut = await getTokenOrThrow({
-    tokenAddress: currencyOut.currency.address,
-    chainId: currencyOut.currency.chainId,
+    tokenAddress: getAddress(currencyOut.currency.address),
+    chainId: toChainId,
   });
 
   const tokenOutUsdPrice = await getTokenPriceOrThrow(tokenOut);
@@ -90,14 +108,11 @@ const mapAsRelayTx = async ({
     tokenPriceUsd: tokenOutUsdPrice,
   });
 
-  const sender = getAddress(relayRequest.data.metadata.sender);
-  const recipient = getAddress(relayRequest.data.metadata.recipient);
+  if (tokenIn.id === tokenOut.id) {
+    // Map as a transfer
+    const direction = sender === address ? 'outgoing' : 'incoming';
 
-  const senderEnsName = await getEnsName(sender);
-  const recipientEnsName = await getEnsName(recipient);
-
-  if (currencyIn.currency.address === currencyOut.currency.address) {
-    const transferItem: TransferHistoryItem = {
+    const transferItem: BridgeTransferHistoryItem = {
       relayId: relayRequest.id,
       from: sender,
       to: recipient,
@@ -106,69 +121,14 @@ const mapAsRelayTx = async ({
       fromChainId: fromChainId,
       toChainId: toChainId,
       timestamp: relayRequest.createdAt,
-      type:
-        address === sender
-          ? HistoryItemType.OUTGOING
-          : HistoryItemType.INCOMING,
-      txHash: txHash,
-      fromEnsName: senderEnsName ?? undefined,
-      toEnsName: recipientEnsName ?? undefined,
+      type: HistoryItemType.BRIDGE_TRANSFER,
+      direction,
+      inTxHash: inTx.hash,
+      outTxHash: outTx.hash,
     };
 
     return transferItem;
   }
-
-  if (relayRequest.data.inTxs.length !== 1) {
-    throw new Error(
-      `Relay request ${relayRequest.id} has ${relayRequest.data.inTxs.length} input transactions`
-    );
-  }
-
-  const swapCurrencyIn = relayRequest.data.inTxs[0].stateChanges.find(
-    change =>
-      change.address === address.toLowerCase() &&
-      change.change.balanceDiff.startsWith('-')
-  )?.change.data.tokenAddress;
-
-  if (!swapCurrencyIn) {
-    throw new Error(
-      `No swap currency in found for Relay request ${relayRequest.id}`
-    );
-  }
-
-  if (relayRequest.data.outTxs.length !== 1) {
-    throw new Error(
-      `Relay request ${relayRequest.id} has ${relayRequest.data.outTxs.length} output transactions`
-    );
-  }
-
-  if (relayRequest.data.outTxs[0].stateChanges === undefined) {
-    throw new Error(
-      `Relay request ${relayRequest.id} has no output state changes`
-    );
-  }
-
-  const swapCurrencyOut = relayRequest.data.outTxs[0].stateChanges.find(
-    change =>
-      change.address === address.toLowerCase() &&
-      !change.change.balanceDiff.startsWith('-')
-  );
-
-  if (!swapCurrencyOut) {
-    throw new Error(
-      `No swap currency out found for Relay request ${relayRequest.id}`
-    );
-  }
-
-  const swapTokenIn = await getTokenOrThrow({
-    tokenAddress: swapCurrencyIn,
-    chainId: relayRequest.data.inTxs[0].chainId,
-  });
-
-  const swapTokenOut = await getTokenOrThrow({
-    tokenAddress: swapCurrencyOut.change.data.tokenAddress,
-    chainId: relayRequest.data.outTxs[0].chainId,
-  });
 
   const swapHistoryItem: SwapHistoryItem = {
     relayId: relayRequest.id,
@@ -176,11 +136,13 @@ const mapAsRelayTx = async ({
     address: getAddress(relayRequest.data.metadata.sender),
     amountIn: amountInFormatted,
     amountOut: amountOutFormatted,
-    tokenIn: swapTokenIn,
-    tokenOut: swapTokenOut,
+    tokenIn: tokenIn,
+    tokenOut: tokenOut,
     fromChainId: fromChainId,
     toChainId: toChainId,
     timestamp: relayRequest.createdAt,
+    inTxHash: inTx.hash,
+    outTxHash: outTx.hash,
   };
 
   return swapHistoryItem;
@@ -256,27 +218,18 @@ const getHistoryOnChain = async ({
               const fromAddress = getAddress(transfer.from as Hex);
               const toAddress = getAddress(transfer.to! as Hex);
 
-              if (
-                RELAY_RECEIVER_ADDRESSES.includes(toAddress) ||
-                RELAY_RECEIVER_ADDRESSES.includes(fromAddress) ||
-                RELAY_ERC20_ROUTER_ADDRESSES.includes(toAddress as Hex) ||
-                RELAY_ERC20_ROUTER_ADDRESSES.includes(fromAddress as Hex) ||
-                fromAddress === '0xf70da97812CB96acDF810712Aa562db8dfA3dbEF'
-              ) {
-                const relayTx = await mapAsRelayTx({
-                  txHash: transfer.hash as Hex,
-                  address,
-                });
+              const relayTx = await mapAsRelayTx({
+                txHash: transfer.hash as Hex,
+                address,
+              });
+
+              if (relayTx) {
                 return relayTx;
               }
 
-              let type;
-
-              if (addresses.includes(fromAddress)) {
-                type = HistoryItemType.OUTGOING;
-              } else {
-                type = HistoryItemType.INCOMING;
-              }
+              const direction = addresses.includes(fromAddress)
+                ? 'outgoing'
+                : 'incoming';
 
               const formattedAmount = formatTokenAmount({
                 amount: parseUnits(
@@ -295,7 +248,8 @@ const getHistoryOnChain = async ({
                 fromChainId: chainId,
                 toChainId: chainId,
                 timestamp: transfer.metadata.blockTimestamp,
-                type,
+                type: HistoryItemType.TRANSFER,
+                direction,
                 txHash: transfer.hash as Hex,
               };
 
@@ -306,11 +260,17 @@ const getHistoryOnChain = async ({
         .filter(item => item !== null)
         // Filter out duplicate Relay txs
         .filter((item, index, self) => {
-          if (item.relayId === undefined) {
+          if (item.type === HistoryItemType.TRANSFER) {
             return true;
           }
 
-          return self.findIndex(sw => sw.relayId === item.relayId) === index;
+          return (
+            self.findIndex(
+              sw =>
+                (sw as BridgeTransferHistoryItem | SwapHistoryItem).relayId ===
+                item.relayId
+            ) === index
+          );
         });
 
       return transfers;
@@ -332,53 +292,23 @@ const getHistory = async ({
         getHistoryOnChain({ addresses, chainId: chainId.id })
       )
     )
-  ).flat();
-
-  /*
-  const confirmedTxHashes = transfers.map(tx => tx.tx);
-
-  // Get pending transactions
-  const pendingTxs = await Promise.all(
-    addresses.map(async address => {
-      const pendingTxsInRedis = await getPendingTxsFromRedis(address);
-
-      // Array to store pending transactions filtered from redis
-      const pendingTxs = [];
-
-      // Array to store confirmed transactions filtered from redis
-      const confirmedTxs = [];
-
-      for (const tx of pendingTxsInRedis) {
-        // Check if the transaction is confirmed
-        const isConfirmed = confirmedTxHashes.includes(tx.txHash);
-
-        if (!isConfirmed) {
-          pendingTxs.push(tx);
-        } else {
-          confirmedTxs.push(tx);
-        }
+  )
+    .flat()
+    // Filter out duplicate Relay txs
+    .filter((item, index, self) => {
+      if (
+        item.type !== HistoryItemType.BRIDGE_TRANSFER &&
+        item.type !== HistoryItemType.SWAP
+      ) {
+        return true;
       }
 
-      // Delete confirmed transactions from redis
-      await deletePendingTx(confirmedTxs);
-
-      return pendingTxs;
-    })
-  );
-
-  const pending = pendingTxs.flat();
-
-  const pendingTransfers = pending.map(tx => ({
-    from: tx.from,
-    to: tx.to,
-    amount: tx.amount,
-    token: tx.token,
-    chainId: tx.chainId,
-    timestamp: new Date().toISOString(),
-    type: HistoryItemType.PENDING,
-    txHash: tx.txHash,
-  }));
-  */
+      return (
+        (self as (SwapHistoryItem | BridgeTransferHistoryItem)[]).findIndex(
+          sw => sw.relayId === item.relayId
+        ) === index
+      );
+    });
 
   const allTransfers = [...transfers];
 

@@ -13,12 +13,14 @@ import {
   HistoryItemType,
   TransferHistoryItem,
   SwapHistoryItem as SwapHistoryItemType,
+  BridgeTransferHistoryItem,
 } from '@raylac/shared';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import SwapListItem from '@/components/SwapListItem/SwapListItem';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootTabsParamsList } from '@/navigation/types';
 import { Hex } from 'viem/_types/types/misc';
+import BridgeTransferListItem from '@/components/BridgeTransferListItem/BridgeTransferListItem';
 
 type Props = NativeStackScreenProps<RootTabsParamsList, 'History'>;
 
@@ -53,14 +55,14 @@ const History = ({ route }: Props) => {
 
   const isTxConfirmed = (txHash: Hex) => {
     return fetchedHistory?.some(
-      item => item.type === HistoryItemType.OUTGOING && item.txHash === txHash
+      item => item.type === HistoryItemType.TRANSFER && item.txHash === txHash
     );
   };
 
   const isRelayIntentConfirmed = (requestId: string) => {
     return fetchedHistory?.some(
       item =>
-        (item.type === HistoryItemType.OUTGOING ||
+        (item.type === HistoryItemType.BRIDGE_TRANSFER ||
           item.type === HistoryItemType.SWAP) &&
         item.relayId === requestId
     );
@@ -71,8 +73,9 @@ const History = ({ route }: Props) => {
       if (!isTxConfirmed(pendingTransfer.txHash)) {
         // We show the pending transfer in the history as a pending transfer is not confirmed yet
         history.unshift({
-          type: HistoryItemType.PENDING,
-          txHash: '0x',
+          type: HistoryItemType.TRANSFER,
+          direction: 'outgoing',
+          txHash: pendingTransfer.txHash,
           from: pendingTransfer.from,
           to: pendingTransfer.to,
           fromChainId: pendingTransfer.chainId,
@@ -87,8 +90,9 @@ const History = ({ route }: Props) => {
       if (!isRelayIntentConfirmed(pendingBridgeTransfer.requestId)) {
         // We show the pending transfer in the history as a pending transfer is not confirmed yet
         history.unshift({
-          type: HistoryItemType.PENDING,
-          txHash: '0x',
+          type: HistoryItemType.BRIDGE_TRANSFER,
+          direction: 'outgoing',
+          relayId: pendingBridgeTransfer.requestId,
           from: pendingBridgeTransfer.from,
           to: pendingBridgeTransfer.to,
           fromChainId: pendingBridgeTransfer.fromChainId,
@@ -96,6 +100,8 @@ const History = ({ route }: Props) => {
           amount: pendingBridgeTransfer.amount,
           token: pendingBridgeTransfer.token,
           timestamp: new Date().toISOString(),
+          inTxHash: '0x',
+          outTxHash: '0x',
           isPending: true,
         });
       }
@@ -111,6 +117,8 @@ const History = ({ route }: Props) => {
           tokenOut: pendingSwap.tokenOut,
           fromChainId: pendingSwap.fromChainId,
           toChainId: pendingSwap.toChainId,
+          inTxHash: '0x',
+          outTxHash: '0x',
           timestamp: new Date().toISOString(),
           isPending: true,
         });
@@ -156,6 +164,10 @@ const History = ({ route }: Props) => {
                 <SwapListItem
                   swap={item as SwapHistoryItemType}
                   isPending={item.isPending}
+                />
+              ) : item.type === HistoryItemType.BRIDGE_TRANSFER ? (
+                <BridgeTransferListItem
+                  transfer={item as BridgeTransferHistoryItem}
                 />
               ) : (
                 <TransferListItem transfer={item as TransferHistoryItem} />

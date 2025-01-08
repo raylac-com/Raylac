@@ -4,8 +4,8 @@ import {
   formatTokenAmount,
   GetSingleInputSwapQuoteRequestBody,
   GetSingleInputSwapQuoteReturnType,
+  RelayGetQuoteRequestBody,
   RelayGetQuoteResponseBody,
-  RelaySwapMultiInputRequestBody,
   SwapStep,
   TRPCErrorMessage,
 } from '@raylac/shared';
@@ -30,21 +30,15 @@ const getSingleInputSwapQuote = async ({
   const outputTokenAddress = getTokenAddressOnChain(outputToken, outputChainId);
 
   // Get quote from Relay
-  const requestBody: RelaySwapMultiInputRequestBody = {
+  const requestBody: RelayGetQuoteRequestBody = {
     user: sender,
     recipient: sender,
-    origins: [
-      {
-        chainId: inputChainId,
-        currency: inputTokenAddress,
-        amount: amount.toString(),
-      },
-    ],
-    destinationCurrency: outputTokenAddress,
+    originChainId: inputChainId,
     destinationChainId: outputChainId,
-    partial: false,
+    amount: amount.toString(),
+    originCurrency: inputTokenAddress,
+    destinationCurrency: outputTokenAddress,
     tradeType: 'EXACT_INPUT',
-    useUserOperation: false,
   };
 
   const qt = st('Get quote');
@@ -52,7 +46,7 @@ const getSingleInputSwapQuote = async ({
   let quote;
   try {
     const { data } = await relayApi.post<RelayGetQuoteResponseBody>(
-      '/execute/swap/multi-input',
+      '/quote',
       requestBody
     );
     quote = data;
@@ -124,7 +118,7 @@ const getSingleInputSwapQuote = async ({
     nonce++;
   }
 
-  const swapStepQuote = quote.steps.find(step => step.id === 'swap');
+  const swapStepQuote = quote.steps.find(step => step.id === 'deposit');
 
   if (!swapStepQuote) {
     throw new Error('Swap step not found');
@@ -212,11 +206,16 @@ const getSingleInputSwapQuote = async ({
 
   let relayerFeeToken;
   if (
-    relayerFeeCurrency?.address === inputTokenAddress ||
-    relayerFeeCurrency?.address === outputTokenAddress
+    relayerFeeCurrency?.address?.toLowerCase() ===
+    inputTokenAddress.toLowerCase()
   ) {
     relayerFeeToken = inputToken;
-  } else if (relayerFeeCurrency?.address === zeroAddress) {
+  } else if (
+    relayerFeeCurrency?.address?.toLowerCase() ===
+    outputTokenAddress.toLowerCase()
+  ) {
+    relayerFeeToken = outputToken;
+  } else if (relayerFeeCurrency?.address?.toLowerCase() === zeroAddress) {
     relayerFeeToken = ETH;
   } else {
     throw new Error(

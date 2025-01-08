@@ -1,18 +1,10 @@
 import { TokenAmount, Token } from './types';
-import { Chain, formatUnits, getAddress, Hex, PrivateKeyAccount } from 'viem';
-import {} from './types';
+import { Chain, formatUnits, Hex, PrivateKeyAccount } from 'viem';
 import * as chains from 'viem/chains';
 import { getAlchemyRpcUrl } from './ethRpc';
 import axios from 'axios';
-import { RELAY_RECEIVER_ADDRESSES } from './addresses';
 import BigNumber from 'bignumber.js';
-import {
-  SendTxRequestBody,
-  HistoryItemType,
-  TokenBalancesReturnType,
-  TransferHistoryItem,
-  SendBridgeTxRequestBody,
-} from './rpcTypes';
+import { TokenBalancesReturnType } from './rpcTypes';
 
 /**
  * Returns viem's `Chain` object from a chain ID
@@ -507,42 +499,6 @@ export const getExplorerUrl = (chainId: number) => {
     default:
       return '';
   }
-};
-
-export const isRelayReceiverAddress = (address: Hex) => {
-  return RELAY_RECEIVER_ADDRESSES.includes(getAddress(address));
-};
-
-export const pendingTransferToHistoryItem = (
-  pendingTransfer: SendTxRequestBody
-): TransferHistoryItem => {
-  return {
-    type: HistoryItemType.PENDING,
-    txHash: pendingTransfer.signedTx,
-    from: pendingTransfer.transfer.from,
-    to: pendingTransfer.transfer.to,
-    fromChainId: pendingTransfer.chainId,
-    toChainId: pendingTransfer.chainId,
-    amount: pendingTransfer.transfer.amount,
-    token: pendingTransfer.transfer.token,
-    timestamp: new Date().toISOString(),
-  };
-};
-
-export const pendingBridgeTransferToHistoryItem = (
-  pendingBridgeTransfer: SendBridgeTxRequestBody
-): TransferHistoryItem => {
-  return {
-    type: HistoryItemType.PENDING,
-    txHash: '0x',
-    from: pendingBridgeTransfer.transfer.from,
-    to: pendingBridgeTransfer.transfer.to,
-    fromChainId: pendingBridgeTransfer.chainId,
-    toChainId: pendingBridgeTransfer.chainId,
-    amount: pendingBridgeTransfer.transfer.amount,
-    token: pendingBridgeTransfer.transfer.token,
-    timestamp: new Date().toISOString(),
-  };
 };
 
 const COLORS = [
