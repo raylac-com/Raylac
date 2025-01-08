@@ -70,14 +70,31 @@ const mapAsRelayTx = async ({
   const inTx = relayRequest.data.inTxs[0];
   const outTx = relayRequest.data.outTxs[0];
 
-  const sender = relayRequest.data.metadata.sender;
-  const recipient = relayRequest.data.metadata.recipient;
+  const sender = relayRequest.data.metadata?.sender;
+  const recipient = relayRequest.data.metadata?.recipient;
 
-  const currencyIn = relayRequest.data.metadata.currencyIn;
-  const amountIn = relayRequest.data.metadata.currencyIn.amount;
+  if (!sender || !recipient) {
+    logger.warn(
+      `No sender or recipient found for relay request ${relayRequest.id}`
+    );
+    return null;
+  }
 
-  const currencyOut = relayRequest.data.metadata.currencyOut;
-  const amountOut = relayRequest.data.metadata.currencyOut.amount;
+  const currencyIn = relayRequest.data.metadata?.currencyIn;
+  const amountIn = relayRequest.data.metadata?.currencyIn?.amount;
+
+  if (!currencyIn || !amountIn) {
+    logger.warn(`No currency in found for relay request ${relayRequest.id}`);
+    return null;
+  }
+
+  const currencyOut = relayRequest.data.metadata?.currencyOut;
+  const amountOut = relayRequest.data.metadata?.currencyOut?.amount;
+
+  if (!currencyOut || !amountOut) {
+    logger.warn(`No currency out found for relay request ${relayRequest.id}`);
+    return null;
+  }
 
   const fromChainId = inTx.chainId;
   const toChainId = outTx.chainId;
@@ -133,7 +150,7 @@ const mapAsRelayTx = async ({
   const swapHistoryItem: SwapHistoryItem = {
     relayId: relayRequest.id,
     type: HistoryItemType.SWAP,
-    address: getAddress(relayRequest.data.metadata.sender),
+    address: getAddress(sender),
     amountIn: amountInFormatted,
     amountOut: amountOutFormatted,
     tokenIn: tokenIn,
