@@ -2,6 +2,8 @@ import Feather from '@expo/vector-icons/Feather';
 import StyledText from '@/components/StyledText/StyledText';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import { Alert, FlatList, Image, Pressable, View } from 'react-native';
+import React, { useState } from 'react';
+import AddressDetailsSheet from '@/components/AddressDetailsSheet/AddressDetailsSheet';
 import colors from '@/lib/styles/colors';
 import { copyToClipboard } from '@/lib/utils';
 import Toast from 'react-native-toast-message';
@@ -17,6 +19,10 @@ import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress'
 
 const AddressListItem = ({ address }: { address: UserAddress }) => {
   const { mutateAsync: deleteAddress } = useDeleteAddress();
+
+  const [selectedAddress, setSelectedAddress] = useState<UserAddress | null>(
+    null
+  );
 
   const onCopyPress = () => {
     copyToClipboard(address.address);
@@ -56,43 +62,55 @@ const AddressListItem = ({ address }: { address: UserAddress }) => {
   };
 
   return (
-    <View
-      style={{
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingRight: 16,
-        borderWidth: 1,
-        borderColor: colors.border,
-        borderRadius: 16,
-        padding: 16,
-        shadowColor: colors.border,
-        shadowOffset: {
-          width: 0,
-          height: 1,
-        },
-        shadowOpacity: 0.5,
-        shadowRadius: 3.84,
-      }}
-    >
-      <Pressable
-        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
-        onPress={onCopyPress}
+    <>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          paddingRight: 16,
+          borderWidth: 1,
+          borderColor: colors.border,
+          borderRadius: 16,
+          padding: 16,
+          shadowColor: colors.border,
+          shadowOffset: {
+            width: 0,
+            height: 1,
+          },
+          shadowOpacity: 0.5,
+          shadowRadius: 3.84,
+        }}
       >
-        <Feather name="copy" size={20} color={colors.border} />
-        <WalletIconAddress address={address.address} />
-        {address.isDefault && (
-          <StyledText style={{ color: colors.subbedText }}>
-            {`Default`}
-          </StyledText>
-        )}
-      </Pressable>
-      <FontAwesome
-        name="remove"
-        size={20}
-        color={colors.border}
-        onPress={onRemovePress}
-      />
-    </View>
+        <View
+          style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
+        >
+          <Pressable onPress={onCopyPress}>
+            <Feather name="copy" size={20} color={colors.border} />
+          </Pressable>
+          <Pressable onPress={() => setSelectedAddress(address)}>
+            <WalletIconAddress address={address.address} />
+          </Pressable>
+          {address.isDefault && (
+            <StyledText style={{ color: colors.subbedText }}>
+              {`Default`}
+            </StyledText>
+          )}
+        </View>
+        <FontAwesome
+          name="remove"
+          size={20}
+          color={colors.border}
+          onPress={onRemovePress}
+        />
+      </View>
+      {selectedAddress && (
+        <AddressDetailsSheet
+          address={selectedAddress.address}
+          addressType={selectedAddress.type}
+          onClose={() => setSelectedAddress(null)}
+        />
+      )}
+    </>
   );
 };
 

@@ -8,6 +8,11 @@ import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { Hex } from 'viem';
 import getSupportedTokens from './api/getSupportedTokens/getSupportedTokens';
 import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.mock';
+import getLidoApyMock from './api/getLidoApy/getLidoApy.mock';
+import submitSingleInputSwapMock from './api/submitSingleInputSwap/submitSingleInputSwap.mock';
+import sendTxMock from './api/sendTx/sendTx.mock';
+import sendBridgeTxMock from './api/sendBridgeTx/sendBridgeTx.mock';
+import getSingleInputSwapQuoteMock from './api/getSingleInputSwapQuote/getSingleInputSwapQuote.mock';
 import {
   BuildSendRequestBody,
   GetHistoryRequestBody,
@@ -69,13 +74,15 @@ export const appRouter = router({
 
   // Not used right now
   getLidoApy: publicProcedure.query(async () => {
-    return getLidoApy();
+    return MOCK_RESPONSE ? getLidoApyMock() : getLidoApy();
   }),
 
   submitSingleInputSwap: publicProcedure
     .input(z.any())
     .mutation(async ({ input }) => {
-      return submitSingleInputSwap(input as SubmitSingleInputSwapRequestBody);
+      return MOCK_RESPONSE
+        ? submitSingleInputSwapMock(input as SubmitSingleInputSwapRequestBody)
+        : submitSingleInputSwap(input as SubmitSingleInputSwapRequestBody);
     }),
 
   buildSend: publicProcedure.input(z.any()).mutation(async ({ input }) => {
@@ -91,19 +98,25 @@ export const appRouter = router({
     }),
 
   sendTx: publicProcedure.input(z.any()).mutation(async ({ input }) => {
-    return sendTx(input as SendTxRequestBody);
+    return MOCK_RESPONSE
+      ? sendTxMock(input as SendTxRequestBody)
+      : sendTx(input as SendTxRequestBody);
   }),
 
   sendBridgeTx: publicProcedure.input(z.any()).mutation(async ({ input }) => {
-    return sendBridgeTx(input as SendBridgeTxRequestBody);
+    return MOCK_RESPONSE
+      ? sendBridgeTxMock(input as SendBridgeTxRequestBody)
+      : sendBridgeTx(input as SendBridgeTxRequestBody);
   }),
 
   getSingleInputSwapQuote: publicProcedure
     .input(z.any())
     .mutation(async ({ input }) => {
-      return getSingleInputSwapQuote(
-        input as GetSingleInputSwapQuoteRequestBody
-      );
+      return MOCK_RESPONSE
+        ? getSingleInputSwapQuoteMock(
+            input as GetSingleInputSwapQuoteRequestBody
+          )
+        : getSingleInputSwapQuote(input as GetSingleInputSwapQuoteRequestBody);
     }),
 
   getHistory: publicProcedure
