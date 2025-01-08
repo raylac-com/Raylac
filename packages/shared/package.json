@@ -2,7 +2,7 @@
   "name": "@raylac/shared",
   "private": true,
   "version": "1.0.0",
-  "description": "",
+  "description": "Shared utilities and types for the Raylac wallet application",
   "main": "./out/index.js",
   "types": "out/index.d.ts",
   "type": "module",
