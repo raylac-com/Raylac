@@ -14,9 +14,7 @@ import {
   GetSingleChainSwapQuoteRequestBody,
   GetSingleInputSwapQuoteRequestBody,
   SendTxRequestBody,
-  SubmitSingleChainSwapRequestBody,
   SubmitSingleInputSwapRequestBody,
-  SubmitSwapRequestBody,
   BuildBridgeSendRequestBody,
   Token,
   SendBridgeTxRequestBody,
@@ -25,10 +23,8 @@ import buildSend from './api/buildSend/buildSend';
 import { ed, logger, st } from '@raylac/shared-backend';
 import getTokenPrice from './api/getTokenPrice/getTokenPrice';
 import { getTokenPriceMock } from './api/getTokenPrice/getTokenPrice.mock';
-import submitSwap from './api/submitSwap/submitSwap';
 import getHistory from './api/getHistory/getHistory';
 import getSingleChainSwapQuote from './api/getSingleChainSwapQuote/getSingleChainSwapQuote';
-import submitSingleChainSwap from './api/submitSingleChainSwap/submitSingleChainSwap';
 import getLidoApy from './api/getLidoApy/getLidoApy';
 import getSingleInputSwapQuote from './api/getSingleInputSwapQuote/getSingleInputSwapQuote';
 import submitSingleInputSwap from './api/submitSingleInputSwap/submitSingleInputSwap';
@@ -74,16 +70,6 @@ export const appRouter = router({
   getLidoApy: publicProcedure.query(async () => {
     return getLidoApy();
   }),
-
-  submitSwap: publicProcedure.input(z.any()).mutation(async ({ input }) => {
-    return submitSwap(input as SubmitSwapRequestBody);
-  }),
-
-  submitSingleChainSwap: publicProcedure
-    .input(z.any())
-    .mutation(async ({ input }) => {
-      return submitSingleChainSwap(input as SubmitSingleChainSwapRequestBody);
-    }),
 
   submitSingleInputSwap: publicProcedure
     .input(z.any())
