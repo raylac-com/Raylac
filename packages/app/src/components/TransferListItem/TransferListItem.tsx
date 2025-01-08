@@ -9,8 +9,12 @@ import { useState } from 'react';
 import TransferListItemSheet from '../TransferListItemSheet/TransferListItemSheet';
 import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import useEnsName from '@/hooks/useEnsName';
+import PendingIndicator from '../PendingIndicator/PendingIndicator';
 
-const TransferListItem = (props: { transfer: TransferHistoryItem }) => {
+const TransferListItem = (props: {
+  transfer: TransferHistoryItem;
+  isPending: boolean;
+}) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const { data: senderEnsName } = useEnsName(props.transfer.from);
@@ -45,26 +49,32 @@ const TransferListItem = (props: { transfer: TransferHistoryItem }) => {
               rowGap: 4,
             }}
           >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                columnGap: 4,
-              }}
-            >
-              <StyledText style={{ color: colors.border }}>
-                {props.transfer.direction === 'incoming' ? 'Received' : 'Sent'}
-              </StyledText>
-              <Feather
-                name={
-                  props.transfer.direction === 'incoming'
-                    ? 'arrow-down-circle'
-                    : 'arrow-up-circle'
-                }
-                size={18}
-                color={colors.border}
-              />
-            </View>
+            {props.isPending ? (
+              <PendingIndicator />
+            ) : (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  columnGap: 4,
+                }}
+              >
+                <StyledText style={{ color: colors.border }}>
+                  {props.transfer.direction === 'incoming'
+                    ? 'Received'
+                    : 'Sent'}
+                </StyledText>
+                <Feather
+                  name={
+                    props.transfer.direction === 'incoming'
+                      ? 'arrow-down-circle'
+                      : 'arrow-up-circle'
+                  }
+                  size={18}
+                  color={colors.border}
+                />
+              </View>
+            )}
             <StyledText
               style={{ fontWeight: 'bold', color: colors.subbedText }}
             >

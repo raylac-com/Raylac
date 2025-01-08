@@ -168,9 +168,13 @@ const History = ({ route }: Props) => {
               ) : item.type === HistoryItemType.BRIDGE_TRANSFER ? (
                 <BridgeTransferListItem
                   transfer={item as BridgeTransferHistoryItem}
+                  isPending={item.isPending}
                 />
               ) : (
-                <TransferListItem transfer={item as TransferHistoryItem} />
+                <TransferListItem
+                  transfer={item as TransferHistoryItem}
+                  isPending={item.isPending}
+                />
               )}
             </Pressable>
           );
