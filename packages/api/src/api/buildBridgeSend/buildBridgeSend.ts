@@ -186,7 +186,8 @@ const buildBridgeSend = async ({
 
     const item = step.items[0];
 
-    const crossChainSendStep: CrossChainSwapStep = {
+    // Create the step with the correct id type
+    const crossChainStep: CrossChainSwapStep = {
       originChainId: item.data.chainId,
       destinationChainId: item.data.chainId,
       id: step.id as 'swap' | 'approve',
@@ -204,7 +205,7 @@ const buildBridgeSend = async ({
 
     fromChainNonce++;
 
-    return crossChainSendStep;
+    return crossChainStep;
   });
 
   const swapStep = quote.steps.find(step => step.id === 'deposit');
