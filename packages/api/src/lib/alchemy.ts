@@ -56,7 +56,7 @@ export const getTokenPriceByAddress = async ({
 
     return data[data.length - 1].value;
   } catch (err: any) {
-    if (err.message.includes('Token address not found')) {
+    if (err.message.includes('not found')) {
       return null;
     }
 
