@@ -1,5 +1,5 @@
 import { TokenAmount, Token } from './types';
-import { Chain, formatUnits, Hex, PrivateKeyAccount } from 'viem';
+import { Chain, formatUnits, Hex, parseUnits, PrivateKeyAccount } from 'viem';
 import * as chains from 'viem/chains';
 import { getAlchemyRpcUrl } from './ethRpc';
 import axios from 'axios';
@@ -532,4 +532,12 @@ export const getColorForAddress = (address: Hex): Hex => {
 
   // eslint-disable-next-line security/detect-object-injection
   return COLORS[colorIndex].hex as Hex;
+};
+
+export const MOCK_TOKEN_AMOUNT = {
+  amount: parseUnits('0.01', 18).toString(),
+  formatted: '0.01',
+  usdValue: '123.45',
+  usdValueFormatted: '123.45',
+  tokenPriceUsd: 123.45,
 };

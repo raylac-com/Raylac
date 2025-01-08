@@ -30,6 +30,8 @@ import sendTx from './api/sendTx/sendTx';
 import buildBridgeSend from './api/buildBridgeSend/buildBridgeSend';
 import sendBridgeTx from './api/sendBridgeTx/sendBridgeTx';
 import getTokenBalancesMock from './api/getTokenBalances/getTokenBalances.mock';
+import buildBridgeSendMock from './api/buildBridgeSend/buildBridgeSend.mock';
+import getHistoryMock from './api/getHistory/getHistory.mock';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -65,6 +67,7 @@ export const appRouter = router({
       return response;
     }),
 
+  // Not used right now
   getLidoApy: publicProcedure.query(async () => {
     return getLidoApy();
   }),
@@ -82,7 +85,9 @@ export const appRouter = router({
   buildBridgeSend: publicProcedure
     .input(z.any())
     .mutation(async ({ input }) => {
-      return buildBridgeSend(input as BuildBridgeSendRequestBody);
+      return MOCK_RESPONSE
+        ? await buildBridgeSendMock(input as BuildBridgeSendRequestBody)
+        : await buildBridgeSend(input as BuildBridgeSendRequestBody);
     }),
 
   sendTx: publicProcedure.input(z.any()).mutation(async ({ input }) => {
@@ -108,7 +113,9 @@ export const appRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return getHistory(input as GetHistoryRequestBody);
+      return MOCK_RESPONSE
+        ? await getHistoryMock(input as GetHistoryRequestBody)
+        : await getHistory(input as GetHistoryRequestBody);
     }),
 
   getSupportedTokens: publicProcedure
