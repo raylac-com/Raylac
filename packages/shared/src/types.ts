@@ -240,7 +240,7 @@ export interface Token {
   decimals: number;
   logoURI: string;
   verified: boolean;
-  color?: string;
+  isKnownToken?: boolean;
   addresses: {
     chainId: number;
     address: Hex;

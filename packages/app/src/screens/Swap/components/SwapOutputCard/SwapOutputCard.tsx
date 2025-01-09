@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import SwapAmountInput from '../SwapAmountInput';
-import { SupportedTokensReturnType, TokenAmount } from '@raylac/shared';
+import { Token, TokenAmount } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import ChainSelector from '@/screens/Swap/components/ChainSelector/ChainSelector';
@@ -17,8 +17,8 @@ const SwapOutputCard = ({
   chainId,
   setChainId,
 }: {
-  token: SupportedTokensReturnType[number] | null;
-  setToken: (value: SupportedTokensReturnType[number] | null) => void;
+  token: Token | null;
+  setToken: (value: Token | null) => void;
   amount: TokenAmount | undefined;
   setAmount: (value: string) => void;
   isLoadingAmount: boolean;

@@ -2,7 +2,7 @@ import { Pressable, TextInput, View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { SupportedTokensReturnType } from '@raylac/shared';
+import { Token } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
@@ -15,7 +15,7 @@ const SwapAmountInput = ({
   setAmount,
   isLoadingAmount,
 }: {
-  selectedToken: SupportedTokensReturnType[number] | null;
+  selectedToken: Token | null;
   chainId: number | null;
   onSelectTokenPress: () => void;
   isLoadingAmount: boolean;

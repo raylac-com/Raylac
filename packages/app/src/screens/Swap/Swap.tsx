@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import SwapInputCard from './components/SwapInputCard/SwapInputCard';
 import SwapOutputCard from './components/SwapOutputCard/SwapOutputCard';
 import { Hex, parseUnits, zeroAddress } from 'viem';
-import { SupportedTokensReturnType, TRPCErrorMessage } from '@raylac/shared';
+import { Token, TRPCErrorMessage } from '@raylac/shared';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useGetSwapQuote from '@/hooks/useGetSwapQuote';
 import useDebounce from '@/hooks/useDebounce';
@@ -16,8 +16,6 @@ import AddressSelector from './components/AddressSelector/AddressSelector';
 import useWriterAddresses from '@/hooks/useWriterAddresses';
 import { RootTabsParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-
-type Token = SupportedTokensReturnType[number];
 
 type Props = NativeStackScreenProps<RootTabsParamsList, 'Swap'>;
 

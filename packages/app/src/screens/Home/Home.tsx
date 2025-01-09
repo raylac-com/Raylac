@@ -87,6 +87,7 @@ const HomeScreen = () => {
     },
     {
       enabled: !!userAddresses,
+      throwOnError: false,
     }
   );
 
