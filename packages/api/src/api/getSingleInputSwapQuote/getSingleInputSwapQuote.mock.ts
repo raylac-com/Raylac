@@ -39,6 +39,7 @@ const getSingleInputSwapQuoteMock = async (
   };
 
   return {
+    totalFeeUsd: '0.12',
     approveStep: mockApproveStep,
     swapStep: mockSwapStep,
     originChainGas: {
@@ -62,8 +63,16 @@ const getSingleInputSwapQuoteMock = async (
       usdValueFormatted: '1,980',
       tokenPriceUsd: 2000,
     },
-    relayerFeeToken: ETH,
-    relayerFee: {
+    relayerServiceFeeToken: ETH,
+    relayerServiceFee: {
+      amount: '1000000000000000',
+      formatted: '0.001',
+      usdValue: '1',
+      usdValueFormatted: '1',
+      tokenPriceUsd: 1000,
+    },
+    relayerGasToken: ETH,
+    relayerGas: {
       amount: '1000000000000000',
       formatted: '0.001',
       usdValue: '2',
