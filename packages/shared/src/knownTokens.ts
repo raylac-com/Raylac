@@ -30,6 +30,10 @@ export const USDC: Token = {
     'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png?1547042389',
   addresses: [
     {
+      chainId: mainnet.id,
+      address: getAddress('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'),
+    },
+    {
       chainId: base.id,
       address: getAddress('0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'),
     },
@@ -64,12 +68,10 @@ export const WST_ETH: Token = {
     'https://firebasestorage.googleapis.com/v0/b/raylac-72351.appspot.com/o/wsteth.png?alt=media&token=c80c5f5e-6ada-47cf-8a30-87fd6f374bad',
   color: '#B2D7E5',
   addresses: [
-    /*
     {
       chainId: mainnet.id,
       address: getAddress('0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0'),
     },
-    */
     {
       chainId: arbitrum.id,
       address: getAddress('0x5979D7b546E38E414F7E9822514be443A4800529'),
