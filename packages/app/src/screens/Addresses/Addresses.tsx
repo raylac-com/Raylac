@@ -1,7 +1,7 @@
 import Feather from '@expo/vector-icons/Feather';
 import StyledText from '@/components/StyledText/StyledText';
 import useUserAddresses from '@/hooks/useUserAddresses';
-import { Alert, FlatList, Image, Pressable, View } from 'react-native';
+import { Alert, FlatList, Pressable, View } from 'react-native';
 import React, { useState } from 'react';
 import AddressDetailsSheet from '@/components/AddressDetailsSheet/AddressDetailsSheet';
 import colors from '@/lib/styles/colors';
@@ -13,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import useDeleteAddress from '@/hooks/useDeleteAddress';
 import { supportedChains } from '@raylac/shared';
-import { getChainIcon } from '@/lib/utils';
+import ChainLogo from '@/components/ChainLogo/ChainLogo';
 import { UserAddress } from '@/types';
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
 
@@ -128,11 +128,7 @@ const SupportedChains = () => {
       </StyledText>
       <View style={{ flexDirection: 'row', columnGap: 4 }}>
         {supportedChains.map(chain => (
-          <Image
-            key={chain.id}
-            source={getChainIcon(chain.id)}
-            style={{ width: 24, height: 24 }}
-          />
+          <ChainLogo key={chain.id} chainId={chain.id} size={16} />
         ))}
       </View>
     </View>

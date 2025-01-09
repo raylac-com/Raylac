@@ -1,7 +1,6 @@
-import { getChainIcon } from '@/lib/utils';
 import { View } from 'react-native';
 import TokenLogo from '../TokenLogo/TokenLogo';
-import { Image } from 'expo-image';
+import ChainLogo from '../ChainLogo/ChainLogo';
 
 const TokenLogoWithChain = ({
   logoURI,
@@ -30,14 +29,9 @@ const TokenLogoWithChain = ({
         />
       )}
       {chainId !== null && (
-        <Image
-          source={getChainIcon(chainId)}
-          style={{
-            width: size / 2,
-            height: size / 2,
-            marginLeft: -size / 4,
-          }}
-        />
+        <View style={{ marginLeft: -size / 4 }}>
+          <ChainLogo chainId={chainId} size={size / 3} />
+        </View>
       )}
     </View>
   );

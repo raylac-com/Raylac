@@ -13,7 +13,7 @@ import {
   SendBridgeTxRequestBody,
 } from '@raylac/shared';
 import { useEffect, useState } from 'react';
-import { Image, Pressable, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 import { Hex, parseUnits } from 'viem';
 import { trpc } from '@/lib/trpc';
 import useUserAddresses from '@/hooks/useUserAddresses';
@@ -23,7 +23,7 @@ import StyledText from '@/components/StyledText/StyledText';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MoveFundsSheetStackParamsList } from '../MoveFundsSheet';
-import { getChainIcon } from '@/lib/utils';
+import ChainLogo from '@/components/ChainLogo/ChainLogo';
 import { useMoveFundsContext } from '@/contexts/MoveFundsContext';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import { getPrivateKey } from '@/lib/key';
@@ -62,10 +62,7 @@ const ChainSelector = ({
         style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
         onPress={onSelectPress}
       >
-        <Image
-          source={getChainIcon(chainId)}
-          style={{ width: 24, height: 24 }}
-        />
+        <ChainLogo chainId={chainId} size={16} />
         <StyledText>{getChainFromId(chainId).name}</StyledText>
       </Pressable>
     </View>

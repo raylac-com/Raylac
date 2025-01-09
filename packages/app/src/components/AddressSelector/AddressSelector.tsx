@@ -1,6 +1,6 @@
-import { getChainIcon, shortenAddress } from '@/lib/utils';
+import { shortenAddress } from '@/lib/utils';
 import { getChainFromId } from '@raylac/shared';
-import { Image } from 'expo-image';
+import ChainLogo from '@/components/ChainLogo/ChainLogo';
 import Entypo from '@expo/vector-icons/Entypo';
 import { supportedChains } from '@raylac/shared';
 import { useRef, useState } from 'react';
@@ -23,7 +23,7 @@ const ChainListItem = ({
       style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
       onPress={onPress}
     >
-      <Image source={getChainIcon(chainId)} style={{ width: 24, height: 24 }} />
+      <ChainLogo chainId={chainId} size={16} />
       <StyledText>{getChainFromId(chainId).name}</StyledText>
     </Pressable>
   );
