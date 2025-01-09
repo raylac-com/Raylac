@@ -3,6 +3,7 @@ import colors from '@/lib/styles/colors';
 import { trpc } from '@/lib/trpc';
 import TokenBalanceItem from '@/components/TokenBalanceItem/TokenBalanceItem';
 import StyledText from '@/components/StyledText/StyledText';
+import useCoingeckoPriceChange from '@/hooks/useCoingeckoPriceChange';
 import { useEffect, useState } from 'react';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import useAccountUsdValue from '@/hooks/useAccountUsdValue';
@@ -210,6 +211,7 @@ const HomeScreen = () => {
                 symbol={item.token.symbol}
                 name={item.token.name}
                 logoUrl={item.token.logoURI}
+                priceChange24h={useCoingeckoPriceChange(item.token)}
               />
             </FeedbackPressable>
           ))}

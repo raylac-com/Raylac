@@ -16,6 +16,7 @@ const TokenBalanceItem = (props: {
   symbol: string;
   balance: TokenAmount;
   logoUrl: string;
+  priceChange24h?: number | null;
 }) => {
   return (
     <View
@@ -60,6 +61,19 @@ const TokenBalanceItem = (props: {
           <StyledText style={{ color: colors.border }}>
             {props.balance.formatted} {props.symbol}
           </StyledText>
+          {props.priceChange24h != null && (
+            <StyledText
+              style={{
+                color: props.priceChange24h! >= 0 ? '#4CAF50' : '#F44336',
+                fontSize: 12,
+                marginTop: 2,
+              }}
+            >
+              {props.priceChange24h! >= 0
+                ? `+${props.priceChange24h!.toFixed(2)}%`
+                : `${props.priceChange24h!.toFixed(2)}%`}
+            </StyledText>
+          )}
         </View>
       </View>
     </View>
