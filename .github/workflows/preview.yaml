@@ -63,6 +63,8 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Create a .env file
         run: printf "EXPO_PUBLIC_RPC_URL=${{ env.RPC_URL }}\nEXPO_PUBLIC_ALCHEMY_API_KEY=${{ secrets.ALCHEMY_API_KEY }}\nAPP_VARIANT=preview" > .env
