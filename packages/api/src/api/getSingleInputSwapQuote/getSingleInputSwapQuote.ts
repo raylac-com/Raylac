@@ -7,6 +7,7 @@ import {
   RelayGetQuoteRequestBody,
   RelayGetQuoteResponseBody,
   SwapStep,
+  Token,
   TRPCErrorMessage,
 } from '@raylac/shared';
 import { ed, logger, st } from '@raylac/shared-backend';
@@ -16,7 +17,28 @@ import { relayApi } from '../../lib/relay';
 import { TRPCError } from '@trpc/server';
 import axios from 'axios';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
-import { Hex, zeroAddress } from 'viem';
+import { Hex } from 'viem';
+import BigNumber from 'bignumber.js';
+
+const getFeeToken = ({
+  feeCurrency,
+  possibleTokens,
+}: {
+  feeCurrency: string;
+  possibleTokens: Token[];
+}) => {
+  const feeToken = possibleTokens.find(token =>
+    token.addresses.some(
+      address => address.address.toLowerCase() === feeCurrency.toLowerCase()
+    )
+  );
+
+  if (!feeToken) {
+    throw new Error(`Unknown fee token ${feeCurrency}`);
+  }
+
+  return feeToken;
+};
 
 const getSingleInputSwapQuote = async ({
   sender,
@@ -118,7 +140,9 @@ const getSingleInputSwapQuote = async ({
     nonce++;
   }
 
-  const swapStepQuote = quote.steps.find(step => step.id === 'deposit');
+  const swapStepQuote = quote.steps.find(
+    step => step.id === 'deposit' || step.id === 'swap'
+  );
 
   if (!swapStepQuote) {
     throw new Error('Swap step not found');
@@ -192,50 +216,66 @@ const getSingleInputSwapQuote = async ({
     tokenPriceUsd: ethPriceUsd,
   });
 
-  const relayerFee = quote.fees.relayer.amount;
+  const relayerGas = quote.fees.relayerGas.amount;
 
-  if (!relayerFee) {
-    throw new Error('Relayer fee is undefined');
+  if (!relayerGas) {
+    throw new Error('Relayer gas is undefined');
   }
 
-  const relayerFeeCurrency = quote.fees.relayer.currency;
+  const relayGasCurrency = quote.fees.relayerGas.currency?.address;
 
-  if (!relayerFeeCurrency) {
+  if (!relayGasCurrency) {
+    throw new Error('Relay gas currency is undefined');
+  }
+
+  const relayerGasToken = getFeeToken({
+    feeCurrency: relayGasCurrency,
+    possibleTokens: [inputToken, outputToken, ETH],
+  });
+
+  const relayerServiceFeeCurrency = quote.fees.relayer.currency?.address;
+
+  if (!relayerServiceFeeCurrency) {
     throw new Error('Relayer fee currency is undefined');
   }
 
-  let relayerFeeToken;
-  if (
-    relayerFeeCurrency?.address?.toLowerCase() ===
-    inputTokenAddress.toLowerCase()
-  ) {
-    relayerFeeToken = inputToken;
-  } else if (
-    relayerFeeCurrency?.address?.toLowerCase() ===
-    outputTokenAddress.toLowerCase()
-  ) {
-    relayerFeeToken = outputToken;
-  } else if (relayerFeeCurrency?.address?.toLowerCase() === zeroAddress) {
-    relayerFeeToken = ETH;
-  } else {
-    throw new Error(
-      `Unknown fee token ${relayerFeeCurrency?.address} for bridge send`
-    );
-  }
+  const relayerServiceFeeToken = getFeeToken({
+    feeCurrency: relayerServiceFeeCurrency,
+    possibleTokens: [inputToken, outputToken, ETH],
+  });
 
   const feeTokenPriceUsd = await getTokenUsdPrice({
-    token: relayerFeeToken,
+    token: relayerServiceFeeToken,
   });
 
   if (feeTokenPriceUsd === null) {
     throw new Error('feeTokenPriceUsd is undefined');
   }
 
-  const relayerFeeFormatted = formatTokenAmount({
-    amount: BigInt(relayerFee),
-    token: relayerFeeToken,
+  const relayerGasFormatted = formatTokenAmount({
+    amount: BigInt(relayerGas),
+    token: relayerGasToken,
     tokenPriceUsd: feeTokenPriceUsd,
   });
+
+  const relayerServiceFee = quote.fees.relayerService.amount;
+
+  if (!relayerServiceFee) {
+    throw new Error('Relayer fee is undefined');
+  }
+
+  const relayerServiceFeeFormatted = formatTokenAmount({
+    amount: BigInt(relayerServiceFee),
+    token: relayerServiceFeeToken,
+    tokenPriceUsd: feeTokenPriceUsd,
+  });
+
+  const totalFeeUsdFormatted = new BigNumber(
+    relayerServiceFeeFormatted.usdValueFormatted
+  )
+    .plus(relayerGasFormatted.usdValueFormatted)
+    .plus(originChainGasFormatted.usdValueFormatted)
+    .toString();
 
   const relayRequestId = swapStepQuote.requestId;
 
@@ -245,9 +285,12 @@ const getSingleInputSwapQuote = async ({
     originChainGas: originChainGasFormatted,
     amountIn: amountInFormatted,
     amountOut: amountOutFormatted,
-    relayerFeeToken,
-    relayerFee: relayerFeeFormatted,
+    relayerGasToken,
+    relayerGas: relayerGasFormatted,
+    relayerServiceFeeToken,
+    relayerServiceFee: relayerServiceFeeFormatted,
     relayRequestId: relayRequestId as Hex,
+    totalFeeUsd: totalFeeUsdFormatted,
   };
 };
 

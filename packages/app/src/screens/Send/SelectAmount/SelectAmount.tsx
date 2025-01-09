@@ -13,6 +13,7 @@ import {
   ETH,
   formatAmount,
   Token,
+  containsNonNumericCharacters,
 } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
@@ -238,10 +239,6 @@ type Props = Pick<
   NativeStackScreenProps<RootStackParamsList, 'SelectAmount'>,
   'route'
 >;
-
-const containsNonNumericCharacters = (text: string) => {
-  return /[^0-9.]/.test(text);
-};
 
 const SelectAmount = ({ route }: Props) => {
   const navigation = useTypedNavigation();

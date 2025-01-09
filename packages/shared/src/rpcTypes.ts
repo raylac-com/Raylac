@@ -98,10 +98,13 @@ export type GetSingleInputSwapQuoteReturnType = {
   swapStep: SwapStep;
   amountIn: TokenAmount;
   amountOut: TokenAmount;
-  relayerFeeToken: Token;
+  relayerGas: TokenAmount;
+  relayerGasToken: Token;
+  relayerServiceFee: TokenAmount;
+  relayerServiceFeeToken: Token;
   originChainGas: TokenAmount;
-  relayerFee: TokenAmount;
   relayRequestId: Hex;
+  totalFeeUsd: string;
 };
 
 export interface SubmitSingleInputSwapRequestBody {

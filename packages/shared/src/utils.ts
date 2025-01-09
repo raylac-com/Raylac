@@ -541,3 +541,7 @@ export const MOCK_TOKEN_AMOUNT = {
   usdValueFormatted: '123.45',
   tokenPriceUsd: 123.45,
 };
+
+export const containsNonNumericCharacters = (text: string) => {
+  return /[^0-9.]/.test(text);
+};

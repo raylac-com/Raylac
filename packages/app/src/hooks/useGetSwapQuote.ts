@@ -34,13 +34,9 @@ const useGetSwapQuote = () => {
         outputChainId,
       };
 
-      try {
-        const quote = await getSingleInputSwapQuote(requestBody);
-        return quote;
-      } catch (_error) {
-        // Don't throw error
-        return null;
-      }
+      const quote = await getSingleInputSwapQuote(requestBody);
+
+      return quote;
     },
   });
 };

@@ -1,10 +1,18 @@
+import Feather from '@expo/vector-icons/Feather';
 import { useEffect, useState } from 'react';
 import SwapInputCard from './components/SwapInputCard/SwapInputCard';
 import SwapOutputCard from './components/SwapOutputCard/SwapOutputCard';
 import { Hex, parseUnits, zeroAddress } from 'viem';
-import { Token, TRPCErrorMessage } from '@raylac/shared';
+import {
+  containsNonNumericCharacters,
+  ETH,
+  GetSingleInputSwapQuoteRequestBody,
+  GetSingleInputSwapQuoteReturnType,
+  Token,
+  TRPCErrorMessage,
+  USDC,
+} from '@raylac/shared';
 import StyledButton from '@/components/StyledButton/StyledButton';
-import useGetSwapQuote from '@/hooks/useGetSwapQuote';
 import useDebounce from '@/hooks/useDebounce';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import StyledText from '@/components/StyledText/StyledText';
@@ -16,6 +24,49 @@ import AddressSelector from './components/AddressSelector/AddressSelector';
 import useWriterAddresses from '@/hooks/useWriterAddresses';
 import { RootTabsParamsList } from '@/navigation/types';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { trpc } from '@/lib/trpc';
+import { Toast } from 'react-native-toast-message/lib/src/Toast';
+import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
+import SwapFeeDetailsSheet from '@/components/SwapFeeDetailsSheet/SwapFeeDetailsSheet';
+import { base } from 'viem/chains';
+
+const TotalFee = ({
+  swapQuote,
+}: {
+  swapQuote: GetSingleInputSwapQuoteReturnType | undefined;
+}) => {
+  const [isFeeDetailsSheetOpen, setIsFeeDetailsSheetOpen] = useState(false);
+
+  if (!swapQuote) {
+    return null;
+  }
+
+  return (
+    <FeedbackPressable
+      onPress={() => setIsFeeDetailsSheetOpen(true)}
+      style={{
+        rowGap: 16,
+        paddingVertical: 8,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}
+    >
+      <StyledText style={{ color: colors.border }}>{`Total fee `}</StyledText>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+        <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
+          {`${swapQuote.totalFeeUsd} USD`}
+        </StyledText>
+        <Feather name="chevron-right" size={24} color={colors.border} />
+      </View>
+      <SwapFeeDetailsSheet
+        isOpen={isFeeDetailsSheetOpen}
+        onClose={() => setIsFeeDetailsSheetOpen(false)}
+        swapQuote={swapQuote}
+      />
+    </FeedbackPressable>
+  );
+};
 
 type Props = NativeStackScreenProps<RootTabsParamsList, 'Swap'>;
 
@@ -28,11 +79,11 @@ const Swap = ({ route }: Props) => {
   // Local State
   //
 
-  const [inputToken, setInputToken] = useState<Token | null>(null);
-  const [outputToken, setOutputToken] = useState<Token | null>(null);
-  const [amountInputText, setAmountInputText] = useState<string>('');
-  const [inputChainId, setInputChainId] = useState<number | null>(null);
-  const [outputChainId, setOutputChainId] = useState<number | null>(null);
+  const [inputToken, setInputToken] = useState<Token | null>(ETH);
+  const [outputToken, setOutputToken] = useState<Token | null>(USDC);
+  const [amountInputText, setAmountInputText] = useState<string>('0.01');
+  const [inputChainId, setInputChainId] = useState<number | null>(base.id);
+  const [outputChainId, setOutputChainId] = useState<number | null>(base.id);
   const [selectedAddress, setSelectedAddress] = useState<Hex | null>(null);
 
   //
@@ -52,7 +103,9 @@ const Swap = ({ route }: Props) => {
     data: swapQuote,
     isPending: isGettingSwapQuote,
     error: getSwapQuoteError,
-  } = useGetSwapQuote();
+  } = trpc.getSingleInputSwapQuote.useMutation({
+    throwOnError: false,
+  });
 
   const { mutateAsync: submitSingleInputSwap, isPending: isSwapping } =
     useSingleInputSwap();
@@ -77,7 +130,12 @@ const Swap = ({ route }: Props) => {
 
   useEffect(() => {
     if (getSwapQuoteError) {
-      alert(getSwapQuoteError.message);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: getSwapQuoteError.message,
+        position: 'bottom',
+      });
     }
   }, [getSwapQuoteError]);
 
@@ -99,14 +157,16 @@ const Swap = ({ route }: Props) => {
       outputChainId &&
       selectedAddress
     ) {
-      getSwapQuote({
-        address: selectedAddress,
-        amount: debouncedParsedInputAmount,
+      const requestBody: GetSingleInputSwapQuoteRequestBody = {
+        sender: selectedAddress,
+        amount: debouncedParsedInputAmount.toString(),
         inputToken,
         outputToken,
         inputChainId,
         outputChainId,
-      });
+      };
+
+      getSwapQuote(requestBody);
     }
   }, [
     selectedAddress,
@@ -123,6 +183,10 @@ const Swap = ({ route }: Props) => {
   //
 
   const onInputAmountChange = (amount: string) => {
+    if (containsNonNumericCharacters(amount)) {
+      return;
+    }
+
     setAmountInputText(amount);
   };
 
@@ -242,16 +306,7 @@ const Swap = ({ route }: Props) => {
         />
       </View>
       <View style={{ rowGap: 16 }}>
-        <StyledText style={{ color: colors.border }}>
-          {swapQuote
-            ? `Gas fee ${swapQuote.originChainGas.usdValueFormatted} USD`
-            : ''}
-        </StyledText>
-        <StyledText style={{ color: colors.border }}>
-          {swapQuote
-            ? `Bridge fee ${swapQuote.relayerFee.usdValueFormatted} USD`
-            : ''}
-        </StyledText>
+        <TotalFee swapQuote={swapQuote} />
         <AddressSelector
           selectedAddress={selectedAddress}
           setSelectedAddress={setSelectedAddress}
