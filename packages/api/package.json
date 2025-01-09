@@ -9,9 +9,10 @@
   "scripts": {
     "start": "dotenv -e ../../.env -- tsx ./src/index",
     "start:watch": "dotenv -e ../../.env -- tsx --watch ./src/index",
-    "build": "tsc -d",
+    "build": "tsc -d && pnpm run sentry:sourcemaps",
     "build:watch": "tsc -d --watch",
-    "lint": "eslint . & tsc --noEmit"
+    "lint": "eslint . & tsc --noEmit",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org raylac --project raylac-api ./out && sentry-cli sourcemaps upload --org raylac --project raylac-api ./out"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +20,7 @@
   "dependencies": {
     "@raylac/shared": "workspace:*",
     "@raylac/shared-backend": "workspace:*",
+    "@sentry/cli": "^2.32.1",
     "@sentry/node": "^8.47.0",
     "@trpc/server": "^11.0.0-rc.439",
     "@types/node": "^20.11.17",
@@ -30,6 +32,5 @@
     "tsx": "^4.7.1",
     "viem": "^2.17.0",
     "zod": "^3.23.8"
-  },
-  "devDependencies": {}
+  }
 }

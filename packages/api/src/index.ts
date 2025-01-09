@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import './lib/sentry';
 import { z } from 'zod';
 import { publicProcedure, router, createCallerFactory } from './trpc';
 import { createContext } from './context';
