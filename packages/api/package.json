@@ -9,7 +9,7 @@
   "scripts": {
     "start": "dotenv -e ../../.env -- tsx ./src/index",
     "start:watch": "dotenv -e ../../.env -- tsx --watch ./src/index",
-    "build": "tsc -d && pnpm run sentry:sourcemaps",
+    "build": "tsc -d",
     "build:watch": "tsc -d --watch",
     "lint": "eslint . & tsc --noEmit",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org raylac --project raylac-api ./out && sentry-cli sourcemaps upload --org raylac --project raylac-api ./out"
