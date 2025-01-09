@@ -9,9 +9,11 @@ import { useState } from 'react';
 import BridgeTransferListItemSheet from '../BridgeTransferListItemSheet/BridgeTransferListItemSheet';
 import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import useEnsName from '@/hooks/useEnsName';
+import PendingIndicator from '../PendingIndicator/PendingIndicator';
 
 const BridgeTransferListItem = (props: {
   transfer: BridgeTransferHistoryItem;
+  isPending: boolean;
 }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
@@ -47,26 +49,32 @@ const BridgeTransferListItem = (props: {
               rowGap: 4,
             }}
           >
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                columnGap: 4,
-              }}
-            >
-              <StyledText style={{ color: colors.border }}>
-                {props.transfer.direction === 'incoming' ? 'Received' : 'Sent'}
-              </StyledText>
-              <Feather
-                name={
-                  props.transfer.direction === 'incoming'
-                    ? 'arrow-down-circle'
-                    : 'arrow-up-circle'
-                }
-                size={18}
-                color={colors.border}
-              />
-            </View>
+            {props.isPending ? (
+              <PendingIndicator />
+            ) : (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  columnGap: 4,
+                }}
+              >
+                <StyledText style={{ color: colors.border }}>
+                  {props.transfer.direction === 'incoming'
+                    ? 'Received'
+                    : 'Sent'}
+                </StyledText>
+                <Feather
+                  name={
+                    props.transfer.direction === 'incoming'
+                      ? 'arrow-down-circle'
+                      : 'arrow-up-circle'
+                  }
+                  size={18}
+                  color={colors.border}
+                />
+              </View>
+            )}
             <StyledText
               style={{ fontWeight: 'bold', color: colors.subbedText }}
             >

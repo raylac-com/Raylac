@@ -60,6 +60,9 @@ importers:
       '@raylac/shared-backend':
         specifier: workspace:*
         version: link:../shared-backend
+      '@sentry/cli':
+        specifier: ^2.32.1
+        version: 2.39.1
       '@sentry/node':
         specifier: ^8.47.0
         version: 8.47.0

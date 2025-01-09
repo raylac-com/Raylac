@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import './lib/sentry';
 import { z } from 'zod';
 import { publicProcedure, router, createCallerFactory } from './trpc';
 import { createContext } from './context';
@@ -8,6 +9,11 @@ import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { Hex } from 'viem';
 import getSupportedTokens from './api/getSupportedTokens/getSupportedTokens';
 import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.mock';
+import getLidoApyMock from './api/getLidoApy/getLidoApy.mock';
+import submitSingleInputSwapMock from './api/submitSingleInputSwap/submitSingleInputSwap.mock';
+import sendTxMock from './api/sendTx/sendTx.mock';
+import sendBridgeTxMock from './api/sendBridgeTx/sendBridgeTx.mock';
+import getSingleInputSwapQuoteMock from './api/getSingleInputSwapQuote/getSingleInputSwapQuote.mock';
 import {
   BuildSendRequestBody,
   GetHistoryRequestBody,
@@ -30,6 +36,8 @@ import sendTx from './api/sendTx/sendTx';
 import buildBridgeSend from './api/buildBridgeSend/buildBridgeSend';
 import sendBridgeTx from './api/sendBridgeTx/sendBridgeTx';
 import getTokenBalancesMock from './api/getTokenBalances/getTokenBalances.mock';
+import buildBridgeSendMock from './api/buildBridgeSend/buildBridgeSend.mock';
+import getHistoryMock from './api/getHistory/getHistory.mock';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -65,14 +73,17 @@ export const appRouter = router({
       return response;
     }),
 
+  // Not used right now
   getLidoApy: publicProcedure.query(async () => {
-    return getLidoApy();
+    return MOCK_RESPONSE ? getLidoApyMock() : getLidoApy();
   }),
 
   submitSingleInputSwap: publicProcedure
     .input(z.any())
     .mutation(async ({ input }) => {
-      return submitSingleInputSwap(input as SubmitSingleInputSwapRequestBody);
+      return MOCK_RESPONSE
+        ? submitSingleInputSwapMock(input as SubmitSingleInputSwapRequestBody)
+        : submitSingleInputSwap(input as SubmitSingleInputSwapRequestBody);
     }),
 
   buildSend: publicProcedure.input(z.any()).mutation(async ({ input }) => {
@@ -82,23 +93,31 @@ export const appRouter = router({
   buildBridgeSend: publicProcedure
     .input(z.any())
     .mutation(async ({ input }) => {
-      return buildBridgeSend(input as BuildBridgeSendRequestBody);
+      return MOCK_RESPONSE
+        ? await buildBridgeSendMock(input as BuildBridgeSendRequestBody)
+        : await buildBridgeSend(input as BuildBridgeSendRequestBody);
     }),
 
   sendTx: publicProcedure.input(z.any()).mutation(async ({ input }) => {
-    return sendTx(input as SendTxRequestBody);
+    return MOCK_RESPONSE
+      ? sendTxMock(input as SendTxRequestBody)
+      : sendTx(input as SendTxRequestBody);
   }),
 
   sendBridgeTx: publicProcedure.input(z.any()).mutation(async ({ input }) => {
-    return sendBridgeTx(input as SendBridgeTxRequestBody);
+    return MOCK_RESPONSE
+      ? sendBridgeTxMock(input as SendBridgeTxRequestBody)
+      : sendBridgeTx(input as SendBridgeTxRequestBody);
   }),
 
   getSingleInputSwapQuote: publicProcedure
     .input(z.any())
     .mutation(async ({ input }) => {
-      return getSingleInputSwapQuote(
-        input as GetSingleInputSwapQuoteRequestBody
-      );
+      return MOCK_RESPONSE
+        ? getSingleInputSwapQuoteMock(
+            input as GetSingleInputSwapQuoteRequestBody
+          )
+        : getSingleInputSwapQuote(input as GetSingleInputSwapQuoteRequestBody);
     }),
 
   getHistory: publicProcedure
@@ -108,7 +127,9 @@ export const appRouter = router({
       })
     )
     .query(async ({ input }) => {
-      return getHistory(input as GetHistoryRequestBody);
+      return MOCK_RESPONSE
+        ? await getHistoryMock(input as GetHistoryRequestBody)
+        : await getHistory(input as GetHistoryRequestBody);
     }),
 
   getSupportedTokens: publicProcedure

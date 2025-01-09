@@ -8,6 +8,7 @@ import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import SwapListItemSheet from '../SwapListItemSheet/SwapListItemSheet';
 import { useState } from 'react';
+import PendingIndicator from '../PendingIndicator/PendingIndicator';
 
 const SwapListItem = (props: { swap: SwapHistoryItem; isPending: boolean }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -54,18 +55,7 @@ const SwapListItem = (props: { swap: SwapHistoryItem; isPending: boolean }) => {
               }}
             >
               {props.isPending ? (
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    columnGap: 4,
-                  }}
-                >
-                  <StyledText style={{ color: colors.border }}>
-                    {`Pending`}
-                  </StyledText>
-                  <Feather name="clock" size={14} color={colors.border} />
-                </View>
+                <PendingIndicator />
               ) : (
                 <View
                   style={{

@@ -1,12 +1,15 @@
 import { createClient } from 'redis';
+import { REDIS_URL } from './envVars';
+import { logger } from '@raylac/shared-backend';
 
-if (!process.env.REDIS_URL) {
-  throw new Error('REDIS_URL is not set');
-}
 const redis = createClient({
-  url: process.env.REDIS_URL,
+  url: REDIS_URL,
 }) as ReturnType<typeof createClient>;
 
-redis.connect();
+if (process.env.MOCK_RESPONSE !== 'true') {
+  redis.connect();
+} else {
+  logger.info('Skipping Redis connection in mock mode');
+}
 
 export const redisClient: ReturnType<typeof createClient> = redis;
