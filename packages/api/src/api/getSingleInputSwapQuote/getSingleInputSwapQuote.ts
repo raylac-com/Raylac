@@ -291,6 +291,8 @@ const getSingleInputSwapQuote = async ({
     relayerServiceFee: relayerServiceFeeFormatted,
     relayRequestId: relayRequestId as Hex,
     totalFeeUsd: totalFeeUsdFormatted,
+    fromChainId: inputChainId,
+    toChainId: outputChainId,
   };
 };
 

@@ -105,6 +105,8 @@ export type GetSingleInputSwapQuoteReturnType = {
   originChainGas: TokenAmount;
   relayRequestId: Hex;
   totalFeeUsd: string;
+  fromChainId: number;
+  toChainId: number;
 };
 
 export interface SubmitSingleInputSwapRequestBody {

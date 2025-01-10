@@ -4,10 +4,127 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import StyledText from '../StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { View } from 'react-native';
-import { GetSingleInputSwapQuoteReturnType } from '@raylac/shared';
+import {
+  ETH,
+  getChainFromId,
+  GetSingleInputSwapQuoteReturnType,
+  Token,
+  TokenAmount,
+} from '@raylac/shared';
 import fontSizes from '@/lib/styles/fontSizes';
 import RelayLogo from '../RelayLogo/RelayLogo';
-import GasLogo from '../GasLogo/GasLogo';
+import ChainLogo from '../ChainLogo/ChainLogo';
+
+const OriginChainGas = ({
+  chainId,
+  amount,
+}: {
+  chainId: number;
+  token: Token;
+  amount: TokenAmount;
+}) => {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
+      <View
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+      >
+        <ChainLogo chainId={chainId} size={20} />
+        <StyledText style={{ color: colors.border }}>
+          {`${getChainFromId(chainId).name} gas`}
+        </StyledText>
+      </View>
+      <View
+        style={{ flexDirection: 'column', alignItems: 'center', columnGap: 8 }}
+      >
+        <StyledText style={{ color: colors.border }}>
+          {`$${amount.usdValueFormatted}`}
+        </StyledText>
+      </View>
+    </View>
+  );
+};
+
+const DestinationChainGas = ({
+  chainId,
+  amount,
+}: {
+  chainId: number;
+  token: Token;
+  amount: TokenAmount;
+}) => {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
+      <View
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+      >
+        <ChainLogo chainId={chainId} size={20} />
+        <StyledText style={{ color: colors.border }}>
+          {`${getChainFromId(chainId).name} gas`}
+        </StyledText>
+      </View>
+      <View
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
+      >
+        <StyledText style={{ color: colors.border }}>
+          {`$${amount.usdValueFormatted}`}
+        </StyledText>
+      </View>
+    </View>
+  );
+};
+
+const RelayServiceFee = ({ amount }: { amount: TokenAmount }) => {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+      }}
+    >
+      <View
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+      >
+        <RelayLogo size={20} />
+        <StyledText style={{ color: colors.border }}>
+          {`Bridge service fee`}
+        </StyledText>
+      </View>
+      <View
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
+      >
+        <StyledText style={{ color: colors.border }}>
+          {`$${amount.usdValueFormatted}`}
+        </StyledText>
+      </View>
+    </View>
+  );
+};
+
+const TotalFee = ({ usdValueFormatted }: { usdValueFormatted: string }) => {
+  return (
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
+        {`Total`}
+      </StyledText>
+      <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
+        {`$${usdValueFormatted}`}
+      </StyledText>
+    </View>
+  );
+};
 
 export interface SwapFeeDetailsSheetProps {
   isOpen: boolean;
@@ -58,65 +175,21 @@ const SwapFeeDetailsSheet = ({
           {`Swap fee`}
         </StyledText>
         <View style={{ rowGap: 16, flexDirection: 'column' }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 4,
-            }}
-          >
-            <View
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
-            >
-              <GasLogo size={24} />
-              <StyledText style={{ color: colors.border }}>
-                {`Origin chain gas fee `}
-              </StyledText>
-            </View>
-            <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
-              {`${swapQuote.originChainGas.usdValueFormatted} USD (ETH)`}
-            </StyledText>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 4,
-            }}
-          >
-            <View
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
-            >
-              <GasLogo size={24} />
-              <StyledText style={{ color: colors.border }}>
-                {`Destination chain gas fee `}
-              </StyledText>
-            </View>
-            <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
-              {`${swapQuote.relayerGas.usdValueFormatted} USD (${swapQuote.relayerGasToken.symbol})`}
-            </StyledText>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: 4,
-            }}
-          >
-            <View
-              style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
-            >
-              <RelayLogo size={24} />
-              <StyledText style={{ color: colors.border }}>
-                {`Relay service fee `}
-              </StyledText>
-            </View>
-            <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
-              {`${swapQuote.relayerServiceFee.usdValueFormatted} USD`}
-            </StyledText>
+          <OriginChainGas
+            chainId={swapQuote.fromChainId}
+            token={ETH}
+            amount={swapQuote.originChainGas}
+          />
+          {swapQuote.toChainId !== swapQuote.fromChainId && (
+            <DestinationChainGas
+              chainId={swapQuote.toChainId}
+              token={swapQuote.relayerGasToken}
+              amount={swapQuote.relayerGas}
+            />
+          )}
+          <RelayServiceFee amount={swapQuote.relayerServiceFee} />
+          <View style={{ marginTop: 16 }}>
+            <TotalFee usdValueFormatted={swapQuote.totalFeeUsd} />
           </View>
         </View>
       </BottomSheetView>

@@ -4,7 +4,6 @@ import SwapInputCard from './components/SwapInputCard/SwapInputCard';
 import SwapOutputCard from './components/SwapOutputCard/SwapOutputCard';
 import { Hex, parseUnits, zeroAddress } from 'viem';
 import {
-  containsNonNumericCharacters,
   ETH,
   GetSingleInputSwapQuoteRequestBody,
   GetSingleInputSwapQuoteReturnType,
@@ -183,10 +182,6 @@ const Swap = ({ route }: Props) => {
   //
 
   const onInputAmountChange = (amount: string) => {
-    if (containsNonNumericCharacters(amount)) {
-      return;
-    }
-
     setAmountInputText(amount);
   };
 

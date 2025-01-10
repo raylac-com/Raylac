@@ -105,7 +105,7 @@ const RelayServiceFee = ({
       >
         <RelayLogo size={20} />
         <StyledText style={{ color: colors.border }}>
-          {`Relay service fee`}
+          {`Bridge service fee`}
         </StyledText>
       </View>
       <View
