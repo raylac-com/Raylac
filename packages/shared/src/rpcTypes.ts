@@ -2,7 +2,7 @@ import { Hex } from 'viem';
 import {
   AlchemyTokenPriceResponse,
   Token,
-  CrossChainSwapStep,
+  DepositStep,
   ApproveStep,
   SwapStep,
   SignedSingleInputSwapStep,
@@ -200,8 +200,10 @@ export interface BuildBridgeSendRequestBody {
 }
 
 export type BuildBridgeSendReturnType = {
+  fromChainId: number;
+  toChainId: number;
   relayRequestId: Hex;
-  steps: CrossChainSwapStep[];
+  steps: DepositStep[];
   transfer: {
     from: Hex;
     to: Hex;
@@ -211,9 +213,13 @@ export type BuildBridgeSendReturnType = {
   originChainGas: TokenAmount;
   relayerServiceFeeToken: Token;
   relayerServiceFee: TokenAmount;
+  relayerGas: TokenAmount;
+  relayerGasToken: Token;
   amountIn: TokenAmount;
   amountOut: TokenAmount;
-  relayerFeeChainId: number;
+  relayerServiceFeeChainId: number;
+  relayerGasChainId: number;
+  totalFeeUsd: string;
 };
 
 export type GetTokenUsdPriceReturnType = number | null;

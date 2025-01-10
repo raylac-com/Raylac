@@ -8,7 +8,7 @@ import {
 } from '@raylac/shared';
 import { base } from 'viem/chains';
 import { arbitrum } from 'viem/chains';
-import { Hex, parseUnits } from 'viem';
+import { Hex, parseEther, parseUnits } from 'viem';
 import { client } from './rpc';
 import { privateKeyToAccount } from 'viem/accounts';
 
@@ -23,8 +23,8 @@ const bridgeSend = async () => {
   const requestBody: BuildBridgeSendRequestBody = {
     from: account.address,
     to: '0x400EA6522867456E988235675b9Cb5b1Cf5b79C8',
-    token: ETH,
-    amount: '1000000000000000000',
+    token: USDC,
+    amount: parseUnits('100', USDC.decimals).toString(),
     fromChainId,
     toChainId,
   };

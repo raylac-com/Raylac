@@ -28,9 +28,7 @@ export interface RelayExecutionStepItem {
   };
 }
 
-export interface CrossChainSwapStep {
-  originChainId: number;
-  destinationChainId: number;
+export interface DepositStep {
   id: 'deposit' | 'approve';
   tx: {
     to: Hex;

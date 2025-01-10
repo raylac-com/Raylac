@@ -20,7 +20,8 @@ export interface SendConfirmSheetProps {
   token: Token;
   fromAddress: Hex;
   toAddress: Hex;
-  amount: TokenAmount;
+  inputAmount: TokenAmount;
+  outputAmount: TokenAmount;
   onClose: () => void;
   onConfirm: () => void;
   isSending: boolean;
@@ -30,16 +31,28 @@ const FromCard = ({
   address,
   token,
   chainId,
+  amount,
 }: {
   token: Token;
   chainId: number;
   address: Hex;
+  amount: TokenAmount;
 }) => {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-      <TokenLogoWithChain size={42} logoURI={token.logoURI} chainId={chainId} />
-      <View>
-        <WalletIconAddress address={address} fontSize={20} />
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+      <TokenLogoWithChain size={52} logoURI={token.logoURI} chainId={chainId} />
+      <View style={{ flexDirection: 'column', rowGap: 4 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <StyledText style={{ fontSize: fontSizes.large, fontWeight: 'bold' }}>
+            {`$${amount.usdValueFormatted} `}
+          </StyledText>
+          <StyledText
+            style={{ fontSize: fontSizes.large, color: colors.border }}
+          >
+            {`${amount.formatted} ${token.symbol}`}
+          </StyledText>
+        </View>
+        <WalletIconAddress address={address} />
       </View>
     </View>
   );
@@ -48,30 +61,32 @@ const FromCard = ({
 const ToCard = ({
   address,
   token,
+  amount,
   chainId,
 }: {
   address: Hex;
   token: Token;
   chainId: number;
+  amount: TokenAmount;
 }) => {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-      <View>
-        <TokenLogoWithChain
-          size={42}
-          logoURI={token.logoURI}
-          chainId={chainId}
-        />
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+      <TokenLogoWithChain size={52} logoURI={token.logoURI} chainId={chainId} />
+      <View style={{ flexDirection: 'column', rowGap: 4 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+          <StyledText style={{ fontSize: fontSizes.large, fontWeight: 'bold' }}>
+            {`$${amount.usdValueFormatted} `}
+          </StyledText>
+          <StyledText
+            style={{ fontSize: fontSizes.large, color: colors.border }}
+          >
+            {`${amount.formatted} ${token.symbol}`}
+          </StyledText>
+        </View>
+        <StyledText style={{ color: colors.border }}>
+          {shortenAddress(address)}
+        </StyledText>
       </View>
-      <StyledText
-        style={{
-          color: colors.border,
-          fontSize: fontSizes.large,
-          fontWeight: 'bold',
-        }}
-      >
-        {`${shortenAddress(address)}`}
-      </StyledText>
     </View>
   );
 };
@@ -83,7 +98,8 @@ const SendConfirmSheet = ({
   token,
   fromAddress,
   toAddress,
-  amount,
+  inputAmount,
+  outputAmount,
   onClose,
   onConfirm,
   isSending,
@@ -125,13 +141,18 @@ const SendConfirmSheet = ({
             style={{ fontSize: fontSizes.twoXLarge, fontWeight: 'bold' }}
           >{`Send`}</StyledText>
           <View style={{ flexDirection: 'column', rowGap: 16 }}>
-            <ToCard address={toAddress} token={token} chainId={toChainId} />
+            <ToCard
+              address={toAddress}
+              token={token}
+              chainId={toChainId}
+              amount={outputAmount}
+            />
             <View
               style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}
             >
               <View
                 style={{
-                  width: 42,
+                  width: 52,
                   flexDirection: 'row',
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -139,19 +160,12 @@ const SendConfirmSheet = ({
               >
                 <Feather name="chevrons-up" size={32} color="black" />
               </View>
-              <View style={{ flexDirection: 'column', rowGap: 4 }}>
-                <StyledText
-                  style={{ fontSize: fontSizes.large, fontWeight: 'bold' }}
-                >{`$${amount.usdValueFormatted}`}</StyledText>
-                <StyledText
-                  style={{ fontSize: fontSizes.base, color: colors.border }}
-                >{`${amount.formatted} ${token.symbol}`}</StyledText>
-              </View>
             </View>
             <FromCard
               address={fromAddress}
               token={token}
               chainId={fromChainId}
+              amount={inputAmount}
             />
           </View>
           <StyledButton

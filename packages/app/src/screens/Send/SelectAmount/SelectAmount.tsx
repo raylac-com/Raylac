@@ -1,4 +1,4 @@
-import Entypo from '@expo/vector-icons/Entypo';
+import Feather from '@expo/vector-icons/Feather';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import StyledText from '@/components/StyledText/StyledText';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -12,19 +12,18 @@ import {
   BuildSendRequestBody,
   ETH,
   formatAmount,
-  Token,
   containsNonNumericCharacters,
+  BuildBridgeSendReturnType,
 } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
-import { formatUnits, Hex, parseUnits, zeroAddress } from 'viem';
+import { formatUnits, parseUnits, zeroAddress } from 'viem';
 import BigNumber from 'bignumber.js';
 import { trpc } from '@/lib/trpc';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 import Skeleton from '@/components/Skeleton/Skeleton';
-import SendToCard from '@/components/SendToCard/SendToCard';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import useSend from '@/hooks/useSend';
 import Toast from 'react-native-toast-message';
@@ -35,6 +34,9 @@ import useBridgeSend from '@/hooks/useBridgeSend';
 import useAddressChainTokenBalance from '@/hooks/useAddressChainTokenBalance';
 import SendConfirmSheet from '@/components/SendConfirmSheet/SendConfirmSheet';
 import { checkIsBalanceSufficient } from '@raylac/shared';
+import BridgeSendFeeDetailsSheet from '@/components/BridgeSendFeeDetailsSheet/BridgeSendFeeDetailsSheet';
+import { optimism } from 'viem/chains';
+import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
 
 const ReviewButton = ({
   onPress,
@@ -67,19 +69,6 @@ const ReviewButton = ({
   );
 };
 
-const SendFromDetail = ({ address }: { address: Hex }) => {
-  return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-      <StyledText style={{ color: colors.subbedText }}>
-        {`Send from`}
-      </StyledText>
-      <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-        {shortenAddress(address)}
-      </StyledText>
-    </View>
-  );
-};
-
 const ChainDetail = ({
   chainId,
   onSelectPress,
@@ -99,7 +88,7 @@ const ChainDetail = ({
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 2 }}
       >
         <ChainLogo chainId={chainId} size={16} />
-        <Entypo name="chevron-thin-right" size={16} color={colors.border} />
+        <Feather name="chevron-right" size={16} color={colors.border} />
       </View>
     </FeedbackPressable>
   );
@@ -119,7 +108,7 @@ const BalanceDetail = ({
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
       >
         {balance ? (
-          <StyledText style={{ color: colors.subbedText }}>
+          <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
             {`$${balance.usdValueFormatted}`}
           </StyledText>
         ) : (
@@ -139,17 +128,16 @@ const GasInfo = ({
   gas,
   isFetchingGasInfo,
 }: {
-  gas: TokenAmount | undefined;
+  gas: TokenAmount;
   isFetchingGasInfo: boolean;
 }) => {
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <StyledText style={{ color: colors.subbedText }}>{`Gas`}</StyledText>
-      {isFetchingGasInfo ? (
-        <Skeleton style={{ width: 100, height: 20 }} />
-      ) : (
+      {isFetchingGasInfo && <Skeleton style={{ width: 100, height: 20 }} />}
+      {gas && (
         <StyledText style={{ color: colors.subbedText }}>
-          {`$${gas?.usdValueFormatted || '0'} (${gas?.formatted || '0'} ETH)`}
+          {`$${gas.usdValueFormatted} (${gas.formatted} ETH)`}
         </StyledText>
       )}
     </View>
@@ -157,34 +145,41 @@ const GasInfo = ({
 };
 
 const BridgeFeeInfo = ({
-  feeToken,
-  feeChainId,
-  bridgeFee,
+  bridgeSendData,
+  isLoading,
 }: {
-  feeToken: Token;
-  feeChainId: number;
-  bridgeFee: TokenAmount | undefined;
+  bridgeSendData: BuildBridgeSendReturnType | undefined;
+  isLoading: boolean;
 }) => {
+  const [isFeeDetailsSheetOpen, setIsFeeDetailsSheetOpen] = useState(false);
+
   return (
-    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-      <StyledText
-        style={{ color: colors.subbedText }}
-      >{`Bridge fee`}</StyledText>
-      {bridgeFee ? (
-        <View
-          style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
-        >
-          <TokenLogoWithChain
-            logoURI={feeToken.logoURI}
-            chainId={feeChainId}
-            size={24}
-          />
-          <StyledText style={{ color: colors.subbedText }}>
-            {`$${bridgeFee.usdValueFormatted}`}
-          </StyledText>
-        </View>
-      ) : (
-        <Skeleton style={{ width: 100, height: 20 }} />
+    <View>
+      <FeedbackPressable
+        style={{ flexDirection: 'row', justifyContent: 'space-between' }}
+        onPress={() => setIsFeeDetailsSheetOpen(true)}
+      >
+        <StyledText
+          style={{ color: colors.subbedText }}
+        >{`Total fee`}</StyledText>
+        {isLoading && <Skeleton style={{ width: 100, height: 20 }} />}
+        {bridgeSendData && (
+          <View
+            style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+          >
+            <StyledText style={{ color: colors.subbedText }}>
+              {`$${bridgeSendData.totalFeeUsd}`}
+            </StyledText>
+            <Feather name="chevron-right" size={16} color={colors.border} />
+          </View>
+        )}
+      </FeedbackPressable>
+      {bridgeSendData && (
+        <BridgeSendFeeDetailsSheet
+          isOpen={isFeeDetailsSheetOpen}
+          bridgeSendData={bridgeSendData}
+          onClose={() => setIsFeeDetailsSheetOpen(false)}
+        />
       )}
     </View>
   );
@@ -236,12 +231,12 @@ const SelectAmount = ({ route }: Props) => {
   const [isChainsSheetOpen, setIsChainsSheetOpen] = useState(false);
 
   const [fromChainId, _setFromChainId] = useState<number>(_chainId);
-  const [toChainId, setToChainId] = useState<number>(_chainId);
+  const [toChainId, setToChainId] = useState<number>(optimism.id);
 
   ///
   /// Local state
   ///
-  const [amountInputText, setAmountInputText] = useState<string>('');
+  const [amountInputText, setAmountInputText] = useState<string>('1');
   const [subAmount, setSubAmount] = useState<string | null>(null);
 
   const [isBalanceSufficient, setIsBalanceSufficient] = useState<boolean>(true);
@@ -276,6 +271,7 @@ const SelectAmount = ({ route }: Props) => {
     data: sendData,
     mutateAsync: buildSend,
     isPending: isBuildingSend,
+    reset: resetSendData,
   } = trpc.buildSend.useMutation({
     throwOnError: false,
   });
@@ -284,6 +280,7 @@ const SelectAmount = ({ route }: Props) => {
     data: bridgeSendData,
     mutateAsync: buildBridgeSend,
     isPending: isBuildingBridgeSend,
+    reset: resetBridgeSendData,
   } = trpc.buildBridgeSend.useMutation({
     throwOnError: false,
   });
@@ -336,14 +333,20 @@ const SelectAmount = ({ route }: Props) => {
       }
 
       if (bridgeSendData) {
-        // This is a cross-chain transfer
-        // TODO: Fix this
-        const bridgeFee = BigInt(bridgeSendData.relayerServiceFee.amount);
+        const originChainGas = BigInt(bridgeSendData.originChainGas.amount);
 
-        if (bridgeSendData.relayerServiceFeeToken.symbol === 'ETH') {
-          setIsGasSufficient(bridgeFee <= BigInt(ethBalance.amount));
+        // This is a cross-chain transfer
+        if (token.id === zeroAddress) {
+          // This is a ETH transfer
+          // Add the send amount and the gas fee
+          const sendAmountPlusGas =
+            BigInt(bridgeSendData.amountIn.amount) +
+            BigInt(bridgeSendData.originChainGas.amount);
+
+          // Check if the send amount plus the gas fee is less than the available gas
+          setIsGasSufficient(sendAmountPlusGas <= BigInt(ethBalance.amount));
         } else {
-          setIsGasSufficient(bridgeFee <= BigInt(tokenBalance.amount));
+          setIsGasSufficient(originChainGas <= BigInt(ethBalance.amount));
         }
       }
     }
@@ -371,6 +374,9 @@ const SelectAmount = ({ route }: Props) => {
     if (parsedAmount === BigInt(0)) {
       return;
     }
+
+    resetBridgeSendData();
+    resetSendData();
 
     if (fromChainId === toChainId) {
       // This is a same-chain transfer
@@ -438,6 +444,9 @@ const SelectAmount = ({ route }: Props) => {
   };
 
   const onReviewButtonPress = () => {
+    if (!isReadyForReview) {
+      throw new Error('Not ready for review');
+    }
     setIsConfirmSheetOpen(true);
   };
 
@@ -521,11 +530,26 @@ const SelectAmount = ({ route }: Props) => {
   };
 
   const isReadyForReview =
-    isBalanceSufficient && isGasSufficient && sendData !== undefined;
+    isBalanceSufficient &&
+    isGasSufficient &&
+    (sendData !== undefined || bridgeSendData !== undefined);
 
   return (
     <ScrollView contentContainerStyle={{ flex: 1, padding: 16, rowGap: 20 }}>
-      <SendToCard toAddress={toAddress} />
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingHorizontal: 8,
+          columnGap: 16,
+        }}
+      >
+        <WalletIconAddress address={fromAddresses[0]} />
+        <Feather name="chevrons-right" size={24} color={colors.border} />
+        <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
+          {shortenAddress(toAddress)}
+        </StyledText>
+      </View>
       <View
         style={{
           flexDirection: 'column',
@@ -624,16 +648,16 @@ const SelectAmount = ({ route }: Props) => {
           chainId={toChainId}
           onSelectPress={() => setIsChainsSheetOpen(true)}
         />
-        <SendFromDetail address={fromAddresses[0]} />
-        <GasInfo
-          gas={bridgeSendData?.originChainGas || sendData?.transfer.gasFee}
-          isFetchingGasInfo={isBuildingBridgeSend || isBuildingSend}
-        />
+        {sendData && (
+          <GasInfo
+            gas={sendData.transfer.gasFee}
+            isFetchingGasInfo={isBuildingSend}
+          />
+        )}
         {bridgeSendData && (
           <BridgeFeeInfo
-            bridgeFee={bridgeSendData?.relayerServiceFee}
-            feeToken={bridgeSendData?.relayerServiceFeeToken}
-            feeChainId={bridgeSendData?.relayerFeeChainId}
+            bridgeSendData={bridgeSendData}
+            isLoading={isBuildingBridgeSend}
           />
         )}
       </View>
@@ -663,7 +687,14 @@ const SelectAmount = ({ route }: Props) => {
           token={token}
           fromAddress={fromAddresses[0]}
           toAddress={toAddress}
-          amount={sendData.transfer.amount}
+          inputAmount={
+            (sendData?.transfer.amount ||
+              bridgeSendData?.amountIn) as TokenAmount
+          }
+          outputAmount={
+            (sendData?.transfer.amount ||
+              bridgeSendData?.amountOut) as TokenAmount
+          }
           onClose={() => {
             setIsConfirmSheetOpen(false);
           }}

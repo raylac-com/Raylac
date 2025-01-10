@@ -1,9 +1,14 @@
 import { logger } from '@raylac/shared-backend';
 import {
-  CrossChainSwapStep,
+  DepositStep,
   ETH,
+  formatAmount,
   formatTokenAmount,
+  formatUsdValue,
+  RelayGasFee,
   RelayGetQuoteRequestBody,
+  Token,
+  TokenAmount,
   TRPCErrorMessage,
 } from '@raylac/shared';
 import { TRPCError } from '@trpc/server';
@@ -17,7 +22,75 @@ import { relayApi } from '../../lib/relay';
 import axios from 'axios';
 import { getNonce } from '../../utils';
 import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
-import { Hex, zeroAddress } from 'viem';
+import { Hex } from 'viem';
+import BigNumber from 'bignumber.js';
+
+/**
+ * Parses a relayer fee into a `TokenAmount` and `Token`
+ */
+const parseRelayerFee = ({
+  fee,
+  possibleTokens,
+}: {
+  fee: RelayGasFee;
+  possibleTokens: Token[];
+}): { amount: TokenAmount; token: Token } => {
+  const amount = fee.amount;
+
+  if (amount === undefined) {
+    throw new Error('Fee amount is undefined');
+  }
+
+  const amountUsd = fee.amountUsd;
+
+  if (amountUsd === undefined) {
+    throw new Error('Fee amountUsd is undefined');
+  }
+
+  const currency = fee.currency;
+
+  if (currency === undefined) {
+    throw new Error('Fee currency is undefined');
+  }
+
+  const decimals = currency.decimals;
+
+  if (decimals === undefined) {
+    throw new Error('Fee currency decimals is undefined');
+  }
+
+  const currencyAddress = currency.address;
+
+  if (currencyAddress === undefined) {
+    throw new Error('Fee currency address is undefined');
+  }
+
+  const token = possibleTokens.find(token =>
+    Object.values(token.addresses).some(
+      address => address.address.toLowerCase() === currencyAddress.toLowerCase()
+    )
+  );
+
+  if (!token) {
+    throw new Error(
+      `Token not found for fee currency ${currencyAddress.toLowerCase()}`
+    );
+  }
+
+  // Compute the usd price from the usd value and the amount returned from Relay
+
+  const tokenUsdPrice = new BigNumber(amountUsd)
+    .div(new BigNumber(formatAmount(amount, decimals)))
+    .toNumber();
+
+  const tokenAmount = formatTokenAmount({
+    amount: BigInt(amount),
+    token,
+    tokenPriceUsd: tokenUsdPrice,
+  });
+
+  return { amount: tokenAmount, token };
+};
 
 const buildBridgeSend = async ({
   from,
@@ -114,72 +187,39 @@ const buildBridgeSend = async ({
     throw new Error('ETH price not found');
   }
 
-  const originChainGas = quote.fees.gas.amount;
-
-  if (originChainGas === undefined) {
-    throw new Error('originChainGas is undefined');
-  }
-
-  const originChainGasFormatted = formatTokenAmount({
-    amount: BigInt(originChainGas),
-    token: ETH,
-    tokenPriceUsd: ethPriceUsd,
+  const originChainGas = parseRelayerFee({
+    fee: quote.fees.gas,
+    possibleTokens: [token, ETH],
   });
 
-  const relayerFeeCurrency = quote.fees.relayer.currency;
-
-  const relayerFeeChainId = quote.fees.relayer.currency?.chainId;
-
-  if (relayerFeeChainId === undefined) {
-    throw new Error('relayerFeeChainId is undefined');
-  }
-
-  const relayFeeAmount = quote.fees.relayer.amount;
-
-  if (relayerFeeCurrency?.address === undefined) {
-    throw new Error('relayerFeeCurrency.address is undefined');
-  }
-
-  let relayerFeeToken;
-  if (
-    relayerFeeCurrency.address.toLowerCase() ===
-      originTokenAddress.toLowerCase() ||
-    relayerFeeCurrency.address.toLowerCase() ===
-      destinationTokenAddress.toLowerCase()
-  ) {
-    relayerFeeToken = token;
-  } else if (relayerFeeCurrency?.address === zeroAddress) {
-    relayerFeeToken = ETH;
-  } else {
-    throw new Error(
-      `Unknown fee token ${relayerFeeCurrency?.address} for bridge send`
-    );
-  }
-
-  if (relayFeeAmount === undefined) {
-    throw new Error('relayFeeAmount ');
-  }
-
-  const feeTokenPriceUsd = await getTokenUsdPrice({
-    token: relayerFeeToken,
+  const relayerServiceFee = parseRelayerFee({
+    fee: quote.fees.relayerService,
+    possibleTokens: [token, ETH],
   });
 
-  if (feeTokenPriceUsd === null) {
-    throw new Error('feeTokenPriceUsd is undefined');
+  const relayerGas = parseRelayerFee({
+    fee: quote.fees.relayerGas,
+    possibleTokens: [token, ETH],
+  });
+
+  const relayerServiceFeeChainId = quote.fees.relayerService.currency?.chainId;
+
+  if (relayerServiceFeeChainId === undefined) {
+    throw new Error('Relayer fee chain id is undefined');
   }
 
-  const relayerServiceFeeFormatted = formatTokenAmount({
-    amount: BigInt(relayFeeAmount),
-    token: relayerFeeToken,
-    tokenPriceUsd: feeTokenPriceUsd,
-  });
+  const relayerGasChainId = quote.fees.relayerGas.currency?.chainId;
+
+  if (relayerGasChainId === undefined) {
+    throw new Error('Relayer gas chain id is undefined');
+  }
 
   let fromChainNonce = await getNonce({
     address: from,
     chainId: fromChainId,
   });
 
-  const steps: CrossChainSwapStep[] = quote.steps.map(step => {
+  const steps: DepositStep[] = quote.steps.map(step => {
     if (step.items.length !== 1) {
       throw new Error('Expected 1 step item, got ' + step.items.length);
     }
@@ -187,9 +227,7 @@ const buildBridgeSend = async ({
     const item = step.items[0];
 
     // Create the step with the correct id type
-    const crossChainStep: CrossChainSwapStep = {
-      originChainId: item.data.chainId,
-      destinationChainId: item.data.chainId,
+    const depositStep: DepositStep = {
       id: (step.id === 'swap' ? 'deposit' : step.id) as 'deposit' | 'approve',
       tx: {
         data: item.data.data,
@@ -205,17 +243,22 @@ const buildBridgeSend = async ({
 
     fromChainNonce++;
 
-    return crossChainStep;
+    return depositStep;
   });
 
-  const swapStep = quote.steps.find(step => step.id === 'deposit');
+  const depositStep = quote.steps.find(step => step.id === 'deposit');
 
-  if (!swapStep) {
+  if (!depositStep) {
     throw new Error('Swap step not found');
   }
+  const totalFeeUsd = formatUsdValue(
+    new BigNumber(relayerServiceFee.amount.usdValue)
+      .plus(new BigNumber(relayerGas.amount.usdValue))
+      .plus(new BigNumber(originChainGas.amount.usdValue))
+  );
 
   return {
-    relayRequestId: swapStep.requestId as Hex,
+    relayRequestId: depositStep.requestId as Hex,
     steps: steps,
     transfer: {
       from: from,
@@ -223,12 +266,18 @@ const buildBridgeSend = async ({
       amount: amountInFormatted,
       token,
     },
-    originChainGas: originChainGasFormatted,
-    relayerFeeChainId,
-    relayerServiceFeeToken: relayerFeeToken,
-    relayerServiceFee: relayerServiceFeeFormatted,
+    originChainGas: originChainGas.amount,
+    relayerGas: relayerGas.amount,
+    relayerServiceFee: relayerServiceFee.amount,
+    relayerGasToken: relayerGas.token,
+    relayerServiceFeeToken: relayerServiceFee.token,
+    relayerServiceFeeChainId,
+    relayerGasChainId,
     amountIn: amountInFormatted,
     amountOut: amountOutFormatted,
+    totalFeeUsd,
+    fromChainId,
+    toChainId,
   };
 };
 

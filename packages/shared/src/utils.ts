@@ -148,7 +148,7 @@ export const formatTokenAmount = ({
   const amountFormatted: TokenAmount = {
     amount: amount.toString(),
     formatted: formatAmount(amount.toString(), token.decimals),
-    usdValue: usdValue.toString(),
+    usdValue: usdValue.toFixed(),
     usdValueFormatted,
     tokenPriceUsd,
   };
