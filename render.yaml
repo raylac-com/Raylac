@@ -6,7 +6,7 @@ services:
     plan: standard
     previewPlan: starter
     runtime: node
-    region: oregon
+    region: singapore
     buildCommand: rm -rf ./packages/{app,scripts,contracts} && pnpm i --ignore-scripts && pnpm build
     startCommand: NODE_ENV=production pnpm -F api start
     autoDeploy: true
@@ -28,6 +28,7 @@ services:
   - type: redis
     name: raylac-redis
     plan: starter
+    region: singapore
     ipAllowList:
       - source: 0.0.0.0/0
         description: everywhere
