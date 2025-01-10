@@ -111,6 +111,7 @@ const SwapInputCard = ({
           setUserInputMode('TOKEN');
           setAmount(value);
         }}
+        canEnterAmount={true}
       />
       {token && (
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

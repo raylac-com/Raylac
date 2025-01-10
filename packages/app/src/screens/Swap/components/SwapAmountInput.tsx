@@ -6,6 +6,7 @@ import { Token } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
+import Toast from 'react-native-toast-message';
 
 const SwapAmountInput = ({
   selectedToken,
@@ -14,6 +15,7 @@ const SwapAmountInput = ({
   amount,
   setAmount,
   isLoadingAmount,
+  canEnterAmount,
 }: {
   selectedToken: Token | null;
   chainId: number | null;
@@ -21,6 +23,7 @@ const SwapAmountInput = ({
   isLoadingAmount: boolean;
   amount: string;
   setAmount: (value: string) => void;
+  canEnterAmount: boolean;
 }) => {
   return (
     <View>
@@ -34,22 +37,24 @@ const SwapAmountInput = ({
         disabled={!!selectedToken}
         onPress={onSelectTokenPress}
       >
-        {selectedToken ? (
-          <TokenLogoWithChain
-            chainId={chainId}
-            logoURI={selectedToken.logoURI}
-            size={34}
-          />
-        ) : (
-          <View
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: 34,
-              backgroundColor: '#D9D9D9',
-            }}
-          />
-        )}
+        <Pressable onPress={onSelectTokenPress}>
+          {selectedToken ? (
+            <TokenLogoWithChain
+              chainId={chainId}
+              logoURI={selectedToken.logoURI}
+              size={34}
+            />
+          ) : (
+            <View
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 34,
+                backgroundColor: '#D9D9D9',
+              }}
+            />
+          )}
+        </Pressable>
         {isLoadingAmount ? (
           <Skeleton
             style={{
@@ -62,7 +67,16 @@ const SwapAmountInput = ({
           <TextInput
             keyboardType="numeric"
             value={selectedToken ? amount : ''}
-            onChangeText={setAmount}
+            onChangeText={text => {
+              if (canEnterAmount) {
+                setAmount(text);
+              } else {
+                Toast.show({
+                  type: 'error',
+                  text1: 'Cannot set output amount',
+                });
+              }
+            }}
             placeholder={'0.00'}
             style={{
               fontSize: fontSizes.twoXLarge,

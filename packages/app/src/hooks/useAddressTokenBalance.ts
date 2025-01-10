@@ -19,19 +19,25 @@ const useAddressTokenBalance = ({
   address,
   token,
 }: {
-  address: Hex;
-  token: Token;
+  address: Hex | null;
+  token: Token | null;
 }): AddressTokenBalance | undefined => {
   // TODO: Make this faster
   const tokenBalances = useTokenBalancePerAddress({
-    addresses: [address],
+    addresses: address ? [address] : [],
   });
+
+  if (!token) {
+    return undefined;
+  }
 
   const tokenBalance = tokenBalances?.length
     ? tokenBalances[0].tokenBalances.find(tb => tb.token.id === token.id)
     : undefined;
 
-  if (!tokenBalance) return undefined;
+  if (!tokenBalance) {
+    return undefined;
+  }
 
   return {
     totalBalance: tokenBalance.totalBalance,

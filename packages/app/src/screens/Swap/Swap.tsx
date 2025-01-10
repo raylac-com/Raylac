@@ -4,12 +4,12 @@ import SwapInputCard from './components/SwapInputCard/SwapInputCard';
 import SwapOutputCard from './components/SwapOutputCard/SwapOutputCard';
 import { Hex, parseUnits, zeroAddress } from 'viem';
 import {
+  containsNonNumericCharacters,
   ETH,
   GetSingleInputSwapQuoteRequestBody,
   GetSingleInputSwapQuoteReturnType,
   Token,
   TRPCErrorMessage,
-  USDC,
 } from '@raylac/shared';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useDebounce from '@/hooks/useDebounce';
@@ -27,7 +27,53 @@ import { trpc } from '@/lib/trpc';
 import { Toast } from 'react-native-toast-message/lib/src/Toast';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import SwapFeeDetailsSheet from '@/components/SwapFeeDetailsSheet/SwapFeeDetailsSheet';
-import { base } from 'viem/chains';
+import { mainnet } from 'viem/chains';
+import useAddressChainTokenBalance from '@/hooks/useAddressChainTokenBalance';
+import useAddressTokenBalance from '@/hooks/useAddressTokenBalance';
+
+const SwapButton = ({
+  swapQuoteLoaded,
+  isAmountTooSmall,
+  isOriginChainGasSufficient,
+  isBalanceSufficient,
+  isLoading,
+  onPress,
+}: {
+  swapQuoteLoaded: boolean;
+  isAmountTooSmall: boolean;
+  isOriginChainGasSufficient: boolean | null;
+  isBalanceSufficient: boolean | null;
+  isLoading: boolean;
+  onPress: () => void;
+}) => {
+  let label;
+
+  if (isAmountTooSmall) {
+    label = 'Amount too small';
+  } else if (isBalanceSufficient === false) {
+    label = 'Insufficient balance';
+  } else if (isOriginChainGasSufficient === false) {
+    label = 'Insufficient origin chain gas';
+  } else {
+    label = 'Swap';
+  }
+
+  const disabled =
+    isOriginChainGasSufficient === false ||
+    isBalanceSufficient === false ||
+    isAmountTooSmall ||
+    isLoading ||
+    !swapQuoteLoaded;
+
+  return (
+    <StyledButton
+      title={label}
+      onPress={onPress}
+      isLoading={isLoading}
+      disabled={disabled}
+    />
+  );
+};
 
 const TotalFee = ({
   swapQuote,
@@ -78,21 +124,38 @@ const Swap = ({ route }: Props) => {
   // Local State
   //
 
-  const [inputToken, setInputToken] = useState<Token | null>(ETH);
-  const [outputToken, setOutputToken] = useState<Token | null>(USDC);
-  const [amountInputText, setAmountInputText] = useState<string>('0.01');
-  const [inputChainId, setInputChainId] = useState<number | null>(base.id);
-  const [outputChainId, setOutputChainId] = useState<number | null>(base.id);
+  const [inputToken, setInputToken] = useState<Token | null>(null);
+  const [outputToken, setOutputToken] = useState<Token | null>(null);
+  const [amountInputText, setAmountInputText] = useState<string>('');
+  const [inputChainId, setInputChainId] = useState<number | null>(null);
+  const [outputChainId, setOutputChainId] = useState<number | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<Hex | null>(null);
+  const [isBalanceSufficient, setIsBalanceSufficient] = useState<
+    boolean | null
+  >(null);
+  const [isOriginChainGasSufficient, setIsOriginChainGasSufficient] = useState<
+    boolean | null
+  >(null);
 
   //
   // Fetch data
   //
 
-  const { data: inputTokenBalance } = useChainTokenBalance({
+  const inputTokenBalances = useAddressTokenBalance({
+    address: selectedAddress,
+    token: inputToken,
+  });
+
+  const { data: inputTokenChainBalance } = useChainTokenBalance({
     chainId: inputChainId,
     token: inputToken,
     address: selectedAddress ?? zeroAddress,
+  });
+
+  const ethBalance = useAddressChainTokenBalance({
+    address: selectedAddress ?? zeroAddress,
+    chainId: inputChainId ?? mainnet.id,
+    token: ETH,
   });
 
   // Mutations
@@ -102,6 +165,7 @@ const Swap = ({ route }: Props) => {
     data: swapQuote,
     isPending: isGettingSwapQuote,
     error: getSwapQuoteError,
+    reset: resetGetSwapQuote,
   } = trpc.getSingleInputSwapQuote.useMutation({
     throwOnError: false,
   });
@@ -113,12 +177,7 @@ const Swap = ({ route }: Props) => {
   // Effects
   //
 
-  useEffect(() => {
-    if (fromToken) {
-      setInputToken(fromToken);
-    }
-  }, [fromToken]);
-
+  // Hook to set the initial selected address
   useEffect(() => {
     if (writerAddresses) {
       if (writerAddresses.length > 0) {
@@ -126,6 +185,26 @@ const Swap = ({ route }: Props) => {
       }
     }
   }, [writerAddresses]);
+
+  // Hook to set the initial input token
+  useEffect(() => {
+    // If the fromToken is provided and the inputToekn is null, set the inputToken
+    if (fromToken && inputToken === null) {
+      setInputToken(fromToken);
+    }
+  }, [fromToken]);
+
+  // Hook to set the initial input chain id
+  useEffect(() => {
+    if (
+      inputTokenBalances &&
+      inputTokenBalances.chainBalances.length > 0 &&
+      inputChainId === null
+    ) {
+      // Set `inputChainId` to the chain with the most balance (the `chainBalances` array is sorted by balance)
+      setInputChainId(inputTokenBalances.chainBalances[0].chainId);
+    }
+  }, [inputTokenBalances]);
 
   useEffect(() => {
     if (getSwapQuoteError) {
@@ -138,9 +217,48 @@ const Swap = ({ route }: Props) => {
     }
   }, [getSwapQuoteError]);
 
-  const parsedInputAmount = inputToken
-    ? parseUnits(amountInputText, inputToken.decimals)
-    : null;
+  // Hook to check if the origin chain  gas is sufficient
+  useEffect(() => {
+    if (swapQuote && ethBalance && inputToken) {
+      if (inputToken.id === zeroAddress) {
+        // The swap input is ETH
+
+        // We check if the input amount plus the gas fee is less than the available ETH
+        const inputAmountPlusGas =
+          BigInt(swapQuote.amountIn.amount) +
+          BigInt(swapQuote.originChainGas.amount);
+
+        const _isOriginChainGasSufficient =
+          BigInt(ethBalance.amount) >= inputAmountPlusGas;
+
+        setIsOriginChainGasSufficient(_isOriginChainGasSufficient);
+      } else {
+        // The swap input is an ERC20 token (not ETH)
+
+        // We check if the gas fee is less than the available ETH
+        const _isOriginChainGasSufficient =
+          BigInt(ethBalance.amount) >= BigInt(swapQuote.originChainGas.amount);
+
+        setIsOriginChainGasSufficient(_isOriginChainGasSufficient);
+      }
+    }
+  }, [swapQuote, ethBalance, inputToken]);
+
+  // Hook to check if the balance is sufficient
+  useEffect(() => {
+    if (inputTokenChainBalance && swapQuote) {
+      const _isBalanceSufficient =
+        BigInt(inputTokenChainBalance.amount) >=
+        BigInt(swapQuote.amountIn.amount);
+
+      setIsBalanceSufficient(_isBalanceSufficient);
+    }
+  }, [swapQuote, inputTokenChainBalance]);
+
+  const parsedInputAmount =
+    !containsNonNumericCharacters(amountInputText) && inputToken
+      ? parseUnits(amountInputText, inputToken.decimals)
+      : null;
 
   const { debouncedValue: debouncedParsedInputAmount } = useDebounce(
     parsedInputAmount,
@@ -156,6 +274,9 @@ const Swap = ({ route }: Props) => {
       outputChainId &&
       selectedAddress
     ) {
+      resetGetSwapQuote();
+      setIsOriginChainGasSufficient(null);
+      setIsBalanceSufficient(null);
       const requestBody: GetSingleInputSwapQuoteRequestBody = {
         sender: selectedAddress,
         amount: debouncedParsedInputAmount.toString(),
@@ -196,8 +317,18 @@ const Swap = ({ route }: Props) => {
 
   const onOutputTokenChange = (token: Token | null) => {
     if (token) {
+      // Set the output token
       setOutputToken(token);
-      setOutputChainId(token.addresses[0].chainId);
+
+      // Set the output chain id to the input chain id if the output token is supported on the input chain
+      if (
+        inputChainId &&
+        token.addresses.some(a => a.chainId === inputChainId)
+      ) {
+        setOutputChainId(inputChainId);
+      } else {
+        setOutputChainId(token.addresses[0].chainId);
+      }
     } else {
       setOutputToken(null);
       setOutputChainId(null);
@@ -253,13 +384,6 @@ const Swap = ({ route }: Props) => {
   // Derived state
   //
 
-  const hasEnoughBalance =
-    inputTokenBalance !== null &&
-    inputTokenBalance !== undefined &&
-    parsedInputAmount !== null
-      ? BigInt(inputTokenBalance.amount) >= parsedInputAmount
-      : undefined;
-
   const isAmountTooSmall =
     getSwapQuoteError?.message === TRPCErrorMessage.SWAP_AMOUNT_TOO_SMALL;
 
@@ -281,8 +405,8 @@ const Swap = ({ route }: Props) => {
           amount={amountInputText}
           setAmount={onInputAmountChange}
           balance={
-            inputTokenBalance?.amount
-              ? BigInt(inputTokenBalance.amount)
+            inputTokenChainBalance?.amount
+              ? BigInt(inputTokenChainBalance.amount)
               : undefined
           }
           isLoadingBalance={false}
@@ -290,6 +414,32 @@ const Swap = ({ route }: Props) => {
           setChainId={setInputChainId}
           // isLoadingBalance={isLoadingTokenBalances}
         />
+        <FeedbackPressable
+          style={{
+            alignSelf: 'center',
+            marginTop: -24,
+            marginBottom: -24,
+            backgroundColor: colors.background,
+          }}
+          onPress={() => {
+            const _inputToken = inputToken;
+            const _outputToken = outputToken;
+            const _inputChainId = inputChainId;
+            const _outputChainId = outputChainId;
+
+            setInputToken(_outputToken);
+            setOutputToken(_inputToken);
+            setInputChainId(_outputChainId);
+            setOutputChainId(_inputChainId);
+          }}
+        >
+          <Feather
+            name="repeat"
+            size={24}
+            color={colors.border}
+            style={{ transform: [{ rotate: '90deg' }] }}
+          />
+        </FeedbackPressable>
         <SwapOutputCard
           token={outputToken}
           setToken={onOutputTokenChange}
@@ -306,21 +456,12 @@ const Swap = ({ route }: Props) => {
           selectedAddress={selectedAddress}
           setSelectedAddress={setSelectedAddress}
         />
-        <StyledButton
-          disabled={
-            isAmountTooSmall ||
-            hasEnoughBalance === false ||
-            isSwapping ||
-            !swapQuote
-          }
-          isLoading={isSwapping}
-          title={
-            isAmountTooSmall
-              ? 'Amount too small'
-              : hasEnoughBalance === false
-                ? 'Insufficient balance'
-                : 'Swap'
-          }
+        <SwapButton
+          swapQuoteLoaded={swapQuote !== undefined}
+          isAmountTooSmall={isAmountTooSmall}
+          isOriginChainGasSufficient={isOriginChainGasSufficient}
+          isBalanceSufficient={isBalanceSufficient}
+          isLoading={isSwapping || isGettingSwapQuote}
           onPress={onSwapPress}
         />
       </View>

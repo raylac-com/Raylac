@@ -63,6 +63,7 @@ const SwapOutputCard = ({
         onSelectTokenPress={() => {
           setIsOpen(true);
         }}
+        canEnterAmount={false}
       />
       {token && (
         <View
