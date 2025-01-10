@@ -4,7 +4,6 @@ services:
   - type: web
     name: raylac-api
     plan: standard
-    previewPlan: starter
     runtime: node
     region: singapore
     buildCommand: rm -rf ./packages/{app,scripts,contracts} && pnpm i --ignore-scripts && pnpm build
