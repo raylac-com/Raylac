@@ -49,6 +49,7 @@ const SwapOutputCard = ({
     >
       {showChainSelector && chainId !== null && (
         <ChainSelector
+          token={token}
           title="Select output chain"
           chainId={chainId}
           setChainId={setChainId}
