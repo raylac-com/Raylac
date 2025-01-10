@@ -124,16 +124,16 @@ const SendConfirmSheet = ({
       onDismiss={onClose}
       enablePanDownToClose
       enableDynamicSizing={false}
-      snapPoints={['50%']}
+      snapPoints={['60%']}
     >
       <BottomSheetView
         style={{
           flex: 1,
           width: '100%',
           flexDirection: 'column',
-          rowGap: 24,
           paddingVertical: 32,
           paddingHorizontal: 16,
+          rowGap: 48,
         }}
       >
         <View style={{ flexDirection: 'column', rowGap: 24 }}>
@@ -168,12 +168,12 @@ const SendConfirmSheet = ({
               amount={inputAmount}
             />
           </View>
-          <StyledButton
-            title="Confirm"
-            onPress={onConfirm}
-            isLoading={isSending}
-          />
         </View>
+        <StyledButton
+          title="Confirm"
+          onPress={onConfirm}
+          isLoading={isSending}
+        />
       </BottomSheetView>
     </BottomSheetModal>
   );

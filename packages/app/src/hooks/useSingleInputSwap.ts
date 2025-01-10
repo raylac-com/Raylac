@@ -9,14 +9,31 @@ import { getQueryKey } from '@trpc/react-query';
 import { privateKeyToAccount } from 'viem/accounts';
 import { getPrivateKey } from '@/lib/key';
 import { Hex } from 'viem';
+import { useEffect } from 'react';
+import Toast from 'react-native-toast-message';
 
 const useSingleInputSwap = () => {
   const queryClient = useQueryClient();
 
-  const { mutateAsync: submitSingleInputSwap } =
-    trpc.submitSingleInputSwap.useMutation();
+  const {
+    mutateAsync: submitSingleInputSwap,
+    error: submitSingleInputSwapError,
+  } = trpc.submitSingleInputSwap.useMutation({
+    throwOnError: false,
+  });
+
+  useEffect(() => {
+    if (submitSingleInputSwapError) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: submitSingleInputSwapError.message,
+      });
+    }
+  }, [submitSingleInputSwapError]);
 
   return useMutation({
+    throwOnError: false,
     mutationFn: async ({
       address,
       swapQuote,
@@ -59,7 +76,7 @@ const useSingleInputSwap = () => {
 
       await submitSingleInputSwap(requestBody);
 
-      await queryClient.invalidateQueries({
+      queryClient.invalidateQueries({
         queryKey: getQueryKey(trpc.getTokenBalances),
       });
     },
