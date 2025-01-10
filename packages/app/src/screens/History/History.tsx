@@ -1,13 +1,17 @@
 import { trpc } from '@/lib/trpc';
+import React, { useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Pressable,
   RefreshControl,
   View,
 } from 'react-native';
 import colors from '@/lib/styles/colors';
 import StyledText from '@/components/StyledText/StyledText';
+import StyledButton from '@/components/StyledButton/StyledButton';
 import TransferListItem from '@/components/TransferListItem/TransferListItem';
 import {
   HistoryItemType,
@@ -25,6 +29,13 @@ import BridgeTransferListItem from '@/components/BridgeTransferListItem/BridgeTr
 type Props = NativeStackScreenProps<RootTabsParamsList, 'History'>;
 
 const History = ({ route }: Props) => {
+  const listRef = useRef<FlatList>(null);
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    setShowScrollToTop(offsetY > 100); // Show button after scrolling 100 units
+  };
   const pendingTransfer = route.params?.pendingTransfer;
   const pendingBridgeTransfer = route.params?.pendingBridgeTransfer;
   const pendingSwap = route.params?.pendingSwap;
@@ -136,6 +147,8 @@ const History = ({ route }: Props) => {
         />
       )}
       <FlatList
+        ref={listRef}
+        onScroll={handleScroll}
         ListEmptyComponent={() => (
           <View
             style={{
@@ -189,6 +202,19 @@ const History = ({ route }: Props) => {
           />
         }
       />
+      {showScrollToTop && (
+        <View style={{ position: 'absolute', bottom: 24, right: 24 }}>
+          <StyledButton
+            title="Back to Top"
+            variant="primary"
+            onPress={() => {
+              if (listRef.current) {
+                listRef.current.scrollToOffset({ offset: 0, animated: true });
+              }
+            }}
+          />
+        </View>
+      )}
     </View>
   );
 };
