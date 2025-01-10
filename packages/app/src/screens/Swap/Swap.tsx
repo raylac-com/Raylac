@@ -365,7 +365,7 @@ const Swap = ({ route }: Props) => {
 
     Toast.show({
       type: 'success',
-      text1: 'Sent swap transaction',
+      text1: 'Swap transaction sent',
       position: 'bottom',
     });
 
