@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import type { Meta, StoryObj } from '@storybook/react';
 import SelectChainSheet from './SelectChainSheet';
 import spacing from '@/lib/styles/spacing';
+import { ETH } from '@raylac/shared';
 
 const meta = {
   title: 'SelectChainSheet',
@@ -10,6 +11,7 @@ const meta = {
   args: {
     title: 'Select Network',
     open: true,
+    token: ETH,
     onSelect: () => {},
     onClose: () => {},
   },
