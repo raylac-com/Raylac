@@ -4,6 +4,7 @@ import StyledText from '@/components/StyledText/StyledText';
 import { shortenAddress } from '@/lib/utils';
 import { Hex } from 'viem';
 import { getColorForAddress } from '@raylac/shared';
+import fontSizes from '@/lib/styles/fontSizes';
 
 const GradientAvatar = ({
   address,
@@ -30,11 +31,25 @@ const GradientAvatar = ({
   );
 };
 
-const WalletIconAddress = ({ address }: { address: Hex }) => {
+const WalletIconAddress = ({
+  address,
+  fontSize = fontSizes.base,
+  avatarSize = 20,
+}: {
+  address: Hex;
+  fontSize?: number;
+  avatarSize?: number;
+}) => {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
-      <GradientAvatar address={address} size={20} />
-      <StyledText style={{ fontWeight: 'bold', color: colors.border }}>
+      <GradientAvatar address={address} size={avatarSize} />
+      <StyledText
+        style={{
+          fontWeight: 'bold',
+          color: colors.border,
+          fontSize: fontSize,
+        }}
+      >
         {shortenAddress(address)}
       </StyledText>
     </View>

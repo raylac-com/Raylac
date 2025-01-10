@@ -543,5 +543,36 @@ export const MOCK_TOKEN_AMOUNT = {
 };
 
 export const containsNonNumericCharacters = (text: string) => {
-  return /[^0-9.]/.test(text);
+  const parsed = new BigNumber(text);
+
+  // Check if the result is not NaN and is finite
+  return parsed.isNaN() || !parsed.isFinite();
+};
+
+/**
+ * Check if the given balance is sufficient for the given amount input
+ */
+export const checkIsBalanceSufficient = (
+  amountInputText: string,
+  tokenBalance: TokenAmount,
+  amountInputMode: 'token' | 'usd',
+  token: Token
+) => {
+  let parsedTokenAmount: bigint;
+
+  if (amountInputMode === 'token') {
+    parsedTokenAmount = parseUnits(amountInputText, token.decimals);
+  } else {
+    // Convert the usd amount to a token amount in string representation
+    const inputTokenAmount = new BigNumber(amountInputText)
+      .dividedBy(tokenBalance.tokenPriceUsd)
+      .toFixed();
+
+    // Parse the token amount
+    parsedTokenAmount = parseUnits(inputTokenAmount, token.decimals);
+  }
+
+  const isBalanceSufficient = parsedTokenAmount <= BigInt(tokenBalance.amount);
+
+  return isBalanceSufficient;
 };

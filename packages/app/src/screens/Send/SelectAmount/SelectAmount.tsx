@@ -18,7 +18,7 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
-import { formatUnits, Hex, parseUnits } from 'viem';
+import { formatUnits, Hex, parseUnits, zeroAddress } from 'viem';
 import BigNumber from 'bignumber.js';
 import { trpc } from '@/lib/trpc';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
@@ -33,31 +33,21 @@ import { getChainIcon } from '@/lib/utils';
 import SelectChainSheet from '@/components/SelectChainSheet/SelectChainSheet';
 import useBridgeSend from '@/hooks/useBridgeSend';
 import useAddressChainTokenBalance from '@/hooks/useAddressChainTokenBalance';
-
-const ConfirmButton = ({
-  onPress,
-  isLoading,
-}: {
-  onPress: () => void;
-  isLoading: boolean;
-}) => {
-  return (
-    <StyledButton title="Confirm" onPress={onPress} isLoading={isLoading} />
-  );
-};
+import SendConfirmSheet from '@/components/SendConfirmSheet/SendConfirmSheet';
+import { checkIsBalanceSufficient } from '@raylac/shared';
 
 const ReviewButton = ({
   onPress,
+  isIdle,
   isLoading,
   isBalanceSufficient,
   isGasSufficient,
-  isReadyForReview,
 }: {
   onPress: () => void;
+  isIdle: boolean;
   isLoading: boolean;
   isBalanceSufficient: boolean;
   isGasSufficient: boolean;
-  isReadyForReview: boolean;
 }) => {
   let label = 'Review';
 
@@ -69,9 +59,8 @@ const ReviewButton = ({
 
   return (
     <StyledButton
-      disabled={!isBalanceSufficient || !isGasSufficient || !isReadyForReview}
+      disabled={!isBalanceSufficient || !isGasSufficient || isLoading || isIdle}
       isLoading={isLoading}
-      variant="outline"
       title={label}
       onPress={onPress}
     />
@@ -128,9 +117,7 @@ const BalanceDetail = ({
 }) => {
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-      <StyledText
-        style={{ color: colors.subbedText }}
-      >{`TokenAmount`}</StyledText>
+      <StyledText style={{ color: colors.subbedText }}>{`Balance`}</StyledText>
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
       >
@@ -206,6 +193,7 @@ const BridgeFeeInfo = ({
   );
 };
 
+/*
 const AvailableGasDetail = ({
   address,
   chainId,
@@ -234,6 +222,7 @@ const AvailableGasDetail = ({
     </View>
   );
 };
+*/
 
 type Props = Pick<
   NativeStackScreenProps<RootStackParamsList, 'SelectAmount'>,
@@ -256,12 +245,13 @@ const SelectAmount = ({ route }: Props) => {
   /// Local state
   ///
   const [amountInputText, setAmountInputText] = useState<string>('');
+  const [subAmount, setSubAmount] = useState<string | null>(null);
 
   const [isBalanceSufficient, setIsBalanceSufficient] = useState<boolean>(true);
   const [isGasSufficient, setIsGasSufficient] = useState<boolean>(true);
 
-  const [isReadyToConfirm, setIsReadyToConfirm] = useState<boolean>(false);
   const [inputMode, setInputMode] = useState<'token' | 'usd'>('usd');
+  const [isConfirmSheetOpen, setIsConfirmSheetOpen] = useState<boolean>(false);
 
   ///
   /// Queries
@@ -309,32 +299,48 @@ const SelectAmount = ({ route }: Props) => {
   /// Effects
   ///
 
+  // Hook to check if the balance is sufficient
   useEffect(() => {
-    if (tokenBalance && tokenPriceUsd !== null && tokenPriceUsd !== undefined) {
-      if (inputMode === 'token') {
-        const _isBalanceSufficient =
-          parseUnits(amountInputText, token.decimals) <=
-          BigInt(tokenBalance.amount);
+    if (
+      amountInputText !== '' &&
+      !containsNonNumericCharacters(amountInputText) &&
+      tokenBalance !== undefined
+    ) {
+      const _isBalanceSufficient = checkIsBalanceSufficient(
+        amountInputText,
+        tokenBalance,
+        inputMode,
+        token
+      );
 
-        setIsBalanceSufficient(_isBalanceSufficient);
-      } else {
-        const _isBalanceSufficient =
-          new BigNumber(amountInputText).dividedBy(tokenPriceUsd) <=
-          new BigNumber(tokenBalance.amount);
-
-        setIsBalanceSufficient(_isBalanceSufficient);
-      }
+      setIsBalanceSufficient(_isBalanceSufficient);
     }
-  }, [amountInputText, tokenBalance, tokenPriceUsd]);
+  }, [amountInputText, tokenBalance, inputMode]);
 
+  // Hook to check if the gas is sufficient
   useEffect(() => {
     if (ethBalance !== undefined && tokenBalance !== undefined) {
       if (sendData) {
+        // This is a same-chain transfer
+        // We simple need to check if the gas fee is less than the available gas
         const sendGas = BigInt(sendData.transfer.gasFee.amount);
-        setIsGasSufficient(sendGas <= BigInt(ethBalance.amount));
+
+        if (token.id === zeroAddress) {
+          // This is a ETH transfer
+          // Add the send amount and the gas fee
+          const sendAmountPlusGas =
+            BigInt(sendData.transfer.amount.amount) + sendGas;
+
+          // Check if the send amount plus the gas fee is less than the available gas
+          setIsGasSufficient(sendAmountPlusGas <= BigInt(ethBalance.amount));
+        } else {
+          setIsGasSufficient(sendGas <= BigInt(ethBalance.amount));
+        }
       }
 
       if (bridgeSendData) {
+        // This is a cross-chain transfer
+        // TODO: Fix this
         const bridgeFee = BigInt(bridgeSendData.relayerServiceFee.amount);
 
         if (bridgeSendData.relayerServiceFeeToken.symbol === 'ETH') {
@@ -346,16 +352,14 @@ const SelectAmount = ({ route }: Props) => {
     }
   }, [sendData, bridgeSendData, ethBalance]);
 
+  // Hook to build the send data
   useEffect(() => {
-    if (containsNonNumericCharacters(amountInputText)) {
-      return;
-    }
-
-    if (tokenPriceUsd === null || tokenPriceUsd === undefined) {
-      return;
-    }
-
-    if (amountInputText === '') {
+    if (
+      amountInputText === '' ||
+      containsNonNumericCharacters(amountInputText) ||
+      tokenPriceUsd === null ||
+      tokenPriceUsd === undefined
+    ) {
       return;
     }
 
@@ -363,7 +367,7 @@ const SelectAmount = ({ route }: Props) => {
       inputMode === 'token'
         ? parseUnits(amountInputText, token.decimals)
         : parseUnits(
-            new BigNumber(amountInputText).dividedBy(tokenPriceUsd).toString(),
+            new BigNumber(amountInputText).dividedBy(tokenPriceUsd).toFixed(),
             token.decimals
           );
 
@@ -372,6 +376,7 @@ const SelectAmount = ({ route }: Props) => {
     }
 
     if (fromChainId === toChainId) {
+      // This is a same-chain transfer
       const buildAggregatedSendRequestBody: BuildSendRequestBody = {
         token,
         amount: parsedAmount.toString(),
@@ -382,6 +387,7 @@ const SelectAmount = ({ route }: Props) => {
 
       buildSend(buildAggregatedSendRequestBody);
     } else {
+      // This is a cross-chain transfer
       const buildBridgeSendRequestBody: BuildBridgeSendRequestBody = {
         token,
         amount: parsedAmount.toString(),
@@ -395,11 +401,36 @@ const SelectAmount = ({ route }: Props) => {
     }
   }, [amountInputText, fromAddresses, toAddress, fromChainId, toChainId]);
 
+  // Hook to calculate the sub amount
+  // (i.e. the amount in USD if the input is token amount,
+  // or the amount in tokens if the input is USD amount)
   useEffect(() => {
-    if (sendData) {
-      setIsReadyToConfirm(false);
+    if (
+      amountInputText !== '' &&
+      !containsNonNumericCharacters(amountInputText) &&
+      tokenPriceUsd !== null &&
+      tokenPriceUsd !== undefined
+    ) {
+      if (inputMode === 'token') {
+        const _subAmount = new BigNumber(amountInputText)
+          .multipliedBy(tokenPriceUsd)
+          .toFixed(2);
+
+        setSubAmount(_subAmount);
+      } else {
+        const tokenAmountRaw = new BigNumber(amountInputText)
+          .dividedBy(tokenPriceUsd)
+          .toFixed();
+
+        const _subAmount = formatAmount(
+          parseUnits(tokenAmountRaw, token.decimals).toString(),
+          token.decimals
+        );
+
+        setSubAmount(_subAmount);
+      }
     }
-  }, [sendData]);
+  }, [amountInputText, tokenPriceUsd]);
 
   ///
   /// Handlers
@@ -410,7 +441,7 @@ const SelectAmount = ({ route }: Props) => {
   };
 
   const onReviewButtonPress = () => {
-    setIsReadyToConfirm(true);
+    setIsConfirmSheetOpen(true);
   };
 
   const onConfirmButtonPress = async () => {
@@ -480,35 +511,20 @@ const SelectAmount = ({ route }: Props) => {
 
   const onMaxBalancePress = () => {
     if (tokenBalance) {
-      const amountText = formatUnits(
-        BigInt(tokenBalance.amount),
-        token.decimals
-      );
-      setAmountInputText(amountText);
+      if (inputMode === 'token') {
+        const amountText = formatUnits(
+          BigInt(tokenBalance.amount),
+          token.decimals
+        );
+        setAmountInputText(amountText);
+      } else {
+        setAmountInputText(tokenBalance.usdValue);
+      }
     }
   };
 
-  let subAmount: string | undefined;
-
-  if (tokenPriceUsd !== undefined && tokenPriceUsd !== null) {
-    if (amountInputText !== '') {
-      if (inputMode === 'token') {
-        subAmount = new BigNumber(amountInputText)
-          .multipliedBy(tokenPriceUsd)
-          .toFixed(2);
-      } else {
-        const tokenAmountRaw = new BigNumber(amountInputText).dividedBy(
-          tokenPriceUsd
-        );
-        subAmount = formatAmount(
-          parseUnits(tokenAmountRaw.toString(), token.decimals).toString(),
-          token.decimals
-        );
-      }
-    }
-  }
-
-  const isReadyForReview = isBalanceSufficient && sendData !== undefined;
+  const isReadyForReview =
+    isBalanceSufficient && isGasSufficient && sendData !== undefined;
 
   return (
     <ScrollView contentContainerStyle={{ flex: 1, padding: 16, rowGap: 20 }}>
@@ -623,22 +639,14 @@ const SelectAmount = ({ route }: Props) => {
             feeChainId={bridgeSendData?.relayerFeeChainId}
           />
         )}
-        <AvailableGasDetail address={fromAddresses[0]} chainId={fromChainId} />
       </View>
-      {isReadyToConfirm ? (
-        <ConfirmButton
-          onPress={onConfirmButtonPress}
-          isLoading={isSending || isSendingBridgeTx}
-        />
-      ) : (
-        <ReviewButton
-          onPress={onReviewButtonPress}
-          isLoading={isBuildingSend || isBuildingBridgeSend}
-          isBalanceSufficient={isBalanceSufficient}
-          isGasSufficient={isGasSufficient}
-          isReadyForReview={isReadyForReview}
-        />
-      )}
+      <ReviewButton
+        onPress={onReviewButtonPress}
+        isIdle={!(sendData !== undefined || bridgeSendData !== undefined)}
+        isLoading={isBuildingSend || isBuildingBridgeSend}
+        isBalanceSufficient={isBalanceSufficient}
+        isGasSufficient={isGasSufficient}
+      />
       <SelectChainSheet
         title="Select recipient chain"
         open={isChainsSheetOpen}
@@ -650,6 +658,22 @@ const SelectAmount = ({ route }: Props) => {
           setIsChainsSheetOpen(false);
         }}
       />
+      {isReadyForReview && (
+        <SendConfirmSheet
+          open={isConfirmSheetOpen}
+          fromChainId={fromChainId}
+          toChainId={toChainId}
+          token={token}
+          fromAddress={fromAddresses[0]}
+          toAddress={toAddress}
+          amount={sendData.transfer.amount}
+          onClose={() => {
+            setIsConfirmSheetOpen(false);
+          }}
+          onConfirm={onConfirmButtonPress}
+          isSending={isSending || isSendingBridgeTx}
+        />
+      )}
     </ScrollView>
   );
 };
