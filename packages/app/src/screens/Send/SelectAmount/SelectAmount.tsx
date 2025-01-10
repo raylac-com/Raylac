@@ -27,8 +27,8 @@ import SendToCard from '@/components/SendToCard/SendToCard';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import useSend from '@/hooks/useSend';
 import Toast from 'react-native-toast-message';
-import { Image } from 'expo-image';
-import { getChainIcon } from '@/lib/utils';
+
+import ChainLogo from '@/components/ChainLogo/ChainLogo';
 import SelectChainSheet from '@/components/SelectChainSheet/SelectChainSheet';
 import useBridgeSend from '@/hooks/useBridgeSend';
 import useAddressChainTokenBalance from '@/hooks/useAddressChainTokenBalance';
@@ -108,10 +108,7 @@ const ChainDetail = ({
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 2 }}
       >
-        <Image
-          source={getChainIcon(chainId)}
-          style={{ width: 24, height: 24 }}
-        />
+        <ChainLogo chainId={chainId} size={16} />
         <Entypo name="chevron-thin-right" size={16} color={colors.border} />
       </View>
     </FeedbackPressable>
