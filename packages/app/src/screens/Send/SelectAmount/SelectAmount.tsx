@@ -35,7 +35,6 @@ import useAddressChainTokenBalance from '@/hooks/useAddressChainTokenBalance';
 import SendConfirmSheet from '@/components/SendConfirmSheet/SendConfirmSheet';
 import { checkIsBalanceSufficient } from '@raylac/shared';
 import BridgeSendFeeDetailsSheet from '@/components/BridgeSendFeeDetailsSheet/BridgeSendFeeDetailsSheet';
-import { optimism } from 'viem/chains';
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
 
 const ReviewButton = ({
@@ -231,7 +230,7 @@ const SelectAmount = ({ route }: Props) => {
   const [isChainsSheetOpen, setIsChainsSheetOpen] = useState(false);
 
   const [fromChainId, _setFromChainId] = useState<number>(_chainId);
-  const [toChainId, setToChainId] = useState<number>(optimism.id);
+  const [toChainId, setToChainId] = useState<number>(_chainId);
 
   ///
   /// Local state
@@ -678,6 +677,7 @@ const SelectAmount = ({ route }: Props) => {
         onClose={() => {
           setIsChainsSheetOpen(false);
         }}
+        token={token}
       />
       {isReadyForReview && (
         <SendConfirmSheet
