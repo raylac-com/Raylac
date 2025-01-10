@@ -1,7 +1,5 @@
 import Feather from '@expo/vector-icons/Feather';
-// import Entypo from '@expo/vector-icons/Entypo';
 import { View } from 'react-native';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import colors from '@/lib/styles/colors';
 import { useState } from 'react';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
@@ -95,7 +93,7 @@ const Fav = () => {
           setExpanded(!expanded);
         }}
       >
-        <AntDesign name="plus" size={24} color={colors.background} />
+        <Feather name="plus" size={24} color={colors.background} />
       </FeedbackPressable>
     </View>
   );

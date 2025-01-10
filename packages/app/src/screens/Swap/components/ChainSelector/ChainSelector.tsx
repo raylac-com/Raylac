@@ -1,6 +1,6 @@
-import { getChainFromId, supportedChains } from '@raylac/shared';
+import { getChainFromId, supportedChains, Token } from '@raylac/shared';
 import ChainLogo from '@/components/ChainLogo/ChainLogo';
-import Entypo from '@expo/vector-icons/Entypo';
+import Feather from '@expo/vector-icons/Feather';
 import { useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
@@ -72,10 +72,16 @@ export const ChainSelectorSheet = ({
 interface ChainSelectorProps {
   title: string;
   chainId: number;
+  token: Token;
   setChainId: (chainId: number) => void;
 }
 
-const ChainSelector = ({ title, chainId, setChainId }: ChainSelectorProps) => {
+const ChainSelector = ({
+  title,
+  token,
+  chainId,
+  setChainId,
+}: ChainSelectorProps) => {
   const [isChainsSheetOpen, setIsChainsSheetOpen] = useState(false);
 
   return (
@@ -86,10 +92,11 @@ const ChainSelector = ({ title, chainId, setChainId }: ChainSelectorProps) => {
       >
         <ChainLogo chainId={chainId} size={16} />
         <StyledText>{getChainFromId(chainId).name}</StyledText>
-        <Entypo name="chevron-down" size={20} color={colors.border} />
+        <Feather name="chevron-down" size={20} color={colors.border} />
       </Pressable>
       <SelectChainSheet
         title={title}
+        token={token}
         open={isChainsSheetOpen}
         onSelect={chain => {
           setChainId(chain.id);

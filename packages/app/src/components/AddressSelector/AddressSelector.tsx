@@ -1,7 +1,8 @@
 import { shortenAddress } from '@/lib/utils';
 import ChainLogo from '@/components/ChainLogo/ChainLogo';
-import { getChainFromId, supportedChains } from '@raylac/shared';
-import Entypo from '@expo/vector-icons/Entypo';
+import { getChainFromId } from '@raylac/shared';
+import Feather from '@expo/vector-icons/Feather';
+import { supportedChains } from '@raylac/shared';
 import { useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
@@ -85,7 +86,7 @@ const AddressSelector = ({ address, setAddress }: AddressSelectorProps) => {
         onPress={() => setIsAddressSheetOpen(true)}
       >
         <StyledText>{shortenAddress(address)}</StyledText>
-        <Entypo name="chevron-down" size={20} color={colors.border} />
+        <Feather name="chevron-down" size={20} color={colors.border} />
       </Pressable>
       <SelectAddressSheet
         open={isAddressSheetOpen}

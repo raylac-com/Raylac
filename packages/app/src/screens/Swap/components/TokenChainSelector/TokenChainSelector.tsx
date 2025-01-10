@@ -1,6 +1,6 @@
 import { getChainFromId, Token, supportedChains } from '@raylac/shared';
 import ChainLogo from '@/components/ChainLogo/ChainLogo';
-import Entypo from '@expo/vector-icons/Entypo';
+import Feather from '@expo/vector-icons/Feather';
 import { useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import BottomSheet, { BottomSheetFlatList } from '@gorhom/bottom-sheet';
@@ -97,7 +97,7 @@ const TokenChainSelector = ({
       >
         <ChainLogo chainId={chainId} size={16} />
         <StyledText>{getChainFromId(chainId).name}</StyledText>
-        <Entypo name="chevron-down" size={20} color={colors.border} />
+        <Feather name="chevron-down" size={20} color={colors.border} />
       </Pressable>
       <SelectTokenChainSheet
         open={isChainsSheetOpen}

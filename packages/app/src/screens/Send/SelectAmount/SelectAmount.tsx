@@ -86,7 +86,7 @@ const ChainDetail = ({
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 2 }}
       >
-        <ChainLogo chainId={chainId} size={16} />
+        <ChainLogo chainId={chainId} size={24} />
         <Feather name="chevron-right" size={16} color={colors.border} />
       </View>
     </FeedbackPressable>
