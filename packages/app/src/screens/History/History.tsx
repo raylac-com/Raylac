@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import colors from '@/lib/styles/colors';
 import StyledText from '@/components/StyledText/StyledText';
-import StyledButton from '@/components/StyledButton/StyledButton';
+import BackToTopButton from './BackToTopButton';
 import TransferListItem from '@/components/TransferListItem/TransferListItem';
 import {
   HistoryItemType,
@@ -204,9 +204,7 @@ const History = ({ route }: Props) => {
       />
       {showScrollToTop && (
         <View style={{ position: 'absolute', bottom: 24, right: 24 }}>
-          <StyledButton
-            title="Back to Top"
-            variant="primary"
+          <BackToTopButton
             onPress={() => {
               if (listRef.current) {
                 listRef.current.scrollToOffset({ offset: 0, animated: true });
