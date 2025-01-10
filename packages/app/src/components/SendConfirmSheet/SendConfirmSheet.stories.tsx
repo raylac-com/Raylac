@@ -11,7 +11,8 @@ const meta = {
   args: {
     fromAddress: zeroAddress,
     toAddress: zeroAddress,
-    amount: MOCK_TOKEN_AMOUNT,
+    inputAmount: MOCK_TOKEN_AMOUNT,
+    outputAmount: MOCK_TOKEN_AMOUNT,
     fromChainId: base.id,
     toChainId: arbitrum.id,
     token: USDC,

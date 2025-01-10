@@ -6,6 +6,7 @@ import {
   SwapStep,
 } from '@raylac/shared';
 import { Hex } from 'viem';
+import { arbitrum, base } from 'viem/chains';
 
 const getSingleInputSwapQuoteMock = async (
   _arg: GetSingleInputSwapQuoteRequestBody
@@ -81,6 +82,8 @@ const getSingleInputSwapQuoteMock = async (
     },
     relayRequestId:
       '0x9876543210987654321098765432109876543210987654321098765432109876' as Hex,
+    fromChainId: base.id,
+    toChainId: arbitrum.id,
   };
 };
 
