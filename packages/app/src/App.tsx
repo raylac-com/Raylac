@@ -1,5 +1,11 @@
-// 3. React Native needs crypto.getRandomValues polyfill and sha512
+// Required polyfills
 import 'react-native-get-random-values';
+import '@walletconnect/react-native-compat';
+
+// WalletKit imports
+import { Core } from '@walletconnect/core';
+import { WalletKit } from '@reown/walletkit';
+import { WalletKitProvider } from './contexts/WalletKitContext';
 import { StatusBar } from 'expo-status-bar';
 import colors from './lib/styles/colors';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -17,7 +23,7 @@ import Toast from 'react-native-toast-message';
 import * as Sentry from '@sentry/react-native';
 import { useTranslation } from 'react-i18next';
 import './i18n';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { getSelectedLanguage } from './i18n';
 import useFetchUpdates from './hooks/useFetchUpdates';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -268,7 +274,15 @@ const asyncStoragePersister = createAsyncStoragePersister({
   storage: AsyncStorage,
 });
 
+// Initialize WalletConnect Core
+const core = new Core({
+  projectId: Constants.expoConfig?.extra?.walletkitProjectId as string,
+});
+
 const App = () => {
+  const [walletKit, setWalletKit] = useState<Awaited<
+    ReturnType<typeof WalletKit.init>
+  > | null>(null);
   const [loaded, error] = useFonts({
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     'Nunito-Regular': require('../assets/Nunito-Regular.ttf'),
@@ -283,15 +297,33 @@ const App = () => {
 
   const { isFetchingUpdates } = useFetchUpdates();
 
-  if (!loaded) {
-    // eslint-disable-next-line no-console
-    console.log('loading fonts');
-    return null;
-  }
+  useEffect(() => {
+    async function initWalletKit() {
+      const kit = await WalletKit.init({
+        core,
+        metadata: {
+          name: Constants.expoConfig?.name || 'Raylac Wallet',
+          description: 'Raylac demo wallet for Reown integration',
+          url: 'https://raylac.com',
+          icons: ['https://raylac.com/icon.png'],
+          redirect: {
+            native: `${Constants.expoConfig?.ios?.bundleIdentifier || 'com.raylac.app'}://`,
+          },
+        },
+      });
+      const instance = await kit;
+      setWalletKit(instance);
+    }
+    initWalletKit();
+  }, []);
 
-  if (isFetchingUpdates) {
+  if (!loaded || !walletKit || isFetchingUpdates) {
     // eslint-disable-next-line no-console
-    console.log('isFetchingUpdates', isFetchingUpdates);
+    console.log('Loading app...', {
+      fontsLoaded: loaded,
+      walletKitLoaded: !!walletKit,
+      isFetchingUpdates,
+    });
     return null;
   }
 
@@ -300,24 +332,26 @@ const App = () => {
   });
 
   return (
-    <NavigationContainer>
-      <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <PersistQueryClientProvider
-          client={queryClient}
-          persistOptions={{
-            persister: asyncStoragePersister,
-            buster: '45',
-          }}
-        >
-          <ThemeProvider value={NavigationTheme}>
-            <SafeAreaProvider>
-              <Screens></Screens>
-              <StatusBar style="dark" />
-            </SafeAreaProvider>
-          </ThemeProvider>
-        </PersistQueryClientProvider>
-      </trpc.Provider>
-    </NavigationContainer>
+    <WalletKitProvider value={walletKit}>
+      <NavigationContainer>
+        <trpc.Provider client={trpcClient} queryClient={queryClient}>
+          <PersistQueryClientProvider
+            client={queryClient}
+            persistOptions={{
+              persister: asyncStoragePersister,
+              buster: '45',
+            }}
+          >
+            <ThemeProvider value={NavigationTheme}>
+              <SafeAreaProvider>
+                <Screens></Screens>
+                <StatusBar style="dark" />
+              </SafeAreaProvider>
+            </ThemeProvider>
+          </PersistQueryClientProvider>
+        </trpc.Provider>
+      </NavigationContainer>
+    </WalletKitProvider>
   );
 };
 

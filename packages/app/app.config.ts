@@ -86,6 +86,7 @@ const config: ExpoConfig = {
       projectId: 'f1bcc97f-3192-41c1-a32e-5b1dd12049cd',
     },
     storybookEnabled: process.env.STORYBOOK_ENABLED,
+    walletkitProjectId: '55245de0fa3490c5cabb54e076b8f855',
   },
   updates: {
     url: 'https://u.expo.dev/f1bcc97f-3192-41c1-a32e-5b1dd12049cd',
