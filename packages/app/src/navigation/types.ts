@@ -95,7 +95,6 @@ export type RootStackParamsList = {
     chainId: number;
     toAddress: Hex;
   };
-  MoveFunds: undefined;
 
   SaveBackupPhrase: {
     genesisAddress: Hex;
