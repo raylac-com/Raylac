@@ -1,7 +1,7 @@
 import { Pressable, TextInput, View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import Feather from '@expo/vector-icons/Feather';
 import { SupportedTokensReturnType } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
 import Skeleton from '@/components/Skeleton/Skeleton';
@@ -98,11 +98,7 @@ const SwapAmountInput = ({
           >
             {selectedToken ? selectedToken.symbol : ''}
           </StyledText>
-          <Ionicons
-            name="chevron-expand-outline"
-            size={24}
-            color={colors.subbedText}
-          />
+          <Feather name="chevron-down" size={24} color={colors.subbedText} />
         </Pressable>
       </Pressable>
     </View>

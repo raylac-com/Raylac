@@ -1,4 +1,4 @@
-import Entypo from '@expo/vector-icons/Entypo';
+import Feather from '@expo/vector-icons/Feather';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
@@ -11,7 +11,6 @@ import {
   BottomSheetTextInput,
 } from '@gorhom/bottom-sheet';
 import TokenLogo from '../TokenLogo/TokenLogo';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useTokenBalancePerAddress from '@/hooks/useTokenBalancePerAddress';
 import { Hex } from 'viem/_types/types/misc';
@@ -110,11 +109,7 @@ const TokenListItem = ({
               >
                 <StyledText>{token.name}</StyledText>
                 {token.verified && (
-                  <Ionicons
-                    name="shield-checkmark"
-                    size={18}
-                    color={colors.green}
-                  />
+                  <Feather name="check-circle" size={18} color={colors.green} />
                 )}
               </View>
               <StyledText style={{ color: colors.border }}>
@@ -135,7 +130,7 @@ const TokenListItem = ({
         */}
           </View>
           {isMultiChain && (
-            <Entypo
+            <Feather
               name={isExpanded ? 'chevron-up' : 'chevron-down'}
               size={24}
               color={colors.border}

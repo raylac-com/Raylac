@@ -8,7 +8,7 @@ import { RootStackParamsList, RootTabsParamsList } from './navigation/types';
 import Home from './screens/Home/Home';
 // import Swap from './screens/Swap/Swap';
 import { NavigationContainer, ThemeProvider } from '@react-navigation/native';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import Feather from '@expo/vector-icons/Feather';
 import { trpc, getRpcLinks } from './lib/trpc';
 import { QueryClient } from '@tanstack/react-query';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
@@ -65,7 +65,7 @@ const Tabs = () => {
           headerShown: false,
           tabBarLabel: () => null,
           tabBarIcon: ({ color }) => (
-            <AntDesign name="home" size={24} color={color} />
+            <Feather name="home" size={24} color={color} />
           ),
         }}
       ></Tab.Screen>
@@ -76,7 +76,7 @@ const Tabs = () => {
           tabBarLabel: () => null,
           tabBarShowLabel: false,
           tabBarIcon: ({ color }) => (
-            <AntDesign name="bars" size={24} color={color} />
+            <Feather name="menu" size={24} color={color} />
           ),
         }}
       ></Tab.Screen>
@@ -87,7 +87,7 @@ const Tabs = () => {
         options={{
           tabBarLabel: () => null,
           tabBarIcon: ({ color }) => (
-            <AntDesign name="swap" size={24} color={color} />
+            <Feather name="refresh-cw" size={24} color={color} />
           ),
           tabBarShowLabel: false,
         }}
@@ -101,7 +101,7 @@ const Tabs = () => {
           tabBarLabel: () => null,
           tabBarShowLabel: false,
           tabBarIcon: ({ color }) => (
-            <AntDesign name="clockcircle" size={24} color={color} />
+            <Feather name="clock" size={24} color={color} />
           ),
         }}
       ></Tab.Screen>
@@ -112,7 +112,7 @@ const Tabs = () => {
           tabBarLabel: () => null,
           tabBarShowLabel: false,
           tabBarIcon: ({ color }) => (
-            <AntDesign name="setting" size={24} color={color} />
+            <Feather name="settings" size={24} color={color} />
           ),
         }}
       ></Tab.Screen>

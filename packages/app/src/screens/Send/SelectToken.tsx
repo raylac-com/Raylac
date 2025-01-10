@@ -1,4 +1,4 @@
-import Entypo from '@expo/vector-icons/Entypo';
+import Feather from '@expo/vector-icons/Feather';
 import * as Clipboard from 'expo-clipboard';
 import TokenLogo from '@/components/TokenLogo/TokenLogo';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
@@ -259,7 +259,7 @@ const TokenListItem = ({
             </View>
           </View>
           {isMultiChain && (
-            <Entypo
+            <Feather
               name={isExpanded ? 'chevron-up' : 'chevron-down'}
               size={24}
               color={colors.border}

@@ -1,7 +1,7 @@
 import { getChainIcon } from '@/lib/utils';
 import { getChainFromId, Token } from '@raylac/shared';
 import { Image } from 'expo-image';
-import Entypo from '@expo/vector-icons/Entypo';
+import Feather from '@expo/vector-icons/Feather';
 import { supportedChains } from '@raylac/shared';
 import { useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -102,7 +102,7 @@ const TokenChainSelector = ({
           style={{ width: 16, height: 16 }}
         />
         <StyledText>{getChainFromId(chainId).name}</StyledText>
-        <Entypo name="chevron-down" size={20} color={colors.border} />
+        <Feather name="chevron-down" size={20} color={colors.border} />
       </Pressable>
       <SelectTokenChainSheet
         open={isChainsSheetOpen}

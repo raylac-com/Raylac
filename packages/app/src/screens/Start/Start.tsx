@@ -1,5 +1,4 @@
-import Entypo from '@expo/vector-icons/Entypo';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import Feather from '@expo/vector-icons/Feather';
 import { View } from 'react-native';
 import StyledButton from '@/components/StyledButton/StyledButton';
 //import useCreateAccount from '@/hooks/useCreateAccoun';
@@ -57,18 +56,18 @@ const Start = () => {
           title="Watch address"
           onPress={() => navigation.navigate('StartWatch')}
           variant="outline"
-          icon={<AntDesign name="eyeo" size={24} color={colors.text} />}
+          icon={<Feather name="eye" size={24} color={colors.text} />}
         />
         <StyledButton
           title="Import account"
           onPress={() => navigation.navigate('ImportAccount')}
-          icon={<Entypo name="key" size={20} color={colors.background} />}
+          icon={<Feather name="key" size={20} color={colors.background} />}
         />
         <StyledButton
           title="Create account"
           isLoading={isCreatingAccount}
           onPress={onCreateAccountPress}
-          icon={<AntDesign name="plus" size={20} color={colors.background} />}
+          icon={<Feather name="plus" size={20} color={colors.background} />}
         />
       </View>
     </View>

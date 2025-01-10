@@ -1,4 +1,4 @@
-import Entypo from '@expo/vector-icons/Entypo';
+import Feather from '@expo/vector-icons/Feather';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import StyledText from '@/components/StyledText/StyledText';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -112,7 +112,7 @@ const ChainDetail = ({
           source={getChainIcon(chainId)}
           style={{ width: 24, height: 24 }}
         />
-        <Entypo name="chevron-thin-right" size={16} color={colors.border} />
+        <Feather name="chevron-right" size={16} color={colors.border} />
       </View>
     </FeedbackPressable>
   );

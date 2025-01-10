@@ -1,4 +1,3 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
@@ -254,11 +253,7 @@ const MoveFundsInput = ({
           >
             {token ? token.symbol : ''}
           </StyledText>
-          <Ionicons
-            name="chevron-expand-outline"
-            size={24}
-            color={colors.subbedText}
-          />
+          <Feather name="chevron-down" size={24} color={colors.subbedText} />
         </FeedbackPressable>
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>

@@ -1,6 +1,6 @@
 import StyledText from '@/components/StyledText/StyledText';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import Feather from '@expo/vector-icons/Feather';
 import colors from '@/lib/styles/colors';
 import {
   formatAmount,
@@ -45,7 +45,7 @@ const SwapPathListItem = ({
           {formatAmount(amount.toString(), inputToken.decimals)}{' '}
           {inputToken.symbol}
         </StyledText>
-        <AntDesign name="arrowright" size={24} color={colors.subbedText} />
+        <Feather name="arrow-right" size={24} color={colors.subbedText} />
         <TokenLogoWithChain
           logoURI={outputToken.logoURI}
           chainId={outputChainId}

@@ -10,7 +10,6 @@ import Toast from 'react-native-toast-message';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import useDeleteAddress from '@/hooks/useDeleteAddress';
 import { supportedChains } from '@raylac/shared';
 import { getChainIcon } from '@/lib/utils';
@@ -96,8 +95,8 @@ const AddressListItem = ({ address }: { address: UserAddress }) => {
             </StyledText>
           )}
         </View>
-        <FontAwesome
-          name="remove"
+        <Feather
+          name="x"
           size={20}
           color={colors.border}
           onPress={onRemovePress}
