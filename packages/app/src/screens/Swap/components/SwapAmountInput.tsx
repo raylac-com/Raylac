@@ -1,4 +1,5 @@
-import { Pressable, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
+import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -27,7 +28,7 @@ const SwapAmountInput = ({
 }) => {
   return (
     <View>
-      <Pressable
+      <FeedbackPressable
         style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -37,7 +38,7 @@ const SwapAmountInput = ({
         disabled={!!selectedToken}
         onPress={onSelectTokenPress}
       >
-        <Pressable onPress={onSelectTokenPress}>
+        <FeedbackPressable onPress={onSelectTokenPress}>
           {selectedToken ? (
             <TokenLogoWithChain
               chainId={chainId}
@@ -54,7 +55,7 @@ const SwapAmountInput = ({
               }}
             />
           )}
-        </Pressable>
+        </FeedbackPressable>
         {isLoadingAmount ? (
           <Skeleton
             style={{
@@ -97,7 +98,7 @@ const SwapAmountInput = ({
             </StyledText>
           </View>
         )}
-        <Pressable
+        <FeedbackPressable
           style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -117,8 +118,8 @@ const SwapAmountInput = ({
             size={24}
             color={colors.subbedText}
           />
-        </Pressable>
-      </Pressable>
+        </FeedbackPressable>
+      </FeedbackPressable>
     </View>
   );
 };

@@ -17,7 +17,7 @@ import {
 } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import { ScrollView, TextInput, View } from 'react-native';
 import { formatUnits, parseUnits, zeroAddress } from 'viem';
 import BigNumber from 'bignumber.js';
 import { trpc } from '@/lib/trpc';
@@ -114,11 +114,11 @@ const BalanceDetail = ({
         ) : (
           <Skeleton style={{ width: 100, height: 20 }} />
         )}
-        <Pressable onPress={onMaxPress}>
+        <FeedbackPressable onPress={onMaxPress}>
           <StyledText
             style={{ color: colors.subbedText, fontWeight: 'bold' }}
           >{`MAX`}</StyledText>
-        </Pressable>
+        </FeedbackPressable>
       </View>
     </View>
   );

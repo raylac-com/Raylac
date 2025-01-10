@@ -1,7 +1,7 @@
 import { createTRPCClient, httpBatchLink } from '@trpc/client';
 import type { AppRouter } from '@raylac/api';
 
-const url = 'http://localhost:3000';
+const url = 'https://raylac-api-pr-45.onrender.com';
 
 export const client = createTRPCClient<AppRouter>({
   links: [

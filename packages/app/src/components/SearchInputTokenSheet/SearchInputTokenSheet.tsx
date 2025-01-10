@@ -4,7 +4,7 @@ import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { TokenAmount, Token } from '@raylac/shared';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import {
   BottomSheetFlatList,
   BottomSheetModal,
@@ -77,7 +77,7 @@ const TokenListItem = ({
           justifyContent: 'space-between',
         }}
       >
-        <Pressable
+        <FeedbackPressable
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
@@ -141,7 +141,7 @@ const TokenListItem = ({
               color={colors.border}
             />
           )}
-        </Pressable>
+        </FeedbackPressable>
       </View>
       {isExpanded && (
         <View style={{ marginBottom: 32, rowGap: 12 }}>

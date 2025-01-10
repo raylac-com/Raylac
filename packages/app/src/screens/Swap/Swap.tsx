@@ -8,6 +8,7 @@ import {
   ETH,
   GetSingleInputSwapQuoteRequestBody,
   GetSingleInputSwapQuoteReturnType,
+  supportedChains,
   Token,
   TRPCErrorMessage,
 } from '@raylac/shared';
@@ -156,6 +157,11 @@ const Swap = ({ route }: Props) => {
     address: selectedAddress ?? zeroAddress,
     chainId: inputChainId ?? mainnet.id,
     token: ETH,
+  });
+
+  // Prefetch supported tokens
+  const { data: _supportedTokens } = trpc.getSupportedTokens.useQuery({
+    chainIds: supportedChains.map(chain => chain.id),
   });
 
   // Mutations
@@ -397,7 +403,14 @@ const Swap = ({ route }: Props) => {
         paddingHorizontal: 16,
       }}
     >
-      <View style={{ flex: 1, rowGap: 16 }}>
+      <View
+        style={{
+          flex: 1,
+          rowGap: 16,
+          flexDirection: 'column',
+          justifyContent: 'center',
+        }}
+      >
         <SwapInputCard
           address={selectedAddress}
           token={inputToken}

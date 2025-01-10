@@ -82,7 +82,7 @@ const SelectAddressSheet = ({
           marginTop: 24,
         }}
         contentContainerStyle={{
-          rowGap: 16,
+          rowGap: 20,
         }}
         renderItem={({ item }) => (
           <Pressable
