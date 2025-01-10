@@ -13,6 +13,7 @@ import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import { Hex } from 'viem';
 import Toast from 'react-native-toast-message';
 import useEnsName from '@/hooks/useEnsName';
+import ChainLogo from '../ChainLogo/ChainLogo';
 
 export interface SwapListItemSheetProps {
   swap: SwapHistoryItem;
@@ -67,9 +68,14 @@ const TxHash = ({ txHash, chainId }: { txHash: string; chainId: number }) => {
       <StyledText style={{ color: colors.subbedText }}>
         {`Transaction`}{' '}
       </StyledText>
-      <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-        {`${shortenTxHash(txHash)}`}
-      </StyledText>
+      <View
+        style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
+      >
+        <ChainLogo chainId={chainId} size={18} />
+        <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
+          {`${shortenTxHash(txHash)}`}
+        </StyledText>
+      </View>
     </FeedbackPressable>
   );
 };
@@ -198,7 +204,10 @@ const SwapListItemSheet = ({ swap, onClose }: SwapListItemSheetProps) => {
           }}
         >
           <Address address={swap.address} />
-          <TxHash txHash={swap.relayId} chainId={swap.fromChainId} />
+          <TxHash txHash={swap.inTxHash} chainId={swap.fromChainId} />
+          {swap.inTxHash !== swap.outTxHash && (
+            <TxHash txHash={swap.outTxHash} chainId={swap.toChainId} />
+          )}
           <DateTime date={new Date(swap.timestamp)} />
         </View>
       </BottomSheetView>

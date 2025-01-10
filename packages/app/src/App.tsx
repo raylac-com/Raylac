@@ -84,7 +84,7 @@ const Tabs = () => {
         options={{
           tabBarLabel: () => null,
           tabBarIcon: ({ color }) => (
-            <Feather name="refresh-cw" size={24} color={color} />
+            <Feather name="repeat" size={24} color={color} />
           ),
           tabBarShowLabel: false,
         }}

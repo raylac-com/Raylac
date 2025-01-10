@@ -1,5 +1,5 @@
 import StyledText from '@/components/StyledText/StyledText';
-import { triggerHapticFeedback } from '@/lib/utils';
+import { shortenAddress, triggerHapticFeedback } from '@/lib/utils';
 import { Token, TokenAmount } from '@raylac/shared';
 import { Pressable, View } from 'react-native';
 import { Hex } from 'viem';
@@ -98,6 +98,11 @@ const SelectTokenChainSheet = ({
       <BottomSheetFlatList
         data={addressTokenBalance?.chainBalances}
         contentContainerStyle={{ rowGap: 16 }}
+        ListEmptyComponent={() => (
+          <StyledText style={{ color: colors.subbedText, textAlign: 'center' }}>
+            {`No ${token.symbol} balance found on supported chains for ${shortenAddress(address)}`}
+          </StyledText>
+        )}
         renderItem={({ item }) => (
           <Pressable
             onPress={() => {

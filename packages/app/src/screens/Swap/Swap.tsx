@@ -363,9 +363,18 @@ const Swap = ({ route }: Props) => {
       swapQuote,
     });
 
+    Toast.show({
+      type: 'success',
+      text1: 'Sent swap transaction',
+      position: 'bottom',
+    });
+
     setInputToken(null);
     setOutputToken(null);
     setAmountInputText('');
+    setInputChainId(null);
+    setOutputChainId(null);
+    setSelectedAddress(null);
 
     const pendingSwapData = {
       address: selectedAddress,

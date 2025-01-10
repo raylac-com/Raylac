@@ -147,6 +147,28 @@ const mapAsRelayTx = async ({
     return transferItem;
   }
 
+  if (fromChainId === toChainId) {
+    // Map as single-chian swap
+    const swapHistoryItem: SwapHistoryItem = {
+      relayId: relayRequest.id,
+      type: HistoryItemType.SWAP,
+      address: getAddress(sender),
+      amountIn: amountInFormatted,
+      amountOut: amountOutFormatted,
+      tokenIn: tokenIn,
+      tokenOut: tokenOut,
+      fromChainId: fromChainId,
+      toChainId: toChainId,
+      timestamp: relayRequest.createdAt,
+      inTxHash: inTx.hash,
+      outTxHash: inTx.hash,
+    };
+
+    return swapHistoryItem;
+  }
+
+  // Map as cross-chain swap
+
   const swapHistoryItem: SwapHistoryItem = {
     relayId: relayRequest.id,
     type: HistoryItemType.SWAP,
