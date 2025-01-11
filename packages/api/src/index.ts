@@ -7,6 +7,72 @@ import { webcrypto } from 'node:crypto';
 import getTokenBalances from './api/getTokenBalances/getTokenBalances';
 import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { Hex } from 'viem';
+
+// Shared Zod schemas for runtime validation
+const hexSchema = z
+  .string()
+  .regex(
+    /^0x[0-9a-fA-F]+$/,
+    'Invalid hex string. Must start with 0x and contain only hex characters.'
+  )
+  .transform((val): Hex => val as Hex);
+
+// Base transaction schema
+const txSchema = z.object({
+  to: hexSchema,
+  data: hexSchema,
+  value: z.string(),
+  maxFeePerGas: z.string(),
+  maxPriorityFeePerGas: z.string(),
+  nonce: z.number(),
+  chainId: z.number(),
+  gas: z.number(),
+});
+
+// Base step schemas matching types.ts interfaces
+const approveStepSchema = z.object({
+  id: z.enum(['approve', 'deposit']),
+  tx: txSchema,
+});
+
+const swapStepSchema = z.object({
+  originChainId: z.number(),
+  destinationChainId: z.number(),
+  tx: txSchema,
+});
+
+// Signed versions
+const signedApproveStepSchema = approveStepSchema.extend({
+  signature: hexSchema,
+});
+
+const signedSwapStepSchema = swapStepSchema.extend({
+  signature: hexSchema,
+});
+
+const tokenSchema = z.object({
+  id: hexSchema,
+  symbol: z.string(),
+  name: z.string(),
+  decimals: z.number(),
+  logoURI: z.string(),
+  verified: z.boolean(),
+  color: z.string().optional(),
+  addresses: z.array(
+    z.object({
+      chainId: z.number(),
+      address: hexSchema,
+    })
+  ),
+});
+
+const tokenAmountSchema = z.object({
+  amount: z.string(),
+  formatted: z.string(),
+  usdValue: z.string(),
+  usdValueFormatted: z.string(),
+  tokenPriceUsd: z.number(),
+});
 import getSupportedTokens from './api/getSupportedTokens/getSupportedTokens';
 import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.mock';
 import getLidoApyMock from './api/getLidoApy/getLidoApy.mock';
@@ -60,7 +126,7 @@ export const appRouter = router({
   getTokenBalances: publicProcedure
     .input(
       z.object({
-        addresses: z.array(z.string()),
+        addresses: z.array(hexSchema),
       })
     )
     .query(async ({ input }) => {
@@ -79,39 +145,98 @@ export const appRouter = router({
   }),
 
   submitSingleInputSwap: publicProcedure
-    .input(z.any())
+    .input(
+      z.object({
+        signedApproveStep: signedApproveStepSchema.nullable(),
+        signedSwapStep: signedSwapStepSchema,
+      })
+    )
     .mutation(async ({ input }) => {
       return MOCK_RESPONSE
         ? submitSingleInputSwapMock(input as SubmitSingleInputSwapRequestBody)
         : submitSingleInputSwap(input as SubmitSingleInputSwapRequestBody);
     }),
 
-  buildSend: publicProcedure.input(z.any()).mutation(async ({ input }) => {
-    return buildSend(input as BuildSendRequestBody);
-  }),
+  buildSend: publicProcedure
+    .input(
+      z.object({
+        amount: z.string(),
+        token: tokenSchema,
+        fromAddress: hexSchema,
+        toAddress: hexSchema,
+        chainId: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return buildSend(input as BuildSendRequestBody);
+    }),
 
   buildBridgeSend: publicProcedure
-    .input(z.any())
+    .input(
+      z.object({
+        from: hexSchema,
+        to: hexSchema,
+        token: tokenSchema,
+        amount: z.string(),
+        fromChainId: z.number(),
+        toChainId: z.number(),
+      })
+    )
     .mutation(async ({ input }) => {
       return MOCK_RESPONSE
         ? await buildBridgeSendMock(input as BuildBridgeSendRequestBody)
         : await buildBridgeSend(input as BuildBridgeSendRequestBody);
     }),
 
-  sendTx: publicProcedure.input(z.any()).mutation(async ({ input }) => {
-    return MOCK_RESPONSE
-      ? sendTxMock(input as SendTxRequestBody)
-      : sendTx(input as SendTxRequestBody);
-  }),
+  sendTx: publicProcedure
+    .input(
+      z.object({
+        signedTx: hexSchema,
+        chainId: z.number(),
+        transfer: z.object({
+          from: hexSchema,
+          to: hexSchema,
+          amount: tokenAmountSchema,
+          token: tokenSchema,
+        }),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return MOCK_RESPONSE
+        ? sendTxMock(input as SendTxRequestBody)
+        : sendTx(input as SendTxRequestBody);
+    }),
 
-  sendBridgeTx: publicProcedure.input(z.any()).mutation(async ({ input }) => {
-    return MOCK_RESPONSE
-      ? sendBridgeTxMock(input as SendBridgeTxRequestBody)
-      : sendBridgeTx(input as SendBridgeTxRequestBody);
-  }),
+  sendBridgeTx: publicProcedure
+    .input(
+      z.object({
+        signedTxs: z.array(hexSchema),
+        chainId: z.number(),
+        transfer: z.object({
+          from: hexSchema,
+          to: hexSchema,
+          amount: tokenAmountSchema,
+          token: tokenSchema,
+        }),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return MOCK_RESPONSE
+        ? sendBridgeTxMock(input as SendBridgeTxRequestBody)
+        : sendBridgeTx(input as SendBridgeTxRequestBody);
+    }),
 
   getSingleInputSwapQuote: publicProcedure
-    .input(z.any())
+    .input(
+      z.object({
+        sender: hexSchema,
+        amount: z.string(),
+        inputToken: tokenSchema,
+        outputToken: tokenSchema,
+        inputChainId: z.number(),
+        outputChainId: z.number(),
+      })
+    )
     .mutation(async ({ input }) => {
       return MOCK_RESPONSE
         ? getSingleInputSwapQuoteMock(
@@ -123,7 +248,7 @@ export const appRouter = router({
   getHistory: publicProcedure
     .input(
       z.object({
-        addresses: z.array(z.string()),
+        addresses: z.array(hexSchema),
       })
     )
     .query(async ({ input }) => {
@@ -164,7 +289,25 @@ export const appRouter = router({
     }),
 
   getTokenPrice: publicProcedure
-    .input(z.object({ token: z.any() }))
+    .input(
+      z.object({
+        token: z.object({
+          id: z.string(),
+          symbol: z.string(),
+          name: z.string(),
+          decimals: z.number(),
+          logoURI: z.string(),
+          verified: z.boolean(),
+          color: z.string().optional(),
+          addresses: z.array(
+            z.object({
+              chainId: z.number(),
+              address: z.string(),
+            })
+          ),
+        }),
+      })
+    )
     .mutation(async ({ input }) => {
       return MOCK_RESPONSE
         ? getTokenPriceMock({
