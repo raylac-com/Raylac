@@ -27,10 +27,12 @@ const BridgeListItem = (props: {
         <View
           style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
         >
-          <TokenLogo
-            source={{ uri: props.bridge.token.logoURI }}
-            style={{ width: 42, height: 42 }}
-          />
+          <View style={{ width: 54 }}>
+            <TokenLogo
+              source={{ uri: props.bridge.token.logoURI }}
+              style={{ width: 42, height: 42 }}
+            />
+          </View>
           <View
             style={{
               flexDirection: 'column',

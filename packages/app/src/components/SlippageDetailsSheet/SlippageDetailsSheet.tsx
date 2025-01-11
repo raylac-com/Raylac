@@ -31,7 +31,7 @@ const MinimumAmountOut = ({
       <StyledText style={{ color: colors.border }}>
         {`Minimum output`}
       </StyledText>
-      <StyledText style={{ fontWeight: 'bold' }}>
+      <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
         {`${formattedAmount} ${token.symbol}`}
       </StyledText>
     </View>
@@ -68,7 +68,7 @@ const SlippagePercent = ({ slippagePercent }: { slippagePercent: number }) => {
     >
       <StyledText style={{ color: colors.border }}>{`Max slippage`}</StyledText>
       <StyledText
-        style={{ fontWeight: 'bold' }}
+        style={{ color: colors.border, fontWeight: 'bold' }}
       >{`${slippagePercent}%`}</StyledText>
     </View>
   );

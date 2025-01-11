@@ -76,14 +76,14 @@ const ChainDetail = ({
   chainId: number;
   onSelectPress: () => void;
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('SelectAmount');
   return (
     <FeedbackPressable
       style={{ flexDirection: 'row', justifyContent: 'space-between' }}
       onPress={onSelectPress}
     >
       <StyledText style={{ color: colors.subbedText }}>
-        {t('Send.recipientReceivesOn')}
+        {t('recipientReceivesOn')}
       </StyledText>
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 2 }}
@@ -102,25 +102,25 @@ const BalanceDetail = ({
   balance: TokenAmount | undefined;
   onMaxPress: () => void;
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('SelectAmount');
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <StyledText style={{ color: colors.subbedText }}>
-        {t('Send.balance')}
+        {t('balance')}
       </StyledText>
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
       >
         {balance ? (
           <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-            {t('Send.balanceAmount', { amount: balance.usdValueFormatted })}
+            {`$${balance.usdValueFormatted}`}
           </StyledText>
         ) : (
           <Skeleton style={{ width: 100, height: 20 }} />
         )}
         <FeedbackPressable onPress={onMaxPress}>
           <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-            {t('Send.max')}
+            {t('max')}
           </StyledText>
         </FeedbackPressable>
       </View>
@@ -135,16 +135,14 @@ const GasInfo = ({
   gas: TokenAmount;
   isFetchingGasInfo: boolean;
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('SelectAmount');
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-      <StyledText style={{ color: colors.subbedText }}>
-        {t('Send.gas')}
-      </StyledText>
+      <StyledText style={{ color: colors.subbedText }}>{t('gas')}</StyledText>
       {isFetchingGasInfo && <Skeleton style={{ width: 100, height: 20 }} />}
       {gas && (
         <StyledText style={{ color: colors.subbedText }}>
-          {t('Send.gasAmount', {
+          {t('gasAmount', {
             amount: gas.usdValueFormatted,
             eth: gas.formatted,
           })}
@@ -161,7 +159,7 @@ const BridgeFeeInfo = ({
   bridgeSendData: BuildBridgeSendReturnType | undefined;
   isLoading: boolean;
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('SelectAmount');
   const [isFeeDetailsSheetOpen, setIsFeeDetailsSheetOpen] = useState(false);
 
   return (
@@ -171,7 +169,7 @@ const BridgeFeeInfo = ({
         onPress={() => setIsFeeDetailsSheetOpen(true)}
       >
         <StyledText style={{ color: colors.subbedText }}>
-          {t('Send.totalFee')}
+          {t('totalFee')}
         </StyledText>
         {isLoading && <Skeleton style={{ width: 100, height: 20 }} />}
         {bridgeSendData && (
@@ -179,7 +177,7 @@ const BridgeFeeInfo = ({
             style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
           >
             <StyledText style={{ color: colors.subbedText }}>
-              {t('Send.totalFeeAmount', { amount: bridgeSendData.totalFeeUsd })}
+              {t('totalFeeAmount', { amount: bridgeSendData.totalFeeUsd })}
             </StyledText>
             <Feather name="chevron-right" size={16} color={colors.border} />
           </View>
@@ -644,7 +642,7 @@ const SelectAmount = ({ route }: Props) => {
       <View
         style={{
           flexDirection: 'column',
-          rowGap: 12,
+          rowGap: 16,
           borderWidth: 1,
           borderColor: colors.border,
           borderRadius: 32,

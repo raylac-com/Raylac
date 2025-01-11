@@ -76,7 +76,7 @@ const SelectTokenChainSheet = ({
       onDismiss={onClose}
       enablePanDownToClose
       enableDynamicSizing={false}
-      snapPoints={['100%']}
+      snapPoints={['50%']}
     >
       <View
         style={{

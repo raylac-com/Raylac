@@ -137,13 +137,11 @@ const TokenBalanceDetailsSheet = ({
     <BottomSheet
       ref={ref}
       style={{
-        flex: 1,
         paddingTop: insets.top,
-        paddingBottom: insets.bottom,
       }}
-      index={0}
       onClose={onClose}
       enablePanDownToClose
+      index={0}
       enableDynamicSizing={false}
       snapPoints={['100%']}
     >
@@ -153,7 +151,7 @@ const TokenBalanceDetailsSheet = ({
           flexDirection: 'column',
           alignItems: 'center',
           paddingHorizontal: 16,
-          paddingBottom: insets.bottom + 16,
+          paddingBottom: insets.bottom + 32,
         }}
       >
         <View style={{ flex: 1 }}>

@@ -134,7 +134,7 @@ const HomeScreen = () => {
       style={{
         flex: 1,
         paddingTop: insets.top,
-        paddingBottom: insets.bottom,
+        paddingBottom: insets.bottom + 16,
         position: 'relative',
       }}
     >

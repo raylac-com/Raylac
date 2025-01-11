@@ -49,7 +49,7 @@ const SelectLanguage = () => {
         flex: 1,
         flexDirection: 'column',
         padding: 16,
-        gap: 16,
+        gap: 24,
       }}
     >
       <LanguageListItem

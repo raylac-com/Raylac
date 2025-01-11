@@ -44,7 +44,7 @@ export const ChainSelectorSheet = ({
         paddingVertical: 32,
       }}
       index={0}
-      snapPoints={['100%']}
+      snapPoints={['50%']}
       enablePanDownToClose
       onClose={onClose}
     >

@@ -208,10 +208,11 @@ const SearchInputTokenSheet = ({
     addresses: address ? [address] : [],
   });
 
-  const tokenList =
-    tokenBalancePerAddress && tokenBalancePerAddress.length > 0
+  const tokenList = tokenBalancePerAddress
+    ? tokenBalancePerAddress.length > 0
       ? tokenBalancePerAddress[0].tokenBalances
-      : [undefined];
+      : []
+    : [undefined];
 
   const tokenListSearchResults = useMemo(() => {
     return searchText

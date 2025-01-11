@@ -212,6 +212,14 @@
     "amountInUsd": "{{ amount }} USD",
     "backToHome": "Back to home"
   },
+  "SelectAmount": {
+    "title": "Select amount",
+    "balance": "Balance",
+    "max": "MAX",
+    "gas": "Gas",
+    "totalFee": "Total fee",
+    "totalFeeAmount": "{{amount}} USD"
+  },
   "SelectAngelRequest": {
     "title": "Select angel request"
   },

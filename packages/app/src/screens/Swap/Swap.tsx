@@ -477,6 +477,7 @@ const Swap = ({ route }: Props) => {
     setInputChainId(null);
     setOutputChainId(null);
     setSelectedAddress(null);
+    resetGetSwapQuote();
 
     if (pendingSwapData) {
       // Navigate to the history screen with the pending swap data
