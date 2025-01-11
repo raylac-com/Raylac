@@ -16,7 +16,7 @@ import { getNonce } from '../../utils';
 import { relayApi } from '../../lib/relay';
 import { TRPCError } from '@trpc/server';
 import axios from 'axios';
-import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
+import getBaseTokenPrice from '../getBaseTokenPrice/getBaseTokenPrice';
 import { Hex } from 'viem';
 import BigNumber from 'bignumber.js';
 
@@ -174,13 +174,13 @@ const getSingleInputSwapQuote = async ({
   const amountIn = amount;
   const amountOut = quote.details.currencyOut.amount;
 
-  const inputTokenPrice = await getTokenUsdPrice({ token: inputToken });
+  const inputTokenPrice = await getBaseTokenPrice({ token: inputToken });
 
   if (inputTokenPrice === null) {
     throw new Error('Failed to get input token price');
   }
 
-  const outputTokenPrice = await getTokenUsdPrice({ token: outputToken });
+  const outputTokenPrice = await getBaseTokenPrice({ token: outputToken });
 
   if (outputTokenPrice === null) {
     throw new Error('Failed to get output token price');
@@ -198,7 +198,7 @@ const getSingleInputSwapQuote = async ({
     tokenPriceUsd: outputTokenPrice,
   });
 
-  const ethPriceUsd = await getTokenUsdPrice({ token: ETH });
+  const ethPriceUsd = await getBaseTokenPrice({ token: ETH });
 
   if (ethPriceUsd === null) {
     throw new Error('ETH price not found');
@@ -244,7 +244,7 @@ const getSingleInputSwapQuote = async ({
     possibleTokens: [inputToken, outputToken, ETH],
   });
 
-  const feeTokenPriceUsd = await getTokenUsdPrice({
+  const feeTokenPriceUsd = await getBaseTokenPrice({
     token: relayerServiceFeeToken,
   });
 

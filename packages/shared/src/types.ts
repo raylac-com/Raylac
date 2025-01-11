@@ -284,6 +284,11 @@ export interface TokenAmount {
   usdValue: string;
   usdValueFormatted: string;
   tokenPriceUsd: number;
+  // Multi-currency support
+  currency?: 'USD' | 'JPY'; // Default is USD when not specified
+  jpyValue?: string; // JPY equivalent value
+  jpyValueFormatted?: string; // Formatted JPY value
+  tokenPriceJpy?: number; // Token price in JPY
 }
 
 export interface PendingTx {

@@ -13,11 +13,11 @@ import { getAlchemyClient } from '../../lib/alchemy';
 import { AssetTransfersCategory, SortingOrder } from 'alchemy-sdk';
 import { logger } from '@raylac/shared-backend';
 import { getToken } from '../../lib/token';
-import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
+import getBaseTokenPrice from '../getBaseTokenPrice/getBaseTokenPrice';
 import { relayGetRequest } from '../../lib/relay';
 
 const getTokenPriceOrThrow = async (token: Token): Promise<number> => {
-  const tokenUsdPrice = await getTokenUsdPrice({ token });
+  const tokenUsdPrice = await getBaseTokenPrice({ token });
 
   if (!tokenUsdPrice) {
     throw new Error(`No token price found for ${token.symbol} `);
@@ -246,7 +246,7 @@ const getHistoryOnChain = async ({
                 return null;
               }
 
-              const usdPrice = await getTokenUsdPrice({
+              const usdPrice = await getBaseTokenPrice({
                 token,
               });
 

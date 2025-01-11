@@ -21,7 +21,7 @@ import {
 import { relayApi } from '../../lib/relay';
 import axios from 'axios';
 import { getNonce } from '../../utils';
-import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
+import getBaseTokenPrice from '../getBaseTokenPrice/getBaseTokenPrice';
 import { Hex } from 'viem';
 import BigNumber from 'bignumber.js';
 
@@ -163,7 +163,7 @@ const buildBridgeSend = async ({
   const amountIn = amount;
   const amountOut = quote.details.currencyOut.amount;
 
-  const tokenPriceUsd = await getTokenUsdPrice({ token });
+  const tokenPriceUsd = await getBaseTokenPrice({ token });
 
   if (tokenPriceUsd === null) {
     throw new Error('tokenPriceUsd is undefined');
@@ -181,7 +181,7 @@ const buildBridgeSend = async ({
     tokenPriceUsd,
   });
 
-  const ethPriceUsd = await getTokenUsdPrice({ token: ETH });
+  const ethPriceUsd = await getBaseTokenPrice({ token: ETH });
 
   if (ethPriceUsd === null) {
     throw new Error('ETH price not found');

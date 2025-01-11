@@ -130,14 +130,19 @@ export const formatUsdValue = (num: BigNumber): string => {
   return formatNumber(num);
 };
 
+// JPY/USD exchange rate (to be replaced with actual API call in future)
+const USD_TO_JPY_RATE = 148.5;
+
 export const formatTokenAmount = ({
   amount,
   token,
   tokenPriceUsd,
+  currency = 'USD',
 }: {
   amount: bigint;
   token: Token;
   tokenPriceUsd: number;
+  currency?: 'USD' | 'JPY';
 }): TokenAmount => {
   const usdValue = new BigNumber(
     formatUnits(amount, token.decimals)
@@ -145,12 +150,24 @@ export const formatTokenAmount = ({
 
   const usdValueFormatted = formatUsdValue(usdValue);
 
+  // Calculate JPY values if needed
+  const tokenPriceJpy = tokenPriceUsd * USD_TO_JPY_RATE;
+  const jpyValue = usdValue.multipliedBy(USD_TO_JPY_RATE);
+  const jpyValueFormatted = formatUsdValue(jpyValue); // Reuse same formatter for now
+
   const amountFormatted: TokenAmount = {
     amount: amount.toString(),
     formatted: formatAmount(amount.toString(), token.decimals),
     usdValue: usdValue.toFixed(),
     usdValueFormatted,
     tokenPriceUsd,
+    // Add multi-currency support
+    currency,
+    ...(currency === 'JPY' && {
+      jpyValue: jpyValue.toFixed(),
+      jpyValueFormatted,
+      tokenPriceJpy,
+    }),
   };
 
   return amountFormatted;

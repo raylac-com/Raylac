@@ -1,16 +1,27 @@
-import { GetTokenUsdPriceReturnType, Token } from '@raylac/shared';
-import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
+import { Token } from '@raylac/shared';
+import getBaseTokenPrice from '../getBaseTokenPrice/getBaseTokenPrice';
+
+export interface GetTokenPriceReturnType {
+  price: number | null;
+  currency: string;
+}
 
 const getTokenPrice = async ({
   token,
+  currency = 'usd',
 }: {
   token: Token;
-}): Promise<GetTokenUsdPriceReturnType> => {
-  const price = await getTokenUsdPrice({
+  currency?: string;
+}): Promise<GetTokenPriceReturnType> => {
+  const basePrice = await getBaseTokenPrice({
     token,
+    currency: currency.toLowerCase(),
   });
 
-  return price;
+  return {
+    price: basePrice,
+    currency: currency.toUpperCase(),
+  };
 };
 
 export default getTokenPrice;

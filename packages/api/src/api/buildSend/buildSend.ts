@@ -10,7 +10,7 @@ import {
 import { getTokenAddressOnChain } from '../../utils';
 import { getNonce, getGasInfo } from '../../utils';
 import { encodeFunctionData, Hex } from 'viem';
-import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
+import getBaseTokenPrice from '../getBaseTokenPrice/getBaseTokenPrice';
 
 const buildERC20TransferExecutionStep = async ({
   token,
@@ -118,7 +118,7 @@ const buildSend = async (
     address: fromAddress,
   });
 
-  const tokenPriceUsd = await getTokenUsdPrice({
+  const tokenPriceUsd = await getBaseTokenPrice({
     token: requestBody.token,
   });
 
@@ -150,7 +150,7 @@ const buildSend = async (
 
   const gasFee = BigInt(tx.gas) * BigInt(maxFeePerGas);
 
-  const ethPriceUsd = await getTokenUsdPrice({ token: ETH });
+  const ethPriceUsd = await getBaseTokenPrice({ token: ETH });
 
   if (ethPriceUsd === null) {
     throw new Error('ETH price not found');
