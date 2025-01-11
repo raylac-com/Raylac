@@ -117,7 +117,7 @@ const Tabs = () => {
 };
 
 const Screens = () => {
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation('App');
 
   useEffect(() => {
     (async () => {
