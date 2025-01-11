@@ -18,7 +18,7 @@ import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress'
 import { useTranslation } from 'react-i18next';
 
 const AddressListItem = ({ address }: { address: UserAddress }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('Addresses_AddressListItem');
   const { mutateAsync: deleteAddress } = useDeleteAddress();
 
   const [selectedAddress, setSelectedAddress] = useState<UserAddress | null>(
@@ -138,6 +138,7 @@ const SupportedChains = () => {
 };
 
 const Addresses = () => {
+  const { t } = useTranslation('Addresses_Addresses');
   const { data: addresses } = useUserAddresses();
   const navigation = useTypedNavigation();
   const insets = useSafeAreaInsets();
@@ -162,7 +163,10 @@ const Addresses = () => {
         renderItem={({ item }) => <AddressListItem address={item} />}
         contentContainerStyle={{ rowGap: 16 }}
       />
-      <StyledButton title="Add address" onPress={onAddAddressPress} />
+      <StyledButton
+        title={t('Addresses.addAddress')}
+        onPress={onAddAddressPress}
+      />
     </View>
   );
 };

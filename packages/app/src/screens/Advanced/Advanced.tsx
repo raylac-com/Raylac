@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const Advanced = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('Advanced_Advanced');
   const EXPO_PUBLIC_RPC_URL = process.env.EXPO_PUBLIC_RPC_URL;
 
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);

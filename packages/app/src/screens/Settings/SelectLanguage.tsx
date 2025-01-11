@@ -36,7 +36,7 @@ const LanguageListItem = ({
 };
 
 const SelectLanguage = () => {
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation('Settings_SelectLanguage');
 
   const handleLanguageChange = async (lang: 'en' | 'ja') => {
     saveSelectedLanguage(lang);

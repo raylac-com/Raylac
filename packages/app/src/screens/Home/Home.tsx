@@ -54,7 +54,7 @@ const AddAddressButton = () => {
 };
 
 const HomeScreen = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('Home_HomeScreen');
   const navigation = useTypedNavigation();
   const insets = useSafeAreaInsets();
 

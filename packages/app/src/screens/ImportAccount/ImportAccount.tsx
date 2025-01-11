@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
  * Sign in screen
  */
 const ImportAccount = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('ImportAccount_ImportAccount');
   const insets = useSafeAreaInsets();
   const [inputText, setInputText] = useState('');
   const [isInputPrivKey, setIsInputPrivKey] = useState(false);
