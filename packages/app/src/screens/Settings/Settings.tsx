@@ -32,9 +32,11 @@ const Settings = () => {
     navigation.navigate('Advanced');
   };
 
+  /** 
   const onLanguagePress = () => {
     navigation.navigate('SelectLanguage');
   };
+  */
 
   return (
     <View
@@ -51,11 +53,13 @@ const Settings = () => {
           icon={<Feather name="zap" size={24} color={colors.border} />}
           onPress={onAdvancedPress}
         />
+        {/** 
         <SettingsListItem
           title="Language"
           icon={<Feather name="globe" size={24} color={colors.border} />}
           onPress={onLanguagePress}
         />
+        */}
       </View>
     </View>
   );
