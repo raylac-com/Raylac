@@ -18,6 +18,7 @@ import {
   TransferHistoryItem,
   SwapHistoryItem as SwapHistoryItemType,
   BridgeTransferHistoryItem,
+  CrossChainSwapHistoryItem,
 } from '@raylac/shared';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import SwapListItem from '@/components/SwapListItem/SwapListItem';
@@ -25,6 +26,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootTabsParamsList } from '@/navigation/types';
 import { Hex } from 'viem/_types/types/misc';
 import BridgeTransferListItem from '@/components/BridgeTransferListItem/BridgeTransferListItem';
+import CrossChainSwapListItem from '@/components/CrossChainSwapListItem/CrossChainSwapListItem';
 
 type Props = NativeStackScreenProps<RootTabsParamsList, 'History'>;
 
@@ -126,10 +128,8 @@ const History = ({ route }: Props) => {
           amountOut: pendingSwap.outputAmount,
           tokenIn: pendingSwap.tokenIn,
           tokenOut: pendingSwap.tokenOut,
-          fromChainId: pendingSwap.fromChainId,
-          toChainId: pendingSwap.toChainId,
-          inTxHash: '0x',
-          outTxHash: '0x',
+          chainId: pendingSwap.chainId,
+          txHash: '0x',
           timestamp: new Date().toISOString(),
           isPending: true,
         });
@@ -176,6 +176,11 @@ const History = ({ route }: Props) => {
               {item.type === HistoryItemType.SWAP ? (
                 <SwapListItem
                   swap={item as SwapHistoryItemType}
+                  isPending={item.isPending}
+                />
+              ) : item.type === HistoryItemType.CROSS_CHAIN_SWAP ? (
+                <CrossChainSwapListItem
+                  swap={item as CrossChainSwapHistoryItem}
                   isPending={item.isPending}
                 />
               ) : item.type === HistoryItemType.BRIDGE_TRANSFER ? (

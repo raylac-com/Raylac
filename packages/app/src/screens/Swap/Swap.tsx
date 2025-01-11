@@ -350,6 +350,14 @@ const Swap = ({ route }: Props) => {
       throw new Error('Output token is null');
     }
 
+    if (!inputChainId) {
+      throw new Error('Input chain id is null');
+    }
+
+    if (!outputChainId) {
+      throw new Error('Output chain id is null');
+    }
+
     if (!swapQuote) {
       throw new Error('Swap quote is null');
     }
@@ -369,6 +377,37 @@ const Swap = ({ route }: Props) => {
       position: 'bottom',
     });
 
+    const isCrossChainSwap = inputChainId !== outputChainId;
+
+    const pendingSwapData: NonNullable<
+      RootTabsParamsList['History']
+    >['pendingSwap'] =
+      isCrossChainSwap === false
+        ? {
+            address: selectedAddress,
+            tokenIn: inputToken,
+            tokenOut: outputToken,
+            inputAmount: swapQuote.amountIn,
+            outputAmount: swapQuote.amountOut,
+            chainId: inputChainId,
+            requestId: swapQuote.relayRequestId,
+          }
+        : undefined;
+
+    const pendingCrossChainSwapData: NonNullable<
+      RootTabsParamsList['History']
+    >['pendingCrossChainSwap'] =
+      isCrossChainSwap === true
+        ? {
+            address: selectedAddress,
+            tokenIn: inputToken,
+            tokenOut: outputToken,
+            fromChainId: inputChainId,
+            toChainId: outputChainId,
+            requestId: swapQuote.relayRequestId,
+          }
+        : undefined;
+
     setInputToken(null);
     setOutputToken(null);
     setAmountInputText('');
@@ -376,23 +415,25 @@ const Swap = ({ route }: Props) => {
     setOutputChainId(null);
     setSelectedAddress(null);
 
-    const pendingSwapData = {
-      address: selectedAddress,
-      tokenIn: inputToken,
-      tokenOut: outputToken,
-      inputAmount: swapQuote.amountIn,
-      outputAmount: swapQuote.amountOut,
-      fromChainId: inputChainId,
-      toChainId: outputChainId,
-      requestId: swapQuote.relayRequestId,
-    };
-
-    navigation.navigate('Tabs', {
-      screen: 'History',
-      params: {
-        pendingSwap: pendingSwapData,
-      },
-    });
+    if (pendingSwapData) {
+      // Navigate to the history screen with the pending swap data
+      navigation.navigate('Tabs', {
+        screen: 'History',
+        params: {
+          pendingSwap: pendingSwapData,
+        },
+      });
+    } else if (pendingCrossChainSwapData) {
+      // Navigate to the history screen with the pending cross chain swap data
+      navigation.navigate('Tabs', {
+        screen: 'History',
+        params: {
+          pendingCrossChainSwap: pendingCrossChainSwapData,
+        },
+      });
+    } else {
+      throw new Error('No pending swap or cross chain swap data');
+    }
   };
 
   //

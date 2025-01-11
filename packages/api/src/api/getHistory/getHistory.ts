@@ -7,6 +7,7 @@ import {
   Token,
   HistoryItemType,
   BridgeTransferHistoryItem,
+  CrossChainSwapHistoryItem,
 } from '@raylac/shared';
 import { getAddress, Hex, parseUnits, zeroAddress } from 'viem';
 import { getAlchemyClient } from '../../lib/alchemy';
@@ -48,7 +49,9 @@ const mapAsRelayTx = async ({
 }: {
   txHash: Hex;
   address: Hex;
-}): Promise<BridgeTransferHistoryItem | SwapHistoryItem | null> => {
+}): Promise<
+  BridgeTransferHistoryItem | SwapHistoryItem | CrossChainSwapHistoryItem | null
+> => {
   const relayRequest = await relayGetRequest({ txHash });
 
   if (!relayRequest) {
@@ -157,34 +160,31 @@ const mapAsRelayTx = async ({
       amountOut: amountOutFormatted,
       tokenIn: tokenIn,
       tokenOut: tokenOut,
+      chainId: fromChainId,
+      timestamp: relayRequest.createdAt,
+      txHash: inTx.hash,
+    };
+
+    return swapHistoryItem;
+  } else {
+    // Map as cross-chain swap
+    const swapHistoryItem: CrossChainSwapHistoryItem = {
+      relayId: relayRequest.id,
+      type: HistoryItemType.CROSS_CHAIN_SWAP,
+      address: getAddress(sender),
+      amountIn: amountInFormatted,
+      amountOut: amountOutFormatted,
+      tokenIn: tokenIn,
+      tokenOut: tokenOut,
       fromChainId: fromChainId,
       toChainId: toChainId,
       timestamp: relayRequest.createdAt,
       inTxHash: inTx.hash,
-      outTxHash: inTx.hash,
+      outTxHash: outTx.hash,
     };
 
     return swapHistoryItem;
   }
-
-  // Map as cross-chain swap
-
-  const swapHistoryItem: SwapHistoryItem = {
-    relayId: relayRequest.id,
-    type: HistoryItemType.SWAP,
-    address: getAddress(sender),
-    amountIn: amountInFormatted,
-    amountOut: amountOutFormatted,
-    tokenIn: tokenIn,
-    tokenOut: tokenOut,
-    fromChainId: fromChainId,
-    toChainId: toChainId,
-    timestamp: relayRequest.createdAt,
-    inTxHash: inTx.hash,
-    outTxHash: outTx.hash,
-  };
-
-  return swapHistoryItem;
 };
 
 const getHistoryOnChain = async ({

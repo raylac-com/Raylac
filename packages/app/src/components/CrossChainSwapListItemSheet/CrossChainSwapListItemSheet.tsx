@@ -1,6 +1,6 @@
 import Feather from '@expo/vector-icons/Feather';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
-import { getExplorerUrl, SwapHistoryItem } from '@raylac/shared';
+import { CrossChainSwapHistoryItem, getExplorerUrl } from '@raylac/shared';
 import { useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import StyledText from '../StyledText/StyledText';
@@ -15,8 +15,8 @@ import Toast from 'react-native-toast-message';
 import useEnsName from '@/hooks/useEnsName';
 import ChainLogo from '../ChainLogo/ChainLogo';
 
-export interface SwapListItemSheetProps {
-  swap: SwapHistoryItem;
+export interface CrossChainSwapListItemSheetProps {
+  swap: CrossChainSwapHistoryItem;
   onClose: () => void;
 }
 
@@ -98,7 +98,10 @@ const DateTime = ({ date }: { date: Date }) => {
   );
 };
 
-const SwapListItemSheet = ({ swap, onClose }: SwapListItemSheetProps) => {
+const CrossChainSwapListItemSheet = ({
+  swap,
+  onClose,
+}: CrossChainSwapListItemSheetProps) => {
   const insets = useSafeAreaInsets();
   const ref = useRef<BottomSheetModal>(null);
 
@@ -158,7 +161,7 @@ const SwapListItemSheet = ({ swap, onClose }: SwapListItemSheetProps) => {
             >
               <TokenLogoWithChain
                 logoURI={swap.tokenIn.logoURI}
-                chainId={swap.chainId}
+                chainId={swap.fromChainId}
                 size={64}
               />
               <StyledText style={{ color: colors.subbedText }}>
@@ -181,7 +184,7 @@ const SwapListItemSheet = ({ swap, onClose }: SwapListItemSheetProps) => {
             >
               <TokenLogoWithChain
                 logoURI={swap.tokenOut.logoURI}
-                chainId={swap.chainId}
+                chainId={swap.toChainId}
                 size={64}
               />
               <StyledText style={{ color: colors.subbedText }}>
@@ -204,7 +207,8 @@ const SwapListItemSheet = ({ swap, onClose }: SwapListItemSheetProps) => {
           }}
         >
           <Address address={swap.address} />
-          <TxHash txHash={swap.txHash} chainId={swap.chainId} />
+          <TxHash txHash={swap.inTxHash} chainId={swap.fromChainId} />
+          <TxHash txHash={swap.outTxHash} chainId={swap.toChainId} />
           <DateTime date={new Date(swap.timestamp)} />
         </View>
       </BottomSheetView>
@@ -212,4 +216,4 @@ const SwapListItemSheet = ({ swap, onClose }: SwapListItemSheetProps) => {
   );
 };
 
-export default SwapListItemSheet;
+export default CrossChainSwapListItemSheet;

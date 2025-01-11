@@ -1,11 +1,11 @@
 import React from 'react';
 import { View } from 'react-native';
 import type { Meta, StoryObj } from '@storybook/react';
-import SwapListItemSheet from './SwapListItemSheet';
+import CrossChainSwapListItemSheet from './CrossChainSwapListItemSheet';
 import { zeroAddress } from 'viem';
 import {
   HistoryItemType,
-  SwapHistoryItem,
+  CrossChainSwapHistoryItem,
   Token,
   TokenAmount,
 } from '@raylac/shared';
@@ -30,8 +30,8 @@ const mockAmount: TokenAmount = {
   tokenPriceUsd: 1.0,
 };
 
-const mockSwap: SwapHistoryItem = {
-  type: HistoryItemType.SWAP,
+const mockSwap: CrossChainSwapHistoryItem = {
+  type: HistoryItemType.CROSS_CHAIN_SWAP,
   relayId: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
   address: zeroAddress,
   tokenIn: mockToken,
@@ -49,14 +49,17 @@ const mockSwap: SwapHistoryItem = {
     formatted: '0.5',
     tokenPriceUsd: 2000.0,
   },
-  chainId: 1,
+  fromChainId: 1,
+  toChainId: 1,
   timestamp: new Date().toISOString(),
-  txHash: '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+  inTxHash:
+    '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+  outTxHash: '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef12345678',
 };
 
 const meta = {
-  title: 'SwapListItemSheet',
-  component: SwapListItemSheet,
+  title: 'CrossChainSwapListItemSheet',
+  component: CrossChainSwapListItemSheet,
   args: {
     swap: mockSwap,
     onClose: () => {},
@@ -68,7 +71,7 @@ const meta = {
       </View>
     ),
   ],
-} satisfies Meta<typeof SwapListItemSheet>;
+} satisfies Meta<typeof CrossChainSwapListItemSheet>;
 
 export default meta;
 

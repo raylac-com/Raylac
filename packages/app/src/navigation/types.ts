@@ -33,6 +33,13 @@ export type RootTabsParamsList = {
           tokenOut: Token;
           inputAmount: TokenAmount;
           outputAmount: TokenAmount;
+          chainId: number;
+          requestId: Hex;
+        };
+        pendingCrossChainSwap?: {
+          address: Hex;
+          tokenIn: Token;
+          tokenOut: Token;
           fromChainId: number;
           toChainId: number;
           requestId: Hex;

@@ -3,14 +3,17 @@ import { View } from 'react-native';
 import StyledText from '../StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import TokenLogo from '../TokenLogo/TokenLogo';
-import { SwapHistoryItem } from '@raylac/shared';
+import { CrossChainSwapHistoryItem } from '@raylac/shared';
 import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
-import SwapListItemSheet from '../SwapListItemSheet/SwapListItemSheet';
 import { useState } from 'react';
 import PendingIndicator from '../PendingIndicator/PendingIndicator';
+import CrossChainSwapListItemSheet from '../CrossChainSwapListItemSheet/CrossChainSwapListItemSheet';
 
-const SwapListItem = (props: { swap: SwapHistoryItem; isPending: boolean }) => {
+const CrossChainSwapListItem = (props: {
+  swap: CrossChainSwapHistoryItem;
+  isPending: boolean;
+}) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   return (
@@ -35,7 +38,7 @@ const SwapListItem = (props: { swap: SwapHistoryItem; isPending: boolean }) => {
             <View style={{ marginTop: -24 }}>
               <TokenLogoWithChain
                 logoURI={props.swap.tokenOut.logoURI}
-                chainId={props.swap.chainId}
+                chainId={props.swap.toChainId}
                 size={42}
               />
             </View>
@@ -91,7 +94,7 @@ const SwapListItem = (props: { swap: SwapHistoryItem; isPending: boolean }) => {
         </View>
       </FeedbackPressable>
       {isSheetOpen && (
-        <SwapListItemSheet
+        <CrossChainSwapListItemSheet
           swap={props.swap}
           onClose={() => setIsSheetOpen(false)}
         />
@@ -100,4 +103,4 @@ const SwapListItem = (props: { swap: SwapHistoryItem; isPending: boolean }) => {
   );
 };
 
-export default SwapListItem;
+export default CrossChainSwapListItem;
