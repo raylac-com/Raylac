@@ -20,10 +20,17 @@
   },
   "Addresses": {
     "noAddresses": "No addresses",
-    "title": "Addresses"
+    "title": "Addresses",
+    "default": "Default",
+    "supportedChains": "Supported chains"
   },
   "Advanced": {
-    "title": "Advanced"
+    "title": "Advanced",
+    "rpcUrl": "RPC URL {{url}}",
+    "updateChannel": "Update channel: {{channel}}",
+    "runtimeVersion": "Runtime version: {{version}}",
+    "updateId": "Updated ID: {{id}}",
+    "updateAvailable": "Update available: {{available}}"
   },
   "BackupAccount": {
     "backupWarning1": "Anyone who has your backup phrase can access and spend your balance.",
@@ -73,7 +80,15 @@
     "title": "Home",
     "assets": "Assets",
     "askForAngel": "Find angels",
-    "angelRequests": "Angel requests"
+    "angelRequests": "Angel requests",
+    "noTokens": "No tokens found",
+    "accountBalance": "${{balance}}"
+  },
+  "CreateAddress": {
+    "title": "Create Address",
+    "name": "Name",
+    "derivingFrom": "Deriving from {{address}}",
+    "new": "New"
   },
   "Receive": {
     "backToHome": "Back to home",
@@ -226,5 +241,30 @@
     "next": "Next",
     "signUpBonus": "Sign up bonus",
     "usd": "USD"
+  },
+  "ImportAccount": {
+    "title": "Import Account",
+    "importAccount": "Import {{type}}"
+  },
+  "Swap": {
+    "title": "Swap",
+    "totalFee": "Total fee",
+    "totalFeeAmount": "{{amount}} USD",
+    "noTokensFound": "No tokens found",
+    "noTokenBalance": "No {{symbol}} balance found on supported chains for {{address}}"
+  },
+  "Send": {
+    "title": "Send",
+    "balance": "Balance",
+    "balanceAmount": "${{amount}}",
+    "gas": "Gas",
+    "gasAmount": "${{amount}} ({{eth}} ETH)",
+    "totalFee": "Total fee",
+    "totalFeeAmount": "${{amount}}",
+    "availableGas": "Available gas",
+    "availableGasAmount": "${{amount}} ({{eth}} ETH)",
+    "max": "MAX",
+    "recipientReceivesOn": "Recipient receives on",
+    "switchTo": "Switch to {{mode}}"
   }
 }

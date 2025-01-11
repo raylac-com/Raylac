@@ -3,6 +3,7 @@ import StyledButton from '@/components/StyledButton/StyledButton';
 import StyledText from '@/components/StyledText/StyledText';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import colors from '@/lib/styles/colors';
+import { useTranslation } from 'react-i18next';
 import fontSizes from '@/lib/styles/fontSizes';
 import { shortenAddress } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
@@ -75,14 +76,15 @@ const ChainDetail = ({
   chainId: number;
   onSelectPress: () => void;
 }) => {
+  const { t } = useTranslation();
   return (
     <FeedbackPressable
       style={{ flexDirection: 'row', justifyContent: 'space-between' }}
       onPress={onSelectPress}
     >
-      <StyledText
-        style={{ color: colors.subbedText }}
-      >{`Recipient receives on`}</StyledText>
+      <StyledText style={{ color: colors.subbedText }}>
+        {t('Send.recipientReceivesOn')}
+      </StyledText>
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 2 }}
       >
@@ -100,23 +102,26 @@ const BalanceDetail = ({
   balance: TokenAmount | undefined;
   onMaxPress: () => void;
 }) => {
+  const { t } = useTranslation();
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-      <StyledText style={{ color: colors.subbedText }}>{`Balance`}</StyledText>
+      <StyledText style={{ color: colors.subbedText }}>
+        {t('Send.balance')}
+      </StyledText>
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
       >
         {balance ? (
           <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-            {`$${balance.usdValueFormatted}`}
+            {t('Send.balanceAmount', { amount: balance.usdValueFormatted })}
           </StyledText>
         ) : (
           <Skeleton style={{ width: 100, height: 20 }} />
         )}
         <FeedbackPressable onPress={onMaxPress}>
-          <StyledText
-            style={{ color: colors.subbedText, fontWeight: 'bold' }}
-          >{`MAX`}</StyledText>
+          <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
+            {t('Send.max')}
+          </StyledText>
         </FeedbackPressable>
       </View>
     </View>
@@ -130,13 +135,19 @@ const GasInfo = ({
   gas: TokenAmount;
   isFetchingGasInfo: boolean;
 }) => {
+  const { t } = useTranslation();
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-      <StyledText style={{ color: colors.subbedText }}>{`Gas`}</StyledText>
+      <StyledText style={{ color: colors.subbedText }}>
+        {t('Send.gas')}
+      </StyledText>
       {isFetchingGasInfo && <Skeleton style={{ width: 100, height: 20 }} />}
       {gas && (
         <StyledText style={{ color: colors.subbedText }}>
-          {`$${gas.usdValueFormatted} (${gas.formatted} ETH)`}
+          {t('Send.gasAmount', {
+            amount: gas.usdValueFormatted,
+            eth: gas.formatted,
+          })}
         </StyledText>
       )}
     </View>
@@ -150,6 +161,7 @@ const BridgeFeeInfo = ({
   bridgeSendData: BuildBridgeSendReturnType | undefined;
   isLoading: boolean;
 }) => {
+  const { t } = useTranslation();
   const [isFeeDetailsSheetOpen, setIsFeeDetailsSheetOpen] = useState(false);
 
   return (
@@ -158,16 +170,16 @@ const BridgeFeeInfo = ({
         style={{ flexDirection: 'row', justifyContent: 'space-between' }}
         onPress={() => setIsFeeDetailsSheetOpen(true)}
       >
-        <StyledText
-          style={{ color: colors.subbedText }}
-        >{`Total fee`}</StyledText>
+        <StyledText style={{ color: colors.subbedText }}>
+          {t('Send.totalFee')}
+        </StyledText>
         {isLoading && <Skeleton style={{ width: 100, height: 20 }} />}
         {bridgeSendData && (
           <View
             style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
           >
             <StyledText style={{ color: colors.subbedText }}>
-              {`$${bridgeSendData.totalFeeUsd}`}
+              {t('Send.totalFeeAmount', { amount: bridgeSendData.totalFeeUsd })}
             </StyledText>
             <Feather name="chevron-right" size={16} color={colors.border} />
           </View>
