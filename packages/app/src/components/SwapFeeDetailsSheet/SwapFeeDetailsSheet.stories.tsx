@@ -10,6 +10,7 @@ import {
 
 const mockQuote: GetSingleInputSwapQuoteReturnType = {
   approveStep: {
+    id: 'approve',
     tx: {
       data: '0x095ea7b300000000000000000000000077a917df7a084b7b3e43517ae28373c2a549262500000000000000000000000000000000000000000000000000000000000f4240',
       to: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
