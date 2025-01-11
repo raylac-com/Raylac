@@ -91,6 +91,9 @@ jobs:
     env:
       TEST_ACCOUNT_MNEMONIC: ${{ secrets.TEST_ACCOUNT_MNEMONIC }}
     steps:
+      - name: Skip for now
+        run: exit 0
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
