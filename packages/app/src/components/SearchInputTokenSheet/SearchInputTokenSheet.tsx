@@ -1,17 +1,16 @@
-import Entypo from '@expo/vector-icons/Entypo';
+import Feather from '@expo/vector-icons/Feather';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { TokenAmount, Token } from '@raylac/shared';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { View } from 'react-native';
 import {
   BottomSheetFlatList,
   BottomSheetModal,
   BottomSheetTextInput,
 } from '@gorhom/bottom-sheet';
 import TokenLogo from '../TokenLogo/TokenLogo';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useTokenBalancePerAddress from '@/hooks/useTokenBalancePerAddress';
 import { Hex } from 'viem/_types/types/misc';
@@ -77,7 +76,7 @@ const TokenListItem = ({
           justifyContent: 'space-between',
         }}
       >
-        <Pressable
+        <FeedbackPressable
           style={{
             flexDirection: 'row',
             justifyContent: 'space-between',
@@ -110,11 +109,7 @@ const TokenListItem = ({
               >
                 <StyledText>{token.name}</StyledText>
                 {token.verified && (
-                  <Ionicons
-                    name="shield-checkmark"
-                    size={18}
-                    color={colors.green}
-                  />
+                  <Feather name="check-circle" size={18} color={colors.green} />
                 )}
               </View>
               <StyledText style={{ color: colors.border }}>
@@ -135,13 +130,13 @@ const TokenListItem = ({
         */}
           </View>
           {isMultiChain && (
-            <Entypo
+            <Feather
               name={isExpanded ? 'chevron-up' : 'chevron-down'}
               size={24}
               color={colors.border}
             />
           )}
-        </Pressable>
+        </FeedbackPressable>
       </View>
       {isExpanded && (
         <View style={{ marginBottom: 32, rowGap: 12 }}>
@@ -213,10 +208,11 @@ const SearchInputTokenSheet = ({
     addresses: address ? [address] : [],
   });
 
-  const tokenList =
-    tokenBalancePerAddress && tokenBalancePerAddress.length > 0
+  const tokenList = tokenBalancePerAddress
+    ? tokenBalancePerAddress.length > 0
       ? tokenBalancePerAddress[0].tokenBalances
-      : [undefined];
+      : []
+    : [undefined];
 
   const tokenListSearchResults = useMemo(() => {
     return searchText

@@ -10,12 +10,28 @@ import { getPrivateKey } from '@/lib/key';
 import { privateKeyToAccount } from 'viem/accounts';
 import { Hex } from 'viem';
 import { getQueryKey } from '@trpc/react-query';
+import { useEffect } from 'react';
+import Toast from 'react-native-toast-message';
 
 const useBridgeSend = () => {
   const queryClient = useQueryClient();
-  const { mutateAsync: sendBridgeTx } = trpc.sendBridgeTx.useMutation();
+  const { mutateAsync: sendBridgeTx, error: sendBridgeTxError } =
+    trpc.sendBridgeTx.useMutation({
+      throwOnError: false,
+    });
+
+  useEffect(() => {
+    if (sendBridgeTxError) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: sendBridgeTxError.message,
+      });
+    }
+  }, [sendBridgeTxError]);
 
   return useMutation({
+    throwOnError: false,
     mutationFn: async ({
       sendData,
       chainId,

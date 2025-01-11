@@ -1,13 +1,8 @@
 import StyledText from '@/components/StyledText/StyledText';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import Feather from '@expo/vector-icons/Feather';
 import colors from '@/lib/styles/colors';
-import {
-  formatAmount,
-  SupportedTokensReturnType,
-  SwapOutput,
-  SwapInput,
-} from '@raylac/shared';
+import { formatAmount, Token, SwapOutput, SwapInput } from '@raylac/shared';
 import { View } from 'react-native';
 
 const SwapPathListItem = ({
@@ -17,9 +12,9 @@ const SwapPathListItem = ({
   outputChainId,
   amount,
 }: {
-  inputToken: SupportedTokensReturnType[number];
+  inputToken: Token;
   inputChainId: number;
-  outputToken: SupportedTokensReturnType[number];
+  outputToken: Token;
   outputChainId: number;
   amount: bigint;
 }) => {
@@ -45,7 +40,7 @@ const SwapPathListItem = ({
           {formatAmount(amount.toString(), inputToken.decimals)}{' '}
           {inputToken.symbol}
         </StyledText>
-        <AntDesign name="arrowright" size={24} color={colors.subbedText} />
+        <Feather name="arrow-right" size={24} color={colors.subbedText} />
         <TokenLogoWithChain
           logoURI={outputToken.logoURI}
           chainId={outputChainId}

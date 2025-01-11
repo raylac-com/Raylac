@@ -11,7 +11,7 @@ import {
   BottomSheetTextInput,
 } from '@gorhom/bottom-sheet';
 import TokenLogo from '../TokenLogo/TokenLogo';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import Feather from '@expo/vector-icons/Feather';
 import { getChainIcon } from '@/lib/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { trpc } from '@/lib/trpc';
@@ -51,11 +51,7 @@ const TokenListItem = ({
           >
             <StyledText>{token.name}</StyledText>
             {token.verified && (
-              <Ionicons
-                name="shield-checkmark"
-                size={18}
-                color={colors.green}
-              />
+              <Feather name="check-circle" size={18} color={colors.green} />
             )}
           </View>
           <StyledText style={{ color: colors.border }}>

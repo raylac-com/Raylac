@@ -1,7 +1,7 @@
-import { getChainIcon, shortenAddress } from '@/lib/utils';
+import { shortenAddress } from '@/lib/utils';
+import ChainLogo from '@/components/ChainLogo/ChainLogo';
 import { getChainFromId } from '@raylac/shared';
-import { Image } from 'expo-image';
-import Entypo from '@expo/vector-icons/Entypo';
+import Feather from '@expo/vector-icons/Feather';
 import { supportedChains } from '@raylac/shared';
 import { useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
@@ -23,7 +23,7 @@ const ChainListItem = ({
       style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
       onPress={onPress}
     >
-      <Image source={getChainIcon(chainId)} style={{ width: 24, height: 24 }} />
+      <ChainLogo chainId={chainId} size={16} />
       <StyledText>{getChainFromId(chainId).name}</StyledText>
     </Pressable>
   );
@@ -86,7 +86,7 @@ const AddressSelector = ({ address, setAddress }: AddressSelectorProps) => {
         onPress={() => setIsAddressSheetOpen(true)}
       >
         <StyledText>{shortenAddress(address)}</StyledText>
-        <Entypo name="chevron-down" size={20} color={colors.border} />
+        <Feather name="chevron-down" size={20} color={colors.border} />
       </Pressable>
       <SelectAddressSheet
         open={isAddressSheetOpen}

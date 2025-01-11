@@ -1,8 +1,10 @@
-import { ETH } from '@raylac/shared';
+import { ETH, MOCK_TOKEN_AMOUNT } from '@raylac/shared';
 import {
   BuildBridgeSendReturnType,
   BuildBridgeSendRequestBody,
 } from '@raylac/shared';
+import { base } from 'viem/op-stack';
+import { arbitrum } from 'viem/chains';
 
 const buildBridgeSend = async (
   _arg: BuildBridgeSendRequestBody
@@ -23,36 +25,18 @@ const buildBridgeSend = async (
       },
       token: ETH,
     },
-    originChainGas: {
-      amount: '588940753125',
-      formatted: '0.00000059',
-      usdValue: '0.001980207199730840160523125',
-      usdValueFormatted: '0.0020',
-      tokenPriceUsd: 3362.3198755114,
-    },
-    relayerFeeChainId: 8453,
+    originChainGas: MOCK_TOKEN_AMOUNT,
+    relayerGasChainId: base.id,
+    relayerGasToken: ETH,
+    relayerGas: MOCK_TOKEN_AMOUNT,
     relayerServiceFeeToken: ETH,
-    relayerServiceFee: {
-      amount: '200675021600000',
-      formatted: '0.00020',
-      usdValue: '0.67473361364435950604624',
-      usdValueFormatted: '0.67',
-      tokenPriceUsd: 3362.3198755114,
-    },
-    amountIn: {
-      amount: '1000000000000000000',
-      formatted: '1',
-      usdValue: '3362.3198755114',
-      usdValueFormatted: '3,362',
-      tokenPriceUsd: 3362.3198755114,
-    },
-    amountOut: {
-      amount: '999799324978400000',
-      formatted: '1',
-      usdValue: '3361.64514189775564049395376',
-      usdValueFormatted: '3,362',
-      tokenPriceUsd: 3362.3198755114,
-    },
+    relayerServiceFee: MOCK_TOKEN_AMOUNT,
+    relayerServiceFeeChainId: arbitrum.id,
+    amountIn: MOCK_TOKEN_AMOUNT,
+    amountOut: MOCK_TOKEN_AMOUNT,
+    fromChainId: base.id,
+    toChainId: arbitrum.id,
+    totalFeeUsd: '0.01',
   };
 
   return mockData;

@@ -1,11 +1,13 @@
-import { Pressable, TextInput, View } from 'react-native';
+import { TextInput, View } from 'react-native';
+import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { SupportedTokensReturnType } from '@raylac/shared';
+import { Token } from '@raylac/shared';
+import Feather from '@expo/vector-icons/Feather';
 import StyledText from '@/components/StyledText/StyledText';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
+import Toast from 'react-native-toast-message';
 
 const SwapAmountInput = ({
   selectedToken,
@@ -14,17 +16,19 @@ const SwapAmountInput = ({
   amount,
   setAmount,
   isLoadingAmount,
+  canEnterAmount,
 }: {
-  selectedToken: SupportedTokensReturnType[number] | null;
+  selectedToken: Token | null;
   chainId: number | null;
   onSelectTokenPress: () => void;
   isLoadingAmount: boolean;
   amount: string;
   setAmount: (value: string) => void;
+  canEnterAmount: boolean;
 }) => {
   return (
     <View>
-      <Pressable
+      <FeedbackPressable
         style={{
           flexDirection: 'row',
           alignItems: 'center',
@@ -34,22 +38,24 @@ const SwapAmountInput = ({
         disabled={!!selectedToken}
         onPress={onSelectTokenPress}
       >
-        {selectedToken ? (
-          <TokenLogoWithChain
-            chainId={chainId}
-            logoURI={selectedToken.logoURI}
-            size={34}
-          />
-        ) : (
-          <View
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: 34,
-              backgroundColor: '#D9D9D9',
-            }}
-          />
-        )}
+        <FeedbackPressable onPress={onSelectTokenPress}>
+          {selectedToken ? (
+            <TokenLogoWithChain
+              chainId={chainId}
+              logoURI={selectedToken.logoURI}
+              size={34}
+            />
+          ) : (
+            <View
+              style={{
+                width: 34,
+                height: 34,
+                borderRadius: 34,
+                backgroundColor: '#D9D9D9',
+              }}
+            />
+          )}
+        </FeedbackPressable>
         {isLoadingAmount ? (
           <Skeleton
             style={{
@@ -62,7 +68,16 @@ const SwapAmountInput = ({
           <TextInput
             keyboardType="numeric"
             value={selectedToken ? amount : ''}
-            onChangeText={setAmount}
+            onChangeText={text => {
+              if (canEnterAmount) {
+                setAmount(text);
+              } else {
+                Toast.show({
+                  type: 'error',
+                  text1: 'Cannot set output amount',
+                });
+              }
+            }}
             placeholder={'0.00'}
             style={{
               fontSize: fontSizes.twoXLarge,
@@ -83,7 +98,7 @@ const SwapAmountInput = ({
             </StyledText>
           </View>
         )}
-        <Pressable
+        <FeedbackPressable
           style={{
             flexDirection: 'row',
             alignItems: 'center',
@@ -98,13 +113,9 @@ const SwapAmountInput = ({
           >
             {selectedToken ? selectedToken.symbol : ''}
           </StyledText>
-          <Ionicons
-            name="chevron-expand-outline"
-            size={24}
-            color={colors.subbedText}
-          />
-        </Pressable>
-      </Pressable>
+          <Feather name="chevron-down" size={24} color={colors.subbedText} />
+        </FeedbackPressable>
+      </FeedbackPressable>
     </View>
   );
 };

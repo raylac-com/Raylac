@@ -56,7 +56,6 @@ export const getAccountFromMnemonic = async ({
 };
 
 export const saveUserAddress = async (userAddress: UserAddress) => {
-  // TODO: Check that the address is checksummed
   if (userAddress.address !== getAddress(userAddress.address)) {
     throw new Error(`Address must be checksummed: ${userAddress.address}`);
   }
@@ -111,9 +110,7 @@ export const savePrivateKey = async ({
   address: Hex;
   privKey: Hex;
 }) => {
-  await SecureStore.setItem(buildPrivateKeyStorageKey(address), privKey, {
-    requireAuthentication: REQUIRE_AUTHENTICATION,
-  });
+  await SecureStore.setItem(buildPrivateKeyStorageKey(address), privKey);
 };
 
 export const getPrivateKey = async (address: Hex): Promise<Hex | null> => {
@@ -138,9 +135,7 @@ export const saveMnemonic = async ({
   address: Hex;
   mnemonic: string;
 }) => {
-  await SecureStore.setItem(buildMnemonicStorageKey(address), mnemonic, {
-    requireAuthentication: REQUIRE_AUTHENTICATION,
-  });
+  await SecureStore.setItem(buildMnemonicStorageKey(address), mnemonic);
 };
 
 /**

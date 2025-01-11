@@ -1,4 +1,4 @@
-import Entypo from '@expo/vector-icons/Entypo';
+import Feather from '@expo/vector-icons/Feather';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import StyledText from '@/components/StyledText/StyledText';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
@@ -32,6 +32,12 @@ const Settings = () => {
     navigation.navigate('Advanced');
   };
 
+  /** 
+  const onLanguagePress = () => {
+    navigation.navigate('SelectLanguage');
+  };
+  */
+
   return (
     <View
       style={{
@@ -44,9 +50,16 @@ const Settings = () => {
       <View style={{ flexDirection: 'column', gap: 28 }}>
         <SettingsListItem
           title="Advanced"
-          icon={<Entypo name="rocket" size={24} color={colors.border} />}
+          icon={<Feather name="zap" size={24} color={colors.border} />}
           onPress={onAdvancedPress}
         />
+        {/** 
+        <SettingsListItem
+          title="Language"
+          icon={<Feather name="globe" size={24} color={colors.border} />}
+          onPress={onLanguagePress}
+        />
+        */}
       </View>
     </View>
   );

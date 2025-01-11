@@ -2,7 +2,7 @@ import { Hex } from 'viem';
 import {
   AlchemyTokenPriceResponse,
   Token,
-  CrossChainSwapStep,
+  DepositStep,
   ApproveStep,
   SwapStep,
   SignedSingleInputSwapStep,
@@ -98,10 +98,17 @@ export type GetSingleInputSwapQuoteReturnType = {
   swapStep: SwapStep;
   amountIn: TokenAmount;
   amountOut: TokenAmount;
-  relayerFeeToken: Token;
+  minimumAmountOut: TokenAmount;
+  relayerGas: TokenAmount;
+  relayerGasToken: Token;
+  relayerServiceFee: TokenAmount;
+  relayerServiceFeeToken: Token;
   originChainGas: TokenAmount;
-  relayerFee: TokenAmount;
   relayRequestId: Hex;
+  totalFeeUsd: string;
+  fromChainId: number;
+  toChainId: number;
+  slippagePercent: number;
 };
 
 export interface SubmitSingleInputSwapRequestBody {
@@ -124,6 +131,8 @@ export enum HistoryItemType {
   TRANSFER = 'transfer',
   BRIDGE_TRANSFER = 'bridge_transfer',
   SWAP = 'swap',
+  CROSS_CHAIN_SWAP = 'cross_chain_swap',
+  BRIDGE = 'bridge',
 }
 
 export type TransferHistoryItem = {
@@ -154,9 +163,36 @@ export type BridgeTransferHistoryItem = {
   outTxHash: Hex;
 };
 
+export type BridgeHistoryItem = {
+  relayId: string;
+  type: HistoryItemType.BRIDGE;
+  address: Hex;
+  amountIn: TokenAmount;
+  amountOut: TokenAmount;
+  token: Token;
+  fromChainId: number;
+  toChainId: number;
+  timestamp: string;
+  inTxHash: Hex;
+  outTxHash: Hex;
+};
+
 export type SwapHistoryItem = {
   relayId: string;
   type: HistoryItemType.SWAP;
+  address: Hex;
+  amountIn: TokenAmount;
+  amountOut: TokenAmount;
+  tokenIn: Token;
+  tokenOut: Token;
+  chainId: number;
+  timestamp: string;
+  txHash: Hex;
+};
+
+export type CrossChainSwapHistoryItem = {
+  relayId: string;
+  type: HistoryItemType.CROSS_CHAIN_SWAP;
   address: Hex;
   amountIn: TokenAmount;
   amountOut: TokenAmount;
@@ -172,7 +208,9 @@ export type SwapHistoryItem = {
 export type HistoryItem =
   | TransferHistoryItem
   | BridgeTransferHistoryItem
-  | SwapHistoryItem;
+  | SwapHistoryItem
+  | CrossChainSwapHistoryItem
+  | BridgeHistoryItem;
 
 export type GetHistoryReturnType = HistoryItem[];
 
@@ -197,8 +235,10 @@ export interface BuildBridgeSendRequestBody {
 }
 
 export type BuildBridgeSendReturnType = {
+  fromChainId: number;
+  toChainId: number;
   relayRequestId: Hex;
-  steps: CrossChainSwapStep[];
+  steps: DepositStep[];
   transfer: {
     from: Hex;
     to: Hex;
@@ -208,9 +248,13 @@ export type BuildBridgeSendReturnType = {
   originChainGas: TokenAmount;
   relayerServiceFeeToken: Token;
   relayerServiceFee: TokenAmount;
+  relayerGas: TokenAmount;
+  relayerGasToken: Token;
   amountIn: TokenAmount;
   amountOut: TokenAmount;
-  relayerFeeChainId: number;
+  relayerServiceFeeChainId: number;
+  relayerGasChainId: number;
+  totalFeeUsd: string;
 };
 
 export type GetTokenUsdPriceReturnType = number | null;

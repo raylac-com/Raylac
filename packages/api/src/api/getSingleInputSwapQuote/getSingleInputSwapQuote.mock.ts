@@ -3,9 +3,11 @@ import {
   ETH,
   GetSingleInputSwapQuoteRequestBody,
   GetSingleInputSwapQuoteReturnType,
+  MOCK_TOKEN_AMOUNT,
   SwapStep,
 } from '@raylac/shared';
 import { Hex } from 'viem';
+import { arbitrum, base } from 'viem/chains';
 
 const getSingleInputSwapQuoteMock = async (
   _arg: GetSingleInputSwapQuoteRequestBody
@@ -39,6 +41,7 @@ const getSingleInputSwapQuoteMock = async (
   };
 
   return {
+    totalFeeUsd: '0.12',
     approveStep: mockApproveStep,
     swapStep: mockSwapStep,
     originChainGas: {
@@ -62,8 +65,16 @@ const getSingleInputSwapQuoteMock = async (
       usdValueFormatted: '1,980',
       tokenPriceUsd: 2000,
     },
-    relayerFeeToken: ETH,
-    relayerFee: {
+    relayerServiceFeeToken: ETH,
+    relayerServiceFee: {
+      amount: '1000000000000000',
+      formatted: '0.001',
+      usdValue: '1',
+      usdValueFormatted: '1',
+      tokenPriceUsd: 1000,
+    },
+    relayerGasToken: ETH,
+    relayerGas: {
       amount: '1000000000000000',
       formatted: '0.001',
       usdValue: '2',
@@ -72,6 +83,10 @@ const getSingleInputSwapQuoteMock = async (
     },
     relayRequestId:
       '0x9876543210987654321098765432109876543210987654321098765432109876' as Hex,
+    fromChainId: base.id,
+    toChainId: arbitrum.id,
+    minimumAmountOut: MOCK_TOKEN_AMOUNT,
+    slippagePercent: 1,
   };
 };
 

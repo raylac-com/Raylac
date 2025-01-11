@@ -1,6 +1,6 @@
 import StyledText from '@/components/StyledText/StyledText';
 import { getChainIcon, triggerHapticFeedback } from '@/lib/utils';
-import { supportedChains } from '@raylac/shared';
+import { getChainFromId, Token } from '@raylac/shared';
 import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Chain } from 'viem';
@@ -30,11 +30,13 @@ const ChainListItem = ({ chain }: { chain: Chain }) => {
 const SelectChainSheet = ({
   title,
   open,
+  token,
   onSelect,
   onClose,
 }: {
   title: string;
   open: boolean;
+  token: Token;
   onSelect: (chain: Chain) => void;
   onClose: () => void;
 }) => {
@@ -84,16 +86,16 @@ const SelectChainSheet = ({
         </StyledText>
       </View>
       <BottomSheetFlatList
-        data={supportedChains}
+        data={token.addresses.map(address => address.chainId)}
         contentContainerStyle={{ rowGap: 16 }}
         renderItem={({ item }) => (
           <Pressable
             onPress={() => {
               triggerHapticFeedback();
-              onSelect(item);
+              onSelect(getChainFromId(item));
             }}
           >
-            <ChainListItem chain={item} />
+            <ChainListItem chain={getChainFromId(item)} />
           </Pressable>
         )}
       />

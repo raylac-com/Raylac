@@ -11,8 +11,10 @@ import { useEffect, useState } from 'react';
 import { TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Hex } from 'viem';
+import { useTranslation } from 'react-i18next';
 
 const CreateAddress = () => {
+  const { t } = useTranslation('CreateAddress');
   const insets = useSafeAreaInsets();
   const [name, setName] = useState('');
   const navigation = useTypedNavigation();
@@ -79,12 +81,14 @@ const CreateAddress = () => {
       <View>
         <StyledText>
           {mnemonicGenesisAddress
-            ? `Deriving from ${shortenAddress(mnemonicGenesisAddress)}`
-            : 'New'}
+            ? t('CreateAddress.derivingFrom', {
+                address: shortenAddress(mnemonicGenesisAddress),
+              })
+            : t('CreateAddress.new')}
         </StyledText>
       </View>
       <View>
-        <StyledText>{`Name`}</StyledText>
+        <StyledText>{t('CreateAddress.name')}</StyledText>
         <TextInput
           value={name}
           onChangeText={setName}

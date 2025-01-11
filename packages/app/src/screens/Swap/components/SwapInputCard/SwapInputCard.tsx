@@ -2,7 +2,7 @@ import { Pressable, TextInput, View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import SwapAmountInput from '../SwapAmountInput';
 import { formatUnits, Hex } from 'viem';
-import { formatAmount, SupportedTokensReturnType } from '@raylac/shared';
+import { formatAmount, Token } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import Skeleton from '@/components/Skeleton/Skeleton';
@@ -21,8 +21,8 @@ const SwapInputCard = ({
   setChainId,
   address,
 }: {
-  token: SupportedTokensReturnType[number] | null;
-  setToken: (value: SupportedTokensReturnType[number] | null) => void;
+  token: Token | null;
+  setToken: (value: Token | null) => void;
   amount: string;
   setAmount: (value: string) => void;
   balance: bigint | undefined;
@@ -111,6 +111,7 @@ const SwapInputCard = ({
           setUserInputMode('TOKEN');
           setAmount(value);
         }}
+        canEnterAmount={true}
       />
       {token && (
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

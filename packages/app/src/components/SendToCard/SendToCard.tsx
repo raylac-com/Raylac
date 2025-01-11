@@ -3,7 +3,7 @@ import StyledText from '../StyledText/StyledText';
 import { Hex } from 'viem';
 import colors from '@/lib/styles/colors';
 import { shortenAddress } from '@/lib/utils';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import Feather from '@expo/vector-icons/Feather';
 
 const SendToCard = ({
   toAddress,
@@ -21,7 +21,7 @@ const SendToCard = ({
         justifyContent: alignCenter ? 'center' : 'flex-start',
       }}
     >
-      <FontAwesome name="send" size={18} color={colors.border} />
+      <Feather name="send" size={18} color={colors.border} />
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
       >

@@ -28,9 +28,7 @@ export interface RelayExecutionStepItem {
   };
 }
 
-export interface CrossChainSwapStep {
-  originChainId: number;
-  destinationChainId: number;
+export interface DepositStep {
   id: 'deposit' | 'approve';
   tx: {
     to: Hex;
@@ -240,7 +238,7 @@ export interface Token {
   decimals: number;
   logoURI: string;
   verified: boolean;
-  color?: string;
+  isKnownToken?: boolean;
   addresses: {
     chainId: number;
     address: Hex;

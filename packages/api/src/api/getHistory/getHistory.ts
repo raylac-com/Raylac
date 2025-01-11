@@ -7,6 +7,8 @@ import {
   Token,
   HistoryItemType,
   BridgeTransferHistoryItem,
+  CrossChainSwapHistoryItem,
+  BridgeHistoryItem,
 } from '@raylac/shared';
 import { getAddress, Hex, parseUnits, zeroAddress } from 'viem';
 import { getAlchemyClient } from '../../lib/alchemy';
@@ -48,7 +50,13 @@ const mapAsRelayTx = async ({
 }: {
   txHash: Hex;
   address: Hex;
-}): Promise<BridgeTransferHistoryItem | SwapHistoryItem | null> => {
+}): Promise<
+  | BridgeTransferHistoryItem
+  | BridgeHistoryItem
+  | SwapHistoryItem
+  | CrossChainSwapHistoryItem
+  | null
+> => {
   const relayRequest = await relayGetRequest({ txHash });
 
   if (!relayRequest) {
@@ -126,43 +134,82 @@ const mapAsRelayTx = async ({
   });
 
   if (tokenIn.id === tokenOut.id) {
-    // Map as a transfer
-    const direction = sender === address ? 'outgoing' : 'incoming';
+    if (sender === recipient && fromChainId !== toChainId) {
+      // Map as a brdige
 
-    const transferItem: BridgeTransferHistoryItem = {
+      const bridgeItem: BridgeHistoryItem = {
+        relayId: relayRequest.id,
+        address: sender,
+        amountIn: amountInFormatted,
+        amountOut: amountOutFormatted,
+        token: tokenIn,
+        fromChainId: fromChainId,
+        toChainId: toChainId,
+        timestamp: relayRequest.createdAt,
+        type: HistoryItemType.BRIDGE,
+        inTxHash: inTx.hash,
+        outTxHash: outTx.hash,
+      };
+
+      return bridgeItem;
+    } else {
+      // Map as transfer
+      const direction = sender === address ? 'outgoing' : 'incoming';
+
+      const transferItem: BridgeTransferHistoryItem = {
+        relayId: relayRequest.id,
+        from: sender,
+        to: recipient,
+        amount: amountInFormatted,
+        token: tokenIn,
+        fromChainId: fromChainId,
+        toChainId: toChainId,
+        timestamp: relayRequest.createdAt,
+        type: HistoryItemType.BRIDGE_TRANSFER,
+        direction,
+        inTxHash: inTx.hash,
+        outTxHash: outTx.hash,
+      };
+
+      return transferItem;
+    }
+  }
+
+  if (fromChainId === toChainId) {
+    // Map as single-chian swap
+    const swapHistoryItem: SwapHistoryItem = {
       relayId: relayRequest.id,
-      from: sender,
-      to: recipient,
-      amount: amountInFormatted,
-      token: tokenIn,
+      type: HistoryItemType.SWAP,
+      address: getAddress(sender),
+      amountIn: amountInFormatted,
+      amountOut: amountOutFormatted,
+      tokenIn: tokenIn,
+      tokenOut: tokenOut,
+      chainId: fromChainId,
+      timestamp: relayRequest.createdAt,
+      txHash: inTx.hash,
+    };
+
+    return swapHistoryItem;
+  } else {
+    // Map as cross-chain swap
+    const swapHistoryItem: CrossChainSwapHistoryItem = {
+      relayId: relayRequest.id,
+      type: HistoryItemType.CROSS_CHAIN_SWAP,
+      address: getAddress(sender),
+      amountIn: amountInFormatted,
+      amountOut: amountOutFormatted,
+      tokenIn: tokenIn,
+      tokenOut: tokenOut,
       fromChainId: fromChainId,
       toChainId: toChainId,
       timestamp: relayRequest.createdAt,
-      type: HistoryItemType.BRIDGE_TRANSFER,
-      direction,
       inTxHash: inTx.hash,
       outTxHash: outTx.hash,
     };
 
-    return transferItem;
+    return swapHistoryItem;
   }
-
-  const swapHistoryItem: SwapHistoryItem = {
-    relayId: relayRequest.id,
-    type: HistoryItemType.SWAP,
-    address: getAddress(sender),
-    amountIn: amountInFormatted,
-    amountOut: amountOutFormatted,
-    tokenIn: tokenIn,
-    tokenOut: tokenOut,
-    fromChainId: fromChainId,
-    toChainId: toChainId,
-    timestamp: relayRequest.createdAt,
-    inTxHash: inTx.hash,
-    outTxHash: outTx.hash,
-  };
-
-  return swapHistoryItem;
 };
 
 const getHistoryOnChain = async ({
@@ -273,22 +320,7 @@ const getHistoryOnChain = async ({
               return transferItem;
             })
         )
-      )
-        .filter(item => item !== null)
-        // Filter out duplicate Relay txs
-        .filter((item, index, self) => {
-          if (item.type === HistoryItemType.TRANSFER) {
-            return true;
-          }
-
-          return (
-            self.findIndex(
-              sw =>
-                (sw as BridgeTransferHistoryItem | SwapHistoryItem).relayId ===
-                item.relayId
-            ) === index
-          );
-        });
+      ).filter(item => item !== null);
 
       return transfers;
     })
@@ -313,16 +345,20 @@ const getHistory = async ({
     .flat()
     // Filter out duplicate Relay txs
     .filter((item, index, self) => {
-      if (
-        item.type !== HistoryItemType.BRIDGE_TRANSFER &&
-        item.type !== HistoryItemType.SWAP
-      ) {
+      if (item.type === HistoryItemType.TRANSFER) {
         return true;
       }
 
       return (
-        (self as (SwapHistoryItem | BridgeTransferHistoryItem)[]).findIndex(
-          sw => sw.relayId === item.relayId
+        self.findIndex(
+          sw =>
+            (
+              sw as
+                | BridgeTransferHistoryItem
+                | SwapHistoryItem
+                | BridgeHistoryItem
+                | CrossChainSwapHistoryItem
+            ).relayId === item.relayId
         ) === index
       );
     });

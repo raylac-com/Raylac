@@ -1,7 +1,7 @@
 import Feather from '@expo/vector-icons/Feather';
 import StyledText from '@/components/StyledText/StyledText';
 import useUserAddresses from '@/hooks/useUserAddresses';
-import { Alert, FlatList, Image, Pressable, View } from 'react-native';
+import { Alert, FlatList, Pressable, View } from 'react-native';
 import React, { useState } from 'react';
 import AddressDetailsSheet from '@/components/AddressDetailsSheet/AddressDetailsSheet';
 import colors from '@/lib/styles/colors';
@@ -10,12 +10,12 @@ import Toast from 'react-native-toast-message';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import useDeleteAddress from '@/hooks/useDeleteAddress';
 import { supportedChains } from '@raylac/shared';
-import { getChainIcon } from '@/lib/utils';
+import ChainLogo from '@/components/ChainLogo/ChainLogo';
 import { UserAddress } from '@/types';
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
+import { useTranslation } from 'react-i18next';
 
 const AddressListItem = ({ address }: { address: UserAddress }) => {
   const { mutateAsync: deleteAddress } = useDeleteAddress();
@@ -90,14 +90,9 @@ const AddressListItem = ({ address }: { address: UserAddress }) => {
           <Pressable onPress={() => setSelectedAddress(address)}>
             <WalletIconAddress address={address.address} />
           </Pressable>
-          {address.isDefault && (
-            <StyledText style={{ color: colors.subbedText }}>
-              {`Default`}
-            </StyledText>
-          )}
         </View>
-        <FontAwesome
-          name="remove"
+        <Feather
+          name="x"
           size={20}
           color={colors.border}
           onPress={onRemovePress}
@@ -115,24 +110,22 @@ const AddressListItem = ({ address }: { address: UserAddress }) => {
 };
 
 const SupportedChains = () => {
+  const { t } = useTranslation('Addresses');
+
   return (
     <View
       style={{
         flexDirection: 'row',
+        justifyContent: 'space-between',
         width: '100%',
-        columnGap: 8,
       }}
     >
       <StyledText style={{ color: colors.subbedText }}>
-        {`Supported chains`}
+        {t('supportedChains')}
       </StyledText>
       <View style={{ flexDirection: 'row', columnGap: 4 }}>
         {supportedChains.map(chain => (
-          <Image
-            key={chain.id}
-            source={getChainIcon(chain.id)}
-            style={{ width: 24, height: 24 }}
-          />
+          <ChainLogo key={chain.id} chainId={chain.id} size={20} />
         ))}
       </View>
     </View>
@@ -140,6 +133,7 @@ const SupportedChains = () => {
 };
 
 const Addresses = () => {
+  const { t } = useTranslation('Addresses');
   const { data: addresses } = useUserAddresses();
   const navigation = useTypedNavigation();
   const insets = useSafeAreaInsets();
@@ -164,7 +158,10 @@ const Addresses = () => {
         renderItem={({ item }) => <AddressListItem address={item} />}
         contentContainerStyle={{ rowGap: 16 }}
       />
-      <StyledButton title="Add address" onPress={onAddAddressPress} />
+      <StyledButton
+        title={t('Addresses.addAddress')}
+        onPress={onAddAddressPress}
+      />
     </View>
   );
 };

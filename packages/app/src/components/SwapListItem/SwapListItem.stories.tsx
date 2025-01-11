@@ -4,7 +4,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import SwapListItem from './SwapListItem';
 import spacing from '@/lib/styles/spacing';
 import { zeroAddress } from 'viem';
-import { base, optimism } from 'viem/chains';
+import { base } from 'viem/chains';
 import { HistoryItemType, USDC } from '@raylac/shared';
 
 const meta = {
@@ -31,11 +31,9 @@ const meta = {
       tokenOut: USDC,
       relayId: '123',
       type: HistoryItemType.SWAP,
-      fromChainId: base.id,
-      toChainId: optimism.id,
+      chainId: base.id,
       timestamp: new Date().toISOString(),
-      inTxHash: '0x123',
-      outTxHash: '0x123',
+      txHash: '0x123',
     },
     isPending: false,
   },

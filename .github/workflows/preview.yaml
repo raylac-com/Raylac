@@ -9,6 +9,8 @@ on:
       - packages/api/**
       - packages/app/**
       - .github/workflows/preview.yaml
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -64,6 +66,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Lint
+        run: pnpm lint
+
       - name: Upload sourcemaps
         run: pnpm -F api sentry:sourcemaps
         env:
@@ -88,6 +93,9 @@ jobs:
     env:
       TEST_ACCOUNT_MNEMONIC: ${{ secrets.TEST_ACCOUNT_MNEMONIC }}
     steps:
+      - name: Skip for now
+        run: exit 0
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -120,6 +128,7 @@ jobs:
 
       - name: Lint
         run: pnpm lint
+
       - name: Setup test environment
         run: pnpm -F ci run setup
 

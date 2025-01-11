@@ -1,12 +1,13 @@
 import { View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import SwapAmountInput from '../SwapAmountInput';
-import { SupportedTokensReturnType, TokenAmount } from '@raylac/shared';
+import { Token, TokenAmount } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import ChainSelector from '@/screens/Swap/components/ChainSelector/ChainSelector';
 import SearchOutputTokenSheet from '@/components/SearchOutputTokenSheet/SearchOutputTokenSheet';
 import Skeleton from '@/components/Skeleton/Skeleton';
+import { formatUnits } from 'viem';
 
 const SwapOutputCard = ({
   token,
@@ -17,8 +18,8 @@ const SwapOutputCard = ({
   chainId,
   setChainId,
 }: {
-  token: SupportedTokensReturnType[number] | null;
-  setToken: (value: SupportedTokensReturnType[number] | null) => void;
+  token: Token | null;
+  setToken: (value: Token | null) => void;
   amount: TokenAmount | undefined;
   setAmount: (value: string) => void;
   isLoadingAmount: boolean;
@@ -50,6 +51,7 @@ const SwapOutputCard = ({
       {showChainSelector && chainId !== null && (
         <ChainSelector
           title="Select output chain"
+          token={token}
           chainId={chainId}
           setChainId={setChainId}
         />
@@ -58,11 +60,16 @@ const SwapOutputCard = ({
         chainId={chainId}
         selectedToken={token}
         isLoadingAmount={isLoadingAmount}
-        amount={amount?.formatted ?? ''}
+        amount={
+          amount && token
+            ? formatUnits(BigInt(amount.amount), token.decimals)
+            : ''
+        }
         setAmount={setAmount}
         onSelectTokenPress={() => {
           setIsOpen(true);
         }}
+        canEnterAmount={false}
       />
       {token && (
         <View

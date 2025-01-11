@@ -51,6 +51,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Lint
+        run: pnpm lint
+
       - name: Upload sourcemaps
         run: pnpm -F api sentry:sourcemaps
         env:

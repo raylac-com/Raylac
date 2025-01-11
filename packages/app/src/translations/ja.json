@@ -19,10 +19,20 @@
   },
   "Addresses": {
     "noAddresses": "アドレスがありません",
-    "title": "アドレス"
+    "title": "アドレス",
+    "supportedChains": "対応チェーン",
+    "addAddress": "アドレスを追加"
+  },
+  "AddressListItem": {
+    "default": "デフォルト"
   },
   "Advanced": {
-    "title": "詳細設定"
+    "title": "詳細設定",
+    "rpcUrl": "RPC URL {{url}}",
+    "updateChannel": "更新チャンネル: {{channel}}",
+    "runtimeVersion": "ランタイムバージョン: {{version}}",
+    "updateId": "更新ID: {{id}}",
+    "updateAvailable": "更新可能: {{available}}"
   },
   "BackupAccount": {
     "backupWarning1": "次に表示される復元フレーズを使用することで、誰でもあなたの残高を使用することができます。",
@@ -70,7 +80,15 @@
     "receive": "受取",
     "seeAll": "全て表示",
     "send": "送金",
-    "title": "ホーム"
+    "title": "ホーム",
+    "noTokens": "トークンがありません",
+    "accountBalance": "${{balance}}"
+  },
+  "CreateAddress": {
+    "title": "アドレスを作成",
+    "name": "名前",
+    "derivingFrom": "{{address}}から派生",
+    "new": "新規"
   },
   "Receive": {
     "backToHome": "ホームに戻る",
@@ -94,7 +112,9 @@
     "writeDownOrSave": "バックアップフレーズをメモしてください。または安全な場所に保存してください。"
   },
   "SelectLanguage": {
-    "title": "言語"
+    "title": "言語",
+    "english": "英語",
+    "japanese": "日本語"
   },
   "SelectRecipient": {
     "searchUser": "ユーザー名、またはETHアドレスで検索",
@@ -154,5 +174,30 @@
     "headerBackTitle": "戻る",
     "next": "次へ",
     "signUpBonus": "新規登録ボーナス"
+  },
+  "ImportAccount": {
+    "title": "アカウントをインポート",
+    "importAccount": "{{type}}をインポート"
+  },
+  "Swap": {
+    "title": "スワップ",
+    "totalFee": "合計手数料",
+    "totalFeeAmount": "{{amount}} USD",
+    "noTokensFound": "トークンが見つかりません",
+    "noTokenBalance": "{{address}}のサポートされているチェーンで{{symbol}}の残高が見つかりません"
+  },
+  "Send": {
+    "title": "送金",
+    "balance": "残高",
+    "balanceAmount": "${{amount}}",
+    "gas": "ガス",
+    "gasAmount": "${{amount}} ({{eth}} ETH)",
+    "totalFee": "合計手数料",
+    "totalFeeAmount": "${{amount}}",
+    "availableGas": "利用可能なガス",
+    "availableGasAmount": "${{amount}} ({{eth}} ETH)",
+    "max": "最大",
+    "recipientReceivesOn": "受取チェーン",
+    "switchTo": "{{mode}}に切り替え"
   }
 }

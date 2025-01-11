@@ -1,7 +1,7 @@
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import useUserAddresses from '@/hooks/useUserAddresses';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import Feather from '@expo/vector-icons/Feather';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 const TopMenuBar = () => {
@@ -24,7 +24,7 @@ const TopMenuBar = () => {
         columnGap: 4,
       }}
     >
-      <Ionicons name="wallet-outline" size={24} color={colors.border} />
+      <Feather name="credit-card" size={24} color={colors.border} />
       <StyledText style={{ color: colors.border }}>
         {`${addresses?.length} addresses`}
       </StyledText>

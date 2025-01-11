@@ -35,7 +35,7 @@ const SwapListItem = (props: { swap: SwapHistoryItem; isPending: boolean }) => {
             <View style={{ marginTop: -24 }}>
               <TokenLogoWithChain
                 logoURI={props.swap.tokenOut.logoURI}
-                chainId={props.swap.toChainId}
+                chainId={props.swap.chainId}
                 size={42}
               />
             </View>

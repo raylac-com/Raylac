@@ -60,10 +60,15 @@ const useTokenBalancePerAddress = ({
         groupByTokens.push({
           token: tokenBalances[0].token,
           totalBalance: formattedTotalBalance,
-          chainBalances: tokenBalances.map(balance => ({
-            chainId: balance.chainId,
-            balance: balance.balance,
-          })),
+          chainBalances: tokenBalances
+            .map(balance => ({
+              chainId: balance.chainId,
+              balance: balance.balance,
+            }))
+            // Sort by balance in descending order
+            .sort((a, b) =>
+              BigInt(a.balance.amount) > BigInt(b.balance.amount) ? -1 : 1
+            ),
         });
       }
 

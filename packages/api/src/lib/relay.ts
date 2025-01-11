@@ -177,12 +177,15 @@ export const relayGetRequest = async ({
 
   const relayRequestData = response.data.requests[0];
 
-  if (relayRequestData.status !== 'pending') {
-    await redisClient.set(
-      `relay:request:${txHash}`,
-      JSON.stringify(relayRequestData)
-    );
+  // If the request is pending, we don't want to return it
+  if (relayRequestData.status === 'pending') {
+    return null;
   }
+
+  await redisClient.set(
+    `relay:request:${txHash}`,
+    JSON.stringify(relayRequestData)
+  );
 
   return relayRequestData;
 };
