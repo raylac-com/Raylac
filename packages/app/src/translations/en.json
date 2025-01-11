@@ -97,7 +97,9 @@
     "writeDownOrSave": "Write down your backup phrase, or save it in a secure place."
   },
   "SelectLanguage": {
-    "title": "Select Language"
+    "title": "Select Language",
+    "english": "English",
+    "japanese": "Japanese"
   },
   "SelectRecipient": {
     "searchUser": "Search user or Ethereum address",

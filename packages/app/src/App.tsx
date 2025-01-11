@@ -42,6 +42,7 @@ import AddAddress from './screens/AddAddress/AddAddress';
 import Advanced from './screens/Advanced/Advanced';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import Addresses from './screens/Addresses/Addresses';
+import SelectLanguage from './screens/Settings/SelectLanguage';
 import CreateAddress from './screens/CreateAddress/CreateAddress';
 import { MoveFundsContextProvider } from './contexts/MoveFundsContext';
 import MoveFundsSheet from './components/MoveFundsSheet/MoveFundsSheet';
@@ -234,6 +235,14 @@ const Screens = () => {
               />
               <RootStack.Screen name="AddAddress" component={AddAddress} />
               <RootStack.Screen name="Advanced" component={Advanced} />
+              <RootStack.Screen
+                name="SelectLanguage"
+                component={SelectLanguage}
+                options={{
+                  title: 'Language',
+                  headerBackVisible: true,
+                }}
+              />
             </RootStack.Navigator>
             <MoveFundsSheet />
           </BottomSheetModalProvider>

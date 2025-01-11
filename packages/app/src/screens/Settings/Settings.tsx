@@ -32,6 +32,10 @@ const Settings = () => {
     navigation.navigate('Advanced');
   };
 
+  const onLanguagePress = () => {
+    navigation.navigate('SelectLanguage');
+  };
+
   return (
     <View
       style={{
@@ -46,6 +50,11 @@ const Settings = () => {
           title="Advanced"
           icon={<Entypo name="rocket" size={24} color={colors.border} />}
           onPress={onAdvancedPress}
+        />
+        <SettingsListItem
+          title="Language"
+          icon={<Entypo name="language" size={24} color={colors.border} />}
+          onPress={onLanguagePress}
         />
       </View>
     </View>
