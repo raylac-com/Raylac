@@ -126,6 +126,7 @@ const getSingleInputSwapQuote = async ({
     const approveStepItem = approveStepQuote.items[0];
 
     approveStep = {
+      id: 'approve',
       tx: {
         data: approveStepItem.data.data,
         to: approveStepItem.data.to,

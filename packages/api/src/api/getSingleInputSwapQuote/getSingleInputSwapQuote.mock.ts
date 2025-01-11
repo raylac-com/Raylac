@@ -13,6 +13,7 @@ const getSingleInputSwapQuoteMock = async (
   _arg: GetSingleInputSwapQuoteRequestBody
 ): Promise<GetSingleInputSwapQuoteReturnType> => {
   const mockApproveStep: ApproveStep = {
+    id: 'approve',
     tx: {
       data: '0x' as Hex,
       to: '0x1234567890123456789012345678901234567890' as Hex,
