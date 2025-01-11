@@ -8,6 +8,7 @@ import BridgeListItemSheet from '../BridgeListItemSheet/BridgeListItemSheet';
 import { useState } from 'react';
 import PendingIndicator from '../PendingIndicator/PendingIndicator';
 import { BridgeHistoryItem, getChainFromId } from '@raylac/shared';
+import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 
 const BridgeListItem = (props: {
   bridge: BridgeHistoryItem;
@@ -27,11 +28,20 @@ const BridgeListItem = (props: {
         <View
           style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
         >
-          <View style={{ width: 54 }}>
-            <TokenLogo
-              source={{ uri: props.bridge.token.logoURI }}
-              style={{ width: 42, height: 42 }}
-            />
+          <View style={{ flexDirection: 'column' }}>
+            <View>
+              <TokenLogo
+                source={{ uri: props.bridge.token.logoURI }}
+                style={{ width: 36, height: 36 }}
+              />
+            </View>
+            <View style={{ marginTop: -24 }}>
+              <TokenLogoWithChain
+                logoURI={props.bridge.token.logoURI}
+                chainId={props.bridge.toChainId}
+                size={42}
+              />
+            </View>
           </View>
           <View
             style={{
