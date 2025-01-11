@@ -58,6 +58,7 @@ export interface SwapStep {
 }
 
 export interface ApproveStep {
+  id: 'deposit' | 'approve';
   tx: {
     to: Hex;
     data: Hex;
@@ -75,6 +76,7 @@ export type SignedSingleInputSwapStep = SwapStep & {
 };
 
 export type SignedApproveStep = ApproveStep & {
+  id: 'deposit' | 'approve';
   signature: Hex;
 };
 
