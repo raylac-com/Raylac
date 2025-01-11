@@ -167,7 +167,7 @@ const ImportAccount = () => {
       />
       <StyledButton
         isLoading={isImportingPrivKey || isImportingMnemonic}
-        title={t('ImportAccount.importAccount', {
+        title={t('importAccount', {
           type: isInputPrivKey
             ? 'private key'
             : isInputMnemonic

@@ -81,14 +81,14 @@ const CreateAddress = () => {
       <View>
         <StyledText>
           {mnemonicGenesisAddress
-            ? t('CreateAddress.derivingFrom', {
+            ? t('derivingFrom', {
                 address: shortenAddress(mnemonicGenesisAddress),
               })
-            : t('CreateAddress.new')}
+            : t('new')}
         </StyledText>
       </View>
       <View>
-        <StyledText>{t('CreateAddress.name')}</StyledText>
+        <StyledText>{t('name')}</StyledText>
         <TextInput
           value={name}
           onChangeText={setName}

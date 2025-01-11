@@ -163,6 +163,7 @@ const Screens = () => {
               name="StartWatch"
               component={StartWatch}
               options={{
+                title: 'Watch Address',
                 headerBackTitle: 'Back',
               }}
             ></RootStack.Screen>
@@ -223,9 +224,30 @@ const Screens = () => {
                 }}
               ></RootStack.Screen>
             </RootStack.Group>
-            <RootStack.Screen name="CreateAddress" component={CreateAddress} />
-            <RootStack.Screen name="AddAddress" component={AddAddress} />
-            <RootStack.Screen name="Advanced" component={Advanced} />
+            <RootStack.Screen
+              name="CreateAddress"
+              component={CreateAddress}
+              options={{
+                title: 'Create Address',
+                headerBackTitle: 'Back',
+              }}
+            />
+            <RootStack.Screen
+              name="AddAddress"
+              component={AddAddress}
+              options={{
+                title: 'Add Address',
+                headerBackTitle: 'Back',
+              }}
+            />
+            <RootStack.Screen
+              name="Advanced"
+              component={Advanced}
+              options={{
+                title: 'Advanced',
+                headerBackTitle: 'Back',
+              }}
+            />
             <RootStack.Screen
               name="SelectLanguage"
               component={SelectLanguage}
