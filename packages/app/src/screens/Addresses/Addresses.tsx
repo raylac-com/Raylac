@@ -18,7 +18,6 @@ import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress'
 import { useTranslation } from 'react-i18next';
 
 const AddressListItem = ({ address }: { address: UserAddress }) => {
-  const { t } = useTranslation('AddressListItem');
   const { mutateAsync: deleteAddress } = useDeleteAddress();
 
   const [selectedAddress, setSelectedAddress] = useState<UserAddress | null>(
@@ -91,11 +90,6 @@ const AddressListItem = ({ address }: { address: UserAddress }) => {
           <Pressable onPress={() => setSelectedAddress(address)}>
             <WalletIconAddress address={address.address} />
           </Pressable>
-          {address.isDefault && (
-            <StyledText style={{ color: colors.subbedText }}>
-              {t('Addresses.default')}
-            </StyledText>
-          )}
         </View>
         <Feather
           name="x"
@@ -116,21 +110,22 @@ const AddressListItem = ({ address }: { address: UserAddress }) => {
 };
 
 const SupportedChains = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('Addresses');
+
   return (
     <View
       style={{
         flexDirection: 'row',
+        justifyContent: 'space-between',
         width: '100%',
-        columnGap: 8,
       }}
     >
       <StyledText style={{ color: colors.subbedText }}>
-        {t('Addresses.supportedChains')}
+        {t('supportedChains')}
       </StyledText>
       <View style={{ flexDirection: 'row', columnGap: 4 }}>
         {supportedChains.map(chain => (
-          <ChainLogo key={chain.id} chainId={chain.id} size={16} />
+          <ChainLogo key={chain.id} chainId={chain.id} size={20} />
         ))}
       </View>
     </View>

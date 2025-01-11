@@ -530,7 +530,6 @@ const Swap = ({ route }: Props) => {
           flex: 1,
           rowGap: 16,
           flexDirection: 'column',
-          justifyContent: 'center',
         }}
       >
         <SwapInputCard

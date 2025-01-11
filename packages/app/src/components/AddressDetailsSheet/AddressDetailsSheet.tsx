@@ -70,25 +70,22 @@ const AddressDetailsSheet = ({
   return (
     <BottomSheetModal
       ref={ref}
-      style={{
-        flex: 1,
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom + 32,
-      }}
       onDismiss={onClose}
+      index={0}
       enablePanDownToClose
       enableDynamicSizing={false}
       snapPoints={['70%']}
     >
       <BottomSheetView
         style={{
-          flex: 1,
           width: '100%',
+          height: '100%',
           flexDirection: 'column',
           justifyContent: 'space-between',
           rowGap: 24,
-          paddingVertical: 32,
+          paddingTop: 32,
           paddingHorizontal: 16,
+          paddingBottom: insets.bottom + 16,
         }}
       >
         <View style={{ rowGap: 32 }}>

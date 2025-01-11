@@ -68,23 +68,9 @@ export type RootStackParamsList = {
   CreateAccount: undefined;
   ImportAccount: undefined;
 
-  AccountInfo: undefined;
-
-  // Send stack
-  TransferHistory: undefined;
-  TransferDetails: {
-    transferId: number;
-  };
-
-  TokenBalances: undefined;
-  TokenBalanceDetails: {
-    tokenId: string;
-  };
-
   BackupAccount: undefined;
   Advanced: undefined;
   SelectLanguage: undefined;
-  SendSuccess: undefined;
 
   // Send stack
   SelectRecipient: undefined;
@@ -101,17 +87,6 @@ export type RootStackParamsList = {
     fromAddresses: Hex[];
     token: Token;
     chainId: number;
-  };
-  SelectChain: {
-    toAddress: Hex;
-    token: Token;
-  };
-  ConfirmSend: {
-    fromAddresses: Hex[];
-    token: Token;
-    amount: TokenAmount;
-    chainId: number;
-    toAddress: Hex;
   };
 
   SaveBackupPhrase: {

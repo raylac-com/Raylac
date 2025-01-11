@@ -50,7 +50,7 @@ const MinimumAmountOutCurrency = ({ amount }: { amount: TokenAmount }) => {
       <StyledText style={{ color: colors.border }}>
         {`Minimum output (USD)`}
       </StyledText>
-      <StyledText style={{ fontWeight: 'bold' }}>
+      <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
         {`$${amount.usdValueFormatted}`}
       </StyledText>
     </View>

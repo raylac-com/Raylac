@@ -134,7 +134,7 @@ const HomeScreen = () => {
       style={{
         flex: 1,
         paddingTop: insets.top,
-        paddingBottom: insets.bottom + 16,
+        paddingBottom: insets.bottom,
         position: 'relative',
       }}
     >
@@ -171,7 +171,7 @@ const HomeScreen = () => {
             {isLoadingAccountUsdValue ? (
               <Skeleton style={{ width: 100, height: 24 }} />
             ) : (
-              t('Home.accountBalance', { balance: accountUsdValue })
+              t('accountBalance', { balance: accountUsdValue })
             )}
           </StyledText>
         </View>
@@ -196,7 +196,7 @@ const HomeScreen = () => {
               }}
             >
               <StyledText style={{ marginTop: 16, color: colors.subbedText }}>
-                {t('Home.noTokens')}
+                {t('noTokens')}
               </StyledText>
               <AddAddressButton />
             </View>
