@@ -3,6 +3,7 @@ import {
   ETH,
   GetSingleInputSwapQuoteRequestBody,
   GetSingleInputSwapQuoteReturnType,
+  MOCK_TOKEN_AMOUNT,
   SwapStep,
 } from '@raylac/shared';
 import { Hex } from 'viem';
@@ -84,6 +85,8 @@ const getSingleInputSwapQuoteMock = async (
       '0x9876543210987654321098765432109876543210987654321098765432109876' as Hex,
     fromChainId: base.id,
     toChainId: arbitrum.id,
+    minimumAmountOut: MOCK_TOKEN_AMOUNT,
+    slippagePercent: 1,
   };
 };
 

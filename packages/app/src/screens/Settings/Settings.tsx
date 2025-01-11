@@ -53,7 +53,7 @@ const Settings = () => {
         />
         <SettingsListItem
           title="Language"
-          icon={<Entypo name="language" size={24} color={colors.border} />}
+          icon={<Feather name="globe" size={24} color={colors.border} />}
           onPress={onLanguagePress}
         />
       </View>
