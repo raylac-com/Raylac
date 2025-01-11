@@ -70,11 +70,7 @@ const BridgeListItem = (props: {
                   <StyledText
                     style={{ color: colors.border }}
                   >{`Bridge`}</StyledText>
-                  <Feather
-                    name={'repeat'}
-                    size={16}
-                    color={colors.subbedText}
-                  />
+                  <Feather name={'zap'} size={16} color={colors.subbedText} />
                 </View>
               )}
             </View>
