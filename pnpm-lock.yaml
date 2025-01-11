@@ -307,6 +307,9 @@ importers:
       axios:
         specifier: ^1.7.2
         version: 1.7.9
+      bignumber.js:
+        specifier: 9.0.1
+        version: 9.0.1
       bip39:
         specifier: ^3.1.0
         version: 3.1.0
