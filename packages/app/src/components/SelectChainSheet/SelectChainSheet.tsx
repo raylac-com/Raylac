@@ -66,7 +66,7 @@ const SelectChainSheet = ({
       onDismiss={onClose}
       enablePanDownToClose
       enableDynamicSizing={false}
-      snapPoints={['100%']}
+      snapPoints={['70%']}
     >
       <View
         style={{

@@ -76,7 +76,8 @@
     "max": "MAX",
     "gas": "Gas",
     "totalFee": "Total fee",
-    "totalFeeAmount": "{{amount}} USD"
+    "totalFeeAmount": "{{amount}} USD",
+    "recipientReceivesOn": "Recipient receives on"
   },
 
   "ImportAccount": {

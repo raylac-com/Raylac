@@ -109,6 +109,7 @@ const SearchBar = ({
         placeholder="Search"
         autoCorrect={false}
         autoComplete="off"
+        autoCapitalize="none"
         onChangeText={onSearchInputChange}
         style={{
           width: '100%',
