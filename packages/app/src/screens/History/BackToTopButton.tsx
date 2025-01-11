@@ -33,7 +33,9 @@ const BackToTopButton = ({ onPress }: BackToTopButtonProps) => {
       onPress={onPress}
     >
       <Feather name="arrow-up" size={20} color={colors.border} />
-      <StyledText style={{ color: colors.border }}>{'Top'}</StyledText>
+      <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
+        {'Top'}
+      </StyledText>
     </FeedbackPressable>
   );
 };

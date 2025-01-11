@@ -37,7 +37,9 @@ const InputAccessoryButton = ({
       onPress={onPress}
     >
       {icon}
-      <StyledText style={{ color: colors.border }}>{label}</StyledText>
+      <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
+        {label}
+      </StyledText>
     </FeedbackPressable>
   );
 };
