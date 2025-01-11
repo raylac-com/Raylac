@@ -3,11 +3,13 @@ import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Hex } from 'viem';
+import { UserAddress } from '@/types';
 import { View } from 'react-native';
 import StyledText from '@/components/StyledText/StyledText';
 import { Token, TokenAmount } from '@raylac/shared';
+import useUserAddresses from '@/hooks/useUserAddresses';
 import WalletIconAddress from '../WalletIconAddress/WalletIconAddress';
-import { shortenAddress } from '@/lib/utils';
+
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import fontSizes from '@/lib/styles/fontSizes';
 import colors from '@/lib/styles/colors';
@@ -38,6 +40,10 @@ const FromCard = ({
   address: Hex;
   amount: TokenAmount;
 }) => {
+  const { data: userAddresses } = useUserAddresses();
+  const userAddress = userAddresses?.find(
+    (a: UserAddress) => a.address === address
+  );
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
       <TokenLogoWithChain size={52} logoURI={token.logoURI} chainId={chainId} />
@@ -52,7 +58,7 @@ const FromCard = ({
             {`${amount.formatted} ${token.symbol}`}
           </StyledText>
         </View>
-        <WalletIconAddress address={address} />
+        <WalletIconAddress address={address} label={userAddress?.label} />
       </View>
     </View>
   );
@@ -69,6 +75,10 @@ const ToCard = ({
   chainId: number;
   amount: TokenAmount;
 }) => {
+  const { data: userAddresses } = useUserAddresses();
+  const userAddress = userAddresses?.find(
+    (a: UserAddress) => a.address === address
+  );
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
       <TokenLogoWithChain size={52} logoURI={token.logoURI} chainId={chainId} />
@@ -83,9 +93,7 @@ const ToCard = ({
             {`${amount.formatted} ${token.symbol}`}
           </StyledText>
         </View>
-        <StyledText style={{ color: colors.border }}>
-          {shortenAddress(address)}
-        </StyledText>
+        <WalletIconAddress address={address} label={userAddress?.label} />
       </View>
     </View>
   );

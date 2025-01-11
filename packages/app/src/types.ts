@@ -15,4 +15,7 @@ export interface UserAddress {
 
   // The address of the first account in the mnemonic group
   mnemonicGenesisAddress?: Hex;
+
+  // Optional label for the address
+  label?: string;
 }

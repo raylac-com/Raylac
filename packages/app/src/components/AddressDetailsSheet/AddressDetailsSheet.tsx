@@ -4,7 +4,7 @@ import { Feather } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Hex } from 'viem';
 import WalletIconAddress from '../WalletIconAddress/WalletIconAddress';
-import { AddressType } from '@/types';
+import { AddressType, UserAddress } from '@/types';
 import StyledText from '../StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { View } from 'react-native';
@@ -17,12 +17,14 @@ export interface AddressDetailsSheetProps {
   address: Hex;
   addressType: AddressType;
   onClose: () => void;
+  userAddress?: UserAddress;
 }
 
 const AddressDetailsSheet = ({
   address,
   addressType,
   onClose,
+  userAddress,
 }: AddressDetailsSheetProps) => {
   const insets = useSafeAreaInsets();
   const ref = useRef<BottomSheetModal>(null);
@@ -89,11 +91,29 @@ const AddressDetailsSheet = ({
         }}
       >
         <View style={{ rowGap: 32 }}>
-          <StyledText
-            style={{ fontWeight: 'bold' }}
-          >{`Address Details`}</StyledText>
+          <StyledText style={{ fontWeight: 'bold' }}>
+            {'Address Details'}
+          </StyledText>
           <View style={{ rowGap: 16 }}>
-            <WalletIconAddress address={address} />
+            <WalletIconAddress address={address} label={userAddress?.label} />
+            {userAddress?.label && (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  columnGap: 8,
+                  justifyContent: 'space-between',
+                }}
+              >
+                <StyledText style={{ color: colors.subbedText }}>
+                  {'Label'}
+                </StyledText>
+                <StyledText
+                  style={{ fontWeight: 'bold', color: colors.border }}
+                >
+                  {userAddress.label}
+                </StyledText>
+              </View>
+            )}
             <View
               style={{
                 flexDirection: 'row',
@@ -101,9 +121,9 @@ const AddressDetailsSheet = ({
                 justifyContent: 'space-between',
               }}
             >
-              <StyledText
-                style={{ color: colors.subbedText }}
-              >{`Type`}</StyledText>
+              <StyledText style={{ color: colors.subbedText }}>
+                {'Type'}
+              </StyledText>
               <StyledText style={{ fontWeight: 'bold', color: colors.border }}>
                 {getAddressTypeLabel(addressType)}
               </StyledText>

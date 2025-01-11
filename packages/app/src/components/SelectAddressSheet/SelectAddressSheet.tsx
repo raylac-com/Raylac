@@ -1,15 +1,22 @@
 import StyledText from '@/components/StyledText/StyledText';
 import { Pressable, View } from 'react-native';
 import { Hex } from 'viem';
+import { UserAddress } from '@/types';
 import { BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet';
 import { useEffect, useRef } from 'react';
 import colors from '@/lib/styles/colors';
 import { triggerHapticFeedback } from '@/lib/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useWriterAddresses from '@/hooks/useWriterAddresses';
+import useUserAddresses from '@/hooks/useUserAddresses';
 import WalletIconAddress from '../WalletIconAddress/WalletIconAddress';
 
 const AddressListItem = ({ address }: { address: Hex }) => {
+  const { data: userAddresses } = useUserAddresses();
+  const userAddress = userAddresses?.find(
+    (a: UserAddress) => a.address === address
+  );
+
   return (
     <View
       style={{
@@ -18,7 +25,7 @@ const AddressListItem = ({ address }: { address: Hex }) => {
         columnGap: 8,
       }}
     >
-      <WalletIconAddress address={address} />
+      <WalletIconAddress address={address} label={userAddress?.label} />
     </View>
   );
 };

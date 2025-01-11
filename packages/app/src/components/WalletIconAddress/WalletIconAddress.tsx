@@ -35,23 +35,37 @@ const WalletIconAddress = ({
   address,
   fontSize = fontSizes.base,
   avatarSize = 20,
+  label,
 }: {
   address: Hex;
   fontSize?: number;
   avatarSize?: number;
+  label?: string;
 }) => {
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}>
       <GradientAvatar address={address} size={avatarSize} />
-      <StyledText
-        style={{
-          fontWeight: 'bold',
-          color: colors.border,
-          fontSize: fontSize,
-        }}
-      >
-        {shortenAddress(address)}
-      </StyledText>
+      <View style={{ flexDirection: 'column' }}>
+        <StyledText
+          style={{
+            fontWeight: 'bold',
+            color: colors.border,
+            fontSize: fontSize,
+          }}
+        >
+          {label ? label : shortenAddress(address)}
+        </StyledText>
+        {label && (
+          <StyledText
+            style={{
+              color: colors.subbedText,
+              fontSize: fontSize * 0.85,
+            }}
+          >
+            {shortenAddress(address)}
+          </StyledText>
+        )}
+      </View>
     </View>
   );
 };
