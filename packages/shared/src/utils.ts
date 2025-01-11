@@ -65,8 +65,23 @@ export const getMaxPriorityFeePerGas = async ({
   return BigInt(result.data.result!);
 };
 
-export const getChainName = (chainId: number) => {
-  return `${getChainFromId(chainId).name} (${chainId})`;
+const CHAIN_NAMES: Record<number, string> = {
+  [chains.mainnet.id]: 'Ethereum',
+  [chains.base.id]: 'Base',
+  [chains.arbitrum.id]: 'Arbitrum',
+  [chains.optimism.id]: 'Optimism',
+  [chains.scroll.id]: 'Scroll',
+  [chains.polygon.id]: 'Polygon',
+  [chains.zksync.id]: 'ZkSync',
+  [chains.avalanche.id]: 'Avalanche',
+  [chains.fantom.id]: 'Fantom',
+  [chains.gnosis.id]: 'Gnosis',
+  [chains.bsc.id]: 'BSC',
+};
+
+export const getChainName = (chainId: number): string => {
+  // eslint-disable-next-line security/detect-object-injection
+  return CHAIN_NAMES[chainId];
 };
 
 export const signEIP1159Tx = async ({

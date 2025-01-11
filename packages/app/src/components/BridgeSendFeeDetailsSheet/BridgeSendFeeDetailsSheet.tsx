@@ -7,7 +7,7 @@ import { View } from 'react-native';
 import {
   BuildBridgeSendReturnType,
   ETH,
-  getChainFromId,
+  getChainName,
   Token,
   TokenAmount,
 } from '@raylac/shared';
@@ -36,7 +36,7 @@ const OriginChainGas = ({
       >
         <ChainLogo chainId={chainId} size={20} />
         <StyledText style={{ color: colors.border }}>
-          {`${getChainFromId(chainId).name} gas`}
+          {`${getChainName(chainId)} gas`}
         </StyledText>
       </View>
       <View
@@ -71,7 +71,7 @@ const DestinationChainGas = ({
       >
         <ChainLogo chainId={chainId} size={20} />
         <StyledText style={{ color: colors.border }}>
-          {`${getChainFromId(chainId).name} gas`}
+          {`${getChainName(chainId)} gas`}
         </StyledText>
       </View>
       <View

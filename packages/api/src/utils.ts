@@ -180,12 +180,6 @@ export const getAlchemyHttpTransport = ({
   return http(`https://${alchemySubdomain}.g.alchemy.com/v2/${apiKey}`);
 };
 
-export const getChainName = (chainId: number) => {
-  const name = Object.values(chains).find(chain => chain.id === chainId)?.name;
-
-  return `${name} (${chainId})`;
-};
-
 export const toAlchemyNetwork = (chainId: number): Network => {
   switch (chainId) {
     case chains.mainnet.id:
