@@ -14,7 +14,7 @@ import { Hex } from 'viem';
 import { useTranslation } from 'react-i18next';
 
 const CreateAddress = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('CreateAddress');
   const insets = useSafeAreaInsets();
   const [name, setName] = useState('');
   const navigation = useTypedNavigation();
