@@ -71,6 +71,7 @@ const getSingleInputSwapQuote = async ({
       '/quote',
       requestBody
     );
+
     quote = data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -173,6 +174,7 @@ const getSingleInputSwapQuote = async ({
 
   const amountIn = amount;
   const amountOut = quote.details.currencyOut.amount;
+  const minimumAmountOut = quote.details.currencyOut.minimumAmount;
 
   const inputTokenPrice = await getTokenUsdPrice({ token: inputToken });
 
@@ -194,6 +196,12 @@ const getSingleInputSwapQuote = async ({
 
   const amountOutFormatted = formatTokenAmount({
     amount: BigInt(amountOut),
+    token: outputToken,
+    tokenPriceUsd: outputTokenPrice,
+  });
+
+  const minimumAmountOutFormatted = formatTokenAmount({
+    amount: BigInt(minimumAmountOut),
     token: outputToken,
     tokenPriceUsd: outputTokenPrice,
   });
@@ -279,12 +287,18 @@ const getSingleInputSwapQuote = async ({
 
   const relayRequestId = swapStepQuote.requestId;
 
+  const slippagePercent =
+    quote.details.slippageTolerance.destination.percent === '0'
+      ? Number(quote.details.slippageTolerance.origin.percent)
+      : Number(quote.details.slippageTolerance.destination.percent);
+
   return {
     approveStep,
     swapStep,
     originChainGas: originChainGasFormatted,
     amountIn: amountInFormatted,
     amountOut: amountOutFormatted,
+    minimumAmountOut: minimumAmountOutFormatted,
     relayerGasToken,
     relayerGas: relayerGasFormatted,
     relayerServiceFeeToken,
@@ -293,6 +307,7 @@ const getSingleInputSwapQuote = async ({
     totalFeeUsd: totalFeeUsdFormatted,
     fromChainId: inputChainId,
     toChainId: outputChainId,
+    slippagePercent,
   };
 };
 

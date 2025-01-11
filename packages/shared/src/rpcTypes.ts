@@ -98,6 +98,7 @@ export type GetSingleInputSwapQuoteReturnType = {
   swapStep: SwapStep;
   amountIn: TokenAmount;
   amountOut: TokenAmount;
+  minimumAmountOut: TokenAmount;
   relayerGas: TokenAmount;
   relayerGasToken: Token;
   relayerServiceFee: TokenAmount;
@@ -107,6 +108,7 @@ export type GetSingleInputSwapQuoteReturnType = {
   totalFeeUsd: string;
   fromChainId: number;
   toChainId: number;
+  slippagePercent: number;
 };
 
 export interface SubmitSingleInputSwapRequestBody {

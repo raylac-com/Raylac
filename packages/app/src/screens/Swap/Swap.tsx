@@ -10,7 +10,9 @@ import {
   GetSingleInputSwapQuoteReturnType,
   supportedChains,
   Token,
+  TokenAmount,
   TRPCErrorMessage,
+  USDC,
 } from '@raylac/shared';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useDebounce from '@/hooks/useDebounce';
@@ -31,6 +33,7 @@ import SwapFeeDetailsSheet from '@/components/SwapFeeDetailsSheet/SwapFeeDetails
 import { mainnet } from 'viem/chains';
 import useAddressChainTokenBalance from '@/hooks/useAddressChainTokenBalance';
 import useAddressTokenBalance from '@/hooks/useAddressTokenBalance';
+import SlippageDetailsSheet from '@/components/SlippageDetailsSheet/SlippageDetailsSheet';
 
 const SwapButton = ({
   swapQuoteLoaded,
@@ -91,8 +94,6 @@ const TotalFee = ({
     <FeedbackPressable
       onPress={() => setIsFeeDetailsSheetOpen(true)}
       style={{
-        rowGap: 16,
-        paddingVertical: 8,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -114,6 +115,51 @@ const TotalFee = ({
   );
 };
 
+const SlippageTolerance = ({
+  outputToken,
+  minimumAmountOut,
+  slippagePercent,
+}: {
+  outputToken: Token | null;
+  minimumAmountOut: TokenAmount | undefined;
+  slippagePercent: number | undefined;
+}) => {
+  const [isSlippageDetailsSheetOpen, setIsSlippageDetailsSheetOpen] =
+    useState(false);
+
+  if (!outputToken || !minimumAmountOut || !slippagePercent) {
+    return null;
+  }
+
+  return (
+    <FeedbackPressable
+      onPress={() => setIsSlippageDetailsSheetOpen(true)}
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}
+    >
+      <StyledText
+        style={{ color: colors.border }}
+      >{`Max slippage `}</StyledText>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+        <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
+          {`${slippagePercent}%`}
+        </StyledText>
+        <Feather name="chevron-right" size={24} color={colors.border} />
+      </View>
+      <SlippageDetailsSheet
+        isOpen={isSlippageDetailsSheetOpen}
+        onClose={() => setIsSlippageDetailsSheetOpen(false)}
+        minimumAmountOut={minimumAmountOut}
+        slippagePercent={slippagePercent}
+        token={outputToken}
+      />
+    </FeedbackPressable>
+  );
+};
+
 type Props = NativeStackScreenProps<RootTabsParamsList, 'Swap'>;
 
 const Swap = ({ route }: Props) => {
@@ -125,9 +171,9 @@ const Swap = ({ route }: Props) => {
   // Local State
   //
 
-  const [inputToken, setInputToken] = useState<Token | null>(null);
-  const [outputToken, setOutputToken] = useState<Token | null>(null);
-  const [amountInputText, setAmountInputText] = useState<string>('');
+  const [inputToken, setInputToken] = useState<Token | null>(USDC);
+  const [outputToken, setOutputToken] = useState<Token | null>(ETH);
+  const [amountInputText, setAmountInputText] = useState<string>('100');
   const [inputChainId, setInputChainId] = useState<number | null>(null);
   const [outputChainId, setOutputChainId] = useState<number | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<Hex | null>(null);
@@ -514,6 +560,11 @@ const Swap = ({ route }: Props) => {
         />
       </View>
       <View style={{ rowGap: 16 }}>
+        <SlippageTolerance
+          outputToken={outputToken}
+          minimumAmountOut={swapQuote?.minimumAmountOut}
+          slippagePercent={swapQuote?.slippagePercent}
+        />
         <TotalFee swapQuote={swapQuote} />
         <AddressSelector
           selectedAddress={selectedAddress}

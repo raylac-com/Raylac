@@ -49,6 +49,7 @@ const swap = async () => {
 
   console.log('quote');
   console.log(JSON.stringify(quote, null, 2));
+  /*
   await sleep(3000);
 
   const signedApproveTx = quote.approveStep
@@ -78,6 +79,7 @@ const swap = async () => {
   console.log(JSON.stringify(submitRequestBody, null, 2));
 
   const tx = await client.submitSingleInputSwap.mutate(submitRequestBody);
+  */
 };
 
 swap();

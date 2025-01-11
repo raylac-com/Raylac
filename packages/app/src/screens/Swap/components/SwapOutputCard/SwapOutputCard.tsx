@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import ChainSelector from '@/screens/Swap/components/ChainSelector/ChainSelector';
 import SearchOutputTokenSheet from '@/components/SearchOutputTokenSheet/SearchOutputTokenSheet';
 import Skeleton from '@/components/Skeleton/Skeleton';
+import { formatUnits } from 'viem';
 
 const SwapOutputCard = ({
   token,
@@ -49,8 +50,8 @@ const SwapOutputCard = ({
     >
       {showChainSelector && chainId !== null && (
         <ChainSelector
-          token={token}
           title="Select output chain"
+          token={token}
           chainId={chainId}
           setChainId={setChainId}
         />
@@ -59,7 +60,11 @@ const SwapOutputCard = ({
         chainId={chainId}
         selectedToken={token}
         isLoadingAmount={isLoadingAmount}
-        amount={amount?.formatted ?? ''}
+        amount={
+          amount && token
+            ? formatUnits(BigInt(amount.amount), token.decimals)
+            : ''
+        }
         setAmount={setAmount}
         onSelectTokenPress={() => {
           setIsOpen(true);
