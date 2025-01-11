@@ -12,7 +12,6 @@ import {
   Token,
   TokenAmount,
   TRPCErrorMessage,
-  USDC,
 } from '@raylac/shared';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useDebounce from '@/hooks/useDebounce';
@@ -171,9 +170,9 @@ const Swap = ({ route }: Props) => {
   // Local State
   //
 
-  const [inputToken, setInputToken] = useState<Token | null>(USDC);
-  const [outputToken, setOutputToken] = useState<Token | null>(ETH);
-  const [amountInputText, setAmountInputText] = useState<string>('100');
+  const [inputToken, setInputToken] = useState<Token | null>(null);
+  const [outputToken, setOutputToken] = useState<Token | null>(null);
+  const [amountInputText, setAmountInputText] = useState<string>('');
   const [inputChainId, setInputChainId] = useState<number | null>(null);
   const [outputChainId, setOutputChainId] = useState<number | null>(null);
   const [selectedAddress, setSelectedAddress] = useState<Hex | null>(null);
