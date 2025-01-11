@@ -57,13 +57,31 @@ const getHistoryMock = async (
       },
       tokenIn: ETH,
       tokenOut: USDC,
+      chainId: arbitrum.id,
+      timestamp: new Date().toISOString(),
+      txHash:
+        '0x123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0' as Hex,
+    },
+    // Cross-chain swap history item
+    {
+      type: HistoryItemType.CROSS_CHAIN_SWAP,
+      relayId: 'swap-tx-001',
+      address: '0x1111111111111111111111111111111111111111' as Hex,
+      amountIn: MOCK_TOKEN_AMOUNT,
+      amountOut: {
+        ...MOCK_TOKEN_AMOUNT,
+        amount: '990000000000000000', // 0.99 tokens (accounting for slippage)
+        formatted: '0.99',
+      },
+      tokenIn: ETH,
+      tokenOut: USDC,
       fromChainId: arbitrum.id,
       toChainId: optimism.id,
       timestamp: new Date().toISOString(),
       inTxHash:
         '0x123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0' as Hex,
       outTxHash:
-        '0x56789abcdef0123456789abcdef0123456789abcdef0123456789abcdef01234' as Hex,
+        '0x123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0' as Hex,
     },
   ];
 };
