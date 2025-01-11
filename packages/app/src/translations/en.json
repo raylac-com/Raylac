@@ -21,8 +21,11 @@
   "Addresses": {
     "noAddresses": "No addresses",
     "title": "Addresses",
-    "default": "Default",
-    "supportedChains": "Supported chains"
+    "supportedChains": "Supported chains",
+    "addAddress": "Add address"
+  },
+  "AddressListItem": {
+    "default": "Default"
   },
   "Advanced": {
     "title": "Advanced",

@@ -18,7 +18,7 @@ import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress'
 import { useTranslation } from 'react-i18next';
 
 const AddressListItem = ({ address }: { address: UserAddress }) => {
-  const { t } = useTranslation('Addresses_AddressListItem');
+  const { t } = useTranslation('AddressListItem');
   const { mutateAsync: deleteAddress } = useDeleteAddress();
 
   const [selectedAddress, setSelectedAddress] = useState<UserAddress | null>(
@@ -138,7 +138,7 @@ const SupportedChains = () => {
 };
 
 const Addresses = () => {
-  const { t } = useTranslation('Addresses_Addresses');
+  const { t } = useTranslation('Addresses');
   const { data: addresses } = useUserAddresses();
   const navigation = useTypedNavigation();
   const insets = useSafeAreaInsets();

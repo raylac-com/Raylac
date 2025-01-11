@@ -20,8 +20,11 @@
   "Addresses": {
     "noAddresses": "アドレスがありません",
     "title": "アドレス",
-    "default": "デフォルト",
-    "supportedChains": "対応チェーン"
+    "supportedChains": "対応チェーン",
+    "addAddress": "アドレスを追加"
+  },
+  "AddressListItem": {
+    "default": "デフォルト"
   },
   "Advanced": {
     "title": "詳細設定",
