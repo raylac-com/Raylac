@@ -9,6 +9,8 @@ on:
       - packages/api/**
       - packages/app/**
       - .github/workflows/preview.yaml
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
