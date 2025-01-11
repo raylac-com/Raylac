@@ -451,6 +451,23 @@ const Swap = ({ route }: Props) => {
             fromChainId: inputChainId,
             toChainId: outputChainId,
             requestId: swapQuote.relayRequestId,
+            amountIn: swapQuote.amountIn,
+            amountOut: swapQuote.amountOut,
+          }
+        : undefined;
+
+    const pendingBridgeData: NonNullable<
+      RootTabsParamsList['History']
+    >['pendingBridge'] =
+      isCrossChainSwap === true
+        ? {
+            address: selectedAddress,
+            token: inputToken,
+            fromChainId: inputChainId,
+            toChainId: outputChainId,
+            requestId: swapQuote.relayRequestId,
+            amountIn: swapQuote.amountIn,
+            amountOut: swapQuote.amountOut,
           }
         : undefined;
 
@@ -475,6 +492,14 @@ const Swap = ({ route }: Props) => {
         screen: 'History',
         params: {
           pendingCrossChainSwap: pendingCrossChainSwapData,
+        },
+      });
+    } else if (pendingBridgeData) {
+      // Navigate to the history screen with the pending bridge data
+      navigation.navigate('Tabs', {
+        screen: 'History',
+        params: {
+          pendingBridge: pendingBridgeData,
         },
       });
     } else {

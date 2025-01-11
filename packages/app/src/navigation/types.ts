@@ -40,6 +40,17 @@ export type RootTabsParamsList = {
           address: Hex;
           tokenIn: Token;
           tokenOut: Token;
+          amountIn: TokenAmount;
+          amountOut: TokenAmount;
+          fromChainId: number;
+          toChainId: number;
+          requestId: Hex;
+        };
+        pendingBridge?: {
+          address: Hex;
+          token: Token;
+          amountIn: TokenAmount;
+          amountOut: TokenAmount;
           fromChainId: number;
           toChainId: number;
           requestId: Hex;

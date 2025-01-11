@@ -19,6 +19,7 @@ import {
   SwapHistoryItem as SwapHistoryItemType,
   BridgeTransferHistoryItem,
   CrossChainSwapHistoryItem,
+  BridgeHistoryItem,
 } from '@raylac/shared';
 import useUserAddresses from '@/hooks/useUserAddresses';
 import SwapListItem from '@/components/SwapListItem/SwapListItem';
@@ -26,6 +27,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootTabsParamsList } from '@/navigation/types';
 import { Hex } from 'viem/_types/types/misc';
 import BridgeTransferListItem from '@/components/BridgeTransferListItem/BridgeTransferListItem';
+import BridgeListItem from '@/components/BridgeListItem/BridgeListItem';
 import CrossChainSwapListItem from '@/components/CrossChainSwapListItem/CrossChainSwapListItem';
 
 type Props = NativeStackScreenProps<RootTabsParamsList, 'History'>;
@@ -41,6 +43,8 @@ const History = ({ route }: Props) => {
   const pendingTransfer = route.params?.pendingTransfer;
   const pendingBridgeTransfer = route.params?.pendingBridgeTransfer;
   const pendingSwap = route.params?.pendingSwap;
+  const pendingCrossChainSwap = route.params?.pendingCrossChainSwap;
+  const pendingBridge = route.params?.pendingBridge;
 
   const { data: addresses } = useUserAddresses();
 
@@ -76,7 +80,9 @@ const History = ({ route }: Props) => {
     return fetchedHistory?.some(
       item =>
         (item.type === HistoryItemType.BRIDGE_TRANSFER ||
-          item.type === HistoryItemType.SWAP) &&
+          item.type === HistoryItemType.SWAP ||
+          item.type === HistoryItemType.BRIDGE ||
+          item.type === HistoryItemType.CROSS_CHAIN_SWAP) &&
         item.relayId === requestId
     );
   };
@@ -134,6 +140,41 @@ const History = ({ route }: Props) => {
           isPending: true,
         });
       }
+    } else if (pendingCrossChainSwap) {
+      if (!isRelayIntentConfirmed(pendingCrossChainSwap.requestId)) {
+        history.unshift({
+          type: HistoryItemType.CROSS_CHAIN_SWAP,
+          relayId: pendingCrossChainSwap.requestId,
+          fromChainId: pendingCrossChainSwap.fromChainId,
+          toChainId: pendingCrossChainSwap.toChainId,
+          address: pendingCrossChainSwap.address,
+          amountIn: pendingCrossChainSwap.amountIn,
+          amountOut: pendingCrossChainSwap.amountOut,
+          tokenIn: pendingCrossChainSwap.tokenIn,
+          tokenOut: pendingCrossChainSwap.tokenOut,
+          timestamp: new Date().toISOString(),
+          inTxHash: '0x',
+          outTxHash: '0x',
+          isPending: true,
+        });
+      }
+    } else if (pendingBridge) {
+      if (!isRelayIntentConfirmed(pendingBridge.requestId)) {
+        history.unshift({
+          type: HistoryItemType.BRIDGE,
+          relayId: pendingBridge.requestId,
+          address: pendingBridge.address,
+          amountIn: pendingBridge.amountIn,
+          amountOut: pendingBridge.amountOut,
+          token: pendingBridge.token,
+          fromChainId: pendingBridge.fromChainId,
+          toChainId: pendingBridge.toChainId,
+          timestamp: new Date().toISOString(),
+          inTxHash: '0x',
+          outTxHash: '0x',
+          isPending: true,
+        });
+      }
     }
   }
 
@@ -181,6 +222,11 @@ const History = ({ route }: Props) => {
               ) : item.type === HistoryItemType.CROSS_CHAIN_SWAP ? (
                 <CrossChainSwapListItem
                   swap={item as CrossChainSwapHistoryItem}
+                  isPending={item.isPending}
+                />
+              ) : item.type === HistoryItemType.BRIDGE ? (
+                <BridgeListItem
+                  bridge={item as BridgeHistoryItem}
                   isPending={item.isPending}
                 />
               ) : item.type === HistoryItemType.BRIDGE_TRANSFER ? (

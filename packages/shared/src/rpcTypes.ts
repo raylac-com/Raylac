@@ -132,6 +132,7 @@ export enum HistoryItemType {
   BRIDGE_TRANSFER = 'bridge_transfer',
   SWAP = 'swap',
   CROSS_CHAIN_SWAP = 'cross_chain_swap',
+  BRIDGE = 'bridge',
 }
 
 export type TransferHistoryItem = {
@@ -157,6 +158,20 @@ export type BridgeTransferHistoryItem = {
   toChainId: number;
   amount: TokenAmount;
   token: Token;
+  timestamp: string;
+  inTxHash: Hex;
+  outTxHash: Hex;
+};
+
+export type BridgeHistoryItem = {
+  relayId: string;
+  type: HistoryItemType.BRIDGE;
+  address: Hex;
+  amountIn: TokenAmount;
+  amountOut: TokenAmount;
+  token: Token;
+  fromChainId: number;
+  toChainId: number;
   timestamp: string;
   inTxHash: Hex;
   outTxHash: Hex;
@@ -194,7 +209,8 @@ export type HistoryItem =
   | TransferHistoryItem
   | BridgeTransferHistoryItem
   | SwapHistoryItem
-  | CrossChainSwapHistoryItem;
+  | CrossChainSwapHistoryItem
+  | BridgeHistoryItem;
 
 export type GetHistoryReturnType = HistoryItem[];
 
