@@ -109,7 +109,9 @@
     "writeDownOrSave": "バックアップフレーズをメモしてください。または安全な場所に保存してください。"
   },
   "SelectLanguage": {
-    "title": "言語"
+    "title": "言語",
+    "english": "英語",
+    "japanese": "日本語"
   },
   "SelectRecipient": {
     "searchUser": "ユーザー名、またはETHアドレスで検索",
