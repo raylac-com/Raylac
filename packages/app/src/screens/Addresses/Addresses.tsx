@@ -15,8 +15,10 @@ import { supportedChains } from '@raylac/shared';
 import ChainLogo from '@/components/ChainLogo/ChainLogo';
 import { UserAddress } from '@/types';
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
+import { useTranslation } from 'react-i18next';
 
 const AddressListItem = ({ address }: { address: UserAddress }) => {
+  const { t } = useTranslation();
   const { mutateAsync: deleteAddress } = useDeleteAddress();
 
   const [selectedAddress, setSelectedAddress] = useState<UserAddress | null>(
@@ -91,7 +93,7 @@ const AddressListItem = ({ address }: { address: UserAddress }) => {
           </Pressable>
           {address.isDefault && (
             <StyledText style={{ color: colors.subbedText }}>
-              {`Default`}
+              {t('Addresses.default')}
             </StyledText>
           )}
         </View>
@@ -114,6 +116,7 @@ const AddressListItem = ({ address }: { address: UserAddress }) => {
 };
 
 const SupportedChains = () => {
+  const { t } = useTranslation();
   return (
     <View
       style={{
@@ -123,7 +126,7 @@ const SupportedChains = () => {
       }}
     >
       <StyledText style={{ color: colors.subbedText }}>
-        {`Supported chains`}
+        {t('Addresses.supportedChains')}
       </StyledText>
       <View style={{ flexDirection: 'row', columnGap: 4 }}>
         {supportedChains.map(chain => (

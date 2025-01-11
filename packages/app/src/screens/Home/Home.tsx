@@ -16,6 +16,7 @@ import TopMenuBar from './components/TopMenuBar/TopMenuBar';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import Feather from '@expo/vector-icons/Feather';
 import { getUserAddresses } from '@/lib/key';
+import { useTranslation } from 'react-i18next';
 
 const AddAddressButton = () => {
   const navigation = useTypedNavigation();
@@ -53,6 +54,7 @@ const AddAddressButton = () => {
 };
 
 const HomeScreen = () => {
+  const { t } = useTranslation();
   const navigation = useTypedNavigation();
   const insets = useSafeAreaInsets();
 
@@ -169,7 +171,7 @@ const HomeScreen = () => {
             {isLoadingAccountUsdValue ? (
               <Skeleton style={{ width: 100, height: 24 }} />
             ) : (
-              `$${accountUsdValue}`
+              t('Home.accountBalance', { balance: accountUsdValue })
             )}
           </StyledText>
         </View>
@@ -194,7 +196,7 @@ const HomeScreen = () => {
               }}
             >
               <StyledText style={{ marginTop: 16, color: colors.subbedText }}>
-                {`No tokens found`}
+                {t('Home.noTokens')}
               </StyledText>
               <AddAddressButton />
             </View>
