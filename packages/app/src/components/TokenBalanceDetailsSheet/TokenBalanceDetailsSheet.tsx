@@ -228,16 +228,17 @@ const TokenBalanceDetailsSheet = ({
           <View
             style={{ flexDirection: 'column', rowGap: 8, paddingBottom: 32 }}
           >
-            <View
-              style={{
-                width: '100%',
-                flexDirection: 'row',
-                columnGap: 8,
-              }}
-            >
-              {canBridge && (
+            {canBridge && (
+              <View
+                style={{
+                  width: '100%',
+                  flexDirection: 'row',
+                  columnGap: 8,
+                }}
+              >
                 <View style={{ flex: 1 }}>
                   <StyledButton
+                    variant="outline"
                     icon={
                       <Feather name="zap" size={18} color={colors.border} />
                     }
@@ -245,23 +246,44 @@ const TokenBalanceDetailsSheet = ({
                     onPress={onBridgePress}
                   />
                 </View>
-              )}
+                <View style={{ flex: 1 }}>
+                  <StyledButton
+                    icon={
+                      <Feather name="repeat" size={18} color={colors.border} />
+                    }
+                    title="Swap"
+                    onPress={onSwapPress}
+                  />
+                </View>
+              </View>
+            )}
+            <View
+              style={{
+                width: '100%',
+                flexDirection: 'row',
+                columnGap: 8,
+              }}
+            >
               <View style={{ flex: 1 }}>
                 <StyledButton
-                  icon={
-                    <Feather name="repeat" size={18} color={colors.border} />
-                  }
-                  title="Swap"
-                  onPress={onSwapPress}
+                  variant="outline"
+                  icon={<Feather name="send" size={18} color={colors.border} />}
+                  title="Send"
+                  onPress={onSendPress}
                 />
               </View>
+              {!canBridge && (
+                <View style={{ flex: 1 }}>
+                  <StyledButton
+                    icon={
+                      <Feather name="repeat" size={18} color={colors.border} />
+                    }
+                    title="Swap"
+                    onPress={onSwapPress}
+                  />
+                </View>
+              )}
             </View>
-            <StyledButton
-              variant="outline"
-              icon={<Feather name="send" size={18} color={colors.border} />}
-              title="Send"
-              onPress={onSendPress}
-            />
           </View>
         </View>
       </BottomSheetView>
