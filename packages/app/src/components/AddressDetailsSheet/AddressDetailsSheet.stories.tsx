@@ -2,14 +2,13 @@ import React from 'react';
 import { View } from 'react-native';
 import type { Meta, StoryObj } from '@storybook/react';
 import AddressDetailsSheet from './AddressDetailsSheet';
-import { zeroAddress } from 'viem';
 import { AddressType } from '../../types';
 
 const meta = {
   title: 'AddressDetailsSheet',
   component: AddressDetailsSheet,
   args: {
-    address: zeroAddress,
+    address: '0x28341dF2CCabe2Cc4A3c6e7ef2fe9E706680C196',
     addressType: AddressType.Mnemonic,
     onClose: () => {},
   },
