@@ -13,11 +13,13 @@ import useImportMnemonic from '@/hooks/useImportMnemonic';
 import { setBackupVerified } from '@/lib/key';
 import colors from '@/lib/styles/colors';
 import SearchInputAccessory from '@/components/SearchInputAccessory/SearchInputAccessory';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Sign in screen
  */
 const ImportAccount = () => {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [inputText, setInputText] = useState('');
   const [isInputPrivKey, setIsInputPrivKey] = useState(false);
@@ -165,7 +167,13 @@ const ImportAccount = () => {
       />
       <StyledButton
         isLoading={isImportingPrivKey || isImportingMnemonic}
-        title={`Import ${isInputPrivKey ? 'private key' : isInputMnemonic ? 'mnemonic' : 'account'}`}
+        title={t('ImportAccount.importAccount', {
+          type: isInputPrivKey
+            ? 'private key'
+            : isInputMnemonic
+              ? 'mnemonic'
+              : 'account',
+        })}
         onPress={onImportPress}
         disabled={!isInputPrivKey && !isInputMnemonic}
       ></StyledButton>

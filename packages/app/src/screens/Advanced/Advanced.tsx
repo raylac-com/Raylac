@@ -2,8 +2,10 @@ import StyledText from '@/components/StyledText/StyledText';
 import { View } from 'react-native';
 import * as Updates from 'expo-updates';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const Advanced = () => {
+  const { t } = useTranslation();
   const EXPO_PUBLIC_RPC_URL = process.env.EXPO_PUBLIC_RPC_URL;
 
   const [isUpdateAvailable, setIsUpdateAvailable] = useState(false);
@@ -17,11 +19,23 @@ const Advanced = () => {
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <StyledText>{`RPC URL ${EXPO_PUBLIC_RPC_URL}`}</StyledText>
-      <StyledText>{`Update channel: ${Updates.channel}`}</StyledText>
-      <StyledText>{`Runtime version: ${Updates.runtimeVersion}`}</StyledText>
-      <StyledText>{`Updated ID : ${Updates.updateId}`}</StyledText>
-      <StyledText>{`Update available: ${isUpdateAvailable}`}</StyledText>
+      <StyledText>
+        {t('Advanced.rpcUrl', { url: EXPO_PUBLIC_RPC_URL })}
+      </StyledText>
+      <StyledText>
+        {t('Advanced.updateChannel', { channel: Updates.channel })}
+      </StyledText>
+      <StyledText>
+        {t('Advanced.runtimeVersion', { version: Updates.runtimeVersion })}
+      </StyledText>
+      <StyledText>
+        {t('Advanced.updateId', { id: Updates.updateId })}
+      </StyledText>
+      <StyledText>
+        {t('Advanced.updateAvailable', {
+          available: String(isUpdateAvailable),
+        })}
+      </StyledText>
     </View>
   );
 };
