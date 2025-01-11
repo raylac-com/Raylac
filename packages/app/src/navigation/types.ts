@@ -6,6 +6,7 @@ export type RootTabsParamsList = {
   Swap:
     | {
         fromToken: Token;
+        bridge?: boolean;
       }
     | undefined;
   History:
