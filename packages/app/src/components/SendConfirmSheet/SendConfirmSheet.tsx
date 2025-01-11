@@ -14,6 +14,7 @@ import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import fontSizes from '@/lib/styles/fontSizes';
 import colors from '@/lib/styles/colors';
 import StyledButton from '../StyledButton/StyledButton';
+import { shortenAddress } from '@/lib/utils';
 
 export interface SendConfirmSheetProps {
   open: boolean;
@@ -75,10 +76,6 @@ const ToCard = ({
   chainId: number;
   amount: TokenAmount;
 }) => {
-  const { data: userAddresses } = useUserAddresses();
-  const userAddress = userAddresses?.find(
-    (a: UserAddress) => a.address === address
-  );
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
       <TokenLogoWithChain size={52} logoURI={token.logoURI} chainId={chainId} />
@@ -93,7 +90,9 @@ const ToCard = ({
             {`${amount.formatted} ${token.symbol}`}
           </StyledText>
         </View>
-        <WalletIconAddress address={address} label={userAddress?.label} />
+        <StyledText style={{ fontWeight: 'bold', color: colors.border }}>
+          {shortenAddress(address)}
+        </StyledText>
       </View>
     </View>
   );
