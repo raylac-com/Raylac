@@ -85,6 +85,7 @@ const TotalFee = ({
 }: {
   swapQuote: GetSingleInputSwapQuoteReturnType | undefined;
 }) => {
+  const { t } = useTranslation('Swap');
   const [isFeeDetailsSheetOpen, setIsFeeDetailsSheetOpen] = useState(false);
 
   if (!swapQuote) {
@@ -100,7 +101,7 @@ const TotalFee = ({
         alignItems: 'center',
       }}
     >
-      <StyledText style={{ color: colors.border }}>{`Total fee `}</StyledText>
+      <StyledText style={{ color: colors.border }}>{t('totalFee')}</StyledText>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
         <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
           {`${swapQuote.totalFeeUsd} USD`}

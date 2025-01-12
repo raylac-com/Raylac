@@ -7,6 +7,7 @@ import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress'
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import colors from '@/lib/styles/colors';
 import Feather from '@expo/vector-icons/Feather';
+import { useTranslation } from 'react-i18next';
 interface AddressSelectorProps {
   selectedAddress: Hex | null;
   setSelectedAddress: (address: Hex) => void;
@@ -16,6 +17,7 @@ const AddressSelector = ({
   selectedAddress,
   setSelectedAddress,
 }: AddressSelectorProps) => {
+  const { t } = useTranslation('AddressSelector');
   const [isOpen, setIsOpen] = useState(false);
   return (
     <View
@@ -43,7 +45,7 @@ const AddressSelector = ({
           {selectedAddress ? (
             <WalletIconAddress address={selectedAddress} />
           ) : (
-            <StyledText>{`Select an address`}</StyledText>
+            <StyledText>{t('selectAddress')}</StyledText>
           )}
           <Feather name="chevron-up" size={24} color={colors.subbedText} />
         </View>

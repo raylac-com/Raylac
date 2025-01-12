@@ -4,6 +4,7 @@ import { Hex } from 'viem';
 import colors from '@/lib/styles/colors';
 import { shortenAddress } from '@/lib/utils';
 import Feather from '@expo/vector-icons/Feather';
+import { useTranslation } from 'react-i18next';
 
 const SendToCard = ({
   toAddress,
@@ -12,6 +13,7 @@ const SendToCard = ({
   toAddress: Hex;
   alignCenter?: boolean;
 }) => {
+  const { t } = useTranslation('SendToCard');
   return (
     <View
       style={{
@@ -25,7 +27,7 @@ const SendToCard = ({
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
       >
-        <StyledText style={{ color: colors.border }}>{`Send to `}</StyledText>
+        <StyledText style={{ color: colors.border }}>{t('sendTo')}</StyledText>
         <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
           {shortenAddress(toAddress)}
         </StyledText>

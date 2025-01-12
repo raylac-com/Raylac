@@ -4,6 +4,7 @@ import { getExplorerUrl, SwapHistoryItem } from '@raylac/shared';
 import { useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import StyledText from '../StyledText/StyledText';
+import { useTranslation } from 'react-i18next';
 import fontSizes from '@/lib/styles/fontSizes';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import colors from '@/lib/styles/colors';
@@ -26,6 +27,7 @@ const shortenTxHash = (txHash: string) => {
 
 const Address = ({ address }: { address: Hex }) => {
   const { data: senderEnsName } = useEnsName(address);
+  const { t } = useTranslation('SwapListItemSheet');
   const onCopyPress = () => {
     copyToClipboard(address);
 
@@ -43,7 +45,9 @@ const Address = ({ address }: { address: Hex }) => {
         justifyContent: 'space-between',
       }}
     >
-      <StyledText style={{ color: colors.subbedText }}>{`Address`} </StyledText>
+      <StyledText style={{ color: colors.subbedText }}>
+        {t('address')}{' '}
+      </StyledText>
       <FeedbackPressable
         onPress={onCopyPress}
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
@@ -58,6 +62,7 @@ const Address = ({ address }: { address: Hex }) => {
 };
 
 const TxHash = ({ txHash, chainId }: { txHash: string; chainId: number }) => {
+  const { t } = useTranslation('SwapListItemSheet');
   return (
     <FeedbackPressable
       style={{ flexDirection: 'row', justifyContent: 'space-between' }}
@@ -66,7 +71,7 @@ const TxHash = ({ txHash, chainId }: { txHash: string; chainId: number }) => {
       }}
     >
       <StyledText style={{ color: colors.subbedText }}>
-        {`Transaction`}{' '}
+        {t('transaction')}{' '}
       </StyledText>
       <View
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
@@ -81,6 +86,7 @@ const TxHash = ({ txHash, chainId }: { txHash: string; chainId: number }) => {
 };
 
 const DateTime = ({ date }: { date: Date }) => {
+  const { t } = useTranslation('SwapListItemSheet');
   return (
     <View
       style={{
@@ -89,7 +95,7 @@ const DateTime = ({ date }: { date: Date }) => {
         justifyContent: 'space-between',
       }}
     >
-      <StyledText style={{ color: colors.subbedText }}>{`Time`} </StyledText>
+      <StyledText style={{ color: colors.subbedText }}>{t('time')} </StyledText>
       <StyledText style={{ color: colors.subbedText }}>
         {new Date(date).toLocaleDateString()}{' '}
         {new Date(date).toLocaleTimeString()}
