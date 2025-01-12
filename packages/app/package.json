@@ -8,7 +8,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "eslint . & tsc --noEmit && pnpm check-i18n",
-    "check-i18n": "sync-i18n --files 'src/translations/*.json' --primary en --languages ja --space 1 --check",
+    "check-i18n": "sync-i18n --files 'src/translations/*.json' --primary en --languages ja --space 2 --check",
     "eas-build-post-install": "pnpm -w build",
     "storybook-generate": "sb-rn-get-stories"
   },
