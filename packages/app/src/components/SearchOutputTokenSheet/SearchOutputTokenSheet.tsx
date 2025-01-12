@@ -16,6 +16,7 @@ import { getChainIcon } from '@/lib/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { trpc } from '@/lib/trpc';
 import useDebounce from '@/hooks/useDebounce';
+import useTokensWithBalances from '@/hooks/useTokensWithBalances';
 
 const TokenListItem = ({
   token,
@@ -128,7 +129,17 @@ const SearchOutputTokenSheet = ({
     searchTerm: debouncedSearchText,
   });
 
-  const tokenList = tokens ?? [undefined, undefined, undefined];
+  const tokenBalances = useTokensWithBalances();
+
+  const tokenList =
+    tokenBalances === undefined && tokens === undefined
+      ? [undefined, undefined, undefined]
+      : [...(tokens ?? []), ...(tokenBalances ?? [])]
+          // Remove duplicates
+          .filter(
+            (token, index, self) =>
+              index === self.findIndex(t => t.id === token.id)
+          );
 
   return (
     <BottomSheetModal
