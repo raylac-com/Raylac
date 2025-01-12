@@ -105,11 +105,22 @@
     "recipientReceivesOn": "Recipient receives on",
     "switchTo": "Switch to {{mode}}"
   },
+  "AddressDetailsSheet": {
+    "title": "Address details",
+    "viewPrivateKey": "View private key",
+    "hidePrivateKey": "Hide private key",
+    "addressType": "Address type",
+    "mnemonic": "Mnemonic",
+    "privateKey": "Private key"
+  },
   "common": {
+    "address": "Address",
+    "copy": "Copy",
     "copied": "Copied",
     "copiedAddress": "Copied address",
     "headerBackTitle": "Back",
     "next": "Next",
-    "usd": "USD"
+    "usd": "USD",
+    "close": "Close"
   }
 }

@@ -186,6 +186,14 @@
     "noTokensFound": "トークンが見つかりません",
     "noTokenBalance": "{{address}}のサポートされているチェーンで{{symbol}}の残高が見つかりません"
   },
+  "AddressDetailsSheet": {
+    "title": "アドレス詳細",
+    "viewPrivateKey": "秘密鍵を表示",
+    "hidePrivateKey": "秘密鍵を隠す",
+    "addressType": "アドレスタイプ",
+    "mnemonic": "ニーモニック",
+    "privateKey": "秘密鍵"
+  },
   "Send": {
     "title": "送金",
     "balance": "残高",
