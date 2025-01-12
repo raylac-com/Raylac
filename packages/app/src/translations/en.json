@@ -1,79 +1,36 @@
 {
-  "SendConfirmSheet": {
-    "send": "Send",
-    "confirm": "Confirm"
-  },
-  "TokenBalanceDetailsSheet": {
-    "bridge": "Bridge",
-    "swap": "Swap",
-    "send": "Send"
-  },
   "AddAddress": {
+    "createAddress": "Create address",
     "importAccount": "Import account",
-    "watchAddress": "Watch address",
-    "createAddress": "Create address"
-  },
-  "ConfirmBackupPhrase": {
-    "clear": "Clear",
-    "viewBackupPhrase": "View backup phrase",
-    "choose3Words": "Choose 3 words from the list below to complete the phrase",
-    "title": "Confirm Backup"
-  },
-  "CreateAddress": {
-    "create": "Create",
-    "title": "Create Address",
-    "name": "Name",
-    "derivingFrom": "Deriving from {{address}}",
-    "new": "New"
-  },
-  "EditAddressLabel": {
-    "editAddressLabel": "Edit Address Label",
-    "label": "Label",
-    "enterLabelPlaceholder": "Enter a label for this address",
-    "save": "Save",
-    "cancel": "Cancel"
-  },
-  "SaveBackupPhrase": {
-    "hideBackupPhrase": "Hide backup phrase",
-    "revealBackupPhrase": "Reveal backup phrase",
-    "savedBackupPhrase": "I saved my backup phrase",
-    "backupPhrase": "Backup phrase",
-    "copyBackupPhrase": "Copy",
-    "save": "Save",
-    "saveBackupPhrase": "Save your backup phrase",
-    "title": "Save Backup Phrase",
-    "writeDownOrSave": "Write down your backup phrase, or save it in a secure place."
-  },
-  "StartWatch": {
     "watchAddress": "Watch address"
   },
-  "Swap": {
-    "amountTooSmall": "Amount too small",
-    "insufficientBalance": "Insufficient balance",
-    "insufficientOriginChainGas": "Insufficient origin chain gas",
-    "swap": "Swap",
-    "title": "Swap",
-    "totalFee": "Total fee",
-    "totalFeeAmount": "{{amount}} USD",
-    "noTokensFound": "No tokens found",
-    "noTokenBalance": "No {{symbol}} balance found on supported chains for {{address}}"
-  },
-  "Addresses": {
-    "noAddresses": "No addresses",
-    "title": "Addresses",
-    "supportedChains": "Supported chains",
-    "addAddress": "Add address"
+  "AddressDetailsSheet": {
+    "addressType": "Address type",
+    "hidePrivateKey": "Hide private key",
+    "mnemonic": "Mnemonic",
+    "privateKey": "Private key",
+    "title": "Address details",
+    "viewPrivateKey": "View private key"
   },
   "AddressListItem": {
     "default": "Default"
   },
+  "AddressSelector": {
+    "selectAddress": "Select an address"
+  },
+  "Addresses": {
+    "addAddress": "Add address",
+    "noAddresses": "No addresses",
+    "supportedChains": "Supported chains",
+    "title": "Addresses"
+  },
   "Advanced": {
-    "title": "Advanced",
     "rpcUrl": "RPC URL {{url}}",
-    "updateChannel": "Update channel: {{channel}}",
     "runtimeVersion": "Runtime version: {{version}}",
-    "updateId": "Updated ID: {{id}}",
-    "updateAvailable": "Update available: {{available}}"
+    "title": "Advanced",
+    "updateAvailable": "Update available: {{available}}",
+    "updateChannel": "Update channel: {{channel}}",
+    "updateId": "Updated ID: {{id}}"
   },
   "BackupAccount": {
     "backupWarning1": "Anyone who has your backup phrase can access and spend your balance.",
@@ -83,19 +40,49 @@
     "revealBackupPhrase": "Reveal backup phrase",
     "title": "Backup Account"
   },
+  "BridgeListItemSheet": {
+    "address": "Address",
+    "time": "Time",
+    "transaction": "Transaction"
+  },
+  "BridgeTransferListItemSheet": {
+    "from": "From",
+    "time": "Time",
+    "to": "To",
+    "transaction": "Transaction"
+  },
   "ConfirmBackupPhrase": {
     "choose3Words": "Choose 3 words from the list below to complete the phrase",
     "title": "Confirm Backup"
   },
-  "Home": {
-    "noTokens": "No tokens found",
-    "accountBalance": "${{balance}}"
-  },
   "CreateAddress": {
-    "title": "Create Address",
-    "name": "Name",
     "derivingFrom": "Deriving from {{address}}",
-    "new": "New"
+    "name": "Name",
+    "new": "New",
+    "title": "Create Address"
+  },
+  "CrossChainSwapListItemSheet": {
+    "address": "Address",
+    "time": "Time",
+    "transaction": "Transaction"
+  },
+  "EditAddressLabel": {
+    "cancel": "Cancel",
+    "editAddressLabel": "Edit Address Label",
+    "enterLabelPlaceholder": "Enter a label for this address",
+    "label": "Label",
+    "save": "Save"
+  },
+  "Home": {
+    "accountBalance": "${{balance}}",
+    "noTokens": "No tokens found"
+  },
+  "ImportAccount": {
+    "importAccount": "Import {{type}}",
+    "title": "Import Account"
+  },
+  "PendingIndicator": {
+    "pending": "Pending"
   },
   "SaveBackupPhrase": {
     "backupPhrase": "Backup phrase",
@@ -105,15 +92,48 @@
     "title": "Save Backup Phrase",
     "writeDownOrSave": "Write down your backup phrase, or save it in a secure place."
   },
+  "SelectAmount": {
+    "balance": "Balance",
+    "gas": "Gas",
+    "max": "MAX",
+    "recipientReceivesOn": "Recipient receives on",
+    "title": "Select amount",
+    "totalFee": "Total fee",
+    "totalFeeAmount": "{{amount}} USD"
+  },
   "SelectLanguage": {
-    "title": "Select Language",
     "english": "English",
-    "japanese": "Japanese"
+    "japanese": "Japanese",
+    "title": "Select Language"
   },
   "SelectRecipient": {
+    "paste": "Paste",
     "searchUser": "Search user or Ethereum address",
-    "title": "Select recipient",
-    "paste": "Paste"
+    "title": "Select recipient"
+  },
+  "SelectToken": {
+    "noTokensFound": "No tokens found"
+  },
+  "Send": {
+    "availableGas": "Available gas",
+    "availableGasAmount": "${{amount}} ({{eth}} ETH)",
+    "balance": "Balance",
+    "balanceAmount": "${{amount}}",
+    "gas": "Gas",
+    "gasAmount": "${{amount}} ({{eth}} ETH)",
+    "max": "MAX",
+    "recipientReceivesOn": "Recipient receives on",
+    "switchTo": "Switch to {{mode}}",
+    "title": "Send",
+    "totalFee": "Total fee",
+    "totalFeeAmount": "${{amount}}"
+  },
+  "SendConfirmSheet": {
+    "confirm": "Confirm",
+    "send": "Send"
+  },
+  "SendToCard": {
+    "sendTo": "Send to"
   },
   "SignUp": {
     "name": "Name",
@@ -124,62 +144,51 @@
     "usernameLengthWarning": "Username must be at least {{minChars}} characters",
     "usernameTaken": "Username is not available"
   },
+  "SlippageDetailsSheet": {
+    "maxSlippage": "Max slippage",
+    "minimumOutput": "Minimum output",
+    "minimumOutputUsd": "Minimum output (USD)",
+    "slippage": "Slippage"
+  },
   "Start": {
     "createAccount": "Create new account",
     "signIn": "Sign in",
     "title": ""
   },
-  "SelectAmount": {
-    "title": "Select amount",
-    "balance": "Balance",
-    "max": "MAX",
-    "gas": "Gas",
-    "totalFee": "Total fee",
-    "totalFeeAmount": "{{amount}} USD",
-    "recipientReceivesOn": "Recipient receives on"
-  },
-
-  "ImportAccount": {
-    "title": "Import Account",
-    "importAccount": "Import {{type}}"
+  "StartWatch": {
+    "watchAddress": "Watch address"
   },
   "Swap": {
+    "noTokenBalance": "No {{symbol}} balance found on supported chains for {{address}}",
+    "noTokensFound": "No tokens found",
     "title": "Swap",
     "totalFee": "Total fee",
-    "totalFeeAmount": "{{amount}} USD",
-    "noTokensFound": "No tokens found",
-    "noTokenBalance": "No {{symbol}} balance found on supported chains for {{address}}"
+    "totalFeeAmount": "{{amount}} USD"
   },
-  "Send": {
-    "title": "Send",
-    "balance": "Balance",
-    "balanceAmount": "${{amount}}",
-    "gas": "Gas",
-    "gasAmount": "${{amount}} ({{eth}} ETH)",
-    "totalFee": "Total fee",
-    "totalFeeAmount": "${{amount}}",
-    "availableGas": "Available gas",
-    "availableGasAmount": "${{amount}} ({{eth}} ETH)",
-    "max": "MAX",
-    "recipientReceivesOn": "Recipient receives on",
-    "switchTo": "Switch to {{mode}}"
+  "SwapListItemSheet": {
+    "address": "Address",
+    "time": "Time",
+    "transaction": "Transaction"
   },
-  "AddressDetailsSheet": {
-    "title": "Address details",
-    "viewPrivateKey": "View private key",
-    "hidePrivateKey": "Hide private key",
-    "addressType": "Address type",
-    "mnemonic": "Mnemonic",
-    "privateKey": "Private key"
+  "TokenBalanceDetailsSheet": {
+    "bridge": "Bridge",
+    "send": "Send",
+    "swap": "Swap"
+  },
+  "TransferListItemSheet": {
+    "from": "From",
+    "time": "Time",
+    "to": "To",
+    "transaction": "Transaction"
   },
   "common": {
     "address": "Address",
-    "copy": "Copy",
+    "close": "Close",
     "copied": "Copied",
     "copiedAddress": "Copied address",
+    "copy": "Copy",
     "headerBackTitle": "Back",
     "next": "Next",
-    "usd": "USD",
-    "close": "Close"
+    "usd": "USD"
   }
 }
