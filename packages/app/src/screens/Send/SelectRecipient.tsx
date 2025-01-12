@@ -1,14 +1,16 @@
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { Pressable, TextInput, View } from 'react-native';
 import { useEffect, useState } from 'react';
 import colors from '@/lib/styles/colors';
 import { Hex, isAddress } from 'viem';
 import { shortenAddress } from '@/lib/utils';
-import fontSizes from '@/lib/styles/fontSizes';
-import Blockie from '@/components/Blockie/Blockie';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamsList } from '@/navigation/types';
 import useEnsAddress from '@/hooks/useEnsAddress';
 import useUserAddresses from '@/hooks/useUserAddresses';
+import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
+import StyledText from '@/components/StyledText/StyledText';
+import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 
 interface AddressListItemProps {
   address: Hex;
@@ -27,25 +29,7 @@ const AddressListItem = (props: AddressListItemProps) => {
         columnGap: 8,
       }}
     >
-      <Blockie address={address} size={36}></Blockie>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'center',
-          alignItems: 'flex-end',
-          columnGap: 4,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: fontSizes.base,
-            fontWeight: 'bold',
-            color: colors.text,
-          }}
-        >
-          {shortenAddress(address)}
-        </Text>
-      </View>
+      <WalletIconAddress address={address} />
     </Pressable>
   );
 };
@@ -106,12 +90,22 @@ const SelectRecipient = ({ navigation }: Props) => {
       ></TextInput>
       <View style={{ marginTop: 24, width: '100%', rowGap: 20 }}>
         {inputAddress && (
-          <AddressListItem
-            address={inputAddress}
+          <FeedbackPressable
             onPress={() => {
               onAddressPress(inputAddress);
             }}
-          ></AddressListItem>
+            style={{
+              marginBottom: 16,
+              flexDirection: 'row',
+              alignItems: 'center',
+              columnGap: 8,
+            }}
+          >
+            <Feather name="send" size={24} color={colors.border} />
+            <StyledText style={{ fontWeight: 'bold' }}>
+              {shortenAddress(inputAddress)}
+            </StyledText>
+          </FeedbackPressable>
         )}
         {userAddresses?.map(a => (
           <AddressListItem

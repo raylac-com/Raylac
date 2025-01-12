@@ -164,7 +164,10 @@ type Props = NativeStackScreenProps<RootTabsParamsList, 'Swap'>;
 const Swap = ({ route }: Props) => {
   const navigation = useTypedNavigation();
   const { data: writerAddresses } = useWriterAddresses();
-  const { fromToken } = route.params ?? { fromToken: null };
+  const { fromToken, bridge } = route.params ?? {
+    fromToken: null,
+    bridge: false,
+  };
 
   //
   // Local State
@@ -240,10 +243,16 @@ const Swap = ({ route }: Props) => {
   // Hook to set the initial input token
   useEffect(() => {
     // If the fromToken is provided and the inputToekn is null, set the inputToken
-    if (fromToken && inputToken === null) {
+    if (fromToken) {
       setInputToken(fromToken);
+
+      // If the bridge flag is true, set the outputToken to ETH
+      if (bridge) {
+        setOutputToken(fromToken);
+        setOutputChainId(fromToken.addresses[0].chainId);
+      }
     }
-  }, [fromToken]);
+  }, [fromToken, bridge]);
 
   // Hook to set the initial input chain id
   useEffect(() => {
@@ -254,8 +263,16 @@ const Swap = ({ route }: Props) => {
     ) {
       // Set `inputChainId` to the chain with the most balance (the `chainBalances` array is sorted by balance)
       setInputChainId(inputTokenBalances.chainBalances[0].chainId);
+
+      // If the bridge flag is true, set the outputChainId to the inputChainId
+      if (bridge) {
+        setOutputToken(inputToken);
+        if (inputTokenBalances.chainBalances.length > 1) {
+          setOutputChainId(inputTokenBalances.chainBalances[1].chainId);
+        }
+      }
     }
-  }, [inputTokenBalances]);
+  }, [inputTokenBalances, bridge]);
 
   useEffect(() => {
     if (getSwapQuoteError) {

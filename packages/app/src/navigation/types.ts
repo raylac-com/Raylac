@@ -6,6 +6,7 @@ export type RootTabsParamsList = {
   Swap:
     | {
         fromToken: Token;
+        bridge?: boolean;
       }
     | undefined;
   History:
@@ -98,4 +99,7 @@ export type RootStackParamsList = {
 
   AddAddress: undefined;
   CreateAddress: undefined;
+  EditAddressLabel: {
+    address: Hex;
+  };
 };

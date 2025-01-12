@@ -88,7 +88,10 @@ const AddressListItem = ({ address }: { address: UserAddress }) => {
             <Feather name="copy" size={20} color={colors.border} />
           </Pressable>
           <Pressable onPress={() => setSelectedAddress(address)}>
-            <WalletIconAddress address={address.address} />
+            <WalletIconAddress
+              address={address.address}
+              label={address.label}
+            />
           </Pressable>
         </View>
         <Feather
@@ -159,7 +162,8 @@ const Addresses = () => {
         contentContainerStyle={{ rowGap: 16 }}
       />
       <StyledButton
-        title={t('Addresses.addAddress')}
+        icon={<Feather name="plus" size={20} color={colors.background} />}
+        title={t('addAddress')}
         onPress={onAddAddressPress}
       />
     </View>

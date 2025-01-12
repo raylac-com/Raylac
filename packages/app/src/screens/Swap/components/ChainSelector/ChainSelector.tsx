@@ -1,4 +1,4 @@
-import { getChainFromId, supportedChains, Token } from '@raylac/shared';
+import { getChainName, supportedChains, Token } from '@raylac/shared';
 import ChainLogo from '@/components/ChainLogo/ChainLogo';
 import Feather from '@expo/vector-icons/Feather';
 import { useRef, useState } from 'react';
@@ -21,7 +21,7 @@ const ChainListItem = ({
       onPress={onPress}
     >
       <ChainLogo chainId={chainId} size={16} />
-      <StyledText>{getChainFromId(chainId).name}</StyledText>
+      <StyledText>{getChainName(chainId)}</StyledText>
     </Pressable>
   );
 };
@@ -91,7 +91,7 @@ const ChainSelector = ({
         onPress={() => setIsChainsSheetOpen(true)}
       >
         <ChainLogo chainId={chainId} size={16} />
-        <StyledText>{getChainFromId(chainId).name}</StyledText>
+        <StyledText>{getChainName(chainId)}</StyledText>
         <Feather name="chevron-down" size={20} color={colors.border} />
       </Pressable>
       <SelectChainSheet

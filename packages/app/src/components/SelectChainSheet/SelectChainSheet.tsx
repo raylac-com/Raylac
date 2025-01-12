@@ -1,6 +1,6 @@
 import StyledText from '@/components/StyledText/StyledText';
 import { getChainIcon, triggerHapticFeedback } from '@/lib/utils';
-import { getChainFromId, Token } from '@raylac/shared';
+import { getChainFromId, getChainName, Token } from '@raylac/shared';
 import { Pressable, View } from 'react-native';
 import { Image } from 'expo-image';
 import { Chain } from 'viem';
@@ -22,7 +22,7 @@ const ChainListItem = ({ chain }: { chain: Chain }) => {
         source={getChainIcon(chain.id)}
         style={{ width: 32, height: 32 }}
       ></Image>
-      <StyledText>{chain.name}</StyledText>
+      <StyledText>{getChainName(chain.id)}</StyledText>
     </View>
   );
 };
@@ -66,7 +66,7 @@ const SelectChainSheet = ({
       onDismiss={onClose}
       enablePanDownToClose
       enableDynamicSizing={false}
-      snapPoints={['100%']}
+      snapPoints={['70%']}
     >
       <View
         style={{

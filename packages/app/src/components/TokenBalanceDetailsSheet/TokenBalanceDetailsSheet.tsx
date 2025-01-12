@@ -133,6 +133,20 @@ const TokenBalanceDetailsSheet = ({
     });
   };
 
+  const onBridgePress = () => {
+    onClose();
+
+    navigation.navigate('Tabs', {
+      screen: 'Swap',
+      params: {
+        fromToken: token,
+        bridge: true,
+      },
+    });
+  };
+
+  const canBridge = token.addresses.length > 1;
+
   return (
     <BottomSheet
       ref={ref}
@@ -212,27 +226,63 @@ const TokenBalanceDetailsSheet = ({
             </View>
           </View>
           <View
-            style={{
-              width: '100%',
-              flexDirection: 'row',
-              columnGap: 8,
-              paddingBottom: 32,
-            }}
+            style={{ flexDirection: 'column', rowGap: 8, paddingBottom: 32 }}
           >
-            <View style={{ flex: 1 }}>
-              <StyledButton
-                variant="outline"
-                icon={<Feather name="send" size={18} color={colors.border} />}
-                title="Send"
-                onPress={onSendPress}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <StyledButton
-                icon={<Feather name="repeat" size={18} color={colors.border} />}
-                title="Swap"
-                onPress={onSwapPress}
-              />
+            {canBridge && (
+              <View
+                style={{
+                  width: '100%',
+                  flexDirection: 'row',
+                  columnGap: 8,
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <StyledButton
+                    variant="outline"
+                    icon={
+                      <Feather name="zap" size={18} color={colors.border} />
+                    }
+                    title="Bridge"
+                    onPress={onBridgePress}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <StyledButton
+                    icon={
+                      <Feather name="repeat" size={18} color={colors.border} />
+                    }
+                    title="Swap"
+                    onPress={onSwapPress}
+                  />
+                </View>
+              </View>
+            )}
+            <View
+              style={{
+                width: '100%',
+                flexDirection: 'row',
+                columnGap: 8,
+              }}
+            >
+              <View style={{ flex: 1 }}>
+                <StyledButton
+                  variant="outline"
+                  icon={<Feather name="send" size={18} color={colors.border} />}
+                  title="Send"
+                  onPress={onSendPress}
+                />
+              </View>
+              {!canBridge && (
+                <View style={{ flex: 1 }}>
+                  <StyledButton
+                    icon={
+                      <Feather name="repeat" size={18} color={colors.border} />
+                    }
+                    title="Swap"
+                    onPress={onSwapPress}
+                  />
+                </View>
+              )}
             </View>
           </View>
         </View>

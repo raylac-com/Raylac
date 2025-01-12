@@ -6,7 +6,7 @@ import colors from '@/lib/styles/colors';
 import { View } from 'react-native';
 import {
   ETH,
-  getChainFromId,
+  getChainName,
   GetSingleInputSwapQuoteReturnType,
   Token,
   TokenAmount,
@@ -36,7 +36,7 @@ const OriginChainGas = ({
       >
         <ChainLogo chainId={chainId} size={20} />
         <StyledText style={{ color: colors.border }}>
-          {`${getChainFromId(chainId).name} gas`}
+          {`${getChainName(chainId)} gas`}
         </StyledText>
       </View>
       <View
@@ -71,7 +71,7 @@ const DestinationChainGas = ({
       >
         <ChainLogo chainId={chainId} size={20} />
         <StyledText style={{ color: colors.border }}>
-          {`${getChainFromId(chainId).name} gas`}
+          {`${getChainName(chainId)} gas`}
         </StyledText>
       </View>
       <View

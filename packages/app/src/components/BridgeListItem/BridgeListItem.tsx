@@ -7,7 +7,7 @@ import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import BridgeListItemSheet from '../BridgeListItemSheet/BridgeListItemSheet';
 import { useState } from 'react';
 import PendingIndicator from '../PendingIndicator/PendingIndicator';
-import { BridgeHistoryItem, getChainFromId } from '@raylac/shared';
+import { BridgeHistoryItem, getChainName } from '@raylac/shared';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 
 const BridgeListItem = (props: {
@@ -70,11 +70,7 @@ const BridgeListItem = (props: {
                   <StyledText
                     style={{ color: colors.border }}
                   >{`Bridge`}</StyledText>
-                  <Feather
-                    name={'repeat'}
-                    size={16}
-                    color={colors.subbedText}
-                  />
+                  <Feather name={'zap'} size={16} color={colors.subbedText} />
                 </View>
               )}
             </View>
@@ -82,7 +78,7 @@ const BridgeListItem = (props: {
               <StyledText
                 style={{ color: colors.subbedText, fontWeight: 'bold' }}
               >
-                {`${getChainFromId(props.bridge.fromChainId).name}`}
+                {`${getChainName(props.bridge.fromChainId)}`}
               </StyledText>
               <Feather
                 name={'arrow-right'}
@@ -92,7 +88,7 @@ const BridgeListItem = (props: {
               <StyledText
                 style={{ color: colors.subbedText, fontWeight: 'bold' }}
               >
-                {`${getChainFromId(props.bridge.toChainId).name}`}
+                {`${getChainName(props.bridge.toChainId)}`}
               </StyledText>
             </View>
           </View>
