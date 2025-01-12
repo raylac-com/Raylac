@@ -9,6 +9,7 @@ import { createHTTPServer } from '@trpc/server/adapters/standalone';
 import { Hex } from 'viem';
 import getSupportedTokens from './api/getSupportedTokens/getSupportedTokens';
 import getSupportedTokensMock from './api/getSupportedTokens/getSupportedTokens.mock';
+import getTrendingTokens from './api/getTrendingTokens/getTrendingTokens';
 import getLidoApyMock from './api/getLidoApy/getLidoApy.mock';
 import submitSingleInputSwapMock from './api/submitSingleInputSwap/submitSingleInputSwap.mock';
 import sendTxMock from './api/sendTx/sendTx.mock';
@@ -162,6 +163,10 @@ export const appRouter = router({
 
       return response;
     }),
+
+  getTrendingTokens: publicProcedure.query(async () => {
+    return getTrendingTokens();
+  }),
 
   getTokenPrice: publicProcedure
     .input(z.object({ token: z.any() }))
