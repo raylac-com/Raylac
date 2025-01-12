@@ -1,4 +1,63 @@
 {
+  "SendConfirmSheet": {
+    "send": "Send",
+    "confirm": "Confirm"
+  },
+  "TokenBalanceDetailsSheet": {
+    "bridge": "Bridge",
+    "swap": "Swap",
+    "send": "Send"
+  },
+  "AddAddress": {
+    "importAccount": "Import account",
+    "watchAddress": "Watch address",
+    "createAddress": "Create address"
+  },
+  "ConfirmBackupPhrase": {
+    "clear": "Clear",
+    "viewBackupPhrase": "View backup phrase",
+    "choose3Words": "Choose 3 words from the list below to complete the phrase",
+    "title": "Confirm Backup"
+  },
+  "CreateAddress": {
+    "create": "Create",
+    "title": "Create Address",
+    "name": "Name",
+    "derivingFrom": "Deriving from {{address}}",
+    "new": "New"
+  },
+  "EditAddressLabel": {
+    "editAddressLabel": "Edit Address Label",
+    "label": "Label",
+    "enterLabelPlaceholder": "Enter a label for this address",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "SaveBackupPhrase": {
+    "hideBackupPhrase": "Hide backup phrase",
+    "revealBackupPhrase": "Reveal backup phrase",
+    "savedBackupPhrase": "I saved my backup phrase",
+    "backupPhrase": "Backup phrase",
+    "copyBackupPhrase": "Copy",
+    "save": "Save",
+    "saveBackupPhrase": "Save your backup phrase",
+    "title": "Save Backup Phrase",
+    "writeDownOrSave": "Write down your backup phrase, or save it in a secure place."
+  },
+  "StartWatch": {
+    "watchAddress": "Watch address"
+  },
+  "Swap": {
+    "amountTooSmall": "Amount too small",
+    "insufficientBalance": "Insufficient balance",
+    "insufficientOriginChainGas": "Insufficient origin chain gas",
+    "swap": "Swap",
+    "title": "Swap",
+    "totalFee": "Total fee",
+    "totalFeeAmount": "{{amount}} USD",
+    "noTokensFound": "No tokens found",
+    "noTokenBalance": "No {{symbol}} balance found on supported chains for {{address}}"
+  },
   "Addresses": {
     "noAddresses": "No addresses",
     "title": "Addresses",
