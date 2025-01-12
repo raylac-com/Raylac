@@ -135,15 +135,6 @@
   "SendToCard": {
     "sendTo": "Send to"
   },
-  "SignUp": {
-    "name": "Name",
-    "signUp": "Sign up",
-    "title": "Sign Up",
-    "username": "Username",
-    "usernameInvalid": "Username contains invalid characters",
-    "usernameLengthWarning": "Username must be at least {{minChars}} characters",
-    "usernameTaken": "Username is not available"
-  },
   "SlippageDetailsSheet": {
     "maxSlippage": "Max slippage",
     "minimumOutput": "Minimum output",

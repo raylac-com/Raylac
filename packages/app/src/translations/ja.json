@@ -1,11 +1,11 @@
 {
   "AddAddress": {
-    "createAddress": "Create address",
-    "importAccount": "Import account",
-    "watchAddress": "Watch address"
+    "createAddress": "アドレスを作成",
+    "importAccount": "アカウントをインポート",
+    "watchAddress": "アドレスを監視"
   },
   "AddressDetailsSheet": {
-    "addressType": "アドレスタイプ",
+    "addressType": "アドレスの種類",
     "hidePrivateKey": "秘密鍵を隠す",
     "mnemonic": "ニーモニック",
     "privateKey": "秘密鍵",
@@ -46,9 +46,9 @@
     "transaction": "取引"
   },
   "BridgeTransferListItemSheet": {
-    "from": "送信元",
+    "from": "送金元",
     "time": "時間",
-    "to": "送信先",
+    "to": "送金先",
     "transaction": "取引"
   },
   "ConfirmBackupPhrase": {
@@ -67,14 +67,14 @@
     "transaction": "取引"
   },
   "EditAddressLabel": {
-    "cancel": "Cancel",
-    "editAddressLabel": "Edit Address Label",
-    "enterLabelPlaceholder": "Enter a label for this address",
-    "label": "Label",
-    "save": "Save"
+    "cancel": "キャンセル",
+    "editAddressLabel": "アドレスラベルを編集",
+    "enterLabelPlaceholder": "このアドレスのラベルを入力してください",
+    "label": "ラベル",
+    "save": "保存"
   },
   "Home": {
-    "accountBalance": "${{balance}}",
+    "accountBalance": "残高: ${{balance}}",
     "noTokens": "トークンがありません"
   },
   "ImportAccount": {
@@ -82,33 +82,33 @@
     "title": "アカウントをインポート"
   },
   "PendingIndicator": {
-    "pending": "保留中"
+    "pending": "処理中"
   },
   "SaveBackupPhrase": {
-    "backupPhrase": "Backup phrase",
+    "backupPhrase": "復元フレーズ",
     "copyBackupPhrase": "コピー",
     "save": "保存",
-    "saveBackupPhrase": "バックアップフレーズを保存",
-    "title": "バックアップフレーズを保存",
-    "writeDownOrSave": "バックアップフレーズをメモしてください。または安全な場所に保存してください。"
+    "saveBackupPhrase": "復元フレーズを保存",
+    "title": "復元フレーズを保存",
+    "writeDownOrSave": "復元フレーズをメモ、または安全な場所に保存してください"
   },
   "SelectAmount": {
-    "balance": "Balance",
-    "gas": "Gas",
-    "max": "MAX",
-    "recipientReceivesOn": "Recipient receives on",
-    "title": "Select amount",
-    "totalFee": "Total fee",
+    "balance": "残高",
+    "gas": "ガス",
+    "max": "最大",
+    "recipientReceivesOn": "受取チェーン",
+    "title": "金額を選択",
+    "totalFee": "合計手数料",
     "totalFeeAmount": "{{amount}} USD"
   },
   "SelectLanguage": {
-    "english": "英語",
+    "english": "English",
     "japanese": "日本語",
     "title": "言語"
   },
   "SelectRecipient": {
-    "paste": "Paste",
-    "searchUser": "ユーザー名、またはETHアドレスで検索",
+    "paste": "貼り付け",
+    "searchUser": "ENS、またはETHアドレスで検索",
     "title": "送金先を選択"
   },
   "SelectToken": {
@@ -129,25 +129,16 @@
     "totalFeeAmount": "${{amount}}"
   },
   "SendConfirmSheet": {
-    "confirm": "Confirm",
-    "send": "Send"
+    "confirm": "送金",
+    "send": "送金"
   },
   "SendToCard": {
     "sendTo": "送信先"
   },
-  "SignUp": {
-    "name": "名前",
-    "signUp": "次へ",
-    "title": "アカウント作成",
-    "username": "ユーザー名",
-    "usernameInvalid": "ユーザー名は英数字のみ使用できます",
-    "usernameLengthWarning": "ユーザー名は{{minChars}}文字以上である必要があります",
-    "usernameTaken": "このユーザー名は既に使用されています"
-  },
   "SlippageDetailsSheet": {
     "maxSlippage": "最大スリッページ",
-    "minimumOutput": "最小出力",
-    "minimumOutputUsd": "最小出力 (USD)",
+    "minimumOutput": "最小受け取り",
+    "minimumOutputUsd": "最小受け取り (USD)",
     "slippage": "スリッページ"
   },
   "Start": {
@@ -156,7 +147,7 @@
     "title": "アカウント作成"
   },
   "StartWatch": {
-    "watchAddress": "Watch address"
+    "watchAddress": "アドレスを監視"
   },
   "Swap": {
     "noTokenBalance": "{{address}}のサポートされているチェーンで{{symbol}}の残高が見つかりません",
@@ -171,22 +162,22 @@
     "transaction": "取引"
   },
   "TokenBalanceDetailsSheet": {
-    "bridge": "Bridge",
-    "send": "Send",
-    "swap": "Swap"
+    "bridge": "ブリッジ",
+    "send": "送金",
+    "swap": "スワップ"
   },
   "TransferListItemSheet": {
-    "from": "送信元",
+    "from": "送金元",
     "time": "時間",
-    "to": "送信先",
+    "to": "送金先",
     "transaction": "取引"
   },
   "common": {
-    "address": "Address",
-    "close": "Close",
+    "address": "アドレス",
+    "close": "閉じる",
     "copied": "コピーしました",
     "copiedAddress": "アドレスをコピーしました",
-    "copy": "Copy",
+    "copy": "コピー",
     "headerBackTitle": "戻る",
     "next": "次へ",
     "usd": "USD"
