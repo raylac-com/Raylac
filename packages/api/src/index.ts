@@ -39,6 +39,7 @@ import sendBridgeTx from './api/sendBridgeTx/sendBridgeTx';
 import getTokenBalancesMock from './api/getTokenBalances/getTokenBalances.mock';
 import buildBridgeSendMock from './api/buildBridgeSend/buildBridgeSend.mock';
 import getHistoryMock from './api/getHistory/getHistory.mock';
+import getTokenData from './api/getTokenData/getTokenData';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -167,6 +168,12 @@ export const appRouter = router({
   getTrendingTokens: publicProcedure.query(async () => {
     return getTrendingTokens();
   }),
+
+  getTokenData: publicProcedure
+    .input(z.object({ chainId: z.number(), tokenAddress: z.string() }))
+    .query(async ({ input }) => {
+      return getTokenData(input as { tokenAddress: Hex; chainId: number });
+    }),
 
   getTokenPrice: publicProcedure
     .input(z.object({ token: z.any() }))

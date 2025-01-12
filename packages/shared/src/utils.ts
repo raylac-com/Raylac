@@ -591,3 +591,22 @@ export const checkIsBalanceSufficient = (
 
   return isBalanceSufficient;
 };
+
+export const chainIdToCoingeckoId = (chainId: number) => {
+  switch (chainId) {
+    case chains.mainnet.id:
+      return 'ethereum';
+    case chains.base.id:
+      return 'base';
+    case chains.arbitrum.id:
+      return 'arbitrum';
+    case chains.optimism.id:
+      return 'optimism';
+    case chains.polygon.id:
+      return 'polygon-pos';
+    default:
+      throw new Error(
+        `chainIdToCoingeckoId: Chain ID ${chainId} not supported`
+      );
+  }
+};

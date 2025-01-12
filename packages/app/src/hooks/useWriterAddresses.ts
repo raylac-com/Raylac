@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 
 const useWriterAddresses = () => {
   return useQuery({
-    queryKey: userKeys.userAddresses,
+    queryKey: userKeys.writerAddresses,
     queryFn: async () => {
       const addresses = await getUserAddresses();
       return addresses.filter(

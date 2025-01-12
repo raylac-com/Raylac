@@ -37,6 +37,9 @@ const useImportMnemonic = () => {
       await queryClient.invalidateQueries({
         queryKey: userKeys.userAddresses,
       });
+      await queryClient.invalidateQueries({
+        queryKey: userKeys.writerAddresses,
+      });
 
       return account.address;
     },

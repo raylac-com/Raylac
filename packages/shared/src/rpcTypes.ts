@@ -8,6 +8,7 @@ import {
   SignedSingleInputSwapStep,
   SignedApproveStep,
   TokenAmount,
+  MultiCurrencyValue,
 } from './types';
 
 export enum TRPCErrorMessage {
@@ -258,3 +259,20 @@ export type BuildBridgeSendReturnType = {
 };
 
 export type GetTokenUsdPriceReturnType = number | null;
+
+export interface GetTokenRequestBody {
+  tokenAddress: Hex;
+  chainId: number;
+}
+
+export interface GetTokenDataReturnType {
+  description: {
+    en: string;
+    ja: string;
+  };
+  marketCap: MultiCurrencyValue;
+  price: MultiCurrencyValue;
+  priceChange24h: MultiCurrencyValue;
+  priceChangePercent24h: string;
+  totalVolume: MultiCurrencyValue;
+}

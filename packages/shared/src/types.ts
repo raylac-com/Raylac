@@ -482,3 +482,8 @@ export type DexScreenerPairsResponse = {
     };
   }[];
 };
+
+export interface MultiCurrencyValue {
+  usd: string;
+  jpy: string;
+}
