@@ -2,6 +2,7 @@ import Feather from '@expo/vector-icons/Feather';
 import * as Clipboard from 'expo-clipboard';
 import StyledText from '@/components/StyledText/StyledText';
 import StyledButton from '@/components/StyledButton/StyledButton';
+import { useTranslation } from 'react-i18next';
 import { Alert, TextInput, View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import { useState } from 'react';
@@ -12,6 +13,7 @@ import useEnsAddress from '@/hooks/useEnsAddress';
 import SearchInputAccessory from '@/components/SearchInputAccessory/SearchInputAccessory';
 
 const StartWatch = () => {
+  const { t } = useTranslation('StartWatch');
   const [address, setAddress] = useState('');
   const { mutateAsync: startWatch } = useStartWatch();
 
@@ -90,7 +92,7 @@ const StartWatch = () => {
         />
       </View>
       <StyledButton
-        title="Watch address"
+        title={t('watchAddress')}
         onPress={onStartPress}
         disabled={!canStart}
       />
