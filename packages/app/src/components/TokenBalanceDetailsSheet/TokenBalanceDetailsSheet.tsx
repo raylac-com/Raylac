@@ -6,6 +6,7 @@ import {
   PerAddressTokenBalance,
   Token,
 } from '@raylac/shared';
+import { useTranslation } from 'react-i18next';
 import StyledText from '../StyledText/StyledText';
 import { View } from 'react-native';
 import TokenLogo from '../TokenLogo/TokenLogo';
@@ -107,6 +108,7 @@ const TokenBalanceDetailsSheet = ({
   token,
   onClose,
 }: TokenBalanceDetailsSheetProps) => {
+  const { t } = useTranslation('TokenBalanceDetailsSheet');
   const ref = useRef<BottomSheet>(null);
   const insets = useSafeAreaInsets();
   const navigation = useTypedNavigation();
@@ -242,7 +244,7 @@ const TokenBalanceDetailsSheet = ({
                     icon={
                       <Feather name="zap" size={18} color={colors.border} />
                     }
-                    title="Bridge"
+                    title={t('bridge')}
                     onPress={onBridgePress}
                   />
                 </View>
@@ -251,7 +253,7 @@ const TokenBalanceDetailsSheet = ({
                     icon={
                       <Feather name="repeat" size={18} color={colors.border} />
                     }
-                    title="Swap"
+                    title={t('swap')}
                     onPress={onSwapPress}
                   />
                 </View>
@@ -268,7 +270,7 @@ const TokenBalanceDetailsSheet = ({
                 <StyledButton
                   variant="outline"
                   icon={<Feather name="send" size={18} color={colors.border} />}
-                  title="Send"
+                  title={t('send')}
                   onPress={onSendPress}
                 />
               </View>

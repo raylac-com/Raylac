@@ -1,5 +1,6 @@
 import Feather from '@expo/vector-icons/Feather';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import SwapInputCard from './components/SwapInputCard/SwapInputCard';
 import SwapOutputCard from './components/SwapOutputCard/SwapOutputCard';
 import { Hex, parseUnits, zeroAddress } from 'viem';
@@ -49,16 +50,17 @@ const SwapButton = ({
   isLoading: boolean;
   onPress: () => void;
 }) => {
+  const { t } = useTranslation('Swap');
   let label;
 
   if (isAmountTooSmall) {
-    label = 'Amount too small';
+    label = t('amountTooSmall');
   } else if (isBalanceSufficient === false) {
-    label = 'Insufficient balance';
+    label = t('insufficientBalance');
   } else if (isOriginChainGasSufficient === false) {
-    label = 'Insufficient origin chain gas';
+    label = t('insufficientOriginChainGas');
   } else {
-    label = 'Swap';
+    label = t('swap');
   }
 
   const disabled =

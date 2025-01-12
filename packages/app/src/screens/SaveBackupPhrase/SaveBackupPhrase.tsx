@@ -2,6 +2,7 @@ import MnemonicWord from '@/components/MnemonicWord/MnemonicWord';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import { getMnemonic } from '@/lib/key';
+import { useTranslation } from 'react-i18next';
 import colors from '@/lib/styles/colors';
 import fontSizes from '@/lib/styles/fontSizes';
 import spacing from '@/lib/styles/spacing';
@@ -17,6 +18,7 @@ import { RootStackParamsList } from '@/navigation/types';
 type Props = NativeStackScreenProps<RootStackParamsList, 'SaveBackupPhrase'>;
 
 const SaveBackupPhrase = ({ route }: Props) => {
+  const { t } = useTranslation('SaveBackupPhrase');
   const { genesisAddress } = route.params;
   const insets = useSafeAreaInsets();
 
@@ -150,12 +152,12 @@ const SaveBackupPhrase = ({ route }: Props) => {
         <View style={{ width: '62%', marginTop: spacing.default }}>
           {mnemonic ? (
             <StyledButton
-              title={'Hide backup phrase'}
+              title={t('hideBackupPhrase')}
               onPress={onHidePress}
             ></StyledButton>
           ) : (
             <StyledButton
-              title={'Reveal backup phrase'}
+              title={t('revealBackupPhrase')}
               onPress={onRevealPress}
             ></StyledButton>
           )}
@@ -168,7 +170,7 @@ const SaveBackupPhrase = ({ route }: Props) => {
         }}
       >
         <StyledButton
-          title="I saved my backup phrase"
+          title={t('savedBackupPhrase')}
           onPress={() => {
             navigation.navigate('ConfirmBackupPhrase', {
               genesisAddress,
