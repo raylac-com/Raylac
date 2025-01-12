@@ -2,6 +2,7 @@ import Feather from '@expo/vector-icons/Feather';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { Hex } from 'viem';
 import { UserAddress } from '@/types';
 import { View } from 'react-native';
@@ -111,6 +112,7 @@ const SendConfirmSheet = ({
   onConfirm,
   isSending,
 }: SendConfirmSheetProps) => {
+  const { t } = useTranslation('SendConfirmSheet');
   const insets = useSafeAreaInsets();
   const ref = useRef<BottomSheetModal>(null);
 
@@ -146,7 +148,9 @@ const SendConfirmSheet = ({
         <View style={{ flexDirection: 'column', rowGap: 24 }}>
           <StyledText
             style={{ fontSize: fontSizes.twoXLarge, fontWeight: 'bold' }}
-          >{`Send`}</StyledText>
+          >
+            {t('send')}
+          </StyledText>
           <View style={{ flexDirection: 'column', rowGap: 16 }}>
             <ToCard
               address={toAddress}
@@ -177,7 +181,7 @@ const SendConfirmSheet = ({
           </View>
         </View>
         <StyledButton
-          title="Confirm"
+          title={t('confirm')}
           onPress={onConfirm}
           isLoading={isSending}
         />
