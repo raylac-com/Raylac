@@ -7,6 +7,7 @@ import StyledText from '@/components/StyledText/StyledText';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
 import colors from '@/lib/styles/colors';
+import { useTranslation } from 'react-i18next';
 import { RootStackParamsList } from '@/navigation/types';
 import { TokenAmount, Token } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -289,6 +290,7 @@ const TokenListItem = ({
 type Props = NativeStackScreenProps<RootStackParamsList, 'SelectToken'>;
 
 const SelectToken = ({ navigation, route }: Props) => {
+  const { t } = useTranslation('SelectToken');
   const insets = useSafeAreaInsets();
   const toAddress = route.params.toAddress;
   const { data: writerAddresses } = useWriterAddresses();
@@ -369,7 +371,7 @@ const SelectToken = ({ navigation, route }: Props) => {
               alignItems: 'center',
             }}
           >
-            <StyledText>{`No tokens found`}</StyledText>
+            <StyledText>{t('noTokensFound')}</StyledText>
           </View>
         }
         sections={

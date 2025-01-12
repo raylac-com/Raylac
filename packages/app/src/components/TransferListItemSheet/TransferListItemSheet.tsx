@@ -4,6 +4,7 @@ import { getExplorerUrl, TransferHistoryItem } from '@raylac/shared';
 import { useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import StyledText from '../StyledText/StyledText';
+import { useTranslation } from 'react-i18next';
 import fontSizes from '@/lib/styles/fontSizes';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import colors from '@/lib/styles/colors';
@@ -25,6 +26,7 @@ const shortenTxHash = (txHash: string) => {
 
 const FromAddress = ({ address }: { address: Hex }) => {
   const { data: senderEnsName } = useEnsName(address);
+  const { t } = useTranslation('TransferListItemSheet');
   const onCopyPress = () => {
     copyToClipboard(address);
 
@@ -42,7 +44,7 @@ const FromAddress = ({ address }: { address: Hex }) => {
         justifyContent: 'space-between',
       }}
     >
-      <StyledText style={{ color: colors.subbedText }}>{`From`} </StyledText>
+      <StyledText style={{ color: colors.subbedText }}>{t('from')} </StyledText>
       <FeedbackPressable
         onPress={onCopyPress}
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
@@ -58,6 +60,7 @@ const FromAddress = ({ address }: { address: Hex }) => {
 
 const ToAddress = ({ address }: { address: Hex }) => {
   const { data: recipientEnsName } = useEnsName(address);
+  const { t } = useTranslation('TransferListItemSheet');
   const onCopyPress = () => {
     copyToClipboard(address);
 
@@ -75,7 +78,7 @@ const ToAddress = ({ address }: { address: Hex }) => {
         justifyContent: 'space-between',
       }}
     >
-      <StyledText style={{ color: colors.subbedText }}>{`To`} </StyledText>
+      <StyledText style={{ color: colors.subbedText }}>{t('to')} </StyledText>
       <FeedbackPressable
         onPress={onCopyPress}
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
@@ -90,6 +93,7 @@ const ToAddress = ({ address }: { address: Hex }) => {
 };
 
 const TxHash = ({ txHash, chainId }: { txHash: string; chainId: number }) => {
+  const { t } = useTranslation('TransferListItemSheet');
   return (
     <FeedbackPressable
       style={{ flexDirection: 'row', justifyContent: 'space-between' }}
@@ -98,7 +102,7 @@ const TxHash = ({ txHash, chainId }: { txHash: string; chainId: number }) => {
       }}
     >
       <StyledText style={{ color: colors.subbedText }}>
-        {`Transaction`}{' '}
+        {t('transaction')}{' '}
       </StyledText>
       <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
         {`${shortenTxHash(txHash)}`}
@@ -108,6 +112,7 @@ const TxHash = ({ txHash, chainId }: { txHash: string; chainId: number }) => {
 };
 
 const DateTime = ({ date }: { date: Date }) => {
+  const { t } = useTranslation('TransferListItemSheet');
   return (
     <View
       style={{
@@ -116,7 +121,7 @@ const DateTime = ({ date }: { date: Date }) => {
         justifyContent: 'space-between',
       }}
     >
-      <StyledText style={{ color: colors.subbedText }}>{`Time`} </StyledText>
+      <StyledText style={{ color: colors.subbedText }}>{t('time')} </StyledText>
       <StyledText style={{ color: colors.subbedText }}>
         {new Date(date).toLocaleDateString()}{' '}
         {new Date(date).toLocaleTimeString()}
