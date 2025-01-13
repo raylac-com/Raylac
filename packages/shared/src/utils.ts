@@ -1,4 +1,4 @@
-import { TokenAmount, Token } from './types';
+import { TokenAmount, Token, MultiCurrencyValue } from './types';
 import { Chain, formatUnits, Hex, parseUnits, PrivateKeyAccount } from 'viem';
 import * as chains from 'viem/chains';
 import { getAlchemyRpcUrl } from './ethRpc';
@@ -145,27 +145,44 @@ export const formatUsdValue = (num: BigNumber): string => {
   return formatNumber(num);
 };
 
+export const formatJpyValue = (num: BigNumber): string => {
+  return num.toFixed();
+};
+
 export const formatTokenAmount = ({
   amount,
   token,
-  tokenPriceUsd,
+  tokenPrice,
 }: {
   amount: bigint;
   token: Token;
-  tokenPriceUsd: number;
+  tokenPrice: MultiCurrencyValue;
 }): TokenAmount => {
   const usdValue = new BigNumber(
     formatUnits(amount, token.decimals)
-  ).multipliedBy(tokenPriceUsd);
+  ).multipliedBy(tokenPrice.usd);
+
+  const jpyValue = new BigNumber(
+    formatUnits(amount, token.decimals)
+  ).multipliedBy(tokenPrice.jpy);
 
   const usdValueFormatted = formatUsdValue(usdValue);
+  const jpyValueFormatted = formatUsdValue(jpyValue);
 
   const amountFormatted: TokenAmount = {
     amount: amount.toString(),
     formatted: formatAmount(amount.toString(), token.decimals),
-    usdValue: usdValue.toFixed(),
-    usdValueFormatted,
-    tokenPriceUsd,
+    currencyValue: {
+      raw: {
+        usd: usdValue.toFixed(),
+        jpy: jpyValue.toFixed(),
+      },
+      formatted: {
+        usd: usdValueFormatted,
+        jpy: jpyValueFormatted,
+      },
+    },
+    tokenPrice,
   };
 
   return amountFormatted;
@@ -180,16 +197,16 @@ const getTokenPriceFromTokenBalances = ({
 }: {
   tokenBalances: TokenBalancesReturnType;
   token: Token;
-}): number => {
-  const tokenPriceUsd = tokenBalances.find(
+}): MultiCurrencyValue => {
+  const tokenPrice = tokenBalances.find(
     balance => balance.token.id === token.id
-  )?.balance.tokenPriceUsd;
+  )?.balance.tokenPrice;
 
-  if (!tokenPriceUsd) {
+  if (!tokenPrice) {
     throw new Error(`Token price not found for token ${token.symbol}`);
   }
 
-  return tokenPriceUsd;
+  return tokenPrice;
 };
 
 /**
@@ -204,7 +221,7 @@ export const getChainTokenBalance = ({
   chainId: number;
   token: Token;
 }): TokenAmount => {
-  const tokenPriceUsd = getTokenPriceFromTokenBalances({
+  const tokenPrice = getTokenPriceFromTokenBalances({
     tokenBalances,
     token,
   });
@@ -221,7 +238,7 @@ export const getChainTokenBalance = ({
   const balance = formatTokenAmount({
     amount: totalBalance,
     token,
-    tokenPriceUsd,
+    tokenPrice,
   });
 
   return balance;
@@ -252,9 +269,20 @@ export const getAddressChainTokenBalance = ({
     return {
       amount: '0',
       formatted: '0',
-      usdValue: '0',
-      usdValueFormatted: '0',
-      tokenPriceUsd: 0,
+      currencyValue: {
+        raw: {
+          usd: '0',
+          jpy: '0',
+        },
+        formatted: {
+          usd: '0',
+          jpy: '0',
+        },
+      },
+      tokenPrice: getTokenPriceFromTokenBalances({
+        tokenBalances,
+        token,
+      }),
     };
   }
 
@@ -265,7 +293,9 @@ export const getTotalUsdValue = (tokenBalances: TokenBalancesReturnType) => {
   return formatUsdValue(
     tokenBalances.reduce(
       (acc, tokenBalance) =>
-        acc.plus(new BigNumber(Number(tokenBalance.balance.usdValue))),
+        acc.plus(
+          new BigNumber(Number(tokenBalance.balance.currencyValue.raw.usd))
+        ),
       new BigNumber(0)
     )
   );
@@ -302,7 +332,7 @@ export const groupTokenBalancesByToken = ({
     const formattedTotalBalance = formatTokenAmount({
       amount: totalBalance,
       token: balances[0].token,
-      tokenPriceUsd: Number(balances[0].balance.tokenPriceUsd),
+      tokenPrice: balances[0].balance.tokenPrice,
     });
 
     const token = balances[0].token;
@@ -312,7 +342,10 @@ export const groupTokenBalancesByToken = ({
 
   // Sort by usd value in descending order
   const sortedGroupedByToken = groupedByToken.sort((a, b) => {
-    return Number(b.totalBalance.usdValue) - Number(a.totalBalance.usdValue);
+    return (
+      Number(b.totalBalance.currencyValue.raw.usd) -
+      Number(a.totalBalance.currencyValue.raw.usd)
+    );
   });
 
   return sortedGroupedByToken;
@@ -379,7 +412,7 @@ export const getPerAddressTokenBalance = ({
     const formattedTotalBalance = formatTokenAmount({
       amount: totalBalance,
       token,
-      tokenPriceUsd: Number(addressBalances[0].balance.tokenPriceUsd),
+      tokenPrice: addressBalances[0].balance.tokenPrice,
     });
 
     balancesPerAddress.push({
@@ -398,15 +431,18 @@ export const getPerAddressTokenBalance = ({
     BigInt(0)
   );
 
-  const tokenPriceUsd =
+  const tokenPrice =
     balancesPerAddress.length > 0
-      ? Number(balancesPerAddress[0].totalBalance.tokenPriceUsd)
-      : 0;
+      ? balancesPerAddress[0].totalBalance.tokenPrice
+      : {
+          usd: '0',
+          jpy: '0',
+        };
 
   const formattedTotalBalance = formatTokenAmount({
     amount: totalBalance,
     token,
-    tokenPriceUsd,
+    tokenPrice,
   });
 
   return {
@@ -465,7 +501,7 @@ export const getTokenBalancePerAddress = ({
       const formattedTotalBalance = formatTokenAmount({
         amount: totalBalance,
         token: tokenBalances[0].token,
-        tokenPriceUsd: tokenBalances[0].balance.tokenPriceUsd,
+        tokenPrice: tokenBalances[0].balance.tokenPrice,
       });
 
       groupByTokens.push({
@@ -570,6 +606,7 @@ export const containsNonNumericCharacters = (text: string) => {
 export const checkIsBalanceSufficient = (
   amountInputText: string,
   tokenBalance: TokenAmount,
+  // TODO: Other other currencies as well
   amountInputMode: 'token' | 'usd',
   token: Token
 ) => {
@@ -580,7 +617,7 @@ export const checkIsBalanceSufficient = (
   } else {
     // Convert the usd amount to a token amount in string representation
     const inputTokenAmount = new BigNumber(amountInputText)
-      .dividedBy(tokenBalance.tokenPriceUsd)
+      .dividedBy(tokenBalance.tokenPrice.usd)
       .toFixed();
 
     // Parse the token amount

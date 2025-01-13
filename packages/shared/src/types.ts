@@ -281,9 +281,11 @@ export enum TokenSet {
 export interface TokenAmount {
   amount: string;
   formatted: string;
-  usdValue: string;
-  usdValueFormatted: string;
-  tokenPriceUsd: number;
+  currencyValue: {
+    raw: MultiCurrencyValue;
+    formatted: MultiCurrencyValue;
+  };
+  tokenPrice: MultiCurrencyValue;
 }
 
 export interface PendingTx {
