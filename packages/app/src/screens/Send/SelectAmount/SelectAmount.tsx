@@ -240,6 +240,7 @@ type Props = Pick<
 
 const SelectAmount = ({ route }: Props) => {
   const navigation = useTypedNavigation();
+  const { t } = useTranslation('SelectAmount');
   const toAddress = route.params.toAddress;
   const fromAddresses = route.params.fromAddresses;
   const token = route.params.token;
@@ -687,7 +688,7 @@ const SelectAmount = ({ route }: Props) => {
         isGasSufficient={isGasSufficient}
       />
       <SelectChainSheet
-        title="Select recipient chain"
+        title={t('selectRecipientChain')}
         open={isChainsSheetOpen}
         onSelect={chain => {
           setToChainId(chain.id);

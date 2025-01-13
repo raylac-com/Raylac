@@ -97,6 +97,7 @@
     "gas": "ガス",
     "max": "最大",
     "recipientReceivesOn": "受取チェーン",
+    "selectRecipientChain": "受取チェーンを選択",
     "title": "金額を選択",
     "totalFee": "合計手数料",
     "totalFeeAmount": "{{amount}} USD"
@@ -135,6 +136,11 @@
   "SendToCard": {
     "sendTo": "送信先"
   },
+  "Settings": {
+    "advanced": "詳細設定",
+    "language": "言語",
+    "title": "設定"
+  },
   "SlippageDetailsSheet": {
     "maxSlippage": "最大スリッページ",
     "minimumOutput": "最小受け取り",
@@ -152,6 +158,7 @@
   "Swap": {
     "noTokenBalance": "{{address}}のサポートされているチェーンで{{symbol}}の残高が見つかりません",
     "noTokensFound": "トークンが見つかりません",
+    "selectOutputChain": "出力チェーンを選択",
     "title": "スワップ",
     "totalFee": "合計手数料",
     "totalFeeAmount": "{{amount}} USD"
