@@ -161,7 +161,8 @@
     "selectOutputChain": "出力チェーンを選択",
     "title": "スワップ",
     "totalFee": "合計手数料",
-    "totalFeeAmount": "{{amount}} USD"
+    "totalFeeAmount": "{{amount}} USD",
+    "amountTooSmall": "金額が小さすぎます"
   },
   "SwapListItemSheet": {
     "address": "アドレス",

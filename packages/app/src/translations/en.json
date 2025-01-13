@@ -53,13 +53,16 @@
   },
   "ConfirmBackupPhrase": {
     "choose3Words": "Choose 3 words from the list below to complete the phrase",
-    "title": "Confirm Backup"
+    "clear": "Clear",
+    "title": "Confirm Backup",
+    "viewBackupPhrase": "View backup phrase"
   },
   "CreateAddress": {
     "derivingFrom": "Deriving from {{address}}",
     "name": "Name",
     "new": "New",
-    "title": "Create Address"
+    "title": "Create Address",
+    "create": "Create"
   },
   "CrossChainSwapListItemSheet": {
     "address": "Address",
@@ -90,7 +93,8 @@
     "save": "Save",
     "saveBackupPhrase": "Save your backup phrase",
     "title": "Save Backup Phrase",
-    "writeDownOrSave": "Write down your backup phrase, or save it in a secure place."
+    "writeDownOrSave": "Write down your backup phrase, or save it in a secure place.",
+    "clear": "Clear"
   },
   "SelectAmount": {
     "balance": "Balance",
@@ -149,8 +153,10 @@
   },
   "Start": {
     "createAccount": "Create new account",
+    "importAccount": "Import account",
+    "watchAddress": "Watch address",
     "signIn": "Sign in",
-    "title": ""
+    "title": "Start"
   },
   "StartWatch": {
     "watchAddress": "Watch address"
@@ -159,9 +165,13 @@
     "noTokenBalance": "No {{symbol}} balance found on supported chains for {{address}}",
     "noTokensFound": "No tokens found",
     "selectOutputChain": "Select output chain",
+    "amountTooSmall": "Amount too small",
     "title": "Swap",
     "totalFee": "Total fee",
-    "totalFeeAmount": "{{amount}} USD"
+    "totalFeeAmount": "{{amount}} USD",
+    "insufficientBalance": "Insufficient balance",
+    "insufficientOriginChainGas": "Insufficient gas",
+    "swap": "Swap"
   },
   "SwapListItemSheet": {
     "address": "Address",
