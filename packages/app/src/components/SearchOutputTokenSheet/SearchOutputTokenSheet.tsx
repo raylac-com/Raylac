@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { trpc } from '@/lib/trpc';
 import useDebounce from '@/hooks/useDebounce';
 import useTokensWithBalances from '@/hooks/useTokensWithBalances';
+import { useTranslation } from 'react-i18next';
 
 const TokenListItem = ({
   token,
@@ -85,9 +86,10 @@ export const SearchInput = ({
   value: string;
   onChangeText: (text: string) => void;
 }) => {
+  const { t } = useTranslation(['common']);
   return (
     <BottomSheetTextInput
-      placeholder="Search for a token"
+      placeholder={t('common:searchForToken')}
       onChangeText={onChangeText}
       autoCapitalize="none"
       style={{
@@ -110,6 +112,7 @@ const SearchOutputTokenSheet = ({
   onSelectToken: (token: Token) => void;
   onClose: () => void;
 }) => {
+  const { t } = useTranslation(['common']);
   const ref = useRef<BottomSheetModal>(null);
   const [searchText, setSearchText] = useState('');
   const insets = useSafeAreaInsets();
@@ -174,7 +177,7 @@ const SearchOutputTokenSheet = ({
         nestedScrollEnabled
         ListEmptyComponent={
           <StyledText style={{ textAlign: 'center', color: colors.border }}>
-            {`No tokens found`}
+            {t('common:noTokensFound')}
           </StyledText>
         }
         renderItem={({ item }) => {

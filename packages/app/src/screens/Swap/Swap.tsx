@@ -129,6 +129,7 @@ const SlippageTolerance = ({
   minimumAmountOut: TokenAmount | undefined;
   slippagePercent: number | undefined;
 }) => {
+  const { t } = useTranslation(['Swap']);
   const [isSlippageDetailsSheetOpen, setIsSlippageDetailsSheetOpen] =
     useState(false);
 
@@ -145,9 +146,9 @@ const SlippageTolerance = ({
         alignItems: 'center',
       }}
     >
-      <StyledText
-        style={{ color: colors.border }}
-      >{`Max slippage `}</StyledText>
+      <StyledText style={{ color: colors.border }}>
+        {t('Swap:maxSlippage')}
+      </StyledText>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
         <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
           {`${slippagePercent}%`}
@@ -168,6 +169,7 @@ const SlippageTolerance = ({
 type Props = NativeStackScreenProps<RootTabsParamsList, 'Swap'>;
 
 const Swap = ({ route }: Props) => {
+  const { t } = useTranslation(['Swap', 'common']);
   const navigation = useTypedNavigation();
   const { data: writerAddresses } = useWriterAddresses();
   const { fromToken, bridge } = route.params ?? {
@@ -284,7 +286,7 @@ const Swap = ({ route }: Props) => {
     if (getSwapQuoteError) {
       Toast.show({
         type: 'error',
-        text1: 'Error',
+        text1: t('common:error'),
         text2: getSwapQuoteError.message,
         position: 'bottom',
       });
@@ -411,23 +413,23 @@ const Swap = ({ route }: Props) => {
 
   const onSwapPress = async () => {
     if (!inputToken) {
-      throw new Error('Input token is null');
+      throw new Error(t('Swap:inputTokenNull'));
     }
 
     if (!outputToken) {
-      throw new Error('Output token is null');
+      throw new Error(t('Swap:outputTokenNull'));
     }
 
     if (!inputChainId) {
-      throw new Error('Input chain id is null');
+      throw new Error(t('Swap:inputChainIdNull'));
     }
 
     if (!outputChainId) {
-      throw new Error('Output chain id is null');
+      throw new Error(t('Swap:outputChainIdNull'));
     }
 
     if (!swapQuote) {
-      throw new Error('Swap quote is null');
+      throw new Error(t('Swap:swapQuoteNull'));
     }
 
     if (!selectedAddress) {
@@ -441,7 +443,7 @@ const Swap = ({ route }: Props) => {
 
     Toast.show({
       type: 'success',
-      text1: 'Swap transaction sent',
+      text1: t('Swap:swapTransactionSent'),
       position: 'bottom',
     });
 
@@ -526,7 +528,7 @@ const Swap = ({ route }: Props) => {
         },
       });
     } else {
-      throw new Error('No pending swap or cross chain swap data');
+      throw new Error(t('Swap:noPendingSwapData'));
     }
   };
 
