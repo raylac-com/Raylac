@@ -50,7 +50,7 @@ const ImportAccount = () => {
       // Sanity check
       if (!isHex(inputText)) {
         clearState();
-        throw new Error(t('common:invalidPrivateKey'));
+        throw new Error('Invalid private key');
       }
 
       await importPrivKey({ privKey: inputText as Hex });
@@ -61,7 +61,7 @@ const ImportAccount = () => {
       // Sanity check
       if (!bip39.validateMnemonic(inputText)) {
         clearState();
-        throw new Error(t('common:invalidMnemonic'));
+        throw new Error('Invalid mnemonic');
       }
 
       const address = await importMnemonic({ mnemonic: inputText });
@@ -71,7 +71,7 @@ const ImportAccount = () => {
       navigation.navigate('Tabs', { screen: 'Home' });
     } else {
       clearState();
-      throw new Error(t('common:invalidInput'));
+      throw new Error('Invalid input');
     }
   }, [
     importPrivKey,

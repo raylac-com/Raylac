@@ -54,7 +54,7 @@ const SearchInputAccessory = ({
   onPaste: () => void;
   inputAccessoryViewID: string;
 }) => {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation('common');
   return (
     <InputAccessoryView nativeID={inputAccessoryViewID}>
       <View
@@ -67,12 +67,12 @@ const SearchInputAccessory = ({
       >
         <InputAccessoryButton
           onPress={onClear}
-          label={t('common:clear')}
+          label={t('clear')}
           icon={<Feather name="x" size={20} color={colors.border} />}
         />
         <InputAccessoryButton
           onPress={onPaste}
-          label={t('common:paste')}
+          label={t('paste')}
           icon={<Feather name="clipboard" size={20} color={colors.border} />}
         />
       </View>

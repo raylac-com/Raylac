@@ -413,23 +413,23 @@ const Swap = ({ route }: Props) => {
 
   const onSwapPress = async () => {
     if (!inputToken) {
-      throw new Error(t('Swap:inputTokenNull'));
+      throw new Error('Input token is null');
     }
 
     if (!outputToken) {
-      throw new Error(t('Swap:outputTokenNull'));
+      throw new Error('Output token is null');
     }
 
     if (!inputChainId) {
-      throw new Error(t('Swap:inputChainIdNull'));
+      throw new Error('Input chain id is null');
     }
 
     if (!outputChainId) {
-      throw new Error(t('Swap:outputChainIdNull'));
+      throw new Error('Output chain id is null');
     }
 
     if (!swapQuote) {
-      throw new Error(t('Swap:swapQuoteNull'));
+      throw new Error('Swap quote is null');
     }
 
     if (!selectedAddress) {
@@ -528,7 +528,7 @@ const Swap = ({ route }: Props) => {
         },
       });
     } else {
-      throw new Error(t('Swap:noPendingSwapData'));
+      throw new Error('No pending swap or cross chain swap data');
     }
   };
 

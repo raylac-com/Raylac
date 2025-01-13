@@ -172,10 +172,10 @@ export const SearchInput = ({
   value: string;
   onChangeText: (text: string) => void;
 }) => {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation('common');
   return (
     <BottomSheetTextInput
-      placeholder={t('common:searchForToken')}
+      placeholder={t('searchForToken')}
       onChangeText={onChangeText}
       autoCapitalize="none"
       style={{
@@ -200,7 +200,7 @@ const SearchInputTokenSheet = ({
   onSelect: ({ token, chainId }: { token: Token; chainId: number }) => void;
   onClose: () => void;
 }) => {
-  const { t } = useTranslation(['common']);
+  const { t } = useTranslation('common');
   const ref = useRef<BottomSheetModal>(null);
   const [searchText, setSearchText] = useState('');
   const insets = useSafeAreaInsets();
@@ -264,7 +264,7 @@ const SearchInputTokenSheet = ({
         }}
         ListEmptyComponent={
           <StyledText style={{ textAlign: 'center', color: colors.border }}>
-            {t('common:noTokensFound')}
+            {t('noTokensFound')}
           </StyledText>
         }
         keyExtractor={(_item, index) => index.toString()}
