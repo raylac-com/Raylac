@@ -16,7 +16,7 @@ import { getNonce } from '../../utils';
 import { relayApi } from '../../lib/relay';
 import { TRPCError } from '@trpc/server';
 import axios from 'axios';
-import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
+import getTokenPrice from '../getTokenPrice/getTokenPrice';
 import { Hex } from 'viem';
 import BigNumber from 'bignumber.js';
 
@@ -176,13 +176,13 @@ const getSingleInputSwapQuote = async ({
   const amountOut = quote.details.currencyOut.amount;
   const minimumAmountOut = quote.details.currencyOut.minimumAmount;
 
-  const inputTokenPrice = await getTokenUsdPrice({ token: inputToken });
+  const inputTokenPrice = await getTokenPrice({ token: inputToken });
 
   if (inputTokenPrice === null) {
     throw new Error('Failed to get input token price');
   }
 
-  const outputTokenPrice = await getTokenUsdPrice({ token: outputToken });
+  const outputTokenPrice = await getTokenPrice({ token: outputToken });
 
   if (outputTokenPrice === null) {
     throw new Error('Failed to get output token price');
@@ -191,22 +191,22 @@ const getSingleInputSwapQuote = async ({
   const amountInFormatted = formatTokenAmount({
     amount: BigInt(amountIn),
     token: inputToken,
-    tokenPriceUsd: inputTokenPrice,
+    tokenPrice: inputTokenPrice,
   });
 
   const amountOutFormatted = formatTokenAmount({
     amount: BigInt(amountOut),
     token: outputToken,
-    tokenPriceUsd: outputTokenPrice,
+    tokenPrice: outputTokenPrice,
   });
 
   const minimumAmountOutFormatted = formatTokenAmount({
     amount: BigInt(minimumAmountOut),
     token: outputToken,
-    tokenPriceUsd: outputTokenPrice,
+    tokenPrice: outputTokenPrice,
   });
 
-  const ethPriceUsd = await getTokenUsdPrice({ token: ETH });
+  const ethPriceUsd = await getTokenPrice({ token: ETH });
 
   if (ethPriceUsd === null) {
     throw new Error('ETH price not found');
@@ -221,7 +221,7 @@ const getSingleInputSwapQuote = async ({
   const originChainGasFormatted = formatTokenAmount({
     amount: BigInt(originChainGas),
     token: ETH,
-    tokenPriceUsd: ethPriceUsd,
+    tokenPrice: ethPriceUsd,
   });
 
   const relayerGas = quote.fees.relayerGas.amount;
@@ -252,18 +252,18 @@ const getSingleInputSwapQuote = async ({
     possibleTokens: [inputToken, outputToken, ETH],
   });
 
-  const feeTokenPriceUsd = await getTokenUsdPrice({
+  const feeTokenPrice = await getTokenPrice({
     token: relayerServiceFeeToken,
   });
 
-  if (feeTokenPriceUsd === null) {
-    throw new Error('feeTokenPriceUsd is undefined');
+  if (feeTokenPrice === null) {
+    throw new Error('feeTokenPrice is undefined');
   }
 
   const relayerGasFormatted = formatTokenAmount({
     amount: BigInt(relayerGas),
     token: relayerGasToken,
-    tokenPriceUsd: feeTokenPriceUsd,
+    tokenPrice: feeTokenPrice,
   });
 
   const relayerServiceFee = quote.fees.relayerService.amount;
@@ -275,14 +275,15 @@ const getSingleInputSwapQuote = async ({
   const relayerServiceFeeFormatted = formatTokenAmount({
     amount: BigInt(relayerServiceFee),
     token: relayerServiceFeeToken,
-    tokenPriceUsd: feeTokenPriceUsd,
+    tokenPrice: feeTokenPrice,
   });
 
+  // TODO: Add JPY total fee
   const totalFeeUsdFormatted = new BigNumber(
-    relayerServiceFeeFormatted.usdValueFormatted
+    relayerServiceFeeFormatted.currencyValue.raw.usd
   )
-    .plus(relayerGasFormatted.usdValueFormatted)
-    .plus(originChainGasFormatted.usdValueFormatted)
+    .plus(relayerGasFormatted.currencyValue.raw.usd)
+    .plus(originChainGasFormatted.currencyValue.raw.usd)
     .toString();
 
   const relayRequestId = swapStepQuote.requestId;

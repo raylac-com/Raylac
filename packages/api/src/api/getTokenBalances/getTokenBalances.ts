@@ -9,7 +9,7 @@ import {
   ETH,
 } from '@raylac/shared';
 import { getAlchemyClient } from '../../lib/alchemy';
-import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
+import getTokenPrice from '../getTokenPrice/getTokenPrice';
 import { getToken } from '../../lib/token';
 import { TokenBalancesResponseErc20, TokenBalanceType } from 'alchemy-sdk';
 // import * as coingecko from '../../lib/coingecko';
@@ -52,7 +52,7 @@ const formatAlchemyTokenBalance = async ({
     return null;
   }
 
-  const tokenPriceUsd = await getTokenUsdPrice({ token });
+  const tokenPriceUsd = await getTokenPrice({ token });
 
   if (!tokenPriceUsd) {
     return null;
@@ -107,7 +107,7 @@ const getFormattedETHBalance = async ({
 }) => {
   const ethBalance = await getETHBalance({ address, chainId });
 
-  const ethTokenPriceUsd = await getTokenUsdPrice({ token: ETH });
+  const ethTokenPriceUsd = await getTokenPrice({ token: ETH });
 
   if (ethTokenPriceUsd === null) {
     throw new Error('ETH token price not found');

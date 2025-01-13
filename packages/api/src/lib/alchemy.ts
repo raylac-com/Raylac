@@ -1,7 +1,8 @@
 import { toAlchemyNetwork } from '../utils';
 import { Alchemy, HistoricalPriceInterval } from 'alchemy-sdk';
+import BigNumber from 'bignumber.js';
 import { ALCHEMY_API_KEY } from './envVars';
-import { AlchemyTokenPriceResponse } from '@raylac/shared';
+import { AlchemyTokenPriceResponse, MultiCurrencyValue } from '@raylac/shared';
 import { Hex } from 'viem';
 import axios from 'axios';
 
@@ -33,7 +34,7 @@ export const getTokenPriceByAddress = async ({
 }: {
   chainId: number;
   address: Hex;
-}): Promise<string | null> => {
+}): Promise<MultiCurrencyValue | null> => {
   const alchemyClient = getAlchemyClient(chainId);
 
   const startTime = new Date().getTime() / 1000 - 24 * 60 * 60; // Yesterday
@@ -54,7 +55,13 @@ export const getTokenPriceByAddress = async ({
       return null;
     }
 
-    return data[data.length - 1].value;
+    const usdPrice = data[data.length - 1].value;
+
+    return {
+      usd: usdPrice,
+      // TODO: Get actual JPY price
+      jpy: new BigNumber(usdPrice).times(140).toString(),
+    };
   } catch (err: any) {
     if (err.message.includes('not found')) {
       return null;

@@ -9,23 +9,26 @@ import {
   BridgeTransferHistoryItem,
   CrossChainSwapHistoryItem,
   BridgeHistoryItem,
+  MultiCurrencyValue,
 } from '@raylac/shared';
 import { getAddress, Hex, parseUnits, zeroAddress } from 'viem';
 import { getAlchemyClient } from '../../lib/alchemy';
 import { AssetTransfersCategory, SortingOrder } from 'alchemy-sdk';
 import { logger } from '@raylac/shared-backend';
 import { getToken } from '../../lib/token';
-import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
+import getTokenPrice from '../getTokenPrice/getTokenPrice';
 import { relayGetRequest } from '../../lib/relay';
 
-const getTokenPriceOrThrow = async (token: Token): Promise<number> => {
-  const tokenUsdPrice = await getTokenUsdPrice({ token });
+const getTokenPriceOrThrow = async (
+  token: Token
+): Promise<MultiCurrencyValue> => {
+  const tokenPrice = await getTokenPrice({ token });
 
-  if (!tokenUsdPrice) {
+  if (!tokenPrice) {
     throw new Error(`No token price found for ${token.symbol} `);
   }
 
-  return tokenUsdPrice;
+  return tokenPrice;
 };
 
 const getTokenOrThrow = async ({
@@ -112,25 +115,25 @@ const mapAsRelayTx = async ({
     chainId: fromChainId,
   });
 
-  const tokenInUsdPrice = await getTokenPriceOrThrow(tokenIn);
+  const tokenInPrice = await getTokenPriceOrThrow(tokenIn);
 
   const tokenOut = await getTokenOrThrow({
     tokenAddress: getAddress(currencyOut.currency.address),
     chainId: toChainId,
   });
 
-  const tokenOutUsdPrice = await getTokenPriceOrThrow(tokenOut);
+  const tokenOutPrice = await getTokenPriceOrThrow(tokenOut);
 
   const amountInFormatted = formatTokenAmount({
     amount: BigInt(amountIn),
     token: tokenIn,
-    tokenPriceUsd: tokenInUsdPrice,
+    tokenPrice: tokenInPrice,
   });
 
   const amountOutFormatted = formatTokenAmount({
     amount: BigInt(amountOut),
     token: tokenOut,
-    tokenPriceUsd: tokenOutUsdPrice,
+    tokenPrice: tokenOutPrice,
   });
 
   if (tokenIn.id === tokenOut.id) {
@@ -271,11 +274,11 @@ const getHistoryOnChain = async ({
                 return null;
               }
 
-              const usdPrice = await getTokenUsdPrice({
+              const tokenPrice = await getTokenPrice({
                 token,
               });
 
-              if (usdPrice === null) {
+              if (tokenPrice === null) {
                 return null;
               }
 
@@ -301,7 +304,7 @@ const getHistoryOnChain = async ({
                   token.decimals
                 ),
                 token,
-                tokenPriceUsd: usdPrice,
+                tokenPrice: tokenPrice,
               });
 
               const transferItem: GetHistoryReturnType[number] = {
