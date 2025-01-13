@@ -585,12 +585,23 @@ export const getColorForAddress = (address: Hex): Hex => {
   return COLORS[colorIndex].hex as Hex;
 };
 
-export const MOCK_TOKEN_AMOUNT = {
+export const MOCK_TOKEN_AMOUNT: TokenAmount = {
   amount: parseUnits('0.01', 18).toString(),
   formatted: '0.01',
-  usdValue: '123.45',
-  usdValueFormatted: '123.45',
-  tokenPriceUsd: 123.45,
+  tokenPrice: {
+    usd: '123.45',
+    jpy: '17283',
+  },
+  currencyValue: {
+    raw: {
+      usd: '123.45',
+      jpy: '17283',
+    },
+    formatted: {
+      usd: '123.45',
+      jpy: '17,283',
+    },
+  },
 };
 
 export const containsNonNumericCharacters = (text: string) => {

@@ -3,6 +3,8 @@ import Skeleton from '@/components/Skeleton/Skeleton';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { TokenAmount, Token } from '@raylac/shared';
+import { getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import {
@@ -26,6 +28,7 @@ const ChainTokenBalance = ({
   token: Token;
   balance: TokenAmount;
 }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View
       style={{
@@ -36,7 +39,7 @@ const ChainTokenBalance = ({
     >
       <TokenLogoWithChain chainId={chainId} logoURI={token.logoURI} size={42} />
       <StyledText style={{ color: colors.border }}>
-        {`$${balance.usdValueFormatted}`}
+        {getCurrencyFormattedValue(balance, selectedCurrency)}
       </StyledText>
     </View>
   );
@@ -57,6 +60,7 @@ const TokenListItem = ({
   onSelect: ({ token, chainId }: { token: Token; chainId: number }) => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   const isMultiChain = chainBalances.length > 1;
 
@@ -113,7 +117,9 @@ const TokenListItem = ({
                 )}
               </View>
               <StyledText style={{ color: colors.border }}>
-                {`$${totalBalance?.usdValueFormatted}`}
+                {totalBalance
+                  ? getCurrencyFormattedValue(totalBalance, selectedCurrency)
+                  : ''}
               </StyledText>
             </View>
             {/**
