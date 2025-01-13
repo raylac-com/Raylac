@@ -290,7 +290,7 @@ const TokenBalanceDetailsSheet = ({
                     icon={
                       <Feather name="repeat" size={18} color={colors.border} />
                     }
-                    title="Swap"
+                    title={t('swap')}
                     onPress={onSwapPress}
                   />
                 </View>
