@@ -1,5 +1,5 @@
 import { trpc } from '@/lib/trpc';
-import useUserAddresses from './useWriterAddresses';
+import useUserAddresses from './useUserAddresses';
 
 const useTokenBalances = () => {
   const { data: userAddresses } = useUserAddresses();
