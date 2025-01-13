@@ -11,6 +11,7 @@ import {
 } from 'viem/chains';
 import { Platform } from 'react-native';
 import { TokenAmount } from '@raylac/shared';
+import { getCurrencySymbol } from './currency';
 
 export const shortenAddress = (address: Hex) => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -64,7 +65,29 @@ export const triggerHapticFeedback = () => {
 export const MOCK_TOKEN_AMOUNT: TokenAmount = {
   amount: parseUnits('0.1', 18).toString(),
   formatted: '0.1',
-  tokenPriceUsd: 1,
-  usdValue: '0.1',
-  usdValueFormatted: '0.1',
+  tokenPrice: {
+    usd: '1',
+    jpy: '140',
+  },
+  currencyValue: {
+    raw: {
+      usd: '0.1',
+      jpy: '14',
+    },
+    formatted: {
+      usd: '0.1',
+      jpy: '14',
+    },
+  },
+};
+
+/**
+ * Get the formatted value of a token amount in a given currency
+ * @returns Example: $0.1
+ */
+export const getCurrencyFormattedValue = (
+  amount: TokenAmount,
+  currency: 'usd' | 'jpy' | undefined
+) => {
+  return `${getCurrencySymbol(currency || 'usd')}${amount.currencyValue.formatted[currency || 'usd']}`;
 };

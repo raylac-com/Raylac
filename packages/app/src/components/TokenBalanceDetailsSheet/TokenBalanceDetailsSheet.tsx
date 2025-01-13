@@ -20,6 +20,8 @@ import WalletIconAddress from '../WalletIconAddress/WalletIconAddress';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import StyledButton from '../StyledButton/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
+import { getCurrencyFormattedValue } from '@/lib/utils';
 
 const ChainTokenBalance = ({
   chainId,
@@ -30,6 +32,8 @@ const ChainTokenBalance = ({
   token: Token;
   balance: TokenAmount;
 }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
+
   return (
     <View
       style={{
@@ -51,7 +55,9 @@ const ChainTokenBalance = ({
             fontWeight: 'bold',
             color: colors.subbedText,
           }}
-        >{`$${balance.usdValueFormatted}`}</StyledText>
+        >
+          {getCurrencyFormattedValue(balance, selectedCurrency)}
+        </StyledText>
       </View>
       <StyledText
         style={{
@@ -112,6 +118,7 @@ const TokenBalanceDetailsSheet = ({
   const ref = useRef<BottomSheet>(null);
   const insets = useSafeAreaInsets();
   const navigation = useTypedNavigation();
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   const { data: tokenBalances } = useTokenBalances();
 
@@ -207,7 +214,10 @@ const TokenBalanceDetailsSheet = ({
                 <StyledText
                   style={{ fontSize: fontSizes.xLarge, fontWeight: 'bold' }}
                 >
-                  {`$${perAddressBalances.totalBalance.usdValueFormatted}`}
+                  {getCurrencyFormattedValue(
+                    perAddressBalances.totalBalance,
+                    selectedCurrency
+                  )}
                 </StyledText>
                 <StyledText style={{ color: colors.subbedText }}>
                   {perAddressBalances.totalBalance.formatted} {token.symbol}
