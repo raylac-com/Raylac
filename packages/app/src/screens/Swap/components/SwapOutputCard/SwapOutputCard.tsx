@@ -2,6 +2,7 @@ import { View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import SwapAmountInput from '../SwapAmountInput';
 import { Token, TokenAmount } from '@raylac/shared';
+import { useTranslation } from 'react-i18next';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import ChainSelector from '@/screens/Swap/components/ChainSelector/ChainSelector';
@@ -30,6 +31,7 @@ const SwapOutputCard = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { data: selectedCurrency } = useSelectedCurrency();
+  const { t } = useTranslation('Swap');
 
   useEffect(() => {
     if (token) {
@@ -53,7 +55,7 @@ const SwapOutputCard = ({
     >
       {showChainSelector && chainId !== null && (
         <ChainSelector
-          title="Select output chain"
+          title={t('selectOutputChain')}
           token={token}
           chainId={chainId}
           setChainId={setChainId}

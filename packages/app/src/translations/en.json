@@ -97,6 +97,7 @@
     "gas": "Gas",
     "max": "MAX",
     "recipientReceivesOn": "Recipient receives on",
+    "selectRecipientChain": "Select recipient chain",
     "title": "Select amount",
     "totalFee": "Total fee",
     "totalFeeAmount": "{{amount}} USD"
@@ -135,6 +136,11 @@
   "SendToCard": {
     "sendTo": "Send to"
   },
+  "Settings": {
+    "advanced": "Advanced",
+    "language": "Language",
+    "title": "Settings"
+  },
   "SlippageDetailsSheet": {
     "maxSlippage": "Max slippage",
     "minimumOutput": "Minimum output",
@@ -152,6 +158,7 @@
   "Swap": {
     "noTokenBalance": "No {{symbol}} balance found on supported chains for {{address}}",
     "noTokensFound": "No tokens found",
+    "selectOutputChain": "Select output chain",
     "title": "Swap",
     "totalFee": "Total fee",
     "totalFeeAmount": "{{amount}} USD"
