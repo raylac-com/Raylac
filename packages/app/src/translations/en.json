@@ -77,7 +77,7 @@
     "save": "Save"
   },
   "Home": {
-    "accountBalance": "${{balance}}",
+    "accountBalance": "{{balance}}",
     "noTokens": "No tokens found"
   },
   "ImportAccount": {

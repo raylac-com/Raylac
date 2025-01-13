@@ -37,6 +37,7 @@ import getTokenBalancesMock from './api/getTokenBalances/getTokenBalances.mock';
 import buildBridgeSendMock from './api/buildBridgeSend/buildBridgeSend.mock';
 import getHistoryMock from './api/getHistory/getHistory.mock';
 import getTokenData from './api/getTokenData/getTokenData';
+import getExchangeRate from './api/getExchangeRate/getExchangeRate';
 
 // @ts-ignore
 if (!globalThis.crypto) globalThis.crypto = webcrypto;
@@ -56,6 +57,10 @@ if (MOCK_RESPONSE) {
 }
 
 export const appRouter = router({
+  getExchangeRate: publicProcedure.query(async () => {
+    return getExchangeRate();
+  }),
+
   getTokenBalances: publicProcedure
     .input(
       z.object({

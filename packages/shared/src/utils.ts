@@ -4,7 +4,7 @@ import * as chains from 'viem/chains';
 import { getAlchemyRpcUrl } from './ethRpc';
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
-import { TokenBalancesReturnType } from './rpcTypes';
+import { GetExchangeRateReturnType, TokenBalancesReturnType } from './rpcTypes';
 
 /**
  * Returns viem's `Chain` object from a chain ID
@@ -146,7 +146,7 @@ export const formatUsdValue = (num: BigNumber): string => {
 };
 
 export const formatJpyValue = (num: BigNumber): string => {
-  return num.toFixed();
+  return num.toFormat(0);
 };
 
 export const formatTokenAmount = ({
@@ -167,7 +167,7 @@ export const formatTokenAmount = ({
   ).multipliedBy(new BigNumber(tokenPrice.jpy));
 
   const usdValueFormatted = formatUsdValue(usdValue);
-  const jpyValueFormatted = formatUsdValue(jpyValue);
+  const jpyValueFormatted = formatJpyValue(jpyValue);
 
   const amountFormatted: TokenAmount = {
     amount: amount.toString(),
@@ -289,14 +289,25 @@ export const getAddressChainTokenBalance = ({
   return addressChainTokenBalance.balance;
 };
 
-export const getTotalUsdValue = (tokenBalances: TokenBalancesReturnType) => {
-  return formatUsdValue(
-    tokenBalances.reduce(
-      (acc, tokenBalance) =>
-        acc.plus(new BigNumber(tokenBalance.balance.currencyValue.raw.usd)),
-      new BigNumber(0)
-    )
+export const getAccountTotalvalue = ({
+  tokenBalances,
+  exchangeRate,
+}: {
+  tokenBalances: TokenBalancesReturnType;
+  exchangeRate: GetExchangeRateReturnType;
+}): MultiCurrencyValue => {
+  const totalUsdValue = tokenBalances.reduce(
+    (acc, tokenBalance) =>
+      acc.plus(new BigNumber(tokenBalance.balance.currencyValue.raw.usd)),
+    new BigNumber(0)
   );
+
+  const totalJpyValue = totalUsdValue.multipliedBy(exchangeRate.jpy);
+
+  return {
+    usd: formatUsdValue(totalUsdValue),
+    jpy: formatJpyValue(totalJpyValue),
+  };
 };
 
 export const groupTokenBalancesByToken = ({

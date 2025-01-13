@@ -276,3 +276,5 @@ export interface GetTokenDataReturnType {
   priceChangePercent24h: string;
   totalVolume: MultiCurrencyValue;
 }
+
+export type GetExchangeRateReturnType = MultiCurrencyValue;

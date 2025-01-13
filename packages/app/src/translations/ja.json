@@ -74,7 +74,7 @@
     "save": "保存"
   },
   "Home": {
-    "accountBalance": "${{balance}}",
+    "accountBalance": "{{balance}}",
     "noTokens": "トークンがありません"
   },
   "ImportAccount": {

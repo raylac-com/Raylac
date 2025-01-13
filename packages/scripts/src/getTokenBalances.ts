@@ -8,7 +8,6 @@ import {
   getChainTokenBalance,
   getPerAddressTokenBalance,
   getTokenBalancePerAddress,
-  getTotalUsdValue,
   groupTokenBalancesByToken,
   USDC,
 } from '@raylac/shared';
