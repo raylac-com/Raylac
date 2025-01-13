@@ -37,6 +37,7 @@ import SendConfirmSheet from '@/components/SendConfirmSheet/SendConfirmSheet';
 import { checkIsBalanceSufficient } from '@raylac/shared';
 import BridgeSendFeeDetailsSheet from '@/components/BridgeSendFeeDetailsSheet/BridgeSendFeeDetailsSheet';
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
+import { getCurrencySymbol } from '@/lib/currency';
 
 const ReviewButton = ({
   onPress,
@@ -163,6 +164,7 @@ const BridgeFeeInfo = ({
 }) => {
   const { t } = useTranslation('SelectAmount');
   const [isFeeDetailsSheetOpen, setIsFeeDetailsSheetOpen] = useState(false);
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   return (
     <View>
@@ -179,7 +181,11 @@ const BridgeFeeInfo = ({
             style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
           >
             <StyledText style={{ color: colors.subbedText }}>
-              {t('totalFeeAmount', { amount: bridgeSendData.totalFeeUsd })}
+              {t('totalFeeAmount', {
+                amount: `${getCurrencySymbol(
+                  selectedCurrency || 'usd'
+                )} ${bridgeSendData.totalFee[selectedCurrency || 'usd']}`,
+              })}
             </StyledText>
             <Feather name="chevron-right" size={16} color={colors.border} />
           </View>

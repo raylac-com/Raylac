@@ -489,3 +489,9 @@ export interface MultiCurrencyValue {
   usd: string;
   jpy: string;
 }
+
+export interface ExchangeRateResponse {
+  conversion_rates: {
+    [key: string]: number;
+  };
+}

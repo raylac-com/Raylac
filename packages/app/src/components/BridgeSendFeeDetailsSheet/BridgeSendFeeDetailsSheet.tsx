@@ -10,12 +10,14 @@ import {
   BuildBridgeSendReturnType,
   ETH,
   getChainName,
+  MultiCurrencyValue,
   Token,
   TokenAmount,
 } from '@raylac/shared';
 import fontSizes from '@/lib/styles/fontSizes';
 import RelayLogo from '../RelayLogo/RelayLogo';
 import ChainLogo from '../ChainLogo/ChainLogo';
+import { getCurrencySymbol } from '@/lib/currency';
 
 const OriginChainGas = ({
   chainId,
@@ -124,14 +126,16 @@ const RelayServiceFee = ({
   );
 };
 
-const TotalFee = ({ totalFeeUsd }: { totalFeeUsd: string }) => {
+const TotalFee = ({ totalFee }: { totalFee: MultiCurrencyValue }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
+
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
         {`Total`}
       </StyledText>
       <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
-        {`$${totalFeeUsd}`}
+        {`${getCurrencySymbol(selectedCurrency || 'usd')} ${totalFee[selectedCurrency || 'usd']}`}
       </StyledText>
     </View>
   );
@@ -202,7 +206,7 @@ const BridgeSendFeeDetailsSheet = ({
             amount={bridgeSendData.relayerServiceFee}
           />
           <View style={{ marginTop: 16 }}>
-            <TotalFee totalFeeUsd={bridgeSendData.totalFeeUsd} />
+            <TotalFee totalFee={bridgeSendData.totalFee} />
           </View>
         </View>
       </BottomSheetView>

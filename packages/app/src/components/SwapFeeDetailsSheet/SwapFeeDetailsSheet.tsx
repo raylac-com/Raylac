@@ -10,12 +10,14 @@ import {
   ETH,
   getChainName,
   GetSingleInputSwapQuoteReturnType,
+  MultiCurrencyValue,
   Token,
   TokenAmount,
 } from '@raylac/shared';
 import fontSizes from '@/lib/styles/fontSizes';
 import RelayLogo from '../RelayLogo/RelayLogo';
 import ChainLogo from '../ChainLogo/ChainLogo';
+import { getCurrencySymbol } from '@/lib/currency';
 
 const OriginChainGas = ({
   chainId,
@@ -118,33 +120,16 @@ const RelayServiceFee = ({ amount }: { amount: TokenAmount }) => {
   );
 };
 
-const TotalFee = ({ totalFeeUsd }: { totalFeeUsd: string }) => {
+const TotalFee = ({ totalFee }: { totalFee: MultiCurrencyValue }) => {
   const { data: selectedCurrency } = useSelectedCurrency();
-  const tokenAmount: TokenAmount = {
-    amount: totalFeeUsd,
-    formatted: totalFeeUsd,
-    tokenPrice: {
-      usd: '1',
-      jpy: '140',
-    },
-    currencyValue: {
-      raw: {
-        usd: totalFeeUsd,
-        jpy: (Number(totalFeeUsd) * 140).toString(),
-      },
-      formatted: {
-        usd: totalFeeUsd,
-        jpy: (Number(totalFeeUsd) * 140).toString(),
-      },
-    },
-  };
+
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
         {`Total`}
       </StyledText>
       <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
-        {getCurrencyFormattedValue(tokenAmount, selectedCurrency)}
+        {`${getCurrencySymbol(selectedCurrency || 'usd')} ${totalFee[selectedCurrency || 'usd']}`}
       </StyledText>
     </View>
   );
@@ -213,7 +198,7 @@ const SwapFeeDetailsSheet = ({
           )}
           <RelayServiceFee amount={swapQuote.relayerServiceFee} />
           <View style={{ marginTop: 16 }}>
-            <TotalFee totalFeeUsd={swapQuote.totalFeeUsd} />
+            <TotalFee totalFee={swapQuote.totalFee} />
           </View>
         </View>
       </BottomSheetView>

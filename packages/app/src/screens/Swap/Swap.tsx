@@ -34,6 +34,8 @@ import { mainnet } from 'viem/chains';
 import useAddressChainTokenBalance from '@/hooks/useAddressChainTokenBalance';
 import useAddressTokenBalance from '@/hooks/useAddressTokenBalance';
 import SlippageDetailsSheet from '@/components/SlippageDetailsSheet/SlippageDetailsSheet';
+import { getCurrencySymbol } from '@/lib/currency';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 
 const SwapButton = ({
   swapQuoteLoaded,
@@ -87,6 +89,7 @@ const TotalFee = ({
 }) => {
   const { t } = useTranslation('Swap');
   const [isFeeDetailsSheetOpen, setIsFeeDetailsSheetOpen] = useState(false);
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   if (!swapQuote) {
     return null;
@@ -104,7 +107,7 @@ const TotalFee = ({
       <StyledText style={{ color: colors.border }}>{t('totalFee')}</StyledText>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
         <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
-          {`${swapQuote.totalFeeUsd} USD`}
+          {`${getCurrencySymbol(selectedCurrency || 'usd')} ${swapQuote.totalFee[selectedCurrency || 'usd']}`}
         </StyledText>
         <Feather name="chevron-right" size={24} color={colors.border} />
       </View>

@@ -106,7 +106,7 @@ export type GetSingleInputSwapQuoteReturnType = {
   relayerServiceFeeToken: Token;
   originChainGas: TokenAmount;
   relayRequestId: Hex;
-  totalFeeUsd: string;
+  totalFee: MultiCurrencyValue;
   fromChainId: number;
   toChainId: number;
   slippagePercent: number;
@@ -255,7 +255,7 @@ export type BuildBridgeSendReturnType = {
   amountOut: TokenAmount;
   relayerServiceFeeChainId: number;
   relayerGasChainId: number;
-  totalFeeUsd: string;
+  totalFee: MultiCurrencyValue;
 };
 
 export type GetTokenUsdPriceReturnType = number | null;

@@ -1,12 +1,9 @@
 import { Hex, zeroAddress } from 'viem';
-import {
-  getTokenPriceByAddress,
-  getTokenPriceBySymbol,
-} from '../../lib/alchemy';
+import { getTokenPriceByAddress } from '../../lib/alchemy';
 import { MultiCurrencyValue, Token } from '@raylac/shared';
 import { redisClient } from '../../lib/redis';
 import { logger } from '@raylac/shared-backend';
-import BigNumber from 'bignumber.js';
+import { mainnet } from 'viem/chains';
 
 const PRICE_CACHE_EXPIRATION_SECONDS = 60 * 3; // 3 minutes
 
@@ -64,28 +61,17 @@ const getTokenPrice = async ({
   }
 
   if (tokenAddress === zeroAddress) {
-    const result = await getTokenPriceBySymbol('ETH');
-
-    const usdPrice = result.prices.find(p => p.currency === 'usd');
-    const jpyPrice = result.prices.find(p => p.currency === 'jpy');
-
-    if (usdPrice === undefined) {
-      throw new Error(`USD price not found for ETH`);
-    }
-
-    const multiCurrencyPrice: MultiCurrencyValue = {
-      usd: usdPrice.value,
-      jpy: jpyPrice
-        ? jpyPrice.value
-        : new BigNumber(usdPrice.value).times(150).toString(),
-    };
+    const tokenPrice = await getTokenPriceByAddress({
+      chainId: mainnet.id,
+      address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2', // wETH price
+    });
 
     await cacheTokenPrice({
       tokenAddress,
-      price: multiCurrencyPrice,
+      price: tokenPrice,
     });
 
-    return multiCurrencyPrice;
+    return tokenPrice;
   }
 
   const price = await getTokenPriceByAddress({

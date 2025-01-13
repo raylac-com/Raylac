@@ -4,6 +4,7 @@ import {
   formatTokenAmount,
   GetSingleInputSwapQuoteRequestBody,
   GetSingleInputSwapQuoteReturnType,
+  MultiCurrencyValue,
   RelayGetQuoteRequestBody,
   RelayGetQuoteResponseBody,
   SwapStep,
@@ -19,6 +20,7 @@ import axios from 'axios';
 import getTokenPrice from '../getTokenPrice/getTokenPrice';
 import { Hex } from 'viem';
 import BigNumber from 'bignumber.js';
+import { getUsdExchangeRate } from '../../lib/exchangeRate';
 
 const getFeeToken = ({
   feeCurrency,
@@ -278,13 +280,21 @@ const getSingleInputSwapQuote = async ({
     tokenPrice: feeTokenPrice,
   });
 
-  // TODO: Add JPY total fee
-  const totalFeeUsdFormatted = new BigNumber(
+  const totalFeeUsd = new BigNumber(
     relayerServiceFeeFormatted.currencyValue.raw.usd
   )
     .plus(relayerGasFormatted.currencyValue.raw.usd)
     .plus(originChainGasFormatted.currencyValue.raw.usd)
     .toString();
+
+  const exchangeRate = await getUsdExchangeRate();
+
+  const totalFee: MultiCurrencyValue = {
+    usd: totalFeeUsd,
+    jpy: new BigNumber(totalFeeUsd)
+      .times(new BigNumber(exchangeRate.jpy))
+      .toString(),
+  };
 
   const relayRequestId = swapStepQuote.requestId;
 
@@ -305,7 +315,7 @@ const getSingleInputSwapQuote = async ({
     relayerServiceFeeToken,
     relayerServiceFee: relayerServiceFeeFormatted,
     relayRequestId: relayRequestId as Hex,
-    totalFeeUsd: totalFeeUsdFormatted,
+    totalFee,
     fromChainId: inputChainId,
     toChainId: outputChainId,
     slippagePercent,

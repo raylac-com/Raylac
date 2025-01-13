@@ -30,7 +30,10 @@ const buildBridgeSend = async (
     amountOut: MOCK_TOKEN_AMOUNT,
     fromChainId: base.id,
     toChainId: arbitrum.id,
-    totalFeeUsd: '0.01',
+    totalFee: {
+      usd: '0.01',
+      jpy: '1.2',
+    },
   };
 
   return mockData;

@@ -41,7 +41,10 @@ const getSingleInputSwapQuoteMock = async (
   };
 
   return {
-    totalFeeUsd: '0.12',
+    totalFee: {
+      usd: '0.12',
+      jpy: '15',
+    },
     approveStep: mockApproveStep,
     swapStep: mockSwapStep,
     originChainGas: MOCK_TOKEN_AMOUNT,

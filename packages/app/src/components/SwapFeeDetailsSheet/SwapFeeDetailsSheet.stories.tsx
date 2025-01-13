@@ -44,7 +44,10 @@ const mockQuote: GetSingleInputSwapQuoteReturnType = {
   relayerServiceFee: MOCK_TOKEN_AMOUNT,
   relayRequestId:
     '0xfb83f5cbb82393897998723b88af15444981487e7b0813cc32d953712f7dac8c',
-  totalFeeUsd: '0.0029',
+  totalFee: {
+    usd: '0.0029',
+    jpy: '0.38',
+  },
   fromChainId: 8453,
   toChainId: 8453,
   slippagePercent: 0.01,

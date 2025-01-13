@@ -5,6 +5,7 @@ import {
   formatAmount,
   formatTokenAmount,
   formatUsdValue,
+  MultiCurrencyValue,
   RelayGasFee,
   RelayGetQuoteRequestBody,
   Token,
@@ -24,17 +25,18 @@ import { getNonce } from '../../utils';
 import getTokenPrice from '../getTokenPrice/getTokenPrice';
 import { Hex } from 'viem';
 import BigNumber from 'bignumber.js';
+import { getUsdExchangeRate } from '../../lib/exchangeRate';
 
 /**
  * Parses a relayer fee into a `TokenAmount` and `Token`
  */
-const parseRelayerFee = ({
+const parseRelayerFee = async ({
   fee,
   possibleTokens,
 }: {
   fee: RelayGasFee;
   possibleTokens: Token[];
-}): { amount: TokenAmount; token: Token } => {
+}): Promise<{ amount: TokenAmount; token: Token }> => {
   const amount = fee.amount;
 
   if (amount === undefined) {
@@ -83,10 +85,13 @@ const parseRelayerFee = ({
     .div(new BigNumber(formatAmount(amount, decimals)))
     .toNumber();
 
-  const tokenPrice = {
+  const exchangeRate = await getUsdExchangeRate();
+
+  const tokenPrice: MultiCurrencyValue = {
     usd: tokenUsdPrice.toString(),
-    // TODO: Get actual JPY price
-    jpy: new BigNumber(tokenUsdPrice).times(140).toString(),
+    jpy: new BigNumber(tokenUsdPrice)
+      .times(new BigNumber(exchangeRate.jpy))
+      .toString(),
   };
 
   const tokenAmount = formatTokenAmount({
@@ -193,17 +198,17 @@ const buildBridgeSend = async ({
     throw new Error('ETH price not found');
   }
 
-  const originChainGas = parseRelayerFee({
+  const originChainGas = await parseRelayerFee({
     fee: quote.fees.gas,
     possibleTokens: [token, ETH],
   });
 
-  const relayerServiceFee = parseRelayerFee({
+  const relayerServiceFee = await parseRelayerFee({
     fee: quote.fees.relayerService,
     possibleTokens: [token, ETH],
   });
 
-  const relayerGas = parseRelayerFee({
+  const relayerGas = await parseRelayerFee({
     fee: quote.fees.relayerGas,
     possibleTokens: [token, ETH],
   });
@@ -263,6 +268,15 @@ const buildBridgeSend = async ({
       .plus(new BigNumber(originChainGas.amount.currencyValue.raw.usd))
   );
 
+  const exchangeRate = await getUsdExchangeRate();
+
+  const totalFee: MultiCurrencyValue = {
+    usd: totalFeeUsd,
+    jpy: new BigNumber(totalFeeUsd)
+      .times(new BigNumber(exchangeRate.jpy))
+      .toString(),
+  };
+
   return {
     relayRequestId: depositStep.requestId as Hex,
     steps: steps,
@@ -281,8 +295,7 @@ const buildBridgeSend = async ({
     relayerGasChainId,
     amountIn: amountInFormatted,
     amountOut: amountOutFormatted,
-    // TODO: Add JPY total fee
-    totalFeeUsd,
+    totalFee,
     fromChainId,
     toChainId,
   };

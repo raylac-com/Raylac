@@ -14,3 +14,4 @@ const getEnvVar = <T>(key: string): T => {
 export const ALCHEMY_API_KEY = getEnvVar<string>('ALCHEMY_API_KEY');
 export const QUICK_NODE_API_KEY = getEnvVar<string>('QUICKNODE_API_KEY');
 export const REDIS_URL = getEnvVar<string>('REDIS_URL');
+export const EXCHANGE_RATE_API_KEY = getEnvVar<string>('EXCHANGE_RATE_API_KEY');
