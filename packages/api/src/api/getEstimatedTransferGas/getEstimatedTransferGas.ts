@@ -54,17 +54,10 @@ const getEstimatedTransferGas = async ({
     token: ETH,
   });
 
-  if (ethPriceUsd === null) {
-    throw new Error('ETH price not found');
-  }
-
   const estimatedGasUsd = formatTokenAmount({
     amount: estimatedGasWei,
     token: ETH,
-    tokenPrice: {
-      usd: ethPriceUsd.toString(),
-      jpy: (ethPriceUsd * 140).toString(),
-    },
+    tokenPriceUsd: Number(ethPriceUsd),
   });
 
   return estimatedGasUsd;

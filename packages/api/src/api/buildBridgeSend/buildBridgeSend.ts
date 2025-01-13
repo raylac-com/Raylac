@@ -86,10 +86,7 @@ const parseRelayerFee = ({
   const tokenAmount = formatTokenAmount({
     amount: BigInt(amount),
     token,
-    tokenPrice: {
-      usd: tokenUsdPrice.toString(),
-      jpy: (tokenUsdPrice * 140).toString(),
-    },
+    tokenPriceUsd: tokenUsdPrice,
   });
 
   return { amount: tokenAmount, token };
@@ -175,19 +172,13 @@ const buildBridgeSend = async ({
   const amountInFormatted = formatTokenAmount({
     amount: BigInt(amountIn),
     token,
-    tokenPrice: {
-      usd: tokenPriceUsd.toString(),
-      jpy: (tokenPriceUsd * 140).toString(),
-    },
+    tokenPriceUsd,
   });
 
   const amountOutFormatted = formatTokenAmount({
     amount: BigInt(amountOut),
     token,
-    tokenPrice: {
-      usd: tokenPriceUsd.toString(),
-      jpy: (tokenPriceUsd * 140).toString(),
-    },
+    tokenPriceUsd,
   });
 
   const ethPriceUsd = await getTokenUsdPrice({ token: ETH });
@@ -261,9 +252,9 @@ const buildBridgeSend = async ({
     throw new Error('Swap step not found');
   }
   const totalFeeUsd = formatUsdValue(
-    new BigNumber(relayerServiceFee.amount.currencyValue.raw.usd)
-      .plus(new BigNumber(relayerGas.amount.currencyValue.raw.usd))
-      .plus(new BigNumber(originChainGas.amount.currencyValue.raw.usd))
+    new BigNumber(relayerServiceFee.amount.usdValue)
+      .plus(new BigNumber(relayerGas.amount.usdValue))
+      .plus(new BigNumber(originChainGas.amount.usdValue))
   );
 
   return {

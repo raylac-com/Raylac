@@ -124,19 +124,13 @@ const mapAsRelayTx = async ({
   const amountInFormatted = formatTokenAmount({
     amount: BigInt(amountIn),
     token: tokenIn,
-    tokenPrice: {
-      usd: tokenInUsdPrice.toString(),
-      jpy: (tokenInUsdPrice * 140).toString(),
-    },
+    tokenPriceUsd: tokenInUsdPrice,
   });
 
   const amountOutFormatted = formatTokenAmount({
     amount: BigInt(amountOut),
     token: tokenOut,
-    tokenPrice: {
-      usd: tokenOutUsdPrice.toString(),
-      jpy: (tokenOutUsdPrice * 140).toString(),
-    },
+    tokenPriceUsd: tokenOutUsdPrice,
   });
 
   if (tokenIn.id === tokenOut.id) {
@@ -307,10 +301,7 @@ const getHistoryOnChain = async ({
                   token.decimals
                 ),
                 token,
-                tokenPrice: {
-                  usd: usdPrice.toString(),
-                  jpy: (usdPrice * 140).toString(),
-                },
+                tokenPriceUsd: usdPrice,
               });
 
               const transferItem: GetHistoryReturnType[number] = {

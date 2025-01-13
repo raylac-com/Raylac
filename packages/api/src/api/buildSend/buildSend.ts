@@ -159,19 +159,13 @@ const buildSend = async (
   const gasFeeFormatted = formatTokenAmount({
     amount: gasFee,
     token: ETH,
-    tokenPrice: {
-      usd: ethPriceUsd.toString(),
-      jpy: (ethPriceUsd * 140).toString(),
-    },
+    tokenPriceUsd: ethPriceUsd,
   });
 
   const formattedAmount = formatTokenAmount({
     amount: BigInt(requestBody.amount),
     token: requestBody.token,
-    tokenPrice: {
-      usd: tokenPriceUsd.toString(),
-      jpy: (tokenPriceUsd * 140).toString(),
-    },
+    tokenPriceUsd: tokenPriceUsd,
   });
 
   return {

@@ -191,28 +191,19 @@ const getSingleInputSwapQuote = async ({
   const amountInFormatted = formatTokenAmount({
     amount: BigInt(amountIn),
     token: inputToken,
-    tokenPrice: {
-      usd: inputTokenPrice.toString(),
-      jpy: (inputTokenPrice * 140).toString(),
-    },
+    tokenPriceUsd: inputTokenPrice,
   });
 
   const amountOutFormatted = formatTokenAmount({
     amount: BigInt(amountOut),
     token: outputToken,
-    tokenPrice: {
-      usd: outputTokenPrice.toString(),
-      jpy: (outputTokenPrice * 140).toString(),
-    },
+    tokenPriceUsd: outputTokenPrice,
   });
 
   const minimumAmountOutFormatted = formatTokenAmount({
     amount: BigInt(minimumAmountOut),
     token: outputToken,
-    tokenPrice: {
-      usd: outputTokenPrice.toString(),
-      jpy: (outputTokenPrice * 140).toString(),
-    },
+    tokenPriceUsd: outputTokenPrice,
   });
 
   const ethPriceUsd = await getTokenUsdPrice({ token: ETH });
@@ -230,10 +221,7 @@ const getSingleInputSwapQuote = async ({
   const originChainGasFormatted = formatTokenAmount({
     amount: BigInt(originChainGas),
     token: ETH,
-    tokenPrice: {
-      usd: ethPriceUsd.toString(),
-      jpy: (ethPriceUsd * 140).toString(),
-    },
+    tokenPriceUsd: ethPriceUsd,
   });
 
   const relayerGas = quote.fees.relayerGas.amount;
@@ -275,10 +263,7 @@ const getSingleInputSwapQuote = async ({
   const relayerGasFormatted = formatTokenAmount({
     amount: BigInt(relayerGas),
     token: relayerGasToken,
-    tokenPrice: {
-      usd: feeTokenPriceUsd.toString(),
-      jpy: (feeTokenPriceUsd * 140).toString(),
-    },
+    tokenPriceUsd: feeTokenPriceUsd,
   });
 
   const relayerServiceFee = quote.fees.relayerService.amount;
@@ -290,17 +275,14 @@ const getSingleInputSwapQuote = async ({
   const relayerServiceFeeFormatted = formatTokenAmount({
     amount: BigInt(relayerServiceFee),
     token: relayerServiceFeeToken,
-    tokenPrice: {
-      usd: feeTokenPriceUsd.toString(),
-      jpy: (feeTokenPriceUsd * 140).toString(),
-    },
+    tokenPriceUsd: feeTokenPriceUsd,
   });
 
   const totalFeeUsdFormatted = new BigNumber(
-    relayerServiceFeeFormatted.currencyValue.formatted.usd
+    relayerServiceFeeFormatted.usdValueFormatted
   )
-    .plus(relayerGasFormatted.currencyValue.formatted.usd)
-    .plus(originChainGasFormatted.currencyValue.formatted.usd)
+    .plus(relayerGasFormatted.usdValueFormatted)
+    .plus(originChainGasFormatted.usdValueFormatted)
     .toString();
 
   const relayRequestId = swapStepQuote.requestId;
