@@ -53,9 +53,12 @@
   },
   "ConfirmBackupPhrase": {
     "choose3Words": "リストから3つの単語を選択して復元フレーズを完成させてください",
-    "title": "復元フレーズを確認"
+    "clear": "クリア",
+    "title": "復元フレーズを確認",
+    "viewBackupPhrase": "復元フレーズを表示"
   },
   "CreateAddress": {
+    "create": "作成",
     "derivingFrom": "{{address}}から派生",
     "name": "名前",
     "new": "新規",
@@ -86,6 +89,7 @@
   },
   "SaveBackupPhrase": {
     "backupPhrase": "復元フレーズ",
+    "clear": "Clear",
     "copyBackupPhrase": "コピー",
     "save": "保存",
     "saveBackupPhrase": "復元フレーズを保存",
@@ -102,15 +106,15 @@
     "totalFee": "合計手数料",
     "totalFeeAmount": "{{amount}} USD"
   },
+  "SelectCurrency": {
+    "jpy": "日本円",
+    "title": "通貨",
+    "usd": "米ドル"
+  },
   "SelectLanguage": {
     "english": "English",
     "japanese": "日本語",
     "title": "言語"
-  },
-  "SelectCurrency": {
-    "title": "通貨",
-    "usd": "米ドル",
-    "jpy": "日本円"
   },
   "SelectRecipient": {
     "paste": "貼り付け",
@@ -143,8 +147,8 @@
   },
   "Settings": {
     "advanced": "詳細設定",
-    "language": "言語",
     "currency": "通貨",
+    "language": "言語",
     "title": "設定"
   },
   "SlippageDetailsSheet": {
@@ -155,8 +159,10 @@
   },
   "Start": {
     "createAccount": "アカウント作成",
+    "importAccount": "Import account",
     "signIn": "ログイン",
-    "title": "アカウント作成"
+    "title": "アカウント作成",
+    "watchAddress": "Watch address"
   },
   "StartWatch": {
     "watchAddress": "アドレスを監視"
@@ -179,8 +185,7 @@
     "swapTransactionSent": "スワップ取引を送信しました",
     "title": "スワップ",
     "totalFee": "合計手数料",
-    "totalFeeAmount": "{{amount}} USD",
-    "amountTooSmall": "金額が小さすぎます"
+    "totalFeeAmount": "{{amount}} USD"
   },
   "SwapListItemSheet": {
     "address": "アドレス",

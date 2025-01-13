@@ -58,11 +58,11 @@
     "viewBackupPhrase": "View backup phrase"
   },
   "CreateAddress": {
+    "create": "Create",
     "derivingFrom": "Deriving from {{address}}",
     "name": "Name",
     "new": "New",
-    "title": "Create Address",
-    "create": "Create"
+    "title": "Create Address"
   },
   "CrossChainSwapListItemSheet": {
     "address": "Address",
@@ -89,12 +89,12 @@
   },
   "SaveBackupPhrase": {
     "backupPhrase": "Backup phrase",
+    "clear": "Clear",
     "copyBackupPhrase": "Copy",
     "save": "Save",
     "saveBackupPhrase": "Save your backup phrase",
     "title": "Save Backup Phrase",
-    "writeDownOrSave": "Write down your backup phrase, or save it in a secure place.",
-    "clear": "Clear"
+    "writeDownOrSave": "Write down your backup phrase, or save it in a secure place."
   },
   "SelectAmount": {
     "balance": "Balance",
@@ -106,15 +106,15 @@
     "totalFee": "Total fee",
     "totalFeeAmount": "{{amount}} USD"
   },
+  "SelectCurrency": {
+    "jpy": "Japanese Yen",
+    "title": "Select Currency",
+    "usd": "US Dollar"
+  },
   "SelectLanguage": {
     "english": "English",
     "japanese": "Japanese",
     "title": "Select Language"
-  },
-  "SelectCurrency": {
-    "title": "Select Currency",
-    "usd": "US Dollar",
-    "jpy": "Japanese Yen"
   },
   "SelectRecipient": {
     "paste": "Paste",
@@ -147,8 +147,8 @@
   },
   "Settings": {
     "advanced": "Advanced",
-    "language": "Language",
     "currency": "Currency",
+    "language": "Language",
     "title": "Settings"
   },
   "SlippageDetailsSheet": {
@@ -160,9 +160,9 @@
   "Start": {
     "createAccount": "Create new account",
     "importAccount": "Import account",
-    "watchAddress": "Watch address",
     "signIn": "Sign in",
-    "title": "Start"
+    "title": "Start",
+    "watchAddress": "Watch address"
   },
   "StartWatch": {
     "watchAddress": "Watch address"
