@@ -107,6 +107,11 @@
     "japanese": "日本語",
     "title": "言語"
   },
+  "SelectCurrency": {
+    "title": "通貨",
+    "usd": "米ドル",
+    "jpy": "日本円"
+  },
   "SelectRecipient": {
     "paste": "貼り付け",
     "searchUser": "ENS、またはETHアドレスで検索",
@@ -139,6 +144,7 @@
   "Settings": {
     "advanced": "詳細設定",
     "language": "言語",
+    "currency": "通貨",
     "title": "設定"
   },
   "SlippageDetailsSheet": {

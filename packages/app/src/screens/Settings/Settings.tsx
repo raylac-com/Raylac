@@ -38,6 +38,10 @@ const Settings = () => {
     navigation.navigate('SelectLanguage');
   };
 
+  const onCurrencyPress = () => {
+    navigation.navigate('SelectCurrency');
+  };
+
   return (
     <View
       style={{
@@ -57,6 +61,11 @@ const Settings = () => {
           title={t('language')}
           icon={<Feather name="globe" size={24} color={colors.border} />}
           onPress={onLanguagePress}
+        />
+        <SettingsListItem
+          title={t('currency')}
+          icon={<Feather name="dollar-sign" size={24} color={colors.border} />}
+          onPress={onCurrencyPress}
         />
       </View>
     </View>

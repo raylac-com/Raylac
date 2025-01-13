@@ -111,6 +111,11 @@
     "japanese": "Japanese",
     "title": "Select Language"
   },
+  "SelectCurrency": {
+    "title": "Select Currency",
+    "usd": "US Dollar",
+    "jpy": "Japanese Yen"
+  },
   "SelectRecipient": {
     "paste": "Paste",
     "searchUser": "Search user or Ethereum address",
@@ -143,6 +148,7 @@
   "Settings": {
     "advanced": "Advanced",
     "language": "Language",
+    "currency": "Currency",
     "title": "Settings"
   },
   "SlippageDetailsSheet": {

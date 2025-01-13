@@ -45,6 +45,7 @@ import Addresses from './screens/Addresses/Addresses';
 import SelectLanguage from './screens/Settings/SelectLanguage';
 import CreateAddress from './screens/CreateAddress/CreateAddress';
 import EmbeddedWallets from './screens/EmbeddedWallets/EmbeddedWallets';
+import SelectCurrency from './screens/Settings/SelectCurrency';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -266,6 +267,15 @@ const Screens = () => {
               component={SelectLanguage}
               options={{
                 title: t('title', { ns: 'SelectLanguage' }),
+                headerBackVisible: true,
+                headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+              }}
+            />
+            <RootStack.Screen
+              name="SelectCurrency"
+              component={SelectCurrency}
+              options={{
+                title: t('title', { ns: 'SelectCurrency' }),
                 headerBackVisible: true,
                 headerBackTitle: t('headerBackTitle', { ns: 'common' }),
               }}
