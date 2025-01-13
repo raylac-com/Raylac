@@ -16,10 +16,21 @@ const meta = {
 
     balance: {
       amount: parseUnits('100', 6).toString(),
-      tokenPriceUsd: 1,
       formatted: '100',
-      usdValue: '100',
-      usdValueFormatted: '100',
+      tokenPrice: {
+        usd: '1',
+        jpy: '140',
+      },
+      currencyValue: {
+        raw: {
+          usd: '100',
+          jpy: '14000',
+        },
+        formatted: {
+          usd: '100',
+          jpy: '14,000',
+        },
+      },
     },
   },
   decorators: [

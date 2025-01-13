@@ -2,6 +2,8 @@ import Feather from '@expo/vector-icons/Feather';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { getExplorerUrl, TransferHistoryItem } from '@raylac/shared';
 import { useEffect, useRef } from 'react';
+import { getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import StyledText from '../StyledText/StyledText';
 import { useTranslation } from 'react-i18next';
@@ -135,6 +137,7 @@ const TransferListItemSheet = ({
   onClose,
 }: TransferListItemSheetProps) => {
   const insets = useSafeAreaInsets();
+  const { data: selectedCurrency } = useSelectedCurrency();
   const ref = useRef<BottomSheetModal>(null);
 
   useEffect(() => {
@@ -186,7 +189,7 @@ const TransferListItemSheet = ({
           <StyledText
             style={{ fontSize: fontSizes.xLarge, fontWeight: 'bold' }}
           >
-            {`$${transfer.amount.usdValueFormatted}`}
+            {getCurrencyFormattedValue(transfer.amount, selectedCurrency)}
           </StyledText>
         </View>
         <View

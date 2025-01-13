@@ -8,6 +8,8 @@ import ChainSelector from '@/screens/Swap/components/ChainSelector/ChainSelector
 import SearchOutputTokenSheet from '@/components/SearchOutputTokenSheet/SearchOutputTokenSheet';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import { formatUnits } from 'viem';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
+import { getCurrencyFormattedValue } from '@/lib/utils';
 
 const SwapOutputCard = ({
   token,
@@ -27,6 +29,7 @@ const SwapOutputCard = ({
   setChainId: (value: number | null) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   useEffect(() => {
     if (token) {
@@ -81,11 +84,13 @@ const SwapOutputCard = ({
             <StyledText
               style={{ color: colors.subbedText, fontWeight: 'bold' }}
             >
-              {`${amount?.usdValueFormatted ?? ''}`}
+              {amount
+                ? getCurrencyFormattedValue(amount, selectedCurrency)
+                : ''}
             </StyledText>
           )}
           <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-            {`USD`}
+            {selectedCurrency?.toUpperCase()}
           </StyledText>
         </View>
       )}

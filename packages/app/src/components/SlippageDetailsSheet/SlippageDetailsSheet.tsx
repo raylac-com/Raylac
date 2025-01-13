@@ -8,6 +8,8 @@ import fontSizes from '@/lib/styles/fontSizes';
 import colors from '@/lib/styles/colors';
 import { formatUnits } from 'viem';
 import { useTranslation } from 'react-i18next';
+import { getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 
 const MinimumAmountOut = ({
   amount,
@@ -42,6 +44,7 @@ const MinimumAmountOut = ({
 
 const MinimumAmountOutCurrency = ({ amount }: { amount: TokenAmount }) => {
   const { t } = useTranslation('SlippageDetailsSheet');
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View
       style={{
@@ -54,7 +57,7 @@ const MinimumAmountOutCurrency = ({ amount }: { amount: TokenAmount }) => {
         {t('minimumOutputUsd')}
       </StyledText>
       <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
-        {`$${amount.usdValueFormatted}`}
+        {getCurrencyFormattedValue(amount, selectedCurrency)}
       </StyledText>
     </View>
   );

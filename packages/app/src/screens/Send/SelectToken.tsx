@@ -11,6 +11,8 @@ import { useTranslation } from 'react-i18next';
 import { RootStackParamsList } from '@/navigation/types';
 import { TokenAmount, Token } from '@raylac/shared';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Keyboard,
@@ -153,6 +155,7 @@ const TokenChainItem = ({
   token: Token;
   balance: TokenAmount;
 }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View
       style={{
@@ -163,7 +166,7 @@ const TokenChainItem = ({
     >
       <TokenLogoWithChain chainId={chainId} logoURI={token.logoURI} size={42} />
       <StyledText style={{ color: colors.border }}>
-        {`$${balance.usdValueFormatted}`}
+        {getCurrencyFormattedValue(balance, selectedCurrency)}
       </StyledText>
     </View>
   );
@@ -183,6 +186,7 @@ const TokenListItem = ({
   }[];
   onPress: ({ token, chainId }: { token: Token; chainId: number }) => void;
 }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
   const [isExpanded, setIsExpanded] = useState(false);
   const heightAnimation = useSharedValue(0);
 
@@ -256,7 +260,7 @@ const TokenListItem = ({
                 <StyledText>{token.name}</StyledText>
               </View>
               <StyledText style={{ color: colors.border }}>
-                {`$${balance.usdValueFormatted}`}
+                {getCurrencyFormattedValue(balance, selectedCurrency)}
               </StyledText>
             </View>
           </View>

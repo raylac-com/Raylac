@@ -15,7 +15,8 @@ import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import fontSizes from '@/lib/styles/fontSizes';
 import colors from '@/lib/styles/colors';
 import StyledButton from '../StyledButton/StyledButton';
-import { shortenAddress } from '@/lib/utils';
+import { shortenAddress, getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 
 export interface SendConfirmSheetProps {
   open: boolean;
@@ -43,6 +44,7 @@ const FromCard = ({
   amount: TokenAmount;
 }) => {
   const { data: userAddresses } = useUserAddresses();
+  const { data: selectedCurrency } = useSelectedCurrency();
   const userAddress = userAddresses?.find(
     (a: UserAddress) => a.address === address
   );
@@ -52,7 +54,7 @@ const FromCard = ({
       <View style={{ flexDirection: 'column', rowGap: 4 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
           <StyledText style={{ fontSize: fontSizes.large, fontWeight: 'bold' }}>
-            {`$${amount.usdValueFormatted} `}
+            {getCurrencyFormattedValue(amount, selectedCurrency)}
           </StyledText>
           <StyledText
             style={{ fontSize: fontSizes.large, color: colors.border }}
@@ -77,13 +79,14 @@ const ToCard = ({
   chainId: number;
   amount: TokenAmount;
 }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
       <TokenLogoWithChain size={52} logoURI={token.logoURI} chainId={chainId} />
       <View style={{ flexDirection: 'column', rowGap: 4 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
           <StyledText style={{ fontSize: fontSizes.large, fontWeight: 'bold' }}>
-            {`$${amount.usdValueFormatted} `}
+            {getCurrencyFormattedValue(amount, selectedCurrency)}
           </StyledText>
           <StyledText
             style={{ fontSize: fontSizes.large, color: colors.border }}

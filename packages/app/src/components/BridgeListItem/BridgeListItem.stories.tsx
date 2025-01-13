@@ -16,16 +16,38 @@ const meta = {
       amountOut: {
         amount: '100',
         formatted: '100',
-        usdValue: '100',
-        usdValueFormatted: '100',
-        tokenPriceUsd: 1,
+        tokenPrice: {
+          usd: '1',
+          jpy: '140',
+        },
+        currencyValue: {
+          raw: {
+            usd: '100',
+            jpy: '14000',
+          },
+          formatted: {
+            usd: '100',
+            jpy: '14,000',
+          },
+        },
       },
       amountIn: {
         amount: '100',
         formatted: '100',
-        usdValue: '100',
-        usdValueFormatted: '100',
-        tokenPriceUsd: 1,
+        tokenPrice: {
+          usd: '1',
+          jpy: '140',
+        },
+        currencyValue: {
+          raw: {
+            usd: '100',
+            jpy: '14000',
+          },
+          formatted: {
+            usd: '100',
+            jpy: '14,000',
+          },
+        },
       },
       token: USDC,
       relayId: '123',

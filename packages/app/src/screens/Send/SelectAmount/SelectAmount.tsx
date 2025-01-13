@@ -5,8 +5,9 @@ import useTypedNavigation from '@/hooks/useTypedNavigation';
 import colors from '@/lib/styles/colors';
 import { useTranslation } from 'react-i18next';
 import fontSizes from '@/lib/styles/fontSizes';
-import { shortenAddress } from '@/lib/utils';
+import { shortenAddress, getCurrencyFormattedValue } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import {
   TokenAmount,
   BuildBridgeSendRequestBody,
@@ -102,6 +103,7 @@ const BalanceDetail = ({
   onMaxPress: () => void;
 }) => {
   const { t } = useTranslation('SelectAmount');
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <StyledText style={{ color: colors.subbedText }}>
@@ -112,7 +114,7 @@ const BalanceDetail = ({
       >
         {balance ? (
           <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-            {`$${balance.usdValueFormatted}`}
+            {getCurrencyFormattedValue(balance, selectedCurrency)}
           </StyledText>
         ) : (
           <Skeleton style={{ width: 100, height: 20 }} />
@@ -135,6 +137,7 @@ const GasInfo = ({
   isFetchingGasInfo: boolean;
 }) => {
   const { t } = useTranslation('SelectAmount');
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <StyledText style={{ color: colors.subbedText }}>{t('gas')}</StyledText>
@@ -142,7 +145,7 @@ const GasInfo = ({
       {gas && (
         <StyledText style={{ color: colors.subbedText }}>
           {t('gasAmount', {
-            amount: gas.usdValueFormatted,
+            amount: getCurrencyFormattedValue(gas, selectedCurrency),
             eth: gas.formatted,
           })}
         </StyledText>
@@ -214,7 +217,7 @@ const AvailableGasDetail = ({
       >{`Available gas`}</StyledText>
       {ethBalance ? (
         <StyledText style={{ color: colors.subbedText }}>
-          {`$${ethBalance.usdValueFormatted} (${ethBalance.formatted} ETH)`}
+          {`${getCurrencyFormattedValue(ethBalance, selectedCurrency)} (${ethBalance.formatted} ETH)`}
         </StyledText>
       ) : (
         <Skeleton style={{ width: 100, height: 20 }} />
@@ -263,7 +266,7 @@ const SelectAmount = ({ route }: Props) => {
     address: fromAddresses[0],
   });
 
-  const tokenPriceUsd = tokenBalance?.tokenPriceUsd;
+  const tokenPriceUsd = tokenBalance?.tokenPrice.usd;
 
   const ethBalance = useAddressChainTokenBalance({
     address: fromAddresses[0],
@@ -533,7 +536,7 @@ const SelectAmount = ({ route }: Props) => {
         );
         setAmountInputText(amountText);
       } else {
-        setAmountInputText(tokenBalance.usdValue);
+        setAmountInputText(tokenBalance.currencyValue.raw.usd);
       }
     }
   };

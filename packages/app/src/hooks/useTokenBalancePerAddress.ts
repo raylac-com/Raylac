@@ -54,7 +54,7 @@ const useTokenBalancePerAddress = ({
         const formattedTotalBalance = formatTokenAmount({
           amount: totalBalance,
           token: tokenBalances[0].token,
-          tokenPriceUsd: tokenBalances[0].balance.tokenPriceUsd,
+          tokenPrice: tokenBalances[0].balance.tokenPrice,
         });
 
         groupByTokens.push({
@@ -82,7 +82,9 @@ const useTokenBalancePerAddress = ({
         }
 
         if (
-          new BigNumber(a.totalBalance.usdValue).gt(b.totalBalance.usdValue)
+          new BigNumber(a.totalBalance.currencyValue.raw.usd).gt(
+            b.totalBalance.currencyValue.raw.usd
+          )
         ) {
           return -1;
         } else {

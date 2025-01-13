@@ -1,6 +1,8 @@
 import Feather from '@expo/vector-icons/Feather';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { CrossChainSwapHistoryItem, getExplorerUrl } from '@raylac/shared';
+import { getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import { useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import StyledText from '../StyledText/StyledText';
@@ -110,6 +112,7 @@ const CrossChainSwapListItemSheet = ({
 }: CrossChainSwapListItemSheetProps) => {
   const insets = useSafeAreaInsets();
   const ref = useRef<BottomSheetModal>(null);
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   const label = 'Swap';
 
@@ -171,7 +174,7 @@ const CrossChainSwapListItemSheet = ({
                 size={64}
               />
               <StyledText style={{ color: colors.subbedText }}>
-                {`$${swap.amountIn.usdValueFormatted}`}
+                {getCurrencyFormattedValue(swap.amountIn, selectedCurrency)}
               </StyledText>
               <StyledText style={{ color: colors.subbedText }}>
                 {`${swap.amountIn.formatted} ${swap.tokenIn.symbol}`}
@@ -194,7 +197,7 @@ const CrossChainSwapListItemSheet = ({
                 size={64}
               />
               <StyledText style={{ color: colors.subbedText }}>
-                {`$${swap.amountOut.usdValueFormatted}`}
+                {getCurrencyFormattedValue(swap.amountOut, selectedCurrency)}
               </StyledText>
               <StyledText style={{ color: colors.subbedText }}>
                 {`${swap.amountOut.formatted} ${swap.tokenOut.symbol}`}

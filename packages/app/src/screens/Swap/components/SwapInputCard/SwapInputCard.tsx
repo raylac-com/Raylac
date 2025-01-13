@@ -30,7 +30,7 @@ const SwapInputCard = ({
   setChainId: (value: number | null) => void;
   address: Hex | null;
 }) => {
-  const tokenPriceUsd = balance?.tokenPriceUsd;
+  const tokenPriceUsd = balance?.tokenPrice.usd;
 
   const [isOpen, setIsOpen] = useState(false);
 
