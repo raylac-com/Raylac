@@ -160,11 +160,11 @@ export const formatTokenAmount = ({
 }): TokenAmount => {
   const usdValue = new BigNumber(
     formatUnits(amount, token.decimals)
-  ).multipliedBy(tokenPrice.usd);
+  ).multipliedBy(new BigNumber(tokenPrice.usd));
 
   const jpyValue = new BigNumber(
     formatUnits(amount, token.decimals)
-  ).multipliedBy(tokenPrice.jpy);
+  ).multipliedBy(new BigNumber(tokenPrice.jpy));
 
   const usdValueFormatted = formatUsdValue(usdValue);
   const jpyValueFormatted = formatUsdValue(jpyValue);
@@ -293,9 +293,7 @@ export const getTotalUsdValue = (tokenBalances: TokenBalancesReturnType) => {
   return formatUsdValue(
     tokenBalances.reduce(
       (acc, tokenBalance) =>
-        acc.plus(
-          new BigNumber(Number(tokenBalance.balance.currencyValue.raw.usd))
-        ),
+        acc.plus(new BigNumber(tokenBalance.balance.currencyValue.raw.usd)),
       new BigNumber(0)
     )
   );

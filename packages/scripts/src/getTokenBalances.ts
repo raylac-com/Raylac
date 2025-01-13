@@ -65,7 +65,7 @@ const getTokenBalances = async () => {
   });
   console.timeEnd('getTokenBalances');
 
-  console.log('tokenBalances', tokenBalancesRpc.length);
+  console.log('tokenBalances', tokenBalancesRpc[0].balance.currencyValue);
 };
 
 getTokenBalances();

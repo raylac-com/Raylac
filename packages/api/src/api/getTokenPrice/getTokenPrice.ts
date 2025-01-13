@@ -6,6 +6,7 @@ import {
 import { MultiCurrencyValue, Token } from '@raylac/shared';
 import { redisClient } from '../../lib/redis';
 import { logger } from '@raylac/shared-backend';
+import BigNumber from 'bignumber.js';
 
 const PRICE_CACHE_EXPIRATION_SECONDS = 60 * 3; // 3 minutes
 
@@ -33,7 +34,7 @@ const cacheTokenPrice = async ({
   }
 };
 
-const getCachedUsdPrice = async ({
+const getCachePrice = async ({
   tokenAddress,
 }: {
   tokenAddress: Hex;
@@ -55,12 +56,10 @@ const getTokenPrice = async ({
   const tokenAddress = token.addresses[0].address;
   const chainId = token.addresses[0].chainId;
 
-  const cachedPrice = await getCachedUsdPrice({ tokenAddress });
+  const cachedPrice = await getCachePrice({ tokenAddress });
 
   if (cachedPrice !== null) {
-    logger.info(
-      `getTokenPrice: Cache hit. Token: ${token.symbol}: ${cachedPrice}`
-    );
+    logger.info(`getTokenPrice: Cache hit. Token: ${token.symbol}`);
     return cachedPrice;
   }
 
@@ -74,13 +73,11 @@ const getTokenPrice = async ({
       throw new Error(`USD price not found for ETH`);
     }
 
-    if (jpyPrice === undefined) {
-      throw new Error(`JPY price not found for ETH`);
-    }
-
     const multiCurrencyPrice: MultiCurrencyValue = {
       usd: usdPrice.value,
-      jpy: jpyPrice.value,
+      jpy: jpyPrice
+        ? jpyPrice.value
+        : new BigNumber(usdPrice.value).times(150).toString(),
     };
 
     await cacheTokenPrice({

@@ -331,7 +331,7 @@ const App = () => {
           client={queryClient}
           persistOptions={{
             persister: asyncStoragePersister,
-            buster: '46',
+            buster: '47',
           }}
         >
           <ThemeProvider value={NavigationTheme}>

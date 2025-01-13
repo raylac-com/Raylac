@@ -52,19 +52,16 @@ const formatAlchemyTokenBalance = async ({
     return null;
   }
 
-  const tokenPriceUsd = await getTokenPrice({ token });
+  const tokenPrice = await getTokenPrice({ token });
 
-  if (!tokenPriceUsd) {
+  if (!tokenPrice) {
     return null;
   }
 
   const formattedBalance = formatTokenAmount({
     amount: tokenBalance,
     token,
-    tokenPrice: {
-      usd: tokenPriceUsd.toString(),
-      jpy: '0',
-    },
+    tokenPrice,
   });
 
   /*
@@ -107,19 +104,16 @@ const getFormattedETHBalance = async ({
 }) => {
   const ethBalance = await getETHBalance({ address, chainId });
 
-  const ethTokenPriceUsd = await getTokenPrice({ token: ETH });
+  const ethTokenPrice = await getTokenPrice({ token: ETH });
 
-  if (ethTokenPriceUsd === null) {
+  if (ethTokenPrice === null) {
     throw new Error('ETH token price not found');
   }
 
   const formattedBalance = formatTokenAmount({
     amount: ethBalance,
     token: ETH,
-    tokenPrice: {
-      usd: ethTokenPriceUsd.toString(),
-      jpy: '0',
-    },
+    tokenPrice: ethTokenPrice,
   });
 
   return formattedBalance;
