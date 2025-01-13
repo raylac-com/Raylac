@@ -125,32 +125,13 @@ const RelayServiceFee = ({
 };
 
 const TotalFee = ({ totalFeeUsd }: { totalFeeUsd: string }) => {
-  const { data: selectedCurrency } = useSelectedCurrency();
-  const tokenAmount: TokenAmount = {
-    amount: totalFeeUsd,
-    formatted: totalFeeUsd,
-    tokenPrice: {
-      usd: '1',
-      jpy: '140',
-    },
-    currencyValue: {
-      raw: {
-        usd: totalFeeUsd,
-        jpy: (Number(totalFeeUsd) * 140).toString(),
-      },
-      formatted: {
-        usd: totalFeeUsd,
-        jpy: (Number(totalFeeUsd) * 140).toString(),
-      },
-    },
-  };
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
         {`Total`}
       </StyledText>
       <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
-        {getCurrencyFormattedValue(tokenAmount, selectedCurrency)}
+        {`$${totalFeeUsd}`}
       </StyledText>
     </View>
   );
