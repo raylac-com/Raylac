@@ -37,7 +37,7 @@ const StartWatch = () => {
         routes: [{ name: 'Tabs', params: { screen: 'Home' } }],
       });
     } else {
-      Alert.alert('Invalid address');
+      Alert.alert(t('invalidAddress'));
     }
   };
 
@@ -79,7 +79,7 @@ const StartWatch = () => {
           autoCapitalize="none"
           autoCorrect={false}
           autoComplete="off"
-          placeholder="ENS or Ethereum address"
+          placeholder={t('ensOrEthereumAddress')}
           inputAccessoryViewID={inputAccessoryViewID}
         />
         {ensAddress && (

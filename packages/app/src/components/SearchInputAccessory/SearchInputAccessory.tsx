@@ -3,6 +3,7 @@ import StyledText from '@/components/StyledText/StyledText';
 import { InputAccessoryView, View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
+import { useTranslation } from 'react-i18next';
 
 const InputAccessoryButton = ({
   onPress,
@@ -53,6 +54,7 @@ const SearchInputAccessory = ({
   onPaste: () => void;
   inputAccessoryViewID: string;
 }) => {
+  const { t } = useTranslation('common');
   return (
     <InputAccessoryView nativeID={inputAccessoryViewID}>
       <View
@@ -65,12 +67,12 @@ const SearchInputAccessory = ({
       >
         <InputAccessoryButton
           onPress={onClear}
-          label="Clear"
+          label={t('clear')}
           icon={<Feather name="x" size={20} color={colors.border} />}
         />
         <InputAccessoryButton
           onPress={onPaste}
-          label="Paste"
+          label={t('paste')}
           icon={<Feather name="clipboard" size={20} color={colors.border} />}
         />
       </View>

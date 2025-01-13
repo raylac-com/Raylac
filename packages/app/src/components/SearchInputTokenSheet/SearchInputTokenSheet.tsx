@@ -18,6 +18,7 @@ import useTokenBalancePerAddress from '@/hooks/useTokenBalancePerAddress';
 import { Hex } from 'viem/_types/types/misc';
 import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
+import { useTranslation } from 'react-i18next';
 
 const ChainTokenBalance = ({
   chainId,
@@ -171,9 +172,10 @@ export const SearchInput = ({
   value: string;
   onChangeText: (text: string) => void;
 }) => {
+  const { t } = useTranslation('common');
   return (
     <BottomSheetTextInput
-      placeholder="Search for a token"
+      placeholder={t('searchForToken')}
       onChangeText={onChangeText}
       autoCapitalize="none"
       style={{
@@ -198,6 +200,7 @@ const SearchInputTokenSheet = ({
   onSelect: ({ token, chainId }: { token: Token; chainId: number }) => void;
   onClose: () => void;
 }) => {
+  const { t } = useTranslation('common');
   const ref = useRef<BottomSheetModal>(null);
   const [searchText, setSearchText] = useState('');
   const insets = useSafeAreaInsets();
@@ -261,7 +264,7 @@ const SearchInputTokenSheet = ({
         }}
         ListEmptyComponent={
           <StyledText style={{ textAlign: 'center', color: colors.border }}>
-            {`No tokens found`}
+            {t('noTokensFound')}
           </StyledText>
         }
         keyExtractor={(_item, index) => index.toString()}

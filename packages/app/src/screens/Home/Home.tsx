@@ -19,6 +19,7 @@ import { getUserAddresses } from '@/lib/key';
 import { useTranslation } from 'react-i18next';
 
 const AddAddressButton = () => {
+  const { t } = useTranslation('common');
   const navigation = useTypedNavigation();
   return (
     <FeedbackPressable
@@ -47,7 +48,7 @@ const AddAddressButton = () => {
     >
       <Feather name="plus" size={20} color={colors.text} />
       <StyledText style={{ color: colors.text, fontWeight: 'bold' }}>
-        {'Add address'}
+        {t('addAddress')}
       </StyledText>
     </FeedbackPressable>
   );

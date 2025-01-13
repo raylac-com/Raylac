@@ -129,6 +129,7 @@ const SlippageTolerance = ({
   minimumAmountOut: TokenAmount | undefined;
   slippagePercent: number | undefined;
 }) => {
+  const { t } = useTranslation(['Swap']);
   const [isSlippageDetailsSheetOpen, setIsSlippageDetailsSheetOpen] =
     useState(false);
 
@@ -145,9 +146,9 @@ const SlippageTolerance = ({
         alignItems: 'center',
       }}
     >
-      <StyledText
-        style={{ color: colors.border }}
-      >{`Max slippage `}</StyledText>
+      <StyledText style={{ color: colors.border }}>
+        {t('Swap:maxSlippage')}
+      </StyledText>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
         <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
           {`${slippagePercent}%`}
@@ -168,6 +169,7 @@ const SlippageTolerance = ({
 type Props = NativeStackScreenProps<RootTabsParamsList, 'Swap'>;
 
 const Swap = ({ route }: Props) => {
+  const { t } = useTranslation(['Swap', 'common']);
   const navigation = useTypedNavigation();
   const { data: writerAddresses } = useWriterAddresses();
   const { fromToken, bridge } = route.params ?? {
@@ -284,7 +286,7 @@ const Swap = ({ route }: Props) => {
     if (getSwapQuoteError) {
       Toast.show({
         type: 'error',
-        text1: 'Error',
+        text1: t('common:error'),
         text2: getSwapQuoteError.message,
         position: 'bottom',
       });
@@ -441,7 +443,7 @@ const Swap = ({ route }: Props) => {
 
     Toast.show({
       type: 'success',
-      text1: 'Swap transaction sent',
+      text1: t('Swap:swapTransactionSent'),
       position: 'bottom',
     });
 
