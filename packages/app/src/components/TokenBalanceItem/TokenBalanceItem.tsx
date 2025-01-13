@@ -1,5 +1,7 @@
 import colors from '@/lib/styles/colors';
 import { TokenAmount } from '@raylac/shared';
+import { getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import { View } from 'react-native';
 import StyledText from '../StyledText/StyledText';
 import TokenLogo from '../TokenLogo/TokenLogo';
@@ -17,6 +19,7 @@ const TokenBalanceItem = (props: {
   balance: TokenAmount;
   logoUrl: string;
 }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View
       style={{
@@ -53,9 +56,9 @@ const TokenBalanceItem = (props: {
             }}
           >
             <StyledText>{shortenName(props.name)}</StyledText>
-            <StyledText
-              style={{ fontWeight: 'bold' }}
-            >{`$${props.balance.usdValueFormatted}`}</StyledText>
+            <StyledText style={{ fontWeight: 'bold' }}>
+              {getCurrencyFormattedValue(props.balance, selectedCurrency)}
+            </StyledText>
           </View>
           <StyledText style={{ color: colors.border }}>
             {props.balance.formatted} {props.symbol}

@@ -1,38 +1,36 @@
 {
-  "Account": {
-    "accountInfo": "アカウント情報",
-    "addresses": "アドレス",
-    "advanced": "詳細設定",
-    "backupAccount": "アカウントのバックアップ",
-    "cancel": "キャンセル",
-    "confirmSignOut": "ログアウト",
-    "confirmSignOutTitle": "ログアウトしますか？",
-    "language": "言語",
-    "signOut": "ログアウト",
-    "title": "アカウント"
+  "AddAddress": {
+    "createAddress": "アドレスを作成",
+    "importAccount": "アカウントをインポート",
+    "watchAddress": "アドレスを監視"
   },
-  "AccountInfo": {
-    "displayName": "名前",
-    "edit": "編集",
-    "title": "アカウント情報",
-    "username": "ユーザー名"
-  },
-  "Addresses": {
-    "noAddresses": "アドレスがありません",
-    "title": "アドレス",
-    "supportedChains": "対応チェーン",
-    "addAddress": "アドレスを追加"
+  "AddressDetailsSheet": {
+    "addressType": "アドレスの種類",
+    "hidePrivateKey": "秘密鍵を隠す",
+    "mnemonic": "ニーモニック",
+    "privateKey": "秘密鍵",
+    "title": "アドレス詳細",
+    "viewPrivateKey": "秘密鍵を表示"
   },
   "AddressListItem": {
     "default": "デフォルト"
   },
+  "AddressSelector": {
+    "selectAddress": "アドレスを選択"
+  },
+  "Addresses": {
+    "addAddress": "アドレスを追加",
+    "noAddresses": "アドレスがありません",
+    "supportedChains": "対応チェーン",
+    "title": "アドレス"
+  },
   "Advanced": {
-    "title": "詳細設定",
     "rpcUrl": "RPC URL {{url}}",
-    "updateChannel": "更新チャンネル: {{channel}}",
     "runtimeVersion": "ランタイムバージョン: {{version}}",
-    "updateId": "更新ID: {{id}}",
-    "updateAvailable": "更新可能: {{available}}"
+    "title": "詳細設定",
+    "updateAvailable": "更新可能: {{available}}",
+    "updateChannel": "更新チャンネル: {{channel}}",
+    "updateId": "更新ID: {{id}}"
   },
   "BackupAccount": {
     "backupWarning1": "次に表示される復元フレーズを使用することで、誰でもあなたの残高を使用することができます。",
@@ -42,162 +40,191 @@
     "revealBackupPhrase": "復元フレーズを表示",
     "title": "アカウントのバックアップ"
   },
+  "BridgeListItemSheet": {
+    "address": "アドレス",
+    "time": "時間",
+    "transaction": "取引"
+  },
+  "BridgeTransferListItemSheet": {
+    "from": "送金元",
+    "time": "時間",
+    "to": "送金先",
+    "transaction": "取引"
+  },
   "ConfirmBackupPhrase": {
     "choose3Words": "リストから3つの単語を選択して復元フレーズを完成させてください",
-    "title": "復元フレーズを確認"
-  },
-  "ConfirmSend": {
-    "amountInUsd": "~${{ amount }}",
-    "receivesAmountOnChain": "{{ name }}さん に {{ amount }} {{ symbol }} を \n {{ chain }} で送金",
-    "send": "送金",
-    "sendToUser": "{{ name }}さん に送金",
-    "title": "送金"
-  },
-  "Deposit": {
-    "copyAddress": "アドレスをコピー",
-    "depositOn": "BaseでETHまたはUSDCを入金",
-    "depositToFreshAddress": "新しいアドレスに入金することで、\n 取引の匿名性が高められます",
-    "getDepositAddress": "入金アドレスを取得",
-    "pastDepositAddresses": "過去の入金アドレス",
-    "title": "入金",
-    "pastReceivingAddresses": "過去の受取アドレス",
-    "getReceivingAddress": "受取アドレスを取得"
-  },
-  "EnterSendAmount": {
-    "availableBalance": "残高: {{ amount}} USDC",
-    "insufficientBalance": "残高が足りません",
-    "privacyNotice1": "{{ name }} さんの新しいアドレスに送金します。",
-    "privacyNotice2": "誰も {{ name }} さんに送金していることを知ることができません。",
-    "receivesOn": "さん \n が受け取るチェーン",
-    "sendToUser": "{{ name }} に送金",
-    "title": "金額を入力",
-    "usd": "ドル"
-  },
-  "Home": {
-    "deposit": "入金",
-    "fiatDenominatedBalance": "{{ balance }} ドル",
-    "noTransfers": "取引がありません",
-    "receive": "受取",
-    "seeAll": "全て表示",
-    "send": "送金",
-    "title": "ホーム",
-    "noTokens": "トークンがありません",
-    "accountBalance": "${{balance}}"
+    "clear": "クリア",
+    "title": "復元フレーズを確認",
+    "viewBackupPhrase": "復元フレーズを表示"
   },
   "CreateAddress": {
-    "title": "アドレスを作成",
-    "name": "名前",
+    "create": "作成",
     "derivingFrom": "{{address}}から派生",
-    "new": "新規"
-  },
-  "Receive": {
-    "backToHome": "ホームに戻る",
-    "orReceiveFromAnyone": "誰からでも受取",
-    "receiveFromRaylacUser": "Raylacユーザーから受取",
-    "receiveOn": "BaseでETHまたはUSDCを受取",
-    "receiveTo": "受取アドレス",
-    "receiveToFreshAddress": "新しいアドレスに受け取ることで、\n 取引の匿名性が高められます",
-    "title": "受取",
-    "yourRaylacUsername": "あなたのユーザー名",
-    "pastReceivingAddresses": "過去の受取アドレス",
-    "getReceivingAddress": "受取アドレスを取得",
-    "copyAddress": "アドレスをコピー"
-  },
-  "SaveBackupPhrase": {
-    "backupPhrase": "Backup phrase",
-    "copyBackupPhrase": "コピー",
-    "save": "保存",
-    "saveBackupPhrase": "バックアップフレーズを保存",
-    "title": "バックアップフレーズを保存",
-    "writeDownOrSave": "バックアップフレーズをメモしてください。または安全な場所に保存してください。"
-  },
-  "SelectLanguage": {
-    "title": "言語",
-    "english": "英語",
-    "japanese": "日本語"
-  },
-  "SelectRecipient": {
-    "searchUser": "ユーザー名、またはETHアドレスで検索",
-    "title": "送金先を選択"
-  },
-  "SendSuccess": {
-    "backToHome": "ホームに戻る",
-    "title": "",
-    "transferSuccessful": "送金しました"
-  },
-  "SignIn": {
-    "enterYourMnemonic": "復元コードを入力",
-    "signIn": "ログイン",
-    "title": "ログイン"
-  },
-  "SignUp": {
     "name": "名前",
-    "signUp": "次へ",
-    "title": "アカウント作成",
-    "username": "ユーザー名",
-    "usernameInvalid": "ユーザー名は英数字のみ使用できます",
-    "usernameLengthWarning": "ユーザー名は{{minChars}}文字以上である必要があります",
-    "usernameTaken": "このユーザー名は既に使用されています"
+    "new": "新規",
+    "title": "アドレスを作成"
   },
-  "Start": {
-    "createAccount": "アカウント作成",
-    "signIn": "ログイン",
-    "title": "アカウント作成"
+  "CrossChainSwapListItemSheet": {
+    "address": "アドレス",
+    "time": "時間",
+    "transaction": "取引"
   },
-  "TransferDetails": {
-    "title": "詳細",
-    "traces": "詳細",
-    "sentTo": "{{ name }} さんに送金",
-    "receivedFrom": "{{ name }} さんから受取"
+  "EditAddressLabel": {
+    "cancel": "キャンセル",
+    "editAddressLabel": "アドレスラベルを編集",
+    "enterLabelPlaceholder": "このアドレスのラベルを入力してください",
+    "label": "ラベル",
+    "save": "保存"
   },
-  "TransferHistory": {
-    "noTransfers": "取引がありません",
-    "title": "取引履歴"
-  },
-  "UpdateDisplayName": {
-    "displayName": "名前",
-    "save": "保存",
-    "title": "名前を変更"
-  },
-  "UpdateUsername": {
-    "save": "保存",
-    "title": "ユーザー名を変更",
-    "username": "ユーザー名"
-  },
-  "Upgrade": {
-    "title": "アップグレード",
-    "upgradeAccount": "更新"
-  },
-  "common": {
-    "copied": "コピーしました",
-    "copiedAddress": "アドレスをコピーしました",
-    "headerBackTitle": "戻る",
-    "next": "次へ",
-    "signUpBonus": "新規登録ボーナス"
+  "Home": {
+    "accountBalance": "{{balance}}",
+    "noTokens": "トークンがありません"
   },
   "ImportAccount": {
-    "title": "アカウントをインポート",
-    "importAccount": "{{type}}をインポート"
+    "importAccount": "{{type}}をインポート",
+    "title": "アカウントをインポート"
   },
-  "Swap": {
-    "title": "スワップ",
+  "PendingIndicator": {
+    "pending": "処理中"
+  },
+  "SaveBackupPhrase": {
+    "backupPhrase": "復元フレーズ",
+    "clear": "Clear",
+    "copyBackupPhrase": "コピー",
+    "save": "保存",
+    "saveBackupPhrase": "復元フレーズを保存",
+    "title": "復元フレーズを保存",
+    "writeDownOrSave": "復元フレーズをメモ、または安全な場所に保存してください"
+  },
+  "SelectAmount": {
+    "balance": "残高",
+    "gas": "ガス",
+    "max": "最大",
+    "recipientReceivesOn": "受取チェーン",
+    "selectRecipientChain": "受取チェーンを選択",
+    "title": "金額を選択",
     "totalFee": "合計手数料",
-    "totalFeeAmount": "{{amount}} USD",
-    "noTokensFound": "トークンが見つかりません",
-    "noTokenBalance": "{{address}}のサポートされているチェーンで{{symbol}}の残高が見つかりません"
+    "totalFeeAmount": "{{amount}} USD"
+  },
+  "SelectCurrency": {
+    "jpy": "日本円",
+    "title": "通貨",
+    "usd": "米ドル"
+  },
+  "SelectLanguage": {
+    "english": "English",
+    "japanese": "日本語",
+    "title": "言語"
+  },
+  "SelectRecipient": {
+    "paste": "貼り付け",
+    "searchUser": "ENS、またはETHアドレスで検索",
+    "title": "送金先を選択"
+  },
+  "SelectToken": {
+    "noTokensFound": "トークンが見つかりません"
   },
   "Send": {
-    "title": "送金",
+    "availableGas": "利用可能なガス",
+    "availableGasAmount": "${{amount}} ({{eth}} ETH)",
     "balance": "残高",
     "balanceAmount": "${{amount}}",
     "gas": "ガス",
     "gasAmount": "${{amount}} ({{eth}} ETH)",
-    "totalFee": "合計手数料",
-    "totalFeeAmount": "${{amount}}",
-    "availableGas": "利用可能なガス",
-    "availableGasAmount": "${{amount}} ({{eth}} ETH)",
     "max": "最大",
     "recipientReceivesOn": "受取チェーン",
-    "switchTo": "{{mode}}に切り替え"
+    "switchTo": "{{mode}}に切り替え",
+    "title": "送金",
+    "totalFee": "合計手数料",
+    "totalFeeAmount": "${{amount}}"
+  },
+  "SendConfirmSheet": {
+    "confirm": "送金",
+    "send": "送金"
+  },
+  "SendToCard": {
+    "sendTo": "送信先"
+  },
+  "Settings": {
+    "advanced": "詳細設定",
+    "currency": "通貨",
+    "language": "言語",
+    "title": "設定"
+  },
+  "SlippageDetailsSheet": {
+    "maxSlippage": "最大スリッページ",
+    "minimumOutput": "最小受け取り",
+    "minimumOutputUsd": "最小受け取り (USD)",
+    "slippage": "スリッページ"
+  },
+  "Start": {
+    "createAccount": "アカウント作成",
+    "importAccount": "Import account",
+    "signIn": "ログイン",
+    "title": "アカウント作成",
+    "watchAddress": "Watch address"
+  },
+  "StartWatch": {
+    "watchAddress": "アドレスを監視"
+  },
+  "Swap": {
+    "amountTooSmall": "金額が小さすぎます",
+    "inputChainIdNull": "入力チェーンIDがありません",
+    "inputTokenNull": "入力トークンがありません",
+    "insufficientBalance": "残高不足",
+    "insufficientOriginChainGas": "オリジンチェーンのガス不足",
+    "maxSlippage": "最大スリッページ",
+    "noPendingSwapData": "保留中のスワップデータがありません",
+    "noTokenBalance": "{{address}}のサポートされているチェーンで{{symbol}}の残高が見つかりません",
+    "noTokensFound": "トークンが見つかりません",
+    "outputChainIdNull": "出力チェーンIDがありません",
+    "outputTokenNull": "出力トークンがありません",
+    "selectOutputChain": "出力チェーンを選択",
+    "swap": "スワップ",
+    "swapQuoteNull": "スワップ見積もりがありません",
+    "swapTransactionSent": "スワップ取引を送信しました",
+    "title": "スワップ",
+    "totalFee": "合計手数料",
+    "totalFeeAmount": "{{amount}} USD"
+  },
+  "SwapListItemSheet": {
+    "address": "アドレス",
+    "time": "時間",
+    "transaction": "取引"
+  },
+  "TokenBalanceDetailsSheet": {
+    "bridge": "ブリッジ",
+    "send": "送金",
+    "swap": "スワップ"
+  },
+  "TransferListItemSheet": {
+    "from": "送金元",
+    "time": "時間",
+    "to": "送金先",
+    "transaction": "取引"
+  },
+  "common": {
+    "addAddress": "アドレスを追加",
+    "address": "アドレス",
+    "clear": "クリア",
+    "close": "閉じる",
+    "copied": "コピーしました",
+    "copiedAddress": "アドレスをコピーしました",
+    "copy": "コピー",
+    "ensOrEthereumAddress": "ENSまたはEthereumアドレス",
+    "error": "エラー",
+    "headerBackTitle": "戻る",
+    "invalidAddress": "無効なアドレス",
+    "invalidInput": "無効な入力",
+    "invalidMnemonic": "無効なニーモニック",
+    "invalidPrivateKey": "無効な秘密鍵",
+    "mnemonicNotFound": "ニーモニックが見つかりません",
+    "next": "次へ",
+    "noTokensFound": "トークンが見つかりません",
+    "paste": "ペースト",
+    "privateKeyNotFound": "秘密鍵が見つかりません",
+    "searchForToken": "トークンを検索",
+    "send": "送信",
+    "usd": "USD"
   }
 }

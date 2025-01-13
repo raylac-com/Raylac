@@ -12,6 +12,7 @@ import StyledButton from '../StyledButton/StyledButton';
 import useLoadPrivateKey from '@/hooks/useLoadPrivateKey';
 import { copyToClipboard } from '@/lib/utils';
 import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
 export interface AddressDetailsSheetProps {
   address: Hex;
@@ -26,6 +27,7 @@ const AddressDetailsSheet = ({
   onClose,
   userAddress,
 }: AddressDetailsSheetProps) => {
+  const { t } = useTranslation('AddressDetailsSheet');
   const insets = useSafeAreaInsets();
   const ref = useRef<BottomSheetModal>(null);
   const { privateKey, loadPrivateKey, hidePrivateKey } =
@@ -37,14 +39,16 @@ const AddressDetailsSheet = ({
 
   const onCopyPress = async () => {
     if (!privateKey) {
-      throw new Error('Private key not found');
+      throw new Error(t('privateKeyNotFound'));
     }
 
     await copyToClipboard(privateKey);
 
     Toast.show({
       type: 'success',
-      text1: 'Copied to clipboard',
+      text1: t('copiedToClipboard', {
+        ns: 'common',
+      }),
     });
   };
 
@@ -91,9 +95,7 @@ const AddressDetailsSheet = ({
         }}
       >
         <View style={{ rowGap: 32 }}>
-          <StyledText style={{ fontWeight: 'bold' }}>
-            {'Address Details'}
-          </StyledText>
+          <StyledText style={{ fontWeight: 'bold' }}>{t('title')}</StyledText>
           <View style={{ rowGap: 16 }}>
             <WalletIconAddress address={address} label={userAddress?.label} />
             {userAddress?.label && (
@@ -122,7 +124,7 @@ const AddressDetailsSheet = ({
               }}
             >
               <StyledText style={{ color: colors.subbedText }}>
-                {'Type'}
+                {t('type')}
               </StyledText>
               <StyledText style={{ fontWeight: 'bold', color: colors.border }}>
                 {getAddressTypeLabel(addressType)}
@@ -151,12 +153,16 @@ const AddressDetailsSheet = ({
                     <Feather name="copy" size={16} color={colors.background} />
                   }
                   onPress={onCopyPress}
-                  title={`Copy`}
+                  title={t('copy', {
+                    ns: 'common',
+                  })}
                 />
                 <StyledButton
                   onPress={onHidePress}
                   variant="outline"
-                  title={`Close`}
+                  title={t('close', {
+                    ns: 'common',
+                  })}
                 />
               </View>
             ) : (
@@ -165,7 +171,7 @@ const AddressDetailsSheet = ({
                 icon={
                   <Feather name="key" size={16} color={colors.background} />
                 }
-                title={`View private key`}
+                title={t('viewPrivateKey')}
               />
             )}
           </View>

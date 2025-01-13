@@ -3,6 +3,8 @@ import Skeleton from '@/components/Skeleton/Skeleton';
 import StyledText from '@/components/StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { TokenAmount, Token } from '@raylac/shared';
+import { getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
 import {
@@ -16,6 +18,7 @@ import useTokenBalancePerAddress from '@/hooks/useTokenBalancePerAddress';
 import { Hex } from 'viem/_types/types/misc';
 import FeedbackPressable from '../FeedbackPressable/FeedbackPressable';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
+import { useTranslation } from 'react-i18next';
 
 const ChainTokenBalance = ({
   chainId,
@@ -26,6 +29,7 @@ const ChainTokenBalance = ({
   token: Token;
   balance: TokenAmount;
 }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View
       style={{
@@ -36,7 +40,7 @@ const ChainTokenBalance = ({
     >
       <TokenLogoWithChain chainId={chainId} logoURI={token.logoURI} size={42} />
       <StyledText style={{ color: colors.border }}>
-        {`$${balance.usdValueFormatted}`}
+        {getCurrencyFormattedValue(balance, selectedCurrency)}
       </StyledText>
     </View>
   );
@@ -57,6 +61,7 @@ const TokenListItem = ({
   onSelect: ({ token, chainId }: { token: Token; chainId: number }) => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   const isMultiChain = chainBalances.length > 1;
 
@@ -113,7 +118,9 @@ const TokenListItem = ({
                 )}
               </View>
               <StyledText style={{ color: colors.border }}>
-                {`$${totalBalance?.usdValueFormatted}`}
+                {totalBalance
+                  ? getCurrencyFormattedValue(totalBalance, selectedCurrency)
+                  : ''}
               </StyledText>
             </View>
             {/**
@@ -165,9 +172,10 @@ export const SearchInput = ({
   value: string;
   onChangeText: (text: string) => void;
 }) => {
+  const { t } = useTranslation('common');
   return (
     <BottomSheetTextInput
-      placeholder="Search for a token"
+      placeholder={t('searchForToken')}
       onChangeText={onChangeText}
       autoCapitalize="none"
       style={{
@@ -192,6 +200,7 @@ const SearchInputTokenSheet = ({
   onSelect: ({ token, chainId }: { token: Token; chainId: number }) => void;
   onClose: () => void;
 }) => {
+  const { t } = useTranslation('common');
   const ref = useRef<BottomSheetModal>(null);
   const [searchText, setSearchText] = useState('');
   const insets = useSafeAreaInsets();
@@ -255,7 +264,7 @@ const SearchInputTokenSheet = ({
         }}
         ListEmptyComponent={
           <StyledText style={{ textAlign: 'center', color: colors.border }}>
-            {`No tokens found`}
+            {t('noTokensFound')}
           </StyledText>
         }
         keyExtractor={(_item, index) => index.toString()}

@@ -26,6 +26,9 @@ const useImportPrivKey = () => {
       await queryClient.invalidateQueries({
         queryKey: userKeys.userAddresses,
       });
+      await queryClient.invalidateQueries({
+        queryKey: userKeys.writerAddresses,
+      });
 
       await sleep(300);
     },

@@ -2,12 +2,15 @@ import { View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import SwapAmountInput from '../SwapAmountInput';
 import { Token, TokenAmount } from '@raylac/shared';
+import { useTranslation } from 'react-i18next';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import ChainSelector from '@/screens/Swap/components/ChainSelector/ChainSelector';
 import SearchOutputTokenSheet from '@/components/SearchOutputTokenSheet/SearchOutputTokenSheet';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import { formatUnits } from 'viem';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
+import { getCurrencyFormattedValue } from '@/lib/utils';
 
 const SwapOutputCard = ({
   token,
@@ -27,6 +30,8 @@ const SwapOutputCard = ({
   setChainId: (value: number | null) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { data: selectedCurrency } = useSelectedCurrency();
+  const { t } = useTranslation('Swap');
 
   useEffect(() => {
     if (token) {
@@ -50,7 +55,7 @@ const SwapOutputCard = ({
     >
       {showChainSelector && chainId !== null && (
         <ChainSelector
-          title="Select output chain"
+          title={t('selectOutputChain')}
           token={token}
           chainId={chainId}
           setChainId={setChainId}
@@ -81,11 +86,13 @@ const SwapOutputCard = ({
             <StyledText
               style={{ color: colors.subbedText, fontWeight: 'bold' }}
             >
-              {`${amount?.usdValueFormatted ?? ''}`}
+              {amount
+                ? getCurrencyFormattedValue(amount, selectedCurrency)
+                : ''}
             </StyledText>
           )}
           <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-            {`USD`}
+            {selectedCurrency?.toUpperCase()}
           </StyledText>
         </View>
       )}

@@ -5,8 +5,9 @@ import useTypedNavigation from '@/hooks/useTypedNavigation';
 import colors from '@/lib/styles/colors';
 import { useTranslation } from 'react-i18next';
 import fontSizes from '@/lib/styles/fontSizes';
-import { shortenAddress } from '@/lib/utils';
+import { shortenAddress, getCurrencyFormattedValue } from '@/lib/utils';
 import { RootStackParamsList } from '@/navigation/types';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import {
   TokenAmount,
   BuildBridgeSendRequestBody,
@@ -23,7 +24,6 @@ import { formatUnits, parseUnits, zeroAddress } from 'viem';
 import BigNumber from 'bignumber.js';
 import { trpc } from '@/lib/trpc';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
-import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import useSend from '@/hooks/useSend';
@@ -37,6 +37,7 @@ import SendConfirmSheet from '@/components/SendConfirmSheet/SendConfirmSheet';
 import { checkIsBalanceSufficient } from '@raylac/shared';
 import BridgeSendFeeDetailsSheet from '@/components/BridgeSendFeeDetailsSheet/BridgeSendFeeDetailsSheet';
 import WalletIconAddress from '@/components/WalletIconAddress/WalletIconAddress';
+import { getCurrencySymbol } from '@/lib/currency';
 
 const ReviewButton = ({
   onPress,
@@ -103,6 +104,7 @@ const BalanceDetail = ({
   onMaxPress: () => void;
 }) => {
   const { t } = useTranslation('SelectAmount');
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <StyledText style={{ color: colors.subbedText }}>
@@ -113,7 +115,7 @@ const BalanceDetail = ({
       >
         {balance ? (
           <StyledText style={{ color: colors.subbedText, fontWeight: 'bold' }}>
-            {`$${balance.usdValueFormatted}`}
+            {getCurrencyFormattedValue(balance, selectedCurrency)}
           </StyledText>
         ) : (
           <Skeleton style={{ width: 100, height: 20 }} />
@@ -136,6 +138,7 @@ const GasInfo = ({
   isFetchingGasInfo: boolean;
 }) => {
   const { t } = useTranslation('SelectAmount');
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <StyledText style={{ color: colors.subbedText }}>{t('gas')}</StyledText>
@@ -143,7 +146,7 @@ const GasInfo = ({
       {gas && (
         <StyledText style={{ color: colors.subbedText }}>
           {t('gasAmount', {
-            amount: gas.usdValueFormatted,
+            amount: getCurrencyFormattedValue(gas, selectedCurrency),
             eth: gas.formatted,
           })}
         </StyledText>
@@ -161,6 +164,7 @@ const BridgeFeeInfo = ({
 }) => {
   const { t } = useTranslation('SelectAmount');
   const [isFeeDetailsSheetOpen, setIsFeeDetailsSheetOpen] = useState(false);
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   return (
     <View>
@@ -177,7 +181,11 @@ const BridgeFeeInfo = ({
             style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
           >
             <StyledText style={{ color: colors.subbedText }}>
-              {t('totalFeeAmount', { amount: bridgeSendData.totalFeeUsd })}
+              {t('totalFeeAmount', {
+                amount: `${getCurrencySymbol(
+                  selectedCurrency || 'usd'
+                )} ${bridgeSendData.totalFee[selectedCurrency || 'usd']}`,
+              })}
             </StyledText>
             <Feather name="chevron-right" size={16} color={colors.border} />
           </View>
@@ -215,7 +223,7 @@ const AvailableGasDetail = ({
       >{`Available gas`}</StyledText>
       {ethBalance ? (
         <StyledText style={{ color: colors.subbedText }}>
-          {`$${ethBalance.usdValueFormatted} (${ethBalance.formatted} ETH)`}
+          {`${getCurrencyFormattedValue(ethBalance, selectedCurrency)} (${ethBalance.formatted} ETH)`}
         </StyledText>
       ) : (
         <Skeleton style={{ width: 100, height: 20 }} />
@@ -232,6 +240,7 @@ type Props = Pick<
 
 const SelectAmount = ({ route }: Props) => {
   const navigation = useTypedNavigation();
+  const { t } = useTranslation('SelectAmount');
   const toAddress = route.params.toAddress;
   const fromAddresses = route.params.fromAddresses;
   const token = route.params.token;
@@ -264,13 +273,13 @@ const SelectAmount = ({ route }: Props) => {
     address: fromAddresses[0],
   });
 
+  const tokenPriceUsd = tokenBalance?.tokenPrice.usd;
+
   const ethBalance = useAddressChainTokenBalance({
     address: fromAddresses[0],
     chainId: fromChainId,
     token: ETH,
   });
-
-  const { data: tokenPriceUsd } = useTokenPriceUsd(token);
 
   ///
   /// Mutations
@@ -366,7 +375,6 @@ const SelectAmount = ({ route }: Props) => {
     if (
       amountInputText === '' ||
       containsNonNumericCharacters(amountInputText) ||
-      tokenPriceUsd === null ||
       tokenPriceUsd === undefined
     ) {
       return;
@@ -376,7 +384,9 @@ const SelectAmount = ({ route }: Props) => {
       inputMode === 'token'
         ? parseUnits(amountInputText, token.decimals)
         : parseUnits(
-            new BigNumber(amountInputText).dividedBy(tokenPriceUsd).toFixed(),
+            new BigNumber(amountInputText)
+              .dividedBy(new BigNumber(tokenPriceUsd))
+              .toFixed(),
             token.decimals
           );
 
@@ -533,7 +543,7 @@ const SelectAmount = ({ route }: Props) => {
         );
         setAmountInputText(amountText);
       } else {
-        setAmountInputText(tokenBalance.usdValue);
+        setAmountInputText(tokenBalance.currencyValue.raw.usd);
       }
     }
   };
@@ -678,7 +688,7 @@ const SelectAmount = ({ route }: Props) => {
         isGasSufficient={isGasSufficient}
       />
       <SelectChainSheet
-        title="Select recipient chain"
+        title={t('selectRecipientChain')}
         open={isChainsSheetOpen}
         onSelect={chain => {
           setToChainId(chain.id);

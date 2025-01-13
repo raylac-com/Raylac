@@ -5,6 +5,7 @@ import {
   formatAmount,
   formatTokenAmount,
   formatUsdValue,
+  MultiCurrencyValue,
   RelayGasFee,
   RelayGetQuoteRequestBody,
   Token,
@@ -21,20 +22,21 @@ import {
 import { relayApi } from '../../lib/relay';
 import axios from 'axios';
 import { getNonce } from '../../utils';
-import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
+import getTokenPrice from '../getTokenPrice/getTokenPrice';
 import { Hex } from 'viem';
 import BigNumber from 'bignumber.js';
+import { getUsdExchangeRate } from '../../lib/exchangeRate';
 
 /**
  * Parses a relayer fee into a `TokenAmount` and `Token`
  */
-const parseRelayerFee = ({
+const parseRelayerFee = async ({
   fee,
   possibleTokens,
 }: {
   fee: RelayGasFee;
   possibleTokens: Token[];
-}): { amount: TokenAmount; token: Token } => {
+}): Promise<{ amount: TokenAmount; token: Token }> => {
   const amount = fee.amount;
 
   if (amount === undefined) {
@@ -83,10 +85,19 @@ const parseRelayerFee = ({
     .div(new BigNumber(formatAmount(amount, decimals)))
     .toNumber();
 
+  const exchangeRate = await getUsdExchangeRate();
+
+  const tokenPrice: MultiCurrencyValue = {
+    usd: tokenUsdPrice.toString(),
+    jpy: new BigNumber(tokenUsdPrice)
+      .times(new BigNumber(exchangeRate.jpy))
+      .toString(),
+  };
+
   const tokenAmount = formatTokenAmount({
     amount: BigInt(amount),
     token,
-    tokenPriceUsd: tokenUsdPrice,
+    tokenPrice,
   });
 
   return { amount: tokenAmount, token };
@@ -163,41 +174,41 @@ const buildBridgeSend = async ({
   const amountIn = amount;
   const amountOut = quote.details.currencyOut.amount;
 
-  const tokenPriceUsd = await getTokenUsdPrice({ token });
+  const tokenPrice = await getTokenPrice({ token });
 
-  if (tokenPriceUsd === null) {
-    throw new Error('tokenPriceUsd is undefined');
+  if (tokenPrice === null) {
+    throw new Error('tokenPrice is undefined');
   }
 
   const amountInFormatted = formatTokenAmount({
     amount: BigInt(amountIn),
     token,
-    tokenPriceUsd,
+    tokenPrice: tokenPrice,
   });
 
   const amountOutFormatted = formatTokenAmount({
     amount: BigInt(amountOut),
     token,
-    tokenPriceUsd,
+    tokenPrice,
   });
 
-  const ethPriceUsd = await getTokenUsdPrice({ token: ETH });
+  const ethPriceUsd = await getTokenPrice({ token: ETH });
 
   if (ethPriceUsd === null) {
     throw new Error('ETH price not found');
   }
 
-  const originChainGas = parseRelayerFee({
+  const originChainGas = await parseRelayerFee({
     fee: quote.fees.gas,
     possibleTokens: [token, ETH],
   });
 
-  const relayerServiceFee = parseRelayerFee({
+  const relayerServiceFee = await parseRelayerFee({
     fee: quote.fees.relayerService,
     possibleTokens: [token, ETH],
   });
 
-  const relayerGas = parseRelayerFee({
+  const relayerGas = await parseRelayerFee({
     fee: quote.fees.relayerGas,
     possibleTokens: [token, ETH],
   });
@@ -252,10 +263,19 @@ const buildBridgeSend = async ({
     throw new Error('Swap step not found');
   }
   const totalFeeUsd = formatUsdValue(
-    new BigNumber(relayerServiceFee.amount.usdValue)
-      .plus(new BigNumber(relayerGas.amount.usdValue))
-      .plus(new BigNumber(originChainGas.amount.usdValue))
+    new BigNumber(relayerServiceFee.amount.currencyValue.raw.usd)
+      .plus(new BigNumber(relayerGas.amount.currencyValue.raw.usd))
+      .plus(new BigNumber(originChainGas.amount.currencyValue.raw.usd))
   );
+
+  const exchangeRate = await getUsdExchangeRate();
+
+  const totalFee: MultiCurrencyValue = {
+    usd: totalFeeUsd,
+    jpy: new BigNumber(totalFeeUsd)
+      .times(new BigNumber(exchangeRate.jpy))
+      .toString(),
+  };
 
   return {
     relayRequestId: depositStep.requestId as Hex,
@@ -275,7 +295,7 @@ const buildBridgeSend = async ({
     relayerGasChainId,
     amountIn: amountInFormatted,
     amountOut: amountOutFormatted,
-    totalFeeUsd,
+    totalFee,
     fromChainId,
     toChainId,
   };

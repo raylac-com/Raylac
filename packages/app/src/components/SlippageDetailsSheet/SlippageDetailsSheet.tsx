@@ -7,6 +7,9 @@ import { Token, TokenAmount } from '@raylac/shared';
 import fontSizes from '@/lib/styles/fontSizes';
 import colors from '@/lib/styles/colors';
 import { formatUnits } from 'viem';
+import { useTranslation } from 'react-i18next';
+import { getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 
 const MinimumAmountOut = ({
   amount,
@@ -15,6 +18,7 @@ const MinimumAmountOut = ({
   amount: TokenAmount;
   token: Token;
 }) => {
+  const { t } = useTranslation('SlippageDetailsSheet');
   const formattedAmount = formatUnits(
     BigInt(amount.amount),
     token.decimals
@@ -29,7 +33,7 @@ const MinimumAmountOut = ({
       }}
     >
       <StyledText style={{ color: colors.border }}>
-        {`Minimum output`}
+        {t('minimumOutput')}
       </StyledText>
       <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
         {`${formattedAmount} ${token.symbol}`}
@@ -39,6 +43,8 @@ const MinimumAmountOut = ({
 };
 
 const MinimumAmountOutCurrency = ({ amount }: { amount: TokenAmount }) => {
+  const { t } = useTranslation('SlippageDetailsSheet');
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View
       style={{
@@ -48,16 +54,17 @@ const MinimumAmountOutCurrency = ({ amount }: { amount: TokenAmount }) => {
       }}
     >
       <StyledText style={{ color: colors.border }}>
-        {`Minimum output (USD)`}
+        {t('minimumOutputUsd')}
       </StyledText>
       <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
-        {`$${amount.usdValueFormatted}`}
+        {getCurrencyFormattedValue(amount, selectedCurrency)}
       </StyledText>
     </View>
   );
 };
 
 const SlippagePercent = ({ slippagePercent }: { slippagePercent: number }) => {
+  const { t } = useTranslation('SlippageDetailsSheet');
   return (
     <View
       style={{
@@ -66,7 +73,9 @@ const SlippagePercent = ({ slippagePercent }: { slippagePercent: number }) => {
         justifyContent: 'space-between',
       }}
     >
-      <StyledText style={{ color: colors.border }}>{`Max slippage`}</StyledText>
+      <StyledText style={{ color: colors.border }}>
+        {t('maxSlippage')}
+      </StyledText>
       <StyledText
         style={{ color: colors.border, fontWeight: 'bold' }}
       >{`${slippagePercent}%`}</StyledText>
@@ -90,6 +99,7 @@ const SlippageDetailsSheet = ({
   onClose,
 }: SlippageDetailsSheetProps) => {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation('SlippageDetailsSheet');
   const ref = useRef<BottomSheetModal>(null);
 
   useEffect(() => {
@@ -124,7 +134,7 @@ const SlippageDetailsSheet = ({
         }}
       >
         <StyledText style={{ fontWeight: 'bold', fontSize: fontSizes.large }}>
-          {`Slippage`}
+          {t('slippage')}
         </StyledText>
         <View style={{ rowGap: 16, flexDirection: 'column' }}>
           <MinimumAmountOut amount={minimumAmountOut} token={token} />

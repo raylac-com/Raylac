@@ -2,6 +2,7 @@ import colors from '@/lib/styles/colors';
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import * as bip39 from 'bip39';
+import { useTranslation } from 'react-i18next';
 import StyledButton from '@/components/StyledButton/StyledButton';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 import Toast from 'react-native-toast-message';
@@ -63,6 +64,7 @@ const pickRandom = ({ array, count }: { array: any[]; count: number }) => {
 type Props = NativeStackScreenProps<RootStackParamsList, 'ConfirmBackupPhrase'>;
 
 const ConfirmBackupPhrase = ({ route }: Props) => {
+  const { t } = useTranslation('ConfirmBackupPhrase');
   const { genesisAddress } = route.params;
   const insets = useSafeAreaInsets();
   const { mnemonic } = useMnemonic(genesisAddress);
@@ -249,14 +251,14 @@ const ConfirmBackupPhrase = ({ route }: Props) => {
         }}
       >
         <StyledButton
-          title="Clear"
+          title={t('clear')}
           onPress={() => {
             setUserInputs([]);
           }}
           variant="outline"
         ></StyledButton>
         <StyledButton
-          title="View backup phrase"
+          title={t('viewBackupPhrase')}
           onPress={() => {
             navigation.navigate('SaveBackupPhrase', {
               genesisAddress,

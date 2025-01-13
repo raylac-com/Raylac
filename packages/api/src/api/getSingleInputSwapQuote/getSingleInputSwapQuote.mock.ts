@@ -41,46 +41,19 @@ const getSingleInputSwapQuoteMock = async (
   };
 
   return {
-    totalFeeUsd: '0.12',
+    totalFee: {
+      usd: '0.12',
+      jpy: '15',
+    },
     approveStep: mockApproveStep,
     swapStep: mockSwapStep,
-    originChainGas: {
-      amount: '21000',
-      formatted: '0.000021',
-      usdValue: '0.05',
-      usdValueFormatted: '0.05',
-      tokenPriceUsd: 2000,
-    },
-    amountIn: {
-      amount: '1000000000000000000',
-      formatted: '1',
-      usdValue: '2000',
-      usdValueFormatted: '2,000',
-      tokenPriceUsd: 2000,
-    },
-    amountOut: {
-      amount: '990000000000000000',
-      formatted: '0.99',
-      usdValue: '1980',
-      usdValueFormatted: '1,980',
-      tokenPriceUsd: 2000,
-    },
+    originChainGas: MOCK_TOKEN_AMOUNT,
+    amountIn: MOCK_TOKEN_AMOUNT,
+    amountOut: MOCK_TOKEN_AMOUNT,
     relayerServiceFeeToken: ETH,
-    relayerServiceFee: {
-      amount: '1000000000000000',
-      formatted: '0.001',
-      usdValue: '1',
-      usdValueFormatted: '1',
-      tokenPriceUsd: 1000,
-    },
+    relayerServiceFee: MOCK_TOKEN_AMOUNT,
     relayerGasToken: ETH,
-    relayerGas: {
-      amount: '1000000000000000',
-      formatted: '0.001',
-      usdValue: '2',
-      usdValueFormatted: '2',
-      tokenPriceUsd: 2000,
-    },
+    relayerGas: MOCK_TOKEN_AMOUNT,
     relayRequestId:
       '0x9876543210987654321098765432109876543210987654321098765432109876' as Hex,
     fromChainId: base.id,

@@ -1,9 +1,10 @@
 import { toAlchemyNetwork } from '../utils';
 import { Alchemy, HistoricalPriceInterval } from 'alchemy-sdk';
+import BigNumber from 'bignumber.js';
 import { ALCHEMY_API_KEY } from './envVars';
-import { AlchemyTokenPriceResponse } from '@raylac/shared';
+import { MultiCurrencyValue } from '@raylac/shared';
 import { Hex } from 'viem';
-import axios from 'axios';
+import { getUsdExchangeRate } from './exchangeRate';
 
 export const getAlchemyClient = (chainId: number) => {
   return new Alchemy({
@@ -12,28 +13,13 @@ export const getAlchemyClient = (chainId: number) => {
   });
 };
 
-export const getTokenPriceBySymbol = async (symbol: string) => {
-  const url = `https://api.g.alchemy.com/prices/v1/tokens/by-symbol?symbols=${symbol}`;
-
-  const headers = {
-    Accept: 'application/json',
-    Authorization: `Bearer ${ALCHEMY_API_KEY}`,
-  };
-
-  const response = await axios.get<{ data: AlchemyTokenPriceResponse[] }>(url, {
-    headers: headers,
-  });
-
-  return response.data.data[0];
-};
-
 export const getTokenPriceByAddress = async ({
   chainId,
   address,
 }: {
   chainId: number;
   address: Hex;
-}): Promise<string | null> => {
+}): Promise<MultiCurrencyValue | null> => {
   const alchemyClient = getAlchemyClient(chainId);
 
   const startTime = new Date().getTime() / 1000 - 24 * 60 * 60; // Yesterday
@@ -54,7 +40,17 @@ export const getTokenPriceByAddress = async ({
       return null;
     }
 
-    return data[data.length - 1].value;
+    const usdPrice = data[data.length - 1].value;
+    const exchangeRate = await getUsdExchangeRate();
+
+    const jpyPrice = new BigNumber(usdPrice)
+      .times(new BigNumber(exchangeRate.jpy))
+      .toString();
+
+    return {
+      usd: usdPrice,
+      jpy: jpyPrice,
+    };
   } catch (err: any) {
     if (err.message.includes('not found')) {
       return null;
@@ -62,36 +58,4 @@ export const getTokenPriceByAddress = async ({
 
     throw err;
   }
-};
-
-export const getTokenPrices = async ({
-  tokenAddresses,
-}: {
-  tokenAddresses: { address: Hex; chainId: number }[];
-}): Promise<AlchemyTokenPriceResponse[]> => {
-  if (tokenAddresses.length > 25) {
-    throw new Error('Alchemy only supports 25 token addresses at a time');
-  }
-
-  const url = `https://api.g.alchemy.com/prices/v1/tokens/by-address`;
-
-  const headers = {
-    Accept: 'application/json',
-    Authorization: `Bearer ${ALCHEMY_API_KEY}`,
-  };
-
-  const response = await axios.post<{ data: AlchemyTokenPriceResponse[] }>(
-    url,
-    {
-      addresses: tokenAddresses.map(token => ({
-        address: token.address,
-        network: toAlchemyNetwork(token.chainId),
-      })),
-    },
-    {
-      headers: headers,
-    }
-  );
-
-  return response.data.data;
 };

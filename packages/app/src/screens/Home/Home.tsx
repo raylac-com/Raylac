@@ -5,7 +5,6 @@ import TokenBalanceItem from '@/components/TokenBalanceItem/TokenBalanceItem';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
-import useAccountUsdValue from '@/hooks/useAccountUsdValue';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import TokenBalanceDetailsSheet from '@/components/TokenBalanceDetailsSheet/TokenBalanceDetailsSheet';
 import { groupTokenBalancesByToken, Token } from '@raylac/shared';
@@ -17,8 +16,12 @@ import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable'
 import Feather from '@expo/vector-icons/Feather';
 import { getUserAddresses } from '@/lib/key';
 import { useTranslation } from 'react-i18next';
+import useAccountTotalValue from '@/hooks/useAccountTotalValue';
+import { getCurrencySymbol } from '@/lib/currency';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 
 const AddAddressButton = () => {
+  const { t } = useTranslation('common');
   const navigation = useTypedNavigation();
   return (
     <FeedbackPressable
@@ -47,7 +50,7 @@ const AddAddressButton = () => {
     >
       <Feather name="plus" size={20} color={colors.text} />
       <StyledText style={{ color: colors.text, fontWeight: 'bold' }}>
-        {'Add address'}
+        {t('addAddress')}
       </StyledText>
     </FeedbackPressable>
   );
@@ -57,6 +60,7 @@ const HomeScreen = () => {
   const { t } = useTranslation('Home');
   const navigation = useTypedNavigation();
   const insets = useSafeAreaInsets();
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   ///
   /// Local state
@@ -93,8 +97,8 @@ const HomeScreen = () => {
     }
   );
 
-  const { data: accountUsdValue, isLoading: isLoadingAccountUsdValue } =
-    useAccountUsdValue();
+  const { data: accountTotalValue, isLoading: isLoadingAccountTotalValue } =
+    useAccountTotalValue();
 
   ///
   /// Effects
@@ -168,10 +172,10 @@ const HomeScreen = () => {
           <StyledText
             style={{ fontSize: 36, fontWeight: 'bold', color: colors.text }}
           >
-            {isLoadingAccountUsdValue ? (
+            {isLoadingAccountTotalValue ? (
               <Skeleton style={{ width: 100, height: 24 }} />
             ) : (
-              t('accountBalance', { balance: accountUsdValue })
+              `${getCurrencySymbol(selectedCurrency || 'usd')} ${accountTotalValue?.usd}`
             )}
           </StyledText>
         </View>

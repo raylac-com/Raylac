@@ -9,9 +9,10 @@ import {
   ETH,
 } from '@raylac/shared';
 import { getAlchemyClient } from '../../lib/alchemy';
-import getTokenUsdPrice from '../getTokenUsdPrice/getTokenUsdPrice';
+import getTokenPrice from '../getTokenPrice/getTokenPrice';
 import { getToken } from '../../lib/token';
 import { TokenBalancesResponseErc20, TokenBalanceType } from 'alchemy-sdk';
+// import * as coingecko from '../../lib/coingecko';
 
 export const getETHBalance = async ({
   address,
@@ -51,19 +52,40 @@ const formatAlchemyTokenBalance = async ({
     return null;
   }
 
-  const tokenPriceUsd = await getTokenUsdPrice({
-    token,
-  });
+  const tokenPrice = await getTokenPrice({ token });
 
-  if (tokenPriceUsd === null) {
+  if (!tokenPrice) {
     return null;
   }
 
   const formattedBalance = formatTokenAmount({
     amount: tokenBalance,
     token,
-    tokenPriceUsd,
+    tokenPrice,
   });
+
+  /*
+  const coinData = await coingecko.getCoinData({
+    tokenAddress,
+    chainId,
+  });
+
+  if (!coinData) {
+    return null;
+  }
+
+  const tokenPriceUsd = coinData.market_data.current_price.usd;
+  const tokenPriceJpy = coinData.market_data.current_price.jpy;
+
+  const formattedBalance = formatTokenAmount({
+    amount: tokenBalance,
+    token,
+    tokenPrice: {
+      usd: tokenPriceUsd.toString(),
+      jpy: tokenPriceJpy.toString(),
+    },
+  });
+  */
 
   return {
     address,
@@ -82,16 +104,16 @@ const getFormattedETHBalance = async ({
 }) => {
   const ethBalance = await getETHBalance({ address, chainId });
 
-  const ethTokenPriceUsd = await getTokenUsdPrice({ token: ETH });
+  const ethTokenPrice = await getTokenPrice({ token: ETH });
 
-  if (ethTokenPriceUsd === null) {
+  if (ethTokenPrice === null) {
     throw new Error('ETH token price not found');
   }
 
   const formattedBalance = formatTokenAmount({
     amount: ethBalance,
     token: ETH,
-    tokenPriceUsd: ethTokenPriceUsd,
+    tokenPrice: ethTokenPrice,
   });
 
   return formattedBalance;

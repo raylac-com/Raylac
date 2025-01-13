@@ -1,6 +1,8 @@
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
+import { getCurrencyFormattedValue } from '@/lib/utils';
 import StyledText from '../StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { View } from 'react-native';
@@ -8,12 +10,14 @@ import {
   ETH,
   getChainName,
   GetSingleInputSwapQuoteReturnType,
+  MultiCurrencyValue,
   Token,
   TokenAmount,
 } from '@raylac/shared';
 import fontSizes from '@/lib/styles/fontSizes';
 import RelayLogo from '../RelayLogo/RelayLogo';
 import ChainLogo from '../ChainLogo/ChainLogo';
+import { getCurrencySymbol } from '@/lib/currency';
 
 const OriginChainGas = ({
   chainId,
@@ -23,6 +27,7 @@ const OriginChainGas = ({
   token: Token;
   amount: TokenAmount;
 }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View
       style={{
@@ -43,7 +48,7 @@ const OriginChainGas = ({
         style={{ flexDirection: 'column', alignItems: 'center', columnGap: 8 }}
       >
         <StyledText style={{ color: colors.border }}>
-          {`$${amount.usdValueFormatted}`}
+          {getCurrencyFormattedValue(amount, selectedCurrency)}
         </StyledText>
       </View>
     </View>
@@ -58,6 +63,7 @@ const DestinationChainGas = ({
   token: Token;
   amount: TokenAmount;
 }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View
       style={{
@@ -78,7 +84,7 @@ const DestinationChainGas = ({
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
       >
         <StyledText style={{ color: colors.border }}>
-          {`$${amount.usdValueFormatted}`}
+          {getCurrencyFormattedValue(amount, selectedCurrency)}
         </StyledText>
       </View>
     </View>
@@ -86,6 +92,7 @@ const DestinationChainGas = ({
 };
 
 const RelayServiceFee = ({ amount }: { amount: TokenAmount }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View
       style={{
@@ -106,21 +113,23 @@ const RelayServiceFee = ({ amount }: { amount: TokenAmount }) => {
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
       >
         <StyledText style={{ color: colors.border }}>
-          {`$${amount.usdValueFormatted}`}
+          {getCurrencyFormattedValue(amount, selectedCurrency)}
         </StyledText>
       </View>
     </View>
   );
 };
 
-const TotalFee = ({ usdValueFormatted }: { usdValueFormatted: string }) => {
+const TotalFee = ({ totalFee }: { totalFee: MultiCurrencyValue }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
+
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
         {`Total`}
       </StyledText>
       <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
-        {`$${usdValueFormatted}`}
+        {`${getCurrencySymbol(selectedCurrency || 'usd')} ${totalFee[selectedCurrency || 'usd']}`}
       </StyledText>
     </View>
   );
@@ -189,7 +198,7 @@ const SwapFeeDetailsSheet = ({
           )}
           <RelayServiceFee amount={swapQuote.relayerServiceFee} />
           <View style={{ marginTop: 16 }}>
-            <TotalFee usdValueFormatted={swapQuote.totalFeeUsd} />
+            <TotalFee totalFee={swapQuote.totalFee} />
           </View>
         </View>
       </BottomSheetView>

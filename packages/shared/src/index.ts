@@ -15,3 +15,4 @@ export * from './ethRpc';
 export * from './supportedChains';
 export * from './rpcTypes';
 export * from './knownTokens';
+export * from './coingeckoTypes';

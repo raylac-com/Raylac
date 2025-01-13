@@ -8,6 +8,7 @@ import {
   SignedSingleInputSwapStep,
   SignedApproveStep,
   TokenAmount,
+  MultiCurrencyValue,
 } from './types';
 
 export enum TRPCErrorMessage {
@@ -105,7 +106,7 @@ export type GetSingleInputSwapQuoteReturnType = {
   relayerServiceFeeToken: Token;
   originChainGas: TokenAmount;
   relayRequestId: Hex;
-  totalFeeUsd: string;
+  totalFee: MultiCurrencyValue;
   fromChainId: number;
   toChainId: number;
   slippagePercent: number;
@@ -254,7 +255,26 @@ export type BuildBridgeSendReturnType = {
   amountOut: TokenAmount;
   relayerServiceFeeChainId: number;
   relayerGasChainId: number;
-  totalFeeUsd: string;
+  totalFee: MultiCurrencyValue;
 };
 
 export type GetTokenUsdPriceReturnType = number | null;
+
+export interface GetTokenRequestBody {
+  tokenAddress: Hex;
+  chainId: number;
+}
+
+export interface GetTokenDataReturnType {
+  description: {
+    en: string;
+    ja: string;
+  };
+  marketCap: MultiCurrencyValue;
+  price: MultiCurrencyValue;
+  priceChange24h: MultiCurrencyValue;
+  priceChangePercent24h: string;
+  totalVolume: MultiCurrencyValue;
+}
+
+export type GetExchangeRateReturnType = MultiCurrencyValue;

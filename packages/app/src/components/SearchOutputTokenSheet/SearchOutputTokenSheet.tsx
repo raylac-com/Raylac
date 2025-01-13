@@ -16,6 +16,8 @@ import { getChainIcon } from '@/lib/utils';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { trpc } from '@/lib/trpc';
 import useDebounce from '@/hooks/useDebounce';
+import useTokensWithBalances from '@/hooks/useTokensWithBalances';
+import { useTranslation } from 'react-i18next';
 
 const TokenListItem = ({
   token,
@@ -84,9 +86,10 @@ export const SearchInput = ({
   value: string;
   onChangeText: (text: string) => void;
 }) => {
+  const { t } = useTranslation('common');
   return (
     <BottomSheetTextInput
-      placeholder="Search for a token"
+      placeholder={t('searchForToken')}
       onChangeText={onChangeText}
       autoCapitalize="none"
       style={{
@@ -109,6 +112,7 @@ const SearchOutputTokenSheet = ({
   onSelectToken: (token: Token) => void;
   onClose: () => void;
 }) => {
+  const { t } = useTranslation('common');
   const ref = useRef<BottomSheetModal>(null);
   const [searchText, setSearchText] = useState('');
   const insets = useSafeAreaInsets();
@@ -128,7 +132,17 @@ const SearchOutputTokenSheet = ({
     searchTerm: debouncedSearchText,
   });
 
-  const tokenList = tokens ?? [undefined, undefined, undefined];
+  const tokenBalances = useTokensWithBalances();
+
+  const tokenList =
+    tokenBalances === undefined && tokens === undefined
+      ? [undefined, undefined, undefined]
+      : [...(tokens ?? []), ...(tokenBalances ?? [])]
+          // Remove duplicates
+          .filter(
+            (token, index, self) =>
+              index === self.findIndex(t => t.id === token.id)
+          );
 
   return (
     <BottomSheetModal
@@ -163,7 +177,7 @@ const SearchOutputTokenSheet = ({
         nestedScrollEnabled
         ListEmptyComponent={
           <StyledText style={{ textAlign: 'center', color: colors.border }}>
-            {`No tokens found`}
+            {t('noTokensFound')}
           </StyledText>
         }
         renderItem={({ item }) => {

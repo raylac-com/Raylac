@@ -2,6 +2,7 @@ import Feather from '@expo/vector-icons/Feather';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 import { Hex } from 'viem';
 import { UserAddress } from '@/types';
 import { View } from 'react-native';
@@ -14,7 +15,8 @@ import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import fontSizes from '@/lib/styles/fontSizes';
 import colors from '@/lib/styles/colors';
 import StyledButton from '../StyledButton/StyledButton';
-import { shortenAddress } from '@/lib/utils';
+import { shortenAddress, getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 
 export interface SendConfirmSheetProps {
   open: boolean;
@@ -42,6 +44,7 @@ const FromCard = ({
   amount: TokenAmount;
 }) => {
   const { data: userAddresses } = useUserAddresses();
+  const { data: selectedCurrency } = useSelectedCurrency();
   const userAddress = userAddresses?.find(
     (a: UserAddress) => a.address === address
   );
@@ -51,7 +54,7 @@ const FromCard = ({
       <View style={{ flexDirection: 'column', rowGap: 4 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
           <StyledText style={{ fontSize: fontSizes.large, fontWeight: 'bold' }}>
-            {`$${amount.usdValueFormatted} `}
+            {getCurrencyFormattedValue(amount, selectedCurrency)}
           </StyledText>
           <StyledText
             style={{ fontSize: fontSizes.large, color: colors.border }}
@@ -76,13 +79,14 @@ const ToCard = ({
   chainId: number;
   amount: TokenAmount;
 }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
       <TokenLogoWithChain size={52} logoURI={token.logoURI} chainId={chainId} />
       <View style={{ flexDirection: 'column', rowGap: 4 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
           <StyledText style={{ fontSize: fontSizes.large, fontWeight: 'bold' }}>
-            {`$${amount.usdValueFormatted} `}
+            {getCurrencyFormattedValue(amount, selectedCurrency)}
           </StyledText>
           <StyledText
             style={{ fontSize: fontSizes.large, color: colors.border }}
@@ -111,6 +115,7 @@ const SendConfirmSheet = ({
   onConfirm,
   isSending,
 }: SendConfirmSheetProps) => {
+  const { t } = useTranslation('SendConfirmSheet');
   const insets = useSafeAreaInsets();
   const ref = useRef<BottomSheetModal>(null);
 
@@ -146,7 +151,9 @@ const SendConfirmSheet = ({
         <View style={{ flexDirection: 'column', rowGap: 24 }}>
           <StyledText
             style={{ fontSize: fontSizes.twoXLarge, fontWeight: 'bold' }}
-          >{`Send`}</StyledText>
+          >
+            {t('send')}
+          </StyledText>
           <View style={{ flexDirection: 'column', rowGap: 16 }}>
             <ToCard
               address={toAddress}
@@ -177,7 +184,7 @@ const SendConfirmSheet = ({
           </View>
         </View>
         <StyledButton
-          title="Confirm"
+          title={t('confirm')}
           onPress={onConfirm}
           isLoading={isSending}
         />

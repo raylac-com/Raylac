@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 import { TextInput } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -14,6 +15,7 @@ import { RootStackParamsList } from '../../navigation/types';
 type Props = NativeStackScreenProps<RootStackParamsList, 'EditAddressLabel'>;
 
 const EditAddressLabel = ({ navigation, route }: Props) => {
+  const { t } = useTranslation('EditAddressLabel');
   const insets = useSafeAreaInsets();
   const { address } = route.params;
   const [label, setLabel] = useState('');
@@ -53,11 +55,11 @@ const EditAddressLabel = ({ navigation, route }: Props) => {
     >
       <View style={{ rowGap: 24 }}>
         <StyledText style={{ fontWeight: 'bold' }}>
-          {'Edit Address Label'}
+          {t('editAddressLabel')}
         </StyledText>
         <View style={{ rowGap: 8 }}>
           <StyledText style={{ color: colors.subbedText }}>
-            {'Label'}
+            {t('label')}
           </StyledText>
           <TextInput
             style={{
@@ -69,7 +71,7 @@ const EditAddressLabel = ({ navigation, route }: Props) => {
             }}
             value={label}
             onChangeText={setLabel}
-            placeholder="Enter a label for this address"
+            placeholder={t('enterLabelPlaceholder')}
             placeholderTextColor={colors.subbedText}
             autoFocus
           />
@@ -81,9 +83,9 @@ const EditAddressLabel = ({ navigation, route }: Props) => {
           rowGap: 12,
         }}
       >
-        <StyledButton title="Save" onPress={onSave} />
+        <StyledButton title={t('save')} onPress={onSave} />
         <StyledButton
-          title="Cancel"
+          title={t('cancel')}
           variant="outline"
           onPress={() => navigation.goBack()}
         />

@@ -2,6 +2,7 @@ import Feather from '@expo/vector-icons/Feather';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import StyledText from '@/components/StyledText/StyledText';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import colors from '@/lib/styles/colors';
 
@@ -27,16 +28,19 @@ const SettingsListItem = ({
 
 const Settings = () => {
   const navigation = useTypedNavigation();
+  const { t } = useTranslation('Settings');
 
   const onAdvancedPress = () => {
     navigation.navigate('Advanced');
   };
 
-  /** 
   const onLanguagePress = () => {
     navigation.navigate('SelectLanguage');
   };
-  */
+
+  const onCurrencyPress = () => {
+    navigation.navigate('SelectCurrency');
+  };
 
   return (
     <View
@@ -49,17 +53,20 @@ const Settings = () => {
     >
       <View style={{ flexDirection: 'column', gap: 28 }}>
         <SettingsListItem
-          title="Advanced"
+          title={t('advanced')}
           icon={<Feather name="zap" size={24} color={colors.border} />}
           onPress={onAdvancedPress}
         />
-        {/** 
         <SettingsListItem
-          title="Language"
+          title={t('language')}
           icon={<Feather name="globe" size={24} color={colors.border} />}
           onPress={onLanguagePress}
         />
-        */}
+        <SettingsListItem
+          title={t('currency')}
+          icon={<Feather name="dollar-sign" size={24} color={colors.border} />}
+          onPress={onCurrencyPress}
+        />
       </View>
     </View>
   );

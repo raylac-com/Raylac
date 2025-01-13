@@ -22,6 +22,9 @@ const useStartWatch = () => {
       await queryClient.invalidateQueries({
         queryKey: userKeys.userAddresses,
       });
+      await queryClient.invalidateQueries({
+        queryKey: userKeys.writerAddresses,
+      });
     },
   });
 };

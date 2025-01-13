@@ -104,7 +104,7 @@ const CreateAddress = () => {
       </View>
 
       <StyledButton
-        title="Create"
+        title={t('create')}
         onPress={onCreatePress}
         isLoading={isDerivingAddress || isCreatingAccount}
       />

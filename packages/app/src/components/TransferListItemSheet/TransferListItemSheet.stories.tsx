@@ -26,9 +26,20 @@ const mockToken: Token = {
 const mockAmount: TokenAmount = {
   amount: '1000000',
   formatted: '1.00',
-  usdValue: '1.00',
-  usdValueFormatted: '1.00',
-  tokenPriceUsd: 1.0,
+  tokenPrice: {
+    usd: '1',
+    jpy: '140',
+  },
+  currencyValue: {
+    raw: {
+      usd: '1.00',
+      jpy: '140.00',
+    },
+    formatted: {
+      usd: '1.00',
+      jpy: '140.00',
+    },
+  },
 };
 
 const mockTransfer: TransferHistoryItem = {

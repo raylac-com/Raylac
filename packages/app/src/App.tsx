@@ -44,6 +44,8 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import Addresses from './screens/Addresses/Addresses';
 import SelectLanguage from './screens/Settings/SelectLanguage';
 import CreateAddress from './screens/CreateAddress/CreateAddress';
+import EmbeddedWallets from './screens/EmbeddedWallets/EmbeddedWallets';
+import SelectCurrency from './screens/Settings/SelectCurrency';
 
 Sentry.init({
   dsn: 'https://5ea0839843bd5707f84b4e437e38d385@o4507910178799616.ingest.us.sentry.io/4507978572496896',
@@ -55,6 +57,8 @@ const Tab = createBottomTabNavigator<RootTabsParamsList>();
 const RootStack = createNativeStackNavigator<RootStackParamsList>();
 
 const Tabs = () => {
+  const { t } = useTranslation();
+
   return (
     <Tab.Navigator initialRouteName="Home">
       <Tab.Screen
@@ -72,6 +76,7 @@ const Tabs = () => {
         name="Addresses"
         component={Addresses}
         options={{
+          title: t('title', { ns: 'Addresses' }),
           tabBarLabel: () => null,
           tabBarShowLabel: false,
           tabBarIcon: ({ color }) => (
@@ -83,6 +88,7 @@ const Tabs = () => {
         name="Swap"
         component={Swap}
         options={{
+          title: t('title', { ns: 'Swap' }),
           tabBarLabel: () => null,
           tabBarIcon: ({ color }) => (
             <Feather name="repeat" size={24} color={color} />
@@ -94,6 +100,7 @@ const Tabs = () => {
         name="History"
         component={History}
         options={{
+          title: t('title', { ns: 'History' }),
           tabBarLabel: () => null,
           tabBarShowLabel: false,
           tabBarIcon: ({ color }) => (
@@ -105,6 +112,7 @@ const Tabs = () => {
         name="Settings"
         component={Settings}
         options={{
+          title: t('title', { ns: 'Settings' }),
           tabBarLabel: () => null,
           tabBarShowLabel: false,
           tabBarIcon: ({ color }) => (
@@ -117,7 +125,7 @@ const Tabs = () => {
 };
 
 const Screens = () => {
-  const { i18n } = useTranslation('App');
+  const { i18n, t } = useTranslation();
 
   useEffect(() => {
     (async () => {
@@ -163,24 +171,25 @@ const Screens = () => {
               name="StartWatch"
               component={StartWatch}
               options={{
-                title: 'Watch Address',
-                headerBackTitle: 'Back',
+                title: t('title', { ns: 'StartWatch' }),
+                headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+                headerBackVisible: true,
               }}
             ></RootStack.Screen>
             <RootStack.Screen
               name="SaveBackupPhrase"
               component={SaveBackupPhrase}
               options={{
-                title: 'Save Backup Phrase',
+                title: t('title', { ns: 'SaveBackupPhrase' }),
                 headerBackVisible: true,
-                headerBackTitle: 'Back',
+                headerBackTitle: t('headerBackTitle', { ns: 'common' }),
               }}
             ></RootStack.Screen>
             <RootStack.Screen
               name="ConfirmBackupPhrase"
               component={ConfirmBackupPhrase}
               options={{
-                title: 'Confirm Backup Phrase',
+                title: t('title', { ns: 'ConfirmBackupPhrase' }),
                 headerBackVisible: false,
               }}
             ></RootStack.Screen>
@@ -188,20 +197,22 @@ const Screens = () => {
               name="ImportAccount"
               component={ImportAccount}
               options={{
-                title: 'Import Account',
+                title: t('title', { ns: 'ImportAccount' }),
                 headerBackVisible: true,
+                headerBackTitle: t('headerBackTitle', { ns: 'common' }),
               }}
             ></RootStack.Screen>
             <RootStack.Group
               screenOptions={{
-                headerBackTitle: 'Back',
+                headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+                headerBackVisible: true,
               }}
             >
               <RootStack.Screen
                 name="SelectRecipient"
                 component={SelectRecipient}
                 options={{
-                  title: 'Select Recipient',
+                  title: t('title', { ns: 'SelectRecipient' }),
                   headerBackVisible: true,
                 }}
               ></RootStack.Screen>
@@ -209,18 +220,18 @@ const Screens = () => {
                 name="SelectToken"
                 component={SelectToken}
                 options={{
-                  title: 'Select Token',
+                  title: t('title', { ns: 'SelectToken' }),
                   headerBackVisible: true,
-                  headerBackTitle: 'Back',
+                  headerBackTitle: t('headerBackTitle', { ns: 'common' }),
                 }}
               ></RootStack.Screen>
               <RootStack.Screen
                 name="SelectAmount"
                 component={SelectAmount}
                 options={{
-                  title: 'Select Amount',
+                  title: t('title', { ns: 'SelectAmount' }),
                   headerBackVisible: true,
-                  headerBackTitle: 'Back',
+                  headerBackTitle: t('headerBackTitle', { ns: 'common' }),
                 }}
               ></RootStack.Screen>
             </RootStack.Group>
@@ -228,32 +239,54 @@ const Screens = () => {
               name="CreateAddress"
               component={CreateAddress}
               options={{
-                title: 'Create Address',
-                headerBackTitle: 'Back',
+                title: t('title', { ns: 'CreateAddress' }),
+                headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+                headerBackVisible: true,
               }}
             />
             <RootStack.Screen
               name="AddAddress"
               component={AddAddress}
               options={{
-                title: 'Add Address',
-                headerBackTitle: 'Back',
+                title: t('addAddress', { ns: 'Addresses' }),
+                headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+                headerBackVisible: true,
               }}
             />
             <RootStack.Screen
               name="Advanced"
               component={Advanced}
               options={{
-                title: 'Advanced',
-                headerBackTitle: 'Back',
+                title: t('title', { ns: 'Advanced' }),
+                headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+                headerBackVisible: true,
               }}
             />
             <RootStack.Screen
               name="SelectLanguage"
               component={SelectLanguage}
               options={{
-                title: 'Language',
+                title: t('title', { ns: 'SelectLanguage' }),
                 headerBackVisible: true,
+                headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+              }}
+            />
+            <RootStack.Screen
+              name="SelectCurrency"
+              component={SelectCurrency}
+              options={{
+                title: t('title', { ns: 'SelectCurrency' }),
+                headerBackVisible: true,
+                headerBackTitle: t('headerBackTitle', { ns: 'common' }),
+              }}
+            />
+            <RootStack.Screen
+              name="EmbeddedWallets"
+              component={EmbeddedWallets}
+              options={{
+                title: t('title', { ns: 'EmbeddedWallets' }),
+                headerBackVisible: true,
+                headerBackTitle: t('headerBackTitle', { ns: 'common' }),
               }}
             />
           </RootStack.Navigator>
@@ -326,7 +359,7 @@ const App = () => {
           client={queryClient}
           persistOptions={{
             persister: asyncStoragePersister,
-            buster: '46',
+            buster: '47',
           }}
         >
           <ThemeProvider value={NavigationTheme}>

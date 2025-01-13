@@ -5,7 +5,6 @@ on:
     paths:
       - packages/shared/**
       - packages/shared-backend/**
-      - packages/sync/**
       - packages/api/**
       - packages/app/**
       - .github/workflows/preview.yaml

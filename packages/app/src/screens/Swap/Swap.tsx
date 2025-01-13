@@ -1,5 +1,6 @@
 import Feather from '@expo/vector-icons/Feather';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import SwapInputCard from './components/SwapInputCard/SwapInputCard';
 import SwapOutputCard from './components/SwapOutputCard/SwapOutputCard';
 import { Hex, parseUnits, zeroAddress } from 'viem';
@@ -33,6 +34,8 @@ import { mainnet } from 'viem/chains';
 import useAddressChainTokenBalance from '@/hooks/useAddressChainTokenBalance';
 import useAddressTokenBalance from '@/hooks/useAddressTokenBalance';
 import SlippageDetailsSheet from '@/components/SlippageDetailsSheet/SlippageDetailsSheet';
+import { getCurrencySymbol } from '@/lib/currency';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 
 const SwapButton = ({
   swapQuoteLoaded,
@@ -49,16 +52,17 @@ const SwapButton = ({
   isLoading: boolean;
   onPress: () => void;
 }) => {
+  const { t } = useTranslation('Swap');
   let label;
 
   if (isAmountTooSmall) {
-    label = 'Amount too small';
+    label = t('amountTooSmall');
   } else if (isBalanceSufficient === false) {
-    label = 'Insufficient balance';
+    label = t('insufficientBalance');
   } else if (isOriginChainGasSufficient === false) {
-    label = 'Insufficient origin chain gas';
+    label = t('insufficientOriginChainGas');
   } else {
-    label = 'Swap';
+    label = t('swap');
   }
 
   const disabled =
@@ -83,7 +87,9 @@ const TotalFee = ({
 }: {
   swapQuote: GetSingleInputSwapQuoteReturnType | undefined;
 }) => {
+  const { t } = useTranslation('Swap');
   const [isFeeDetailsSheetOpen, setIsFeeDetailsSheetOpen] = useState(false);
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   if (!swapQuote) {
     return null;
@@ -98,10 +104,10 @@ const TotalFee = ({
         alignItems: 'center',
       }}
     >
-      <StyledText style={{ color: colors.border }}>{`Total fee `}</StyledText>
+      <StyledText style={{ color: colors.border }}>{t('totalFee')}</StyledText>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
         <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
-          {`${swapQuote.totalFeeUsd} USD`}
+          {`${getCurrencySymbol(selectedCurrency || 'usd')} ${swapQuote.totalFee[selectedCurrency || 'usd']}`}
         </StyledText>
         <Feather name="chevron-right" size={24} color={colors.border} />
       </View>
@@ -123,6 +129,7 @@ const SlippageTolerance = ({
   minimumAmountOut: TokenAmount | undefined;
   slippagePercent: number | undefined;
 }) => {
+  const { t } = useTranslation(['Swap']);
   const [isSlippageDetailsSheetOpen, setIsSlippageDetailsSheetOpen] =
     useState(false);
 
@@ -139,9 +146,9 @@ const SlippageTolerance = ({
         alignItems: 'center',
       }}
     >
-      <StyledText
-        style={{ color: colors.border }}
-      >{`Max slippage `}</StyledText>
+      <StyledText style={{ color: colors.border }}>
+        {t('Swap:maxSlippage')}
+      </StyledText>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
         <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
           {`${slippagePercent}%`}
@@ -162,6 +169,7 @@ const SlippageTolerance = ({
 type Props = NativeStackScreenProps<RootTabsParamsList, 'Swap'>;
 
 const Swap = ({ route }: Props) => {
+  const { t } = useTranslation(['Swap', 'common']);
   const navigation = useTypedNavigation();
   const { data: writerAddresses } = useWriterAddresses();
   const { fromToken, bridge } = route.params ?? {
@@ -278,7 +286,7 @@ const Swap = ({ route }: Props) => {
     if (getSwapQuoteError) {
       Toast.show({
         type: 'error',
-        text1: 'Error',
+        text1: t('common:error'),
         text2: getSwapQuoteError.message,
         position: 'bottom',
       });
@@ -435,7 +443,7 @@ const Swap = ({ route }: Props) => {
 
     Toast.show({
       type: 'success',
-      text1: 'Swap transaction sent',
+      text1: t('Swap:swapTransactionSent'),
       position: 'bottom',
     });
 
@@ -554,11 +562,7 @@ const Swap = ({ route }: Props) => {
           setToken={onInputTokenChange}
           amount={amountInputText}
           setAmount={onInputAmountChange}
-          balance={
-            inputTokenChainBalance?.amount
-              ? BigInt(inputTokenChainBalance.amount)
-              : undefined
-          }
+          balance={inputTokenChainBalance ?? undefined}
           isLoadingBalance={false}
           chainId={inputChainId}
           setChainId={setInputChainId}

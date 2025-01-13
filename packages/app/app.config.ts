@@ -34,7 +34,7 @@ const config: ExpoConfig = {
   newArchEnabled: true,
   name,
   slug: 'raylac',
-  version: '1.2.0',
+  version: '1.3.0',
   orientation: 'portrait',
   icon,
   userInterfaceStyle: 'light',
@@ -49,6 +49,7 @@ const config: ExpoConfig = {
       usesNonExemptEncryption: false,
     },
     bundleIdentifier,
+    runtimeVersion: '1.2.0',
   },
   android: {
     adaptiveIcon: {
@@ -56,6 +57,7 @@ const config: ExpoConfig = {
       backgroundColor: '#ffffff',
     },
     package: bundleIdentifier,
+    runtimeVersion: '1.3.0',
   },
   plugins: [
     [
@@ -90,7 +92,6 @@ const config: ExpoConfig = {
   updates: {
     url: 'https://u.expo.dev/f1bcc97f-3192-41c1-a32e-5b1dd12049cd',
   },
-  runtimeVersion: '1.2.0',
   owner: 'raylac',
 };
 

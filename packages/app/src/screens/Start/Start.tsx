@@ -1,6 +1,7 @@
 import Feather from '@expo/vector-icons/Feather';
 import { View } from 'react-native';
 import StyledButton from '@/components/StyledButton/StyledButton';
+import { useTranslation } from 'react-i18next';
 //import useCreateAccount from '@/hooks/useCreateAccoun';
 import useTypedNavigation from '@/hooks/useTypedNavigation';
 //import { sleep } from '@raylac/shared';
@@ -11,6 +12,7 @@ import useCreateAccount from '@/hooks/useCreateAccoun';
 import colors from '@/lib/styles/colors';
 
 const Start = () => {
+  const { t } = useTranslation('Start');
   const insets = useSafeAreaInsets();
 
   const navigation = useTypedNavigation();
@@ -53,18 +55,18 @@ const Start = () => {
       </View>
       <View style={{ flexDirection: 'column', rowGap: 8 }}>
         <StyledButton
-          title="Watch address"
+          title={t('watchAddress')}
           onPress={() => navigation.navigate('StartWatch')}
           variant="outline"
           icon={<Feather name="eye" size={24} color={colors.text} />}
         />
         <StyledButton
-          title="Import account"
+          title={t('importAccount')}
           onPress={() => navigation.navigate('ImportAccount')}
           icon={<Feather name="key" size={20} color={colors.background} />}
         />
         <StyledButton
-          title="Create account"
+          title={t('createAccount')}
           isLoading={isCreatingAccount}
           onPress={onCreateAccountPress}
           icon={<Feather name="plus" size={20} color={colors.background} />}

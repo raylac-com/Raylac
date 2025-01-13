@@ -72,6 +72,7 @@ export type RootStackParamsList = {
   BackupAccount: undefined;
   Advanced: undefined;
   SelectLanguage: undefined;
+  SelectCurrency: undefined;
 
   // Send stack
   SelectRecipient: undefined;
@@ -102,4 +103,5 @@ export type RootStackParamsList = {
   EditAddressLabel: {
     address: Hex;
   };
+  EmbeddedWallets: undefined;
 };

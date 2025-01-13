@@ -1,6 +1,11 @@
 import StyledText from '@/components/StyledText/StyledText';
-import { shortenAddress, triggerHapticFeedback } from '@/lib/utils';
+import {
+  shortenAddress,
+  triggerHapticFeedback,
+  getCurrencyFormattedValue,
+} from '@/lib/utils';
 import { Token, TokenAmount } from '@raylac/shared';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import { Pressable, View } from 'react-native';
 import { Hex } from 'viem';
 import { BottomSheetFlatList, BottomSheetModal } from '@gorhom/bottom-sheet';
@@ -19,6 +24,7 @@ const ChainTokenListItem = ({
   token: Token;
   balance: TokenAmount;
 }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View
       style={{
@@ -29,7 +35,7 @@ const ChainTokenListItem = ({
     >
       <TokenLogoWithChain chainId={chainId} logoURI={token.logoURI} size={42} />
       <StyledText style={{ color: colors.subbedText }}>
-        {`$${balance.usdValueFormatted} ${token.symbol}`}
+        {`${getCurrencyFormattedValue(balance, selectedCurrency)} ${token.symbol}`}
       </StyledText>
     </View>
   );

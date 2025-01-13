@@ -16,13 +16,7 @@ const buildBridgeSend = async (
     transfer: {
       from: '0x28341dF2CCabe2Cc4A3c6e7ef2fe9E706680C196',
       to: '0x400EA6522867456E988235675b9Cb5b1Cf5b79C8',
-      amount: {
-        amount: '1000000000000000000',
-        formatted: '1',
-        usdValue: '3362.3198755114',
-        usdValueFormatted: '3,362',
-        tokenPriceUsd: 3362.3198755114,
-      },
+      amount: MOCK_TOKEN_AMOUNT,
       token: ETH,
     },
     originChainGas: MOCK_TOKEN_AMOUNT,
@@ -36,7 +30,10 @@ const buildBridgeSend = async (
     amountOut: MOCK_TOKEN_AMOUNT,
     fromChainId: base.id,
     toChainId: arbitrum.id,
-    totalFeeUsd: '0.01',
+    totalFee: {
+      usd: '0.01',
+      jpy: '1.2',
+    },
   };
 
   return mockData;
