@@ -23,7 +23,6 @@ import { formatUnits, parseUnits, zeroAddress } from 'viem';
 import BigNumber from 'bignumber.js';
 import { trpc } from '@/lib/trpc';
 import TokenLogoWithChain from '@/components/TokenLogoWithChain/TokenLogoWithChain';
-import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 import Skeleton from '@/components/Skeleton/Skeleton';
 import FeedbackPressable from '@/components/FeedbackPressable/FeedbackPressable';
 import useSend from '@/hooks/useSend';
@@ -264,13 +263,13 @@ const SelectAmount = ({ route }: Props) => {
     address: fromAddresses[0],
   });
 
+  const tokenPriceUsd = tokenBalance?.tokenPriceUsd;
+
   const ethBalance = useAddressChainTokenBalance({
     address: fromAddresses[0],
     chainId: fromChainId,
     token: ETH,
   });
-
-  const { data: tokenPriceUsd } = useTokenPriceUsd(token);
 
   ///
   /// Mutations
@@ -366,7 +365,6 @@ const SelectAmount = ({ route }: Props) => {
     if (
       amountInputText === '' ||
       containsNonNumericCharacters(amountInputText) ||
-      tokenPriceUsd === null ||
       tokenPriceUsd === undefined
     ) {
       return;
@@ -376,7 +374,9 @@ const SelectAmount = ({ route }: Props) => {
       inputMode === 'token'
         ? parseUnits(amountInputText, token.decimals)
         : parseUnits(
-            new BigNumber(amountInputText).dividedBy(tokenPriceUsd).toFixed(),
+            new BigNumber(amountInputText)
+              .dividedBy(new BigNumber(tokenPriceUsd))
+              .toFixed(),
             token.decimals
           );
 

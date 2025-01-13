@@ -22,13 +22,10 @@ import {
   SendTxRequestBody,
   SubmitSingleInputSwapRequestBody,
   BuildBridgeSendRequestBody,
-  Token,
   SendBridgeTxRequestBody,
 } from '@raylac/shared';
 import buildSend from './api/buildSend/buildSend';
 import { ed, logger, st } from '@raylac/shared-backend';
-import getTokenPrice from './api/getTokenPrice/getTokenPrice';
-import { getTokenPriceMock } from './api/getTokenPrice/getTokenPrice.mock';
 import getHistory from './api/getHistory/getHistory';
 import getLidoApy from './api/getLidoApy/getLidoApy';
 import getSingleInputSwapQuote from './api/getSingleInputSwapQuote/getSingleInputSwapQuote';
@@ -173,18 +170,6 @@ export const appRouter = router({
     .input(z.object({ chainId: z.number(), tokenAddress: z.string() }))
     .query(async ({ input }) => {
       return getTokenData(input as { tokenAddress: Hex; chainId: number });
-    }),
-
-  getTokenPrice: publicProcedure
-    .input(z.object({ token: z.any() }))
-    .mutation(async ({ input }) => {
-      return MOCK_RESPONSE
-        ? getTokenPriceMock({
-            token: input.token as Token,
-          })
-        : getTokenPrice({
-            token: input.token as Token,
-          });
     }),
 
   getGitCommit: publicProcedure.query(async () => {

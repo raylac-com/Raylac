@@ -557,11 +557,7 @@ const Swap = ({ route }: Props) => {
           setToken={onInputTokenChange}
           amount={amountInputText}
           setAmount={onInputAmountChange}
-          balance={
-            inputTokenChainBalance?.amount
-              ? BigInt(inputTokenChainBalance.amount)
-              : undefined
-          }
+          balance={inputTokenChainBalance ?? undefined}
           isLoadingBalance={false}
           chainId={inputChainId}
           setChainId={setInputChainId}

@@ -1,12 +1,11 @@
 import { Pressable, TextInput, View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import SwapAmountInput from '../SwapAmountInput';
-import { formatUnits, Hex } from 'viem';
-import { formatAmount, Token } from '@raylac/shared';
+import { Hex } from 'viem';
+import { Token, TokenAmount } from '@raylac/shared';
 import StyledText from '@/components/StyledText/StyledText';
 import { useEffect, useState } from 'react';
 import Skeleton from '@/components/Skeleton/Skeleton';
-import useTokenPriceUsd from '@/hooks/useTokenPriceUsd';
 import TokenChainSelector from '../TokenChainSelector/TokenChainSelector';
 import SearchInputTokenSheet from '@/components/SearchInputTokenSheet/SearchInputTokenSheet';
 
@@ -25,18 +24,18 @@ const SwapInputCard = ({
   setToken: (value: Token | null) => void;
   amount: string;
   setAmount: (value: string) => void;
-  balance: bigint | undefined;
+  balance: TokenAmount | undefined;
   isLoadingBalance: boolean;
   chainId: number | null;
   setChainId: (value: number | null) => void;
   address: Hex | null;
 }) => {
+  const tokenPriceUsd = balance?.tokenPriceUsd;
+
   const [isOpen, setIsOpen] = useState(false);
 
   const [userInputMode, setUserInputMode] = useState<'USD' | 'TOKEN'>('TOKEN');
   const [usdAmountInput, setUsdAmountInput] = useState<string>('');
-
-  const { data: tokenPriceUsd } = useTokenPriceUsd(token);
 
   useEffect(() => {
     if (token) {
@@ -71,11 +70,6 @@ const SwapInputCard = ({
       setAmount(tokenAmount.toString());
     }
   };
-
-  const tokenBalanceFormatted =
-    balance !== undefined && token
-      ? formatAmount(balance.toString(), token.decimals)
-      : undefined;
 
   const showChainSelector = token && token.addresses.length > 1;
 
@@ -138,8 +132,7 @@ const SwapInputCard = ({
             style={{ flexDirection: 'row', alignItems: 'center', columnGap: 4 }}
             onPress={() => {
               if (balance !== undefined && token) {
-                const parsedBalance = formatUnits(balance, token.decimals);
-                setAmount(parsedBalance);
+                setAmount(balance.formatted);
               }
             }}
           >
@@ -149,7 +142,7 @@ const SwapInputCard = ({
               <StyledText
                 style={{ color: colors.subbedText, fontWeight: 'bold' }}
               >
-                {tokenBalanceFormatted} {token.symbol}
+                {balance?.formatted} {token.symbol}
               </StyledText>
             )}
             <StyledText
