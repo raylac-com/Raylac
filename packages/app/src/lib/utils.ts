@@ -91,3 +91,18 @@ export const getCurrencyFormattedValue = (
 ) => {
   return `${getCurrencySymbol(currency || 'usd')}${amount.currencyValue.formatted[currency || 'usd']}`;
 };
+
+export const embeddedTypeToIcon = (_type: string) => {
+  /*
+  switch (type) {
+    case 'Polymarket':
+      return require('../../assets/embedded/polymarket.png');
+    case 'Warpcast':
+      return require('../../assets/embedded/warpcast.png');
+    default:
+      return null;
+  }
+      */
+
+  return null;
+};

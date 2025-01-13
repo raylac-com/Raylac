@@ -102,4 +102,5 @@ export type RootStackParamsList = {
   EditAddressLabel: {
     address: Hex;
   };
+  EmbeddedWallets: undefined;
 };

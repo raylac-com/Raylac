@@ -12,6 +12,8 @@ export interface UserAddress {
   accountIndex?: number;
   isBackupVerified: boolean;
   isDefault: boolean;
+  isEmbedded?: boolean;
+  embeddedType?: string; // Polymarket, Warpcast, etc
 
   // The address of the first account in the mnemonic group
   mnemonicGenesisAddress?: Hex;
