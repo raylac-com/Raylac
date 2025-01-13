@@ -19,9 +19,20 @@ const buildBridgeSend = async (
       amount: {
         amount: '1000000000000000000',
         formatted: '1',
-        usdValue: '3362.3198755114',
-        usdValueFormatted: '3,362',
-        tokenPriceUsd: 3362.3198755114,
+        tokenPrice: {
+          usd: '3362.3198755114',
+          jpy: '470724.78',
+        },
+        currencyValue: {
+          raw: {
+            usd: '3362.3198755114',
+            jpy: '470724.78',
+          },
+          formatted: {
+            usd: '3,362.32',
+            jpy: '470,724.78',
+          },
+        },
       },
       token: ETH,
     },

@@ -1,6 +1,8 @@
 import Feather from '@expo/vector-icons/Feather';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { BridgeHistoryItem, getExplorerUrl } from '@raylac/shared';
+import { getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import { useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import StyledText from '../StyledText/StyledText';
@@ -107,6 +109,7 @@ const DateTime = ({ date }: { date: Date }) => {
 const BridgeListItemSheet = ({ bridge, onClose }: BridgeListItemSheetProps) => {
   const insets = useSafeAreaInsets();
   const ref = useRef<BottomSheetModal>(null);
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   const label = 'Bridge';
 
@@ -168,7 +171,7 @@ const BridgeListItemSheet = ({ bridge, onClose }: BridgeListItemSheetProps) => {
                 size={64}
               />
               <StyledText style={{ color: colors.subbedText }}>
-                {`$${bridge.amountIn.usdValueFormatted}`}
+                {getCurrencyFormattedValue(bridge.amountIn, selectedCurrency)}
               </StyledText>
               <StyledText style={{ color: colors.subbedText }}>
                 {`${bridge.amountIn.formatted} ${bridge.token.symbol}`}
@@ -191,7 +194,7 @@ const BridgeListItemSheet = ({ bridge, onClose }: BridgeListItemSheetProps) => {
                 size={64}
               />
               <StyledText style={{ color: colors.subbedText }}>
-                {`$${bridge.amountOut.usdValueFormatted}`}
+                {getCurrencyFormattedValue(bridge.amountOut, selectedCurrency)}
               </StyledText>
               <StyledText style={{ color: colors.subbedText }}>
                 {`${bridge.amountOut.formatted} ${bridge.token.symbol}`}

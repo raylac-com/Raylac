@@ -1,5 +1,7 @@
 import Feather from '@expo/vector-icons/Feather';
 import { View } from 'react-native';
+import { getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import StyledText from '../StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import TokenLogo from '../TokenLogo/TokenLogo';
@@ -12,6 +14,7 @@ import PendingIndicator from '../PendingIndicator/PendingIndicator';
 
 const SwapListItem = (props: { swap: SwapHistoryItem; isPending: boolean }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   return (
     <View>
@@ -86,7 +89,7 @@ const SwapListItem = (props: { swap: SwapHistoryItem; isPending: boolean }) => {
           style={{ flexDirection: 'row', alignItems: 'center', columnGap: 5 }}
         >
           <StyledText style={{ fontWeight: 'bold' }}>
-            {`$${props.swap.amountIn.usdValueFormatted}`}
+            {getCurrencyFormattedValue(props.swap.amountIn, selectedCurrency)}
           </StyledText>
         </View>
       </FeedbackPressable>

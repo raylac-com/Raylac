@@ -5,6 +5,7 @@ import {
   GetSingleInputSwapQuoteReturnType,
   MOCK_TOKEN_AMOUNT,
   SwapStep,
+  TokenAmount,
 } from '@raylac/shared';
 import { Hex } from 'viem';
 import { arbitrum, base } from 'viem/chains';
@@ -47,40 +48,95 @@ const getSingleInputSwapQuoteMock = async (
     originChainGas: {
       amount: '21000',
       formatted: '0.000021',
-      usdValue: '0.05',
-      usdValueFormatted: '0.05',
-      tokenPriceUsd: 2000,
-    },
+      tokenPrice: {
+        usd: '2000',
+        jpy: '280000',
+      },
+      currencyValue: {
+        raw: {
+          usd: '0.05',
+          jpy: '7',
+        },
+        formatted: {
+          usd: '0.05',
+          jpy: '7',
+        },
+      },
+    } satisfies TokenAmount,
     amountIn: {
       amount: '1000000000000000000',
       formatted: '1',
-      usdValue: '2000',
-      usdValueFormatted: '2,000',
-      tokenPriceUsd: 2000,
-    },
+      tokenPrice: {
+        usd: '2000',
+        jpy: '280000',
+      },
+      currencyValue: {
+        raw: {
+          usd: '2000',
+          jpy: '280000',
+        },
+        formatted: {
+          usd: '2,000',
+          jpy: '280,000',
+        },
+      },
+    } satisfies TokenAmount,
     amountOut: {
       amount: '990000000000000000',
       formatted: '0.99',
-      usdValue: '1980',
-      usdValueFormatted: '1,980',
-      tokenPriceUsd: 2000,
-    },
+      tokenPrice: {
+        usd: '2000',
+        jpy: '280000',
+      },
+      currencyValue: {
+        raw: {
+          usd: '1980',
+          jpy: '277200',
+        },
+        formatted: {
+          usd: '1,980',
+          jpy: '277,200',
+        },
+      },
+    } satisfies TokenAmount,
     relayerServiceFeeToken: ETH,
     relayerServiceFee: {
       amount: '1000000000000000',
       formatted: '0.001',
-      usdValue: '1',
-      usdValueFormatted: '1',
-      tokenPriceUsd: 1000,
-    },
+      tokenPrice: {
+        usd: '1000',
+        jpy: '140000',
+      },
+      currencyValue: {
+        raw: {
+          usd: '1',
+          jpy: '140',
+        },
+        formatted: {
+          usd: '1',
+          jpy: '140',
+        },
+      },
+    } satisfies TokenAmount,
     relayerGasToken: ETH,
     relayerGas: {
       amount: '1000000000000000',
       formatted: '0.001',
-      usdValue: '2',
-      usdValueFormatted: '2',
-      tokenPriceUsd: 2000,
-    },
+      tokenPrice: {
+        usd: '2000',
+        jpy: '280000',
+      },
+      currencyValue: {
+        raw: {
+          usd: '2',
+          jpy: '280',
+        },
+        formatted: {
+          usd: '2',
+          jpy: '280',
+        },
+      },
+    } satisfies TokenAmount,
     relayRequestId:
       '0x9876543210987654321098765432109876543210987654321098765432109876' as Hex,
     fromChainId: base.id,

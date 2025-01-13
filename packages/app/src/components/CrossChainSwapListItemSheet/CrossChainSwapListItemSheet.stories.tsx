@@ -25,9 +25,20 @@ const mockToken: Token = {
 const mockAmount: TokenAmount = {
   amount: '1000000',
   formatted: '1.00',
-  usdValue: '1.00',
-  usdValueFormatted: '1.00',
-  tokenPriceUsd: 1.0,
+  tokenPrice: {
+    usd: '1',
+    jpy: '140',
+  },
+  currencyValue: {
+    raw: {
+      usd: '1.00',
+      jpy: '140.00',
+    },
+    formatted: {
+      usd: '1.00',
+      jpy: '140.00',
+    },
+  },
 };
 
 const mockSwap: CrossChainSwapHistoryItem = {
@@ -47,7 +58,20 @@ const mockSwap: CrossChainSwapHistoryItem = {
     ...mockAmount,
     amount: '500000000000000000',
     formatted: '0.5',
-    tokenPriceUsd: 2000.0,
+    tokenPrice: {
+      usd: '2000',
+      jpy: '280000',
+    },
+    currencyValue: {
+      raw: {
+        usd: '1000',
+        jpy: '140000',
+      },
+      formatted: {
+        usd: '1,000',
+        jpy: '140,000',
+      },
+    },
   },
   fromChainId: 1,
   toChainId: 1,
@@ -106,15 +130,39 @@ export const DifferentAmounts: Story = {
         ...mockAmount,
         amount: '5000000',
         formatted: '5.00',
-        usdValue: '5.00',
-        usdValueFormatted: '5.00',
+        tokenPrice: {
+          usd: '1',
+          jpy: '140',
+        },
+        currencyValue: {
+          raw: {
+            usd: '5.00',
+            jpy: '700.00',
+          },
+          formatted: {
+            usd: '5.00',
+            jpy: '700.00',
+          },
+        },
       } as TokenAmount,
       amountOut: {
         ...mockAmount,
         amount: '2500000000000000000',
         formatted: '2.5',
-        usdValue: '5.00',
-        usdValueFormatted: '5.00',
+        tokenPrice: {
+          usd: '2',
+          jpy: '280',
+        },
+        currencyValue: {
+          raw: {
+            usd: '5.00',
+            jpy: '700.00',
+          },
+          formatted: {
+            usd: '5.00',
+            jpy: '700.00',
+          },
+        },
       } as TokenAmount,
     },
   },

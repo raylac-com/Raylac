@@ -1,6 +1,8 @@
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { useEffect, useRef } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import StyledText from '../StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import { View } from 'react-native';
@@ -23,6 +25,7 @@ const OriginChainGas = ({
   token: Token;
   amount: TokenAmount;
 }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View
       style={{
@@ -43,7 +46,7 @@ const OriginChainGas = ({
         style={{ flexDirection: 'column', alignItems: 'center', columnGap: 8 }}
       >
         <StyledText style={{ color: colors.border }}>
-          {`$${amount.usdValueFormatted}`}
+          {getCurrencyFormattedValue(amount, selectedCurrency)}
         </StyledText>
       </View>
     </View>
@@ -58,6 +61,7 @@ const DestinationChainGas = ({
   token: Token;
   amount: TokenAmount;
 }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View
       style={{
@@ -78,7 +82,7 @@ const DestinationChainGas = ({
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
       >
         <StyledText style={{ color: colors.border }}>
-          {`$${amount.usdValueFormatted}`}
+          {getCurrencyFormattedValue(amount, selectedCurrency)}
         </StyledText>
       </View>
     </View>
@@ -92,6 +96,7 @@ const RelayServiceFee = ({
   token: Token;
   amount: TokenAmount;
 }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
   return (
     <View
       style={{
@@ -112,21 +117,40 @@ const RelayServiceFee = ({
         style={{ flexDirection: 'row', alignItems: 'center', columnGap: 8 }}
       >
         <StyledText style={{ color: colors.border }}>
-          {`$${amount.usdValueFormatted}`}
+          {getCurrencyFormattedValue(amount, selectedCurrency)}
         </StyledText>
       </View>
     </View>
   );
 };
 
-const TotalFee = ({ usdValueFormatted }: { usdValueFormatted: string }) => {
+const TotalFee = ({ totalFeeUsd }: { totalFeeUsd: string }) => {
+  const { data: selectedCurrency } = useSelectedCurrency();
+  const tokenAmount: TokenAmount = {
+    amount: totalFeeUsd,
+    formatted: totalFeeUsd,
+    tokenPrice: {
+      usd: '1',
+      jpy: '140',
+    },
+    currencyValue: {
+      raw: {
+        usd: totalFeeUsd,
+        jpy: (Number(totalFeeUsd) * 140).toString(),
+      },
+      formatted: {
+        usd: totalFeeUsd,
+        jpy: (Number(totalFeeUsd) * 140).toString(),
+      },
+    },
+  };
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
       <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
         {`Total`}
       </StyledText>
       <StyledText style={{ color: colors.border, fontWeight: 'bold' }}>
-        {`$${usdValueFormatted}`}
+        {getCurrencyFormattedValue(tokenAmount, selectedCurrency)}
       </StyledText>
     </View>
   );
@@ -197,7 +221,7 @@ const BridgeSendFeeDetailsSheet = ({
             amount={bridgeSendData.relayerServiceFee}
           />
           <View style={{ marginTop: 16 }}>
-            <TotalFee usdValueFormatted={bridgeSendData.totalFeeUsd} />
+            <TotalFee totalFeeUsd={bridgeSendData.totalFeeUsd} />
           </View>
         </View>
       </BottomSheetView>

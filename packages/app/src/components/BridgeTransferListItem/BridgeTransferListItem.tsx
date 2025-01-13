@@ -1,5 +1,7 @@
 import { View } from 'react-native';
 import colors from '@/lib/styles/colors';
+import { getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import StyledText from '../StyledText/StyledText';
 import Feather from '@expo/vector-icons/Feather';
 import { shortenAddress } from '@/lib/utils';
@@ -16,6 +18,7 @@ const BridgeTransferListItem = (props: {
   isPending: boolean;
 }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   const { data: senderEnsName } = useEnsName(props.transfer.from);
   const { data: recipientEnsName } = useEnsName(props.transfer.to);
@@ -85,7 +88,7 @@ const BridgeTransferListItem = (props: {
           </View>
         </View>
         <StyledText style={{ fontWeight: 'bold' }}>
-          {`$${props.transfer.amount.usdValueFormatted}`}
+          {getCurrencyFormattedValue(props.transfer.amount, selectedCurrency)}
         </StyledText>
       </FeedbackPressable>
       {isSheetOpen && (

@@ -2,8 +2,9 @@ import { View } from 'react-native';
 import colors from '@/lib/styles/colors';
 import StyledText from '../StyledText/StyledText';
 import Feather from '@expo/vector-icons/Feather';
-import { shortenAddress } from '@/lib/utils';
+import { shortenAddress, getCurrencyFormattedValue } from '@/lib/utils';
 import { TransferHistoryItem } from '@raylac/shared';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import TokenLogoWithChain from '../TokenLogoWithChain/TokenLogoWithChain';
 import { useState } from 'react';
 import TransferListItemSheet from '../TransferListItemSheet/TransferListItemSheet';
@@ -16,6 +17,7 @@ const TransferListItem = (props: {
   isPending: boolean;
 }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   const { data: senderEnsName } = useEnsName(props.transfer.from);
   const { data: recipientEnsName } = useEnsName(props.transfer.to);
@@ -85,7 +87,7 @@ const TransferListItem = (props: {
           </View>
         </View>
         <StyledText style={{ fontWeight: 'bold' }}>
-          {`$${props.transfer.amount.usdValueFormatted}`}
+          {getCurrencyFormattedValue(props.transfer.amount, selectedCurrency)}
         </StyledText>
       </FeedbackPressable>
       {isSheetOpen && (

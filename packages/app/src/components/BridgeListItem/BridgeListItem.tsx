@@ -1,5 +1,7 @@
 import Feather from '@expo/vector-icons/Feather';
 import { View } from 'react-native';
+import { getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import StyledText from '../StyledText/StyledText';
 import colors from '@/lib/styles/colors';
 import TokenLogo from '../TokenLogo/TokenLogo';
@@ -15,6 +17,7 @@ const BridgeListItem = (props: {
   isPending: boolean;
 }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   return (
     <View>
@@ -97,7 +100,7 @@ const BridgeListItem = (props: {
           style={{ flexDirection: 'row', alignItems: 'center', columnGap: 5 }}
         >
           <StyledText style={{ fontWeight: 'bold' }}>
-            {`$${props.bridge.amountIn.usdValueFormatted}`}
+            {getCurrencyFormattedValue(props.bridge.amountIn, selectedCurrency)}
           </StyledText>
         </View>
       </FeedbackPressable>

@@ -12,7 +12,9 @@ const useTokensWithBalances = (): Token[] | undefined => {
     ? // Sort by usd value in descending order
       tokenBalances
         .sort((a, b) =>
-          new BigNumber(b.balance.usdValue).minus(a.balance.usdValue).toNumber()
+          new BigNumber(b.balance.currencyValue.raw.usd)
+            .minus(a.balance.currencyValue.raw.usd)
+            .toNumber()
         )
         // Map to `Token` type
         .map(balance => balance.token)

@@ -1,6 +1,8 @@
 import Feather from '@expo/vector-icons/Feather';
 import { View } from 'react-native';
 import StyledText from '../StyledText/StyledText';
+import { getCurrencyFormattedValue } from '@/lib/utils';
+import useSelectedCurrency from '@/hooks/useSelectedCurrency';
 import colors from '@/lib/styles/colors';
 import TokenLogo from '../TokenLogo/TokenLogo';
 import { CrossChainSwapHistoryItem } from '@raylac/shared';
@@ -15,6 +17,7 @@ const CrossChainSwapListItem = (props: {
   isPending: boolean;
 }) => {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { data: selectedCurrency } = useSelectedCurrency();
 
   return (
     <View>
@@ -89,7 +92,7 @@ const CrossChainSwapListItem = (props: {
           style={{ flexDirection: 'row', alignItems: 'center', columnGap: 5 }}
         >
           <StyledText style={{ fontWeight: 'bold' }}>
-            {`$${props.swap.amountIn.usdValueFormatted}`}
+            {getCurrencyFormattedValue(props.swap.amountIn, selectedCurrency)}
           </StyledText>
         </View>
       </FeedbackPressable>

@@ -15,9 +15,20 @@ const getTokenBalancesMock = async ({
       balance: {
         amount: parseUnits('1', ETH.decimals).toString(),
         formatted: '1',
-        usdValue: '1234.23',
-        usdValueFormatted: '1234.23',
-        tokenPriceUsd: 1234.23,
+        tokenPrice: {
+          usd: '1234.23',
+          jpy: '172792.20',
+        },
+        currencyValue: {
+          raw: {
+            usd: '1234.23',
+            jpy: '172792.20',
+          },
+          formatted: {
+            usd: '1,234.23',
+            jpy: '172,792.20',
+          },
+        },
       },
     },
     {
@@ -27,9 +38,20 @@ const getTokenBalancesMock = async ({
       balance: {
         amount: parseUnits('1234.23', USDC.decimals).toString(),
         formatted: '1234.23',
-        usdValue: '1234.23',
-        usdValueFormatted: '1234.23',
-        tokenPriceUsd: 1,
+        tokenPrice: {
+          usd: '1',
+          jpy: '140',
+        },
+        currencyValue: {
+          raw: {
+            usd: '1234.23',
+            jpy: '172792.20',
+          },
+          formatted: {
+            usd: '1,234.23',
+            jpy: '172,792.20',
+          },
+        },
       },
     },
   ];

@@ -65,10 +65,6 @@ export const triggerHapticFeedback = () => {
 export const MOCK_TOKEN_AMOUNT: TokenAmount = {
   amount: parseUnits('0.1', 18).toString(),
   formatted: '0.1',
-  tokenPrice: {
-    usd: '1',
-    jpy: '140',
-  },
   currencyValue: {
     raw: {
       usd: '0.1',
@@ -78,6 +74,10 @@ export const MOCK_TOKEN_AMOUNT: TokenAmount = {
       usd: '0.1',
       jpy: '14',
     },
+  },
+  tokenPrice: {
+    usd: '1',
+    jpy: '140',
   },
 };
 
